@@ -19,8 +19,9 @@
 #'
 #' @name ACTIONet
 #' @docType package
+#' @author Shahin Mohammadi
+#' @import Rcpp evalCpp
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ACTIONet, .registration=TRUE
 #' @exportPattern ^[[:alpha:]]+ 
 NULL
-
