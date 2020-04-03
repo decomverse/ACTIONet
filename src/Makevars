@@ -1,0 +1,5 @@
+LINALG=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
+SOURCES=$(wildcard *.cc)
+OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o)
+PKG_LIBS=${LINALG} -lpthread -lm
+PKG_CXXFLAGS=`find ../include -type d | sed s/^/-I/` -w -msse2 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS -DARMA_64BIT_WORD -std=c++11
