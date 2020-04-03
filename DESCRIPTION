@@ -1,0 +1,24 @@
+Package: ACTIONet
+Type: Package
+Title: Robust multi-resolution analysis of single-cell datasets
+biocViews: ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
+Version: 1.0
+Date: 2020-01-01
+Authors@R: c(
+    person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com", 
+        role = c("cre", "aut"), comment = c(ORCID = "0000-0001-8734-2326")),
+    person("Jose", "Davila-Velderrain", email = "jdjosedavila@gmail.com", 
+        role = "aut", comment = c(ORCID = ""))
+    )
+Maintainer: Shahin Mohammadi <mohammadi@broadinstitute.org>
+Description: 
+License: GPL (>= 2)
+URL: http://compbio.mit.edu/ACTIONet/
+Depends: Rcpp, RcppArmadillo, NetLibR, Matrix, igraph, SingleCellExperiment, SummarizedExperiment, wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer
+Imports: NetLibR, Matrix, igraph, SingleCellExperiment, Matrix, igraph, SingleCellExperiment, ComplexHeatmap
+Suggests: scran
+LinkingTo: Rcpp,RcppArmadillo
+Remotes: immunogenomics/harmony,shmohammadi86/NetLibR
+Encoding: UTF-8
+RoxygenNote: 7.0.1
+VignetteBuilder: knitr
