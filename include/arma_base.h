@@ -7,17 +7,15 @@
 #define ARMA_BLAS_UNDERSCORE
 
 /*
-#undef ARMA_BLAS_CAPITALS
-#define ARMA_BLAS_UNDERSCORE
 #define ARMA_64BIT_WORD
 #define ARMA_BLAS_LONG_LONG
 */
+
 
 #include <RcppArmadillo.h>
 #include <Rcpp.h>
 
 using namespace arma;
 using namespace std;
-
 
 #endif

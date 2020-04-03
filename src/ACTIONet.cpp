@@ -11,6 +11,20 @@ using namespace arma;
 
 #define ARMA_USE_CXX11_RNG
 
+//' Computes SVD decomposition
+//'
+//' This is direct implementation of the randomized SVD algorithm for sparse matrices:
+//' Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
+//' 
+//' @param A Input matrix (either a "matrix" or "sparseMatrix")
+//' @param dim Dimension of SVD decomposition
+//' @param iters Number of 
+//' @return A named list with U, sigma, and V components
+//' @export
+//' @examples
+//' A = randn(100, 20)
+//' SVD.out = FengSVD(A, dim = 2)
+//' U = SVD.out$U
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 List FengSVD(SEXP A, int dim, int iters = 5, int seed = 0) {	
@@ -34,6 +48,20 @@ List FengSVD(SEXP A, int dim, int iters = 5, int seed = 0) {
 
 
 
+//' Computes SVD decomposition
+//'
+//' This is direct implementation of the randomized SVD algorithm:
+//' XFrom: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
+//' 
+//' @param A Input matrix (either a "matrix" or "sparseMatrix")
+//' @param dim Dimension of SVD decomposition
+//' @param iters Number of 
+//' @return A named list with U, sigma, and V components
+//' @export
+//' @examples
+//' A = randn(100, 20)
+//' SVD.out = HalkoSVD(A, dim = 2)
+//' U = SVD.out$U
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 List HalkoSVD(SEXP A, int dim, int iters = 5, int seed = 0) {	
