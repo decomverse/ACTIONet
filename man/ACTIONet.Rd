@@ -12,7 +12,6 @@ Joint archetypal/network-based analysis for multi-resolution decomposition of si
 
 \enumerate{
 \item ?reduce.sce to reduce raw count matrix in an SingleCellExperiment objects.
-\item ?reduce.and.batch.correct.sce.Harmony to reduce raw and batch.correct count matrix in an SingleCellExperiment objects.
 \item ?run.ACTIONet to run ACTIONet on SingleCellExperiment objects.
 }
 }
@@ -27,3 +26,6 @@ Joint archetypal/network-based analysis for multi-resolution decomposition of si
 }
 }
 
+\author{
+Shahin Mohammadi
+}
