@@ -13,12 +13,11 @@ Authors@R: c(
 Maintainer: Shahin Mohammadi <mohammadi@broadinstitute.org>
 Description: 
 License: GPL (>= 2)
-URL: http://compbio.mit.edu/ACTIONet/
-Depends: Rcpp, RcppArmadillo, NetLibR, Matrix, igraph, SingleCellExperiment, SummarizedExperiment, wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer
-Imports: NetLibR, Matrix, igraph, SingleCellExperiment, Matrix, igraph, SingleCellExperiment, ComplexHeatmap
-Suggests: scran
+URL: https://github.com/shmohammadi86/ACTIONet
+Depends: Rcpp, RcppArmadillo, Matrix, igraph, SingleCellExperiment, SummarizedExperiment
+Imports: Matrix, igraph, SingleCellExperiment
+Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer, ComplexHeatmap
 LinkingTo: Rcpp,RcppArmadillo
-Remotes: immunogenomics/harmony,shmohammadi86/NetLibR
 Encoding: UTF-8
 RoxygenNote: 7.0.1
 VignetteBuilder: knitr
