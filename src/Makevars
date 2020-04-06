@@ -1,5 +1,6 @@
-LINALG=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
-SOURCES=$(wildcard *.cc)
+LINALG=$(BLAS_LIBS) $(LAPACK_LIBS)
+#LINALG= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+SOURCES+=$(shell find ACTIONet/ -type f -name "*.cc")
 OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o)
 PKG_LIBS=${LINALG} -lpthread -lm
-PKG_CXXFLAGS=`find ../include -type d | sed s/^/-I/` -w -msse2 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS -DARMA_64BIT_WORD -std=c++11
+PKG_CXXFLAGS=`find ../inst/include -type d | xargs realpath | sed s/^/-I/` -O2 -std=c++11
