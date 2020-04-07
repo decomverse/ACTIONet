@@ -8,4 +8,6 @@
 *.so
 *.a
 test/
+dist/
+ACTIONet.egg-info/
 

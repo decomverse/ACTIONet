@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <iterator>
-#include <arma/include/armadillo>
+#include <arma/armadillo>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <numpy/npy_common.h>
