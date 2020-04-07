@@ -6,13 +6,12 @@
 #undef ARMA_BLAS_CAPITALS
 #define ARMA_BLAS_UNDERSCORE
 
-/*
+
 #define ARMA_64BIT_WORD
 #define ARMA_BLAS_LONG_LONG
-*/
 
 
-#include <arma/include/armadillo>
+#include <arma/armadillo>
 
 using namespace arma;
 using namespace std;
