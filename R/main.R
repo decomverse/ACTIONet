@@ -104,7 +104,7 @@ run.ACTIONet <- function(sce, k_max = 30, min_specificity_z_threshold = -1, netw
 #' @examples
 #' ACTIONet.out.pruned = get.archetype.markers(ACTIONet.out, 10)
 get.archetype.markers <- function(ACTIONet.out, top.genes = 20) {
-	cell.state.DE = SummarizedExperiment::assays(assays(ACTIONet.out$specificity.scores)[["upper_significance"]]
+	cell.state.DE = SummarizedExperiment::assays(ACTIONet.out$specificity.scores)[["upper_significance"]]
 	Top.genes = apply(cell.state.DE, 2, function(x) rownames(cell.state.DE )[order(x, decreasing = T)[1:top.genes]])
 	
 	df = as.data.frame(Top.genes)

@@ -170,38 +170,38 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_pseudo_bulk
-mat compute_pseudo_bulk(SEXP S, uvec sample_assignments);
+mat compute_pseudo_bulk(SEXP S, arma::Col<unsigned long long> sample_assignments);
 RcppExport SEXP _ACTIONet_compute_pseudo_bulk(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
-    Rcpp::traits::input_parameter< uvec >::type sample_assignments(sample_assignmentsSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_pseudo_bulk_per_ind
-field<mat> compute_pseudo_bulk_per_ind(SEXP S, uvec sample_assignments, uvec individuals);
+field<mat> compute_pseudo_bulk_per_ind(SEXP S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
 RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
-    Rcpp::traits::input_parameter< uvec >::type sample_assignments(sample_assignmentsSEXP);
-    Rcpp::traits::input_parameter< uvec >::type individuals(individualsSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind(S, sample_assignments, individuals));
     return rcpp_result_gen;
 END_RCPP
 }
 // renormalize_input_matrix
-List renormalize_input_matrix(SEXP S, uvec sample_assignments);
+List renormalize_input_matrix(SEXP S, arma::Col<unsigned long long> sample_assignments);
 RcppExport SEXP _ACTIONet_renormalize_input_matrix(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
-    Rcpp::traits::input_parameter< uvec >::type sample_assignments(sample_assignmentsSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     rcpp_result_gen = Rcpp::wrap(renormalize_input_matrix(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP

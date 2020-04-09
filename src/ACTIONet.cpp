@@ -237,8 +237,8 @@ List run_ACTION(mat S_r, int k_min = 2, int k_max=30, int thread_no = 4) {
 // [[Rcpp::export]]
 List prune_archetypes(const List& C_trace, const List& H_trace, double min_specificity_z_threshold = -1) {	
 	int n_list = H_trace.size();
-	vector<mat> C_trace_vec(n_list+1);
-	vector<mat> H_trace_vec(n_list+1);
+	field<mat> C_trace_vec(n_list+1);
+	field<mat> H_trace_vec(n_list+1);
 	for (int i = 0; i < n_list; i++) {
 		if(Rf_isNull(H_trace[i])) {
 			continue;
@@ -417,7 +417,7 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass) {
 //' cell.clusters = unification.out$sample_assignments
 //'	pbs = compute_pseudo_bulk(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk(SEXP S, uvec sample_assignments) {
+mat compute_pseudo_bulk(SEXP S, arma::Col<unsigned long long> sample_assignments) {
 	
 	mat pb;
     if (Rf_isS4(S)) {
@@ -448,7 +448,7 @@ mat compute_pseudo_bulk(SEXP S, uvec sample_assignments) {
 //' cell.clusters = unification.out$sample_assignments
 //'	pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_ind(SEXP S, uvec sample_assignments, uvec individuals) {
+field<mat> compute_pseudo_bulk_per_ind(SEXP S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals) {
 	
 	field<mat> pbs_list;
     if (Rf_isS4(S)) {
@@ -479,7 +479,7 @@ field<mat> compute_pseudo_bulk_per_ind(SEXP S, uvec sample_assignments, uvec ind
 //' cell.clusters = unification.out$sample_assignments
 //'	S.norm = renormalize_input_matrix(S, cell.clusters)
 // [[Rcpp::export]]
-List renormalize_input_matrix(SEXP S, uvec sample_assignments) {
+List renormalize_input_matrix(SEXP S, arma::Col<unsigned long long> sample_assignments) {
     List res;
     if (Rf_isS4(S)) {
 		sp_mat tmp = as<arma::sp_mat>(S);

@@ -1,7 +1,7 @@
 #include <ACTIONet.h>
 
 namespace ACTIONet {
-	mat compute_pseudo_bulk(sp_mat S, uvec sample_assignments) {	
+	mat compute_pseudo_bulk(sp_mat S, arma::Col<unsigned long long> sample_assignments) {	
 		
 		mat pb = zeros(S.n_rows, max(sample_assignments));
 
@@ -21,7 +21,7 @@ namespace ACTIONet {
 		return(pb);
 	}	
 
-	mat compute_pseudo_bulk(mat S, uvec sample_assignments) {			
+	mat compute_pseudo_bulk(mat S, arma::Col<unsigned long long> sample_assignments) {			
 		mat pb = zeros(S.n_rows, max(sample_assignments));
 		
 		for(int j = 0; j < pb.n_cols; j++) {
@@ -34,7 +34,7 @@ namespace ACTIONet {
 	}		
 	
 	
-	field<mat> compute_pseudo_bulk_per_ind(sp_mat S, uvec sample_assignments, uvec individuals) {	
+	field<mat> compute_pseudo_bulk_per_ind(sp_mat S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals) {	
 		
 		field<mat> pbs(max(sample_assignments));
 		for(int k = 0; k < max(sample_assignments); k++) {
@@ -62,7 +62,7 @@ namespace ACTIONet {
 		return(pbs);
 	}	
 
-	field<mat> compute_pseudo_bulk_per_ind(mat S, uvec sample_assignments, uvec individuals) {	
+	field<mat> compute_pseudo_bulk_per_ind(mat S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals) {	
 		
 		field<mat> pbs(max(sample_assignments));
 		for(int k = 0; k < max(sample_assignments); k++) {

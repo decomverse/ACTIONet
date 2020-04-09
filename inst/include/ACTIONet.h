@@ -90,9 +90,9 @@ namespace ACTIONet {
 		
 		// To store the output of run_ACTION()
 		struct ACTION_results {
-			vector<uvec> selected_cols;
-			vector<mat> H;
-			vector<mat> C;
+			field<uvec> selected_cols;
+			field<mat> H;
+			field<mat> C;
 		};
 
 		// To store the output of reconstruct_archetypes()
@@ -144,7 +144,7 @@ namespace ACTIONet {
 
 	// Pre-ACTIONet archetype filtering/aggregation
 	// To prune archetypes across different levels and concatenate the resulting archetypes
-		multilevel_archetypal_decomposition prune_archetypes(vector<mat> C_trace, vector<mat> H_trace, double min_specificity_z_threshold);
+		multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold);
 		
 		
 	// Post-ACTIONet archetype filtering/aggregation
@@ -165,15 +165,15 @@ namespace ACTIONet {
 	
 	
 	// Methods for pseudo-bulk construction
-		mat compute_pseudo_bulk(sp_mat S, uvec sample_assignments);
-		mat compute_pseudo_bulk(mat S, uvec sample_assignments);
-		field<mat> compute_pseudo_bulk_per_ind(sp_mat S, uvec sample_assignments, uvec individuals);
-		field<mat> compute_pseudo_bulk_per_ind(mat S, uvec sample_assignments, uvec individuals);
+		mat compute_pseudo_bulk(sp_mat S, arma::Col<unsigned long long> sample_assignments);
+		mat compute_pseudo_bulk(mat S, arma::Col<unsigned long long> sample_assignments);
+		field<mat> compute_pseudo_bulk_per_ind(sp_mat S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+		field<mat> compute_pseudo_bulk_per_ind(mat S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
 		
 		
 	// Methods for renormalizing input matrix within and between each class
-		mat renormalize_input_matrix(mat S, uvec sample_assignments);
-		sp_mat renormalize_input_matrix(sp_mat S, uvec sample_assignments);
+		mat renormalize_input_matrix(mat S, arma::Col<unsigned long long> sample_assignments);
+		sp_mat renormalize_input_matrix(sp_mat S, arma::Col<unsigned long long> sample_assignments);
 		
 		
 	// Methods for computing feature specificity/discriminative-scores
