@@ -117,15 +117,19 @@ namespace ACTIONet {
 
 		
 		mat logPvals_lower = square(Lambda)/(2 * Nu);
-		(logPvals_lower(Lambda >= 0)).zeros();
+		uvec uidx = find(Lambda>=0);
+		logPvals_lower(uidx) = zeros(uidx.n_elem);
 		
+				
 		mat Lambda_scaled = Lambda;
 		for(int j = 0; j < Lambda_scaled.n_cols; j++) {
 			Lambda_scaled.col(j) *= (a(j) / 3);
 		}
 		mat logPvals_upper = square(Lambda)/(2*(Nu + Lambda_scaled));
-		(logPvals_upper(Lambda <= 0)).zeros();
-
+		uvec lidx = find(Lambda<=0);
+		logPvals_upper(lidx) = zeros(lidx.n_elem);
+		
+		
 		logPvals_lower /= log(10);
 		logPvals_upper /= log(10);
     

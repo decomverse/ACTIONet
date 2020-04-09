@@ -1,7 +1,7 @@
 #include <ACTIONet.h>
 
 namespace ACTIONet {
-	multilevel_archetypal_decomposition prune_archetypes(vector<mat> C_trace, vector<mat> H_trace, double min_specificity_z_threshold) {	
+	multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold) {	
 		mat C_stacked;
 		mat H_stacked;
 		int depth = H_trace.size();

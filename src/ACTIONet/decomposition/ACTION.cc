@@ -165,7 +165,7 @@ namespace ACTIONet {
 
 	ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no) {
 		int feature_no = S_r.n_rows;
-		
+				
 		printf("Running ACTION\n");
 		
 		if(k_max == -1)
@@ -175,9 +175,17 @@ namespace ACTIONet {
 		k_max = std::min(k_max, (int)S_r.n_cols);	
 					
 		ACTION_results trace; 
+		/*
 		trace.H.resize(k_max + 1);
 		trace.C.resize(k_max + 1);
 		trace.selected_cols.resize(k_max + 1);
+		*/
+
+		trace.H = field<mat>(k_max + 1);
+		trace.C = field<mat>(k_max + 1);
+		trace.selected_cols = field<uvec>(k_max + 1);
+
+
 		
 		mat X_r = normalise(S_r, 1); // ATTENTION!
 		 		
@@ -214,9 +222,16 @@ namespace ACTIONet {
 		k_max = std::min(k_max, (int)S_r.n_cols);	
 					
 		ACTION_results trace; 
+		/*
 		trace.H.resize(k_max + 1);
 		trace.C.resize(k_max + 1);
 		trace.selected_cols.resize(k_max + 1);
+		*/
+
+		trace.H = field<mat>(k_max + 1);
+		trace.C = field<mat>(k_max + 1);
+		trace.selected_cols = field<uvec>(k_max + 1);
+		
 		
 		mat X_r = normalise(S_r, 1); // ATTENTION!
 		 		
@@ -269,10 +284,13 @@ namespace ACTIONet {
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);			
 		}
+		/*
 		trace.H.resize(current_k+1);
 		trace.C.resize(current_k+1);
 		trace.selected_cols.resize(current_k+1);
+		*/
 		
+
 		return trace;
 	}	
 }
