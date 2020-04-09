@@ -372,8 +372,6 @@ namespace hnswlib {
             }
 
             visited_array[ep_id] = visited_array_tag;
-
-			int counts = 0;
 			
             while (!candidate_set.empty()) {
 
@@ -410,7 +408,6 @@ namespace hnswlib {
 
                         char *currObj1 = (getDataByInternalId(candidate_id));
                         dist_t dist = fstdistfunc_(data_point, currObj1, dist_func_param_);
-                        counts ++;
 
                         if (top_candidates.size() < ef || lowerBound > dist) {						
                             candidate_set.emplace(-dist, candidate_id);
@@ -432,15 +429,6 @@ namespace hnswlib {
                     }
                 }
             }
-
-			printf("Visited counts = %d\n", counts);
-			
-			counts = 0;
-			for(int k = 0; k < max_elements_; k++) {
-				if(visited_array[k] == visited_array_tag)
-					counts++;
-			}
-			printf("\tVisited counts 2 = %d\n", counts);
 			
             visited_list_pool_->releaseVisitedList(vl);
             return top_candidates;

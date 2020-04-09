@@ -23,32 +23,13 @@ reduce.sce <- function(sce, norm.method = "default", reduced_dim = 50, max.iter 
     }
     
     
-    if (!("cell.hashtag" %in% colnames(colData(sce.norm)))) {
-        print("tagging cells")
-        time.tag = Sys.time()
-        if(is.null(passphrase))
-			passphrase = as.character(time.tag)
-        
-        encoded.ids = encode.ids(colnames(sce.norm), passphrase)        
-        sce.norm$cell.hashtag = cell.hashtags
-        
-        colData(sce.norm)$original.colnames = colnames(sce.norm)
-        colnames(sce.norm) = sce.norm$cell.hashtag
-        
-        metadata(sce.norm)$tagging.time = time.tag
-        metadata(sce.norm)$passphrase = passphrase
-    }
-
     if (!("logcounts" %in% names(SummarizedExperiment::assays(sce.norm)))) {
         print("Normalizing sce object")
         
         sce.norm = normalize.sce(sce.norm, norm.method)
-		rownames(SummarizedExperiment::assays(sce.norm)$counts) = rownames(SummarizedExperiment::assays(sce.norm)$logcounts) = rownames(sce.norm)
-		colnames(SummarizedExperiment::assays(sce.norm)$counts) = colnames(SummarizedExperiment::assays(sce.norm)$logcounts) = colnames(sce.norm)
-    } else {
-		rownames(SummarizedExperiment::assays(sce.norm)$logcounts) = rownames(sce.norm)
-		colnames(SummarizedExperiment::assays(sce.norm)$logcounts) = colnames(sce.norm)
     }
+	rownames(SummarizedExperiment::assays(sce.norm)$counts) = rownames(SummarizedExperiment::assays(sce.norm)$logcounts) = rownames(sce.norm)
+	colnames(SummarizedExperiment::assays(sce.norm)$counts) = colnames(SummarizedExperiment::assays(sce.norm)$logcounts) = colnames(sce.norm)
         
     
     print("Running main reduction")
