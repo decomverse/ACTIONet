@@ -4,34 +4,30 @@
 \alias{infer.missing.cell.annotations}
 \title{Uses a variant of the label propagation algorithm to infer missing labels}
 \usage{
-infer.missing.cell.annotations(
-  ACTIONet.out,
-  annotation.in,
-  annotation.out,
-  double.stochastic = FALSE,
-  max_iter = 3
-)
+infer.missing.cell.annotations(ace, annotation.in, annotation.out,
+  double.stochastic = FALSE, max_iter = 3, adjust.levels = T)
 }
 \arguments{
-\item{ACTIONet.out}{Input results to be clustered
+\item{ace}{Input results to be clustered
 (alternatively it can be the ACTIONet igraph object)}
 
 \item{annotation.in}{Annotations to correct with missing values (NA) in it.
-It can be either a named annotation (inside ACTIONet.out$annotations) or a label vector.}
+It can be either a named annotation (inside ace$annotations) or a label vector.}
 
 \item{annotation.out}{Name of the updated annotations to be stored.}
 
 \item{double.stochastic}{Whether to densify adjacency matrix before running label propagation (default=FALSE).}
 
 \item{max_iter}{How many iterative rounds of correction/inference should be performed (default=3)}
+
+\item{adjust.levels}{Whether or not re-adjust labels at the end}
 }
 \value{
-ACTIONet.out with updated annotations added to ACTIONet.out$annotations
+ace with updated annotations added to ace$annotations
 }
 \description{
 Uses a variant of the label propagation algorithm to infer missing labels
 }
 \examples{
-ACTIONet.out = add.cell.annotations(ACTIONet.out, cell.labels, "input_annotations")
-ACTIONet.out = infer.missing.cell.annotations(ACTIONet.out, "input_annotations", "updated_annotations")
+ace = infer.missing.cell.annotations(ace, sce$archetype_Assignments, "updated_archetype_annotations")
 }

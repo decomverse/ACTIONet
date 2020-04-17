@@ -1,5 +1,21 @@
-run.SCINET.archetype <- function(ACTIONet.out, G=NULL, core = T, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
-	require(SCINET)
+#' Computes a list of archetype-specific interactomes
+#'
+#' @param ace ACTIONet output object
+#' @param G Baseline network as an adjacency matrix or igraph object. 
+#' If it is NULL, PCNet is loaded as the baseline from SCINET package.
+#' @param min.edge.weight Used in post-processing to remove insignificant edges
+#' @param compute.topo.specificity Whether to compute topological specificity scores (will be stores as V(G)$specificity)
+#' @param spec.sample_no Number of random samples for computing topological specificity scores
+#' @param thread_no Number of parallel threads 
+#'  
+#' @return A list of igraph objects
+#' 
+#' @examples
+#' network.list = run.SCINET.archetype(ace)
+#' G = network.list[[1]]
+#' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
+run.SCINET.archetype <- function(ace, G=NULL, core = T, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 4, compute.topo.specificity = T) {
+	library(SCINET)
 	
 	print("Preprocessing the baseline interactome");
 	if( is.null(G) ) {
@@ -13,34 +29,16 @@ run.SCINET.archetype <- function(ACTIONet.out, G=NULL, core = T, min.edge.weight
 	} else if(is.igraph(G)){		
 		Adj = as(get.adjacency(G), 'sparseMatrix')
 	}
-      
-	if(core == T) {
-		if (("unification.out" %in% names(ACTIONet.out))) {
-			print("Using unification.out$DE.core (merged archetypes)")
-			DE.profile = as.matrix(log1p(SummarizedExperiment::assays(ACTIONet.out$unification.out$DE.core)[["significance"]]))
-		} else {
-			print("unification.out is not in ACTIONet.out. Running unify.cell.states() first ...")
-			ACTIONet.out$unification.out = unify.cell.states(ACTIONet.out, sce, reduction_slot = reduction_slot, sce.data.attr = sce.data.attr)    
-			DE.profile = as.matrix(log1p(SummarizedExperiment::assays(ACTIONet.out$unification.out$DE.core)[["significance"]]))
-		}
-	} else {
-		if (("archetype.differential.signature" %in% names(ACTIONet.out))) {
-			print("Using archetype.differential.signature (all archetypes)")
-			DE.profile = as.matrix(log1p(ACTIONet.out$archetype.differential.signature))
-		} else {
-			print("archetype.differential.signature is not in ACTIONet.out. Running compute.archetype.feature.specificity() first ...")
-			ACTIONet.out$archetype.differential.signature = compute.archetype.feature.specificity(ACTIONet.out, sce, mode = specificity.mode, sce.data.attr = sce.data.attr)
-			DE.profile = as.matrix(log1p(ACTIONet.out$archetype.differential.signature))
-		}
-	}                  
 	
+	gene.scores = rowFactors(ace)[["archetype_gene_specificity"]]
+		
 	
-	common.genes = intersect(rownames(DE.profile), rownames(PCNet))
+	common.genes = intersect(rownames(gene.scores), rownames(PCNet))
 	if(length(common.genes) == 0) {
 		print("No common genes found. Check rownames (or vertex names) for the input graph");
-		return(ACTIONet.out)
+		return(ace)
 	}
-	A = DE.profile[common.genes, ]
+	A = gene.scores[common.genes, ]
 	G = Adj[common.genes, common.genes]
 	
 	
@@ -49,7 +47,7 @@ run.SCINET.archetype <- function(ACTIONet.out, G=NULL, core = T, min.edge.weight
 	cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, thread_no = thread_no)
 	cellstate.nets.list = as.list(cellstate.nets)
 	
-	print("Prunning nodes/edges ... ");
+	print("Post-processing networks\n");
 	cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
 		G.Adj@x[G.Adj@x < min.edge.weight] = 0
 		filter.mask = Matrix::colSums(G.Adj) == 0
@@ -58,32 +56,43 @@ run.SCINET.archetype <- function(ACTIONet.out, G=NULL, core = T, min.edge.weight
 		if(compute.topo.specificity == TRUE) {
 			z.scores = topo.spec(G, spec.sample_no)
 			V(G)$specificity = 1 / (1 + exp(-z.scores))
-		}
-		
-		# G = igraph::graph_from_adjacency_matrix(G.Adj, mode = "undirected", weighted = T)
-		# V(G)$name = common.genes
-		# G = delete_edges(G, E(G)[E(G)$weight < min.edge.weight])
-		# if(compute.topo.specificity == TRUE) {
-		# 	z.scores = topo.spec(G, spec.sample_no)
-		# 	V(G)$specificity = 1 / (1 + exp(-z.scores))
-		# }
-		# G = delete_vertices(G, V(G)[strength(G) == 0])				
+		}			
 		
 		return(G)
 	})
 
-	if(is.null(colnames(DE.profile))) {		
-		names(cellstate.nets.list.igraph) = 1:ncol(DE.profile)
+	if(is.null(colnames(gene.scores))) {		
+		names(cellstate.nets.list.igraph) = 1:ncol(gene.scores)
 	} else {
-		names(cellstate.nets.list.igraph) = colnames(DE.profile)
+		names(cellstate.nets.list.igraph) = colnames(gene.scores)
 	}
 	
 	return(cellstate.nets.list.igraph)
 }
 
-run.SCINET.annotation <- function(ACTIONet.out, annotation_name, G=NULL, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
-	require(SCINET)
-	
+#' Computes a list of cluster-specific interactomes
+#'
+#' @param ace ACTIONet output object
+#' @param specificity.slot.name An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function
+#' @param G Baseline network as an adjacency matrix or igraph object. 
+#' If it is NULL, PCNet is loaded as the baseline from SCINET package.
+#' @param min.edge.weight Used in post-processing to remove insignificant edges
+#' @param compute.topo.specificity Whether to compute topological specificity scores (will be stores as V(G)$specificity)
+#' @param spec.sample_no Number of random samples for computing topological specificity scores
+#' @param thread_no Number of parallel threads 
+#'  
+#' @return A list of igraph objects
+#' 
+#' @examples
+#' data("curatedMarkers_human") # pre-packaged in ACTIONet
+#' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+#' ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
+#' network.list = run.SCINET.clusters(ace, "cluster_specificity_scores")
+#' G = network.list[[1]]
+#' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
+run.SCINET.clusters <- function(ace, specificity.slot.name, G=NULL, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
+	library(SCINET)
+		
 	print("Preprocessing the baseline interactome");
 	if( is.null(G) ) {
 		if(!exists('PCNet') ) {
@@ -98,24 +107,19 @@ run.SCINET.annotation <- function(ACTIONet.out, annotation_name, G=NULL, min.edg
 	}
 
 
-	cl.idx = which(names(ACTIONet.out$annotations) == annotation_name)
-	if(length(cl.idx) == 0) {
-		R.utils::printf('Error in run.annotation.SCINET: annotation_name "%s" not found\n', annotation_name)
-		return(ACTIONet.out)
-	}		
-	
-	if( is.null(ACTIONet.out$annotations[[cl.idx]]$DE.profile) ) {
-		print("DE.profile of the annotation is missing. Computing it from scratch (please wait) ... ");		
-		ACTIONet.out = compute.annotations.feature.specificity(ACTIONet.out, sce, annotation_name)
+	if(! (specificity.slot.name %in% names(rowFactors(ace))) ) {
+		message(sprintf("%s does not exist in rowFactors(ace)", specificity.slot.name))
 	}
-	DE.profile  = log1p(as.matrix(SummarizedExperiment::assays(ACTIONet.out$annotations[[cl.idx]]$DE.profile)[["significance"]]))
-	
-	common.genes = intersect(rownames(DE.profile), rownames(PCNet))
+
+	gene.scores = as.matrix(log1p(t(rowFactors(ace)[[specificity.slot.name]])))
+
+
+	common.genes = intersect(rownames(gene.scores), rownames(PCNet))
 	if(length(common.genes) == 0) {
 		print("No common genes found. Check rownames (or vertex names) for the input graph");
-		return(ACTIONet.out)
+		return(ace)
 	}
-	A = DE.profile[common.genes, ]
+	A = gene.scores[common.genes, ]
 	G = Adj[common.genes, common.genes]
 	
 	
@@ -124,7 +128,7 @@ run.SCINET.annotation <- function(ACTIONet.out, annotation_name, G=NULL, min.edg
 	cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, thread_no = thread_no)
 	cellstate.nets.list = as.list(cellstate.nets)
 	
-	print("Prunning nodes/edges ... ");
+	print("Post-processing networks\n");
 	cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
 		G.Adj@x[G.Adj@x < min.edge.weight] = 0
 		filter.mask = Matrix::colSums(G.Adj) == 0
@@ -134,29 +138,37 @@ run.SCINET.annotation <- function(ACTIONet.out, annotation_name, G=NULL, min.edg
 			z.scores = topo.spec(G, spec.sample_no)
 			V(G)$specificity = 1 / (1 + exp(-z.scores))
 		}
-		
-		# G = igraph::graph_from_adjacency_matrix(G.Adj, mode = "undirected", weighted = T)
-		# V(G)$name = common.genes
-		# G = delete_edges(G, E(G)[E(G)$weight < min.edge.weight])
-		# if(compute.topo.specificity == TRUE) {
-		# 	z.scores = topo.spec(G, spec.sample_no)
-		# 	V(G)$specificity = 1 / (1 + exp(-z.scores))
-		# }
-		# G = delete_vertices(G, V(G)[strength(G) == 0])
 						
 		return(G)
 	})
 
-	if(is.null(colnames(DE.profile))) {		
-		names(cellstate.nets.list.igraph) = 1:ncol(DE.profile)
+	if(is.null(colnames(gene.scores))) {		
+		names(cellstate.nets.list.igraph) = 1:ncol(gene.scores)
 	} else {
-		names(cellstate.nets.list.igraph) = colnames(DE.profile)
+		names(cellstate.nets.list.igraph) = colnames(gene.scores)
 	}
 	return(cellstate.nets.list.igraph)
 }
 
 
-run.SCINET.gene.scores <- function(gene.scores.mat, G=NULL, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
+#' Computes a list of specific interactomes for an arbitrary gene score matrix
+#'
+#' @param gene.scores gene.scores
+#' @param specificity.slot.name An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function
+#' @param G Baseline network as an adjacency matrix or igraph object. 
+#' If it is NULL, PCNet is loaded as the baseline from SCINET package.
+#' @param min.edge.weight Used in post-processing to remove insignificant edges
+#' @param compute.topo.specificity Whether to compute topological specificity scores (will be stores as V(G)$specificity)
+#' @param spec.sample_no Number of random samples for computing topological specificity scores
+#' @param thread_no Number of parallel threads 
+#'  
+#' @return A list of igraph objects
+#' 
+#' @examples
+#' network.list = run.SCINET.gene.scores(gene.scores)
+#' G = network.list[[1]]
+#' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
+run.SCINET.gene.scores <- function(gene.scores, G=NULL, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
 	require(SCINET)
 	
 	print("Preprocessing the baseline interactome");
@@ -173,12 +185,12 @@ run.SCINET.gene.scores <- function(gene.scores.mat, G=NULL, min.edge.weight = 2,
 	}
 
 
-	common.genes = intersect(rownames(gene.scores.mat), rownames(Adj))
+	common.genes = intersect(rownames(gene.scores), rownames(Adj))
 	if(length(common.genes) == 0) {
 		print("No common genes found. Check rownames (or vertex names) for the input graph");
 		return()
 	}
-	A = gene.scores.mat[common.genes, ]
+	A = gene.scores[common.genes, ]
 	G = Adj[common.genes, common.genes]
 	
 	
@@ -188,7 +200,7 @@ run.SCINET.gene.scores <- function(gene.scores.mat, G=NULL, min.edge.weight = 2,
 	cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, thread_no = thread_no)
 	cellstate.nets.list = as.list(cellstate.nets)
 	
-	print("Prunning nodes/edges ... ");
+	print("Post-processing networks\n");
 	cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
 		G.Adj@x[G.Adj@x < min.edge.weight] = 0
 		filter.mask = Matrix::colSums(G.Adj) == 0
@@ -199,21 +211,14 @@ run.SCINET.gene.scores <- function(gene.scores.mat, G=NULL, min.edge.weight = 2,
 			V(G)$specificity.z = z.scores
 			V(G)$specificity = 1 / (1 + exp(-z.scores))
 		}
-		# G = igraph::graph_from_adjacency_matrix(G.Adj, mode = "undirected", weighted = T)
-		# V(G)$name = common.genes
-		# G = delete_edges(G, E(G)[E(G)$weight < min.edge.weight])
-		# if(compute.topo.specificity == TRUE) {
-		# 	z.scores = topo.spec(G, spec.sample_no)
-		# 	V(G)$specificity = 1 / (1 + exp(-z.scores))
-		# }
-		# G = delete_vertices(G, V(G)[strength(G) == 0])				
+				
 		return(G)
 	})
 	
-	if(is.null(colnames(gene.scores.mat))) {		
-		names(cellstate.nets.list.igraph) = 1:ncol(gene.scores.mat)
+	if(is.null(colnames(gene.scores))) {		
+		names(cellstate.nets.list.igraph) = 1:ncol(gene.scores)
 	} else {
-		names(cellstate.nets.list.igraph) = colnames(gene.scores.mat)
+		names(cellstate.nets.list.igraph) = colnames(gene.scores)
 	}
 
 	return(cellstate.nets.list.igraph)

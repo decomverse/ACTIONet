@@ -145,9 +145,9 @@ List reduce_kernel(SEXP S, int reduced_dim = 50, int iter = 5, int seed = 0, int
 //' B = S_r
 //' H = run_simplex_regression(A, B)
 // [[Rcpp::export]]
-mat run_simplex_regression(mat A, mat B) {	
+mat run_simplex_regression(mat &A, mat &B) {	
 	mat X = ACTIONet::run_simplex_regression(A, B);
-	
+
 	return X;
 }
 
@@ -192,9 +192,9 @@ List run_SPA(mat A, int k) {
 //' H8 = ACTION.out$H[[8]]
 //' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_ACTION(mat S_r, int k_min = 2, int k_max=30, int thread_no = 4) {	
+List run_ACTION(mat S_r, int k_min = 2, int k_max=30, int thread_no = 4, int max_it = 50, double min_delta = 0.01, int type = 1) {	
 
-	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no);
+	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta, type);
 
 	List res;
 	
@@ -315,7 +315,7 @@ List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, mat &H_stacked) {
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = build_ACTIONet(prune.out$H_stacked)
 // [[Rcpp::export]]
-sp_mat build_ACTIONet(mat &H_stacked, double density = 1.0, int thread_no=8, bool mutual_edges_only = true) {
+sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, bool mutual_edges_only = true) {
 	double M = 16, ef_construction = 200, ef = 50;
 	sp_mat G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
 	
@@ -342,7 +342,7 @@ sp_mat build_ACTIONet(mat &H_stacked, double density = 1.0, int thread_no=8, boo
 //'	G = build_ACTIONet(prune.out$H_stacked)
 //'	vis.out = layout_ACTIONet(G, S_r)
 // [[Rcpp::export]]
-List layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level= 50, unsigned int n_epochs = 100, int thread_no = 4) {
+List layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level= 50, unsigned int n_epochs = 500, int thread_no = 4) {
 
 	field<mat> res = ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no);
     
@@ -403,7 +403,7 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass) {
 }
 
 
-//' Computes pseudobulkt profiles
+//' Computes pseudobulk profiles
 //'
 //' @param S Input matrix
 //' @param sample_assignments Any sample clustering/annotation (it has to be in {1, ..., max_class_num})
@@ -422,10 +422,10 @@ mat compute_pseudo_bulk(SEXP S, arma::Col<unsigned long long> sample_assignments
 	mat pb;
     if (Rf_isS4(S)) {
 		sp_mat tmp = as<arma::sp_mat>(S);
-		pb = ACTIONet::compute_pseudo_bulk(tmp, sample_assignments);
+		pb = ACTIONet::compute_pseudo_bulk_per_cluster(tmp, sample_assignments);
     } else {
 		mat tmp = as<arma::mat>(S);
-		pb = ACTIONet::compute_pseudo_bulk(tmp, sample_assignments);
+		pb = ACTIONet::compute_pseudo_bulk_per_cluster(tmp, sample_assignments);
     } 	
 	
     return pb;
@@ -496,7 +496,7 @@ List renormalize_input_matrix(SEXP S, arma::Col<unsigned long long> sample_assig
 }
 
 
-//' Compute feature specificity (discriminative scores)
+//' Compute feature specificity (from archetype footprints)
 //'
 //' @param S Input matrix
 //' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
@@ -507,9 +507,12 @@ List renormalize_input_matrix(SEXP S, arma::Col<unsigned long long> sample_assig
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = build_ACTIONet(prune.out$H_stacked)
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
-//'	logPvals.list = renormalize_input_matrix(S, unification.out$H_unified)
+//' cell.clusters = unification.out$sample_assignments
+//'	S.norm = renormalize_input_matrix(S, cell.clusters)
+//'	logPvals.list = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
+//' specificity.scores = logPvals.list$upper_significance
 // [[Rcpp::export]]
-List compute_feature_specificity(SEXP S, mat H) {
+List compute_archetype_feature_specificity(SEXP S, mat &H) {
     
     field<mat> res;
     
@@ -528,4 +531,156 @@ List compute_feature_specificity(SEXP S, mat H) {
 
 
 	return(out_list);
+}
+
+//' Compute feature specificity (from cluster assignments)
+//'
+//' @param S Input matrix
+//' @param sample_assignments Vector of cluster assignments
+//' 
+//' @return A list with the over/under-logPvals
+//' 
+//' @examples
+//' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
+//'	G = build_ACTIONet(prune.out$H_stacked)
+//' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
+//' cell.clusters = unification.out$sample_assignments
+//'	S.norm = renormalize_input_matrix(S, cell.clusters)
+//'	logPvals.list = compute_cluster_feature_specificity(S.norm, cell.clusters)
+//' specificity.scores = logPvals.list$upper_significance
+// [[Rcpp::export]]
+List compute_cluster_feature_specificity(SEXP S, uvec sample_assignments) {
+    
+    field<mat> res;
+    
+    if (Rf_isS4(S)) {
+		sp_mat tmp = as<arma::sp_mat>(S);
+		res = ACTIONet::compute_feature_specificity(tmp, sample_assignments);
+    } else {
+		mat tmp = as<arma::mat>(S);
+		res = ACTIONet::compute_feature_specificity(tmp, sample_assignments);
+    } 		
+
+    List out_list;
+	out_list["average_profile"] = res(0);
+	out_list["upper_significance"] = res(1);
+	out_list["lower_significance"] = res(2);
+
+
+	return(out_list);
+}
+
+//' Compute coreness of graph vertices
+//'
+//' @param G Input graph
+//' 
+//' @return cn core-number of each graph node
+//' 
+//' @examples
+//' G = colNets(ace)$ACTIONet
+//' cn = compute_core_number(G)
+// [[Rcpp::export]]
+uvec compute_core_number(sp_mat &G) {
+
+	uvec core_num = ACTIONet::compute_core_number(G);
+
+	return(core_num);
+}
+
+
+//' Compute coreness of subgraph vertices induced by each archetype
+//'
+//' @param G Input graph
+//' @param sample_assignments Archetype discretization (output of unify_archetypes())
+//' 
+//' @return cn core-number of each graph node
+//' 
+//' @examples
+//' G = colNets(ace)$ACTIONet
+//' assignments = ace$archetype.assignment
+//' connectivity = compute_core_number(G, assignments)
+// [[Rcpp::export]]
+vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments) {
+
+	vec conn = ACTIONet::compute_archetype_core_centrality(G, sample_assignments);
+
+	return(conn);
+}
+
+
+
+
+//' Computes network diffusion over a given network, starting with an arbitrarty set of initial scores
+//'
+//' @param G Input graph
+//' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
+//' @param thread_no Number of parallel threads
+//' @param alpha Random-walk depth ( between [0, 1] )
+//' @param max_it PageRank iterations
+//' 
+//' @return Matrix of diffusion scores
+//' 
+//' @examples
+//' G = colNets(ace)$ACTIONet
+//' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+//' smoothed.expression = compute_network_diffusion(G, gene.expression)
+// [[Rcpp::export]]
+mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no = 4, double alpha = 0.85, int max_it = 3) {
+
+	mat Diff = ACTIONet::compute_network_diffusion(G, X0, thread_no, alpha, max_it);
+
+	return(Diff);
+}
+
+
+
+
+//' Computes sparse network diffusion over a given network, starting with an arbitrarty set of initial scores
+//'
+//' @param G Input graph
+//' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
+//' @param alpha Random-walk depth ( between [0, 1] )
+//' @param rho Sparsity controling parameter
+//' @param epsilon,max_it Conditions on the length of diffusion 
+//' 
+//' @return Matrix of sparse diffusion scores
+//' 
+//' @examples
+//' G = colNets(ace)$ACTIONet
+//' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+//' smoothed.expression = compute_sparse_network_diffusion(G, gene.expression)
+// [[Rcpp::export]]
+sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha = 0.85, double rho = 1e-4, double epsilon = 0.001, int max_iter = 20) {		
+
+	sp_mat scores = ACTIONet::compute_sparse_network_diffusion(G, X0, alpha, rho, epsilon, max_iter);
+
+	return(scores);
+}
+
+
+
+
+//' Computes feature enrichment wrt a given annotation
+//'
+//' @param scores Specificity scores of features
+//' @param associations Binary matrix of annotations
+//' @param L Length of the top-ranked scores to scan
+//' 
+//' @return Matrix of log-pvalues
+//' 
+//' @examples
+//' data("gProfilerDB_human")
+//' G = colNets(ace)$ACTIONet
+//' associations = gProfilerDB_human$SYMBOL$REAC
+//' common.genes = intersect(rownames(ace), rownames(associations))
+//' specificity_scores = rowFactors(ace)[["archetype_gene_specificity"]]
+//' logPvals = compute_feature_specificity(specificity_scores[common.genes, ], annotations[common.genes, ])
+//' rownames(logPvals) = colnames(specificity_scores)
+//' colnames(logPvals) = colnames(annotations)
+// [[Rcpp::export]]
+mat assess_enrichment(mat &scores, mat &associations, int L) {
+	
+	mat logPvals = ACTIONet::assess_enrichment(scores, associations, L);
+
+	return(logPvals);
 }

@@ -209,17 +209,37 @@ import.sce.from.Seurat <- function(Seurat.obj) {
 #' Constructs an `SingleCellExeriment` object from AnnData
 #' Please refer to: https://satijalab.org/seurat/v3.0/conversion_vignette.html
 #'
-#' @param AnnData.fname Path to the AnnData file
+#' @param fname Path to the AnnData file
 #' 
 #' @return `SingleCellExeriment` object
 #' 
 #' @examples
 #' sce = import.sce.from.AnnData(file_name)
-import.sce.from.AnnData <- function(AnnData.fname) {
+import.sce.from.AnnData <- function(fname) {
     sce <- Seurat::as.SingleCellExperiment(Seurat::ReadH5AD(file = AnnData.fname))
     
     return(sce)
 }
+
+
+#' Constructs an `SingleCellExeriment` object from AnnData
+#' This function depends on sceasy (https://github.com/cellgeni/sceasy) and 
+#' LoomExperiment(BioC) for file conversion.
+#'
+#' @param fname Path to the AnnData file
+#' 
+#' @return `SingleCellExeriment` object
+#' 
+#' @examples
+#' sce = import.sce.from.loom(file_name)
+import.sce.from.loom <- function(fname) {
+    sce <- sceasy:::readExchangeableLoom(fname)
+    
+    return(sce)
+}
+
+
+
 
 #' Constructs an `SingleCellExeriment` object from CDS format in Monocle
 #'

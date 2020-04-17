@@ -4,16 +4,11 @@
 \alias{import.sce.from.10X}
 \title{Imports data from a 10X experiment folder and constructs an `SingleCellExeriment` object}
 \usage{
-import.sce.from.10X(
-  input_path,
-  mtx_file = "matrix.mtx.gz",
+import.sce.from.10X(input_path, mtx_file = "matrix.mtx.gz",
   feature_annotations = "features.tsv.gz",
-  sample_annotations = "barcodes.tsv.gz",
-  sep = "\\t",
-  prefilter = FALSE,
-  min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500
-)
+  sample_annotations = "barcodes.tsv.gz", sep = "\\t",
+  prefilter = FALSE, min.cell.frac.per.gene = 0.005,
+  min.genes.per.cell = 500)
 }
 \arguments{
 \item{input_path}{Folder containing input files}

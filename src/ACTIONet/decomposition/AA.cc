@@ -18,28 +18,21 @@ namespace ACTIONet {
 	   Vector<double> norms;
 	   cout.precision(8);
 
-
+		//printf("(Old) %d- %d %.3e %.3e\n", p, I2, lambda2, epsilon);
+		
 	   for(int t=0; t<I2; ++t) {
 		  SPAMS_Matrix<double> G;
-		  if (computeXtX) {
-			 Z.XtX(G);
-			 G.addDiag(lambda2*lambda2);
-		  }
 		  // step 1: fix Z to compute Alpha
 		  for(int i=0; i<n; ++i) {
 			 Vector<double> refColX;
 			 Vector<double> refColAlphaT;
 			 X.refCol(i,refColX);
 			 AlphaT.refCol(i, refColAlphaT);
-			 if (computeXtX) {
-				activeSetS<double>(Z,refColX, refColAlphaT, G, lambda2, epsilon);
-			 } else {
-				activeSet<double>(Z,refColX, refColAlphaT, lambda2, epsilon);
-			 }
+			 
+			 activeSet<double>(Z,refColX, refColAlphaT, lambda2, epsilon);
 		  }
+		  
 		  // step 2: fix Alpha, fix all but one to compute Zi
-	#ifdef NEW_VERSION
-		  // new version
 		  Vector<double> refColX;
 		  Vector<double> tmp;
 		  matRSS.copy(X);
@@ -50,6 +43,8 @@ namespace ACTIONet {
 			 Z.refCol(l, refColZ);
 			 // matRSS = X- Z*AlphaT
 			 if(sumAsq < double(10e-8)) {
+				 printf("%d- Ooops @<%d, %d>\n",p, t, l);
+				 
 				// singular
 				matRSS.norm_2_cols(norms);
 				int k = norms.max();
@@ -68,42 +63,10 @@ namespace ACTIONet {
 				matRSS.rank1Update(tmp, copRowAlphaT);
 			 }
 		  }
-	#else
-		  // end new version
-
-		  Vector<double> refColX;
-		  for(int l=0; l<p; ++l) {
-			 AlphaT.copyRow(l, copRowAlphaT);
-			 double sumAsq =  copRowAlphaT.nrm2sq();
-			 Z.refCol(l, refColZ);
-			 // matRSS = X- Z*AlphaT
-			 matRSS.copy(X);
-			 Z.mult(AlphaT, matRSS, false, false, double(-1.0), double(1.0));
-			 if(sumAsq < double(10e-8)) {
-				// singular
-				matRSS.norm_2_cols(norms);
-				int k = norms.max();
-				X.refCol(k, refColX);
-				refColZ.copy(refColX);
-			 } else {
-				matRSS.rank1Update(refColZ, copRowAlphaT);
-				matRSS.mult(copRowAlphaT, vBarre, 1/sumAsq, double());
-				// least square to get Beta
-				BetaT.refCol(l, refColBetaT);
-				activeSet<double>(X, vBarre, refColBetaT, lambda2, epsilon);
-				X.mult(refColBetaT, refColZ);
-			 }
-		  }
-
-		  matRSS.copy(X);
-		  Z.mult(AlphaT, matRSS, false, false, double(-1.0), double(1.0));
-	#endif
-		  RSS = matRSS.normFsq();
 		  
-	#ifdef DEBUG      
-		  cout << "RSS AS = " << RSS << endl;
-	#endif      
-		  flush(cout);
+		  RSS = matRSS.normFsq();
+		  printf("\t%d- RSS = %.3e\n", t, RSS);
+		  
 	   }
 		  
 	   memcpy(A._X, AlphaT._X, p*n*sizeof(double));
@@ -542,8 +505,7 @@ namespace ACTIONet {
 	   memcpy(alpha._X, AlphaT._X, n*p*sizeof(double));
 	}
 
-
-	void AA (double *A_ptr, int A_rows, int A_cols, double *W0_ptr, int W0_cols, double *C_ptr, double *H_ptr) {
+	void AA (double *A_ptr, int A_rows, int A_cols, double *W0_ptr, int W0_cols, double *C_ptr, double *H_ptr, int stepsAS = 50) {
 		SPAMS_Matrix<double> C_spam;		
 		C_spam._X = C_ptr;
 		C_spam._externAlloc = true;	
@@ -559,11 +521,10 @@ namespace ACTIONet {
 		
 		double lambda2 = 1e-5;
 		double epsilon = 1e-5;
-		int stepsFISTA = 3;
-		int stepsAS = 50;			
 			
-		arch_dense(A_spam, W0_spam, W_spam, H_spam, C_spam, stepsFISTA, stepsAS, epsilon,lambda2, false); //arch_dense(A, W0, Z, A, B....)
+		arch_dense(A_spam, W0_spam, W_spam, H_spam, C_spam, 0, stepsAS, epsilon,lambda2, false); //arch_dense(A, W0, Z, A, B....)
 	}
+
 
 
 	void simplexRegression(double *A_ptr, int A_cols, double *B_ptr, int B_rows, int B_cols, double *X_ptr) { // min(|| AX - B ||) s.t. simplex constraint
