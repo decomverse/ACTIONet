@@ -2,7 +2,6 @@
 #'
 #' @param object ACTIONetExperiment object
 #'
-#' @examples
 #' @importFrom BiocGenerics NCOL NROW
 setValidity2("ACTIONetExperiment", function(object) {
     NR <- NROW(object)

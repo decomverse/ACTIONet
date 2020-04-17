@@ -4,7 +4,6 @@
 #' @param ... other parameters
 #'
 #' @exportMethod rowNets
-#' @examples
 setGeneric("rowNets", function(x, ...) standardGeneric("rowNets"))
 
 #' Get colNets
@@ -13,7 +12,6 @@ setGeneric("rowNets", function(x, ...) standardGeneric("rowNets"))
 #' @param ... other parameters
 #'
 #' @exportMethod colNets
-#' @examples
 #' @export
 setGeneric("colNets", function(x, ...) standardGeneric("colNets"))
 
@@ -23,7 +21,6 @@ setGeneric("colNets", function(x, ...) standardGeneric("colNets"))
 #' @param ... other parameters
 #'
 #' @exportMethod rowFactors
-#' @examples
 #' @export
 setGeneric("rowFactors", function(x, ...) standardGeneric("rowFactors"))
 
@@ -33,7 +30,6 @@ setGeneric("rowFactors", function(x, ...) standardGeneric("rowFactors"))
 #' @param ... other parameters
 #'
 #' @exportMethod colFactors
-#' @examples
 #' @export
 setGeneric("colFactors", function(x, ...) standardGeneric("colFactors"))
 
@@ -43,7 +39,6 @@ setGeneric("colFactors", function(x, ...) standardGeneric("colFactors"))
 #' @param ... other parameters
 #'
 #' @exportMethod rowNets<-
-#' @examples
 setGeneric("rowNets<-", function(x, ...) standardGeneric("rowNets<-"))
 
 #' Set colNets
@@ -52,7 +47,6 @@ setGeneric("rowNets<-", function(x, ...) standardGeneric("rowNets<-"))
 #' @param ... other parameters
 #'
 #' @exportMethod colNets<-
-#' @examples
 setGeneric("colNets<-", function(x, ...) standardGeneric("colNets<-"))
 
 #' Set rowFactors
@@ -61,7 +55,6 @@ setGeneric("colNets<-", function(x, ...) standardGeneric("colNets<-"))
 #' @param ... other parameters
 #'
 #' @exportMethod rowFactors<-
-#' @examples
 setGeneric("rowFactors<-", function(x, ...) standardGeneric("rowFactors<-"))
 
 #' Set colFactors
@@ -70,7 +63,6 @@ setGeneric("rowFactors<-", function(x, ...) standardGeneric("rowFactors<-"))
 #' @param ... other parameters
 #'
 #' @exportMethod colFactors<-
-#' @examples
 setGeneric("colFactors<-", function(x, ...) standardGeneric("colFactors<-"))
 
 

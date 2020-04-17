@@ -4,23 +4,16 @@
 \alias{correct.cell.annotations}
 \title{Uses a variant of the label propagation algorithm to correct likely noisy labels}
 \usage{
-correct.cell.annotations(
-  ACTIONet.out,
-  annotation.in,
-  annotation.out,
-  LFR.threshold = 2,
-  double.stochastic = FALSE,
-  max_iter = 3,
-  adjust.levels = T,
-  min.cell.fraction = 0.001
-)
+correct.cell.annotations(ace, annotation.in, annotation.out,
+  LFR.threshold = 2, double.stochastic = FALSE, max_iter = 3,
+  adjust.levels = T, min.cell.fraction = 0.001)
 }
 \arguments{
-\item{ACTIONet.out}{Input results to be clustered
+\item{ace}{Input results to be clustered
 (alternatively it can be the ACTIONet igraph object)}
 
 \item{annotation.in}{Annotations to correct with missing values (NA) in it.
-It can be either a named annotation (inside ACTIONet.out$annotations) or a label vector.}
+It can be either a named annotation (inside ace$annotations) or a label vector.}
 
 \item{annotation.out}{Name of the updated annotations to be stored.}
 
@@ -33,12 +26,12 @@ It can be either a named annotation (inside ACTIONet.out$annotations) or a label
 \item{min.cell.fraction}{Annotations with less that this fraction will be removed}
 }
 \value{
-ACTIONet.out with updated annotations added to ACTIONet.out$annotations
+ace with updated annotations added to ace$annotations
 }
 \description{
 Uses a variant of the label propagation algorithm to correct likely noisy labels
 }
 \examples{
-ACTIONet.out = add.cell.annotations(ACTIONet.out, cell.labels, "input_annotations")
-ACTIONet.out = correct.cell.annotations(ACTIONet.out, "input_annotations", "updated_annotations")
+ace = add.cell.annotations(ace, cell.labels, "input_annotations")
+ace = correct.cell.annotations(ace, "input_annotations", "updated_annotations")
 }

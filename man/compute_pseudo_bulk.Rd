@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{compute_pseudo_bulk}
 \alias{compute_pseudo_bulk}
-\title{Computes pseudobulkt profiles}
+\title{Computes pseudobulk profiles}
 \usage{
 compute_pseudo_bulk(S, sample_assignments)
 }
@@ -15,7 +15,7 @@ compute_pseudo_bulk(S, sample_assignments)
 S matrix aggregated within each class of sample_assignments
 }
 \description{
-Computes pseudobulkt profiles
+Computes pseudobulk profiles
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)

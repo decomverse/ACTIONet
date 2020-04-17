@@ -9,7 +9,7 @@ namespace hnswlib {
 
     static double JSD_metric(const void *pVect1_p, const void *pVect2_p, const void *params) {
 		double *log_vec = (double *)params;
-        size_t N = (size_t) log_vec[1000001];
+        size_t N = (size_t) log_vec[0];
         
 		double * pVect1 = (double *)pVect1_p;
 		double * pVect2 = (double *)pVect2_p;
@@ -20,7 +20,8 @@ namespace hnswlib {
 			double p = pVect1[i];
 			double q = pVect2[i];
 			double m = (p + q)*half;
-
+			
+			/*
 			int p_idx = (int)floor(p *1000000.0);
 			int q_idx = (int)floor(q *1000000.0);
 			int m_idx = (int)floor(m *1000000.0);
@@ -28,7 +29,12 @@ namespace hnswlib {
 			double lg_p = log_vec[p_idx];
 			double lg_q = log_vec[q_idx];
 			double lg_m = log_vec[m_idx];
-
+			*/
+			
+			double lg_p = fasterlog2(p);
+			double lg_q = fasterlog2(q);
+			double lg_m = fasterlog2(m);
+			
 			sum1 += (p * lg_p) + (q * lg_q);
 			sum2 +=  m * lg_m;		  
 		}
@@ -43,18 +49,14 @@ namespace hnswlib {
 
         DISTFUNC<double> fstdistfunc_;
         size_t data_size_;
-        double params[1000002];
+        double params[2];
         
     public:
         JSDSpace(size_t dim) {
             fstdistfunc_ = JSD_metric;
             data_size_ = dim * sizeof(double);
-            
-            for(register int i = 0; i <= 1000000; i++) {
-				params[i] = (double)log2((double)i / 1000000.0);
-			}
-			params[1000001] = dim;
-			params[0] = 0;			
+			params[0] = dim;
+		
         }
 
         size_t get_data_size() {

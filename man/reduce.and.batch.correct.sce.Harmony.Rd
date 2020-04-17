@@ -5,14 +5,9 @@
 \title{Takes a `SingleCellExperiment` object, batch corrects, and adds the reduced kernel matrix
 (It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)}
 \usage{
-reduce.and.batch.correct.sce.Harmony(
-  sce,
-  batch.vec = NULL,
-  norm.method = "default",
-  reduced_dim = 50,
-  max.iter = 5,
-  passphrase = NULL
-)
+reduce.and.batch.correct.sce.Harmony(sce, batch.vec = NULL,
+  norm.method = "default", reduced_dim = 50, max.iter = 5,
+  passphrase = NULL)
 }
 \arguments{
 \item{sce}{Input sce object}

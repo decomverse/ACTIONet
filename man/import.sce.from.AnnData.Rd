@@ -5,10 +5,10 @@
 \title{Constructs an `SingleCellExeriment` object from AnnData
 Please refer to: https://satijalab.org/seurat/v3.0/conversion_vignette.html}
 \usage{
-import.sce.from.AnnData(AnnData.fname)
+import.sce.from.AnnData(fname)
 }
 \arguments{
-\item{AnnData.fname}{Path to the AnnData file}
+\item{fname}{Path to the AnnData file}
 }
 \value{
 `SingleCellExeriment` object

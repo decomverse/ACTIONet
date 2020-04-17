@@ -4,13 +4,8 @@
 \alias{import.sce.from.table}
 \title{Constructs an `SingleCellExeriment` object from a full count matrix file}
 \usage{
-import.sce.from.table(
-  fname,
-  sep = "\\t",
-  prefilter = FALSE,
-  min.cell.frac.per.gene = 0.001,
-  min.genes.per.cell = 300
-)
+import.sce.from.table(fname, sep = "\\t", prefilter = FALSE,
+  min.cell.frac.per.gene = 0.001, min.genes.per.cell = 300)
 }
 \arguments{
 \item{fname}{Full path to the count matrix file}

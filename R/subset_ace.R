@@ -2,7 +2,6 @@
 #'
 #' @param i,j rows and columns
 #'
-#' @examples
 #' @export
 setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., drop=TRUE) {
     rn <- rowNets(x, withDimnames=FALSE)
