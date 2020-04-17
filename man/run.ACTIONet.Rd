@@ -4,21 +4,15 @@
 \alias{run.ACTIONet}
 \title{A wrapper function to call all main functions of the ACTIONet}
 \usage{
-run.ACTIONet(
-  sce,
-  k_max = 30,
-  min_specificity_z_threshold = -1,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  n_epochs = 500,
-  thread_no = 4,
-  sce.data.attr = "logcounts",
-  reduction_slot = "S_r"
-)
+run.ACTIONet(sce, k_max = 30, AA_delta = 0.01,
+  min_specificity_z_threshold = -1, network_density = 1,
+  mutual_edges_only = TRUE, layout_compactness = 50,
+  layout_epochs = 500, thread_no = 4, data.slot = "logcounts",
+  reduction.slot = "S_r",
+  renormalize.logcounts.slot = "logcounts_adjusted")
 }
 \arguments{
-\item{sce}{Reduced `SingleCellExperiment` object (output of reduce.sce() function).}
+\item{sce}{Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).}
 
 \item{k_max}{Maximum depth of decompositions (default=30).}
 
@@ -29,23 +23,23 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
-\item{n_epochs}{Number of epochs for SGD algorithm (default=500).}
-
 \item{thread_no}{Number of parallel threads (default=4)}
 
-\item{sce.data.attr}{Corresponding slot in the `sce` object the normalized counts (default="logcounts")}
+\item{data.slot}{Corresponding slot in the `ace` object the normalized counts (default="logcounts")}
 
-\item{reduction_slot}{Slot in the ReducedDims(sce) that holds reduced kernel (default="S_r")}
+\item{reduction.slot}{Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")}
+
+\item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
+If it is NULL, values of logcounts(sce) would be directly used without renormalization for computing speicificity scores}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
+
+\item{n_epochs}{Number of epochs for SGD algorithm (default=500).}
 }
 \value{
 A named list: \itemize{
-\item ACTION.out: Output of run_ACTION() with C and H traces.
-\item pruning.out: Output of prune_archetypes() with C_stacked and H_stacked inside.
-\item ACTIONet: ACTIONet graph, constructed by build_ACTIONet(), in the igraph format
-\item vis.out: Output of the layout_ACTIONet() function. It includes coordinates and colors for ACTIONet nodes.
-\item unification.out: Output of the unify_archetypes() function. Includes C_unified, H_unified, and sample_assignments.
+\item ace: ACTIONetExperiment object (derived from SingleCellExperiment)
+\item ACTIONet.trace: Log of ACTIONet function calls 
 }
 }
 \description{
@@ -53,5 +47,7 @@ A wrapper function to call all main functions of the ACTIONet
 }
 \examples{
 sce = reduce(sce)
-ACTIONet.out = run_ACTIONet(sce)
+ACTIONet.out = run.ACTIONet(sce)
+ace = ACTIONet.out$ace # main output
+trace = ACTIONet.out$trace # for backup
 }

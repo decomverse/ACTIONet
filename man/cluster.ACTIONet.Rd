@@ -4,15 +4,11 @@
 \alias{cluster.ACTIONet}
 \title{A wrapper function For Leiden algorithm}
 \usage{
-cluster.ACTIONet(
-  ACTIONet.out,
-  annotation.name = NULL,
-  resolution_parameter = 0.5,
-  arch.init = TRUE
-)
+cluster.ACTIONet(ace, annotation.name = NULL,
+  resolution_parameter = 0.5, arch.init = TRUE)
 }
 \arguments{
-\item{ACTIONet.out}{Input results to be clustered}
+\item{ace}{Input results to be clustered}
 
 \item{annotation.name}{Arbitrary name to be given to the final clustering for future reference.}
 
@@ -22,13 +18,13 @@ The higher the resolution, the more clusters we will get (default=0.5).}
 \item{arch.init}{Whether to use archetype-assignments to initialize clustering (default=TRUE)}
 }
 \value{
-ACTIONet.out with added annotation
+ace with added annotation
 }
 \description{
 A wrapper function For Leiden algorithm
 }
 \examples{
-ACTIONet.out = cluster.ACTIONet(ACTIONet.out, "Leiden_clusters")
-plot.ACTIONet(ACTIONet.out, "Leiden_clusters")
-clusters = ACTIONet.out$annotations$Leiden_clusters$Labels
+ace = cluster.ACTIONet(ace, "Leiden_clusters")
+plot.ACTIONet(ace, "Leiden_clusters")
+clusters = colData(ace)[["Leiden_clusters"]]
 }

@@ -93,10 +93,10 @@ normalize.sce <- function(sce, norm.method = "default") {
     return(sce.norm)
 }
 
-renormalize.sce <- function(ACTIONet.out, sce) {
+renormalize.sce <- function(sce) {
 	library(scater)
 
-	system.time({sce <- computeSumFactors(sce, clusters=ACTIONet.out$unification.out$assignments.core)})
+	system.time({sce <- computeSumFactors(sce, clusters=sce$unification.out$assignments.core)})
 	summary(sizeFactors(sce))
 
 	final.sce = normalize(sce)

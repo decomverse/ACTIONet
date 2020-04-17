@@ -1,7 +1,7 @@
 Package: ACTIONet
 Type: Package
 Title: Robust multi-resolution analysis of single-cell datasets
-biocViews: ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
+biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
 Version: 1.0
 Date: 2020-01-01
 Authors@R: c(
@@ -14,10 +14,10 @@ Maintainer: Shahin Mohammadi <mohammadi@broadinstitute.org>
 Description: 
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: Rcpp, RcppArmadillo, Matrix, igraph, SingleCellExperiment, SummarizedExperiment
-Imports: Matrix, igraph, SingleCellExperiment
-Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer, ComplexHeatmap
+Depends: Rcpp, RcppArmadillo, Matrix, SingleCellExperiment
+Imports: Matrix, SingleCellExperiment
+Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer,ComplexHeatmap
 LinkingTo: Rcpp,RcppArmadillo
 Encoding: UTF-8
-RoxygenNote: 7.0.1
 VignetteBuilder: knitr
+RoxygenNote: 6.1.1

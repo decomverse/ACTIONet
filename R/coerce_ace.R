@@ -2,8 +2,7 @@
 #'
 #' @param from SingleCellExperiment object
 #'
-#' @examples
-#' @exportMethods coerce
+#' @exportMethod coerce
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     new("ACTIONetExperiment", from, 
     rowNets=S4Vectors::SimpleList(), 

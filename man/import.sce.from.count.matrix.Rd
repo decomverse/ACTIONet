@@ -4,14 +4,9 @@
 \alias{import.sce.from.count.matrix}
 \title{Constructs an `SingleCellExeriment` object from count matrix, gene names, and sample_annotations}
 \usage{
-import.sce.from.count.matrix(
-  counts,
-  gene.names,
-  sample_annotations = NULL,
-  prefilter = FALSE,
-  min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500
-)
+import.sce.from.count.matrix(counts, gene.names,
+  sample_annotations = NULL, prefilter = FALSE,
+  min.cell.frac.per.gene = 0.005, min.genes.per.cell = 500)
 }
 \arguments{
 \item{counts}{Matrix of counts}

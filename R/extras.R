@@ -385,23 +385,6 @@ unhash = function(hashed, alphabet) {
 }
 
 
-layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, cex = 1.0, ...) {
-	require(wordcloud)
-    lay <- wordlayout(x, y, words = labels, cex = 1.25*cex, ...)
-
-    x = lay[, 1] + 0.5 * lay[, 3]
-    y = lay[, 2] + 0.5 * lay[, 4]
-    
-    theta = seq(0, 2 * pi, length.out = 50)
-    xy <- xy.coords(x, y)
-    xo <- r * strwidth("A")
-    yo <- r * strheight("A")
-    
-    for (i in theta) {
-        text(xy$x + cos(i) * xo, xy$y + sin(i) * yo, labels, col = bg, cex = cex, ...)
-    }
-    text(xy$x, xy$y, labels, col = col, cex = cex, ...)
-}
 
 combine.logPvals <- function(logPvals, top.len = NULL, base = 10) {
     if (is.null(top.len)) {
@@ -420,47 +403,9 @@ combine.logPvals <- function(logPvals, top.len = NULL, base = 10) {
 }
 
 
-preprocess.labels <- function(ACTIONet.out, labels) {
-	if(is.null(labels)) {
-		return(NULL)
-	}
-	if( (length(labels) == 1) & is.character(labels)) {
-		idx = which(names(ACTIONet.out$annotations) == labels)
-		if(length(idx) == 0) {
-			R.utils::printf('Error preprocess.labels: annotation.name %s not found\n', labels)
-			return(NULL)
-		}		
-		labels = ACTIONet.out$annotations[[idx]]$Labels
-	}
 
-	if((length(labels) > 1) & is.logical(labels)) {
-		labels = factor(as.numeric(labels), levels = c(0, 1), labels = c("No", "Yes"))
-	}
-	
-	if((length(labels) > 1) & is.character(labels)) {
-		labels = factor(labels)
-	}
-	
-	if(is.factor(labels)) {
-		v = as.numeric(labels)
-		names(v) = levels(labels)[v]		
-		labels = v
-	}
-	if(is.matrix(labels)) {
-		L = as.numeric(labels)
-		names(L) = names(labels)
-		labels = L
-	} 
-	
-	if( is.null(names(labels)) | length(unique(names(labels))) > 100 )  {
-		names(labels) = as.character(labels)
-	}
-	
-	return(labels)
-}
-
-reannotate.labels <- function(ACTIONet.out, Labels) {
-	Labels = preprocess.labels(ACTIONet.out, Labels)			
+reannotate.labels <- function(ace, Labels) {
+	Labels = preprocess.labels(ace, Labels)			
 	
 	
 	Annot = sort(unique(Labels))
@@ -517,82 +462,51 @@ doubleNorm <- function(Enrichment, log.transform = T, min.threshold = 0) {
 	return(Enrichment.scaled)
 }
 
-
-compute.cell.connectivity <- function(ACTIONet.out, alpha_val = 0.85) {
-    cn = coreness(ACTIONet.out$ACTIONet)
-    cn.pr = page_rank(ACTIONet.out$ACTIONet, personalized = cn, damping = alpha_val)$vector    
-	x.n = cn.pr / sd(cn.pr)
-
-	IDX = split(1:length(ACTIONet.out$unification.out$assignments.core), ACTIONet.out$unification.out$assignments.core)
-	locality = matrix(0, nrow = length(ACTIONet.out$unification.out$assignments.core), ncol = length(IDX))
-	for (i in 1:length(IDX)) {
-		print(i)
-		idx = IDX[[i]]
-		
-		sub.ACTIONet = igraph::induced.subgraph(ACTIONet.out$ACTIONet, V(ACTIONet.out$ACTIONet)[idx])
-		
-		sub.cn = coreness(sub.ACTIONet)		
-		if(sum(sub.cn) == 0) {
-			locality[idx, i] = 0
-		} else {
-			pr = page_rank(sub.ACTIONet, personalized = sub.cn, damping = alpha_val)$vector
-			y.n = pr/sd(pr)
-
-			v = y.n * x.n[idx]
-			v[is.na(v)] = 0
-			
-			locality[idx, i] = v
-		}
+assess.label.local.enrichment <- function(P, Labels) {
+	if( is.null(names(Labels)) ){
+		names(Labels) = as.character(Labels)
 	}
-	connectivity = Matrix::rowSums(locality)
-	return(connectivity)
-}
-
-
-
-
-construct.archetype.signature.profile <- function(sce, ACTIONet.out, reduction_slot = "S_r") {
-    require(SingleCellExperiment)
+    counts = table(Labels)
+    p = counts/sum(counts)
+	Annot = names(Labels)[match(as.numeric(names(counts)), Labels)]
     
-    # eigengene x archetypes
-    reduced.archetype.profile = (t(reducedDims(sce)[[reduction_slot]]) %*% ACTIONet.out$reconstruct.out$C_stacked)
-    
-    X = rowData(sce)
-    cnames = colnames(X)
-    idx = grep("^PC", cnames)
-    V = as.matrix(X[, idx])
-    
-    perm = order(sapply(cnames[idx], function(str) as.numeric(stringr::str_replace(str, "PC", ""))))
-    V = V[, perm]
-    
-    # gene x archetypes
-    archetype.signature.profile = V %*% reduced.archetype.profile
-    rownames(archetype.signature.profile) = rownames(sce)
-    
-    return(archetype.signature.profile)
-}
-
-add.archetype.labels <- function(ACTIONet.out, k_min = 2, k_max = 20) {
-	print("Adding archetype labels")
+    X = sapply(names(p), function(label) {
+        x = as.numeric(Matrix::sparseVector(x = 1, i = which(Labels == label), length = length(Labels)))
+    })
+	colnames(X) = Annot
 	
-    temp <- lapply(k_min:k_max, function(i) 1:i)
-    arch.labels <- paste("A", unlist(lapply(1:length(temp), function(i) paste(i, temp[[i]], sep = "_"))), sep = "")
+    Exp = array(1, nrow(P)) %*% t(p)
+    Obs = as(P %*% X, "dgTMatrix")
     
-    arch.labels <- arch.labels[ACTIONet.out$reconstruct.out$selected_archs]
-    colnames(ACTIONet.out$reconstruct.out$C_stacked) <- arch.labels
-    rownames(ACTIONet.out$reconstruct.out$H_stacked) <- arch.labels
-    colnames(ACTIONet.out$reconstruct.out$archetype_profile) <- arch.labels
-    colnames(ACTIONet.out$reconstruct.out$backbone) <- arch.labels
-	rownames(ACTIONet.out$reconstruct.out$landmark_cells) <- arch.labels
-	
-    if('signature.profile' %in% names(ACTIONet.out)) {		
-		colnames(ACTIONet.out$signature.profile) <- arch.labels
-	}
-    if('archetype.differential.signature' %in% names(ACTIONet.out)) {		
-		colnames(ACTIONet.out$archetype.differential.signature) <- arch.labels
-    }
+    # Need to rescale due to missing values within the neighborhood
+    rs = Matrix::rowSums(Obs)
+    Obs = Matrix::sparseMatrix(i = Obs@i + 1, j = Obs@j + 1, x = Obs@x/rs[Obs@i + 1], dims = dim(Obs))
     
-    return(ACTIONet.out)
+    Lambda = Obs - Exp
+    
+    
+    w2 = Matrix::rowSums(P^2)
+    Nu = w2 %*% t(p)
+    
+    a = as.numeric(qlcMatrix::rowMax(P)) %*% t(array(1, length(p)))
+    
+    
+    logPval = (Lambda^2)/(2 * (Nu + (a * Lambda)/3))
+    logPval[Lambda < 0] = 0
+    logPval[is.na(logPval)] = 0
+    
+    logPval = as.matrix(logPval)
+    
+    colnames(logPval) = Annot
+    
+
+    max.idx = apply(logPval, 1, which.max)
+    updated.Labels = as.numeric(names(p))[max.idx]
+    names(updated.Labels) = Annot[max.idx]
+    
+    updated.Labels.conf = apply(logPval, 1, max)
+    
+    res = list(Labels = updated.Labels, Labels.confidence = updated.Labels.conf, Enrichment = logPval)
+    
+    return(res)
 }
-
-

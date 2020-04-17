@@ -104,8 +104,8 @@ run_SPA <- function(A, k) {
 #' ACTION.out = run_ACTION(S_r, k_max = 10)
 #' H8 = ACTION.out$H[[8]]
 #' cell.assignments = apply(H8, 2, which.max)
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 4L) {
-    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no)
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 4L, max_it = 50L, min_delta = 0.01, type = 1L) {
+    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta, type)
 }
 
 #' Filters multi-level archetypes and concatenate filtered archetypes.
@@ -184,7 +184,7 @@ build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 8L, mutual_edge
 #' @examples
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #'	vis.out = layout_ACTIONet(G, S_r)
-layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 100L, thread_no = 4L) {
+layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, thread_no = 4L) {
     .Call(`_ACTIONet_layout_ACTIONet`, G, S_r, compactness_level, n_epochs, thread_no)
 }
 
@@ -214,7 +214,7 @@ decode_ids <- function(encoded_ids, pass) {
     .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
 }
 
-#' Computes pseudobulkt profiles
+#' Computes pseudobulk profiles
 #'
 #' @param S Input matrix
 #' @param sample_assignments Any sample clustering/annotation (it has to be in {1, ..., max_class_num})
@@ -266,7 +266,7 @@ renormalize_input_matrix <- function(S, sample_assignments) {
     .Call(`_ACTIONet_renormalize_input_matrix`, S, sample_assignments)
 }
 
-#' Compute feature specificity (discriminative scores)
+#' Compute feature specificity (from archetype footprints)
 #'
 #' @param S Input matrix
 #' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
@@ -277,8 +277,115 @@ renormalize_input_matrix <- function(S, sample_assignments) {
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
-#'	logPvals.list = renormalize_input_matrix(S, unification.out$H_unified)
-compute_feature_specificity <- function(S, H) {
-    .Call(`_ACTIONet_compute_feature_specificity`, S, H)
+#' cell.clusters = unification.out$sample_assignments
+#'	S.norm = renormalize_input_matrix(S, cell.clusters)
+#'	logPvals.list = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
+#' specificity.scores = logPvals.list$upper_significance
+compute_archetype_feature_specificity <- function(S, H) {
+    .Call(`_ACTIONet_compute_archetype_feature_specificity`, S, H)
+}
+
+#' Compute feature specificity (from cluster assignments)
+#'
+#' @param S Input matrix
+#' @param sample_assignments Vector of cluster assignments
+#' 
+#' @return A list with the over/under-logPvals
+#' 
+#' @examples
+#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
+#'	G = build_ACTIONet(prune.out$H_stacked)
+#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
+#' cell.clusters = unification.out$sample_assignments
+#'	S.norm = renormalize_input_matrix(S, cell.clusters)
+#'	logPvals.list = compute_cluster_feature_specificity(S.norm, cell.clusters)
+#' specificity.scores = logPvals.list$upper_significance
+compute_cluster_feature_specificity <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_cluster_feature_specificity`, S, sample_assignments)
+}
+
+#' Compute coreness of graph vertices
+#'
+#' @param G Input graph
+#' 
+#' @return cn core-number of each graph node
+#' 
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' cn = compute_core_number(G)
+compute_core_number <- function(G) {
+    .Call(`_ACTIONet_compute_core_number`, G)
+}
+
+#' Compute coreness of subgraph vertices induced by each archetype
+#'
+#' @param G Input graph
+#' @param sample_assignments Archetype discretization (output of unify_archetypes())
+#' 
+#' @return cn core-number of each graph node
+#' 
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' assignments = ace$archetype.assignment
+#' connectivity = compute_core_number(G, assignments)
+compute_archetype_core_centrality <- function(G, sample_assignments) {
+    .Call(`_ACTIONet_compute_archetype_core_centrality`, G, sample_assignments)
+}
+
+#' Computes network diffusion over a given network, starting with an arbitrarty set of initial scores
+#'
+#' @param G Input graph
+#' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
+#' @param thread_no Number of parallel threads
+#' @param alpha Random-walk depth ( between [0, 1] )
+#' @param max_it PageRank iterations
+#' 
+#' @return Matrix of diffusion scores
+#' 
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+#' smoothed.expression = compute_network_diffusion(G, gene.expression)
+compute_network_diffusion <- function(G, X0, thread_no = 4L, alpha = 0.85, max_it = 3L) {
+    .Call(`_ACTIONet_compute_network_diffusion`, G, X0, thread_no, alpha, max_it)
+}
+
+#' Computes sparse network diffusion over a given network, starting with an arbitrarty set of initial scores
+#'
+#' @param G Input graph
+#' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
+#' @param alpha Random-walk depth ( between [0, 1] )
+#' @param rho Sparsity controling parameter
+#' @param epsilon,max_it Conditions on the length of diffusion 
+#' 
+#' @return Matrix of sparse diffusion scores
+#' 
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+#' smoothed.expression = compute_sparse_network_diffusion(G, gene.expression)
+compute_sparse_network_diffusion <- function(G, X0, alpha = 0.85, rho = 1e-4, epsilon = 0.001, max_iter = 20L) {
+    .Call(`_ACTIONet_compute_sparse_network_diffusion`, G, X0, alpha, rho, epsilon, max_iter)
+}
+
+#' Computes feature enrichment wrt a given annotation
+#'
+#' @param scores Specificity scores of features
+#' @param associations Binary matrix of annotations
+#' @param L Length of the top-ranked scores to scan
+#' 
+#' @return Matrix of log-pvalues
+#' 
+#' @examples
+#' data("gProfilerDB_human")
+#' G = colNets(ace)$ACTIONet
+#' associations = gProfilerDB_human$SYMBOL$REAC
+#' common.genes = intersect(rownames(ace), rownames(associations))
+#' specificity_scores = rowFactors(ace)[["archetype_gene_specificity"]]
+#' logPvals = compute_feature_specificity(specificity_scores[common.genes, ], annotations[common.genes, ])
+#' rownames(logPvals) = colnames(specificity_scores)
+#' colnames(logPvals) = colnames(annotations)
+assess_enrichment <- function(scores, associations, L) {
+    .Call(`_ACTIONet_assess_enrichment`, scores, associations, L)
 }
 

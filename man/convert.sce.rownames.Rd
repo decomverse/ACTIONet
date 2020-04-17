@@ -5,7 +5,8 @@
 \title{Translates rownames() of the `sce` object for mouse and human datasets.
 A typical use-case is when input ids are in ENSEMBL format, but user is interested to work with gene symbols.}
 \usage{
-convert.sce.rownames(sce, from = "ENSEMBL", to = "SYMBOL", species = "human")
+convert.sce.rownames(sce, from = "ENSEMBL", to = "SYMBOL",
+  species = "human")
 }
 \arguments{
 \item{sce}{Input `sce` object}

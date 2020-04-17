@@ -4,13 +4,8 @@
 \alias{reduce.sce}
 \title{Takes a `SingleCellExperiment` object and adds the reduced kernel matrix}
 \usage{
-reduce.sce(
-  sce,
-  norm.method = "default",
-  reduced_dim = 50,
-  max.iter = 5,
-  passphrase = NULL
-)
+reduce.sce(sce, norm.method = "default", reduced_dim = 50,
+  max.iter = 5, passphrase = NULL)
 }
 \arguments{
 \item{sce}{Input sce object}
@@ -25,7 +20,7 @@ reduce.sce(
 \item{passphrase}{Passphrase for encrypting column names of the sce object for anonymization}
 }
 \value{
-Reduced sce object with added ReducedDims(sce)[["S_r"]]
+ACTIONetExperiment object (ACE), derived from SingleCellExperiment (SCE), with added ReducedDims(sce)[["S_r"]]
 }
 \description{
 Takes a `SingleCellExperiment` object and adds the reduced kernel matrix

@@ -90,7 +90,7 @@ namespace ACTIONet {
 	
 	mat computeFullSim(mat &H, int thread_no) {	
 		double log_vec[1000001];
-		for(register int i = 0; i <= 1000000; i++) {
+		for( int i = 0; i <= 1000000; i++) {
 			log_vec[i] = (double)log2((double)i / 1000000.0);
 		}
 		log_vec[0] = 0;		
@@ -106,7 +106,7 @@ namespace ACTIONet {
 
 		mat G = zeros(sample_no, sample_no);		
 		ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
-			for(register int j = 0; j < sample_no; j++) {
+			for( int j = 0; j < sample_no; j++) {
 				G(i, j) = Sim(H.colptr(i), H.colptr(j), log_vec, dim);
 			}
 		});
@@ -117,10 +117,10 @@ namespace ACTIONet {
 	}	
 		
 	// k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
-	sp_mat build_ACTIONet_JS_KstarNN(mat &H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		double LC = 1.0 / density;
 
-		printf("Building adaptive ACTIONet (density = %.2f)\n", density);
+		printf("Building adaptive network (density = %.2f)\n", density);
 
 		H_stacked = clamp(H_stacked, 0, 1);
 		H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
@@ -185,7 +185,7 @@ namespace ACTIONet {
 		mat lambda = zeros(size(beta));
 		//lambda.col(0) = datum::inf*ones(sample_no);
 		//lambda.col(1) = beta.col(1) + 1;			
-		register int k;
+		 int k;
 		for(k = 1; k <= kNN; k++) {
 			beta_sum += beta.col(k);
 			beta_sq_sum += square(beta.col(k));
@@ -240,13 +240,15 @@ namespace ACTIONet {
 		}
 		printf("done\n");
 		
+		G_sym.diag().zeros();
+		
 		return(G_sym);		
 	}
 
-	sp_mat build_ACTIONet_JS_KstarNN_v2(mat &H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		double LC = 1.0 / density;
 
-		printf("Building adaptive ACTIONet (density = %.2f)\n", density);
+		printf("Building adaptive network (density = %.2f) -- Updated\n", density);
 
 		H_stacked = clamp(H_stacked, 0, 1);
 		H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
@@ -313,12 +315,14 @@ namespace ACTIONet {
 		}
 		printf("done\n");
 		
+		G_sym.diag().zeros();
+		
 		return(G_sym);		
 	}
 
-	sp_mat build_ACTIONet_JS_KNN(mat &H_stacked, double k, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 
-		printf("Building ACTIONet with fixed k = %d\n", (int)k);
+		printf("Building fixed-degree network (k = %d)\n", (int)k);
 
 		H_stacked = clamp(H_stacked, 0, 1);
 		H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
@@ -384,13 +388,15 @@ namespace ACTIONet {
 			G_sym = sqrt(G % Gt);
 		}
 		printf("done\n");
+
+		G_sym.diag().zeros();
 		
 		return(G_sym);		
 	}
 
 
 	
-	sp_mat build_ACTIONet(mat &H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		sp_mat G = build_ACTIONet_JS_KstarNN(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
 		
 		return(G);
