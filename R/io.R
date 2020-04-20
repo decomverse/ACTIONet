@@ -294,3 +294,152 @@ convert.sce.rownames <- function(sce, from = "ENSEMBL", to = "SYMBOL", species =
     
     return(sce)
 }
+
+
+preprocessDF <- function(df, drop_single_values = TRUE) {
+	if(ncol(df) > 0) {
+		nn = colnames(df)
+		for(n in nn) {
+			x = df[, n] 
+			if(length(unique(x)) < 50) {
+				x = factor(x, sort(unique(x)))
+				df[, n] = x
+			}
+		}
+	}
+    if (ncol(df) == 0) df[['name']] <- rownames(df)
+    if (drop_single_values) {
+        k_singular <- sapply(df, function(x) length(unique(x)) == 1)
+        if (sum(k_singular) > 0)
+            warning(paste('Dropping single category variables:'),
+                    paste(colnames(df)[k_singular], collapse=', '))
+            df <- df[, !k_singular, drop=F]
+        if (ncol(df) == 0) df[['name']] <- rownames(df)
+    }
+    return(df)
+}
+
+ace2anndata <- function(ace, outFile = NULL, main_layer = 'logcounts', transfer_layers = c("counts", "logcounts_renorm")) {
+	
+    assay_names <- SummarizedExperiment::assayNames(ace)
+    main_layer <- match.arg(main_layer, assay_names)
+    transfer_layers <- transfer_layers[transfer_layers %in% assay_names]
+    transfer_layers <- transfer_layers[transfer_layers != main_layer]
+
+    X <- SummarizedExperiment::assay(ace, main_layer)
+
+    obs <- preprocessDF(as.data.frame(SummarizedExperiment::colData(ace)))
+	obs$index = colnames(ace)
+	
+    var <- preprocessDF(as.data.frame(SummarizedExperiment::rowData(ace)))
+	var$gene_ids = rownames(ace)
+	
+    obsm <- NULL
+    reductions <- SingleCellExperiment::reducedDimNames(ace)
+    if (length(reductions) > 0) {
+        obsm <- sapply(
+            reductions,
+            function(name) as.matrix(
+                    SingleCellExperiment::reducedDim(ace, type=name)),
+            simplify = FALSE
+        )
+        names(obsm) <- paste0(
+            'X_', tolower(SingleCellExperiment::reducedDimNames(ace)))
+    }
+	
+    Fn.o = names(ACTIONet::colFactors(ace))
+    if (length(Fn.o) > 0) {
+        obsm.ext <- sapply(Fn.o, function(name) Matrix::t(as.matrix(ACTIONet::colFactors(ace)[[name]])), simplify = FALSE)
+        names(obsm.ext) <- Fn.o
+        obsm = c(obsm, obsm.ext)
+    }
+
+	varm = NULL
+	Fn.v = names(ACTIONet::rowFactors(ace))
+	if (length(Fn.v) > 0) {
+		varm <- sapply(Fn.v, function(name) as.matrix(ACTIONet::rowFactors(ace)[[name]]), simplify = FALSE)
+		names(varm) <- Fn.v
+	} 	
+
+	
+	varp = NULL
+	Nn.v = names(ACTIONet::rowNets(ace))
+	if (length(Nn.v) > 0) {
+		varp <- sapply(Nn.v, function(name) as.matrix(ACTIONet::rowNets(ace)[[name]]), simplify = FALSE)
+		names(varp) <- Nn.v
+	} 	
+	
+	obsp = NULL
+	Nn.o = names(ACTIONet::colNets(ace))
+	if (length(Nn.o) > 0) {
+		obsp <- sapply(Nn.o, function(name) as.matrix(ACTIONet::colNets(ace)[[name]]), simplify = FALSE)
+	} 		
+	
+    layers <- list()
+    for (layer in transfer_layers) {
+        mat <- SummarizedExperiment::assay(ace, layer)
+        if (all(dim(mat) == dim(X))) layers[[layer]] <- Matrix::t(mat)
+    }
+
+	uns = metadata(ace)
+	uns = uns[sapply(uns, function(x) is.matrix(x) | is.sparseMatrix(x))]
+	# Mn = names(metadata(ace))
+	# if (length(Mn) > 0) {
+	# 	uns <- sapply(Mn, function(name) as.matrix(metadata(ace)[[name]]), simplify = FALSE)
+	# } 
+	
+    require(reticulate)
+    anndata <- reticulate::import('anndata', convert = FALSE)
+
+    adata <- anndata$AnnData(
+        X = Matrix::t(X),
+        obs = obs,
+        obsm = obsm,
+        obsp = obsp,
+        var = var,
+        varm = varm,
+        varp = varp,
+        uns = uns,
+        layers = layers
+    )
+
+    if (!is.null(outFile))
+        adata$write(outFile, compression = 'gzip')
+
+}
+
+import_ace_from_legacy <- function(ACTIONet.out, sce) {
+    ace = as(sce, "ACTIONetExperiment")
+    
+	ACTION.out = ACTIONet.out$ACTION.out
+    pruning.out = ACTIONet.out$reconstruct.out
+    G = ACTIONet.out$build.out$ACTIONet
+    
+	colNets(ace)$ACTIONet = G
+    vis.out = ACTIONet.out$vis.out
+    
+    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
+    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
+    ace$denovo_color = rgb(vis.out$colors)
+
+	unification.out = ACTIONet.out$unification.out
+	colFactors(ace)[["archetype_footprint"]] = ACTIONet.out$unification.out$H.core
+	colFactors(ace)[["archetype_cell_contributions"]] = t(ACTIONet.out$unification.out$C.core)
+	ace$archetype_assignment = ACTIONet.out$unification.out$assignments.core
+
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$archetype_assignment)
+
+	specificity.out = ACTIONet.out$unification.out$DE.core
+	rowFactors(ace)[["archetype_gene_profile"]] = specificity.out[["profile"]]
+	rowFactors(ace)[["archetype_gene_specificity"]] = specificity.out[["significance"]]
+	
+	
+	# Prepare output
+	trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
+    trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
+      
+    out = list(ace = ace, trace = trace)
+    
+    return(out)
+}
+
