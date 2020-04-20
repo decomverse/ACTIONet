@@ -43,3 +43,47 @@ ACTIONetExperiment <- function(...,
 }
 
 
+
+#' @importFrom utils .DollarNames
+setGeneric('.DollarNames', package='utils')
+
+#' @S3method .DollarNames ACTIONetExperiment
+.DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
+	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)) )
+    grep(pattern, ll, value=TRUE)
+}
+
+#' Auto-completion for \code{\linkS4class{ACTIONetExperiment}} objects
+#' @rdname ACTIONetExperiment-class
+#' @export
+setMethod('.DollarNames', 'ACTIONetExperiment', .DollarNames.ACTIONetExperiment)
+
+
+
+#' @export
+setMethod("$", "ACTIONetExperiment",
+    function(x, name)
+{
+	if(name %in% names(colData(x))) {
+		colData(x)[[name]]
+	} else if (name %in% names(rowFactors(x))) {
+		rowFactors(x)[[name]]
+	} else if (name %in% names(colFactors(x))) {
+		colFactors(x)[[name]]
+	} else if (name %in% names(colNets(x))) {
+		colNets(x)[[name]]
+	} else if(name %in% names(rowNets(x))) {
+		rowNets(x)[[name]]
+	} else {
+		message(sprintf("Attribute %s not found", name))
+	}
+	
+})
+
+#' @export
+setReplaceMethod("$", "ACTIONetExperiment",
+    function(x, name, value)
+{
+    colData(x)[[name]] <- value
+    x
+})

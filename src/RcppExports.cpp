@@ -106,8 +106,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, mat& H_stacked);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP) {
+List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, mat& H_stacked, int minPoints, int minClusterSize, double outlier_threshold);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP minPointsSEXP, SEXP minClusterSizeSEXP, SEXP outlier_thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -115,7 +115,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, H_stacked));
+    Rcpp::traits::input_parameter< int >::type minPoints(minPointsSEXP);
+    Rcpp::traits::input_parameter< int >::type minClusterSize(minClusterSizeSEXP);
+    Rcpp::traits::input_parameter< double >::type outlier_threshold(outlier_thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, H_stacked, minPoints, minClusterSize, outlier_threshold));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -300,6 +303,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NetDBSCAN
+vec NetDBSCAN(SEXP G, int minPts, double eps, double alpha);
+RcppExport SEXP _ACTIONet_NetDBSCAN(SEXP GSEXP, SEXP minPtsSEXP, SEXP epsSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type G(GSEXP);
+    Rcpp::traits::input_parameter< int >::type minPts(minPtsSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(NetDBSCAN(G, minPts, eps, alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_HDBSCAN
+List run_HDBSCAN(mat& X, int minPoints, int minClusterSize);
+RcppExport SEXP _ACTIONet_run_HDBSCAN(SEXP XSEXP, SEXP minPointsSEXP, SEXP minClusterSizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type minPoints(minPointsSEXP);
+    Rcpp::traits::input_parameter< int >::type minClusterSize(minClusterSizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_HDBSCAN(X, minPoints, minClusterSize));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_FengSVD", (DL_FUNC) &_ACTIONet_FengSVD, 4},
@@ -309,7 +339,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 3},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 4},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
@@ -324,6 +354,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 5},
     {"_ACTIONet_compute_sparse_network_diffusion", (DL_FUNC) &_ACTIONet_compute_sparse_network_diffusion, 6},
     {"_ACTIONet_assess_enrichment", (DL_FUNC) &_ACTIONet_assess_enrichment, 3},
+    {"_ACTIONet_NetDBSCAN", (DL_FUNC) &_ACTIONet_NetDBSCAN, 4},
+    {"_ACTIONet_run_HDBSCAN", (DL_FUNC) &_ACTIONet_run_HDBSCAN, 3},
     {NULL, NULL, 0}
 };
 
