@@ -87,18 +87,18 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$archetype_assignment, transparency.attr = ace$node_centrality)
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 2, 
-	node.size = 1, CPal = Pals.Snap88, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", add.states = F, title = "", border.contrast.factor = 0.5, reduction.slot = "ACTIONet2D") {
+	node.size = 1, CPal = Pals.Snap88, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, reduction.slot = "ACTIONet2D") {
     
     text.halo.width = 0.1
     label.text.size = 0.8
     
-    node.size = node.size * 0.5
+    node.size = node.size * 0.25
     
     labels = preprocess.labels(ace, labels)
     coors = reducedDims(ace)[[reduction.slot]]
     
 	if(is.null(labels)) {
-        vCol = ace$denovo.color
+        vCol = ace$denovo_color
         Annot = NULL
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
@@ -148,27 +148,6 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 	rand.perm = sample(nrow(coors))
 	graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol[rand.perm], col = vCol.border[rand.perm], axes = F, xlab = "", ylab = "", main = title, xlim = XL, ylim = YL) 
 
-	if(add.states == T) {
-		par(new=TRUE)
-		
-		M = as(ace$unification.out$C.core, 'sparseMatrix')
-		cs = Matrix::colSums(M)
-		M = scale(M, center = FALSE, scale = cs)
-		
-	    cell.Lab = grDevices::convertColor(color = t(col2rgb(vCol)/256), from = "sRGB", to = "Lab")	    
-	    core.Lab = t(t(cell.Lab) %*% M)
-	    core.colors = rgb(grDevices::convertColor(color = core.Lab, from = "Lab", to = "sRGB"))
-		core.colors = colorspace::lighten(core.colors, 0.1)
-		
-		core.coors = t(t(coors) %*% M)		
-
-	    graphics::plot(core.coors, pch = 25, add = T, cex = 3*node.size, bg = core.colors, col = "#eeeeee", axes = FALSE, xlab = "", ylab = "", xlim = XL, ylim = YL)
-	    
-        layout.labels(x = core.coors[, 1], y = core.coors[, 2]-strheight("A"), labels = 1:ncol(M), col = colorspace::darken(core.colors, 0.5), bg = "#eeeeee", r = text.halo.width, cex = label.text.size)
-
-	}    
-    
-    
     if ( add.text == T & (!is.null(Annot)) ) {
 		par(xpd = T, mar = par()$mar * c(1.1,1.1,1.1,1.1))
 		
@@ -249,7 +228,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     coor = reducedDims(ace)[[reduction.slot]]
     
 	if(is.null(labels)) {
-        vCol = ace$denovo.color
+        vCol = ace$denovo_color
         Annot = NULL
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
@@ -363,7 +342,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 
     if (is.null(CPal)) {
         #Pal = ace$unification.out$Pal
-			arch.Lab = colFactors(ace)[["archetype_cell_contributions"]] %*% grDevices::convertColor(color = t(col2rgb(ace$denovo.color)/256), from = "sRGB", to = "Lab")
+			arch.Lab = colFactors(ace)[["archetype_cell_contributions"]] %*% grDevices::convertColor(color = t(col2rgb(ace$denovo_color)/256), from = "sRGB", to = "Lab")
 			core.Pal = rgb(grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB"))
     } else {
     	if(length(CPal) == 1) {
@@ -459,7 +438,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 	labels = preprocess.labels(ace, labels)
 	
 	if(is.null(labels)) {
-        vCol = ace$denovo.color
+        vCol = ace$denovo_color
         Annot = NULL
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]

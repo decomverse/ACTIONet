@@ -50,7 +50,7 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_thr
     
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    ace$denovo.color = rgb(vis.out$colors)
+    ace$denovo_color = rgb(vis.out$colors)
 
 
 	# Identiy equivalent classes of archetypes and group them together
@@ -136,6 +136,5 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
 	
 	return(W)
 }
-
 
 

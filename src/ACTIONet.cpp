@@ -281,14 +281,17 @@ List prune_archetypes(const List& C_trace, const List& H_trace, double min_speci
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 //' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, mat &H_stacked) {
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, H_stacked);
+List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, mat &H_stacked, int minPoints = 5, int minClusterSize = 5, double outlier_threshold = 0.0) {
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, H_stacked, minPoints, minClusterSize, outlier_threshold);
 	
 		
 	List out_list;		
 	
-	for(int i = 0; i < results.archetype_groups.n_elem; i++) results.archetype_groups[i]++;
 	out_list["archetype_groups"] = results.archetype_groups;
+
+	for(int i = 0; i < results.selected_archetypes.n_elem; i++) results.selected_archetypes[i]++;
+	out_list["selected_archetypes"] = results.selected_archetypes;
+
 
 	out_list["C_unified"] = results.C_unified;
 	out_list["H_unified"] = results.H_unified;
@@ -684,3 +687,65 @@ mat assess_enrichment(mat &scores, mat &associations, int L) {
 
 	return(logPvals);
 }
+
+
+
+	
+//' Computes disjoint clusters for vertices of G.
+//' (It uses an adjusted DBSCAN procedure)
+//'
+//' @param G Adjacency matrix of the input graph
+//' @param minPts, eps DBSCAN parameters
+//' @param alpha Diffusion parameter for initial node ordering
+//' 
+//' @return Matrix of log-pvalues
+//' 
+//' @examples
+//' G = colNets(ace)$ACTIONet
+//' clusters = NetDBSCAN(G)
+// [[Rcpp::export]]
+vec NetDBSCAN(SEXP G, int minPts = 10, double eps = 0.5, double alpha = 0.85) {
+
+	sp_mat Adj;
+    if (Rf_isS4(G)) {
+		Adj = as<arma::sp_mat>(G);
+    } else {
+		Adj = sp_mat(as<arma::mat>(G));
+    }     
+	
+	vec clusters = ACTIONet::NetDBSCAN(Adj, minPts, eps, alpha);
+
+	return(clusters);
+}
+
+
+//' Clusters data points using the hierarchical DBSCAN algorithm.
+//'
+//' @param X Input data matrix with each row being a data point
+//' 
+//' @return A list with \itemize{
+//' \item labels
+//' \item membershipProbabilities
+//' \item outlierScores
+//'}
+//' 
+//' @examples
+//' S_r = t(reducedDims(ace)[["S_r"]])
+//' W_r = S_r %*% trace$pruning.out$C_stacked
+//' X = Matrix::t(W_r)
+//' HDBSCAN.out = run_HDBSCAN(X)
+//' clusters = HDBSCAN.out$labels
+// [[Rcpp::export]]
+List run_HDBSCAN(mat &X, int minPoints = 5, int minClusterSize = 5) {
+    
+    field<vec> res = ACTIONet::run_HDBSCAN(X, minPoints, minClusterSize);
+    
+    List out_list;
+	out_list["labels"] = res(0);
+	out_list["membershipProbabilities"] = res(1);
+	out_list["outlierScores"] = res(2);
+
+
+	return(out_list);
+}
+

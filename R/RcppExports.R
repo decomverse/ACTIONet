@@ -146,8 +146,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1)
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 #' cell.clusters = unification.out$sample_assignments
-unify_archetypes <- function(G, S_r, C_stacked, H_stacked) {
-    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, H_stacked)
+unify_archetypes <- function(G, S_r, C_stacked, H_stacked, minPoints = 5L, minClusterSize = 5L, outlier_threshold = 0.0) {
+    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, H_stacked, minPoints, minClusterSize, outlier_threshold)
 }
 
 #' Builds an interaction network from the multi-level archetypal decompositions
@@ -387,5 +387,41 @@ compute_sparse_network_diffusion <- function(G, X0, alpha = 0.85, rho = 1e-4, ep
 #' colnames(logPvals) = colnames(annotations)
 assess_enrichment <- function(scores, associations, L) {
     .Call(`_ACTIONet_assess_enrichment`, scores, associations, L)
+}
+
+#' Computes disjoint clusters for vertices of G.
+#' (It uses an adjusted DBSCAN procedure)
+#'
+#' @param G Adjacency matrix of the input graph
+#' @param minPts, eps DBSCAN parameters
+#' @param alpha Diffusion parameter for initial node ordering
+#' 
+#' @return Matrix of log-pvalues
+#' 
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' clusters = NetDBSCAN(G)
+NetDBSCAN <- function(G, minPts = 10L, eps = 0.5, alpha = 0.85) {
+    .Call(`_ACTIONet_NetDBSCAN`, G, minPts, eps, alpha)
+}
+
+#' Clusters data points using the hierarchical DBSCAN algorithm.
+#'
+#' @param X Input data matrix with each row being a data point
+#' 
+#' @return A list with \itemize{
+#' \item labels
+#' \item membershipProbabilities
+#' \item outlierScores
+#'}
+#' 
+#' @examples
+#' S_r = t(reducedDims(ace)[["S_r"]])
+#' W_r = S_r %*% trace$pruning.out$C_stacked
+#' X = Matrix::t(W_r)
+#' HDBSCAN.out = run_HDBSCAN(X)
+#' clusters = HDBSCAN.out$labels
+run_HDBSCAN <- function(X, minPoints = 5L, minClusterSize = 5L) {
+    .Call(`_ACTIONet_run_HDBSCAN`, X, minPoints, minClusterSize)
 }
 
