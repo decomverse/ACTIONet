@@ -31,7 +31,7 @@
 #include <tauprng.h>
 #include <colorspace.h>
 #include <cryptor.hpp>
-
+#include <hdbscan.hpp>
 
 // SVD algorithms
 #define HALKO_ALG 1
@@ -104,7 +104,8 @@ namespace ACTIONet {
 
 		// To store the output of unify_archetypes()
 		struct unification_results {
-			uvec archetype_groups; 
+			vec archetype_groups; 
+			uvec selected_archetypes;
 			mat C_unified;
 			mat H_unified;
 			uvec sample_assignments;
@@ -128,9 +129,12 @@ namespace ACTIONet {
 		
 		// min_{X} (|| AX - B ||) s.t. simplex constraint using ACTIVE Set Method
 		mat run_simplex_regression(mat &A, mat &B);
+		mat run_simplex_regression_proxdist(mat &X, mat &Y, int pmaxiter, int pincmaxiter);
+
 
 		// Robust archetypal analysis method
-		field<mat> run_AA (mat &X, mat &Z0);
+		field<mat> run_AA (mat &S, mat &W0, int max_it, double min_delta);	
+		
 	// *********************************
 		
 		
@@ -139,8 +143,8 @@ namespace ACTIONet {
 		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
 
 	// ACTION decomposition
-		ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no);
-		ACTION_results run_ACTION_dev(mat S_r, int k_min, int k_max, int thread_no, bool auto_stop);
+		ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+		ACTION_results run_ACTION_dev(mat S_r, int k_min, int k_max, int thread_no, bool auto_stop, int max_it, double min_delta);
 
 	// Pre-ACTIONet archetype filtering/aggregation
 	// To prune archetypes across different levels and concatenate the resulting archetypes
@@ -149,15 +153,15 @@ namespace ACTIONet {
 		
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
-		unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, mat &H_stacked);
+		unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold);
 	
 	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
-		sp_mat build_ACTIONet_JS_KstarNN(mat &H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
-		sp_mat build_ACTIONet_JS_KstarNN_v2(mat &H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
-		sp_mat build_ACTIONet_JS_KNN(mat &H_stacked, int k, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
+		sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
+		sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
+		sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
 		
-		sp_mat build_ACTIONet(mat &H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
+		sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
 
 
 	// SGD-based force-directed layout (adopted and modified from the UMAP implementation)
@@ -165,21 +169,39 @@ namespace ACTIONet {
 	
 	
 	// Methods for pseudo-bulk construction
-		mat compute_pseudo_bulk(sp_mat S, uvec sample_assignments);
-		mat compute_pseudo_bulk(mat S, uvec sample_assignments);
-		field<mat> compute_pseudo_bulk_per_ind(sp_mat S, uvec sample_assignments, uvec individuals);
-		field<mat> compute_pseudo_bulk_per_ind(mat S, uvec sample_assignments, uvec individuals);
+		mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat& H);
+		mat compute_pseudo_bulk_per_archetype(mat &S, mat& H);
+		mat compute_pseudo_bulk_per_cluster(sp_mat &S, arma::Col<unsigned long long> sample_assignments);
+		mat compute_pseudo_bulk_per_cluster(mat &S, arma::Col<unsigned long long> sample_assignments);
+		field<mat> compute_pseudo_bulk_per_ind(sp_mat &S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+		field<mat> compute_pseudo_bulk_per_ind(mat &S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
 		
 		
 	// Methods for renormalizing input matrix within and between each class
-		mat renormalize_input_matrix(mat S, uvec sample_assignments);
-		sp_mat renormalize_input_matrix(sp_mat S, uvec sample_assignments);
+		mat renormalize_input_matrix(mat &S, arma::Col<unsigned long long> sample_assignments);
+		sp_mat renormalize_input_matrix(sp_mat &S, arma::Col<unsigned long long> sample_assignments);
 		
 		
 	// Methods for computing feature specificity/discriminative-scores
-		field<mat> compute_feature_specificity(sp_mat S, mat H);
-		field<mat> compute_feature_specificity(mat S, mat H);
-		
+		field<mat> compute_feature_specificity(sp_mat &S, mat &H);
+		field<mat> compute_feature_specificity(mat &S, mat &H);
+		field<mat> compute_feature_specificity(sp_mat &S, uvec sample_assignments);
+		field<mat> compute_feature_specificity(mat &S, uvec sample_assignments);
+
+	
+	// Methods for feature enrichment analysis
+		mat assess_enrichment(mat &scores, mat &associations, int L);
+
+
+	// Network tools
+		uvec compute_core_number(sp_mat &G);
+		vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments);		
+		mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no, double alpha, int max_it);
+		sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha, double rho, double epsilon, int max_iter);
+		vec NetDBSCAN(sp_mat& G, int minPts, double eps, double alpha_val);
+	
+		field<vec> run_HDBSCAN(mat &X, int minPoints, int minClusterSize);
+
 }
 
 #endif

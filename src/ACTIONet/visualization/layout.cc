@@ -3,6 +3,9 @@
 #include <thread>
 #include <atomic>
 
+#include <limits>
+#define DBL_MAX std::numeric_limits<double>::max()
+
 template<class Function>
 inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
     if (numThreads <= 0) {
@@ -93,7 +96,7 @@ namespace ACTIONet {
 				// Binary search to find optimal sigma
 				double sigma = 1.0;
 				double lo = 0.0;
-				double hi = std::numeric_limits<double>::max();
+				double hi = DBL_MAX;
 				
 				int j;
 				for(j = 0; j < 64; j ++) {
@@ -109,7 +112,7 @@ namespace ACTIONet {
 					}
 					else {
 						lo = sigma;
-						if (hi == std::numeric_limits<double>::max()) {
+						if (hi == DBL_MAX) {
 							sigma *= 2;
 						}
 						else {

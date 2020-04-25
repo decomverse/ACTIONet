@@ -1,11 +1,72 @@
 #include "ACTIONet.h"
 
-
 namespace ACTIONet {
-	void simplexRegression(double *A_ptr, int A_cols, double *B_ptr, int B_rows, int B_cols, double *X_ptr);
-	void AA (double *A_ptr, int A_rows, int A_cols, double *W0_ptr, int W0_cols, double *C_ptr, double *H_ptr);
+	// Solves the standard Archetypal Analysis (AA) problem
+	field<mat> run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 0.01) {	
+		
+		int sample_no = A.n_cols;
+		int d = A.n_rows; // input dimension
+		int k = W0.n_cols; // AA components
+		   
+		
+		mat C = zeros(sample_no, k);
+		mat H = zeros(k, sample_no);
+		
+		mat W = W0;
+		vec c(sample_no);	
 
-	
+		//printf("(New) %d- %d\n", k, max_it);
+
+		for (int it = 0; it < max_it; it++) {		
+			H = run_simplex_regression(W, A);
+			
+			mat C_old = C;
+			mat R = A - W*H;	
+			for(int i = 0; i < k; i++) {
+				vec w = W.col(i);
+				rowvec h = H.row(i);
+				vec ht = trans(h);
+				
+				double norm_sq = arma::dot(h, h);
+				if(norm_sq < double(10e-8)) {
+					printf("%d- Ooops @<%d, %d>\n",k, it, i);
+					
+					// singular
+					int max_res_idx = index_max(rowvec(sum(square(R), 0)));
+					W.col(i) = A.col(max_res_idx);
+					c.zeros();
+					c(max_res_idx) = 1;
+					C.col(i) = c;					
+				} else {				 				
+					vec b = (1.0 / norm_sq) *R*ht + w;
+					c = run_simplex_regression(A, b);		
+					R += (w - A*c)*h; // Rank-1 update
+					W.col(i) = A*c;
+					C.col(i) = c;			
+				}
+			}				
+			double delta = arma::max(rowvec(sum(abs(C - C_old)))) / 2.0;
+
+			//double RSS = norm(R, "fro"); RSS *= RSS;
+			//printf("\t<%d, %d>- RSS = %.3e, delta = %.3e\n", l, it, RSS, delta);
+			
+			if(delta < min_delta)
+				break;
+		}
+		
+
+		C = clamp(C, 0, 1);
+		C = normalise(C, 1);
+		H = clamp(H, 0, 1);
+		H = normalise(H, 1);
+		
+		field<mat> decomposition(2,1);
+		decomposition(0) = C;
+		decomposition(1) = H;
+		
+		return decomposition;
+	}
+
 	template<class Function>
 	inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
 		if (numThreads <= 0) {
@@ -116,54 +177,7 @@ namespace ACTIONet {
 		return res;
 	}
 
-	// min(|| AX - B ||) s.t. simplex constraint
-	mat run_simplex_regression(mat &A, mat &B) { 
-		double *A_ptr = A.memptr();
-		double *B_ptr = B.memptr();
-		
-		int A_cols = A.n_cols;
-		int B_rows = B.n_rows;
-		int B_cols = B.n_cols;
-		
-		mat X(A.n_cols, B.n_cols);
-		simplexRegression(A_ptr, A_cols, B_ptr, B_rows, B_cols, X.memptr());
-		
-		X = clamp(X, 0, 1);
-		X = normalise(X, 1);
-
-		return(X);
-	}
-
-	// Solves the standard Archetypal Analysis (AA) problem
-	field<mat> run_AA (mat &A, mat &W0) {
-		double *A_ptr = A.memptr();
-		double *W0_ptr = W0.memptr();
-		
-		int A_rows = A.n_rows;
-		int A_cols = A.n_cols;
-		int W0_cols = W0.n_cols;
-		
-		double *C_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
-		double *H_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
-
-		AA(A_ptr, A_rows, A_cols, W0_ptr, W0_cols, C_ptr, H_ptr);
-		
-		mat C = mat(C_ptr, A_cols, W0_cols);
-		mat H = mat(H_ptr, W0_cols, A_cols);
-
-		C = clamp(C, 0, 1);
-		C = normalise(C, 1);
-		H = clamp(H, 0, 1);
-		H = normalise(H, 1);
-		
-		field<mat> decomposition(2,1);
-		decomposition(0) = C;
-		decomposition(1) = H;
-		
-		return decomposition;
-	}
-
-	ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no) {
+	ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01) {
 		int feature_no = S_r.n_rows;
 				
 		printf("Running ACTION\n");
@@ -190,8 +204,6 @@ namespace ACTIONet {
 		mat X_r = normalise(S_r, 1); // ATTENTION!
 		 		
 		int current_k = 0;		
-		field<mat> AA_res(2, 1);
-		
 		int total = k_min-1;
 		printf("Iterating from k=%d ... %d\n", k_min, k_max);
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {			
@@ -201,7 +213,9 @@ namespace ACTIONet {
 			trace.selected_cols[kk] = SPA_res.selected_columns;
 			
 			mat W = X_r.cols(trace.selected_cols[kk]);
-			AA_res = run_AA(X_r, W);
+			
+			field<mat> AA_res;			
+			AA_res = run_AA(X_r, W, max_it, min_delta);
 
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);			
@@ -210,7 +224,7 @@ namespace ACTIONet {
 		return trace;
 	}	
 
-	ACTION_results run_ACTION_dev(mat S_r, int k_min, int k_max, int thread_no, bool auto_stop = true) {
+	ACTION_results run_ACTION_dev(mat S_r, int k_min, int k_max, int thread_no, bool auto_stop = true, int max_it = 30, double min_delta = 0.01) {
 		int feature_no = S_r.n_rows;
 		
 		printf("Running ACTION (developmental version)\n");
@@ -235,9 +249,7 @@ namespace ACTIONet {
 		
 		mat X_r = normalise(S_r, 1); // ATTENTION!
 		 		
-		int current_k = 0;		
-		field<mat> AA_res(2, 1);
-		
+		int current_k = 0;				
 		printf("Iterating from k=%d ... %d (auto stop = %d)\n", k_min, k_max, auto_stop);
 		for(int kk = k_min; kk <= k_max; kk++) {
 			printf("\tk = %d\n", kk);
@@ -251,7 +263,7 @@ namespace ACTIONet {
 			//W.print("W");
 			
 			
-			AA_res = run_AA(X_r, W);
+			field<mat> AA_res = run_AA(X_r, W, max_it, min_delta);
 			
 			if(auto_stop) {
 				mat C = AA_res(0);
