@@ -5,6 +5,7 @@ import setuptools
 import os
 from pathlib import Path
 import distutils.ccompiler
+import sysconfig
 
 
 __version__ = '1.0'
@@ -15,6 +16,17 @@ for (dirpath, dirnames, filenames) in os.walk('src'):
 		if file.endswith(".cc"):
 			source_files += [os.path.join(dirpath, file)]
 source_files+=["python_interface/wrapper.cc"]
+
+os.environ['CC'] = "ccache g++"
+#os.environ['LDFLAGS'] = "-Wl,--start-group " + os.environ['MKLROOT']+"/lib/intel64/libmkl_intel_ilp64.a " + os.environ['MKLROOT']+ "/lib/intel64/libmkl_sequential.a " + os.environ['MKLROOT'] + "/lib/intel64/libmkl_core.a" + " -Wl,--end-group"
+#MKL_files=[os.environ['MKLROOT']+"/lib/intel64/libmkl_intel_ilp64.a", os.environ['MKLROOT']+ "/lib/intel64/libmkl_sequential.a", os.environ['MKLROOT'] + "/lib/intel64/libmkl_core.a "]
+
+MKL=[os.environ['MKLROOT']+"/lib/intel64/libmkl_intel_ilp64.a", os.environ['MKLROOT']+ "/lib/intel64/libmkl_sequential.a", os.environ['MKLROOT'] + "/lib/intel64/libmkl_core.a"]
+
+
+#extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
+extra_compile_args = ["-w", "-m64"]
+
 
 def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
     # those lines are copied from distutils.ccompiler.CCompiler directly
@@ -50,16 +62,15 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'ACTIONet',
+        '_ACTIONet',
         source_files,
 	define_macros=[('MKL_ILP64', None)],
-        include_dirs=['include', os.environ['MKLROOT']+'/include','include/arma','include/ACTIONet','include/ACTIONet/SPAMS','include/ACTIONet/hnsw',
-            get_pybind_include(),
-            get_pybind_include(user=True)
-        ],
+        include_dirs=['include', os.environ['MKLROOT']+'/include','include/arma','include/ACTIONet','include/ACTIONet/SPAMS','include/ACTIONet/hnsw','include/ACTIONet/HDBSCAN', get_pybind_include(), get_pybind_include(user=True)],
 	library_dirs = [os.environ['MKLROOT']+'/lib/intel64'],
-	libraries = ['mkl_sycl','mkl_intel_ilp64','mkl_sequential','mkl_core','sycl','OpenCL','pthread','m','dl'],
-	extra_compile_args = ['w'],
+	libraries = ["pthread", "m", "dl"],
+	extra_objects=MKL+MKL+MKL,
+	#extra_compile_args = extra_compile_args,
+	#extra_link_args = MKL_files,
         language='c++'
     ),
 ]
@@ -95,38 +106,6 @@ def cpp_flag(compiler):
                        'is needed!')
 
 
-class BuildExt(build_ext):
-    """A custom build extension for adding compiler-specific options."""
-    c_opts = {
-        'msvc': ['/EHsc'],
-        'unix': [],
-    }
-    l_opts = {
-        'msvc': [],
-        'unix': [],
-    }
-
-    if sys.platform == 'darwin':
-        darwin_opts = ['-stdlib=libc++', '-mmacosx-version-min=10.7']
-        c_opts['unix'] += darwin_opts
-        l_opts['unix'] += darwin_opts
-
-    def build_extensions(self):
-        ct = self.compiler.compiler_type
-        opts = self.c_opts.get(ct, [])
-        link_opts = self.l_opts.get(ct, [])
-        if ct == 'unix':
-            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
-            opts.append(cpp_flag(self.compiler))
-            if has_flag(self.compiler, '-fvisibility=hidden'):
-                opts.append('-fvisibility=hidden')
-        elif ct == 'msvc':
-            opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
-        for ext in self.extensions:
-            ext.extra_compile_args = opts
-            ext.extra_link_args = link_opts
-        build_ext.build_extensions(self)
-
 setup(
     name='ACTIONet',
     version=__version__,
@@ -135,9 +114,10 @@ setup(
     url='https://github.com/shmohammadi86/ACTIONet',
     description='Main implementation of the ACTIONet package',
     long_description='',
+    packages=setuptools.find_packages("lib"),
+    package_dir={"": "lib"},
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.4', 'numpy'],
     setup_requires=['pybind11>=2.4', 'numpy'],
-    cmdclass={'build_ext': BuildExt},
     zip_safe=False,
 )

@@ -10,4 +10,5 @@
 test/
 dist/
 ACTIONet.egg-info/
-
+build/
+data/
