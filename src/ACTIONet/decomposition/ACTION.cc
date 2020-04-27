@@ -1,63 +1,8 @@
 #include "ACTIONet.h"
 
 namespace ACTIONet {
-	void AA (double *A_ptr, int A_rows, int A_cols, double *W0_ptr, int W0_cols, double *C_ptr, double *H_ptr, int max_it);
-
-/*
-	void simplexRegression(double *A_ptr, int A_cols, double *B_ptr, int B_rows, int B_cols, double *X_ptr);
-
-	// min(|| AX - B ||) s.t. simplex constraint
-	mat run_simplex_regression(mat &A, mat &B) { 
-		double *A_ptr = A.memptr();
-		double *B_ptr = B.memptr();
-		
-		int A_cols = A.n_cols;
-		int B_rows = B.n_rows;
-		int B_cols = B.n_cols;
-		
-		mat X(A.n_cols, B.n_cols);
-		simplexRegression(A_ptr, A_cols, B_ptr, B_rows, B_cols, X.memptr());
-		
-		X = clamp(X, 0, 1);
-		X = normalise(X, 1);
-
-		return(X);
-	}
-*/
-
-	/*
 	// Solves the standard Archetypal Analysis (AA) problem
-	field<mat> run_AA (mat &A, mat &W0, int max_it = 30, double min_delta = 0.01) {
-		double *A_ptr = A.memptr();
-		double *W0_ptr = W0.memptr();
-		
-		int A_rows = A.n_rows;
-		int A_cols = A.n_cols;
-		int W0_cols = W0.n_cols;
-		
-		double *C_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
-		double *H_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
-
-		AA(A_ptr, A_rows, A_cols, W0_ptr, W0_cols, C_ptr, H_ptr);
-		
-		mat C = mat(C_ptr, A_cols, W0_cols);
-		mat H = mat(H_ptr, W0_cols, A_cols);
-
-		C = clamp(C, 0, 1);
-		C = normalise(C, 1);
-		H = clamp(H, 0, 1);
-		H = normalise(H, 1);
-		
-		field<mat> decomposition(2,1);
-		decomposition(0) = C;
-		decomposition(1) = H;
-		
-		return decomposition;
-	}
-*/
-
-	// Solves the standard Archetypal Analysis (AA) problem
-	field<mat> run_AA_new (mat &A, mat W0, int max_it = 50, double min_delta = 0.01) {	
+	field<mat> run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 0.01) {	
 		
 		int sample_no = A.n_cols;
 		int d = A.n_rows; // input dimension
@@ -122,35 +67,6 @@ namespace ACTIONet {
 		return decomposition;
 	}
 
-	field<mat> run_AA_old (mat &A, mat W0, int max_it = 50, double min_delta = 0.01) {	
-		double *A_ptr = A.memptr();
-		double *W0_ptr = W0.memptr();
-		
-		int A_rows = A.n_rows;
-		int A_cols = A.n_cols;
-		int W0_cols = W0.n_cols;
-		
-		double *C_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
-		double *H_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
-
-		AA(A_ptr, A_rows, A_cols, W0_ptr, W0_cols, C_ptr, H_ptr, max_it);
-		
-		mat C = mat(C_ptr, A_cols, W0_cols);
-		mat H = mat(H_ptr, W0_cols, A_cols);
-
-		C = clamp(C, 0, 1);
-		C = normalise(C, 1);
-		H = clamp(H, 0, 1);
-		H = normalise(H, 1);
-		
-		field<mat> decomposition(2,1);
-		decomposition(0) = C;
-		decomposition(1) = H;
-		
-		return decomposition;
-	}
-
-	
 	template<class Function>
 	inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
 		if (numThreads <= 0) {
@@ -261,7 +177,7 @@ namespace ACTIONet {
 		return res;
 	}
 
-	ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01, int type = 1) {
+	ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01) {
 		int feature_no = S_r.n_rows;
 				
 		printf("Running ACTION\n");
@@ -299,12 +215,7 @@ namespace ACTIONet {
 			mat W = X_r.cols(trace.selected_cols[kk]);
 			
 			field<mat> AA_res;			
-			if(type == 0) {
-				AA_res = run_AA_old(X_r, W, max_it, min_delta);				
-				
-			} else {
-				AA_res = run_AA_new(X_r, W, max_it, min_delta);
-			}
+			AA_res = run_AA(X_r, W, max_it, min_delta);
 
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);			
@@ -352,7 +263,7 @@ namespace ACTIONet {
 			//W.print("W");
 			
 			
-			field<mat> AA_res = run_AA_new(X_r, W, max_it, min_delta);
+			field<mat> AA_res = run_AA(X_r, W, max_it, min_delta);
 			
 			if(auto_stop) {
 				mat C = AA_res(0);

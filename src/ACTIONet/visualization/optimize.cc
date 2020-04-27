@@ -157,10 +157,8 @@ struct SgdWorker{
 };
 
 
-
-template<typename T, bool DoMove = true>
 std::vector<double> optimize_layout(
-    const T& gradient,
+    const apumap_gradient& gradient,
     std::vector<double>& head_embedding,
     std::vector<double>& tail_embedding,
     const std::vector<unsigned int>& positive_head,
@@ -187,7 +185,7 @@ std::vector<double> optimize_layout(
 	
   Sampler sampler(epochs_per_sample, negative_sample_rate);
   
-  SgdWorker<T, DoMove> worker(gradient, 
+  SgdWorker<apumap_gradient, true> worker(gradient, 
                               positive_head, positive_tail,
                               sampler,
                               head_embedding, tail_embedding,
@@ -209,133 +207,4 @@ std::vector<double> optimize_layout(
 
   
   return head_embedding;
-}
-
-
-std::vector<double>  optimize_layout_umap(
-    std::vector<double> head_vec, std::vector<double> tail_vec,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<double> epochs_per_sample,
-    double a, double b, double gamma, double initial_alpha,
-    double negative_sample_rate, bool move_other = true) {
-  // For normal UMAP, tail_embedding is NULL and we want to pass
-  // a shallow copy of head_embedding as tail_embedding.
-  // When updating new values, tail_embedding is the new coordinate to optimize
-  // and gets passed as normal.
-      const umap_gradient gradient(a, b, gamma);
-
-  		std::vector<double> result = optimize_layout<umap_gradient, true>(
-			gradient, head_vec, tail_vec, positive_head, positive_tail,
-			n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-			negative_sample_rate, 0);	
-  
-  
-  
-  /*
-  std::vector<double> *tail_vec_ptr = nullptr;
-  bool delete_tail_ptr = false;
-  if (tail_vec.size() == 0) {
-    tail_vec_ptr = &head_vec;
-  } else {
-    tail_vec_ptr = &tail_vec;
-  }
-
-  std::vector<double> result;
-    const umap_gradient gradient(a, b, gamma);
-    if (move_other) {
-		result = optimize_layout<umap_gradient, true>(
-			gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-			n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-			negative_sample_rate, grain_size);
-    } else {
-        result = optimize_layout<umap_gradient, false>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, grain_size);
-    
-	}
-    */
-  return (result);
-}
-
-
-
-
-std::vector<double>  optimize_layout_tumap(
-    std::vector<double> head_vec, std::vector<double> tail_vec,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<double> epochs_per_sample,
-    double initial_alpha, double negative_sample_rate, bool move_other = true) {
-  
-  const tumap_gradient gradient;
-  
-  std::vector<double> *tail_vec_ptr = nullptr;
-  bool delete_tail_ptr = false;
-  if (tail_vec.size() == 0) {
-    tail_vec_ptr = &head_vec;
-  } else {
-    tail_vec_ptr = &tail_vec;
-  }
-
-  std::vector<double> result;
-  if (move_other) {
-      result = optimize_layout<tumap_gradient, true>(
-          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-          negative_sample_rate, 0);
-  } else {
-	  result = optimize_layout<tumap_gradient, false>(
-		  gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-		  n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-		  negative_sample_rate, 0);    
-  }
-   
-  
-  return (result);
-}
-
-
-std::vector<double>  optimize_layout_largevis(
-    std::vector<double> head_vec, std::vector<double> tail_vec,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<double> epochs_per_sample,
-	double gamma, double initial_alpha, double negative_sample_rate) {
-  const largevis_gradient gradient(gamma);
-
-
-  		std::vector<double> result = optimize_layout<largevis_gradient, true>(
-			gradient, head_vec, tail_vec, positive_head, positive_tail,
-			n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-			negative_sample_rate, 0);	
-  
-  
-  
-  /*
-  std::vector<double> *tail_vec_ptr = nullptr;
-  bool delete_tail_ptr = false;
-  if (tail_vec.size() == 0) {
-    tail_vec_ptr = &head_vec;
-  } else {
-    tail_vec_ptr = &tail_vec;
-  }
-
-  std::vector<double> result;
-    const umap_gradient gradient(a, b, gamma);
-    if (move_other) {
-		result = optimize_layout<umap_gradient, true>(
-			gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-			n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-			negative_sample_rate, grain_size);
-    } else {
-        result = optimize_layout<umap_gradient, false>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, grain_size);
-    
-	}
-    */
-  return (result);
 }
