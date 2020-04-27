@@ -1,0 +1,254 @@
+---
+title: "Testing core functionalities of the ACTIONet package"
+author: 
+- Shahin Mohammadi
+- Jose Davila-Velderrain
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+
+### Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               eval=T)
+opts_knit$set(width=75)
+```
+
+
+```{r setup, include=F}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	include = TRUE
+)
+
+```
+
+
+
+Here we provide an in-depth, step-by-step guide to familiarize you with ACTIONet building blocks. For the sake of compatibility, we will use the PBMC 3k dataset used in the [Seurat](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html) and [Scanpy](https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html) for this tutorial.
+
+
+
+## Preparing the environment
+
+To start, you need to load the ACTIONet package. 
+
+For the ACTIONet installation instruction, see [ACTIONet](https://github.com/shmohammadi86/ACTIONet).
+
+```{r Prepare environment}
+require(ACTIONet)
+
+```
+
+# Preparation
+## Importing data from a `SingleCellExperiment` object
+We have preprocessed and stored the PBMC 3k dataset as an `SCE` object, which is the main datatype used in the ACTIONet framework. For more information on how to convert different datatypes to `SingleCellExperiment` format, please consult our tutorial on [Bring your data along -- Import/export options in ACTIONet](https://github.com/shmohammadi86/ACTIONet/tutorials/Import.html).
+
+
+```{r}
+sce = readRDS("pbmc3k_sce.RDS")
+
+sce
+
+```
+
+
+## Reducing the `SCE` object
+Next, we use the `reduce.sce()` function to both normalize the counts' matrix (lib-size normalization + log-transformation, by default) and compute a factorized (reduced) form  of the kernel matrix (50 by default). By default, no batch correction is performed, and the simplest depth-normalization method is used. We then save the output for future use.
+
+
+```{r Reduce SCE object}
+sce = reduce.sce(sce = sce)
+
+S_r = t(reducedDims(sce)[["ACTION"]])
+
+```
+
+
+**PS**: ACTIONet includes 7 additional normalization methods (scran, linnorm, scone, SCnorm, DESeq2, TMM, and logCPM). However, the `default` method is the fastest and performs very well for ACTIONet construction. 
+
+**PS**: ACTIONet also seamlessly integrates with [Harmony](https://github.com/immunogenomics/harmony) batch-correction method. For more information on how to use batch correction please consult [To batch correct or not to batch correct, that is the question!](https://github.com/shmohammadi86/ACTIONet/tutorials/Batch.html).
+
+## Creating an `ACTIONetExperiment (ACE)` object to hold results
+We have extended the `SingleCellExperiment` class to incorporate additional slots, similar to `AnnData` format, to hold multidimensional and structural meta-data for rows and columns. To construct an `ACE` object from an `SCE` object, we run
+
+```{r}
+ace = as(sce, "ACTIONetExperiment")
+
+ace
+
+```
+As it can be seen, the new slots are `rowNets`, `colNets`, `rowFactors`, and `colFactors`. Each slot has its on getter/setter functions, which we will use through out the rest of the tutorial to store results.
+
+
+# Running ACTIONet
+
+## Running multi-level ACTION decomposition
+This will run ACTIONet with increasing number of archetypes
+```{r}
+ACTION.out = run_ACTION(S_r, k_max = 30, thread_no =8, max_it = 50, min_delta = 1e-9)
+
+
+```
+
+## Prune nonspecific and/or unreliable archetypes
+To remove unreliable archetypes and a first pass filtering, we can use `prune_archetypes()` function:
+
+```{r}
+pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
+
+
+C_stacked = pruning.out$C_stacked
+H_stacked = pruning.out$H_stacked
+
+colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
+colFactors(ace)[["H_stacked"]] = H_stacked
+
+```
+
+`C_stacked` and `H_stacked` are the concatenated `C` and `H` matrices across different levels, respectively, after pruning noisy archetypes.
+
+
+
+## Building ACTIONet graph
+```{r}
+set.seed(0)
+G = build_ACTIONet(H_stacked = H_stacked,  thread_no=8)
+
+```
+
+To store computed graph as a network associated with cells (columns) in the `ACE` object, we can use:
+
+```{r}
+	colNets(ace)$ACTIONet = G
+
+```
+
+	
+	
+## Layout ACTIONet
+We have adopted and modified the SGD-based layout algorithm utilized in the *UMAP* for our visualization. We use `S_r` for our initialization:
+
+```{r}
+	initial.coordinates = t(scale(t(S_r)))
+    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, n_epochs = 500)
+    
+```
+
+And then we can store the coordinates as `reducedDims()` and computed *de novo* colors as attributes in the `colData()`:
+
+```{r}
+    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
+    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
+    reducedDims(ace)$denovo_color = vis.out$colors
+    
+	
+```
+
+
+## Identiy equivalent classes of archetypes and group them together
+There is a large redundancy between the set of archetypes. `unify_archetypes()` tries to coalesce these archetypes and partition them into equivalent classes.
+
+```{r}
+	unification.out = unify_archetypes(G, S_r, pruning.out$C_stacked, pruning.out$H_stacked, minPoints = 10, minClusterSize = 10, outlier_threshold = 0.5)
+
+```
+
+And store the results back in the `ACE` object:
+```{r}
+	colFactors(ace)[["C_unified"]] = t(unification.out$C_unified)
+	colFactors(ace)[["H_unified"]] = unification.out$H_unified
+	ace$assigned_archetype = unification.out$sample_assignments
+	
+```
+
+
+## Use graph core of global and induced subgraphs to infer centrality/quality of each cell
+We have developed a novel technique to estimate the quality of cells based on the strategic placement in the ACTIONet, w.r.t to each archetype:
+
+```{r}
+ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+
+```
+
+
+
+## Re-normalize input (~gene expression) matrix and compute feature (~gene) specificity scores
+
+```{r}
+    S = assays(ace)[["logcounts"]]
+    norm.out = ACTIONet::renormalize_input_matrix(S, unification.out$sample_assignments)
+	assays(ace)[["logcounts_renorm"]] = norm.out$S_norm
+	
+```
+
+
+	
+## Compute gene specificity for each archetype
+This computes the "marker-ness" of each genes for different archetypes:
+
+```{r}
+	S.norm = norm.out$S_norm
+	## Core/unified archetypes only
+	specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
+	specificity.out = lapply(specificity.out, function(specificity.scores) {
+		rownames(specificity.scores) = rownames(ace)
+		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
+		return(specificity.scores)
+	})
+	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
+	
+	## All pruned archetypes
+	specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
+	specificity.out = lapply(specificity.out, function(specificity.scores) {
+		rownames(specificity.scores) = rownames(ace)
+		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
+		return(specificity.scores)
+	})
+	rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
+	
+```
+
+
+## Creating a trace of all that we have done	
+```{r}
+	trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
+    trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
+    
+```
+
+## Visualization
+### Compare plots
+```{r}
+plot.ACTIONet(ace, ace$louvain, reduction.slot = "pca", title = "pca")
+
+plot.ACTIONet(ace, ace$louvain, reduction.slot = "draw_graph_fr", title = "ForceDirected")
+
+plot.ACTIONet(ace, ace$louvain, reduction.slot = "tsne", title = "tSNE")
+
+plot.ACTIONet(ace, ace$louvain, reduction.slot = "umap", title = "UMAP")
+
+plot.ACTIONet(ace, ace$louvain, reduction.slot = "ACTIONet2D", title = "ACTIONet", transparency.attr = ace$node_centrality, trans.fact = 1)
+
+```
+
+
