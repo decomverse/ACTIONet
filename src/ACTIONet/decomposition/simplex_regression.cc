@@ -1,5 +1,6 @@
 #include <ACTIONet.h>
 #include <mini_cblas.h>
+#include <cassert>
 
 // Re-implemented from: Fast and Robust Archetypal Analysis for Representation Learning
 namespace ACTIONet {
