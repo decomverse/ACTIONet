@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 4, data.slot = "logcounts", reduction.slot = "S_r", renormalize.logcounts.slot = "logcounts_adjusted") {
+run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 4, data.slot = "logcounts", reduction.slot = "ACTION", renormalize.logcounts.slot = "logcounts_adjusted") {
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
