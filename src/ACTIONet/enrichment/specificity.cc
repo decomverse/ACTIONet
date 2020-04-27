@@ -146,7 +146,7 @@ namespace ACTIONet {
 	field<mat> compute_feature_specificity(sp_mat &S, uvec sample_assignments) {			
 		mat H(max(sample_assignments), S.n_cols);
 		
-		for(int i = 0; i <= max(sample_assignments); i++) {
+		for(int i = 1; i <= max(sample_assignments); i++) {
 			vec v = zeros(S.n_cols);
 			uvec idx = find(sample_assignments == i);
 			v(idx) = ones(idx.n_elem);
@@ -162,7 +162,7 @@ namespace ACTIONet {
 	field<mat> compute_feature_specificity(mat &S, uvec sample_assignments) {			
 		mat H(max(sample_assignments), S.n_cols);
 		
-		for(int i = 0; i <= max(sample_assignments); i++) {
+		for(int i = 1; i <= max(sample_assignments); i++) {
 			vec v = zeros(S.n_cols);
 			uvec idx = find(sample_assignments == i);
 			v(idx) = ones(idx.n_elem);

@@ -8,3 +8,6 @@
 *.so
 *.a
 tests/tmp
+build
+dist
+lib
