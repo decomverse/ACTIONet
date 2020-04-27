@@ -44,9 +44,6 @@ ACTIONetExperiment <- function(...,
 
 
 
-#' @importFrom utils .DollarNames
-setGeneric('.DollarNames', package='utils')
-
 #' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
 	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)) )

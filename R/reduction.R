@@ -44,7 +44,7 @@ reduce.sce <- function(sce, norm.method = "default", reduced_dim = 50, max.iter 
     S_r = t(reduction.out$S_r)
     rownames(S_r) = colnames(sce.norm)
     colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("Dim%d", i))    
-    reducedDim(sce.norm, "S_r") <- S_r
+    reducedDim(sce.norm, "ACTION") <- S_r
     
     
     metadata(sce.norm)$reduction.time = Sys.time()
