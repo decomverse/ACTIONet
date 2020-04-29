@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 4, data.slot = "logcounts", reduction.slot = "ACTION", renormalize.logcounts.slot = "logcounts_adjusted") {
+run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 4, data.slot = "logcounts", reduction.slot = "ACTION", renormalize.logcounts.slot = "logcounts_adjusted") {
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -32,20 +32,28 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_thr
     
     ace = as(sce, "ACTIONetExperiment")
     
+    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+    
     # Run ACTION
-	ACTION.out = run_ACTION(t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]]), k_min = 2, k_max = k_max, thread_no = thread_no, AA_delta)
+	ACTION.out = run_ACTION(S_r, k_min = 2, k_max = k_max, thread_no = thread_no, AA_delta)
     
     # Prune nonspecific and/or unreliable archetypes
     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold)
+
+	C_stacked = pruning.out$C_stacked
+	H_stacked = pruning.out$H_stacked
+
+	colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
+	colFactors(ace)[["H_stacked"]] = H_stacked
     
     # Build ACTIONet
     set.seed(0)
-    G = build_ACTIONet(H_stacked = pruning.out$H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
+    G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
 	colNets(ace)$ACTIONet = G
 	
 	
     # Layout ACTIONet
-	initial.coordinates = t(scale(reducedDims(ace)[[reduction.slot]]))
+	initial.coordinates = t(scale(t(S_r)))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
     
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
@@ -54,9 +62,9 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_thr
 
 
 	# Identiy equivalent classes of archetypes and group them together
-	unification.out = unify_archetypes(G, S_r, pruning.out$C_stacked, pruning.out$H_stacked)
-	colFactors(ace)[["archetype_footprint"]] = unification.out$H_unified
-	colFactors(ace)[["archetype_cell_contributions"]] = t(unification.out$C_unified)
+	unification.out = unify_archetypes(G, S_r, C_stacked, H_stacked)
+	colFactors(ace)[["H_unified"]] = unification.out$H_unified
+	colFactors(ace)[["C_unified"]] = t(unification.out$C_unified)
 	ace$archetype_assignment = unification.out$sample_assignments
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
@@ -74,15 +82,28 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 0.01, min_specificity_z_thr
 	}
 	
 	# Compute gene specificity for each archetype	
-	S.norm = assays(ace)[[renormalize.logcounts.slot]]
+	S.norm = norm.out$S_norm
+	## Core/unified archetypes only
 	specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
+	specificity.out = lapply(specificity.out, function(specificity.scores) {
+		rownames(specificity.scores) = rownames(ace)
+		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
+		return(specificity.scores)
+	})
+	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
+	
+	## All pruned archetypes
+	specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
 	specificity.out = lapply(specificity.out, function(specificity.scores) {
 		rownames(specificity.scores) = rownames(ace)
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
-	rowFactors(ace)[["archetype_gene_profile"]] = specificity.out[["average_profile"]]
-	rowFactors(ace)[["archetype_gene_specificity"]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
 	
 	
 	# Prepare output
