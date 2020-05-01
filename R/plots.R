@@ -274,7 +274,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 #' @return Enrichment heatmap
 #' 
 #' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+#' feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 #' plot.top.k.features(feature.enrichment.table, 3)
 plot.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = T, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
 
@@ -317,14 +317,14 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' @return Featur view
 #' 
 #' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+#' feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 #' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5, CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F) {
-	M = Matrix::t(as(colFactors(ace)[["archetype_footprint"]], 'sparseMatrix'))
+	M = Matrix::t(as(colFactors(ace)[["H_unified"]], 'sparseMatrix'))
 	cs = Matrix::colSums(M)
 	M = scale(M, center = FALSE, scale = cs)
 	
-	if(ncol(feature.enrichment.table) != nrow(colFactors(ace)[["archetype_footprint"]])) {
+	if(ncol(feature.enrichment.table) != nrow(colFactors(ace)[["H_unified"]])) {
 		feature.enrichment.table = Matrix::t(feature.enrichment.table)
 	}
 	
@@ -398,7 +398,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 #' @examples
 #' plot.ACTIONet.gene.view(ace, 5)
 plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", title = "", label.text.size = 0.8, renormalize = F) {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 	
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -475,7 +475,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 		if(ncol(enrichment.table) == nV) {
 			cell.scores = Matrix::t(enrichment.table)
 		} else if( (nrow(enrichment.table) != nV) ) {
-			H = colFactors(ace)[["archetype_footprint"]]
+			H = colFactors(ace)[["H_unified"]]
 			if( (nrow(enrichment.table) == nrow(H)) | (ncol(enrichment.table) == nrow(H)) ) {
 				cell.scores = map.cell.scores.from.archetype.enrichment(ace, enrichment.table)				
 			} else {
@@ -485,7 +485,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 			cell.scores = enrichment.table
 		}
 	} else {
-		temp.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])			
+		temp.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])			
 		if( !is.null(row.names(temp.enrichment.table)) ) {
 			filtered.rows = grep(blacklist.pattern, rownames(temp.enrichment.table))
 			if(length(filtered.rows) > 0)
@@ -496,7 +496,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 			GT = apply(enrichment.table, 2, function(x) rownames(enrichment.table)[order(x, decreasing = T)[1:min(100, nrow(enrichment.table))]])
 			selected.features = sort(unique(as.character(GT)))
 			
-			cell.scores = t(enrichment.table[selected.features, ] %*% colFactors(ace)[["archetype_footprint"]])
+			cell.scores = t(enrichment.table[selected.features, ] %*% colFactors(ace)[["H_unified"]])
 		} else {
 			cell.scores = NULL
 		}	
@@ -752,7 +752,7 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
 
 
 select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T) {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 	
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -765,7 +765,7 @@ select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.patter
 
 
 plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 	
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -779,7 +779,7 @@ plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern 
 
 
 plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 	
 	filtered.rows = match(intersect(rownames(ace), genes), rownames(ace))
 	if(length(filtered.rows) > 0)
@@ -792,7 +792,7 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
 }
 
 plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma", title = "", arch.labels = NULL, reduction.slot = "ACTIONet2D") {
-	Ht = Matrix::t(colFactors(ace)[["archetype_footprint"]])
+	Ht = Matrix::t(colFactors(ace)[["H_unified"]])
 	
 	node.size = node.size * 0.3
     coors = reducedDims(ace)[[reduction.slot]]

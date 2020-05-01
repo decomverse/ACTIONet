@@ -15,7 +15,7 @@
 annotate.archetypes.using.labels <- function(ace, labels) {
 	Labels = preprocess.labels(ace, labels)
 
-	profile = colFactors(ace)[["archetype_footprint"]]		
+	profile = colFactors(ace)[["H_unified"]]		
     Annot = names(Labels)[match(sort(unique(Labels)), Labels)]
 	
 	# Using t-statistics
@@ -83,7 +83,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 			marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
 	}
 
-	specificity.panel = as.matrix(log1p(t(rowFactors(ace)$archetype_gene_specificity)))
+	specificity.panel = as.matrix(log1p(t(rowFactors(ace)$H_unified_upper_significance)))
 
 
     GS.names = names(marker.genes)
@@ -293,7 +293,7 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
 #' labels = cell.annotations$Labels
-annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, annotation.name, rand.sample.no = 1000) {	
+annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000) {	
 	arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, rand.sample.no = rand.sample.no)
 	
 	enrichment.mat = arch.annot$Enrichment
@@ -327,7 +327,7 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, anno
 #' cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat)
 #' cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
 map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F) {
-	cell.scores.mat = Matrix::t(colFactors(ace)[["archetype_footprint"]])
+	cell.scores.mat = Matrix::t(colFactors(ace)[["H_unified"]])
 	
     if (nrow(enrichment.matrix) != ncol(cell.scores.mat)) {
 		print("Flipping enrichment matrix")
