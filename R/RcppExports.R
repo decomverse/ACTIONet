@@ -104,8 +104,25 @@ run_SPA <- function(A, k) {
 #' ACTION.out = run_ACTION(S_r, k_max = 10)
 #' H8 = ACTION.out$H[[8]]
 #' cell.assignments = apply(H8, 2, which.max)
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 4L, max_it = 50L, min_delta = 0.01, type = 1L) {
-    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta, type)
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 4L, max_it = 50L, min_delta = 0.01) {
+    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
+}
+
+#' Runs multi-level ACTION decomposition method
+#'
+#' @param S_r Reduced kernel matrix
+#' @param w Weight vector for each observation
+#' @param k_min Minimum number of archetypes to consider (default=2)
+#' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
+#' @param thread_no Number of parallel threads (default=4)
+#' 
+#' @return A named list with entries 'C' and 'H', each a list for different values of k
+#' @examples
+#' ACTION.out = run_ACTION(S_r, k_max = 10)
+#' H8 = ACTION.out$H[[8]]
+#' cell.assignments = apply(H8, 2, which.max)
+run_weighted_ACTION <- function(S_r, w, k_min = 2L, k_max = 30L, thread_no = 4L, max_it = 50L, min_delta = 0.01) {
+    .Call(`_ACTIONet_run_weighted_ACTION`, S_r, w, k_min, k_max, thread_no, max_it, min_delta)
 }
 
 #' Filters multi-level archetypes and concatenate filtered archetypes.

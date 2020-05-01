@@ -44,7 +44,7 @@ ACTIONetExperiment <- function(...,
 
 
 
-#' @S3method .DollarNames ACTIONetExperiment
+#' @export
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
 	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)) )
     grep(pattern, ll, value=TRUE)
@@ -54,7 +54,6 @@ ACTIONetExperiment <- function(...,
 #' @rdname ACTIONetExperiment-class
 #' @export
 setMethod('.DollarNames', 'ACTIONetExperiment', .DollarNames.ACTIONetExperiment)
-
 
 
 #' @export

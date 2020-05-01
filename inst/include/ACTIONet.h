@@ -119,8 +119,10 @@ namespace ACTIONet {
 		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
 
 	// ACTION decomposition
-		ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta, int type);
-		ACTION_results run_ACTION_dev(mat S_r, int k_min, int k_max, int thread_no, bool auto_stop, int max_it, double min_delta);
+		ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+		ACTION_results run_ACTION_dev(mat &S_r, int k_min, int k_max, int thread_no, bool auto_stop, int max_it, double min_delta);
+
+		ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max, int thread_no, int max_it, double min_delta);
 
 	// Pre-ACTIONet archetype filtering/aggregation
 	// To prune archetypes across different levels and concatenate the resulting archetypes

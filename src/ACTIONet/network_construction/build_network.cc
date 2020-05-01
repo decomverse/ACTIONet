@@ -325,7 +325,7 @@ namespace ACTIONet {
 		printf("Building fixed-degree network (k = %d)\n", (int)k);
 
 		H_stacked = clamp(H_stacked, 0, 1);
-		H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
+		//H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
 
 		double kappa = 5.0;
 		int sample_no = H_stacked.n_cols;		

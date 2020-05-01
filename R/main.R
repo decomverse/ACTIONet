@@ -43,8 +43,8 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_thr
 	C_stacked = pruning.out$C_stacked
 	H_stacked = pruning.out$H_stacked
 
-	colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
-	colFactors(ace)[["H_stacked"]] = H_stacked
+	#colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
+	#colFactors(ace)[["H_stacked"]] = H_stacked
     
     # Build ACTIONet
     set.seed(0)
@@ -74,15 +74,15 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_thr
     
     # Re-normalize input (~gene expression) matrix and compute feature (~gene) specificity scores
     if(is.null(renormalize.logcounts.slot)) {
-		renormalize.logcounts.slot = data.slot
+		S.norm = assays(ace)[[data.slot]]
 	} else {
 		S = assays(ace)[[data.slot]]
 		norm.out = ACTIONet::renormalize_input_matrix(S, unification.out$sample_assignments)
 		assays(ace)[[renormalize.logcounts.slot]] = norm.out$S_norm
+		S.norm = norm.out$S_norm
 	}
 	
 	# Compute gene specificity for each archetype	
-	S.norm = norm.out$S_norm
 	## Core/unified archetypes only
 	specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
 	specificity.out = lapply(specificity.out, function(specificity.scores) {
@@ -94,16 +94,16 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_thr
 	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
 	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
 	
-	## All pruned archetypes
-	specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
-	specificity.out = lapply(specificity.out, function(specificity.scores) {
-		rownames(specificity.scores) = rownames(ace)
-		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
-		return(specificity.scores)
-	})
-	rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
-	rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
-	rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
+	# ## All pruned archetypes
+	# specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
+	# specificity.out = lapply(specificity.out, function(specificity.scores) {
+	# 	rownames(specificity.scores) = rownames(ace)
+	# 	colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
+	# 	return(specificity.scores)
+	# })
+	# rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
+	# rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
+	# rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
 	
 	
 	# Prepare output
@@ -124,7 +124,7 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_thr
 #' @return Sorted table with the selected top-ranked
 #' 
 #' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+#' feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 #' enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
 select.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = F, reorder.columns = T) {
 	

@@ -177,7 +177,7 @@ namespace ACTIONet {
 		return res;
 	}
 
-	ACTION_results run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01) {
+	ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01) {
 		int feature_no = S_r.n_rows;
 				
 		printf("Running ACTION\n");
@@ -221,88 +221,6 @@ namespace ACTIONet {
 			trace.H[kk] = AA_res(1);			
 		});
 		
-		return trace;
-	}	
-
-	ACTION_results run_ACTION_dev(mat S_r, int k_min, int k_max, int thread_no, bool auto_stop = true, int max_it = 30, double min_delta = 0.01) {
-		int feature_no = S_r.n_rows;
-		
-		printf("Running ACTION (developmental version)\n");
-		
-		if(k_max == -1)
-			k_max = (int)S_r.n_cols;
-			
-		k_min = std::max(k_min, 2);
-		k_max = std::min(k_max, (int)S_r.n_cols);	
-					
-		ACTION_results trace; 
-		/*
-		trace.H.resize(k_max + 1);
-		trace.C.resize(k_max + 1);
-		trace.selected_cols.resize(k_max + 1);
-		*/
-
-		trace.H = field<mat>(k_max + 1);
-		trace.C = field<mat>(k_max + 1);
-		trace.selected_cols = field<uvec>(k_max + 1);
-		
-		
-		mat X_r = normalise(S_r, 1); // ATTENTION!
-		 		
-		int current_k = 0;				
-		printf("Iterating from k=%d ... %d (auto stop = %d)\n", k_min, k_max, auto_stop);
-		for(int kk = k_min; kk <= k_max; kk++) {
-			printf("\tk = %d\n", kk);
-			SPA_results SPA_res = run_SPA(X_r, kk);
-			trace.selected_cols[kk] = SPA_res.selected_columns;
-			
-			mat W = X_r.cols(trace.selected_cols[kk]);
-			if(kk > k_min) {
-				W.cols(span(0, kk-2)) = X_r * trace.C[kk-1];
-			}
-			//W.print("W");
-			
-			
-			field<mat> AA_res = run_AA(X_r, W, max_it, min_delta);
-			
-			if(auto_stop) {
-				mat C = AA_res(0);
-				bool has_trivial_arch = false;
-				for(int c = 0; c < C.n_cols; c++) {
-					int r = 0, nnz_counts = 0;
-					while(r < C.n_rows) {
-						if(C(r, c) > 0)
-							nnz_counts ++;
-							
-						if(nnz_counts > 1)
-							break;
-						
-						r++;
-					}
-					if(nnz_counts <= 1) {
-						has_trivial_arch = true;
-						break;
-					}
-				}				
-				if(has_trivial_arch > 0) {
-					printf("\t\tFound trivial archetypes at k = %d\n", kk);
-					
-					break;
-				}
-			}
-			
-			current_k = std::max(current_k, kk);
-
-			trace.C[kk] = AA_res(0);
-			trace.H[kk] = AA_res(1);			
-		}
-		/*
-		trace.H.resize(current_k+1);
-		trace.C.resize(current_k+1);
-		trace.selected_cols.resize(current_k+1);
-		*/
-		
-
 		return trace;
 	}	
 }

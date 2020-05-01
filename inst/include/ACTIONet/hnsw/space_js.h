@@ -16,9 +16,14 @@ namespace hnswlib {
 		double half = 0.5;
 		
 		double sum1 = 0, sum2 = 0;
+		double res1 = 1.0, res2 = 1.0;
 		for (size_t i = 0; i < N; i++) {
 			double p = pVect1[i];
 			double q = pVect2[i];
+			
+			res1 -= p;
+			res2 -= q;
+			
 			double m = (p + q)*half;
 			
 			/*
@@ -40,6 +45,8 @@ namespace hnswlib {
 		}
         
         double JS = std::max(half*sum1 - sum2, 0.0);
+        
+        JS += half*(std::max(res1, 0.0) + std::max(res2, 0.0)); // If there is residual, consider that as as being in mismatched dimension
         
 		return (double)sqrt(JS);
 	}

@@ -76,19 +76,35 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_ACTION
-List run_ACTION(mat S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta, int type);
-RcppExport SEXP _ACTIONet_run_ACTION(SEXP S_rSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP, SEXP typeSEXP) {
+List run_ACTION(mat& S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+RcppExport SEXP _ACTIONet_run_ACTION(SEXP S_rSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
     Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
     Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
-    Rcpp::traits::input_parameter< int >::type type(typeSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta, type));
+    rcpp_result_gen = Rcpp::wrap(run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_weighted_ACTION
+List run_weighted_ACTION(mat& S_r, vec w, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+RcppExport SEXP _ACTIONet_run_weighted_ACTION(SEXP S_rSEXP, SEXP wSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< vec >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_weighted_ACTION(S_r, w, k_min, k_max, thread_no, max_it, min_delta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -337,7 +353,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 6},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 2},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
-    {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 7},
+    {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
+    {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 3},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
