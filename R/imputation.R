@@ -14,7 +14,7 @@ impute.genes.using.archetypes <- function(ace, genes) {
 
 
 	Z = rowFactors(ace)[["archetype_gene_profile"]][genes, ]
-	H = colFactors(ace)[["archetype_footprint"]]
+	H = colFactors(ace)[["H_unified"]]
 
 	imputed.gene.expression = t(Z %*% H)
 	colnames(imputed.gene.expression) = genes
@@ -38,8 +38,8 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
     genes = intersect(unique(genes), rownames(ace))
 
 
-	Z = log1p(rowFactors(ace)[["archetype_gene_specificity"]][genes, ])
-	H = colFactors(ace)[["archetype_footprint"]]
+	Z = log1p(rowFactors(ace)[["H_unified_upper_significance"]][genes, ])
+	H = colFactors(ace)[["H_unified"]]
 
 	imputed.gene.expression = t(Z %*% H)
 	colnames(imputed.gene.expression) = genes

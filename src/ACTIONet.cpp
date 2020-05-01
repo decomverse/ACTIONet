@@ -192,9 +192,47 @@ List run_SPA(mat A, int k) {
 //' H8 = ACTION.out$H[[8]]
 //' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_ACTION(mat S_r, int k_min = 2, int k_max=30, int thread_no = 4, int max_it = 50, double min_delta = 0.01, int type = 1) {	
+List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 4, int max_it = 50, double min_delta = 0.01) {	
 
-	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta, type);
+	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
+
+	List res;
+	
+	List C(k_max);
+	for (int i = k_min; i <= k_max; i++) {
+		C[i-1] = trace.C[i];
+	}
+	res["C"] = C;	
+
+	List H(k_max);
+	for (int i = k_min; i <= k_max; i++) {
+		H[i-1] = trace.H[i];
+	}
+	res["H"] = H;
+	
+		
+	return res;
+}
+
+
+
+//' Runs multi-level ACTION decomposition method
+//'
+//' @param S_r Reduced kernel matrix
+//' @param w Weight vector for each observation
+//' @param k_min Minimum number of archetypes to consider (default=2)
+//' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
+//' @param thread_no Number of parallel threads (default=4)
+//' 
+//' @return A named list with entries 'C' and 'H', each a list for different values of k
+//' @examples
+//' ACTION.out = run_ACTION(S_r, k_max = 10)
+//' H8 = ACTION.out$H[[8]]
+//' cell.assignments = apply(H8, 2, which.max)
+// [[Rcpp::export]]
+List run_weighted_ACTION(mat &S_r, vec w, int k_min = 2, int k_max=30, int thread_no = 4, int max_it = 50, double min_delta = 0.01) {	
+
+	ACTIONet::ACTION_results trace = ACTIONet::run_weighted_ACTION(S_r, w, k_min, k_max, thread_no, max_it, min_delta);
 
 	List res;
 	
@@ -676,7 +714,7 @@ sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha = 0.
 //' G = colNets(ace)$ACTIONet
 //' associations = gProfilerDB_human$SYMBOL$REAC
 //' common.genes = intersect(rownames(ace), rownames(associations))
-//' specificity_scores = rowFactors(ace)[["archetype_gene_specificity"]]
+//' specificity_scores = rowFactors(ace)[["H_unified_upper_significance"]]
 //' logPvals = compute_feature_specificity(specificity_scores[common.genes, ], annotations[common.genes, ])
 //' rownames(logPvals) = colnames(specificity_scores)
 //' colnames(logPvals) = colnames(annotations)

@@ -6,7 +6,7 @@
 #' @return Matrix of TF x cell type/state indicating inferred TF activity scores
 #' 
 #' @examples
-#' scores = rowFactors(ace)$archetype_gene_specificity
+#' scores = rowFactors(ace)$H_unified_upper_significance
 #' TF.scores = assess.TF.activities.from.scores(scores)
 assess.TF.activities.from.scores <- function(scores) {
 	if(!exists("ChEA3plusDB")) {
@@ -40,7 +40,7 @@ assess.TF.activities.from.scores <- function(scores) {
 #' @examples
 #' TF.scores = assess.TF.activities.from.archetypes(ace)
 assess.TF.activities.from.archetypes <- function(ace) {
-	scores = rowFactors(ace)$archetype_gene_specificity
+	scores = rowFactors(ace)$H_unified_upper_significance
 
 	TF.scores = assess.TF.activities.from.scores(scores)
 	
@@ -60,7 +60,7 @@ assess.TF.activities.from.archetypes <- function(ace) {
 #' @examples
 #' data("gProfilerDB_human")
 #' associations = gProfilerDB_human$SYMBOL$WP
-#' scores = rowFactors(ace)$archetype_gene_specificity
+#' scores = rowFactors(ace)$H_unified_upper_significance
 #' Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
 assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000) {
 	if(is.list(associations)) {
@@ -85,7 +85,7 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
 assess.geneset.enrichment.from.archetypes <- function(scores, associations, L = 1000) {
-	scores = rowFactors(ace)$archetype_gene_specificity
+	scores = rowFactors(ace)$H_unified_upper_significance
 
 	Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations, L)
 	

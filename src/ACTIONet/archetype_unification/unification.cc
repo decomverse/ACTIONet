@@ -58,6 +58,8 @@ namespace ACTIONet {
 				C_unified.col(i) = mean(subC, 1);				
 			}
 		}
+		C_unified = normalise(C_unified, 1, 0);
+		
 		mat W_unified = S_r * C_unified;
 		mat H_unified = run_simplex_regression(W_unified, S_r);
 		
