@@ -5,7 +5,8 @@
 \title{Filters multi-level archetypes and concatenate filtered archetypes.
 (Pre-ACTIONet archetype processing)}
 \usage{
-prune_archetypes(C_trace, H_trace, min_specificity_z_threshold = -1)
+prune_archetypes(C_trace, H_trace, min_specificity_z_threshold = -1,
+  min_cells = 3L)
 }
 \arguments{
 \item{C_trace, H_trace}{Output of ACTION}

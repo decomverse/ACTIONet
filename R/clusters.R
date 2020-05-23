@@ -4,24 +4,34 @@
 #' @param clusters Cluster
 #' @param output.slot.name Name of the output in rowFactors(ace) to store results
 #' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
-#' Typically it is either "logcounts" or "logcounts_adjusted"
+#' Typically it is either "logcounts" or "logcounts"
  
 #' @return `ACE` object with specificity scores of each cluster added to rowFactors(ace) as a matrix with name defined by output.slot.name
 #' 
 #' @examples
 #' ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name, renormalize.logcounts.slot = "logcounts_adjusted") {			
-	S.norm = assays(ace)[[renormalize.logcounts.slot]]
+compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name, data.slot = "logcounts") {			
+	S = assays(ace)[[data.slot]]
+	
+	if(is.factor(clusters)) {
+		UL = levels(clusters)
+	} else {
+		UL = sort(unique(clusters))
+	}
+	lables = match(clusters, UL)
 	
 	# Compute gene specificity for each cluster
-	specificity.out = compute_cluster_feature_specificity(S.norm, clusters)
+	specificity.out = compute_cluster_feature_specificity(S, lables)
 	specificity.out = lapply(specificity.out, function(specificity.scores) {
 		rownames(specificity.scores) = rownames(ace)
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
 		return(specificity.scores)
 	})
 	
-	rowFactors(ace)[[output.slot.name]] = specificity.out[["upper_significance"]]
+	X = specificity.out[["upper_significance"]]
+	colnames(X) = UL
+	
+	rowFactors(ace)[[output.slot.name]] = X
 		
 	return(ace)
 }

@@ -70,6 +70,15 @@ namespace ACTIONet {
 			field<mat> H;
 			field<mat> C;
 		};
+		
+		// To store the output of run_ACTION()
+		struct Online_ACTION_results {
+			field<uvec> selected_cols;
+			field<mat> A;
+			field<mat> B;
+			field<mat> C;
+			field<mat> D;
+		};		
 
 		// To store the output of reconstruct_archetypes()
 		struct multilevel_archetypal_decomposition {
@@ -84,7 +93,7 @@ namespace ACTIONet {
 			uvec selected_archetypes;
 			mat C_unified;
 			mat H_unified;
-			uvec sample_assignments;
+			uvec assigned_archetype;
 		};	
 		
 	// Low-level functions
@@ -110,6 +119,13 @@ namespace ACTIONet {
 
 		// Robust archetypal analysis method
 		field<mat> run_AA (mat &S, mat &W0, int max_it, double min_delta);	
+
+		// Online archetypal analysis method (Online Dictionary Learning for Approximate Archetypal Analysis)
+		field<mat> Online_update_AA(mat& Xt, mat& D, mat& A, mat& B);
+		field<mat> run_online_AA (mat &X, mat &D0, field<uvec> samples);
+		Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples, int k_min, int k_max, int thread_no);
+
+
 		
 	// *********************************
 		
@@ -126,12 +142,13 @@ namespace ACTIONet {
 
 	// Pre-ACTIONet archetype filtering/aggregation
 	// To prune archetypes across different levels and concatenate the resulting archetypes
-		multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold);
+		multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold, int min_cells);
 		
 		
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
-		unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold);
+		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
+		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overlap, double resolution);
 	
 	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
@@ -180,6 +197,14 @@ namespace ACTIONet {
 	
 		field<vec> run_HDBSCAN(mat &X, int minPoints, int minClusterSize);
 
+		mat MWM_hungarian(mat &G);
+		mat Prune_PageRank(mat &U, double density);
+		field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no);	
+		
+		
+		vec unsigned_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters, int seed);
+		vec signed_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters, int seed);
+		
 }
 
 #endif

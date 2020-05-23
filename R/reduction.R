@@ -12,34 +12,53 @@
 #' @examples
 #' sce = import.sce.from.10X(input_path)
 #' sce = reduce.sce(sce)
-reduce.sce <- function(sce, norm.method = "default", reduced_dim = 50, max.iter = 5, passphrase = NULL) {        
-    sce.norm = sce
+reduce.sce <- function(sce, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default") { 
+    if (!(data.slot %in% names(sce@assays))) {
+		if(normalization.method != "none") {
+			print("Normalizing sce object ... ");
+			sce = normalize.sce(sce, normalization.method)
+		} else {			
+			R.utils::printf("Slot %s not found. This can be potentially due to missing normalization step.", data.slot)
+			return(sce)
+		}
+    }
     
+    sce.norm = sce    
     if (is.null(rownames(sce.norm))) {
         rownames(sce.norm) = sapply(1:nrow(sce.norm), function(i) sprintf("Gene%d", i))
-    }
+    } else {
+		rn = rownames(sce.norm)
+		if(length(unique(rn)) < length(rn)) {
+			rownames(sce.norm) = make.names(rn, unique = TRUE)
+		}
+	}
+	
     if (is.null(colnames(sce.norm))) {
         colnames(sce.norm) = sapply(1:ncol(sce.norm), function(i) sprintf("Cell%d", i))
-    }
+    } else {
+		cn = colnames(sce.norm)
+		if(length(unique(cn)) < length(cn)) {
+			colnames(sce.norm) = make.names(cn, unique = TRUE)
+		}
+	}
     
     
-    if (!("logcounts" %in% names(SummarizedExperiment::assays(sce.norm)))) {
-        print("Normalizing sce object")
-        
-        sce.norm = normalize.sce(sce.norm, norm.method)
-    }
-    SummarizedExperiment::assays(sce.norm) = lapply(SummarizedExperiment::assays(sce.norm), function(A) {
-		rownames(A) = rownames(sce.norm)
-		colnames(A) = colnames(sce.norm)
-		return(A)
-	})
+
+    
+    for(n in names(sce.norm@assays)) {
+		rownames(sce.norm@assays[[n]]) = rownames(sce.norm)
+		colnames(sce.norm@assays[[n]]) = colnames(sce.norm)
+	}
         
     
     print("Running main reduction")
     # reduction_algorithm=ACTION, SVD_algorithm=Halko
-    suppressWarnings({
-        reduction.out = reduce_kernel(as(SummarizedExperiment::assays(sce.norm)$logcounts, "sparseMatrix"), reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1) 
-    })
+    S = sce.norm@assays[[data.slot]]
+    if(is.matrix(S)) {
+        reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1) 
+	} else {
+        reduction.out = reduce_kernel(S, reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1) 
+    }
     
     S_r = t(reduction.out$S_r)
     rownames(S_r) = colnames(sce.norm)
@@ -51,9 +70,9 @@ reduce.sce <- function(sce, norm.method = "default", reduced_dim = 50, max.iter 
     return(sce.norm)
 }
 
-batch.correct.sce.Harmony <- function(sce, batch.vec) {
+batch.correct.sce.Harmony <- function(sce, batch.vec, reduction.slot = "ACTION") {
     require(harmony)
-    reducedDims(sce)$S_r = harmony::HarmonyMatrix(reducedDims(sce)$S_r, batch.vec, do_pca = FALSE)
+    reducedDims(sce)[[reduction.slot]] = harmony::HarmonyMatrix(reducedDims(sce)[[reduction.slot]], batch.vec, do_pca = FALSE)
     return(sce)
 }
 
@@ -75,7 +94,7 @@ batch.correct.sce.Harmony <- function(sce, batch.vec) {
 #' sce = import.sce.from.10X(input_path)
 #' batch.vec = sce$Batch # Assumes sample annotations are in the input_path with "Batch" attribute being provided
 #' sce = reduce.and.batch.correct.sce.Harmony(sce)
-reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, norm.method = "default", reduced_dim = 50, max.iter = 5, passphrase = NULL) {
+reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default") {
 	if( !("harmony" %in% rownames(installed.packages())) ) {
 		message("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.")
 		return
@@ -88,7 +107,7 @@ reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, norm.met
         return(sce)
     }
     
-    sce = reduce.sce(sce, reduced_dim = reduced_dim, max.iter = max.iter, norm.method = norm.method, passphrase = passphrase)
+    sce = reduce.sce(sce, reduced_dim = reduced_dim, max.iter = max.iter, normalization.method = normalization.method, data.slot = data.slot)
     sce = batch.correct.sce.Harmony(sce, batch.vec)
     
     return(sce)

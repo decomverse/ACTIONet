@@ -7,7 +7,7 @@
 compute_archetype_feature_specificity(S, H)
 }
 \arguments{
-\item{S}{Input matrix}
+\item{S}{Input matrix (sparseMatrix)}
 
 \item{H}{A soft membership matrix - Typically H_unified from the unify_archetypes() function.}
 }

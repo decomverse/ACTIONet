@@ -6,20 +6,20 @@
 (It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)}
 \usage{
 reduce.and.batch.correct.sce.Harmony(sce, batch.vec = NULL,
-  norm.method = "default", reduced_dim = 50, max.iter = 5,
-  passphrase = NULL)
+  reduced_dim = 50, max.iter = 5, data.slot = "logcounts",
+  normalization.method = "default")
 }
 \arguments{
 \item{sce}{Input sce object}
 
 \item{batch.vec}{Vector of batches per sample}
 
-\item{norm.method}{Normalization method to use. See normalize.sce() function (default:"default")
-(used only if the sce object is not already normalized)}
-
 \item{reduced_dim}{Dimension of SVD used for reducing kernel matrix}
 
 \item{max.iter}{Number of SVD iterations}
+
+\item{norm.method}{Normalization method to use. See normalize.sce() function (default:"default")
+(used only if the sce object is not already normalized)}
 
 \item{passphrase}{Passphrase for encrypting column names of the sce object for anonymization}
 }

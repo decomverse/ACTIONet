@@ -5,7 +5,7 @@
 \title{Computes feature (i.e. gene) specificity scores for each cluster}
 \usage{
 compute.cluster.feature.specificity(ace, clusters, output.slot.name,
-  renormalize.logcounts.slot = "logcounts_adjusted")
+  data.slot = "logcounts")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -15,7 +15,7 @@ compute.cluster.feature.specificity(ace, clusters, output.slot.name,
 \item{output.slot.name}{Name of the output in rowFactors(ace) to store results}
 
 \item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
-Typically it is either "logcounts" or "logcounts_adjusted"}
+Typically it is either "logcounts" or "logcounts"}
 }
 \value{
 `ACE` object with specificity scores of each cluster added to rowFactors(ace) as a matrix with name defined by output.slot.name
