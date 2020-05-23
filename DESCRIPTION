@@ -14,8 +14,8 @@ Maintainer: Shahin Mohammadi <mohammadi@broadinstitute.org>
 Description: 
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: Rcpp, RcppArmadillo, Matrix, SingleCellExperiment, hdf5r
-Imports: Matrix, SingleCellExperiment, hdf5r, ComplexHeatmap
+Depends: Rcpp, RcppArmadillo, Matrix, SingleCellExperiment, hdf5r, scater
+Imports: Matrix, SingleCellExperiment, hdf5r, ComplexHeatmap, scater
 Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer,ComplexHeatmap
 LinkingTo: Rcpp,RcppArmadillo
 Encoding: UTF-8
