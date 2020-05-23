@@ -31,22 +31,23 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 
 	N = nrow(DF)
 
-	cat.vars = which(sapply(1:ncol(DF), function(i) (!is.numeric(DF[, i]) & (length(unique(DF[, i])) < 256) )))
+	cat.vars = which(sapply(1:ncol(DF), function(i) length(unique(DF[, i])) < 256 ))
 	if(length(cat.vars) > 0) {
 		cat = h5group$create_group("__categories")
 
 		for(i in 1:length(cat.vars)) {
 			x =  DF[, cat.vars[i]]
 			if(class(x) == "factor") {
-				l = levels(x)
+				l = as.character(levels(x))
 				v = as.numeric(x) - 1
 			} else {
+        x = as.character(x)
 				l = sort(unique(x))
 				v = match(x, l) - 1
 			}
 
-			dtype = H5T_STRING$new(type="c", size=Inf)
-    		dtype = dtype$set_cset(cset = "UTF-8")
+		  dtype = H5T_STRING$new(type="c", size=Inf)
+    	dtype = dtype$set_cset(cset = "UTF-8")
 			l.enum = cat$create_dataset(colnames(DF)[cat.vars[i]], l, gzip_level = compression.level, dtype = dtype)
 
 
