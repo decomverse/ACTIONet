@@ -47,7 +47,7 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
 				cn[[k]] = tmp[j, j]
 			}			
 		}		
-		if(lengh(cf) > 0) {
+		if(length(cf) > 0) {
 			for (k in 1:length(cf)) {
 				v = cf[[k]]
 				cf[[k]] = tmp[, j, drop=FALSE]

@@ -43,17 +43,15 @@ ACTIONetExperiment <- function(...,
 }
 
 
-
-#' @export
+#' @export .DollarNames.ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
 	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)) )
     grep(pattern, ll, value=TRUE)
 }
 
-#' Auto-completion for \code{\linkS4class{ACTIONetExperiment}} objects
-#' @rdname ACTIONetExperiment-class
 #' @export
 setMethod('.DollarNames', 'ACTIONetExperiment', .DollarNames.ACTIONetExperiment)
+
 
 
 #' @export

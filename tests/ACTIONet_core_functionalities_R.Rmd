@@ -63,6 +63,7 @@ We have preprocessed and stored the PBMC 3k dataset as an `SCE` object, which is
 ```{r}
 sce = readRDS("pbmc3k_sce.RDS")
 
+
 sce
 
 ```
@@ -76,6 +77,7 @@ Next, we use the `reduce.sce()` function to both normalize the counts' matrix (l
 sce = reduce.sce(sce = sce)
 
 S_r = t(reducedDims(sce)[["ACTION"]])
+S = logcounts(sce)
 
 ```
 
@@ -116,6 +118,10 @@ pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 C_stacked = pruning.out$C_stacked
 H_stacked = pruning.out$H_stacked
 
+# 
+H_stacked = do.call(rbind, ACTION.out$H[-1])
+C_stacked = do.call(cbind, ACTION.out$C[-1])
+
 colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
 colFactors(ace)[["H_stacked"]] = H_stacked
 
@@ -155,7 +161,7 @@ And then we can store the coordinates as `reducedDims()` and computed *de novo* 
 ```{r}
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    reducedDims(ace)$denovo_color = vis.out$colors
+    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
     
 	
 ```
@@ -165,7 +171,8 @@ And then we can store the coordinates as `reducedDims()` and computed *de novo* 
 There is a large redundancy between the set of archetypes. `unify_archetypes()` tries to coalesce these archetypes and partition them into equivalent classes.
 
 ```{r}
-	unification.out = unify_archetypes(G, S_r, pruning.out$C_stacked, pruning.out$H_stacked, minPoints = 10, minClusterSize = 10, outlier_threshold = 0.5)
+	archs = as.matrix(S %*% C_stacked)
+	unification.out = unify_archetypes(G, S_r, archs, pruning.out$C_stacked, pruning.out$H_stacked, minPoints = 10, minClusterSize = 10, outlier_threshold = 0.0)
 
 ```
 
@@ -173,7 +180,7 @@ And store the results back in the `ACE` object:
 ```{r}
 	colFactors(ace)[["C_unified"]] = t(unification.out$C_unified)
 	colFactors(ace)[["H_unified"]] = unification.out$H_unified
-	ace$assigned_archetype = unification.out$sample_assignments
+	ace$assigned_archetype = unification.out$assigned_archetype
 	
 ```
 
@@ -187,25 +194,14 @@ ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetyp
 ```
 
 
-
-## Re-normalize input (~gene expression) matrix and compute feature (~gene) specificity scores
-
-```{r}
-    S = assays(ace)[["logcounts"]]
-    norm.out = ACTIONet::renormalize_input_matrix(S, unification.out$sample_assignments)
-	assays(ace)[["logcounts_renorm"]] = norm.out$S_norm
-	
-```
-
-
 	
 ## Compute gene specificity for each archetype
 This computes the "marker-ness" of each genes for different archetypes:
 
 ```{r}
-	S.norm = norm.out$S_norm
+	S = logcounts(ace)
 	## Core/unified archetypes only
-	specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
+	specificity.out = compute_archetype_feature_specificity_full(S, unification.out$H_unified)
 	specificity.out = lapply(specificity.out, function(specificity.scores) {
 		rownames(specificity.scores) = rownames(ace)
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
@@ -214,17 +210,6 @@ This computes the "marker-ness" of each genes for different archetypes:
 	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
 	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
 	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
-	
-	## All pruned archetypes
-	specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
-	specificity.out = lapply(specificity.out, function(specificity.scores) {
-		rownames(specificity.scores) = rownames(ace)
-		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
-		return(specificity.scores)
-	})
-	rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
-	rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
-	rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
 	
 ```
 
@@ -248,6 +233,10 @@ plot.ACTIONet(ace, ace$louvain, reduction.slot = "tsne", title = "tSNE")
 plot.ACTIONet(ace, ace$louvain, reduction.slot = "umap", title = "UMAP")
 
 plot.ACTIONet(ace, ace$louvain, reduction.slot = "ACTIONet2D", title = "ACTIONet", transparency.attr = ace$node_centrality, trans.fact = 1)
+
+```
+```{r}
+plot.ACTIONet(ace)
 
 ```
 

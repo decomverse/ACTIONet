@@ -325,25 +325,32 @@ namespace hnswlib {
                 }
             }
 
+			double k;			
 			
-			std::sort (dists.begin(), dists.end());			
-			
-			double lambda = dists[1]+1 ;
-			double Sum_beta = 0, Sum_beta_square = 0;
-			
-			int k = 1;
-			for(; k < dists.size(); k++ ) {
-				double beta = LC*dists[k];
+			if(dists.size() > 1) {
+				std::sort (dists.begin(), dists.end());			
 				
-				Sum_beta += beta;
-				Sum_beta_square += beta*beta;
-				lambda = (1.0/k) * ( Sum_beta + sqrt( k  + Sum_beta*Sum_beta - k * Sum_beta_square ) ) ; 						
+				double lambda = dists[1]+1 ;
+				double Sum_beta = 0, Sum_beta_square = 0;
+				
+				k = 1;
+				for(; k < dists.size(); k++ ) {
+					double beta = LC*dists[k];
+					
+					Sum_beta += beta;
+					Sum_beta_square += beta*beta;
+					lambda = (1.0/k) * ( Sum_beta + sqrt( k  + Sum_beta*Sum_beta - k * Sum_beta_square ) ) ; 						
 
-				if(lambda < beta)
-					break;
+					if(lambda < beta)
+						break;
+				}
+				k--;
+			} else {
+				k = 1;
 			}
-			
             visited_list_pool_->releaseVisitedList(vl);
+			
+			k= dists.size();
             
             return (size_t)k;
         }

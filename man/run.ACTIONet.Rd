@@ -4,12 +4,12 @@
 \alias{run.ACTIONet}
 \title{A wrapper function to call all main functions of the ACTIONet}
 \usage{
-run.ACTIONet(sce, k_max = 30, AA_delta = 0.01,
-  min_specificity_z_threshold = -1, network_density = 1,
-  mutual_edges_only = TRUE, layout_compactness = 50,
-  layout_epochs = 500, thread_no = 4, data.slot = "logcounts",
-  reduction.slot = "S_r",
-  renormalize.logcounts.slot = "logcounts_adjusted")
+run.ACTIONet(sce, k_max = 30, AA_delta = 1e-06,
+  min.cells.per.arch = 2, min_specificity_z_threshold = -1,
+  network_density = 1, mutual_edges_only = FALSE,
+  layout_compactness = 50, layout_epochs = 500, thread_no = 8,
+  data.slot = "logcounts", reduction.slot = "ACTION",
+  unification.resolution = 1)
 }
 \arguments{
 \item{sce}{Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).}
@@ -23,18 +23,18 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
-\item{thread_no}{Number of parallel threads (default=4)}
+\item{thread_no}{Number of parallel threads (default=8)}
 
 \item{data.slot}{Corresponding slot in the `ace` object the normalized counts (default="logcounts")}
 
 \item{reduction.slot}{Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")}
 
-\item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
-If it is NULL, values of logcounts(sce) would be directly used without renormalization for computing speicificity scores}
-
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 
 \item{n_epochs}{Number of epochs for SGD algorithm (default=500).}
+
+\item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
+If it is NULL, values of logcounts(sce) would be directly used without renormalization for computing speicificity scores}
 }
 \value{
 A named list: \itemize{

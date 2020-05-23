@@ -74,7 +74,7 @@ Kappa <- function(p, q) {
 
 HGT_tail <- function(population.size, success.count, sample.size, observed.success) {
     if (sum(success.count) == 0) 
-        return(1)
+        return(rep(0, success.count))
     
     success.rate = success.count/population.size
     expected.success = sample.size * success.rate

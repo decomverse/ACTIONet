@@ -22,6 +22,6 @@ Enrichment heatmap
 Plots heatmap of the top-ranked features of an enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 plot.top.k.features(feature.enrichment.table, 3)
 }

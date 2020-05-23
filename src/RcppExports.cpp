@@ -7,13 +7,23 @@
 
 using namespace Rcpp;
 
+// set_seed
+void set_seed(double seed);
+RcppExport SEXP _ACTIONet_set_seed(SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type seed(seedSEXP);
+    set_seed(seed);
+    return R_NilValue;
+END_RCPP
+}
 // FengSVD
-List FengSVD(SEXP A, int dim, int iters, int seed);
+List FengSVD(sp_mat& A, int dim, int iters, int seed);
 RcppExport SEXP _ACTIONet_FengSVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type A(ASEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
@@ -21,13 +31,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// FengSVD_full
+List FengSVD_full(mat& A, int dim, int iters, int seed);
+RcppExport SEXP _ACTIONet_FengSVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(FengSVD_full(A, dim, iters, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 // HalkoSVD
-List HalkoSVD(SEXP A, int dim, int iters, int seed);
+List HalkoSVD(sp_mat& A, int dim, int iters, int seed);
 RcppExport SEXP _ACTIONet_HalkoSVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type A(ASEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
@@ -35,19 +59,49 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// HalkoSVD_full
+List HalkoSVD_full(mat& A, int dim, int iters, int seed);
+RcppExport SEXP _ACTIONet_HalkoSVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(HalkoSVD_full(A, dim, iters, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 // reduce_kernel
-List reduce_kernel(SEXP S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
+List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
 RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< int >::type reduced_dim(reduced_dimSEXP);
     Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type reduction_algorithm(reduction_algorithmSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
     rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// reduce_kernel_full
+List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
+RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< int >::type reduced_dim(reduced_dimSEXP);
+    Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    Rcpp::traits::input_parameter< int >::type reduction_algorithm(reduction_algorithmSEXP);
+    Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -91,6 +145,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_online_ACTION
+List run_online_ACTION(mat& S_r, field<uvec> samples, int k_min, int k_max, int thread_no);
+RcppExport SEXP _ACTIONet_run_online_ACTION(SEXP S_rSEXP, SEXP samplesSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< field<uvec> >::type samples(samplesSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_online_ACTION(S_r, samples, k_min, k_max, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
 // run_weighted_ACTION
 List run_weighted_ACTION(mat& S_r, vec w, int k_min, int k_max, int thread_no, int max_it, double min_delta);
 RcppExport SEXP _ACTIONet_run_weighted_ACTION(SEXP S_rSEXP, SEXP wSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
@@ -109,32 +178,31 @@ BEGIN_RCPP
 END_RCPP
 }
 // prune_archetypes
-List prune_archetypes(const List& C_trace, const List& H_trace, double min_specificity_z_threshold);
-RcppExport SEXP _ACTIONet_prune_archetypes(SEXP C_traceSEXP, SEXP H_traceSEXP, SEXP min_specificity_z_thresholdSEXP) {
+List prune_archetypes(const List& C_trace, const List& H_trace, double min_specificity_z_threshold, int min_cells);
+RcppExport SEXP _ACTIONet_prune_archetypes(SEXP C_traceSEXP, SEXP H_traceSEXP, SEXP min_specificity_z_thresholdSEXP, SEXP min_cellsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const List& >::type C_trace(C_traceSEXP);
     Rcpp::traits::input_parameter< const List& >::type H_trace(H_traceSEXP);
     Rcpp::traits::input_parameter< double >::type min_specificity_z_threshold(min_specificity_z_thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(prune_archetypes(C_trace, H_trace, min_specificity_z_threshold));
+    Rcpp::traits::input_parameter< int >::type min_cells(min_cellsSEXP);
+    rcpp_result_gen = Rcpp::wrap(prune_archetypes(C_trace, H_trace, min_specificity_z_threshold, min_cells));
     return rcpp_result_gen;
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, mat& H_stacked, int minPoints, int minClusterSize, double outlier_threshold);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP minPointsSEXP, SEXP minClusterSizeSEXP, SEXP outlier_thresholdSEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double min_overlap, double resolution);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP min_overlapSEXP, SEXP resolutionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
-    Rcpp::traits::input_parameter< int >::type minPoints(minPointsSEXP);
-    Rcpp::traits::input_parameter< int >::type minClusterSize(minClusterSizeSEXP);
-    Rcpp::traits::input_parameter< double >::type outlier_threshold(outlier_thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, H_stacked, minPoints, minClusterSize, outlier_threshold));
+    Rcpp::traits::input_parameter< double >::type min_overlap(min_overlapSEXP);
+    Rcpp::traits::input_parameter< double >::type resolution(resolutionSEXP);
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, min_overlap, resolution));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -192,63 +260,124 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_pseudo_bulk
-mat compute_pseudo_bulk(SEXP S, arma::Col<unsigned long long> sample_assignments);
+mat compute_pseudo_bulk(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
 RcppExport SEXP _ACTIONet_compute_pseudo_bulk(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_pseudo_bulk_full
+mat compute_pseudo_bulk_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_full(S, sample_assignments));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_pseudo_bulk_per_ind
-field<mat> compute_pseudo_bulk_per_ind(SEXP S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+field<mat> compute_pseudo_bulk_per_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
 RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind(S, sample_assignments, individuals));
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_pseudo_bulk_per_ind_full
+field<mat> compute_pseudo_bulk_per_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind_full(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind_full(S, sample_assignments, individuals));
+    return rcpp_result_gen;
+END_RCPP
+}
 // renormalize_input_matrix
-List renormalize_input_matrix(SEXP S, arma::Col<unsigned long long> sample_assignments);
+sp_mat renormalize_input_matrix(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
 RcppExport SEXP _ACTIONet_renormalize_input_matrix(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     rcpp_result_gen = Rcpp::wrap(renormalize_input_matrix(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
+// renormalize_input_matrix_full
+mat renormalize_input_matrix_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+RcppExport SEXP _ACTIONet_renormalize_input_matrix_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(renormalize_input_matrix_full(S, sample_assignments));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_archetype_feature_specificity
-List compute_archetype_feature_specificity(SEXP S, mat& H);
+List compute_archetype_feature_specificity(sp_mat& S, mat& H);
 RcppExport SEXP _ACTIONet_compute_archetype_feature_specificity(SEXP SSEXP, SEXP HSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_archetype_feature_specificity(S, H));
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_archetype_feature_specificity_full
+List compute_archetype_feature_specificity_full(mat& S, mat& H);
+RcppExport SEXP _ACTIONet_compute_archetype_feature_specificity_full(SEXP SSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_archetype_feature_specificity_full(S, H));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_cluster_feature_specificity
-List compute_cluster_feature_specificity(SEXP S, uvec sample_assignments);
+List compute_cluster_feature_specificity(sp_mat& S, uvec sample_assignments);
 RcppExport SEXP _ACTIONet_compute_cluster_feature_specificity(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< uvec >::type sample_assignments(sample_assignmentsSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_cluster_feature_specificity(S, sample_assignments));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_cluster_feature_specificity_full
+List compute_cluster_feature_specificity_full(mat& S, uvec sample_assignments);
+RcppExport SEXP _ACTIONet_compute_cluster_feature_specificity_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< uvec >::type sample_assignments(sample_assignmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_cluster_feature_specificity_full(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -346,26 +475,104 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// MWM_hungarian
+mat MWM_hungarian(mat& G);
+RcppExport SEXP _ACTIONet_MWM_hungarian(SEXP GSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type G(GSEXP);
+    rcpp_result_gen = Rcpp::wrap(MWM_hungarian(G));
+    return rcpp_result_gen;
+END_RCPP
+}
+// signed_cluster
+vec signed_cluster(sp_mat A, double resolution_parameter, Nullable<IntegerVector> initial_clusters_, int seed);
+RcppExport SEXP _ACTIONet_signed_cluster(SEXP ASEXP, SEXP resolution_parameterSEXP, SEXP initial_clusters_SEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< double >::type resolution_parameter(resolution_parameterSEXP);
+    Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type initial_clusters_(initial_clusters_SEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(signed_cluster(A, resolution_parameter, initial_clusters_, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// unsigned_cluster
+vec unsigned_cluster(sp_mat A, double resolution_parameter, Nullable<IntegerVector> initial_clusters_, int seed);
+RcppExport SEXP _ACTIONet_unsigned_cluster(SEXP ASEXP, SEXP resolution_parameterSEXP, SEXP initial_clusters_SEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< double >::type resolution_parameter(resolution_parameterSEXP);
+    Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type initial_clusters_(initial_clusters_SEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(unsigned_cluster(A, resolution_parameter, initial_clusters_, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Prune_PageRank
+mat Prune_PageRank(mat& U, double density);
+RcppExport SEXP _ACTIONet_Prune_PageRank(SEXP USEXP, SEXP densitySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type U(USEXP);
+    Rcpp::traits::input_parameter< double >::type density(densitySEXP);
+    rcpp_result_gen = Rcpp::wrap(Prune_PageRank(U, density));
+    return rcpp_result_gen;
+END_RCPP
+}
+// transform_layout
+List transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no);
+RcppExport SEXP _ACTIONet_transform_layout(SEXP WSEXP, SEXP coor2DSEXP, SEXP coor3DSEXP, SEXP colRGBSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< mat >::type coor2D(coor2DSEXP);
+    Rcpp::traits::input_parameter< mat >::type coor3D(coor3DSEXP);
+    Rcpp::traits::input_parameter< mat >::type colRGB(colRGBSEXP);
+    Rcpp::traits::input_parameter< int >::type compactness_level(compactness_levelSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(transform_layout(W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
     {"_ACTIONet_FengSVD", (DL_FUNC) &_ACTIONet_FengSVD, 4},
+    {"_ACTIONet_FengSVD_full", (DL_FUNC) &_ACTIONet_FengSVD_full, 4},
     {"_ACTIONet_HalkoSVD", (DL_FUNC) &_ACTIONet_HalkoSVD, 4},
+    {"_ACTIONet_HalkoSVD_full", (DL_FUNC) &_ACTIONet_HalkoSVD_full, 4},
     {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 6},
+    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 6},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 2},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
+    {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
-    {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 3},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
+    {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 5},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
     {"_ACTIONet_compute_pseudo_bulk", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk, 2},
+    {"_ACTIONet_compute_pseudo_bulk_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_full, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind_full, 3},
     {"_ACTIONet_renormalize_input_matrix", (DL_FUNC) &_ACTIONet_renormalize_input_matrix, 2},
+    {"_ACTIONet_renormalize_input_matrix_full", (DL_FUNC) &_ACTIONet_renormalize_input_matrix_full, 2},
     {"_ACTIONet_compute_archetype_feature_specificity", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity, 2},
+    {"_ACTIONet_compute_archetype_feature_specificity_full", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity_full, 2},
     {"_ACTIONet_compute_cluster_feature_specificity", (DL_FUNC) &_ACTIONet_compute_cluster_feature_specificity, 2},
+    {"_ACTIONet_compute_cluster_feature_specificity_full", (DL_FUNC) &_ACTIONet_compute_cluster_feature_specificity_full, 2},
     {"_ACTIONet_compute_core_number", (DL_FUNC) &_ACTIONet_compute_core_number, 1},
     {"_ACTIONet_compute_archetype_core_centrality", (DL_FUNC) &_ACTIONet_compute_archetype_core_centrality, 2},
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 5},
@@ -373,6 +580,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_assess_enrichment", (DL_FUNC) &_ACTIONet_assess_enrichment, 3},
     {"_ACTIONet_NetDBSCAN", (DL_FUNC) &_ACTIONet_NetDBSCAN, 4},
     {"_ACTIONet_run_HDBSCAN", (DL_FUNC) &_ACTIONet_run_HDBSCAN, 3},
+    {"_ACTIONet_MWM_hungarian", (DL_FUNC) &_ACTIONet_MWM_hungarian, 1},
+    {"_ACTIONet_signed_cluster", (DL_FUNC) &_ACTIONet_signed_cluster, 4},
+    {"_ACTIONet_unsigned_cluster", (DL_FUNC) &_ACTIONet_unsigned_cluster, 4},
+    {"_ACTIONet_Prune_PageRank", (DL_FUNC) &_ACTIONet_Prune_PageRank, 2},
+    {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 7},
     {NULL, NULL, 0}
 };
 

@@ -8,7 +8,7 @@
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 #' @param n_epochs Number of epochs for SGD algorithm (default=500).
-#' @param thread_no Number of parallel threads (default=4)
+#' @param thread_no Number of parallel threads (default=8)
 #' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
 #' @param data.slot Corresponding slot in the `ace` object the normalized counts (default="logcounts")
 #' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 4, data.slot = "logcounts", reduction.slot = "ACTION", renormalize.logcounts.slot = "logcounts_adjusted") {
+run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1) {		
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -32,19 +32,41 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_thr
     
     ace = as(sce, "ACTIONetExperiment")
     
+	S = assays(ace)[[data.slot]]
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
     
     # Run ACTION
-	ACTION.out = run_ACTION(S_r, k_min = 2, k_max = k_max, thread_no = thread_no, AA_delta)
+	ACTION.out = run_ACTION(S_r, k_min = 2, k_max = k_max, thread_no = thread_no, max_it = 50, min_delta = AA_delta)
     
     # Prune nonspecific and/or unreliable archetypes
-    pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold)
+    pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold, min_cells = min.cells.per.arch)
 
 	C_stacked = pruning.out$C_stacked
 	H_stacked = pruning.out$H_stacked
 
-	#colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
-	#colFactors(ace)[["H_stacked"]] = H_stacked
+	colFactors(ace)[["H_stacked"]] = H_stacked
+	colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
+
+
+	# Compute gene specificity for all pruned archetype	
+	if(is.matrix(S)) {
+		pruned.specificity.out = compute_archetype_feature_specificity_full(S, H_stacked)
+	} else {
+		pruned.specificity.out = compute_archetype_feature_specificity(S, H_stacked)
+	}
+	
+	pruned.specificity.out = lapply(pruned.specificity.out, function(specificity.scores) {
+		rownames(specificity.scores) = rownames(ace)
+		colnames(specificity.scores) = paste("AA", 1:ncol(specificity.scores), sep = "") # AA: All Archetypes!
+		return(specificity.scores)
+	})
+	rowFactors(ace)[["H_stacked_profile"]] = pruned.specificity.out[["archetypes"]]
+	rowFactors(ace)[["H_stacked_upper_significance"]] = pruned.specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_stacked_lower_significance"]] = pruned.specificity.out[["lower_significance"]]
+	
+	
+
+
     
     # Build ACTIONet
     set.seed(0)
@@ -58,104 +80,47 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min_specificity_z_thr
     
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    ace$denovo_color = rgb(vis.out$colors)
+    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
 
 
 	# Identiy equivalent classes of archetypes and group them together
-	unification.out = unify_archetypes(G, S_r, C_stacked, H_stacked)
+	archs = as.matrix(S %*% C_stacked)
+	# unification.out = unify_archetypes(G, S_r, archs, C_stacked, H_stacked, HDBSCAN.minPoints, HDBSCAN.minClusterSize, HDBSCAN.outlier_threshold)
+	unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0, resolution = unification.resolution)
+	
+
 	colFactors(ace)[["H_unified"]] = unification.out$H_unified
-	colFactors(ace)[["C_unified"]] = t(unification.out$C_unified)
-	ace$archetype_assignment = unification.out$sample_assignments
+	colFactors(ace)[["C_unified"]] = Matrix::t(unification.out$C_unified)
+	ace$assigned_archetype = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-	ace$node_centrality = compute_archetype_core_centrality(G, ace$archetype_assignment)
-
-	
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
     
-    # Re-normalize input (~gene expression) matrix and compute feature (~gene) specificity scores
-    if(is.null(renormalize.logcounts.slot)) {
-		S.norm = assays(ace)[[data.slot]]
+
+	# Compute gene specificity for each archetype	
+	if(is.matrix(S)) {
+		specificity.out = compute_archetype_feature_specificity_full(S, unification.out$H_unified)
 	} else {
-		S = assays(ace)[[data.slot]]
-		norm.out = ACTIONet::renormalize_input_matrix(S, unification.out$sample_assignments)
-		assays(ace)[[renormalize.logcounts.slot]] = norm.out$S_norm
-		S.norm = norm.out$S_norm
+		specificity.out = compute_archetype_feature_specificity(S, unification.out$H_unified)
 	}
 	
-	# Compute gene specificity for each archetype	
-	## Core/unified archetypes only
-	specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
 	specificity.out = lapply(specificity.out, function(specificity.scores) {
 		rownames(specificity.scores) = rownames(ace)
-		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
+		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
 	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
 	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
 	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
-	
-	# ## All pruned archetypes
-	# specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
-	# specificity.out = lapply(specificity.out, function(specificity.scores) {
-	# 	rownames(specificity.scores) = rownames(ace)
-	# 	colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
-	# 	return(specificity.scores)
-	# })
-	# rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
-	# rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
-	# rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
-	
+
 	
 	# Prepare output
 	trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
     trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
-      
+         
     out = list(ace = ace, trace = trace)
     
     return(out)
-}
-
-
-#' Report the top-rank features from a given enrichment table
-#'
-#' @param top.features Number of features to return
-#' @param reorder.columns Whether to optimally re-order columns of the enrichment table
-#' 
-#' @return Sorted table with the selected top-ranked
-#' 
-#' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
-#' enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
-select.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = F, reorder.columns = T) {
-	
-	W0 = (feature.enrichment.table)
-	if(normalize == T)
-		W0 = doubleNorm(W0)
-	
-	IDX = matrix(0, nrow = top.features, ncol = ncol(W0))
-	VV = matrix(0, nrow = top.features, ncol = ncol(W0))
-	W = (W0)
-	for(i in 1:nrow(IDX)) {
-	  W.m = as(MWM_hungarian(W), 'dgTMatrix')
-	  IDX[i, W.m@j+1] = W.m@i + 1
-	  VV[i, W.m@j+1] = W.m@x
-	  
-	  W[IDX[i, W.m@j+1], ] = 0
-	}
-
-	if(reorder.columns == T) {
-		feature.enrichment.table.aggregated = apply(IDX, 2, function(perm) as.numeric(Matrix::colMeans(W0[perm, ])))
-		CC = cor(feature.enrichment.table.aggregated)
-		D = as.dist(1 - CC)
-		cols = seriation::get_order(seriation::seriate(D, "OLO"))	
-		rows = as.numeric(IDX[, cols])
-	} else {
-		cols = 1:ncol(W0)
-		rows = unique(as.numeric(IDX))
-	}
-	W = feature.enrichment.table[rows, cols]
-	
-	return(W)
 }
 
 

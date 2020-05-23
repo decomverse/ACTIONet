@@ -1,7 +1,7 @@
 #include <ACTIONet.h>
 
 namespace ACTIONet {
-	multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold) {	
+	multilevel_archetypal_decomposition prune_archetypes(field<mat> C_trace, field<mat> H_trace, double min_specificity_z_threshold, int min_cells = 3) {	
 		mat C_stacked;
 		mat H_stacked;
 		int depth = H_trace.size();
@@ -87,6 +87,16 @@ namespace ACTIONet {
 			}			
 		}				
 		printf("done (further %d archs removed)\n", bad_archs); fflush(stdout);
+
+		
+		uvec idx = find(C_stacked > 0);
+		mat C_bin = C_stacked;
+		C_bin(idx).ones();
+		uvec trivial_idx = find(sum(C_bin) < min_cells);
+		pruned(trivial_idx).ones();
+		
+		printf("Found (and removed) %d trivial archetypes\n", trivial_idx.n_elem); fflush(stdout);
+		
 		
 		uvec selected_archs = find(pruned == 0);		
 		results.selected_archs = selected_archs;

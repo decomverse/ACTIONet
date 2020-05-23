@@ -5,7 +5,8 @@
 \title{Annotate archetypes using prior cell annotations 
 (It uses t-test on the archetype footprint matrix (H))}
 \usage{
-annotate.archetypes.using.labels(ace, labels)
+annotate.archetypes.using.labels(ace, labels,
+  archetype.slot = "H_unified")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

@@ -5,7 +5,7 @@
 \title{Main ACTIONet 3D plotting functions}
 \usage{
 plot.ACTIONet.3D(ace, labels = NULL, transparency.attr = NULL,
-  trans.z.threshold = -1, trans.fact = 2, node.size = 1,
+  trans.z.threshold = -1, trans.fact = 1, node.size = 1,
   CPal = Pals.Snap88, reduction.slot = "ACTIONet3D")
 }
 \arguments{
@@ -33,5 +33,5 @@ Main ACTIONet 3D plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet.3D(ace, ace$archetype_assignment, transparency.attr = ace$node_centrality)
+plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 }

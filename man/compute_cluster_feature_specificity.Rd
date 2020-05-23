@@ -7,7 +7,7 @@
 compute_cluster_feature_specificity(S, sample_assignments)
 }
 \arguments{
-\item{S}{Input matrix}
+\item{S}{Input matrix ("sparseMatrix")}
 
 \item{sample_assignments}{Vector of cluster assignments}
 }

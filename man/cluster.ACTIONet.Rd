@@ -2,29 +2,28 @@
 % Please edit documentation in R/network_tools.R
 \name{cluster.ACTIONet}
 \alias{cluster.ACTIONet}
-\title{A wrapper function For Leiden algorithm}
+\title{A wrapper function For Leiden algorithm applied to an ACE object}
 \usage{
-cluster.ACTIONet(ace, annotation.name = NULL,
-  resolution_parameter = 0.5, arch.init = TRUE)
+cluster.ACTIONet(ace, resolution_parameter = 0.5, arch.init = TRUE,
+  seed = 0)
 }
 \arguments{
 \item{ace}{Input results to be clustered}
-
-\item{annotation.name}{Arbitrary name to be given to the final clustering for future reference.}
 
 \item{resolution_parameter}{Resolution of the clustering.
 The higher the resolution, the more clusters we will get (default=0.5).}
 
 \item{arch.init}{Whether to use archetype-assignments to initialize clustering (default=TRUE)}
+
+\item{seed}{Random seed}
 }
 \value{
 ace with added annotation
 }
 \description{
-A wrapper function For Leiden algorithm
+A wrapper function For Leiden algorithm applied to an ACE object
 }
 \examples{
-ace = cluster.ACTIONet(ace, "Leiden_clusters")
-plot.ACTIONet(ace, "Leiden_clusters")
-clusters = colData(ace)[["Leiden_clusters"]]
+clusters = cluster.ACTIONet(ace)
+plot.ACTIONet(ace, clusters)
 }

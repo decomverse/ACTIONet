@@ -5,14 +5,21 @@
 \title{Identifies and aggregates redundant archetypes into equivalent classes
 (Post-ACTIONet archetype processing)}
 \usage{
-unify_archetypes(G, S_r, C_stacked, H_stacked)
+unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 10,
+  resolution = 1)
 }
 \arguments{
-\item{G}{Adjacency matrix of the ACTIONet graph}
-
 \item{S_r}{Reduced kernel profile}
 
 \item{C_stacked, H_stacked}{Output of reconstruct_archetypes()}
+
+\item{G}{Adjacency matrix of the ACTIONet graph}
+
+\item{archetypes}{Archetype profile (S*C)}
+
+\item{minPoints, }{minClusterSize, outlier_threshold HDBSCAN parameters}
+
+\item{reduced_dim}{Kernel reduction}
 }
 \value{
 A named list: \itemize{

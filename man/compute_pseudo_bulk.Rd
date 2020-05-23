@@ -7,7 +7,7 @@
 compute_pseudo_bulk(S, sample_assignments)
 }
 \arguments{
-\item{S}{Input matrix}
+\item{S}{Input matrix ("sparseMatrix")}
 
 \item{sample_assignments}{Any sample clustering/annotation (it has to be in {1, ..., max_class_num})}
 }
