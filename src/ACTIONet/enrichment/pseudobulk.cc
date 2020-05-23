@@ -26,8 +26,15 @@ namespace ACTIONet {
 		
 		for(int j = 0; j < pb.n_cols; j++) {
 			uvec idx = find(sample_assignments == (j+1));
-			mat subS = S.cols(idx);
-			pb.col(j) = mean(subS, 1);						
+			if(idx.n_elem == 0)
+				continue;
+				
+			if(idx.n_elem > 1) {
+				mat subS = S.cols(idx);
+				pb.col(j) = mean(subS, 1);						
+			} else {
+				pb.col(j) = S.col(idx(0));
+			}
 		}
 		
 		return(pb);

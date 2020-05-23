@@ -22,6 +22,6 @@ PErforms geneset enrichment analysis on arbitrary gene scores
 \examples{
 data("gProfilerDB_human")
 associations = gProfilerDB_human$SYMBOL$WP
-scores = rowFactors(ace)$archetype_gene_specificity
+scores = rowFactors(ace)$H_unified_upper_significance
 Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
 }

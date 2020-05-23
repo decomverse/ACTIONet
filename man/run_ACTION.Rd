@@ -4,8 +4,8 @@
 \alias{run_ACTION}
 \title{Runs multi-level ACTION decomposition method}
 \usage{
-run_ACTION(S_r, k_min = 2L, k_max = 30L, thread_no = 4L,
-  max_it = 50L, min_delta = 0.01, type = 1L)
+run_ACTION(S_r, k_min = 2L, k_max = 30L, thread_no = 8L,
+  max_it = 50L, min_delta = 1e-06)
 }
 \arguments{
 \item{S_r}{Reduced kernel matrix}
@@ -15,6 +15,8 @@ run_ACTION(S_r, k_min = 2L, k_max = 30L, thread_no = 4L,
 \item{k_max}{Maximum number of archetypes to consider, or "depth" of decomposition (default=30)}
 
 \item{thread_no}{Number of parallel threads (default=4)}
+
+\item{max_it, min_delta}{Convergence parameters for archetypal analysis}
 }
 \value{
 A named list with entries 'C' and 'H', each a list for different values of k

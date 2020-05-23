@@ -7,7 +7,7 @@
 compute_pseudo_bulk_per_ind(S, sample_assignments, individuals)
 }
 \arguments{
-\item{S}{Input matrix}
+\item{S}{Input matrix ("sparseMatrix")}
 
 \item{sample_assignments}{Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})}
 

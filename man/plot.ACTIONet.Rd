@@ -5,10 +5,10 @@
 \title{Main ACTIONet plotting functions}
 \usage{
 plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
-  trans.z.threshold = -0.5, trans.fact = 2, node.size = 1,
+  trans.z.threshold = -0.5, trans.fact = 1, node.size = 1,
   CPal = Pals.Snap88, add.text = TRUE, suppress.legend = TRUE,
-  legend.pos = "bottomright", add.states = F, title = "",
-  border.contrast.factor = 0.5, reduction.slot = "ACTIONet2D")
+  legend.pos = "bottomright", title = "",
+  border.contrast.factor = 0.1, reduction.slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -29,13 +29,13 @@ plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
 
 \item{legend.pos}{If suppress.legend == F, where should we put the legend}
 
-\item{add.states}{Whether or not to include interpolated cell state positions in the plot}
-
 \item{title}{Main title of the plot}
 
 \item{border.contrast.factor}{How much the node and its border should contrast}
 
 \item{reduction.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+
+\item{add.states}{Whether or not to include interpolated cell state positions in the plot}
 }
 \value{
 Visualized ACTIONet
@@ -45,5 +45,5 @@ Main ACTIONet plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet(ace, ace$archetype_assignment, transparency.attr = ace$node_centrality)
+plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 }

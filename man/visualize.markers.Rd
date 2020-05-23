@@ -7,7 +7,7 @@ It also optionally imputes the markers.}
 \usage{
 visualize.markers(ace, marker.genes, transparency.attr = NULL,
   trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
-  CPal = "magma", alpha_val = 0.85)
+  CPal = "magma", alpha_val = 0.95)
 }
 \arguments{
 \item{ace}{ACTIONet output object}

@@ -111,7 +111,7 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G=NULL, min.edge.wei
 		message(sprintf("%s does not exist in rowFactors(ace)", specificity.slot.name))
 	}
 
-	gene.scores = as.matrix(log1p(t(rowFactors(ace)[[specificity.slot.name]])))
+	gene.scores = Matrix::t(as.matrix(log1p(t(rowFactors(ace)[[specificity.slot.name]]))))
 
 
 	common.genes = intersect(rownames(gene.scores), rownames(PCNet))

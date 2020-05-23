@@ -12,10 +12,14 @@
 #' 
 #' @examples
 #' arch.annot = annotate.archetypes.using.labels(ace, sce$celltypes)
-annotate.archetypes.using.labels <- function(ace, labels) {
+annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_unified") {
 	Labels = preprocess.labels(ace, labels)
 
-	profile = colFactors(ace)[["H_unified"]]		
+	if(is.matrix(ace) | is.sparseMatrix(ace)) {
+		profile = as.matrix(ace)
+	} else {
+		profile = colFactors(ace)[[archetype.slot]]		
+	}
     Annot = names(Labels)[match(sort(unique(Labels)), Labels)]
 	
 	# Using t-statistics
@@ -184,7 +188,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.cells.using.markers(ace, marker.genes = marker.genes)
 #' cell.labels = arch.annot$Labels
-annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100, alpha_val = 0.9, thread_no = 8, imputation = "PageRank") {
+annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100, alpha_val = 0.9, thread_no = 8, imputation = "PageRank", data.slot = "logcounts") {
     require(ACTIONet)
     require(igraph)
     require(Matrix)
@@ -229,12 +233,14 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
     if (imputation == "PageRank") {
         # PageRank-based imputation
         print("Using PageRank for imptation of marker genes")
-        imputed.marker.expression = impute.genes.using.ACTIONet(ace, markers.table$Gene, alpha_val, thread_no)
-    } else {
+        imputed.marker.expression = impute.genes.using.ACTIONet(ace, markers.table$Gene, alpha_val, thread_no, data.slot = data.slot)
+    } else if(imputation == "archImpute") {
         # PCA-based imputation
         print("Using archImpute for imptation of marker genes")
         imputed.marker.expression = impute.specific.genes.using.archetypes(ace, markers.table$Gene)
-    }
+    } else {
+		imputed.marker.expression = ace@assays[[data.slot]]
+	}
     
     
     IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
@@ -331,7 +337,7 @@ map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, no
 	
     if (nrow(enrichment.matrix) != ncol(cell.scores.mat)) {
 		print("Flipping enrichment matrix")
-        Enrichment = t(Enrichment)
+        enrichment.matrix = t(enrichment.matrix)
     }
 
 	if(normalize == T) {

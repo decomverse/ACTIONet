@@ -4,7 +4,7 @@
 \alias{compute_network_diffusion}
 \title{Computes network diffusion over a given network, starting with an arbitrarty set of initial scores}
 \usage{
-compute_network_diffusion(G, X0, thread_no = 4L, alpha = 0.85,
+compute_network_diffusion(G, X0, thread_no = 8L, alpha = 0.85,
   max_it = 3L)
 }
 \arguments{

@@ -65,9 +65,17 @@ assess.TF.activities.from.archetypes <- function(ace) {
 assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000) {
 	if(is.list(associations)) {
 		associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in% gs))
+		rownames(associations) = rownames(scores)
 	}
+	associations = as.matrix(associations)
 	
-	Enrichment.mat = t(assess_enrichment(scores, associations, L))	
+	common.features = intersect(rownames(associations), rownames(scores))
+	L = min(L, length(common.features))
+	
+	
+	Enrichment.mat = t(assess_enrichment(scores[common.features, ], associations[common.features, ], L))	
+	
+	rownames(Enrichment.mat) = colnames(associations)
 	
 	return(Enrichment.mat)	
 }
@@ -84,8 +92,8 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' data("gProfilerDB_human")
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
-assess.geneset.enrichment.from.archetypes <- function(scores, associations, L = 1000) {
-	scores = rowFactors(ace)$H_unified_upper_significance
+assess.geneset.enrichment <- function(ace, associations, L = 1000, specificity.slot = 'H_unified_upper_significance') {
+	scores = as.matrix(rowFactors(ace)[[specificity.slot]]);
 
 	Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations, L)
 	

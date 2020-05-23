@@ -1,38 +1,71 @@
 #' A wrapper function For Leiden algorithm
 #'
-#' @param ace Input results to be clustered
-#' @param annotation.name Arbitrary name to be given to the final clustering for future reference.
+#' @param G Adjacency matrix of the input graph
 #' @param resolution_parameter Resolution of the clustering.
 #' The higher the resolution, the more clusters we will get (default=0.5).
-#' @param arch.init Whether to use archetype-assignments to initialize clustering (default=TRUE)
+#' @param initial.clustering Used as the inital clustering
+#' @param seed Random seed
 #' 
 #' @return ace with added annotation
 #' 
 #' @examples
-#' ace = cluster.ACTIONet(ace, "Leiden_clusters")
-#' plot.ACTIONet(ace, "Leiden_clusters")
-#' clusters = colData(ace)[["Leiden_clusters"]]
-cluster.ACTIONet <- function(ace, annotation.name = NULL, resolution_parameter = 0.5, arch.init = TRUE) {
-	if( !("NetLibR" %in% rownames(installed.packages())) ) {
-		message("You need to install NetLibR (https://github.com/shmohammadi86/NetLibR) first to use graph-based clustering.")
-		return
-	} else {
-		library(NetLibR)
+#' clusters = cluster.graph(G, 1.0)
+cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NULL, seed = 0) {
+	if(is.matrix(G)) {
+		G = as(G, 'sparseMatrix')
 	}
 	
-    if (arch.init == TRUE) {
-        print("Perform archetype-based initialization")
-		initial.clusters = ace$archetype_assignment
-        clusters = as.numeric(unsigned_cluster(colNets(ace)$ACTIONet, resolution_parameter, 0, initial.clusters))
-    } else {
-        print("Perform default initialization")
-        clusters = as.numeric(unsigned_cluster(colNets(ace)$ACTIONet, resolution_parameter, 0))
-    }    
-    names(clusters) = paste("Cluster", as.character(clusters), sep = " ")
+	is.signed = FALSE
+	if(min(G) < 0) {
+		is.signed = TRUE;
+		print("Graph is signed. Switching to signed graph clustering mode.")
+	}
 	
-	colData(ace)[[annotation.name]] = clusters
+    if (!is.null(initial.clustering)) {
+        print("Perform graph clustering with *prior* initialization")
+		initial.clusters = ace$assigned_archetype
+
+		if(is.signed) {
+			clusters = as.numeric(signed_cluster(G, resolution_parameter, initial.clustering, seed))
+		} else {
+			clusters = as.numeric(unsigned_cluster(G, resolution_parameter, initial.clustering, seed))
+		}
+    } else {
+        print("Perform graph clustering with *uniform* initialization")
+
+		if(is.signed) {
+			clusters = as.numeric(signed_cluster(G, resolution_parameter, NULL, seed))
+		} else {
+			clusters = as.numeric(unsigned_cluster(G, resolution_parameter, NULL, seed))
+		}
+    }    
+	
+}
+
+#' A wrapper function For Leiden algorithm applied to an ACE object
+#'
+#' @param ace Input results to be clustered
+
+#' @param resolution_parameter Resolution of the clustering.
+#' The higher the resolution, the more clusters we will get (default=0.5).
+#' @param arch.init Whether to use archetype-assignments to initialize clustering (default=TRUE)
+#' @param seed Random seed
+#' 
+#' @return ace with added annotation
+#' 
+#' @examples
+#' clusters = cluster.ACTIONet(ace)
+#' plot.ACTIONet(ace, clusters)
+cluster.ACTIONet <- function(ace, resolution_parameter = 0.5, arch.init = TRUE, seed = 0) {	
+    initial.clusters = NULL
+    if (arch.init == TRUE) {
+		initial.clusters = ace$assigned_archetype
+	}
 		
-    return(ace)
+	clusters = cluster.graph(G, resolution_parameter, initial.clusters, seed)
+    names(clusters) = paste("C", as.character(clusters), sep = "")
+	
+	return(clusters)
 }
 
 
@@ -50,7 +83,7 @@ cluster.ACTIONet <- function(ace, annotation.name = NULL, resolution_parameter =
 #' @return ace with updated annotations added to ace$annotations
 #' 
 #' @examples
-#' ace = infer.missing.cell.annotations(ace, sce$archetype_Assignments, "updated_archetype_annotations")
+#' ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
 infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, max_iter = 3, adjust.levels = T) {    
     Adj = colNets(ace)$ACTIONet 
     A = as(Adj, 'dgTMatrix')
@@ -189,3 +222,4 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
 
 	return(ace)
 }
+

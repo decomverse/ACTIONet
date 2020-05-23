@@ -28,6 +28,6 @@ Featur view
 Plots projection of features onto the ACTIONet plot
 }
 \examples{
-feature.enrichment.table = as.matrix(rowFactors(ace)[["archetype_gene_specificity"]])
+feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 }
