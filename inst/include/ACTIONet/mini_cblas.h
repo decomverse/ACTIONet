@@ -2,6 +2,7 @@
 #define MINI_CBLAS_H
 
 	#include <arma_base.h>
+	#include "cblas.h"
 
 	#ifndef BLAS_extern
 	#define BLAS_extern extern
@@ -14,6 +15,7 @@
 	 */
 	#define CBLAS_INDEX size_t  /* this may vary between platforms */
 
+/*
 	enum CBLAS_LAYOUT {CblasRowMajor=101, CblasColMajor=102};
 	enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
 	enum CBLAS_UPLO {CblasUpper=121, CblasLower=122};
@@ -65,7 +67,7 @@
 		}
 		return NULL;
 	}
-
+*/
 
 /*
 	#if !defined(ARMA_BLAS_CAPITALS)  
@@ -109,43 +111,43 @@
 
 	inline double cblas_dot( INTT n,  double* X,
 		   INTT incX,  double* Y, INTT incY) {
-	   //return arma_fortran(cblas_ddot(n,X,incX,Y,incY);
-	   return arma_fortran(ddot)(&n,X,&incX,Y,&incY);
+	   return cblas_ddot(n,X,incX,Y,incY);
+	   //return arma_fortran(ddot)(&n,X,&incX,Y,&incY);
 	};
 
 	inline void cblas_copy( INTT n,  double* X, 
 		   INTT incX, double* Y,  INTT incY) {
-	   //cblas_dcopy(n,X,incX,Y,incY);
-	   arma_fortran(dcopy)(&n,X,&incX,Y,&incY);
+	   cblas_dcopy(n,X,incX,Y,incY);
+	   //arma_fortran(dcopy)(&n,X,&incX,Y,&incY);
 	};
 
 	inline void cblas_symv( CBLAS_LAYOUT order,
 		   CBLAS_UPLO Uplo,  INTT N, 
 		   float alpha,  float *A,  INTT lda,  float *X, 
 		   INTT incX,  float beta,float *Y,   INTT incY) {
-	   //cblas_ssymv(order,Uplo,N,alpha,A,lda,X,incX,beta,Y,incY);
-	   arma_fortran(ssymv)(cblas_uplo(Uplo),&N,&alpha,A,&lda,X,&incX,&beta,Y,&incY);
+	   cblas_ssymv(order,Uplo,N,alpha,A,lda,X,incX,beta,Y,incY);
+	   //arma_fortran(ssymv)(cblas_uplo(Uplo),&N,&alpha,A,&lda,X,&incX,&beta,Y,&incY);
 	}
 
 	inline void cblas_symv( CBLAS_LAYOUT order,
 		   CBLAS_UPLO Uplo,  INTT N, 
 		   double alpha,  double *A,  INTT lda,  double *X, 
 		   INTT incX,  double beta,double *Y,   INTT incY) {
-	   //cblas_dsymv(order,Uplo,N,alpha,A,lda,X,incX,beta,Y,incY);
-	   arma_fortran(dsymv)(cblas_uplo(Uplo),&N,&alpha,A,&lda,X,&incX,&beta,Y,&incY);
+	   cblas_dsymv(order,Uplo,N,alpha,A,lda,X,incX,beta,Y,incY);
+	   //arma_fortran(dsymv)(cblas_uplo(Uplo),&N,&alpha,A,&lda,X,&incX,&beta,Y,&incY);
 	}
 
 	inline void cblas_scal( INTT n,  double a, double* X,
 		   INTT incX) {
-	   //cblas_dscal(n,a,X,incX);
-	   arma_fortran(dscal)(&n,&a,X,&incX);
+	   cblas_dscal(n,a,X,incX);
+	   //arma_fortran(dscal)(&n,&a,X,&incX);
 	};
 
 
 	inline void cblas_axpy( INTT n,  double a,  double* X, 
 		   INTT incX, double* Y,  INTT incY) {
-	   //cblas_daxpy(n,a,X,incX,Y,incY);
-	   arma_fortran(daxpy)(&n,&a,X,&incX,Y,&incY);
+	   cblas_daxpy(n,a,X,incX,Y,incY);
+	   //arma_fortran(daxpy)(&n,&a,X,&incX,Y,&incY);
 	};
 
 	inline void cblas_gemv( CBLAS_LAYOUT order,
@@ -153,16 +155,16 @@
 		   double alpha,  double *A,  INTT lda,
 		   double *X,  INTT incX,  double beta,
 		  double *Y,  INTT incY) {
-	   //cblas_dgemv(order,TransA,M,N,alpha,A,lda,X,incX,beta,Y,incY);
-	   arma_fortran(dgemv)(cblas_transpose(TransA),&M,&N,&alpha,A,&lda,X,&incX,&beta,Y,&incY);
+	   cblas_dgemv(order,TransA,M,N,alpha,A,lda,X,incX,beta,Y,incY);
+	   //arma_fortran(dgemv)(cblas_transpose(TransA),&M,&N,&alpha,A,&lda,X,&incX,&beta,Y,&incY);
 	};
 
 
 	inline void cblas_ger( CBLAS_LAYOUT order, 
 		   INTT M,  INTT N,  double alpha,  double *X,  INTT incX,
 		   double* Y,  INTT incY, double *A,  INTT lda) {
-	   //cblas_dger(order,M,N,alpha,X,incX,Y,incY,A,lda);
-	   arma_fortran(dger)(&M,&N,&alpha,X,&incX,Y,&incY,A,&lda);
+	   cblas_dger(order,M,N,alpha,X,incX,Y,incY,A,lda);
+	   //arma_fortran(dger)(&M,&N,&alpha,X,&incX,Y,&incY,A,&lda);
 	};
 	
 #endif
