@@ -1,7 +1,7 @@
 h5addAttr.str <- function(h5group, attr.name, attr.val) {
-    dtype = H5T_STRING$new(type="c", size=Inf)    
+    dtype = H5T_STRING$new(type="c", size=Inf)
     dtype = dtype$set_cset(cset = "UTF-8")
-    
+
     space = H5S$new(type="scalar")
 	h5group$create_attr(attr_name = attr.name, dtype = dtype, space = space)
 	attr = h5group$attr_open_by_name(attr_name = attr.name, ".")
@@ -10,9 +10,9 @@ h5addAttr.str <- function(h5group, attr.name, attr.val) {
 
 h5addAttr.str_array <- function(h5group, attr.name, attr.val) {
     #dtype <- guess_dtype(x=attr.val, scalar=F, string_len=Inf)
-    dtype = H5T_STRING$new(type="c", size=Inf)    
+    dtype = H5T_STRING$new(type="c", size=Inf)
     dtype = dtype$set_cset(cset = "UTF-8")
-    
+
     space = H5S$new(type="simple", dims = length(attr.val), maxdims = length(attr.val))
 	h5group$create_attr(attr_name = attr.name, dtype = dtype, space = space)
 	attr = h5group$attr_open_by_name(attr_name = attr.name, ".")
@@ -24,8 +24,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 
 	string.dtype = H5T_STRING$new(type="c", size=Inf)    
 	string.dtype = string.dtype$set_cset(cset = "UTF-8")
-	
-		
+
 	h5addAttr.str(h5group, "_index", "index")
 	h5addAttr.str(h5group, "encoding-version", "0.1.0")
 	h5addAttr.str(h5group, "encoding-type", "dataframe")
@@ -35,24 +34,25 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 
 	N = nrow(DF)
 
-	cat.vars = which(sapply(1:ncol(DF), function(i) ((class(DF[, i]) != "numeric") & (length(unique(DF[, i])) < 256) )))
+	cat.vars = which(sapply(1:ncol(DF), function(i) length(unique(DF[, i])) < 256 ))
 	if(length(cat.vars) > 0) {
 		cat = h5group$create_group("__categories")
-		
+
 		for(i in 1:length(cat.vars)) {
 			x =  DF[, cat.vars[i]]
 			if(class(x) == "factor") {
-				l = levels(x)
+				l = as.character(levels(x))
 				v = as.numeric(x) - 1
 			} else {
+        x = as.character(x)
 				l = sort(unique(x))
 				v = match(x, l) - 1
 			}
 
-			dtype = H5T_STRING$new(type="c", size=Inf)    
-    		dtype = dtype$set_cset(cset = "UTF-8")
+		  dtype = H5T_STRING$new(type="c", size=Inf)
+    	dtype = dtype$set_cset(cset = "UTF-8")
 			l.enum = cat$create_dataset(colnames(DF)[cat.vars[i]], l, gzip_level = compression.level, dtype = dtype)
-			
+
 
 		    dtype = H5T_ENUM$new(labels = c("FALSE", "TRUE"), values = 0:1)
 		    space = H5S$new(type="scalar")
@@ -64,22 +64,21 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 			l.vec = h5group$create_dataset(colnames(DF)[cat.vars[i]], as.integer(v), gzip_level = compression.level, dtype = h5types$H5T_NATIVE_INT8)
 
 			ref = cat$create_reference(name = colnames(DF)[cat.vars[i]])
-			
+
 		    dtype = guess_dtype(ref)
 		    space = H5S$new(type="scalar")
 			res = l.vec$create_attr(attr_name = "categories", dtype = dtype, space = space)
 			attr = l.vec$attr_open_by_name(attr_name = "categories", ".")
-			attr$write(ref)			
+			attr$write(ref)
 
 		}
 	}
 	index = rownames(DF)
 	if(length(unique(index)) < length(index)) {
-		index = make.names(index, unique = TRUE)	
+		index = make.names(index, unique = TRUE)
 	}
 
 
-	
 	h5group$create_dataset("index", index, gzip_level = compression.level, dtype = string.dtype)
 	for(i in setdiff(1:ncol(DF), cat.vars)) {
 		x = DF[, i]
@@ -90,12 +89,12 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 		} else {
 			h5group$create_dataset(nn, as.single(x), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
 		}
-		
+
 	}
 }
 
 write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.level) {
-	X = Matrix::t(as(X, 'dgCMatrix'))	
+	X = Matrix::t(as(X, 'dgCMatrix'))
 	Xgroup = h5file$create_group(gname)
 
 
@@ -109,20 +108,20 @@ write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.lev
 }
 
 read.HD5DF <- function(h5file, gname, compression.level = 0) {
-	
+
 	h5group = h5file[[gname]]
 	attr = h5attributes(h5group)
 	if(! ( ("encoding-type" %in% names(attr)) & (attr[["encoding-type"]] == "dataframe")) ) {
 		R.utils::printf("%s is not a dataframe. Abort.\n", gname)
 		return()
 	}
-	
+
 	vars = vector("list", length(attr[["column-order"]]))
 	names(vars) = attr[["column-order"]]
 	for(vn in names(vars)) {
 		vars[[vn]] = h5group[[vn]]$read()
 	}
-	
+
 	if("__categories" %in% names(h5group)) {
 		cat = h5group[["__categories"]]
 		for(nn in names(cat)) {
@@ -133,12 +132,12 @@ read.HD5DF <- function(h5file, gname, compression.level = 0) {
 
 	DF = DataFrame(vars)
 	rownames(DF) = h5group[[attr[["_index"]]]]$read()
-	
+
 	return(DF)
 }
 
 read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) {
-	
+
 	h5group = h5file[[gname]]
 	attr = h5attributes(h5group)
 	if(! ( ("encoding-type" %in% names(attr)) & (attr[["encoding-type"]] %in% c("csc_matrix", "csr_matrix"))) ) {
@@ -149,13 +148,13 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 	data = h5group[["data"]]$read()
 	indices = h5group[["indices"]]$read()
 	indptr = h5group[["indptr"]]$read()
-	
+
 	if(attr[["encoding-type"]] == "csc_matrix") {
 		X = Matrix::t(new("dgCMatrix", i = indices, p = indptr, x = data, Dim = attr$shape))
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
 		X = Matrix::t(new("dgRMatrix", j = indices, p = indptr, x = data, Dim = attr$shape))
 	}
-	
+
 	return(X)
 }
 
@@ -173,23 +172,23 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	remaining.assays = setdiff(names(assays(ace)), main.assay)
 	if( (minimal.export == F) & (0 < length(remaining.assays)) ) {
 		layers = h5file$create_group("layers")
-		
+
 		for(an in remaining.assays) {
 			Xr = as(assays(ace)[[an]], 'dgCMatrix')
 			write.HD5SpMat(layers, gname = an, Xr, compression.level = compression.level)
 		}
 	}
-	
-		
 
-	## Write obs (colData() in ACE)	
+
+
+	## Write obs (colData() in ACE)
 	obs.DF = as.data.frame(colData(ace))
 	write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
-	
+
 	## Write var (matching rowData() in ACE)
 	var.DF = as.data.frame(rowData(ace))
 	write.HD5DF(h5file, "var", var.DF, compression.level = compression.level)
-	
+
 	## Write subset of obsm related to the cell embeddings (reducedDims() with 2 or 3 columns)
 	obsm = h5file$create_group("obsm")
 	RD = reducedDims(ace)
@@ -212,8 +211,8 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 				obsm$create_dataset(names(subRD)[[i]], Matrix::t(subRD[[i]]), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
 			}
 		}
-		
-		
+
+
 		# Export additional "obsm"-associated matrices, i.e. colFactors(): obs in AnnData ~ columns in SCE ~ cells => AA results
 		CF = colFactors(ace)
 		if((length(CF) > 0)) {
@@ -222,7 +221,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 				obsm$create_dataset(names(CF)[[i]], Matrix::t(CF[[i]]), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
 			}
 		}
-		
+
 		# Export "varm"-associated matrices, i.e. rowFactors(): variables in AnnData ~ rows in SCE ~ genes => such as DE matrices
 		RF = rowFactors(ace)
 		if((length(RF) > 0)) {
@@ -232,30 +231,30 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 				varm$create_dataset(names(RF)[[i]], Matrix::t(RF[[i]]), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
 			}
 		}
-		
-		
+
+
 		# Export "obsp"-associated matrices, i.e. colNets(): obs in AnnData ~ cols in SCE ~ cells => cell-cell networks (such as ACTIONet)
 		CN = colNets(ace)
 		if((length(CN) > 0)) {
 			obsp = h5file$create_group("obsp")
 			CN = lapply(CN, function(x) as(x, "dgCMatrix"))
-			
+
 			for(i in 1:length(CN)) {
 				write.HD5SpMat(obsp, gname = names(CN)[[i]], CN[[i]], compression.level = compression.level)
 			}
 		}
-		
-		
+
+
 		# Export "varp"-associated matrices, i.e. rowNets(): var in AnnData ~ rows in SCE ~ genes => gene-gene networks (such as SCINET)
 		RN = rowNets(ace)
 		if((length(RN) > 0)) {
 			varp = h5file$create_group("varp")
 			RN = lapply(RN, function(x) as(x, "dgCMatrix"))
-			
+
 			for(i in 1:length(RN)) {
 				write.HD5SpMat(varp, gname = names(RN)[[i]], RN[[i]], compression.level = compression.level)
 			}
-		}		
+		}
 	}
 
 	h5file$close_all()
@@ -263,17 +262,17 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 }
 
 AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minimal.export = T, compression.level = 0) {
-	
+
 	h5file = H5File$new(fname, mode = "r")
-	
+
 	objs = names(h5file)
 	missing.elemenets = setdiff(list("X", "obs", "var"), objs)
 	if(0 < length(missing.elemenets) ) {
 		R.utils::printf("[%s] missing from the h5ad file. Abort.\n", paste(missing.elemenets, sep = ','))
 		return()
 	}
-	
-	
+
+
 	X.attr = h5attributes(h5file[["X"]])
 	if(length(X.attr) == 0) { # Full matrix
 		X = h5file[["X"]]$read()
@@ -282,12 +281,12 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 	}
 	assays = list(X)
 	names(assays) = main.assay
-	
+
 	if("layers" %in% objs) {
 		layers = h5file[["layers"]]
 		additional_assays = vector("list", length(names(layers)))
 		names(additional_assays) = names(layers)
-		
+
 		for(an in names(layers)) {
 			attr = h5attributes(layers[[an]])
 			if(length(attr) == 0) { # Dense matrix
@@ -298,8 +297,8 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		}
 		assays = c(assays, additional_assays)
 	}
-	
-	
+
+
 	obs.DF = read.HD5DF(h5file = h5file, gname = "obs", compression.level = compression.level)
 	var.DF = read.HD5DF(h5file = h5file, gname = "var", compression.level = compression.level)
 
@@ -308,8 +307,8 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		colnames(X) = rownames(obs.DF)
 		return(X)
 	})
-	
-	ACE = ACTIONetExperiment(assays = assays, rowData = var.DF, colData = obs.DF)	
+
+	ACE = ACTIONetExperiment(assays = assays, rowData = var.DF, colData = obs.DF)
 
 	if("obsm" %in% objs) {
 		obsm = h5file[["obsm"]]
@@ -323,8 +322,8 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 				colFactors(ACE)[[mn]] = Xr
 			}
 		}
-	}	
-	
+	}
+
 	if("varm" %in% objs) {
 		varm = h5file[["varm"]]
 		for(mn in names(varm)) {
@@ -360,10 +359,10 @@ AnnData2ACE.python <- function(inFile) {
 	require(reticulate)
 	anndata <- reticulate::import('anndata', convert = FALSE)
 	scipy <- reticulate::import('scipy', convert = TRUE)
-	
-	
+
+
 	from = anndata$read_h5ad(inFile)
-	
+
 	meta.data <- py_to_r(from$obs)
 	for (key in colnames(meta.data)) {
 		if (from$obs[key]$dtype$name == "category") {
@@ -390,65 +389,65 @@ AnnData2ACE.python <- function(inFile) {
 	}
 	rownames(x = data.matrix) <- rownames(x = meta.features)
 	colnames(x = data.matrix) <- rownames(x = meta.data)
-	
+
 	ace = ACTIONetExperiment(assays = list(logcounts = data.matrix), rowData = meta.features, colData = meta.data)
 
-		
+
 	obsm_keys <- toString(from$obsm$keys())
 	obsm_keys <- gsub("KeysView(AxisArrays with keys: ", "", obsm_keys, fixed = TRUE)
 	obsm_keys <- substr(obsm_keys, 1, nchar(obsm_keys) - 1)
-	obsm_keys <- strsplit(obsm_keys, split = ", ", fixed = TRUE)[[1]]	
+	obsm_keys <- strsplit(obsm_keys, split = ", ", fixed = TRUE)[[1]]
 	for (key in obsm_keys) {
 		R.utils::printf("Importing obsm: %s ... ", key)
 		mat = py_to_r(from$obsm$get(key))
 		if (startsWith(key, "X_")) {
 			R.utils::printf("as a reducedDim()\n")
 			key <- substr(key, 3, nchar(key))
-			reducedDims(ace)[[key]] = mat					
+			reducedDims(ace)[[key]] = mat
 		} else {
 			R.utils::printf("as a colFactor()\n")
 			colFactors(ace)[[key]] = Matrix::t(mat)
 		}
-	}	
-	
+	}
+
 	varm_keys <- toString(from$varm$keys())
 	varm_keys <- gsub("KeysView(AxisArrays with keys: ", "", varm_keys, fixed = TRUE)
 	varm_keys <- substr(varm_keys, 1, nchar(varm_keys) - 1)
-	varm_keys <- strsplit(varm_keys, split = ", ", fixed = TRUE)[[1]]	
+	varm_keys <- strsplit(varm_keys, split = ", ", fixed = TRUE)[[1]]
 	for (key in varm_keys) {
 		R.utils::printf("Importing varm: %s", key)
 		mat = py_to_r(from$varm$get(key))
 		rowFactors(ace)[[key]] = mat
-	}		
-	
+	}
+
 	obsp_keys <- toString(from$obsp$keys())
 	obsp_keys <- gsub("KeysView(PairwiseArrays with keys: ", "", obsp_keys, fixed = TRUE)
 	obsp_keys <- substr(obsp_keys, 1, nchar(obsp_keys) - 1)
-	obsp_keys <- strsplit(obsp_keys, split = ", ", fixed = TRUE)[[1]]	
+	obsp_keys <- strsplit(obsp_keys, split = ", ", fixed = TRUE)[[1]]
 	for (key in obsp_keys) {
 		key <- substr(key, 1, nchar(key) - 15)
 
 		R.utils::printf("Importing colNets: %s", key)
 		mat = py_to_r(from$obsp$get(key))
 		colNets(ace)[[key]] = mat
-	}	
-	
-	
+	}
+
+
 	varp_keys <- toString(from$varp$keys())
 	varp_keys <- gsub("KeysView(PairwiseArrays with keys: ", "", varp_keys, fixed = TRUE)
 	varp_keys <- substr(varp_keys, 1, nchar(varp_keys) - 1)
-	varp_keys <- strsplit(varp_keys, split = ", ", fixed = TRUE)[[1]]	
+	varp_keys <- strsplit(varp_keys, split = ", ", fixed = TRUE)[[1]]
 	for (key in varp_keys) {
 		R.utils::printf("Importing colNets: %s", key)
 		mat = py_to_r(from$varp$get(key))
 		rowNets(ace)[[key]] = mat
-	}	
-	
+	}
+
 	return(ace)
 }
 
 ACE2AnnData.python <- function(ace, outFile = NULL, main_layer = 'logcounts', transfer_layers = c()) {
-	
+
     assay_names <- SummarizedExperiment::assayNames(ace)
     main_layer <- match.arg(main_layer, assay_names)
     transfer_layers <- transfer_layers[transfer_layers %in% assay_names]
@@ -458,11 +457,11 @@ ACE2AnnData.python <- function(ace, outFile = NULL, main_layer = 'logcounts', tr
 
     obs <- preprocessDF(as.data.frame(SummarizedExperiment::colData(ace)))
     rownames(obs) = make.names(colnames(ace), unique = TRUE);
-	
-	
+
+
     var <- preprocessDF(as.data.frame(SummarizedExperiment::rowData(ace)))
 	rownames(var) = make.names(rownames(ace), unique = TRUE)
-	
+
     obsm <- NULL
     reductions <- SingleCellExperiment::reducedDimNames(ace)
     if (length(reductions) > 0) {
@@ -475,7 +474,7 @@ ACE2AnnData.python <- function(ace, outFile = NULL, main_layer = 'logcounts', tr
         names(obsm) <- paste0(
             'X_', tolower(SingleCellExperiment::reducedDimNames(ace)))
     }
-	
+
     Fn.o = names(ACTIONet::colFactors(ace))
     if (length(Fn.o) > 0) {
         obsm.ext <- sapply(Fn.o, function(name) Matrix::t(as.matrix(ACTIONet::colFactors(ace)[[name]])), simplify = FALSE)
@@ -488,30 +487,30 @@ ACE2AnnData.python <- function(ace, outFile = NULL, main_layer = 'logcounts', tr
 	if (length(Fn.v) > 0) {
 		varm <- sapply(Fn.v, function(name) as.matrix(ACTIONet::rowFactors(ace)[[name]]), simplify = FALSE)
 		names(varm) <- Fn.v
-	} 	
+	}
 
-	
+
 	varp = NULL
 	Nn.v = names(ACTIONet::rowNets(ace))
 	if (length(Nn.v) > 0) {
 		varp <- sapply(Nn.v, function(name) as(ACTIONet::rowNets(ace)[[name]], 'sparseMatrix'), simplify = FALSE)
 		names(obsp) <- paste0(Nn.v, '_connectivities');
-	} 	
-	
+	}
+
 	obsp = NULL
 	Nn.o = names(ACTIONet::colNets(ace))
 	if (length(Nn.o) > 0) {
 		obsp <- sapply(Nn.o, function(name) as(ACTIONet::colNets(ace)[[name]], 'sparseMatrix'), simplify = FALSE)
 		names(varp) <- paste0(Nn.o, '_connectivities');
-	} 		
-	
+	}
+
     layers <- list()
     for (layer in transfer_layers) {
         mat <- SummarizedExperiment::assay(ace, layer)
         if (all(dim(mat) == dim(X))) layers[[layer]] <- Matrix::t(mat)
     }
 
-	
+
     require(reticulate)
     anndata <- reticulate::import('anndata', convert = FALSE)
 
@@ -534,18 +533,18 @@ ACE2AnnData.python <- function(ace, outFile = NULL, main_layer = 'logcounts', tr
 
 
 ACE2AnnData.minimal.python <- function(ace, outFile = NULL, main_layer = 'logcounts') {
-	
+
     X <- SummarizedExperiment::assay(ace, main_layer)
 
     obs <- preprocessDF(as.data.frame(SummarizedExperiment::colData(ace)))
     rownames(obs) = make.names(colnames(ace), unique = TRUE);
-	
-	
+
+
     var <- preprocessDF(as.data.frame(SummarizedExperiment::rowData(ace)))
 	rownames(var) = make.names(rownames(ace), unique = TRUE)
-	
+
 	obsm = list(X_ACTIONet2D = ACTIONet.out$vis.out$coordinates, X_ACTIONet3D = ACTIONet.out$vis.out$coordinates_3D)
-		
+
     require(reticulate)
     anndata <- reticulate::import('anndata', convert = FALSE)
 
