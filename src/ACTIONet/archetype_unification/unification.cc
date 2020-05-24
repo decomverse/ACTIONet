@@ -95,28 +95,22 @@ namespace ACTIONet {
 		mat A_full = compute_overlap_matrix(C_stacked);
 		
 		
-		printf("A2\n");
 		uvec idx = find(A_full < min_overlap);
 		if(0 < idx.n_elem)
 			A_full(idx).zeros();
 			
 		
-		
 		sp_mat A(A_full);
 		
 		
-		printf("A3\n");
 		uvec initial_clusters(A.n_rows);
 		for (int i = 0; i < A.n_rows; i++) initial_clusters(i) = i;
 
-		printf("A4 (res = %f)\n", resolution);
 		vec clusters = unsigned_cluster(A, resolution, initial_clusters, 0);
 		
-		printf("A5\n");
 		uvec cn = compute_core_number(A);
 		
 		
-		printf("A6\n");
 		uvec selected_archs = find(1 < cn);
 
 		output.archetype_groups = clusters;

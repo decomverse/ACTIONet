@@ -1,5 +1,3 @@
 CXX=g++
-SOURCES+=$(shell find ACTIONet/ -type f -name "*.cc")
-OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o)
-PKG_LIBS=-fPIC $(BLAS_LIBS) $(LAPACK_LIBS) -lpthread -lm
-PKG_CXXFLAGS=`find ../inst/include -type d | xargs realpath | sed s/^/-I/` -O4 -std=c++11 -w
+CXXFLAGS+=-O3 -w -march=native -frename-registers -flto
+LINALG=$(BLAS_LIBS) $(LAPACK_LIBS)

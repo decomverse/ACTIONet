@@ -1,3 +1,0 @@
-SOURCES+=$(shell find ACTIONet/ -type f -name "*.cc")
-OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o)
-PKG_CXXFLAGS=`find ../inst/include -type d | xargs realpath | sed s/^/-I/`

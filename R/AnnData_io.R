@@ -21,7 +21,11 @@ h5addAttr.str_array <- function(h5group, attr.name, attr.val) {
 
 write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 	h5group = h5file$create_group(gname)
+
+	string.dtype = H5T_STRING$new(type="c", size=Inf)    
+	string.dtype = string.dtype$set_cset(cset = "UTF-8")
 	
+		
 	h5addAttr.str(h5group, "_index", "index")
 	h5addAttr.str(h5group, "encoding-version", "0.1.0")
 	h5addAttr.str(h5group, "encoding-type", "dataframe")
@@ -74,8 +78,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 		index = make.names(index, unique = TRUE)	
 	}
 
-	string.dtype = H5T_STRING$new(type="c", size=Inf)    
-	string.dtype = string.dtype$set_cset(cset = "UTF-8")
+
 	
 	h5group$create_dataset("index", index, gzip_level = compression.level, dtype = string.dtype)
 	for(i in setdiff(1:ncol(DF), cat.vars)) {
