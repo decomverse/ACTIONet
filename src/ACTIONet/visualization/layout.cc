@@ -267,8 +267,8 @@ namespace ACTIONet {
 	  
 		printf("Estimating node colors ... "); fflush(stdout);
 		mat Z = zscore(conv_to<mat>::from(coordinates_3D));
-		vec a = 200*Z.col(0) / max(abs(coordinates_3D.col(0)));
-		vec b = 200*Z.col(1) / max(abs(coordinates_3D.col(1)));
+		vec a = 128*Z.col(0) / max(abs(Z.col(0)));
+		vec b = 128*Z.col(1) / max(abs(Z.col(1)));
 		vec L = Z.col(2);
 		L = 35.0 + 50.0*(L - min(L)) / (max(L) - min(L));
 
@@ -350,9 +350,7 @@ namespace ACTIONet {
 		positive_head.resize(nnz);
 		positive_tail.resize(nnz);
 		epochs_per_sample.resize(nnz);
-		
-		printf("%d elements\n", positive_tail.size());
-		
+				
 		
 		vector<float> result;
 

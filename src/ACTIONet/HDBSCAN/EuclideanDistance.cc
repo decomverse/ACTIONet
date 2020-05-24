@@ -1,4 +1,3 @@
-#pragma once
 #include"EuclideanDistance.hpp"
 #include<vector>
 #include<cmath>

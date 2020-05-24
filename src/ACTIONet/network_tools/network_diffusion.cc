@@ -77,7 +77,7 @@ namespace ACTIONet {
 		sp_mat I = speye(size(G));
 		*/
 		sp_mat P = normalise(G, 1, 0);		
-		sp_mat I = speye(size(P));
+		sp_mat I = speye(P.n_rows, P.n_cols);
 		sp_mat A = I - alpha*P;		
 		//mat PR = (1-alpha)*spsolve(A, mat(X), "superlu"); 
 		mat PR = (1-alpha)*spsolve(A, mat(X)); 
