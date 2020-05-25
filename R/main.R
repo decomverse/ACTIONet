@@ -41,18 +41,15 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
     # Prune nonspecific and/or unreliable archetypes
     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold, min_cells = min.cells.per.arch)
 
-	C_stacked = pruning.out$C_stacked
-	H_stacked = pruning.out$H_stacked
-
-	colFactors(ace)[["H_stacked"]] = as(H_stacked, 'sparseMatrix')
-	colFactors(ace)[["C_stacked"]] = as(Matrix::t(C_stacked), 'sparseMatrix')
+	colFactors(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')
+	colFactors(ace)[["C_stacked"]] = as(Matrix::t(pruning.out$C_stacked), 'sparseMatrix')
 
 
 	# Compute gene specificity for all pruned archetype	
 	if(is.matrix(S)) {
-		pruned.specificity.out = compute_archetype_feature_specificity_full(S, H_stacked)
+		pruned.specificity.out = compute_archetype_feature_specificity_full(S, pruning.out$H_stacked)
 	} else {
-		pruned.specificity.out = compute_archetype_feature_specificity(S, H_stacked)
+		pruned.specificity.out = compute_archetype_feature_specificity(S, pruning.out$H_stacked)
 	}
 	
 	pruned.specificity.out = lapply(pruned.specificity.out, function(specificity.scores) {
@@ -68,7 +65,7 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
     
     # Build ACTIONet
     set.seed(0)
-    G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
+    G = build_ACTIONet(H_stacked = pruning.out$H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
 	colNets(ace)$ACTIONet = G
 	
 	
@@ -82,10 +79,7 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 
 	# Identiy equivalent classes of archetypes and group them together
-	archs = as.matrix(S %*% C_stacked)
-	# unification.out = unify_archetypes(G, S_r, archs, C_stacked, H_stacked, HDBSCAN.minPoints, HDBSCAN.minClusterSize, HDBSCAN.outlier_threshold)
-	unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0, resolution = unification.resolution)
-	
+	unification.out = unify_archetypes(S_r, pruning.out$C_stacked, pruning.out$H_stacked, min_overlap = 0, resolution = unification.resolution)
 
 	colFactors(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
 	colFactors(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
@@ -142,7 +136,8 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = F
 	
     # re-Build ACTIONet
     set.seed(0)
-	H_stacked = colFactors(ace)[["H_stacked"]]
+	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
+	
     G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
 	colNets(ace)$ACTIONet = G
 	

@@ -12,11 +12,15 @@ CPal88 = c("#E31A1C", "#FFD700", "#771122", "#777711", "#1F78B4", "#68228B", "#A
 CPal20 = c('#1f77b4', '#ff7f0e', '#279e68', '#d62728', '#aa40fc', '#8c564b', '#e377c2', '#b5bd61', '#17becf', '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', '#dbdb8d', '#9edae5', '#ad494a', '#8c6d31')
     
 
-preprocess.labels <- function(ace, labels) {
+preprocess.labels <- function(labels, ace = NULL) {
 	if(is.null(labels)) {
 		return(NULL)
 	}
 	if( (length(labels) == 1) & is.character(labels)) {
+		if(is.null(ace)) {
+			R.utils::printf('Error preprocess.labels: annotation.name %s not found (no ace object provided)\n', labels)
+			return(NULL)
+		}
 		idx = which(names(colData(ace)) == labels)
 		if(length(idx) == 0) {
 			R.utils::printf('Error preprocess.labels: annotation.name %s not found\n', labels)
@@ -83,7 +87,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' @param title Main title of the plot
 #' @param border.contrast.factor How much the node and its border should contrast
 #' @param add.states Whether or not to include interpolated cell state positions in the plot
-#' @param reduction.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
 #' 
 #' @return Visualized ACTIONet
 #' 
@@ -91,19 +95,37 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1, 
-	node.size = 1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, reduction.slot = "ACTIONet2D") {
+	node.size = 1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, coordinate.slot = "ACTIONet2D") {
     
     text.halo.width = 0.1
     label.text.size = 0.8
     
     node.size = node.size * 0.25
     
-    labels = preprocess.labels(ace, labels)
-    coors = reducedDims(ace)[[reduction.slot]]
-    
+    if(class(ace) == "ACTIONetExperiment") {
+		labels = preprocess.labels(labels, ace)
+		if(is.character(coordinate.slot)) {
+			coors = reducedDims(ace)[[coordinate.slot]]
+		} else {
+			coors = as.matrix(coordinate.slot)
+		}
+	} else {
+		if(is.matrix(ace) | is.sparseMatrix(ace)) {
+			coors = as.matrix(ace)
+			labels = preprocess.labels(labels)
+		}
+		else {
+			print("Unknown type for ace")
+			return()
+		}
+	}
 	if(is.null(labels)) {
-        vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
-        Annot = NULL
+		if(class(ace) == "ACTIONetExperiment") {			
+			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
+		} else {
+			vCol = "tomato"
+		}
+		Annot = NULL
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
 		if(length(CPal) > 1) {
@@ -213,14 +235,14 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' @param node.size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param title Main title of the plot
-#' @param reduction.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
 #' 
 #' @return Visualized ACTIONet
 #' 
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
-plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, reduction.slot = "ACTIONet3D") {
+plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, coordinate.slot = "ACTIONet3D") {
     require(ggplot2)
     require(ggpubr)
     require(threejs)
@@ -231,12 +253,31 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     node.size = node.size * 0.2
     
 
-    labels = preprocess.labels(ace, labels)
-    coor = reducedDims(ace)[[reduction.slot]]
-    
+    if(class(ace) == "ACTIONetExperiment") {
+		labels = preprocess.labels(labels, ace)
+		if(is.character(coordinate.slot)) {
+			coors = reducedDims(ace)[[coordinate.slot]]
+		} else {
+			coors = as.matrix(coordinate.slot)
+		}
+	} else {
+		if(is.matrix(ace) | is.sparseMatrix(ace)) {
+			coors = as.matrix(ace)
+			labels = preprocess.labels(labels)
+		}
+		else {
+			print("Unknown type for ace")
+			return()
+		}
+	}
+	    
 	if(is.null(labels)) {
-        vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
-        Annot = NULL
+		if(class(ace) == "ACTIONetExperiment") {			
+			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
+		} else {
+			vCol = "tomato"
+		}
+		Annot = NULL
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
 		if(length(CPal) > 1) {
@@ -441,11 +482,31 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     nV = ncol(ace)
     node.size = node.size * 3
     
-	labels = preprocess.labels(ace, labels)
-	
+    if(class(ace) == "ACTIONetExperiment") {
+		labels = preprocess.labels(labels, ace)
+		if(is.character(coordinate.slot)) {
+			coors = reducedDims(ace)[[coordinate.slot]]
+		} else {
+			coors = as.matrix(coordinate.slot)
+		}
+	} else {
+		if(is.matrix(ace) | is.sparseMatrix(ace)) {
+			coors = as.matrix(ace)
+			labels = preprocess.labels(labels)
+		}
+		else {
+			print("Unknown type for ace")
+			return()
+		}
+	}
+		
 	if(is.null(labels)) {
-        vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
-        Annot = NULL
+		if(class(ace) == "ACTIONetExperiment") {			
+			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
+		} else {
+			vCol = "tomato"
+		}
+		Annot = NULL
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
 		if(length(CPal) > 1) {
@@ -522,14 +583,16 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     
     # Setup visualization parameters
     sketch.graph = graph_from_adjacency_matrix(colNets(ace)$ACTIONet, mode = "undirected", weighted = TRUE)
-    coor = reducedDims(ace)$ACTIONet2D
-    coor3D = reducedDims(ace)$ACTIONet3D
-    V(sketch.graph)$x = coor[, 1]
-    V(sketch.graph)$y = coor[, 2]
-    V(sketch.graph)$x3D = coor3D[, 1]
-    V(sketch.graph)$y3D = coor3D[, 2]
-    V(sketch.graph)$z3D = coor3D[, 3]
-
+    
+    if(threeD == F) {
+		V(sketch.graph)$x = coors[, 1]
+		V(sketch.graph)$y = coors[, 2]
+	} else {
+		V(sketch.graph)$x3D = coors[, 1]
+		V(sketch.graph)$y3D = coors[, 2]
+		V(sketch.graph)$z3D = coors[, 3]
+	}
+	
     sketch.graph = delete.edges(sketch.graph, E(sketch.graph))
     
     node.data <- get.data.frame(sketch.graph, what = "vertices")
@@ -650,7 +713,7 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
 #' @param node.size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
-#' @param reduction.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
 #' 
 #' @return Visualized ACTIONet with projected scores
@@ -659,11 +722,11 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)["CD14", ]
 #' plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
-plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", title = "", alpha_val = 0.85, nonparameteric = FALSE, reduction.slot = "ACTIONet2D") {
+plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", title = "", alpha_val = 0.85, nonparameteric = FALSE, coordinate.slot = "ACTIONet2D") {
 
     node.size = node.size * 0.3
 
-    coors = reducedDims(ace)[[reduction.slot]]
+    coors = reducedDims(ace)[[coordinate.slot]]
 
     NA.col = "#eeeeee"
         
@@ -719,7 +782,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
 #' @param node.size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
-#' @param reduction.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
 #' 
 #' @return Visualized ACTIONet with projected scores
@@ -805,7 +868,7 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
 	
 }
 
-plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma", title = "", arch.labels = NULL, reduction.slot = "ACTIONet2D", alpha_val = 0.85, pp = 2) {
+plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma", title = "", arch.labels = NULL, coordinate.slot = "ACTIONet2D", alpha_val = 0.85, pp = 2) {
 	Ht = Matrix::t(colFactors(ace)[["H_unified"]])
 	cs = Matrix::colSums(Ht)
 	cs[cs == 0] = 1
@@ -813,7 +876,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma"
 	U.pr = nrow(U)*compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha_val)
 	
 	node.size = node.size * 0.3
-    coors = reducedDims(ace)[[reduction.slot]]
+    coors = reducedDims(ace)[[coordinate.slot]]
 
     if (CPal %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
 		require(viridis)
