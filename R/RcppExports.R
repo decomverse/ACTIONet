@@ -423,6 +423,20 @@ renormalize_input_matrix_full <- function(S, sample_assignments) {
     .Call(`_ACTIONet_renormalize_input_matrix_full`, S, sample_assignments)
 }
 
+#' Compute feature specificity (from archetype footprints and binary input)
+#'
+#' @param S Input matrix (sparseMatrix - binary)
+#' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
+#' 
+#' @return A list with the over/under-logPvals
+#' 
+#' @examples
+#'	logPvals.list = compute_archetype_feature_specificity_bin(S.bin, unification.out$H_unified)
+#' specificity.scores = logPvals.list$upper_significance
+compute_archetype_feature_specificity_bin <- function(S, H) {
+    .Call(`_ACTIONet_compute_archetype_feature_specificity_bin`, S, H)
+}
+
 #' Compute feature specificity (from archetype footprints)
 #'
 #' @param S Input matrix (sparseMatrix)
@@ -672,5 +686,13 @@ transform_layout <- function(W, coor2D, coor3D, colRGB, compactness_level = 50L,
 
 sgd2_layout_weighted <- function(G, S_r, t_max = 30L, eps = .01, seed = 0L) {
     .Call(`_ACTIONet_sgd2_layout_weighted`, G, S_r, t_max, eps, seed)
+}
+
+sgd2_layout_weighted_convergent <- function(G, S_r, t_max = 30L, eps = 0.01, delta = 0.03, t_maxmax = 200L, seed = 0L) {
+    .Call(`_ACTIONet_sgd2_layout_weighted_convergent`, G, S_r, t_max, eps, delta, t_maxmax, seed)
+}
+
+sgd2_layout_sparse_weighted <- function(G, S_r, p = 200L, t_max = 30L, eps = 0.01, seed = 0L) {
+    .Call(`_ACTIONet_sgd2_layout_sparse_weighted`, G, S_r, p, t_max, eps, seed)
 }
 

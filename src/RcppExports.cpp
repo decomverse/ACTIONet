@@ -333,6 +333,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_archetype_feature_specificity_bin
+List compute_archetype_feature_specificity_bin(sp_mat& S, mat& H);
+RcppExport SEXP _ACTIONet_compute_archetype_feature_specificity_bin(SEXP SSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_archetype_feature_specificity_bin(S, H));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_archetype_feature_specificity
 List compute_archetype_feature_specificity(sp_mat& S, mat& H);
 RcppExport SEXP _ACTIONet_compute_archetype_feature_specificity(SEXP SSEXP, SEXP HSEXP) {
@@ -558,6 +570,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sgd2_layout_weighted_convergent
+mat sgd2_layout_weighted_convergent(sp_mat& G, mat S_r, int t_max, double eps, double delta, int t_maxmax, int seed);
+RcppExport SEXP _ACTIONet_sgd2_layout_weighted_convergent(SEXP GSEXP, SEXP S_rSEXP, SEXP t_maxSEXP, SEXP epsSEXP, SEXP deltaSEXP, SEXP t_maxmaxSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< mat >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< int >::type t_max(t_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< int >::type t_maxmax(t_maxmaxSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(sgd2_layout_weighted_convergent(G, S_r, t_max, eps, delta, t_maxmax, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sgd2_layout_sparse_weighted
+mat sgd2_layout_sparse_weighted(sp_mat& G, mat S_r, int p, int t_max, double eps, int seed);
+RcppExport SEXP _ACTIONet_sgd2_layout_sparse_weighted(SEXP GSEXP, SEXP S_rSEXP, SEXP pSEXP, SEXP t_maxSEXP, SEXP epsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< mat >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type t_max(t_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(sgd2_layout_sparse_weighted(G, S_r, p, t_max, eps, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -584,6 +629,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_pseudo_bulk_per_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind_full, 3},
     {"_ACTIONet_renormalize_input_matrix", (DL_FUNC) &_ACTIONet_renormalize_input_matrix, 2},
     {"_ACTIONet_renormalize_input_matrix_full", (DL_FUNC) &_ACTIONet_renormalize_input_matrix_full, 2},
+    {"_ACTIONet_compute_archetype_feature_specificity_bin", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity_bin, 2},
     {"_ACTIONet_compute_archetype_feature_specificity", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity, 2},
     {"_ACTIONet_compute_archetype_feature_specificity_full", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity_full, 2},
     {"_ACTIONet_compute_cluster_feature_specificity", (DL_FUNC) &_ACTIONet_compute_cluster_feature_specificity, 2},
@@ -601,6 +647,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_Prune_PageRank", (DL_FUNC) &_ACTIONet_Prune_PageRank, 2},
     {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 7},
     {"_ACTIONet_sgd2_layout_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted, 5},
+    {"_ACTIONet_sgd2_layout_weighted_convergent", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted_convergent, 7},
+    {"_ACTIONet_sgd2_layout_sparse_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_sparse_weighted, 6},
     {NULL, NULL, 0}
 };
 

@@ -123,7 +123,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 		if(class(ace) == "ACTIONetExperiment") {			
 			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
 		} else {
-			vCol = "tomato"
+			vCol = rep("tomato", nrow(coors))
 		}
 		Annot = NULL
 	} else {
@@ -139,8 +139,10 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
 		}
-		if(length(Pal) < length(Annot))
-			Pal = CPal88
+		if(!is.null(Annot)) {
+			if(length(Pal) < length(Annot))
+				Pal = CPal88
+		}
 			
         names(Pal) = Annot
         vCol = Pal[names(labels)]
@@ -275,7 +277,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 		if(class(ace) == "ACTIONetExperiment") {			
 			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
 		} else {
-			vCol = "tomato"
+			vCol = rep("tomato", nrow(coors))
 		}
 		Annot = NULL
 	} else {
@@ -312,7 +314,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
         vCol.border = colorspace::darken(vCol, 0.5)
     }
         
-    scatterplot3js(x = coor[, 1], y = coor[, 2], z = coor[, 3], axis.scales = FALSE, size = node.size, axis = F, grid = F, color = as.character(vCol), 
+    scatterplot3js(x = coors[, 1], y = coors[, 2], z = coors[, 3], axis.scales = FALSE, size = node.size, axis = F, grid = F, color = as.character(vCol), 
         stroke = as.character(vCol.border), bg = "black")
 }
 
@@ -383,12 +385,14 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 	cs = colSums(X)
 	cs[cs == 0] = 1
 	X = scale(X, center = F, scale = cs)
-	feature.coors = t(X) %*% core.coors
+	feature.coors = scale(t(X) %*% core.coors)
 
     if (is.null(CPal)) {
         #Pal = ace$unification.out$Pal
-			arch.Lab = Matrix::t(M) %*% grDevices::convertColor(color = Matrix::t(colFactors(ace)$denovo_color), from = "sRGB", to = "Lab")
-			core.Pal = rgb(grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB"))
+			cells.Lab = grDevices::convertColor(color = Matrix::t(colFactors(ace)$denovo_color), from = "sRGB", to = "Lab")
+			arch.Lab = Matrix::t(M) %*% cells.Lab			
+			arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+			core.Pal = rgb(arch.RGB)
     } else {
     	if(length(CPal) == 1) {
             core.Pal = ggpubr::get_palette(CPal, length(unique(ace$archetype.assignment)))
@@ -475,12 +479,14 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, 
-	node.size = 1, CPal = CPal20, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet") {
+	node.size = 1, CPal = CPal20, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet", coordinate.slot = "ACTIONet2D") {
     require(plotly)
     require(ACTIONet)
 
     nV = ncol(ace)
     node.size = node.size * 3
+    if(coordinate.slot == "ACTIONet2D" & threeD == T)
+    	coordinate.slot = "ACTIONet3D"
     
     if(class(ace) == "ACTIONetExperiment") {
 		labels = preprocess.labels(labels, ace)
@@ -504,7 +510,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 		if(class(ace) == "ACTIONetExperiment") {			
 			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
 		} else {
-			vCol = "tomato"
+			vCol = rep("tomato", nrow(coors))
 		}
 		Annot = NULL
 	} else {
@@ -520,9 +526,11 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
 		}
-		if(length(Pal) < length(Annot))
-			Pal = CPal88
-
+		if(!is.null(Annot)) {
+			if(length(Pal) < length(Annot))
+				Pal = CPal88
+		}
+		
         names(Pal) = Annot
         vCol = Pal[names(labels)]
 	}
@@ -680,9 +688,11 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 	} else {
         Pal = ggpubr::get_palette(CPal, length(Annot))
 	}
-	if(length(Pal) < length(Annot))
-		Pal = CPal88
-
+	if(!is.null(Annot)) {
+		if(length(Pal) < length(Annot))
+			Pal = CPal88
+	}
+	
     names(Pal) = Annot
 
 	if( !(gene.name %in% rownames(ace)) ) {
@@ -867,13 +877,12 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
 	return(ht)
 	
 }
-
-plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma", title = "", arch.labels = NULL, coordinate.slot = "ACTIONet2D", alpha_val = 0.85, pp = 2) {
+plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma", title = "", arch.labels = NULL, coordinate.slot = "ACTIONet2D", alpha_val = 0.9) {
 	Ht = Matrix::t(colFactors(ace)[["H_unified"]])
 	cs = Matrix::colSums(Ht)
 	cs[cs == 0] = 1
 	U = as(scale(Ht, center = F, scale = cs), 'dgTMatrix')
-	U.pr = nrow(U)*compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha_val)
+	U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
 	
 	node.size = node.size * 0.3
     coors = reducedDims(ace)[[coordinate.slot]]
@@ -902,15 +911,19 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma"
 		print(i)
 		x = U.pr[, i]
 
-		#hs = sort(h, decreasing = T)
-		#nnz = round( (sum(hs^2)^2) / (sum(hs^4)) )
+		xs = sort(x, decreasing = T)
+		nnz = round( (sum(xs)^2) / (sum(xs^2)) )
+		threshold = xs[nnz]
+
+		x[x < threshold] = threshold
+		x = log(x)
 		
-		#h = (h / hs[nnz])^2
-		
-		x = x^pp
+
+
 		
 	    vCol = scales::col_bin(Pal_grad, domain = NULL, bins = 10)(x)
         vCol = scales::alpha(vCol, 0.05 + 0.95*x/max(x))
+        vCol = colorspace::lighten(vCol, 0.2)
 	    idx = order(x, decreasing = F)
 		plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol[idx], cex = node.size, pch = 21, axes = FALSE, xlab = "", ylab = "", main = arch.labels[[i]])
 	    

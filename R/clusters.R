@@ -54,8 +54,8 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
 #' arch.annot = annotate.clusters.using.labels(ace, ace$clusters, sce$celltypes)
 annotate.clusters.using.labels <- function(ace, clusters, labels) {
 	
-	clusters = preprocess.labels(ace, clusters)
-	Labels = preprocess.labels(ace, labels)
+	clusters = preprocess.labels(clusters, ace)
+	Labels = preprocess.labels(labels, ace)
 
 
     pop.size = length(Labels)
