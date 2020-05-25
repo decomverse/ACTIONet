@@ -319,7 +319,7 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
     return(df)
 }
 
-import_ace_from_legacy <- function(ACTIONet.out, sce, full.import = T) {
+import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
     ace = as(sce, "ACTIONetExperiment")
     
 	ACTION.out = ACTIONet.out$ACTION.out
@@ -331,16 +331,19 @@ import_ace_from_legacy <- function(ACTIONet.out, sce, full.import = T) {
     
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    ace$denovo_color = vis.out$colors
+    colFactors(ace)$denovo_color = col2rgb(vis.out$colors)
+    
+    
 
 	if(full.import == T) {
-		colFactors(ace)[["H_stacked"]] = ACTIONet.out$reconstruct.out$H_stacked
-		colFactors(ace)[["C_stacked"]] = t(ACTIONet.out$reconstruct.out$C_stacked)
+		colFactors(ace)[["H_stacked"]] = as(ACTIONet.out$reconstruct.out$H_stacked, 'sparseMatrix')
+		colFactors(ace)[["C_stacked"]] = as(t(ACTIONet.out$reconstruct.out$C_stacked), 'sparseMatrix')
 	}
 	
 	unification.out = ACTIONet.out$unification.out
-	colFactors(ace)[["H_unified"]] = ACTIONet.out$unification.out$H.core
-	colFactors(ace)[["C_unified"]] = t(ACTIONet.out$unification.out$C.core)
+	colFactors(ace)[["H_unified"]] = as(ACTIONet.out$unification.out$H.core, 'sparseMatrix')
+	colFactors(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), 'sparseMatrix')
+	
 	ace$assigned_archetype = ACTIONet.out$unification.out$assignments.core
 
 	#ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
