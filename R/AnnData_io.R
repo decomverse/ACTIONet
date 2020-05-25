@@ -82,6 +82,9 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 	h5group$create_dataset("index", index, gzip_level = compression.level, dtype = string.dtype)
 	for(i in setdiff(1:ncol(DF), cat.vars)) {
 		x = DF[, i]
+		if(!is.numeric(x)) # To avoid issues with new "DFrame" implementation of sce that includes all types in columns
+			next
+			
 		nn = colnames(DF)[i]
 		if(!is.numeric(x)) {
 			x = as.character(x)
