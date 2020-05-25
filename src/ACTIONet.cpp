@@ -722,6 +722,30 @@ mat renormalize_input_matrix_full(mat& S, arma::Col<unsigned long long> sample_a
 
 
 
+//' Compute feature specificity (from archetype footprints and binary input)
+//'
+//' @param S Input matrix (sparseMatrix - binary)
+//' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
+//' 
+//' @return A list with the over/under-logPvals
+//' 
+//' @examples
+//'	logPvals.list = compute_archetype_feature_specificity_bin(S.bin, unification.out$H_unified)
+//' specificity.scores = logPvals.list$upper_significance
+// [[Rcpp::export]]
+List compute_archetype_feature_specificity_bin(sp_mat& S, mat &H) {
+    
+    field<mat> res = ACTIONet::compute_feature_specificity_bin(S, H);	
+
+    List out_list;
+	out_list["archetypes"] = res(0);
+	out_list["upper_significance"] = res(1);
+	out_list["lower_significance"] = res(2);
+
+
+	return(out_list);
+}
+
 //' Compute feature specificity (from archetype footprints)
 //'
 //' @param S Input matrix (sparseMatrix)
@@ -810,6 +834,8 @@ List compute_cluster_feature_specificity(sp_mat& S, uvec sample_assignments) {
 
 	return(out_list);
 }
+
+
 //' Compute feature specificity (from cluster assignments)
 //'
 //' @param S Input matrix ("matrix")
@@ -1162,9 +1188,66 @@ mat sgd2_layout_weighted(sp_mat &G, mat S_r, int t_max = 30, double eps = .01, i
 	return(trans(X));
 }
 
-/*
-	void layout_weighted(int n, double* X, int m, int* I, int* J, double* V, int t_max, double eps, int seed);
-	void layout_weighted_convergent(int n, double* X, int m, int* I, int* J, double* V, int t_max, double eps, double delta, int t_maxmax, int seed);
-	void layout_sparse_weighted(int n, double* X, int m, int* I, int* J, double* V, int p, int t_max, double eps, int seed);
-*/
+// [[Rcpp::export]]
+mat sgd2_layout_weighted_convergent(sp_mat &G, mat S_r, int t_max = 30, double eps = 0.01, double delta = 0.03, int t_maxmax = 200, int seed = 0) {
+	int n = S_r.n_cols;
+	G.diag().zeros();
+	
+	int m = G.n_nonzero;
+	int *I = new int[m];
+	int *J = new int[m];
+	double *V = new double[m];
+	
+	sp_mat::const_iterator it     = G.begin();
+	sp_mat::const_iterator it_end = G.end();
+	int idx = 0;
+	for(; it != it_end; ++it) {
+		I[idx] = it.row();
+		J[idx] = it.col();
+		V[idx] = (*it);
+		idx++;
+	}
+  	
+  	mat X(2, n);
+  	X = S_r.rows(0, 1);
+	layout_weighted_convergent(n, X.memptr(), m, I, J, V, t_max, eps, delta, t_maxmax, seed);
+	
+	
+	delete [] I;
+	delete [] J;
+	delete [] V;
+	
+	return(trans(X));
+}
 
+// [[Rcpp::export]]
+mat sgd2_layout_sparse_weighted(sp_mat &G, mat S_r, int p = 200, int t_max = 30, double eps = 0.01, int seed = 0) {
+	int n = S_r.n_cols;
+	G.diag().zeros();
+	
+	int m = G.n_nonzero;
+	int *I = new int[m];
+	int *J = new int[m];
+	double *V = new double[m];
+	
+	sp_mat::const_iterator it     = G.begin();
+	sp_mat::const_iterator it_end = G.end();
+	int idx = 0;
+	for(; it != it_end; ++it) {
+		I[idx] = it.row();
+		J[idx] = it.col();
+		V[idx] = (*it);
+		idx++;
+	}
+  	
+  	mat X(2, n);
+  	X = S_r.rows(0, 1);
+	layout_sparse_weighted(n, X.memptr(), m, I, J, V, p, t_max, eps, seed);
+	
+	
+	delete [] I;
+	delete [] J;
+	delete [] V;
+	
+	return(trans(X));
+}

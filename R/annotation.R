@@ -13,7 +13,7 @@
 #' @examples
 #' arch.annot = annotate.archetypes.using.labels(ace, sce$celltypes)
 annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_unified") {
-	Labels = preprocess.labels(ace, labels)
+	Labels = preprocess.labels(labels, ace)
 
 	if(is.matrix(ace) | is.sparseMatrix(ace)) {
 		profile = as.matrix(ace)

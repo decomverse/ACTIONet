@@ -405,7 +405,7 @@ combine.logPvals <- function(logPvals, top.len = NULL, base = 10) {
 
 
 reannotate.labels <- function(ace, Labels) {
-	Labels = preprocess.labels(ace, Labels)			
+	Labels = preprocess.labels(Labels, ace)			
 	
 	
 	Annot = sort(unique(Labels))
