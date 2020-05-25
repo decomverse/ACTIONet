@@ -188,6 +188,7 @@ namespace ACTIONet {
 		
 		
 	// Methods for computing feature specificity/discriminative-scores
+		field<mat> compute_feature_specificity_bin(sp_mat &Sb, mat &H);
 		field<mat> compute_feature_specificity(sp_mat &S, mat &H);
 		field<mat> compute_feature_specificity(mat &S, mat &H);
 		field<mat> compute_feature_specificity(sp_mat &S, uvec sample_assignments);

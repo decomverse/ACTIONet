@@ -98,7 +98,7 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
     }
     
     
-	Labels = preprocess.labels(ace, annotation.in)			
+	Labels = preprocess.labels(annotation.in, ace)			
 	if(is.null(Labels)) {
 		return(ace)
 	}
@@ -172,7 +172,7 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
     }
     
     
-	Labels = preprocess.labels(ace, annotation.in)			
+	Labels = preprocess.labels(annotation.in, ace)			
 	if(is.null(Labels)) {
 		return(ace)
 	}
