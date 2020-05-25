@@ -1126,6 +1126,45 @@ List transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compact
 	out_list["colors"] = res(2);
 
     return out_list;
-	
+    	
 }
+
+
+// [[Rcpp::export]]
+mat sgd2_layout_weighted(sp_mat &G, mat S_r, int t_max = 30, double eps = .01, int seed = 0) {
+	int n = S_r.n_cols;
+	G.diag().zeros();
+	
+	int m = G.n_nonzero;
+	int *I = new int[m];
+	int *J = new int[m];
+	double *V = new double[m];
+	
+	sp_mat::const_iterator it     = G.begin();
+	sp_mat::const_iterator it_end = G.end();
+	int idx = 0;
+	for(; it != it_end; ++it) {
+		I[idx] = it.row();
+		J[idx] = it.col();
+		V[idx] = (*it);
+		idx++;
+	}
+  	
+  	mat X(2, n);
+  	X = S_r.rows(0, 1);
+	layout_weighted(n, X.memptr(), m, I, J, V, t_max, eps, seed);
+	
+	
+	delete [] I;
+	delete [] J;
+	delete [] V;
+	
+	return(trans(X));
+}
+
+/*
+	void layout_weighted(int n, double* X, int m, int* I, int* J, double* V, int t_max, double eps, int seed);
+	void layout_weighted_convergent(int n, double* X, int m, int* I, int* J, double* V, int t_max, double eps, double delta, int t_maxmax, int seed);
+	void layout_sparse_weighted(int n, double* X, int m, int* I, int* J, double* V, int p, int t_max, double eps, int seed);
+*/
 

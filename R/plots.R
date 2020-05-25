@@ -1,5 +1,5 @@
-# From: https://github.com/r3fang/SnapATAC/blob/master/R/plottings-utilities.R
-Pals.Snap88 = c("#E31A1C", "#FFD700", "#771122", "#777711", "#1F78B4", "#68228B", "#AAAA44", "#60CC52", "#771155", "#DDDD77", 
+# From: SnapATAC
+CPal88 = c("#E31A1C", "#FFD700", "#771122", "#777711", "#1F78B4", "#68228B", "#AAAA44", "#60CC52", "#771155", "#DDDD77", 
     "#774411", "#AA7744", "#AA4455", "#117744", "#000080", "#44AA77", "#AA4488", "#DDAA77", "#D9D9D9", "#BC80BD", "#FFED6F", "#7FC97F", 
     "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17", "#666666", "#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", 
     "#E6AB02", "#A6761D", "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", 
@@ -7,6 +7,10 @@ Pals.Snap88 = c("#E31A1C", "#FFD700", "#771122", "#777711", "#1F78B4", "#68228B"
     "#CBD5E8", "#F4CAE4", "#E6F5C9", "#FFF2AE", "#F1E2CC", "#CCCCCC", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FFFF33", "#A65628", 
     "#F781BF", "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", "#8DD3C7", "#FFFFB3", 
     "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5")
+
+# From: Scanpy
+CPal20 = c('#1f77b4', '#ff7f0e', '#279e68', '#d62728', '#aa40fc', '#8c564b', '#e377c2', '#b5bd61', '#17becf', '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', '#dbdb8d', '#9edae5', '#ad494a', '#8c6d31')
+    
 
 preprocess.labels <- function(ace, labels) {
 	if(is.null(labels)) {
@@ -87,7 +91,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1, 
-	node.size = 1, CPal = Pals.Snap88, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, reduction.slot = "ACTIONet2D") {
+	node.size = 1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, reduction.slot = "ACTIONet2D") {
     
     text.halo.width = 0.1
     label.text.size = 0.8
@@ -113,6 +117,9 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
 		}
+		if(length(Pal) < length(Annot))
+			Pal = CPal88
+			
         names(Pal) = Annot
         vCol = Pal[names(labels)]
 	}
@@ -213,7 +220,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
-plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = Pals.Snap88, reduction.slot = "ACTIONet3D") {
+plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, reduction.slot = "ACTIONet3D") {
     require(ggplot2)
     require(ggpubr)
     require(threejs)
@@ -243,6 +250,9 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
 		}
+		if(length(Pal) < length(Annot))
+			Pal = CPal88
+
         names(Pal) = Annot
         vCol = Pal[names(labels)]
 	}
@@ -424,7 +434,7 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, 
-	node.size = 1, CPal = Pals.Snap88, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet") {
+	node.size = 1, CPal = CPal20, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet") {
     require(plotly)
     require(ACTIONet)
 
@@ -449,6 +459,9 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
 		}
+		if(length(Pal) < length(Annot))
+			Pal = CPal88
+
         names(Pal) = Annot
         vCol = Pal[names(labels)]
 	}
@@ -583,7 +596,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 #' 
 #' @examples
 #' plot.individual.gene(ace, ace$assigned_archetype, "CD14")
-plot.individual.gene <- function(ace, labels, gene.name, CPal = Pals.Snap88) {
+plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
     require(igraph)
     require(ACTIONet)
     require(ggpubr)
@@ -604,6 +617,9 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = Pals.Snap88) {
 	} else {
         Pal = ggpubr::get_palette(CPal, length(Annot))
 	}
+	if(length(Pal) < length(Annot))
+		Pal = CPal88
+
     names(Pal) = Annot
 
 	if( !(gene.name %in% rownames(ace)) ) {

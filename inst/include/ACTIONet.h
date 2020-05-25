@@ -46,6 +46,16 @@
 #define ACTIONet_OR_SYM 2
 
 
+// s_gd2 visualization
+void layout_unweighted(int n, double* X, int m, int* I, int* J, int t_max, double eps, int seed);
+void layout_weighted(int n, double* X, int m, int* I, int* J, double* V, int t_max, double eps, int seed);
+void layout_unweighted_convergent(int n, double* X, int m, int* I, int* J, int t_max, double eps, double delta, int t_maxmax, int seed);
+void layout_weighted_convergent(int n, double* X, int m, int* I, int* J, double* V, int t_max, double eps, double delta, int t_maxmax, int seed);
+
+void layout_sparse_unweighted(int n, double* X, int m, int* I, int* J, int p, int t_max, double eps, int seed);
+void layout_sparse_weighted(int n, double* X, int m, int* I, int* J, double* V, int p, int t_max, double eps, int seed);
+
+void mds_direct(int n, int kd, double* X, double* d, double* w, int t_max, double* etas, int seed);
 
     
 namespace ACTIONet {
@@ -204,6 +214,7 @@ namespace ACTIONet {
 		
 		vec unsigned_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters, int seed);
 		vec signed_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters, int seed);
+		
 		
 }
 
