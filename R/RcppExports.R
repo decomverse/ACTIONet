@@ -670,3 +670,7 @@ transform_layout <- function(W, coor2D, coor3D, colRGB, compactness_level = 50L,
     .Call(`_ACTIONet_transform_layout`, W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no)
 }
 
+sgd2_layout_weighted <- function(G, S_r, t_max = 30L, eps = .01, seed = 0L) {
+    .Call(`_ACTIONet_sgd2_layout_weighted`, G, S_r, t_max, eps, seed)
+}
+

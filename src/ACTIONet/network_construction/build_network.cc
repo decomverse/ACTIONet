@@ -273,7 +273,7 @@ namespace ACTIONet {
 			
 		});
 		printf("Done\n");
-
+		
 		
 		printf("\tConstructing k*-NN ... ");		
 		

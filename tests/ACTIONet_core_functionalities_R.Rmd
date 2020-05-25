@@ -60,6 +60,45 @@ require(ACTIONet)
 We have preprocessed and stored the PBMC 3k dataset as an `SCE` object, which is the main datatype used in the ACTIONet framework. For more information on how to convert different datatypes to `SingleCellExperiment` format, please consult our tutorial on [Bring your data along -- Import/export options in ACTIONet](https://github.com/shmohammadi86/ACTIONet/tutorials/Import.html).
 
 
+
+```{r}
+# require(ACTIONet)
+# 
+# sce = readRDS("pbmc3k_sce.RDS")
+# sce = reduce.sce(sce)
+
+ACTIONet_results = run.ACTIONet(sce, k_max = 20, network_density = 0.2)
+
+
+ace = ACTIONet_results$ace
+
+plot.ACTIONet(ace, sce$louvain)
+
+
+G = colNets(ace)$ACTIONet
+degs = Matrix::colSums(colNets(ace)$ACTIONet > 0)
+mean(degs) # 226.4579 (density = 1), 120.5572 (density = 0.5), 16.45413 (density = 0.1)
+plot(density(degs))
+
+
+S_r = Matrix::t(reducedDims(ace)[["ACTION"]])
+
+X_sgd2 = sgd2_layout_weighted(G = G, S_r = S_r, t_max = 100)
+
+reducedDims(ace)[["sgd2"]] = X_sgd2
+
+plot.ACTIONet(ace, reduction.slot = "sgd2", labels = sce$louvain)
+
+
+```
+```{r}
+ace.updated = reconstruct.ACTIONet(ace, network_density = 1)
+
+plot.ACTIONet(ace)
+plot.ACTIONet(ace.updated)
+
+```
+
 ```{r}
 sce = readRDS("pbmc3k_sce.RDS")
 
