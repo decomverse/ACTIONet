@@ -543,6 +543,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sgd2_layout_weighted
+mat sgd2_layout_weighted(sp_mat& G, mat S_r, int t_max, double eps, int seed);
+RcppExport SEXP _ACTIONet_sgd2_layout_weighted(SEXP GSEXP, SEXP S_rSEXP, SEXP t_maxSEXP, SEXP epsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< mat >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< int >::type t_max(t_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(sgd2_layout_weighted(G, S_r, t_max, eps, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -585,6 +600,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_unsigned_cluster", (DL_FUNC) &_ACTIONet_unsigned_cluster, 4},
     {"_ACTIONet_Prune_PageRank", (DL_FUNC) &_ACTIONet_Prune_PageRank, 2},
     {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 7},
+    {"_ACTIONet_sgd2_layout_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted, 5},
     {NULL, NULL, 0}
 };
 

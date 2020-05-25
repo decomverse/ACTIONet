@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1) {		
+run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-6) {		
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -44,8 +44,8 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min.cells.per.arch = 
 	C_stacked = pruning.out$C_stacked
 	H_stacked = pruning.out$H_stacked
 
-	colFactors(ace)[["H_stacked"]] = H_stacked
-	colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
+	colFactors(ace)[["H_stacked"]] = as(H_stacked, 'sparseMatrix')
+	colFactors(ace)[["C_stacked"]] = as(Matrix::t(C_stacked), 'sparseMatrix')
 
 
 	# Compute gene specificity for all pruned archetype	
@@ -63,8 +63,6 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min.cells.per.arch = 
 	rowFactors(ace)[["H_stacked_profile"]] = pruned.specificity.out[["archetypes"]]
 	rowFactors(ace)[["H_stacked_upper_significance"]] = pruned.specificity.out[["upper_significance"]]
 	rowFactors(ace)[["H_stacked_lower_significance"]] = pruned.specificity.out[["lower_significance"]]
-	
-	
 
 
     
@@ -89,8 +87,8 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min.cells.per.arch = 
 	unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0, resolution = unification.resolution)
 	
 
-	colFactors(ace)[["H_unified"]] = unification.out$H_unified
-	colFactors(ace)[["C_unified"]] = Matrix::t(unification.out$C_unified)
+	colFactors(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
+	colFactors(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
 	ace$assigned_archetype = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
@@ -124,3 +122,70 @@ run.ACTIONet <- function(sce, k_max = 30, AA_delta = 1e-6, min.cells.per.arch = 
 }
 
 
+#' Reconstructs the ACTIONet graph with the new parameters (uses prior decomposition)
+#'
+#' @param ace ACTIONetExperiment object containing the results
+#' @param network_density Density factor of ACTIONet graph (default=1).
+#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
+#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
+#' @param n_epochs Number of epochs for SGD algorithm (default=500).
+#' @param thread_no Number of parallel threads (default=8)
+#' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
+#' 
+#' @return ace Updated ace object
+#' 
+#' @examples
+#' plot.ACTIONet(ace)
+#' ace.updated = reconstruct.ACTIONet(ace, network_density = 0.1)
+#' plot.ACTIONet(ace.updated)
+reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, reduction.slot = "ACTION") {
+	
+    # re-Build ACTIONet
+    set.seed(0)
+	H_stacked = colFactors(ace)[["H_stacked"]]
+    G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
+	colNets(ace)$ACTIONet = G
+	
+	
+    # re-Layout ACTIONet
+    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+	initial.coordinates = t(scale(t(S_r)))
+    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
+    
+    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
+    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
+
+	return(ace)
+}
+
+
+
+#' Rerun layout on the ACTIONet graph with new parameters
+#'
+#' @param ace ACTIONetExperiment object containing the results
+#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
+#' @param n_epochs Number of epochs for SGD algorithm (default=500).
+#' @param thread_no Number of parallel threads (default=8)
+#' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
+#' 
+#' @return ace Updated ace object
+#' 
+#' @examples
+#' plot.ACTIONet(ace)
+#' ace.updated = rerun.layout(ace, layout_compactness = 20)
+#' plot.ACTIONet(ace.updated)
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 8, reduction.slot = "ACTION") {
+    G = colNets(ace)[["ACTIONet"]]
+    	
+    # re-Layout ACTIONet
+    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+	initial.coordinates = t(scale(t(S_r)))
+    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
+    
+    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
+    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
+
+	return(ace)
+}

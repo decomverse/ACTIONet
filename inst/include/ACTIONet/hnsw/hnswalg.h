@@ -344,14 +344,13 @@ namespace hnswlib {
 					if(lambda < beta)
 						break;
 				}
+				//print("k = %d/%d (LC = %d)\n", k, dists.size(), LC); 
 				k--;
 			} else {
 				k = 1;
 			}
             visited_list_pool_->releaseVisitedList(vl);
-			
-			k= dists.size();
-            
+			            
             return (size_t)k;
         }
 
