@@ -25,8 +25,8 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
 
   const auto n_epochs_per_sample = epochs_per_sample.size();
   float alpha = initial_alpha;
-
-  for (auto n = 0U; n < n_epochs; n++) {
+	
+  for (auto n = 0U; n < n_epochs; n++) {	  
     worker.set_alpha(alpha);
     worker.set_n(n);
     if (n_threads > 0) {
@@ -37,6 +37,7 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
     }
     alpha = initial_alpha * (1.0 - (float(n) / float(n_epochs)));
   }
+  
   return head_embedding;
 }
 

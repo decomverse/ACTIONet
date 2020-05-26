@@ -145,6 +145,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_AA
+List run_AA(mat& A, mat& W0, int max_it, double min_delta);
+RcppExport SEXP _ACTIONet_run_AA(SEXP ASEXP, SEXP W0SEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type W0(W0SEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_AA(A, W0, max_it, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // run_online_ACTION
 List run_online_ACTION(mat& S_r, field<uvec> samples, int k_min, int k_max, int thread_no);
 RcppExport SEXP _ACTIONet_run_online_ACTION(SEXP S_rSEXP, SEXP samplesSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP) {
@@ -603,6 +617,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_AA_coreset
+List compute_AA_coreset(sp_mat& S, int m);
+RcppExport SEXP _ACTIONet_compute_AA_coreset(SEXP SSEXP, SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_AA_coreset(S, m));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -615,6 +641,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 2},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
+    {"_ACTIONet_run_AA", (DL_FUNC) &_ACTIONet_run_AA, 4},
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
@@ -649,6 +676,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_sgd2_layout_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted, 5},
     {"_ACTIONet_sgd2_layout_weighted_convergent", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted_convergent, 7},
     {"_ACTIONet_sgd2_layout_sparse_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_sparse_weighted, 6},
+    {"_ACTIONet_compute_AA_coreset", (DL_FUNC) &_ACTIONet_compute_AA_coreset, 2},
     {NULL, NULL, 0}
 };
 

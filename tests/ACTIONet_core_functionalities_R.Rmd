@@ -62,42 +62,207 @@ We have preprocessed and stored the PBMC 3k dataset as an `SCE` object, which is
 
 
 ```{r}
-# require(ACTIONet)
-# 
-# sce = readRDS("pbmc3k_sce.RDS")
-# sce = reduce.sce(sce)
+require(ACTIONet)
 
-ACTIONet_results = run.ACTIONet(sce, k_max = 20, network_density = 0.2)
+sce = readRDS("pbmc3k_sce.RDS")
+sce = reduce.sce(sce)
+
+ACTIONet_results = run.ACTIONet(sce, k_max = 20, network_density = 0.5)
 
 
 ace = ACTIONet_results$ace
 
 plot.ACTIONet(ace, sce$louvain)
 
+```
 
+```{r}
+
+```
+
+
+```{r}
 G = colNets(ace)$ACTIONet
-degs = Matrix::colSums(colNets(ace)$ACTIONet > 0)
-mean(degs) # 226.4579 (density = 1), 120.5572 (density = 0.5), 16.45413 (density = 0.1)
-plot(density(degs))
-
-
+H_stacked = ACTIONet_results$trace$pruning.out$H_stacked
 S_r = Matrix::t(reducedDims(ace)[["ACTION"]])
 
-X_sgd2 = sgd2_layout_weighted(G = G, S_r = S_r, t_max = 100)
+system.time( {X_sgd2 = sgd2_layout_weighted(G = G, S_r = S_r)} ) # 8.226 s
+system.time( {X2_sgd2 = sgd2_layout_weighted_convergent(G = G, S_r = S_r)} )
+system.time( {X2_sgd2 = sgd2_layout_sparse_weighted(G = G, S_r = S_r, p = 100)} ) # 1s
+
+plot.ACTIONet(ace, coordinate.slot = X2_sgd2, labels = sce$louvain)
+
+```
+
+
+
+
+```{r}
+# 
+# 
+S_r = Matrix::t(reducedDims(ace)[["ACTION"]])
+
+X_sgd2 = sgd2_layout_weighted(G = G, S_r = S_r, t_max = 30)
+
+
+
 
 reducedDims(ace)[["sgd2"]] = X_sgd2
+# 
+# plot.ACTIONet(ace, labels = sce$louvain)
+#
 
-plot.ACTIONet(ace, reduction.slot = "sgd2", labels = sce$louvain)
+# Use denovo colors
+plot.ACTIONet(ace)
 
+# USe known labels
+labels = sce$louvain
+plot.ACTIONet(ace, labels = labels)
+
+# Use alternative coordinates
+plot.ACTIONet(ace, coordinate.slot = "sgd2")
+plot.ACTIONet(ace, coordinate.slot = X_sgd2)
+plot.ACTIONet(X_sgd2)
+
+plot.ACTIONet(ace, coordinate.slot = "sgd2", labels = labels)
+plot.ACTIONet(ace, coordinate.slot = X_sgd2, labels = labels)
+plot.ACTIONet(X_sgd2, labels = labels)
+
+
+# Use transparency to emphasize cool stuff!
+## How aggressively to blur?
+plot.ACTIONet(ace, labels = labels, transparency.attr = ace$node_centrality, trans.z.threshold = -1)
+plot.ACTIONet(ace, labels = labels, transparency.attr = ace$node_centrality, trans.z.threshold = 0)
+plot.ACTIONet(ace, labels = labels, transparency.attr = ace$node_centrality, trans.z.threshold = 1)
+
+## How extensively to blur?
+plot.ACTIONet(ace, labels = labels, transparency.attr = ace$node_centrality, trans.z.threshold = 0.5, trans.fact = 1)
+plot.ACTIONet(ace, labels = labels, transparency.attr = ace$node_centrality, trans.z.threshold = 0.5, trans.fact = 2)
+plot.ACTIONet(ace, labels = labels, transparency.attr = ace$node_centrality, trans.z.threshold = 0.5, trans.fact = 3)
+
+# 3D plot
+plot.ACTIONet.3D(ace, labels = labels)
+
+# Interactive plot using plot.ly
+plot.ACTIONet.interactive(ace)
+plot.ACTIONet.interactive(ace, labels = labels)
+
+# Interactive plot using plot.ly (3D)
+plot.ACTIONet.interactive(ace, threeD = T)
+plot.ACTIONet.interactive(ace, labels = labels, threeD = T)
+
+
+# Plot footprint
+plot.ACTIONet.archetype.footprint(ace)
+
+# Plot gene view
+plot.ACTIONet.gene.view(ace, top.genes = 10)
 
 ```
 ```{r}
-ace.updated = reconstruct.ACTIONet(ace, network_density = 1)
+ace2 = reconstruct.ACTIONet(ace, network_density = 0.5)
+ace3 = reconstruct.ACTIONet(ace, network_density = 0.2)
+ace4 = reconstruct.ACTIONet(ace, network_density = 0.1)
 
-plot.ACTIONet(ace)
-plot.ACTIONet(ace.updated)
+plot.ACTIONet(ace, sce$Celltypes)
+plot.ACTIONet(ace2, sce$Celltypes)
+plot.ACTIONet(ace3, sce$Celltypes)
+plot.ACTIONet(ace4, sce$Celltypes)
+
 
 ```
+
+
+```{r}
+
+			
+plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5, CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F) {
+	M = Matrix::t(as(colFactors(ace)[["H_unified"]], 'sparseMatrix'))
+	cs = Matrix::colSums(M)
+	M = scale(M, center = FALSE, scale = cs)
+	
+	if(ncol(feature.enrichment.table) != nrow(colFactors(ace)[["H_unified"]])) {
+		feature.enrichment.table = Matrix::t(feature.enrichment.table)
+	}
+	
+	if(max(feature.enrichment.table) > 50)
+		feature.enrichment.table = log1p(feature.enrichment.table)
+
+	X = t(select.top.k.features(feature.enrichment.table, 3, normalize = renormalize, reorder.columns = F))
+	selected.features = colnames(X)
+	
+	print(X)
+	
+	Z = Z = t(scale(reducedDims(ace)[["ACTIONet2D"]]))
+	core.coors = t(Z %*% M)
+
+	cs = colSums(X)
+	cs[cs == 0] = 1
+	X = scale(X, center = F, scale = cs)
+	feature.coors = scale(t(X) %*% core.coors)
+	print(feature.coors)
+	
+    if (is.null(CPal)) {
+        #Pal = ace$unification.out$Pal
+			cells.Lab = grDevices::convertColor(color = Matrix::t(colFactors(ace)$denovo_color), from = "sRGB", to = "Lab")
+			arch.Lab = Matrix::t(M) %*% cells.Lab			
+			arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+			core.Pal = rgb(arch.RGB)
+    } else {
+    	if(length(CPal) == 1) {
+            core.Pal = ggpubr::get_palette(CPal, length(unique(ace$archetype.assignment)))
+    	} else {
+            core.Pal = CPal[1:length(unique(ace$archetype.assignment))]
+    	}
+    }
+    core.Lab = grDevices::convertColor(color = t(col2rgb(core.Pal)/256), from = "sRGB", to = "Lab")
+    
+    feature.color.Lab = t(X) %*% core.Lab
+
+    feature.colors = rgb(grDevices::convertColor(color = feature.color.Lab, from = "Lab", to = "sRGB"))
+    names(feature.colors) = selected.features
+
+
+	x = feature.coors[, 1]
+	y = feature.coors[, 2]
+    plot (x, y, type = "n", col = feature.colors, axes = FALSE, xlab = "", ylab = "", main = title)
+
+	words = selected.features
+    lay <- wordlayout(x, y, words, label.text.size)
+    for (i in 1:length(x)) {
+        xl <- lay[i, 1]
+        yl <- lay[i, 2]
+        w <- lay[i, 3]
+        h <- lay[i, 4]
+        if (x[i] < xl || x[i] > xl + w || y[i] < yl || y[i] > 
+            yl + h) {
+            points(x[i], y[i], pch = 16, col = colorspace::darken(feature.colors[[i]], 0.6), cex = 0.75*label.text.size)
+            nx <- xl + 0.5 * w
+            ny <- yl + 0.5 * h
+            lines(c(x[i], nx), c(y[i], ny), col = colorspace::darken(feature.colors[[i]], 0.5))
+        }
+    }
+    #plot.new()
+    loc.x = lay[, 1] + 0.5 * lay[, 3]
+    loc.y = lay[, 2] + 0.5 * lay[, 4]
+    text(loc.x, loc.y, words, col = feature.colors, cex = label.text.size)
+
+}
+
+plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", title = "", label.text.size = 0.8, renormalize = F) {
+	require(wordcloud)
+	
+	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+	
+	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
+	if(length(filtered.rows) > 0)
+		feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
+	
+	plot.ACTIONet.feature.view(ace, feature.enrichment.table, title = "Gene view", renormalize = renormalize)
+}
+
+```
+
 
 ```{r}
 sce = readRDS("pbmc3k_sce.RDS")
