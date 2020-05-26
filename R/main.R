@@ -170,11 +170,12 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = F
 #' plot.ACTIONet(ace)
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 8, reduction.slot = "ACTION") {
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 8, reduction.slot = "ACTIONet3D") {
     G = colNets(ace)[["ACTIONet"]]
     	
     # re-Layout ACTIONet
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+    
 	initial.coordinates = t(scale(t(S_r)))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
     

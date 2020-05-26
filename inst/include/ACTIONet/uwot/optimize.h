@@ -104,11 +104,16 @@ struct SgdWorker {
     
     std::vector<float> dys(ndim);
     for (auto i = begin; i < end; i++) {
+		//printf("=> <%d, %d>:: %d\n", begin, end, i);
       if (!sampler.is_sample_edge(i, n)) {
+		  //printf("\tFail\n");
         continue;
       }
+      
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
+
+	   //printf("\tPos ... "); fflush(stdout);
 
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
@@ -126,8 +131,12 @@ struct SgdWorker {
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
+      //printf("Done\n"); fflush(stdout);
+      
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
+		//  printf("\tNeg %d (/%d) ... ", p, n_neg_samples);
+		  
         std::size_t dkn = (prng() % tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
@@ -146,6 +155,8 @@ struct SgdWorker {
                                        Gradient::clamp_hi);
           head_embedding[dj + d] += grad_d;
         }
+        //printf("done\n"); fflush(stdout);
+        
       }
       sampler.next_sample(i, n_neg_samples);
     }
