@@ -267,10 +267,10 @@ namespace ACTIONet {
 	  
 		printf("Estimating node colors ... "); fflush(stdout);
 		mat Z = zscore(conv_to<mat>::from(coordinates_3D));
-		vec a = 128*Z.col(0) / max(abs(Z.col(0)));
-		vec b = 128*Z.col(1) / max(abs(Z.col(1)));
+		vec a = 150*Z.col(0) / 1.96;
+		vec b = 150*Z.col(1) / 1.96;
 		vec L = Z.col(2);
-		L = 35.0 + 50.0*(L - min(L)) / (max(L) - min(L));
+		L = 10.0 + 80.0*(L - min(L)) / (max(L) - min(L));
 
 		double r_channel, g_channel, b_channel;
 		mat RGB_colors = zeros(nV, 3);
@@ -304,85 +304,84 @@ namespace ACTIONet {
 		int thread_no = 8) { 
 
 		int nV = W.n_cols;
-		mat Wn = normalise(exp(zscore(mat(W))), 1, 0); // soft-max
+		
+		if(compactness_level < 0 || compactness_level > 100)
+			compactness_level = 50;
+			
+		double a_param = UMAP_A[compactness_level];
+		double b_param = UMAP_B[compactness_level];
+		
+		// 1) Smooth similarity scores
+		sp_mat G = W;
+		G.for_each( [](sp_mat::elem_type& val) { val = -log(val); } );		
+		W = smoothKNN(G, thread_no);
+
+		// 2) Use prior embedding to initialize new points (after smoothing -- might need further thresholding prior to averaging)
+		sp_mat Wn = normalise(W, 1, 0); // soft-max
 		mat arch_coor2D = mat(coor2D * Wn);
 		mat arch_coor3D = mat(coor3D * Wn);
 		mat arch_colRGB = mat(colRGB * Wn);
 		arch_colRGB = clamp(arch_colRGB, 0, 1);
 
+		// 3) Store old (ACTIONet) and new (initial) coordinates
 		vector<float> head_vec(arch_coor2D.memptr(), arch_coor2D.memptr()+arch_coor2D.n_elem);		
 		vector<float> tail_vec(coor2D.memptr(), coor2D.memptr()+coor2D.n_elem);		
 
-		sp_mat G = W;
-		G.for_each( [](sp_mat::elem_type& val) { val = -log(val); } );		
-		W = smoothKNN(G, thread_no);
 
 
-		if(compactness_level < 0 || compactness_level > 100)
-			compactness_level = 50;
-
-			
-		double a_param = UMAP_A[compactness_level];
-		double b_param = UMAP_B[compactness_level];
-
-		// linearized list of edges (1-simplices)
-		vector<unsigned int> positive_head; positive_head.reserve(W.n_elem);
-		vector<unsigned int> positive_tail; positive_tail.reserve(W.n_elem);	
-		vector<float> epochs_per_sample; epochs_per_sample.reserve(W.n_elem);	
-
-
-		W.for_each( [](sp_mat::elem_type& val) { val = -log(val); } );		
-		W = smoothKNN(W, thread_no);
-
-		double w_max = max(max(W));
-		int nnz = 0;
-		for(int tail = 0; tail < W.n_rows; tail++) { // archs
-			for(int head = 0; head < W.n_cols; head++) { // cells
-				double w = W(tail, head);
-				if(w > 0) {				
-					nnz++;
-					epochs_per_sample.push_back(w_max / w); // Higher the weight of the edge, the more likely it is to be sampled (inversely proportional to epochs_per_sample)
-					positive_head.push_back(head);
-					positive_tail.push_back(tail);
-				}				
-			}
-		}		
-		positive_head.resize(nnz);
-		positive_tail.resize(nnz);
-		epochs_per_sample.resize(nnz);
-				
+		// 4) Linearize edges and estimate epochs 
+		double global_max = arma::max(arma::max(W));
+		double min_threshold = global_max / n_epochs;
+		vector<unsigned int> positive_head; positive_head.reserve(W.n_nonzero);
+		vector<unsigned int> positive_tail; positive_tail.reserve(W.n_nonzero);	
+		vector<float> epochs_per_sample; epochs_per_sample.reserve(W.n_nonzero);		
 		
+		sp_mat::const_iterator it     = W.begin();
+		sp_mat::const_iterator it_end = W.end();
+		for(; it != it_end; ++it) {		
+			double w = (*it);
+			if( w < min_threshold) {
+				continue;
+			}
+			
+			epochs_per_sample.push_back( (float) (global_max / w) );
+			positive_tail.push_back(it.row());
+			positive_head.push_back(it.col());
+		}
+		//positive_tail.resize(idx); positive_head.resize(idx); epochs_per_sample.resize(idx);
+
 		vector<float> result;
 
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
-			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, 0, true, thread_no, 1, true);	
+			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);	
 
 		
 		fmat coordinates(result.data(), 2, nV);
 		printf("Done\n"); fflush(stdout);
+		
+		
+		
 
-/*
 		vector<float> head_vec3D(coor3D.memptr(), coor3D.memptr()+coor3D.n_elem);		
 		vector<float> tail_vec3D(arch_coor3D.memptr(), arch_coor3D.memptr()+arch_coor3D.n_elem);	
 		
 		printf("Compute 3D layout ... "); fflush(stdout);
 		result.clear();
-		
+
+
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
-			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true);	
-		
+			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);	
+
 		fmat coordinates_3D(result.data(), 3, nV);	
 		printf("Done\n"); fflush(stdout);
 	  
 
-*/
-
 
 		field<mat> res(3);
-		
+
 		
 		res(0) = conv_to<mat>::from(coordinates);
-		//res(1) = conv_to<mat>::from(coordinates_3D);
+		res(1) = conv_to<mat>::from(coordinates_3D);
 		res(2) = arch_colRGB;
 		
 		return res;	  		

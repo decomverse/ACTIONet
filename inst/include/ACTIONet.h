@@ -67,6 +67,14 @@ namespace ACTIONet {
 			vec lambda;
 			vec exp_var;
 		};
+		
+		
+		// To store the output of compute_AA_coreset()
+		struct Coreset {
+			mat S_coreset;
+			vec w_coreset;
+			uvec index;
+		};		
 
 		// To store the output of run_SPA()
 		struct SPA_results {
@@ -216,6 +224,8 @@ namespace ACTIONet {
 		vec unsigned_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters, int seed);
 		vec signed_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters, int seed);
 		
+		
+		Coreset compute_AA_coreset(sp_mat &S, int m); 
 		
 }
 

@@ -176,6 +176,23 @@ run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50
     .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
 }
 
+#' Runs multi-level ACTION decomposition method
+#'
+#' @param S_r Reduced kernel matrix
+#' @param k_min Minimum number of archetypes to consider (default=2)
+#' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
+#' @param thread_no Number of parallel threads (default=4)
+#' @param max_it,min_delta Convergence parameters for archetypal analysis
+#' 
+#' @return A named list with entries 'C' and 'H', each a list for different values of k
+#' @examples
+#' ACTION.out = run_ACTION(S_r, k_max = 10)
+#' H8 = ACTION.out$H[[8]]
+#' cell.assignments = apply(H8, 2, which.max)
+run_AA <- function(A, W0, max_it = 50L, min_delta = 1e-7) {
+    .Call(`_ACTIONet_run_AA`, A, W0, max_it, min_delta)
+}
+
 #' Runs multi-level Online ACTION decomposition method
 #'
 #' @param S_r Reduced kernel matrix
@@ -694,5 +711,20 @@ sgd2_layout_weighted_convergent <- function(G, S_r, t_max = 30L, eps = 0.01, del
 
 sgd2_layout_sparse_weighted <- function(G, S_r, p = 200L, t_max = 30L, eps = 0.01, seed = 0L) {
     .Call(`_ACTIONet_sgd2_layout_sparse_weighted`, G, S_r, p, t_max, eps, seed)
+}
+
+#' Computes a coreset for archetypal analysis
+#' Ref: Coresets for Archetypal Analysis (http://papers.neurips.cc/paper/8945-coresets-for-archetypal-analysis)
+#'
+#' @param S Input matrix (e.g., gene x cell)
+#' @param m Number of samples (or 0, to be automatically identified)
+#' @param seed Random seed
+#' 
+#' @return clusters Assignment vector of samples to clusters
+#' 
+#' @examples
+#' coreset = compute_AA_coreset(S, 1000)
+compute_AA_coreset <- function(S, m = 0L) {
+    .Call(`_ACTIONet_compute_AA_coreset`, S, m)
 }
 
