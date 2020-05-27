@@ -25,16 +25,18 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 	string.dtype = H5T_STRING$new(type="c", size=Inf)    
 	string.dtype = string.dtype$set_cset(cset = "UTF-8")
 
-	h5addAttr.str(h5group, "_index", "index")
-	h5addAttr.str(h5group, "encoding-version", "0.1.0")
-	h5addAttr.str(h5group, "encoding-type", "dataframe")
-
-	cn = colnames(DF)
-	h5addAttr.str_array(h5group, "column-order", cn)
-
 	N = nrow(DF)
 
 	cat.vars = which(sapply(1:ncol(DF), function(i) length(unique(DF[, i])) < 256 ))
+	noncat.num.vars = which(sapply(1:ncol(DF), function(i) {
+		if(is.numeric(DF[, i])) 
+			return(sum(round(DF[, i]) != DF[, i]) != 0)
+		else 
+			return(FALSE)
+	}))
+	cat.vars = setdiff(cat.vars, noncat.num.vars)
+		
+	
 	if(length(cat.vars) > 0) {
 		cat = h5group$create_group("__categories")
 
@@ -44,13 +46,13 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 				l = as.character(levels(x))
 				v = as.numeric(x) - 1
 			} else {
-        x = as.character(x)
+				x = as.character(x)
 				l = sort(unique(x))
 				v = match(x, l) - 1
 			}
 
-		  dtype = H5T_STRING$new(type="c", size=Inf)
-    	dtype = dtype$set_cset(cset = "UTF-8")
+			dtype = H5T_STRING$new(type="c", size=Inf)
+			dtype = dtype$set_cset(cset = "UTF-8")
 			l.enum = cat$create_dataset(colnames(DF)[cat.vars[i]], l, gzip_level = compression.level, dtype = dtype)
 
 
@@ -80,20 +82,32 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 
 
 	h5group$create_dataset("index", index, gzip_level = compression.level, dtype = string.dtype)
-	for(i in setdiff(1:ncol(DF), cat.vars)) {
-		x = DF[, i]
-		if(!is.numeric(x)) # To avoid issues with new "DFrame" implementation of sce that includes all types in columns
-			next
-			
-		nn = colnames(DF)[i]
-		if(!is.numeric(x)) {
-			x = as.character(x)
-			h5group$create_dataset(nn, as.character(x), gzip_level = compression.level, dtype = string.dtype)
-		} else {
+	if(length(noncat.num.vars) > 0) {
+		for(i in noncat.num.vars) {
+			x = DF[, i]
+			nn = colnames(DF)[i]
 			h5group$create_dataset(nn, as.single(x), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
-		}
-
+		}	
 	}
+	
+	h5addAttr.str(h5group, "_index", "index")
+	h5addAttr.str(h5group, "encoding-version", "0.1.0")
+	h5addAttr.str(h5group, "encoding-type", "dataframe")
+	
+	cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
+	if(length(cn) > 0) {
+		h5addAttr.str_array(h5group, "column-order", cn)	
+	} else {
+		dtype = H5T_STRING$new(type="c", size=Inf)
+		dtype = dtype$set_cset(cset = "UTF-8")
+		space = H5S$new(type="simple", dims = 0, maxdims = 1)
+		
+		h5group$create_attr(attr_name = "column-order", dtype = dtype, space = space)
+		
+		#attr = h5group$attr_open_by_name(attr_name = "column-order", ".")
+		#attr$write(attr.val)	
+	}
+		
 }
 
 write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.level) {
@@ -162,6 +176,10 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 }
 
 ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", minimal.export = F, compression.level = 0) {
+	if(file.exists(fname)) {
+		file.remove(fname)
+	}	
+	
 	h5file = H5File$new(fname, mode = "w")
 
 	## Write X (logcounts() in ACE, in either sparse or dense format)
