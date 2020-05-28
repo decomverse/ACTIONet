@@ -4,7 +4,7 @@
 \alias{plot.individual.gene}
 \title{Plot gene expression violin plot}
 \usage{
-plot.individual.gene(ace, labels, gene.name, CPal = Pals.Snap88)
+plot.individual.gene(ace, labels, gene.name, CPal = CPal20)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -22,5 +22,5 @@ Visualized ACTIONet
 Plot gene expression violin plot
 }
 \examples{
-plot.individual.gene(ace, ace$assigned_archetype, "CD14")
+plot.individual.gene(ace, ace$unfied_archetypes, "CD14")
 }

@@ -7,7 +7,7 @@
 \usage{
 reduce.and.batch.correct.sce.Harmony(sce, batch.vec = NULL,
   reduced_dim = 50, max.iter = 5, data.slot = "logcounts",
-  normalization.method = "default")
+  normalization.method = "default", reduction_name = "ACTION")
 }
 \arguments{
 \item{sce}{Input sce object}

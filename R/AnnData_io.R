@@ -20,7 +20,6 @@ h5addAttr.str_array <- function(h5group, attr.name, attr.val) {
 }
 
 write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
-	h5group = h5file$create_group(gname)
 
 	string.dtype = H5T_STRING$new(type="c", size=Inf)    
 	string.dtype = string.dtype$set_cset(cset = "UTF-8")
@@ -35,6 +34,30 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 			return(FALSE)
 	}))
 	cat.vars = setdiff(cat.vars, noncat.num.vars)
+	cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
+
+	h5group = h5file$create_group(gname)
+
+	h5addAttr.str(h5group, "_index", "index")
+	h5addAttr.str(h5group, "encoding-version", "0.1.0")
+	h5addAttr.str(h5group, "encoding-type", "dataframe")
+	
+
+	if(length(cn) == 0) {
+		dtype = H5T_STRING$new(type="c", size=Inf)
+		dtype = dtype$set_cset(cset = "UTF-8")
+		space = H5S$new(type="simple", dims = 0, maxdims = 10)
+		
+		h5group$create_attr(attr_name = "column-order", dtype = dtype, space = space)
+		
+		# attr = h5group$attr_open_by_name(attr_name = "column-order", ".")
+		# attr$write()			
+	} else {
+		h5addAttr.str_array(h5group, "column-order", cn)			
+	}
+
+	
+
 		
 	
 	if(length(cat.vars) > 0) {
@@ -89,25 +112,6 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 			h5group$create_dataset(nn, as.single(x), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
 		}	
 	}
-	
-	h5addAttr.str(h5group, "_index", "index")
-	h5addAttr.str(h5group, "encoding-version", "0.1.0")
-	h5addAttr.str(h5group, "encoding-type", "dataframe")
-	
-	cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
-	if(length(cn) > 0) {
-		h5addAttr.str_array(h5group, "column-order", cn)	
-	} else {
-		dtype = H5T_STRING$new(type="c", size=Inf)
-		dtype = dtype$set_cset(cset = "UTF-8")
-		space = H5S$new(type="simple", dims = 0, maxdims = 1)
-		
-		h5group$create_attr(attr_name = "column-order", dtype = dtype, space = space)
-		
-		#attr = h5group$attr_open_by_name(attr_name = "column-order", ".")
-		#attr$write(attr.val)	
-	}
-		
 }
 
 write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.level) {
@@ -127,14 +131,22 @@ write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.lev
 read.HD5DF <- function(h5file, gname, compression.level = 0) {
 
 	h5group = h5file[[gname]]
-	attr = h5attributes(h5group)
-	if(! ( ("encoding-type" %in% names(attr)) & (attr[["encoding-type"]] == "dataframe")) ) {
+
+	if(! (h5group$attr_open_by_name("encoding-type", ".")$read() == "dataframe") ) {
 		R.utils::printf("%s is not a dataframe. Abort.\n", gname)
 		return()
 	}
+	rn = h5group[[h5group$attr_open_by_name("_index", ".")$read()]]$read()
+	
+	cn = h5group$attr_open_by_name("column-order", ".")
+	if(cn$get_storage_size() == 0) {
+		DF = DataFrame(row.names = rn)	
+		return(DF)		
+	}
 
-	vars = vector("list", length(attr[["column-order"]]))
-	names(vars) = attr[["column-order"]]
+	column.names = cn$read()
+	vars = vector("list", length(column.names))
+	names(vars) = column.names
 	for(vn in names(vars)) {
 		vars[[vn]] = h5group[[vn]]$read()
 	}
@@ -148,7 +160,7 @@ read.HD5DF <- function(h5file, gname, compression.level = 0) {
 	}
 
 	DF = DataFrame(vars)
-	rownames(DF) = h5group[[attr[["_index"]]]]$read()
+	rownames(DF) = rn
 
 	return(DF)
 }
@@ -320,9 +332,14 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 	}
 
 
-	obs.DF = read.HD5DF(h5file = h5file, gname = "obs", compression.level = compression.level)
-	var.DF = read.HD5DF(h5file = h5file, gname = "var", compression.level = compression.level)
+	if("obs" %in% objs) {
+		obs.DF = read.HD5DF(h5file = h5file, gname = "obs", compression.level = compression.level)			
+	}
 
+	if("var" %in% objs) {
+		var.DF = read.HD5DF(h5file = h5file, gname = "var", compression.level = compression.level)
+	}
+	
 	assays = lapply(assays, function(X) {
 		rownames(X) = rownames(var.DF)
 		colnames(X) = rownames(obs.DF)
@@ -335,9 +352,9 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		obsm = h5file[["obsm"]]
 		for(mn in names(obsm)) {
 			Xr = obsm[[mn]]$read()
-			if(sum(grepl(pattern = "X_", mn))) { # It is an embedding/dimension reduction
+			if(sum(grepl(pattern = "^X_", mn))) { # It is an embedding/dimension reduction
 				reducedDims(ACE)[[stringr::str_sub(mn, start = 3)]] = Matrix::t(Xr)
-			} else if(nrow(Xr) <= 100) { # Keep small factors as reducedDims()
+			} else if(nrow(Xr) <= 100 & (sum(grepl(pattern = "^C_", mn)|grepl(pattern = "^H_", mn))==0)) { # Keep small factors as reducedDims() -- i.e., "ACTION" or "PCA" reductions
 				reducedDims(ACE)[[mn]] = Matrix::t(Xr)
 			} else {
 				colFactors(ACE)[[mn]] = Xr

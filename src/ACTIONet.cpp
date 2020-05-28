@@ -500,8 +500,8 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overl
 	out_list["C_unified"] = results.C_unified;
 	out_list["H_unified"] = results.H_unified;
 	
-	for(int i = 0; i < results.assigned_archetype.n_elem; i++) results.assigned_archetype[i]++;
-	out_list["assigned_archetype"] = results.assigned_archetype;
+	for(int i = 0; i < results.assigned_archetypes.n_elem; i++) results.assigned_archetypes[i]++;
+	out_list["unfied_archetypes"] = results.assigned_archetypes;
 
     return out_list;
 }
