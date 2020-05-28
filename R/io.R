@@ -331,7 +331,7 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
     
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    colFactors(ace)$denovo_color = col2rgb(vis.out$colors)
+    reducedDims(ace)$denovo_color = Matrix::t(col2rgb(vis.out$colors))
     
     
 
@@ -344,9 +344,9 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
 	colFactors(ace)[["H_unified"]] = as(ACTIONet.out$unification.out$H.core, 'sparseMatrix')
 	colFactors(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), 'sparseMatrix')
 	
-	ace$assigned_archetype = ACTIONet.out$unification.out$assignments.core
+	ace$unfied_archetypes = ACTIONet.out$unification.out$assignments.core
 
-	#ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+	#ace$node_centrality = compute_archetype_core_centrality(G, ace$unfied_archetypes)
 
 	specificity.out = ACTIONet.out$unification.out$DE.core
 	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["profile"]]

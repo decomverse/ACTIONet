@@ -24,13 +24,14 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 0.5, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-6) {		
+run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 0.5, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-6) {		
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
     }
     
-    ace = as(sce, "ACTIONetExperiment")
+    ace = as(sce, "ACTIONetExperiment") 
+
     
 	S = assays(ace)[[data.slot]]
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
@@ -71,11 +72,15 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 	
     # Layout ACTIONet
 	initial.coordinates = t(scale(t(S_r)))
-    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
-    
+	if(layout.in.parallel == FALSE) {		
+		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
+    } else { # WARNING! This makes the results none reproducible
+		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
+	}
+	
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
+    reducedDims(ace)$denovo_color = vis.out$colors
 
 
 	# Identiy equivalent classes of archetypes and group them together
@@ -83,10 +88,10 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 	colFactors(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
 	colFactors(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
-	ace$assigned_archetype = unification.out$assigned_archetype
+	ace$unfied_archetypes = unification.out$unfied_archetypes
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-	ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$unfied_archetypes)
     
 
 	# Compute gene specificity for each archetype	
@@ -132,7 +137,7 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 #' plot.ACTIONet(ace)
 #' ace.updated = reconstruct.ACTIONet(ace, network_density = 0.1)
 #' plot.ACTIONet(ace.updated)
-reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, reduction.slot = "ACTION") {
+reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, layout.in.parallel = FALSE, reduction.slot = "ACTION") {
 	
     # re-Build ACTIONet
     set.seed(0)
@@ -145,11 +150,15 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = F
     # re-Layout ACTIONet
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
 	initial.coordinates = t(scale(t(S_r)))
-    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
-    
+	if(layout.in.parallel == FALSE) {		
+		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
+    } else { # WARNING! This makes the results none reproducible
+		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
+	}
+	    
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
+    reducedDims(ace)$denovo_color = vis.out$colors
 
 	return(ace)
 }
@@ -170,18 +179,62 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = F
 #' plot.ACTIONet(ace)
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 8, reduction.slot = "ACTIONet3D") {
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 8, layout.in.parallel = FALSE, reduction.slot = "ACTION") {
     G = colNets(ace)[["ACTIONet"]]
     	
     # re-Layout ACTIONet
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
     
 	initial.coordinates = t(scale(t(S_r)))
-    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
-    
+	if(layout.in.parallel == FALSE) {		
+		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
+    } else { # WARNING! This makes the results none reproducible
+		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
+	}
+	    
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    colFactors(ace)$denovo_color = Matrix::t(vis.out$colors)
+    reducedDims(ace)$denovo_color = vis.out$colors
 
+	return(ace)
+}
+
+
+rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION", unified_suffix = "unified") {
+	S = assays(ace)[[data.slot]]
+    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+	C_stacked = Matrix::t(as.matrix(colFactors(ace)[["C_stacked"]]))
+	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
+    G = colNets(ace)[["ACTIONet"]]
+	
+	unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0, resolution = resolution)
+
+	R.utils::printf("resolution = %d -> %d states\n", resolution, length(unique(unification.out$unfied_archetypes)))
+	
+	colFactors(ace)[[sprintf("H_%s", unified_suffix)]] = as(unification.out$H_unified, 'sparseMatrix')
+	colFactors(ace)[[sprintf("C_%s", unified_suffix)]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
+	colData(ace)[[sprintf("%s_archetypes", unified_suffix)]]  = unification.out$unfied_archetypes
+
+	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$unfied_archetypes)
+    
+
+	# Compute gene specificity for each archetype	
+	if(is.matrix(S)) {
+		specificity.out = compute_archetype_feature_specificity_full(S, unification.out$H_unified)
+	} else {
+		specificity.out = compute_archetype_feature_specificity(S, unification.out$H_unified)
+	}
+	
+	specificity.out = lapply(specificity.out, function(specificity.scores) {
+		rownames(specificity.scores) = rownames(ace)
+		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
+		return(specificity.scores)
+	})
+	
+	rowFactors(ace)[[sprintf("H_%s_profile", unified_suffix)]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[[sprintf("H_%s_upper_significance", unified_suffix)]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[[sprintf("H_%s_lower_significance", unified_suffix)]] = specificity.out[["lower_significance"]]
+	
 	return(ace)
 }

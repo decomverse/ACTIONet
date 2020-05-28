@@ -111,7 +111,7 @@ namespace ACTIONet {
 			uvec selected_archetypes;
 			mat C_unified;
 			mat H_unified;
-			uvec assigned_archetype;
+			uvec assigned_archetypes;
 		};	
 		
 	// Low-level functions
@@ -178,7 +178,7 @@ namespace ACTIONet {
 
 
 	// SGD-based force-directed layout (adopted and modified from the UMAP implementation)
-		field<mat> layout_ACTIONet(sp_mat &G, mat &S_r, int compactness_level, unsigned int n_epochs, int thread_no);	
+		field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level, unsigned int n_epochs, int thread_no);	
 	
 	
 	// Methods for pseudo-bulk construction

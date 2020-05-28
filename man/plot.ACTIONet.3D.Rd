@@ -6,7 +6,7 @@
 \usage{
 plot.ACTIONet.3D(ace, labels = NULL, transparency.attr = NULL,
   trans.z.threshold = -1, trans.fact = 1, node.size = 1,
-  CPal = Pals.Snap88, reduction.slot = "ACTIONet3D")
+  CPal = CPal20, coordinate.slot = "ACTIONet3D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -21,7 +21,7 @@ plot.ACTIONet.3D(ace, labels = NULL, transparency.attr = NULL,
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
-\item{reduction.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
 
 \item{title}{Main title of the plot}
 }
@@ -33,5 +33,5 @@ Main ACTIONet 3D plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+plot.ACTIONet.3D(ace, ace$unfied_archetypes, transparency.attr = ace$node_centrality)
 }

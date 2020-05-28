@@ -23,7 +23,7 @@ cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NU
 	
     if (!is.null(initial.clustering)) {
         print("Perform graph clustering with *prior* initialization")
-		initial.clusters = ace$assigned_archetype
+		initial.clusters = ace$unfied_archetypes
 
 		if(is.signed) {
 			clusters = as.numeric(signed_cluster(G, resolution_parameter, initial.clustering, seed))
@@ -59,7 +59,7 @@ cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NU
 cluster.ACTIONet <- function(ace, resolution_parameter = 0.5, arch.init = TRUE, seed = 0) {	
     initial.clusters = NULL
     if (arch.init == TRUE) {
-		initial.clusters = ace$assigned_archetype
+		initial.clusters = ace$unfied_archetypes
 	}
 		
 	clusters = cluster.graph(G, resolution_parameter, initial.clusters, seed)
@@ -83,7 +83,7 @@ cluster.ACTIONet <- function(ace, resolution_parameter = 0.5, arch.init = TRUE, 
 #' @return ace with updated annotations added to ace$annotations
 #' 
 #' @examples
-#' ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
+#' ace = infer.missing.cell.annotations(ace, sce$unfied_archetypess, "updated_archetype_annotations")
 infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, max_iter = 3, adjust.levels = T) {    
     Adj = colNets(ace)$ACTIONet 
     A = as(Adj, 'dgTMatrix')

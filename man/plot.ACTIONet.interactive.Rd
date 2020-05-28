@@ -6,9 +6,9 @@
 \usage{
 plot.ACTIONet.interactive(ace, labels = NULL, transparency.attr = NULL,
   trans.z.threshold = -1, trans.fact = 1, node.size = 1,
-  CPal = Pals.Snap88, enrichment.table = NULL, top.features = 7,
+  CPal = CPal20, enrichment.table = NULL, top.features = 7,
   blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-  threeD = FALSE, title = "ACTIONet")
+  threeD = FALSE, title = "ACTIONet", coordinate.slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -41,5 +41,5 @@ Main ACTIONet interactive plotting function
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet.interactive(ace, ace$assigned_archetype)
+plot.ACTIONet.interactive(ace, ace$unfied_archetypes)
 }

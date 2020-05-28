@@ -40,18 +40,18 @@ namespace uwot {
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
+void move_other_vertex(std::vector<double> &, double, std::size_t, std::size_t) {}
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
 template <>
-void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
+void move_other_vertex<true>(std::vector<double> &embedding, double grad_d,
                              std::size_t i, std::size_t nrj) {
   embedding[nrj + i] -= grad_d;
 }
 
-inline auto clamp(float v, float lo, float hi) -> float {
-  float t = v < lo ? lo : v;
+inline auto clamp(double v, double lo, double hi) -> double {
+  double t = v < lo ? lo : v;
   return t > hi ? hi : t;
 }
 
@@ -60,24 +60,24 @@ inline auto clamp(float v, float lo, float hi) -> float {
 template <typename Gradient, bool DoMoveVertex>
 struct SgdWorker {
   int n; // epoch counter
-  float alpha;
+  double alpha;
   const Gradient gradient;
   const std::vector<unsigned int> positive_head;
   const std::vector<unsigned int> positive_tail;
   uwot::Sampler sampler;
-  std::vector<float> &head_embedding;
-  std::vector<float> &tail_embedding;
+  std::vector<double> &head_embedding;
+  std::vector<double> &tail_embedding;
   std::size_t ndim;
   std::size_t head_nvert;
   std::size_t tail_nvert;
   std::mt19937 rng;
   std::uniform_int_distribution<long> gen;  
-  float dist_eps;
+  double dist_eps;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
-            std::vector<float> &head_embedding,
-            std::vector<float> &tail_embedding, std::size_t ndim, unsigned int seed)
+            std::vector<double> &head_embedding,
+            std::vector<double> &tail_embedding, std::size_t ndim, unsigned int seed)
       :
 
         n(0), alpha(0.0), gradient(gradient),
@@ -90,7 +90,7 @@ struct SgdWorker {
         ndim(ndim), head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
 		rng(seed), gen(-2147483647, 2147483646),        
-        dist_eps(std::numeric_limits<float>::epsilon()) {}
+        dist_eps(std::numeric_limits<double>::epsilon()) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
@@ -100,9 +100,11 @@ struct SgdWorker {
       s2 = gen(rng); // technically this needs to always be > 7
       s3 = gen(rng); // should be > 15
     }
+    //printf("States: s1 = %ld, s2 = %ld, s3 = %ld\n", s1, s2, s3);
+    
     tau_prng prng(s1, s2, s3);
     
-    std::vector<float> dys(ndim);
+    std::vector<double> dys(ndim);
     for (auto i = begin; i < end; i++) {
 		//printf("=> <%d, %d>:: %d\n", begin, end, i);
       if (!sampler.is_sample_edge(i, n)) {
@@ -115,17 +117,19 @@ struct SgdWorker {
 
 	   //printf("\tPos ... "); fflush(stdout);
 
-      float dist_squared = 0.0;
+      double dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
-        float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+        double diff = head_embedding[dj + d] - tail_embedding[dk + d];
         dys[d] = diff;
         dist_squared += diff * diff;
+        //printf("\t%d- %f, %f, %f, %f\n", d, head_embedding[dj + d], tail_embedding[dk + d], diff, dist_squared);
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
-      float grad_coeff = gradient.grad_attr(dist_squared);
+      double grad_coeff = gradient.grad_attr(dist_squared);
+      //printf("%d- <%d, %d>:: dist_sq = %f, pos grad = %f\n", i, dj, dk, dist_squared, grad_coeff);
 
       for (std::size_t d = 0; d < ndim; d++) {
-        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+        double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
@@ -141,17 +145,19 @@ struct SgdWorker {
         if (dj == dkn) {
           continue;
         }
-        float dist_squared = 0.0;
+        //printf("\t<%d, %d>- %d => neg grad = ", i, p, dkn);
+        double dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
-          float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
+          double diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] = diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
-        float grad_coeff = gradient.grad_rep(dist_squared);
-
+        double grad_coeff = gradient.grad_rep(dist_squared);
+		//printf("%f\n", grad_coeff);
+		
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+          double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
           head_embedding[dj + d] += grad_d;
         }
@@ -164,7 +170,7 @@ struct SgdWorker {
 
   void set_n(int n) { this->n = n; }
 
-  void set_alpha(float alpha) { this->alpha = alpha; }
+  void set_alpha(double alpha) { this->alpha = alpha; }
 
 };
 } // namespace uwot

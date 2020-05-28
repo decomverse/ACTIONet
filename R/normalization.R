@@ -93,6 +93,8 @@ normalize.sce <- function(sce, norm.method = "default") {
     metadata(sce.norm)$normalization.method = norm.method
     metadata(sce.norm)$normalization.time = Sys.time()
 
+	sce.norm = add.count.metadata(sce.norm)
+
     return(sce.norm)
 }
 
@@ -103,6 +105,8 @@ renormalize.sce <- function(sce) {
 	summary(sizeFactors(sce))
 
 	final.sce = normalize(sce)
+    
+	final.sce = add.count.metadata(final.sce)
 
     metadata(final.sce)$normalization.method = 'renormalized'
     metadata(final.sce)$sizeFactors = sizeFactors(final.sce)

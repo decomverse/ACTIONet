@@ -510,3 +510,19 @@ assess.label.local.enrichment <- function(P, Labels) {
     
     return(res)
 }
+
+make.fname <- function(str) {
+	nn = stringr::str_replace(str, " ", "_")
+	nn = stringr::str_replace(nn, fixed("."), "_")
+	nn = stringr::str_replace(nn, fixed("/"), "_")
+	
+	return(nn)
+}
+
+add.count.metadata <- function(ace) {
+    ace$n_counts = Matrix::colSums(counts(ace))
+    ace$n_genes = Matrix::colSums(counts(ace) > 0)
+    rowData(ace)$n_cells = Matrix::rowSums(counts(ace) > 0) 
+    
+    return(ace)
+}
