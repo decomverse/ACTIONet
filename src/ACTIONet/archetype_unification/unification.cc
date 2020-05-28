@@ -157,11 +157,11 @@ namespace ACTIONet {
 		mat W_unified = S_r * C_unified;
 		mat H_unified = run_simplex_regression(W_unified, S_r);
 		
-		uvec assigned_archetype = trans(index_max( H_unified, 0 ));
+		uvec assigned_archetypes = trans(index_max( H_unified, 0 ));
 		
 		output.C_unified = C_unified;
 		output.H_unified = H_unified;
-		output.assigned_archetype = assigned_archetype;
+		output.assigned_archetypes = assigned_archetypes;
 		
 
 		return(output);

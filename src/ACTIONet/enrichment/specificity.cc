@@ -5,6 +5,8 @@ namespace ACTIONet {
 		field<mat> res(3);
 
 		mat Ht = trans(H);
+		Ht.each_col( [](vec& h){ double mu = mean(h); h /= (mu == 0)?1:mu; } ); // For numerical stability
+
 
 		printf("Compute stats ... ");
 		//vec row_p = vec(mean(Sb, 1));
@@ -53,6 +55,7 @@ namespace ACTIONet {
 		mat logPvals_lower = square(Lambda)/(2 * Nu);
 		uvec uidx = find(Lambda>=0);
 		logPvals_lower(uidx) = zeros(uidx.n_elem);
+		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
 		
 				
 		mat Lambda_scaled = Lambda;
@@ -62,6 +65,7 @@ namespace ACTIONet {
 		mat logPvals_upper = square(Lambda)/(2*(Nu + Lambda_scaled));
 		uvec lidx = find(Lambda<=0);
 		logPvals_upper(lidx) = zeros(lidx.n_elem);
+		logPvals_upper.replace(datum::nan, 0);  // replace each NaN with 0
 		
 		
 		logPvals_lower /= log(10);
@@ -69,7 +73,7 @@ namespace ACTIONet {
 		printf("done\n");
     
 
-		res(0) = Obs;
+		res(0) = Obs / Ht.n_rows;
 		res(1) = logPvals_upper;
 		res(2) = logPvals_lower;
 		
@@ -82,6 +86,7 @@ namespace ACTIONet {
 		field<mat> res(3);
 
 		mat Ht = trans(H);
+		Ht.each_col( [](vec& h){ double mu = mean(h); h /= (mu == 0)?1:mu; } ); // For numerical stability
 		
 		// make sure all values are positive
 		double min_val = S.min();
@@ -140,11 +145,13 @@ namespace ACTIONet {
 		mat logPvals_lower = square(Lambda)/(2 * Nu);
 		uvec uidx = find(Lambda>=0);
 		logPvals_lower(uidx) = zeros(uidx.n_elem);
-		
+		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
+
 
 		mat logPvals_upper = square(Lambda)/(2*(Nu + (Lambda%A/3)));
 		uvec lidx = find(Lambda<=0);
 		logPvals_upper(lidx) = zeros(lidx.n_elem);
+		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
 		
 		
 		logPvals_lower /= log(10);
@@ -152,7 +159,7 @@ namespace ACTIONet {
 		printf("done\n");
     
 
-		res(0) = Obs;
+		res(0) = Obs / Ht.n_rows;
 		res(1) = logPvals_upper;
 		res(2) = logPvals_lower;
 		
@@ -172,6 +179,7 @@ namespace ACTIONet {
 		(Sb(nnz_idx)).ones();
 
 		mat Ht = trans(H);
+		Ht.each_col( [](vec& h){ double mu = mean(h); h /= (mu == 0)?1:mu; } ); // For numerical stability
 
 		printf("Compute stats ... ");
 		vec row_p = vec(sum(Sb, 1));
@@ -210,11 +218,14 @@ namespace ACTIONet {
 		mat logPvals_lower = square(Lambda)/(2 * Nu);
 		uvec uidx = find(Lambda>=0);
 		logPvals_lower(uidx) = zeros(uidx.n_elem);
-		
+		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
+
 
 		mat logPvals_upper = square(Lambda)/(2*(Nu + (Lambda%A/3)));
 		uvec lidx = find(Lambda<=0);
 		logPvals_upper(lidx) = zeros(lidx.n_elem);
+		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
+		
 		
 		
 		logPvals_lower /= log(10);
@@ -222,7 +233,7 @@ namespace ACTIONet {
 		printf("done\n");
     
 
-		res(0) = Obs;
+		res(0) = Obs / Ht.n_rows;
 		res(1) = logPvals_upper;
 		res(2) = logPvals_lower;
 		

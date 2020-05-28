@@ -7,7 +7,7 @@
 plot.ACTIONet.gradient(ace, x, transparency.attr = NULL,
   trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
   CPal = "magma", title = "", alpha_val = 0.85,
-  nonparameteric = FALSE, reduction.slot = "ACTIONet2D")
+  nonparameteric = FALSE, coordinate.slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -24,7 +24,7 @@ plot.ACTIONet.gradient(ace, x, transparency.attr = NULL,
 
 \item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
 
-\item{reduction.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
 }
 \value{
 Visualized ACTIONet with projected scores

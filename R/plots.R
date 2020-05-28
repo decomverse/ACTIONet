@@ -93,7 +93,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' 
 #' @examples
 #' ace = run.ACTIONet(sce)
-#' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+#' plot.ACTIONet(ace, ace$unfied_archetypes, transparency.attr = ace$node_centrality)
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1, 
 	node.size = 1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, coordinate.slot = "ACTIONet2D") {
     
@@ -121,7 +121,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 	}
 	if(is.null(labels)) {
 		if(class(ace) == "ACTIONetExperiment") {			
-			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
+			vCol = rgb(reducedDims(sub.ace)$denovo_color)
 		} else {
 			vCol = rep("tomato", nrow(coors))
 		}
@@ -129,19 +129,22 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
 		if(length(CPal) > 1) {
-			#idx = labels[match(sort(unique(labels)), labels)]
-            #Pal = CPal[idx]	
-            if(is.null(names(CPal))) {
+			if(length(CPal) < length(Annot)) {
+				if(length(Annot) <= 20) {
+					CPal = CPal20
+					message("Not enough colors. Switching to CPal20")
+				} else {
+					CPal = CPal88
+					message("Not enough colors. Switching to CPal88")
+				}
+			}            
+            if(is.null(names(CPal))) {					
 				Pal = CPal[1:length(Annot)]
 			} else {            
 				Pal = CPal[Annot]		
 			}
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
-		}
-		if(!is.null(Annot)) {
-			if(length(Pal) < length(Annot))
-				Pal = CPal88
 		}
 			
         names(Pal) = Annot
@@ -243,7 +246,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' 
 #' @examples
 #' ace = run.ACTIONet(sce)
-#' plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+#' plot.ACTIONet.3D(ace, ace$unfied_archetypes, transparency.attr = ace$node_centrality)
 plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, coordinate.slot = "ACTIONet3D") {
     require(ggplot2)
     require(ggpubr)
@@ -275,7 +278,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 	    
 	if(is.null(labels)) {
 		if(class(ace) == "ACTIONetExperiment") {			
-			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
+			vCol = rgb(reducedDims(sub.ace)$denovo_color)
 		} else {
 			vCol = rep("tomato", nrow(coors))
 		}
@@ -283,9 +286,16 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
 		if(length(CPal) > 1) {
-			#idx = labels[match(sort(unique(labels)), labels)]
-            #Pal = CPal[idx]	
-            if(is.null(names(CPal))) {
+			if(length(CPal) < length(Annot)) {
+				if(length(Annot) <= 20) {
+					CPal = CPal20
+					message("Not enough colors. Switching to CPal20")
+				} else {
+					CPal = CPal88
+					message("Not enough colors. Switching to CPal88")
+				}
+			}
+			if(is.null(names(CPal))) {					
 				Pal = CPal[1:length(Annot)]
 			} else {            
 				Pal = CPal[Annot]		
@@ -293,8 +303,6 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
 		}
-		if(length(Pal) < length(Annot))
-			Pal = CPal88
 
         names(Pal) = Annot
         vCol = Pal[names(labels)]
@@ -389,7 +397,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 
     if (is.null(CPal)) {
         #Pal = ace$unification.out$Pal
-			cells.Lab = grDevices::convertColor(color = Matrix::t(colFactors(ace)$denovo_color), from = "sRGB", to = "Lab")
+			cells.Lab = grDevices::convertColor(color = reducedDims(ace)$denovo_color, from = "sRGB", to = "Lab")
 			arch.Lab = Matrix::t(M) %*% cells.Lab			
 			arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 			core.Pal = rgb(arch.RGB)
@@ -477,7 +485,7 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' 
 #' @examples
 #' ace = run.ACTIONet(sce)
-#' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
+#' plot.ACTIONet.interactive(ace, ace$unfied_archetypes)
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, 
 	node.size = 1, CPal = CPal20, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet", coordinate.slot = "ACTIONet2D") {
     require(plotly)
@@ -508,7 +516,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 		
 	if(is.null(labels)) {
 		if(class(ace) == "ACTIONetExperiment") {			
-			vCol = rgb(Matrix::t(colFactors(ace)$denovo_color))
+			vCol = rgb(reducedDims(sub.ace)$denovo_color)
 		} else {
 			vCol = rep("tomato", nrow(coors))
 		}
@@ -516,19 +524,22 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 	} else {
 		Annot = names(labels)[match(sort(unique(labels)), labels)]
 		if(length(CPal) > 1) {
-			#idx = labels[match(sort(unique(labels)), labels)]
-            #Pal = CPal[idx]	
-            if(is.null(names(CPal))) {
+			if(length(CPal) < length(Annot)) {
+				if(length(Annot) <= 20) {
+					CPal = CPal20
+					message("Not enough colors. Switching to CPal20")
+				} else {
+					CPal = CPal88
+					message("Not enough colors. Switching to CPal88")
+				}
+			}
+			if(is.null(names(CPal))) {					
 				Pal = CPal[1:length(Annot)]
 			} else {            
 				Pal = CPal[Annot]		
 			}
 		} else {
             Pal = ggpubr::get_palette(CPal, length(Annot))
-		}
-		if(!is.null(Annot)) {
-			if(length(Pal) < length(Annot))
-				Pal = CPal88
 		}
 		
         names(Pal) = Annot
@@ -666,7 +677,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 #' @return Visualized ACTIONet
 #' 
 #' @examples
-#' plot.individual.gene(ace, ace$assigned_archetype, "CD14")
+#' plot.individual.gene(ace, ace$unfied_archetypes, "CD14")
 plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
     require(igraph)
     require(ACTIONet)
@@ -680,17 +691,23 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 	Labels = factor(Labels, levels = Annot)
 	
 	if(length(CPal) > 1) {
+		if(length(CPal) < length(Annot)) {
+			if(length(Annot) <= 20) {
+				CPal = CPal20
+				message("Not enough colors. Switching to CPal20")
+			} else {
+				CPal = CPal88
+				message("Not enough colors. Switching to CPal88")
+			}
+		}		
         if(is.null(names(CPal))) {
+				
 			Pal = CPal[1:length(Annot)]
 		} else {            
 			Pal = CPal[Annot]		
 		}
 	} else {
         Pal = ggpubr::get_palette(CPal, length(Annot))
-	}
-	if(!is.null(Annot)) {
-		if(length(Pal) < length(Annot))
-			Pal = CPal88
 	}
 	
     names(Pal) = Annot

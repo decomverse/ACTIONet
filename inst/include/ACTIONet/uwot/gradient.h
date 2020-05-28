@@ -33,7 +33,7 @@ namespace uwot {
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
-inline auto fastPrecisePow(float a, float b) -> float {
+inline auto fastPrecisePow(double a, double b) -> double {
   // calculate approximation with fraction of the exponent
   int e = static_cast<int>(b);
   union {
@@ -54,31 +54,31 @@ inline auto fastPrecisePow(float a, float b) -> float {
     e >>= 1;
   }
 
-  return static_cast<float>(r * u.d);
+  return static_cast<double>(r * u.d);
 }
 
 // Class templated on the powfun function as suggested by Aaron Lun
-template <float (*powfun)(float, float)> class base_umap_gradient {
+template <double (*powfun)(double, double)> class base_umap_gradient {
 public:
-  base_umap_gradient(float a, float b, float gamma)
+  base_umap_gradient(double a, double b, double gamma)
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
-  auto grad_attr(float dist_squared) const -> float {
-    float pd2b = powfun(dist_squared, b);
+  auto grad_attr(double dist_squared) const -> double {
+    double pd2b = powfun(dist_squared, b);
     return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
   }
-  auto grad_rep(float dist_squared) const -> float {
+  auto grad_rep(double dist_squared) const -> double {
     return gamma_b_2 /
            ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
   }
 
-  static const constexpr float clamp_hi = 4.0;
-  static const constexpr float clamp_lo = -4.0;
+  static const constexpr double clamp_hi = 4.0;
+  static const constexpr double clamp_lo = -4.0;
 
 private:
-  float a;
-  float b;
-  float a_b_m2;
-  float gamma_b_2;
+  double a;
+  double b;
+  double a_b_m2;
+  double gamma_b_2;
 };
 
 // UMAP using standard power function
@@ -95,31 +95,31 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 class tumap_gradient {
 public:
   tumap_gradient() = default;
-  auto grad_attr(float dist_squared) const -> float {
+  auto grad_attr(double dist_squared) const -> double {
     return -2.0 / (dist_squared + 1.0);
   }
-  auto grad_rep(float dist_squared) const -> float {
+  auto grad_rep(double dist_squared) const -> double {
     return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
   }
-  static const constexpr float clamp_hi = 4.0;
-  static const constexpr float clamp_lo = -4.0;
+  static const constexpr double clamp_hi = 4.0;
+  static const constexpr double clamp_lo = -4.0;
 };
 
 class largevis_gradient {
 public:
-  largevis_gradient(float gamma) : gamma_2(gamma * 2.0) {}
-  auto grad_attr(float dist_squared) const -> float {
+  largevis_gradient(double gamma) : gamma_2(gamma * 2.0) {}
+  auto grad_attr(double dist_squared) const -> double {
     return -2.0 / (dist_squared + 1.0);
   }
-  auto grad_rep(float dist_squared) const -> float {
+  auto grad_rep(double dist_squared) const -> double {
     return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
   }
 
-  static const constexpr float clamp_hi = 5.0;
-  static const constexpr float clamp_lo = -5.0;
+  static const constexpr double clamp_hi = 5.0;
+  static const constexpr double clamp_lo = -5.0;
 
 private:
-  float gamma_2;
+  double gamma_2;
 };
 } // namespace uwot
 

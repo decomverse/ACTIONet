@@ -17,13 +17,13 @@ const double UMAP_B[101] = {0.790494973419029,0.80063784415826,0.810876441425738
 #define GAMMA 1.0 
 
 
-std::vector<float>  optimize_layout_umap(
-    std::vector<float> head_vec, std::vector<float> tail_vec,
+std::vector<double>  optimize_layout_umap(
+    std::vector<double> head_vec, std::vector<double> tail_vec,
     const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    float a, float b, float gamma, float initial_alpha,
-    float negative_sample_rate, bool approx_pow,
+    unsigned int n_vertices, const std::vector<double> epochs_per_sample,
+    double a, double b, double gamma, double initial_alpha,
+    double negative_sample_rate, bool approx_pow,
     std::size_t n_threads, std::size_t grain_size,
     bool move_other);
     
@@ -156,14 +156,15 @@ namespace ACTIONet {
 	}
 
 	field<mat> layout_ACTIONet(sp_mat &G,
-		mat &S_r,
+		mat S_r,
 		int compactness_level = 50,
 		unsigned int n_epochs = 500,
 		int thread_no = 8) { 
+
 			
 		field<mat> res(3);
 
-		fmat init_coors = conv_to<fmat>::from(S_r);
+		mat init_coors = S_r;
 		
 		printf("Running layout with: compactness=%d, # epochs = %d\n", compactness_level, n_epochs);
 		
@@ -182,7 +183,7 @@ namespace ACTIONet {
 		unsigned int nE = G.n_nonzero;
 		vector<unsigned int> positive_head(nE);
 		vector<unsigned int> positive_tail(nE);
-		vector<float> epochs_per_sample(nE);		
+		vector<double> epochs_per_sample(nE);		
 	
 	
 		const double* values = G.values;
@@ -227,25 +228,26 @@ namespace ACTIONet {
 		*/
 		
 		// Initial coordinates of vertices (0-simplices)
-		fmat initial_coor2D = init_coors.rows(0, 1);		
-		vector<float> head_vec(initial_coor2D.memptr(), initial_coor2D.memptr()+initial_coor2D.n_elem);		
-		vector<float> tail_vec(head_vec);
+		mat initial_coor2D = init_coors.rows(0, 1);		
+		vector<double> head_vec(initial_coor2D.memptr(), initial_coor2D.memptr()+initial_coor2D.n_elem);		
+		vector<double> tail_vec(head_vec);
+		
 		
 		printf("Computing 2D layout ... "); fflush(stdout);		
 		// Stores linearized coordinates [x1, y1, x2, y2, ...]
-		vector<float> result;
+		vector<double> result;
 
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
-			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true);	
+			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
-		fmat coordinates(result.data(), 2, nV);
+		mat coordinates(result.data(), 2, nV);
 		printf("Done\n"); fflush(stdout);
 
 		
 		/****************************
 		 *  Now compute node colors *
 		 ***************************/	
-		fmat initial_coor3D = join_vert(coordinates, init_coors.row(2));
+		mat initial_coor3D = join_vert(coordinates, init_coors.row(2));
 		head_vec.clear(); 
 		head_vec.resize(initial_coor3D.n_elem);
 		std::copy(initial_coor3D.memptr(), initial_coor3D.memptr() + initial_coor3D.n_elem, head_vec.begin());		
@@ -255,9 +257,9 @@ namespace ACTIONet {
 		printf("Compute 3D layout ... "); fflush(stdout);
 		result.clear();
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
-			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true);	
+			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
-		fmat coordinates_3D(result.data(), 3, nV);	
+		mat coordinates_3D(result.data(), 3, nV);	
 		printf("Done\n"); fflush(stdout);
 
 
@@ -266,9 +268,9 @@ namespace ACTIONet {
 	  
 	  
 		printf("Estimating node colors ... "); fflush(stdout);
-		mat Z = zscore(conv_to<mat>::from(coordinates_3D));
-		vec a = 150*Z.col(0) / 1.96;
-		vec b = 150*Z.col(1) / 1.96;
+		mat Z = zscore(coordinates_3D);
+		vec a = 128*Z.col(0) / 1.96;
+		vec b = 128*Z.col(1) / 1.96;
 		vec L = Z.col(2);
 		L = 10.0 + 80.0*(L - min(L)) / (max(L) - min(L));
 
@@ -284,8 +286,8 @@ namespace ACTIONet {
 		
 		printf("done\n");
 		
-		res(0) = conv_to<mat>::from(coordinates);
-		res(1) = conv_to<mat>::from(coordinates_3D);
+		res(0) = coordinates;
+		res(1) = coordinates_3D;
 		res(2) = RGB_colors;
 		
 		return res;	  		
@@ -324,8 +326,8 @@ namespace ACTIONet {
 		arch_colRGB = clamp(arch_colRGB, 0, 1);
 
 		// 3) Store old (ACTIONet) and new (initial) coordinates
-		vector<float> head_vec(arch_coor2D.memptr(), arch_coor2D.memptr()+arch_coor2D.n_elem);		
-		vector<float> tail_vec(coor2D.memptr(), coor2D.memptr()+coor2D.n_elem);		
+		vector<double> head_vec(arch_coor2D.memptr(), arch_coor2D.memptr()+arch_coor2D.n_elem);		
+		vector<double> tail_vec(coor2D.memptr(), coor2D.memptr()+coor2D.n_elem);		
 
 
 
@@ -334,7 +336,7 @@ namespace ACTIONet {
 		double min_threshold = global_max / n_epochs;
 		vector<unsigned int> positive_head; positive_head.reserve(W.n_nonzero);
 		vector<unsigned int> positive_tail; positive_tail.reserve(W.n_nonzero);	
-		vector<float> epochs_per_sample; epochs_per_sample.reserve(W.n_nonzero);		
+		vector<double> epochs_per_sample; epochs_per_sample.reserve(W.n_nonzero);		
 		
 		sp_mat::const_iterator it     = W.begin();
 		sp_mat::const_iterator it_end = W.end();
@@ -344,26 +346,26 @@ namespace ACTIONet {
 				continue;
 			}
 			
-			epochs_per_sample.push_back( (float) (global_max / w) );
+			epochs_per_sample.push_back( (double) (global_max / w) );
 			positive_tail.push_back(it.row());
 			positive_head.push_back(it.col());
 		}
 		//positive_tail.resize(idx); positive_head.resize(idx); epochs_per_sample.resize(idx);
 
-		vector<float> result;
+		vector<double> result;
 
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
-			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);	
+			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false);	
 
 		
-		fmat coordinates(result.data(), 2, nV);
+		mat coordinates(result.data(), 2, nV);
 		printf("Done\n"); fflush(stdout);
 		
 		
 		
 
-		vector<float> head_vec3D(coor3D.memptr(), coor3D.memptr()+coor3D.n_elem);		
-		vector<float> tail_vec3D(arch_coor3D.memptr(), arch_coor3D.memptr()+arch_coor3D.n_elem);	
+		vector<double> head_vec3D(coor3D.memptr(), coor3D.memptr()+coor3D.n_elem);		
+		vector<double> tail_vec3D(arch_coor3D.memptr(), arch_coor3D.memptr()+arch_coor3D.n_elem);	
 		
 		printf("Compute 3D layout ... "); fflush(stdout);
 		result.clear();
@@ -372,7 +374,7 @@ namespace ACTIONet {
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);	
 
-		fmat coordinates_3D(result.data(), 3, nV);	
+		mat coordinates_3D(result.data(), 3, nV);	
 		printf("Done\n"); fflush(stdout);
 	  
 
@@ -380,8 +382,8 @@ namespace ACTIONet {
 		field<mat> res(3);
 
 		
-		res(0) = conv_to<mat>::from(coordinates);
-		res(1) = conv_to<mat>::from(coordinates_3D);
+		res(0) = coordinates;
+		res(1) = coordinates_3D;
 		res(2) = arch_colRGB;
 		
 		return res;	  		

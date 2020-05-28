@@ -77,7 +77,7 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
-annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000) {
+annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, significance.slot = "H_unified_upper_significance") {
     require(ACTIONet)
     require(igraph)
     require(Matrix)
@@ -87,7 +87,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 			marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
 	}
 
-	specificity.panel = as.matrix(log1p(t(rowFactors(ace)$H_unified_upper_significance)))
+	specificity.panel = as.matrix(log1p(t(rowFactors(ace)[[significance.slot]])))
 
 
     GS.names = names(marker.genes)
@@ -299,12 +299,15 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
 #' labels = cell.annotations$Labels
-annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000) {	
-	arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, rand.sample.no = rand.sample.no)
+annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, unified_suffix = "unified") {
+
+	significance.slot = sprintf("H_%s_upper_significance", unified_suffix)	
+	arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, rand.sample.no = rand.sample.no, significance.slot = significance.slot)
 	
 	enrichment.mat = arch.annot$Enrichment
 
-	cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat, normalize = T)
+	H.slot = sprintf("H_%s", unified_suffix)	
+	cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat, normalize = T, H.slot = H.slot)
 	cell.annotations = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
 	
 	Labels = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
@@ -314,7 +317,6 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 	
 	return(res)
 }
-
 
 #' Interpolates cell scores from archetype enrichment matrix
 #'
@@ -332,8 +334,8 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 #' enrichment.mat = arch.annot$enrichment
 #' cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat)
 #' cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
-map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F) {
-	cell.scores.mat = Matrix::t(colFactors(ace)[["H_unified"]])
+map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F, H.slot = "H_unified") {
+	cell.scores.mat = Matrix::t(colFactors(ace)[[H.slot]])
 	
     if (nrow(enrichment.matrix) != ncol(cell.scores.mat)) {
 		print("Flipping enrichment matrix")

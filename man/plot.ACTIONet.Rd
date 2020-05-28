@@ -6,9 +6,9 @@
 \usage{
 plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
   trans.z.threshold = -0.5, trans.fact = 1, node.size = 1,
-  CPal = Pals.Snap88, add.text = TRUE, suppress.legend = TRUE,
+  CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
   legend.pos = "bottomright", title = "",
-  border.contrast.factor = 0.1, reduction.slot = "ACTIONet2D")
+  border.contrast.factor = 0.1, coordinate.slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -33,7 +33,7 @@ plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
 
 \item{border.contrast.factor}{How much the node and its border should contrast}
 
-\item{reduction.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
 
 \item{add.states}{Whether or not to include interpolated cell state positions in the plot}
 }
@@ -45,5 +45,5 @@ Main ACTIONet plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+plot.ACTIONet(ace, ace$unfied_archetypes, transparency.attr = ace$node_centrality)
 }
