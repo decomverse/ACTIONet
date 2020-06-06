@@ -269,10 +269,12 @@ namespace ACTIONet {
 	  
 		printf("Estimating node colors ... "); fflush(stdout);
 		mat Z = zscore(coordinates_3D);
-		vec a = 128*Z.col(0) / 1.96;
-		vec b = 128*Z.col(1) / 1.96;
+		
+		vec a = 128*Z.col(0) / max(abs(Z.col(0)));
+		vec b = 128*Z.col(1) / max(abs(Z.col(1)));
+
 		vec L = Z.col(2);
-		L = 10.0 + 80.0*(L - min(L)) / (max(L) - min(L));
+		L = 25.0 + 70.0*(L - min(L)) / (max(L) - min(L));
 
 		double r_channel, g_channel, b_channel;
 		mat RGB_colors = zeros(nV, 3);

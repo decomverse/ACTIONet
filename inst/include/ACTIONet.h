@@ -34,6 +34,7 @@
 #include <hdbscan.hpp>
 
 // SVD algorithms
+#define IRLB_ALG 0
 #define HALKO_ALG 1
 #define FENG_ALG 2
 
@@ -123,6 +124,9 @@ namespace ACTIONet {
 		field<mat> HalkoSVD(mat &A, int dim, int max_it, int seed);		
 		field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed);	
 
+		field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed);
+		field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
+
 		// ACTION-based kernel reduction algorithms
 		ReducedKernel ACTION_reduction(sp_mat &A, int dim, int iter, int seed, int SVD_algorithm);
 		ReducedKernel ACTION_reduction(mat &A, int dim, int iter, int seed, int SVD_algorithm);
@@ -151,6 +155,18 @@ namespace ACTIONet {
 	// Entry-points to compute a reduced kernel matrix	
 		ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
 		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
+		
+		ReducedKernel SVD2ACTIONred(sp_mat &S, field<mat> SVD_results);
+		ReducedKernel SVD2ACTIONred(mat &S, field<mat> SVD_results);
+
+		ReducedKernel PCA2ACTIONred(sp_mat &S, field<mat> PCA_results);
+		ReducedKernel PCA2ACTIONred(mat &S, field<mat> PCA_results);
+		
+		field<mat> SVD2PCA(sp_mat &S, field<mat> SVD_results);
+		field<mat> SVD2PCA(mat &S, field<mat> SVD_results);
+		field<mat> PCA2SVD(sp_mat &S, field<mat> PCA_results);
+		field<mat> PCA2SVD(mat &S, field<mat> PCA_results);
+	
 
 	// ACTION decomposition
 		ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);

@@ -2,8 +2,15 @@
 #define ARMA_BASE_H
 
 
+
+
+#include <cblas.h>
+
+#undef ARMA_USE_MKL_TYPES
 //#define ARMA_64BIT_WORD
 //#define ARMA_BLAS_LONG_LONG
+//#define ARMA_USE_FORTRAN_HIDDEN_ARGS
+
 
 #define ARMA_DONT_USE_WRAPPER
 #undef ARMA_BLAS_CAPITALS
@@ -15,5 +22,6 @@
 
 using namespace arma;
 using namespace std;
+
 
 #endif

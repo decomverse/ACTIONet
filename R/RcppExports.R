@@ -7,6 +7,46 @@ set_seed <- function(seed) {
 
 #' Computes SVD decomposition
 #'
+#' This is direct implementation of the randomized SVD algorithm:
+#' From: IRLBA R Package
+#' 
+#' @param A Input matrix ("sparseMatrix")
+#' @param dim Dimension of SVD decomposition
+#' @param iters Number of iterations (default=5)
+#' @param seed Random seed (default=0)
+#' 
+#' @return A named list with U, sigma, and V components
+#' 
+#' @examples
+#' A = randn(100, 20)
+#' SVD.out = IRLBA_SVD(A, dim = 2)
+#' U = SVD.out$U
+IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L) {
+    .Call(`_ACTIONet_IRLB_SVD`, A, dim, iters, seed)
+}
+
+#' Computes SVD decomposition
+#'
+#' This is direct implementation of the randomized SVD algorithm:
+#' From: IRLBA R Package
+#' 
+#' @param A Input matrix ("sparseMatrix")
+#' @param dim Dimension of SVD decomposition
+#' @param iters Number of iterations (default=5)
+#' @param seed Random seed (default=0)
+#' 
+#' @return A named list with U, sigma, and V components
+#' 
+#' @examples
+#' A = randn(100, 20)
+#' SVD.out = IRLBA_SVD_full(A, dim = 2)
+#' U = SVD.out$U
+IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L) {
+    .Call(`_ACTIONet_IRLB_SVD_full`, A, dim, iters, seed)
+}
+
+#' Computes SVD decomposition
+#'
 #' This is direct implementation of the randomized SVD algorithm for sparse matrices:
 #' Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
 #' 
@@ -726,5 +766,109 @@ sgd2_layout_sparse_weighted <- function(G, S_r, p = 200L, t_max = 30L, eps = 0.0
 #' coreset = compute_AA_coreset(S, 1000)
 compute_AA_coreset <- function(S, m = 0L) {
     .Call(`_ACTIONet_compute_AA_coreset`, S, m)
+}
+
+#' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+#'
+#' @param S Input matrix ("sparseMatrix")
+#' @param U Left singular vectors
+#' @param s signular values
+#' @param V Right singular vectors
+#' 
+#' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+#' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+#' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+#' \item lambda, exp_var: Summary statistics of the sigular-values.
+#' }
+#' 
+#' @examples
+#' S = logcounts(sce)
+#' irlba.out = irlba::irlba(S, nv = 50)
+#' red.out = SVD2ACTIONred_full(S, irlba.out$u, as.matrix(irlba.out$d), irlba.out$v)
+#' Sr = red.out$S_r
+SVD2ACTIONred <- function(S, u, d, v) {
+    .Call(`_ACTIONet_SVD2ACTIONred`, S, u, d, v)
+}
+
+#' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+#'
+#' @param S Input matrix ("sparseMatrix")
+#' @param U Left singular vectors
+#' @param s signular values
+#' @param V Right singular vectors
+#' 
+#' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+#' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+#' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+#' \item lambda, exp_var: Summary statistics of the sigular-values.
+#' }
+#' 
+#' @examples
+#' S = logcounts(sce)
+#' irlba.out = irlba::irlba(S, nv = 50)
+#' red.out = SVD2ACTIONred_full(S, irlba.out$u, as.matrix(irlba.out$d), irlba.out$v)
+#' Sr = red.out$S_r
+SVD2ACTIONred_full <- function(S, u, d, v) {
+    .Call(`_ACTIONet_SVD2ACTIONred_full`, S, u, d, v)
+}
+
+#' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+#'
+#' @param S Input matrix ("sparseMatrix")
+#' @param U Left singular vectors
+#' @param s signular values
+#' @param V Right singular vectors
+#' 
+#' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+#' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+#' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+#' \item lambda, exp_var: Summary statistics of the sigular-values.
+#' }
+#' 
+#' @examples
+#' S = logcounts(sce)
+#' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
+#' red.out = PCA2ACTIONred_full(S, irlba.out$x, irlba.out$rotation, as.matrix(irlba.out$sdev))
+#' Sr = red.out$S_r
+PCA2ACTIONred <- function(S, x, rotation, sdev) {
+    .Call(`_ACTIONet_PCA2ACTIONred`, S, x, rotation, sdev)
+}
+
+#' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+#'
+#' @param S Input matrix ("sparseMatrix")
+#' @param U Left singular vectors
+#' @param s signular values
+#' @param V Right singular vectors
+#' 
+#' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+#' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+#' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+#' \item lambda, exp_var: Summary statistics of the sigular-values.
+#' }
+#' 
+#' @examples
+#' S = logcounts(sce)
+#' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
+#' red.out = PCA2ACTIONred_full(S, irlba.out$x, irlba.out$rotation, as.matrix(irlba.out$sdev))
+#' Sr = red.out$S_r
+PCA2ACTIONred_full <- function(S, x, rotation, sdev) {
+    .Call(`_ACTIONet_PCA2ACTIONred_full`, S, x, rotation, sdev)
+}
+
+PCA2SVD <- function(S, x, sdev, rotation) {
+    .Call(`_ACTIONet_PCA2SVD`, S, x, sdev, rotation)
+}
+
+PCA2SVD_full <- function(S, x, sdev, rotation) {
+    .Call(`_ACTIONet_PCA2SVD_full`, S, x, sdev, rotation)
+}
+
+SVD2PCA <- function(S, u, d, v) {
+    .Call(`_ACTIONet_SVD2PCA`, S, u, d, v)
+}
+
+SVD2PCA_full <- function(S, u, d, v) {
+    .Call(`_ACTIONet_SVD2PCA_full`, S, u, d, v)
 }
 
