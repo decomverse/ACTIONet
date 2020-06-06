@@ -12,7 +12,7 @@
 #' @examples
 #' sce = import.sce.from.10X(input_path)
 #' sce = reduce.sce(sce)
-reduce.sce <- function(sce, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION") {
+reduce.sce <- function(sce, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 0) {
     if (!(data.slot %in% names(assays(sce)))) {
 		if(normalization.method != "none") {
 			print("Normalizing sce object ... ");
@@ -52,12 +52,15 @@ reduce.sce <- function(sce, reduced_dim = 50, max.iter = 5, data.slot = "logcoun
 
 
     print("Running main reduction")
-    # reduction_algorithm=ACTION, SVD_algorithm=Halko
+    # reduction_algorithm=ACTION (1), SVD_algorithm=IRLB (0)
+    if(SVD_algorithm == 0)
+		max.iter = max.iter * 100
+		
     S = assays(sce.norm)[[data.slot]]
     if(is.matrix(S)) {
-        reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1)
+        reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max.iter, seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
 	} else {
-        reduction.out = reduce_kernel(S, reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1)
+        reduction.out = reduce_kernel(S, reduced_dim = reduced_dim, iter = max.iter, seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
     }
 
     S_r = t(reduction.out$S_r)
@@ -94,7 +97,7 @@ batch.correct.sce.Harmony <- function(sce, batch.vec, reduction.slot = "ACTION")
 #' sce = import.sce.from.10X(input_path)
 #' batch.vec = sce$Batch # Assumes sample annotations are in the input_path with "Batch" attribute being provided
 #' sce = reduce.and.batch.correct.sce.Harmony(sce)
-reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction_name = "ACTION") {
+reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction_name = "ACTION", seed = 0, SVD_algorithm = 0) {
 	if( !("harmony" %in% rownames(installed.packages())) ) {
 		message("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.")
 		return
@@ -107,7 +110,7 @@ reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, reduced_
         return(sce)
     }
 
-    sce = reduce.sce(sce, reduced_dim = reduced_dim, max.iter = max.iter, normalization.method = normalization.method, data.slot = data.slot, reduction.slot = reduction.slot)
+    sce = reduce.sce(sce, reduced_dim = reduced_dim, max.iter = max.iter, normalization.method = normalization.method, data.slot = data.slot, reduction.slot = reduction.slot, seed = seed, SVD_algorithm = SVD_algorithm)
     sce = batch.correct.sce.Harmony(sce, batch.vec)
 
     return(sce)

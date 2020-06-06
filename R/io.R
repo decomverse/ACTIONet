@@ -319,9 +319,13 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
     return(df)
 }
 
-import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
+import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.all = F) {
     ace = as(sce, "ACTIONetExperiment")
     
+    if("S_r" %in% names(reducedDims(sce))) {
+		reducedDims(ace)[["ACTION"]] = reducedDims(sce)[["S_r"]]
+	}
+	
 	ACTION.out = ACTIONet.out$ACTION.out
     pruning.out = ACTIONet.out$reconstruct.out
     G = ACTIONet.out$build.out$ACTIONet
@@ -331,7 +335,7 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
     
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    reducedDims(ace)$denovo_color = Matrix::t(col2rgb(vis.out$colors))
+    reducedDims(ace)$denovo_color = vis.out$colors
     
     
 
@@ -344,9 +348,9 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
 	colFactors(ace)[["H_unified"]] = as(ACTIONet.out$unification.out$H.core, 'sparseMatrix')
 	colFactors(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), 'sparseMatrix')
 	
-	ace$unfied_archetypes = ACTIONet.out$unification.out$assignments.core
+	ace$assigned_archetype = ACTIONet.out$unification.out$assignments.core
 
-	#ace$node_centrality = compute_archetype_core_centrality(G, ace$unfied_archetypes)
+	#ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
 
 	specificity.out = ACTIONet.out$unification.out$DE.core
 	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["profile"]]
@@ -354,10 +358,14 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T) {
 	
 	
 	# Prepare output
-	trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
-    trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
+	if(return.all) {
+		trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
+		trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
       
-    out = list(ace = ace, trace = trace)
+		out = list(ace = ace, trace = trace)
     
-    return(out)
+		return(out)
+    } else {
+		return(ace)
+	}
 }

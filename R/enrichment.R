@@ -140,3 +140,54 @@ assess.geneset.enrichment.gProfiler <- function(genes, category = c("GO:BP", "RE
         
     return(p)
 }
+
+
+assess.genesets = function(arch.gs, terms.gs, N, min.pval = 1e-100, correct = T) {
+
+  shared = t(sapply(terms.gs, function(gs1){
+  	sapply(arch.gs, function(gs2) {
+  		nn = intersect(gs1, gs2)
+  })}))
+  colnames(shared) = names(arch.gs)  
+
+  GS.sizes = sapply(terms.gs, length)
+  logPvals.out = sapply(1:ncol(shared), function(i) {
+    gg = shared[, i]
+    x = as.numeric(sapply(gg, length))
+    
+    n.sample = length(arch.gs[[i]])
+    n.success = as.numeric(GS.sizes)
+
+    v = rep(0, length(x))
+
+    min.overlap = n.success * n.sample / N
+    idx = which(x >= min.overlap)
+    if(length(idx) == 0)
+    	return(v)
+    
+    # p = phyper(x[idx]-1, n.success[idx], N - n.success[idx], n.sample, lower.tail = F)
+    # 
+    # 
+    # if(correct == T) {
+    #   p = p.adjust(p, "fdr")
+    # }
+    # p[p < min.pval] = min.pval
+    # v[idx] = -log10(p)
+
+    v[idx] = HGT_tail(population.size = N, success.count = n.success[idx], sample.size = n.sample, observed.success = x[idx])
+    
+    return(v)
+  })
+  rownames(logPvals.out) = names(terms.gs)
+  colnames(logPvals.out) = names(arch.gs)
+
+  # if(correct == T) {
+  #   idx = which(logPvals.out > 0)
+  #   pp = 10^(-logPvals.out[idx])
+  #   pp.adj = p.adjust(pp, "BH")
+  #   logPvals.out[idx] = -log10(pp.adj)
+  # }
+  
+  return(t(logPvals.out))
+}
+
