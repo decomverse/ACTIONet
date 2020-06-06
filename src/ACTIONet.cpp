@@ -22,6 +22,69 @@ void set_seed(double seed) {
     set_seed_r(std::floor(std::fabs(seed)));
 }
 
+
+//' Computes SVD decomposition
+//'
+//' This is direct implementation of the randomized SVD algorithm:
+//' From: IRLBA R Package
+//' 
+//' @param A Input matrix ("sparseMatrix")
+//' @param dim Dimension of SVD decomposition
+//' @param iters Number of iterations (default=5)
+//' @param seed Random seed (default=0)
+//' 
+//' @return A named list with U, sigma, and V components
+//' 
+//' @examples
+//' A = randn(100, 20)
+//' SVD.out = IRLBA_SVD(A, dim = 2)
+//' U = SVD.out$U
+// [[Rcpp::export]]
+List IRLB_SVD(sp_mat& A, int dim, int iters = 1000, int seed = 0) {	
+
+	field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed);            
+	
+	List res;
+	
+	res["U"] = SVD_out(0);	
+	res["sigma"] = SVD_out(1);	
+	res["V"] = SVD_out(2);	
+	
+	return res;
+}
+
+
+//' Computes SVD decomposition
+//'
+//' This is direct implementation of the randomized SVD algorithm:
+//' From: IRLBA R Package
+//' 
+//' @param A Input matrix ("sparseMatrix")
+//' @param dim Dimension of SVD decomposition
+//' @param iters Number of iterations (default=5)
+//' @param seed Random seed (default=0)
+//' 
+//' @return A named list with U, sigma, and V components
+//' 
+//' @examples
+//' A = randn(100, 20)
+//' SVD.out = IRLBA_SVD_full(A, dim = 2)
+//' U = SVD.out$U
+// [[Rcpp::export]]
+List IRLB_SVD_full(mat& A, int dim, int iters = 1000, int seed = 0) {	
+
+	field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed);            
+	
+	List res;
+	
+	res["U"] = SVD_out(0);	
+	res["sigma"] = SVD_out(1);	
+	res["V"] = SVD_out(2);	
+	
+	return res;
+}
+
+
 //' Computes SVD decomposition
 //'
 //' This is direct implementation of the randomized SVD algorithm for sparse matrices:
@@ -46,9 +109,9 @@ List FengSVD(sp_mat& A, int dim, int iters = 5, int seed = 0) {
         
 	List res;
 	
-	res["U"] = SVD_out(0);	
-	res["sigma"] = SVD_out(1);	
-	res["V"] = SVD_out(2);	
+	res["u"] = SVD_out(0);	
+	res["d"] = SVD_out(1);	
+	res["v"] = SVD_out(2);	
 		
 	return res;
 }
@@ -75,9 +138,9 @@ List FengSVD_full(mat& A, int dim, int iters = 5, int seed = 0) {
         
 	List res;
 	
-	res["U"] = SVD_out(0);	
-	res["sigma"] = SVD_out(1);	
-	res["V"] = SVD_out(2);	
+	res["u"] = SVD_out(0);	
+	res["d"] = SVD_out(1);	
+	res["v"] = SVD_out(2);	
 		
 	return res;
 }
@@ -107,9 +170,9 @@ List HalkoSVD(sp_mat& A, int dim, int iters = 5, int seed = 0) {
 	
 	List res;
 	
-	res["U"] = SVD_out(0);	
-	res["sigma"] = SVD_out(1);	
-	res["V"] = SVD_out(2);	
+	res["u"] = SVD_out(0);	
+	res["d"] = SVD_out(1);	
+	res["v"] = SVD_out(2);	
 	
 	return res;
 }
@@ -138,9 +201,9 @@ List HalkoSVD_full(mat& A, int dim, int iters = 5, int seed = 0) {
 	
 	List res;
 		
-	res["U"] = SVD_out(0);	
-	res["sigma"] = SVD_out(1);	
-	res["V"] = SVD_out(2);	
+	res["u"] = SVD_out(0);	
+	res["d"] = SVD_out(1);	
+	res["v"] = SVD_out(2);	
 	
 	return res;
 }
@@ -180,8 +243,6 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, 
 		
 	return res;
 }
-
-
 
 
 
@@ -501,7 +562,7 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overl
 	out_list["H_unified"] = results.H_unified;
 	
 	for(int i = 0; i < results.assigned_archetypes.n_elem; i++) results.assigned_archetypes[i]++;
-	out_list["unfied_archetypes"] = results.assigned_archetypes;
+	out_list["assigned_archetypes"] = results.assigned_archetypes;
 
     return out_list;
 }
@@ -1305,3 +1366,298 @@ List compute_AA_coreset(sp_mat &S, int m = 0) {
 
 	return(out_list);	
 }
+
+
+
+
+
+
+//' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+//'
+//' @param S Input matrix ("sparseMatrix")
+//' @param U Left singular vectors
+//' @param s signular values
+//' @param V Right singular vectors
+//' 
+//' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+//' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+//' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+//' \item lambda, exp_var: Summary statistics of the sigular-values.
+//' }
+//' 
+//' @examples
+//' S = logcounts(sce)
+//' irlba.out = irlba::irlba(S, nv = 50)
+//' red.out = SVD2ACTIONred_full(S, irlba.out$u, as.matrix(irlba.out$d), irlba.out$v)
+//' Sr = red.out$S_r
+// [[Rcpp::export]]
+List SVD2ACTIONred(sp_mat &S, mat u, vec d, mat v) {
+	if(1 < d.n_cols)
+		d = d.diag();
+	
+	field<mat> SVD_results(3);
+	SVD_results(0) = u;
+	SVD_results(1) = d;
+	SVD_results(2) = v;
+	
+	
+	ACTIONet::ReducedKernel reduction = ACTIONet::SVD2ACTIONred(S, SVD_results);			
+			
+	List res;	
+	res["S_r"] = reduction.S_r;		
+	res["V"] = reduction.V;
+	res["lambda"] = reduction.lambda;
+	res["explained_var"] = reduction.exp_var;	
+		
+	return res;
+}
+
+
+//' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+//'
+//' @param S Input matrix ("sparseMatrix")
+//' @param U Left singular vectors
+//' @param s signular values
+//' @param V Right singular vectors
+//' 
+//' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+//' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+//' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+//' \item lambda, exp_var: Summary statistics of the sigular-values.
+//' }
+//' 
+//' @examples
+//' S = logcounts(sce)
+//' irlba.out = irlba::irlba(S, nv = 50)
+//' red.out = SVD2ACTIONred_full(S, irlba.out$u, as.matrix(irlba.out$d), irlba.out$v)
+//' Sr = red.out$S_r
+// [[Rcpp::export]]
+List SVD2ACTIONred_full(mat &S, mat u, vec d, mat v) {
+	if(1 < d.n_cols)
+		d = d.diag();
+	
+	field<mat> SVD_results(3);
+	SVD_results(0) = u;
+	SVD_results(1) = d;
+	SVD_results(2) = v;
+	
+	
+	ACTIONet::ReducedKernel reduction = ACTIONet::SVD2ACTIONred(S, SVD_results);			
+			
+	List res;	
+	res["S_r"] = reduction.S_r;		
+	res["V"] = reduction.V;
+	res["lambda"] = reduction.lambda;
+	res["explained_var"] = reduction.exp_var;	
+		
+	return res;
+}
+
+
+
+//' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+//'
+//' @param S Input matrix ("sparseMatrix")
+//' @param U Left singular vectors
+//' @param s signular values
+//' @param V Right singular vectors
+//' 
+//' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+//' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+//' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+//' \item lambda, exp_var: Summary statistics of the sigular-values.
+//' }
+//' 
+//' @examples
+//' S = logcounts(sce)
+//' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
+//' red.out = PCA2ACTIONred_full(S, irlba.out$x, irlba.out$rotation, as.matrix(irlba.out$sdev))
+//' Sr = red.out$S_r
+// [[Rcpp::export]]
+List PCA2ACTIONred(sp_mat &S, mat x, vec sdev, mat rotation) {
+	
+	field<mat> SVD_results(3);
+	
+	vec d = sdev*sqrt(x.n_rows - 1);
+	mat U = x;
+	for(int i = 0; i < U.n_cols; i++) {
+		U.col(i) /= d(i);
+	}	
+	
+	SVD_results(0) = U;
+	SVD_results(1) = d;
+	SVD_results(2) = rotation;
+	
+	
+	ACTIONet::ReducedKernel reduction = ACTIONet::PCA2ACTIONred(S, SVD_results);			
+			
+	List res;	
+	res["S_r"] = reduction.S_r;		
+	res["V"] = reduction.V;
+	res["lambda"] = reduction.lambda;
+	res["explained_var"] = reduction.exp_var;	
+		
+	return res;
+}
+
+
+//' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
+//'
+//' @param S Input matrix ("sparseMatrix")
+//' @param U Left singular vectors
+//' @param s signular values
+//' @param V Right singular vectors
+//' 
+//' @return A named list with S_r, V, lambda, and exp_var. \itemize{
+//' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
+//' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
+//' \item lambda, exp_var: Summary statistics of the sigular-values.
+//' }
+//' 
+//' @examples
+//' S = logcounts(sce)
+//' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
+//' red.out = PCA2ACTIONred_full(S, irlba.out$x, irlba.out$rotation, as.matrix(irlba.out$sdev))
+//' Sr = red.out$S_r
+// [[Rcpp::export]]
+List PCA2ACTIONred_full(mat &S, mat x, vec sdev, mat rotation) {
+	
+	field<mat> SVD_results(3);
+	
+	vec d = sdev*sqrt(x.n_rows - 1);
+	mat U = x;
+	for(int i = 0; i < U.n_cols; i++) {
+		U.col(i) /= d(i);
+	}	
+	
+	SVD_results(0) = U;
+	SVD_results(1) = d;
+	SVD_results(2) = rotation;
+
+	
+	
+	ACTIONet::ReducedKernel reduction = ACTIONet::PCA2ACTIONred(S, SVD_results);			
+			
+	List res;	
+	res["S_r"] = reduction.S_r;		
+	res["V"] = reduction.V;
+	res["lambda"] = reduction.lambda;
+	res["explained_var"] = reduction.exp_var;	
+		
+	return res;
+}
+
+
+
+
+
+// [[Rcpp::export]]
+List PCA2SVD(sp_mat &S, mat x, vec sdev, mat rotation) {
+	
+	field<mat> PCA_results(3);
+	vec d = sdev*sqrt(x.n_rows - 1);
+	
+	mat U = x;
+	for(int i = 0; i < U.n_cols; i++) {
+		U.col(i) /= d(i);
+	}
+	PCA_results(0) = U;
+	PCA_results(1) = d;
+	PCA_results(2) = rotation;
+	
+	
+	field<mat> SVD_results = ACTIONet::PCA2SVD(S, PCA_results);			
+			
+	List res;	
+	res["u"] = SVD_results(0);		
+	res["d"] = SVD_results(1);
+	res["v"] = SVD_results(2);
+		
+	return res;
+}
+
+
+
+// [[Rcpp::export]]
+List PCA2SVD_full(mat &S, mat x, vec sdev, mat rotation) {
+	
+	field<mat> PCA_results(3);
+	vec d = sdev*sqrt(x.n_rows - 1);
+	
+	mat U = x;
+	for(int i = 0; i < U.n_cols; i++) {
+		U.col(i) /= d(i);
+	}
+	PCA_results(0) = U;
+	PCA_results(1) = d;
+	PCA_results(2) = rotation;
+	
+	
+	field<mat> SVD_results = ACTIONet::PCA2SVD(S, PCA_results);			
+			
+	List res;	
+	res["u"] = SVD_results(0);		
+	res["d"] = SVD_results(1);
+	res["v"] = SVD_results(2);
+		
+	return res;
+}
+
+
+// [[Rcpp::export]]
+List SVD2PCA(sp_mat &S, mat u, vec d, mat v) {
+	if(1 < d.n_cols)
+		d = d.diag();
+			
+	field<mat> SVD_results(3);
+	SVD_results(0) = u;
+	SVD_results(1) = d;
+	SVD_results(2) = v;
+	
+	
+	field<mat> PCA_results = ACTIONet::SVD2PCA(S, SVD_results);			
+			
+	List res;	
+	vec s = PCA_results(1).col(0);
+	
+	mat X = PCA_results(0);
+	for(int i = 0; i < X.n_cols;i++) {
+		X.col(i) *= s(i);
+	}
+	res["x"] = X;		
+	res["rotation"] = PCA_results(2);
+	res["sdev"] = s/sqrt(X.n_rows - 1);	
+
+	return res;
+}
+
+
+// [[Rcpp::export]]
+List SVD2PCA_full(mat &S, mat u, vec d, mat v) {	
+	if(1 < d.n_cols)
+		d = d.diag();
+			
+	field<mat> SVD_results(3);
+	SVD_results(0) = u;
+	SVD_results(1) = d;
+	SVD_results(2) = v;
+	
+	
+	field<mat> PCA_results = ACTIONet::SVD2PCA(S, SVD_results);			
+			
+	List res;	
+	vec s = PCA_results(1).col(0);
+	
+	mat X = PCA_results(0);
+	for(int i = 0; i < X.n_cols;i++) {
+		X.col(i) *= s(i);
+	}
+	res["x"] = X;		
+	res["rotation"] = PCA_results(2);
+	res["sdev"] = s/sqrt(X.n_rows - 1);	
+		
+	return res;
+}
+
+
+

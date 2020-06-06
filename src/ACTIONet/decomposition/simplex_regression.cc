@@ -1,5 +1,5 @@
 #include <ACTIONet.h>
-#include <mini_cblas.h>
+//#include <mini_cblas.h>
 #include <cassert>
 
 // Re-implemented from: Fast and Robust Archetypal Analysis for Representation Learning
@@ -49,10 +49,10 @@ namespace ACTIONet {
 	  na = 1;
 	  xRed[0] = x[0];
 	  cRed[0] = c[0];
-	  cblas_copy(m, pr_M, 1, pr_MRed, 1);
+	  cblas_dcopy(m, pr_M, 1, pr_MRed, 1);
 
 	  // BLAS GRed = MRedT * MRed + lam2sq (na = 1 for now)
-	  double coeff = cblas_dot(m,pr_MRed,1,pr_MRed,1) + lam2sq;
+	  double coeff = cblas_ddot(m,pr_MRed,1,pr_MRed,1) + lam2sq;
 	  GRed(0,0) = coeff;
 	  GRedinv(0,0)= double(1.0) / GRed(0,0);
 
@@ -87,7 +87,7 @@ namespace ACTIONet {
 		  // MRed
 		  for(int i = 0; i < na; ++i) {
 			 // BLAS copy first columns of M to MRed
-			 cblas_copy(m, pr_M + m*NASet[i], 1, pr_MRed + m*i , 1);
+			 cblas_dcopy(m, pr_M + m*NASet[i], 1, pr_MRed + m*i , 1);
 		  }
 		  // gRed
 		  for(int i = 0; i<na; ++i) {
@@ -96,10 +96,10 @@ namespace ACTIONet {
 
 		  // GinvA
 		  // BLAS GinvA = GRedinv * A (ARed == A)
-		  cblas_symv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_A,1,double(),pr_GinvA,1);
+		  cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_A,1,double(),pr_GinvA,1);
 		  // Ginvg
 		  // BLAS Ginvg = GRedinv * gRed
-		  cblas_symv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_gRed,1,double(),pr_Ginvg,1);
+		  cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_gRed,1,double(),pr_Ginvg,1);
 		  double sGinvg = double();
 		  double sGinvA = double();
 		  for(int i = 0; i< na; ++i) {
@@ -108,9 +108,9 @@ namespace ACTIONet {
 		  }
 		  double lambdaS = sGinvg / sGinvA;
 		  // BLAS PRed = GinvA * lambdaS - Ginvg
-		  cblas_copy(na, pr_GinvA, 1, pr_PRed, 1);
-		  cblas_scal(na, lambdaS, pr_PRed, 1);
-		  cblas_axpy(na, double(-1.0), pr_Ginvg, 1, pr_PRed, 1);
+		  cblas_dcopy(na, pr_GinvA, 1, pr_PRed, 1);
+		  cblas_dscal(na, lambdaS, pr_PRed, 1);
+		  cblas_daxpy(na, double(-1.0), pr_Ginvg, 1, pr_PRed, 1);
 
 		  double maxPRed = abs(PRed[0]);
 		  for(int i = 0; i< na; ++i) {
@@ -143,20 +143,20 @@ namespace ACTIONet {
 
 				// update GRedinv
 				// BLAS UB = MRed.double * M[:, indexMin]
-				cblas_gemv(CblasColMajor,CblasTrans,m,na,double(1.0),pr_MRed,m,pr_M+indexMin*m,1,double(),pr_UB,1);
+				cblas_dgemv(CblasColMajor,CblasTrans,m,na,double(1.0),pr_MRed,m,pr_M+indexMin*m,1,double(),pr_UB,1);
 				// BLAS UC = M[:,indexMin].double* M[:, indexMin]
-				double UC = cblas_dot(m,pr_M+indexMin*m,1, pr_M+indexMin*m,1) + lam2sq;
+				double UC = cblas_ddot(m,pr_M+indexMin*m,1, pr_M+indexMin*m,1) + lam2sq;
 				// BLAS UAiB = GRedinv * UB
-				cblas_symv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_UB,1,double(),pr_UAiB,1);
-				double USi = double(1.0)/(UC - cblas_dot(na,pr_UB,1,pr_UAiB,1));
+				cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_UB,1,double(),pr_UAiB,1);
+				double USi = double(1.0)/(UC - cblas_ddot(na,pr_UB,1,pr_UAiB,1));
 				// GRedinv (restricted) += USi * UAiB*UAiB
 				//replace cblas_syr(CblasColMajor,CblasUpper,na,USi, pr_UAiB, 1, pr_GRedinv, L);  
-				cblas_ger(CblasColMajor,na,na,USi,pr_UAiB,1,pr_UAiB,1,pr_GRedinv,L);
+				cblas_dger(CblasColMajor,na,na,USi,pr_UAiB,1,pr_UAiB,1,pr_GRedinv,L);
 				// copy -UAiB*USi, -UAiB.double*USi, USi to GRedinv
-				cblas_copy(na, pr_UAiB, 1, pr_GRedinv+na*L, 1);
-				cblas_scal(na, -USi, pr_GRedinv+na*L,1);
-				cblas_copy(na, pr_UAiB, 1, pr_GRedinv+na, L);
-				cblas_scal(na, -USi, pr_GRedinv+na,L);
+				cblas_dcopy(na, pr_UAiB, 1, pr_GRedinv+na*L, 1);
+				cblas_dscal(na, -USi, pr_GRedinv+na*L,1);
+				cblas_dcopy(na, pr_UAiB, 1, pr_GRedinv+na, L);
+				cblas_dscal(na, -USi, pr_GRedinv+na,L);
 				GRedinv(na,na) = USi;
 
 				na += 1;
@@ -173,18 +173,18 @@ namespace ACTIONet {
 				}
 			 }
 			 // update x and Gplus
-			 cblas_scal(na, min(double(1.0), alphaMin), pr_PRed, 1);
+			 cblas_dscal(na, min(double(1.0), alphaMin), pr_PRed, 1);
 			 for(int i = 0; i< na; ++i) {
 				x[NASet[i]] += PRed[i];
 				xRed[i] = x[NASet[i]];
 				// BLAS Gplus += M.double * M[:, NASet[i]] * cAdv
-				//cblas_gemv(CblasColMajor,CblasTrans,m,p,cAdv,pr_M,m, pr_M+NASet[i]*m,1,double(1.0),pr_Gplus,1);
+				//cblas_dgemv(CblasColMajor,CblasTrans,m,p,cAdv,pr_M,m, pr_M+NASet[i]*m,1,double(1.0),pr_Gplus,1);
 				// BLAS Gplus
 				Gplus[NASet[i]] += PRed[i]*lam2sq;
 			 }
 			 // Gplus += M.double * MRed * (scaled PRed)
-			 cblas_gemv(CblasColMajor,CblasNoTrans,m,na,double(1.0),pr_MRed,m,pr_PRed,1,double(),pr_MRedPRed,1);    
-			 cblas_gemv(CblasColMajor,CblasTrans,m,p,double(1.0),pr_M,m,pr_MRedPRed,1,double(1.0),pr_Gplus,1);
+			 cblas_dgemv(CblasColMajor,CblasNoTrans,m,na,double(1.0),pr_MRed,m,pr_PRed,1,double(),pr_MRedPRed,1);    
+			 cblas_dgemv(CblasColMajor,CblasTrans,m,p,double(1.0),pr_M,m,pr_MRedPRed,1,double(1.0),pr_Gplus,1);
 
 
 			 // delete one constraint or not?
@@ -209,21 +209,21 @@ namespace ACTIONet {
 				// downdate GRedinv
 				double UCi = double(1.0)/GRedinv(indexMin, indexMin); 
 				// BLAS UB = GRedinv[ALL\indexMin,indexMin]
-				cblas_copy(na+1, pr_GRedinv+indexMin*L, 1, pr_UB, 1);
+				cblas_dcopy(na+1, pr_GRedinv+indexMin*L, 1, pr_UB, 1);
 				for(int i = indexMin; i<na; ++i)
 				   UB[i] = UB[i+1];
 				UB[na] = double();
 				// get (GRedinv translated)
 				// column first
 				for(int i = indexMin; i<na; ++i)
-				   cblas_copy(na+1, pr_GRedinv+(i+1)*L,1,pr_GRedinv+i*L,1);
+				   cblas_dcopy(na+1, pr_GRedinv+(i+1)*L,1,pr_GRedinv+i*L,1);
 				// row then
 				for(int i = indexMin; i<na; ++i)
-				   cblas_copy(na+1, pr_GRedinv+i+1, L, pr_GRedinv+i, L);
+				   cblas_dcopy(na+1, pr_GRedinv+i+1, L, pr_GRedinv+i, L);
 
 				// BLAS GRedinv = (GRedinv translated) - UB*UB.double*UCi 
 				//replace cblas_syr(CblasColMajor,CblasUpper,na,-UCi, pr_UB, 1, pr_GRedinv, L);  
-				cblas_ger(CblasColMajor,na,na,-UCi,pr_UB,1,pr_UB,1,pr_GRedinv,L);
+				cblas_dger(CblasColMajor,na,na,-UCi,pr_UB,1,pr_UB,1,pr_GRedinv,L);
 			 }
 		  }
 	   }
@@ -272,13 +272,13 @@ namespace ACTIONet {
 	  na = 1;
 	  xRed[0] = x[0];
 	  cRed[0] = c[0];
-	  cblas_copy(m, pr_M, 1, pr_MRed, 1);
+	  cblas_dcopy(m, pr_M, 1, pr_MRed, 1);
 
 	  // BLAS GRed = MRedT * MRed + lam2sq (na = 1 for now)
-	  double coeff = cblas_dot(m,pr_MRed,1,pr_MRed,1) + lam2sq;
+	  double coeff = cblas_ddot(m,pr_MRed,1,pr_MRed,1) + lam2sq;
 	  GRed(0,0) = coeff;
 	  GRedinv(0,0)= double(1.0) / GRed(0,0);
-	  cblas_copy(p, pr_G, 1, pr_MTMRed, 1);
+	  cblas_dcopy(p, pr_G, 1, pr_MTMRed, 1);
 
 
 	   arma::vec Gplus = G*x + c;
@@ -313,10 +313,10 @@ namespace ACTIONet {
 
 		  // GinvA
 		  // BLAS GinvA = GRedinv * A (ARed == A)
-		  cblas_symv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_A,1,double(),pr_GinvA,1);
+		  cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_A,1,double(),pr_GinvA,1);
 		  // Ginvg
 		  // BLAS Ginvg = GRedinv * gRed
-		  cblas_symv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_gRed,1,double(),pr_Ginvg,1);
+		  cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_gRed,1,double(),pr_Ginvg,1);
 		  double sGinvg = double();
 		  double sGinvA = double();
 		  for(int i = 0; i< na; ++i) {
@@ -325,9 +325,9 @@ namespace ACTIONet {
 		  }
 		  double lambdaS = sGinvg / sGinvA;
 		  // BLAS PRed = GinvA * lambdaS - Ginvg
-		  cblas_copy(na, pr_GinvA, 1, pr_PRed, 1);
-		  cblas_scal(na, lambdaS, pr_PRed, 1);
-		  cblas_axpy(na, double(-1.0), pr_Ginvg, 1, pr_PRed, 1);
+		  cblas_dcopy(na, pr_GinvA, 1, pr_PRed, 1);
+		  cblas_dscal(na, lambdaS, pr_PRed, 1);
+		  cblas_daxpy(na, double(-1.0), pr_Ginvg, 1, pr_PRed, 1);
 
 		  double maxPRed = abs(PRed[0]);
 		  for(int i = 0; i< na; ++i) {
@@ -358,7 +358,7 @@ namespace ACTIONet {
 				cRed[na] = c[indexMin];
 				// Gplus inchange
 				// update MTMRed
-				cblas_copy(p, pr_G+indexMin*p, 1, pr_MTMRed+na*p, 1);
+				cblas_dcopy(p, pr_G+indexMin*p, 1, pr_MTMRed+na*p, 1);
 
 				// update GRedinv
 				// BLAS UB = MRed.double * M[:, indexMin]
@@ -369,16 +369,16 @@ namespace ACTIONet {
 				// BLAS UC = M[:,indexMin].double* M[:, indexMin]
 				double UC = G(indexMin, indexMin);
 				// BLAS UAiB = GRedinv * UB
-				cblas_symv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_UB,1,double(),pr_UAiB,1);
-				double USi = double(1.0)/(UC - cblas_dot(na,pr_UB,1,pr_UAiB,1));
+				cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_UB,1,double(),pr_UAiB,1);
+				double USi = double(1.0)/(UC - cblas_ddot(na,pr_UB,1,pr_UAiB,1));
 				// GRedinv (restricted) += USi * UAiB*UAiB
 				//replace cblas_syr(CblasColMajor,CblasUpper,na,USi, pr_UAiB, 1, pr_GRedinv, L);  
-				cblas_ger(CblasColMajor,na,na,USi,pr_UAiB,1,pr_UAiB,1,pr_GRedinv,L);
+				cblas_dger(CblasColMajor,na,na,USi,pr_UAiB,1,pr_UAiB,1,pr_GRedinv,L);
 				// copy -UAiB*USi, -UAiB.double*USi, USi to GRedinv
-				cblas_copy(na, pr_UAiB, 1, pr_GRedinv+na*L, 1);
-				cblas_scal(na, -USi, pr_GRedinv+na*L,1);
-				cblas_copy(na, pr_UAiB, 1, pr_GRedinv+na, L);
-				cblas_scal(na, -USi, pr_GRedinv+na,L);
+				cblas_dcopy(na, pr_UAiB, 1, pr_GRedinv+na*L, 1);
+				cblas_dscal(na, -USi, pr_GRedinv+na*L,1);
+				cblas_dcopy(na, pr_UAiB, 1, pr_GRedinv+na, L);
+				cblas_dscal(na, -USi, pr_GRedinv+na,L);
 				GRedinv(na,na) = USi;
 
 				na += 1;
@@ -395,13 +395,13 @@ namespace ACTIONet {
 				}
 			 }
 			 // update x and Gplus
-			 cblas_scal(na, min(double(1.0), alphaMin), pr_PRed, 1);
+			 cblas_dscal(na, min(double(1.0), alphaMin), pr_PRed, 1);
 			 for(int i = 0; i< na; ++i) {
 				x[NASet[i]] += PRed[i];
 				xRed[i] = x[NASet[i]];
 			 }
 			 // Gplus += MTMRed * (scaled PRed)
-			 cblas_gemv(CblasColMajor,CblasNoTrans,p,na,double(1.0),pr_MTMRed,p,pr_PRed,1,double(1.0),pr_Gplus,1);
+			 cblas_dgemv(CblasColMajor,CblasNoTrans,p,na,double(1.0),pr_MTMRed,p,pr_PRed,1,double(1.0),pr_Gplus,1);
 
 
 			 // delete one constraint or not?
@@ -425,26 +425,26 @@ namespace ACTIONet {
 
 				// downdate MTMRed
 				for(int i = indexMin; i<na; ++i)
-				   cblas_copy(p, pr_MTMRed+(i+1)*p, 1, pr_MTMRed+i*p, 1);
+				   cblas_dcopy(p, pr_MTMRed+(i+1)*p, 1, pr_MTMRed+i*p, 1);
 
 				// downdate GRedinv
 				double UCi = double(1.0)/GRedinv(indexMin, indexMin); 
 				// BLAS UB = GRedinv[ALL\indexMin,indexMin]
-				cblas_copy(na+1, pr_GRedinv+indexMin*L, 1, pr_UB, 1);
+				cblas_dcopy(na+1, pr_GRedinv+indexMin*L, 1, pr_UB, 1);
 				for(int i = indexMin; i<na; ++i)
 				   UB[i] = UB[i+1];
 				UB[na] = double();
 				// get (GRedinv translated)
 				// column first
 				for(int i = indexMin; i<na; ++i)
-				   cblas_copy(na+1, pr_GRedinv+(i+1)*L,1,pr_GRedinv+i*L,1);
+				   cblas_dcopy(na+1, pr_GRedinv+(i+1)*L,1,pr_GRedinv+i*L,1);
 				// row then
 				for(int i = indexMin; i<na; ++i)
-				   cblas_copy(na+1, pr_GRedinv+i+1, L, pr_GRedinv+i, L);
+				   cblas_dcopy(na+1, pr_GRedinv+i+1, L, pr_GRedinv+i, L);
 
 				// BLAS GRedinv = (GRedinv translated) - UB*UB.double*UCi 
 				//replace cblas_syr(CblasColMajor,CblasUpper,na,-UCi, pr_UB, 1, pr_GRedinv, L);  
-				cblas_ger(CblasColMajor,na,na,-UCi,pr_UB,1,pr_UB,1,pr_GRedinv,L);
+				cblas_dger(CblasColMajor,na,na,-UCi,pr_UB,1,pr_UB,1,pr_GRedinv,L);
 			 }
 		  }
 	   }

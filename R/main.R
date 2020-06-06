@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 0.5, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-6) {		
+run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 8, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300) {		
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -88,10 +88,10 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 	colFactors(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
 	colFactors(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
-	ace$unfied_archetypes = unification.out$unfied_archetypes
+	ace$assigned_archetype = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-	ace$node_centrality = compute_archetype_core_centrality(G, ace$unfied_archetypes)
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
     
 
 	# Compute gene specificity for each archetype	
@@ -137,25 +137,24 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 #' plot.ACTIONet(ace)
 #' ace.updated = reconstruct.ACTIONet(ace, network_density = 0.1)
 #' plot.ACTIONet(ace.updated)
-reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = FALSE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, layout.in.parallel = FALSE, reduction.slot = "ACTION") {
+reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 8, layout.in.parallel = FALSE, reduction.slot = "ACTION") {
+    set.seed(0)
 	
     # re-Build ACTIONet
-    set.seed(0)
 	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
 	
     G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
 	colNets(ace)$ACTIONet = G
 	
 	
-    # re-Layout ACTIONet
-    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
-	initial.coordinates = t(scale(t(S_r)))
+    # Layout ACTIONet
+	initial.coordinates = t(scale(SingleCellExperiment::reducedDims(ace)[[reduction.slot]]))
 	if(layout.in.parallel == FALSE) {		
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
     } else { # WARNING! This makes the results none reproducible
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	}
-	    
+	
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
     reducedDims(ace)$denovo_color = vis.out$colors
@@ -209,14 +208,14 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 	
 	unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0, resolution = resolution)
 
-	R.utils::printf("resolution = %d -> %d states\n", resolution, length(unique(unification.out$unfied_archetypes)))
+	R.utils::printf("resolution = %d -> %d states\n", resolution, length(unique(unification.out$assigned_archetype)))
 	
 	colFactors(ace)[[sprintf("H_%s", unified_suffix)]] = as(unification.out$H_unified, 'sparseMatrix')
 	colFactors(ace)[[sprintf("C_%s", unified_suffix)]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
-	colData(ace)[[sprintf("%s_archetypes", unified_suffix)]]  = unification.out$unfied_archetypes
+	colData(ace)[[sprintf("%s_archetypes", unified_suffix)]]  = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-	ace$node_centrality = compute_archetype_core_centrality(G, ace$unfied_archetypes)
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
     
 
 	# Compute gene specificity for each archetype	
