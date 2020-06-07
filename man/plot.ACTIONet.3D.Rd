@@ -33,5 +33,5 @@ Main ACTIONet 3D plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet.3D(ace, ace$unfied_archetypes, transparency.attr = ace$node_centrality)
+plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 }
