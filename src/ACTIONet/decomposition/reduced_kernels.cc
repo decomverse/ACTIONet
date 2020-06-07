@@ -233,9 +233,10 @@ namespace ACTIONet {
 	}	
 
 	
-	ReducedKernel ACTION_reduction(sp_mat &S, int dim, int iter = 5, int seed = 0, int SVD_algorithm = HALKO_ALG) {			
+	ReducedKernel ACTION_reduction(sp_mat &S, int dim, int iter = 5, int seed = 0, int SVD_algorithm = HALKO_ALG, bool prenormalize = false) {			
 		int n = S.n_rows;
-		//S = normalise(S, 2);    
+		if(prenormalize)
+			S = normalise(S, 2);    
 
 		printf("\tComputing reduced ACTION kernel. Input matrix size: %d x %d\n", S.n_rows, S.n_cols); fflush(stdout);
 		
@@ -255,8 +256,16 @@ namespace ACTIONet {
 		mat B = join_rows(b1, b2);
 		
 		printf("\tPerform SVD on the original matrix\n"); fflush(stdout);
+		vec s;
+		mat U, V;
 		field<mat> SVD_results;
 		switch(SVD_algorithm) {
+			case FULL_SVD:
+				svd_econ(U, s, V, mat(S));			
+				SVD_results(0) = U;
+				SVD_results(1) = s;
+				SVD_results(2) = V;
+				break;			
 			case IRLB_ALG:
 				SVD_results = IRLB_SVD(S, dim, iter, seed);				
 				break;
@@ -272,9 +281,9 @@ namespace ACTIONet {
 				break;
 		}
 
-		mat U = SVD_results(0);
-		vec s = SVD_results(1);
-		mat V = SVD_results(2);
+		U = SVD_results(0);
+		s = SVD_results(1);
+		V = SVD_results(2);
 		
 		printf("\tUpdate SVD ..."); fflush(stdout);
 		vec s_prime;
@@ -327,9 +336,10 @@ namespace ACTIONet {
 		return output;	
 	}
 
-	ReducedKernel ACTION_reduction(mat &S, int dim, int iter = 5, int seed = 0, int SVD_algorithm = HALKO_ALG) {			
+	ReducedKernel ACTION_reduction(mat &S, int dim, int iter = 5, int seed = 0, int SVD_algorithm = HALKO_ALG, bool prenormalize = false) {			
 		int n = S.n_rows;
-		//S = normalise(S, 2);    
+		if(prenormalize)
+			S = normalise(S, 2);    
 
 		printf("\tComputing reduced ACTION kernel. Input matrix size: %d x %d\n", S.n_rows, S.n_cols); fflush(stdout);
 		
@@ -349,11 +359,19 @@ namespace ACTIONet {
 		mat B = join_rows(b1, b2);
 		
 		printf("\tPerform SVD on the original matrix\n"); fflush(stdout);
+		vec s;
+		mat U, V;
 		field<mat> SVD_results;
 		switch(SVD_algorithm) {
+			case FULL_SVD:
+				svd_econ(U, s, V, S);			
+				SVD_results(0) = U;
+				SVD_results(1) = s;
+				SVD_results(2) = V;
+				break;			
 			case IRLB_ALG:
 				SVD_results = IRLB_SVD(S, dim, iter, seed);				
-				break;			
+				break;
 			case HALKO_ALG:
 				SVD_results = HalkoSVD(S, dim, iter, seed);				
 				break;
@@ -366,9 +384,10 @@ namespace ACTIONet {
 				break;
 		}
 
-		mat U = SVD_results(0);
-		vec s = SVD_results(1);
-		mat V = SVD_results(2);
+		U = SVD_results(0);
+		s = SVD_results(1);
+		V = SVD_results(2);
+
 		
 		printf("\tUpdate SVD ..."); fflush(stdout);
 		vec s_prime;
@@ -420,14 +439,14 @@ namespace ACTIONet {
 		return output;	
 	}
 	
-	ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG) {
-		ReducedKernel output = ACTION_reduction(S, dim, iter, seed, SVD_algorithm);
+	ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG, bool prenormalize = false) {
+		ReducedKernel output = ACTION_reduction(S, dim, iter, seed, SVD_algorithm, prenormalize);
 		
 		return(output);
 	}
 
-	ReducedKernel reduce_kernel(mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG) {
-		ReducedKernel output = ACTION_reduction(S, dim, iter, seed, SVD_algorithm);
+	ReducedKernel reduce_kernel(mat &S, int dim, int iter = 5, int seed = 0, int reduction_algorithm = ACTIONRED_ALG, int SVD_algorithm = HALKO_ALG, bool prenormalize = false) {
+		ReducedKernel output = ACTION_reduction(S, dim, iter, seed, SVD_algorithm, prenormalize);
 		
 		return(output);	
 	}

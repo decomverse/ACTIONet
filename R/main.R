@@ -178,18 +178,14 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' plot.ACTIONet(ace)
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 8, layout.in.parallel = FALSE, reduction.slot = "ACTION") {
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1, reduction.slot = "ACTION") {
     G = colNets(ace)[["ACTIONet"]]
     	
     # re-Layout ACTIONet
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
     
 	initial.coordinates = t(scale(t(S_r)))
-	if(layout.in.parallel == FALSE) {		
-		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
-    } else { # WARNING! This makes the results none reproducible
-		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
-	}
+	vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	    
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D

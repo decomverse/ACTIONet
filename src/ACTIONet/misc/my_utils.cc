@@ -222,6 +222,24 @@ namespace ACTIONet {
 		return(out);
 	}	
 	
+	mat robust_zscore(mat A) {	
+		rowvec median = mean(A, 0);
+		rowvec sigma = stddev(A, 0);
+
+		
+		for(int j = 0; j < A.n_cols; j++) {
+			vec v = A.col(j);
+			double med = arma::median(v);
+			double mad = arma::median(arma::abs(v-med));
+			
+			vec z = (v - med) / mad;
+			A.col(j) = z;
+		}
+		
+		return A;
+	}	
+	
+	
 	mat zscore(mat A) {	
 		rowvec mu = mean(A, 0);
 		rowvec sigma = stddev(A, 0);
@@ -232,7 +250,7 @@ namespace ACTIONet {
 		}
 		
 		return A;
-	}	
+	}
 	
 	void convtests (int Bsz, int n, double tol, double svtol, double Smax, double *svratio, double *residuals, int *k, int *converged, double S) 
 	{
