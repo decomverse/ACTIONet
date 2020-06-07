@@ -151,19 +151,20 @@ namespace ACTIONet {
 				j++;
 			}
 			
-			/*
+			
 			mat tmp(B, work, work, true);			
 			mat Umat(BU, work, work, false);
 			vec svec(BS, work, false);
 			mat Vmat(BV, work, work, false);
 
 			svd(Umat, svec, Vmat, tmp);
-			*/
 			
+			
+			/*
 			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
 			int *BI = (int *) T;
 			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
-
+			*/
 
 
 			R_F = cblas_dnrm2(n, F, inc);
@@ -399,18 +400,19 @@ namespace ACTIONet {
 				j++;
 			}
 			
-/*			
+			
 			mat tmp(B, work, work, true);			
 			mat Umat(BU, work, work, false);
 			vec svec(BS, work, false);
 			mat Vmat(BV, work, work, false);
 
 			svd(Umat, svec, Vmat, tmp);
-*/						
+
+/*						
 			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B		
 			int *BI = (int *) T;
 			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
-
+*/
 			R_F = cblas_dnrm2(n, F, inc);
 			R = 1.0 / R_F;
 			cblas_dscal(n, R, F, inc);
