@@ -1,0 +1,6 @@
+CXX=dpcpp
+SHLIB_LD=dpcpp
+CXXFLAGS+=-O3 -std=c++11 -fsycl-device-code-split=per_kernel -DMKL_ILP64 -I${MKLROOT}/include -w
+LINALG=-fPIC -fsycl-device-code-split=per_kernel ${MKLROOT}/lib/intel64/libmkl_sycl.a ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -L${MKLROOT}/lib -lsycl -lOpenCL -lpthread -lm -ldl
+
+

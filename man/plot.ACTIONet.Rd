@@ -45,5 +45,5 @@ Main ACTIONet plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet(ace, ace$unfied_archetypes, transparency.attr = ace$node_centrality)
+plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 }

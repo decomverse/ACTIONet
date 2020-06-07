@@ -29,5 +29,5 @@ ace with updated annotations added to ace$annotations
 Uses a variant of the label propagation algorithm to infer missing labels
 }
 \examples{
-ace = infer.missing.cell.annotations(ace, sce$unfied_archetypess, "updated_archetype_annotations")
+ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
 }
