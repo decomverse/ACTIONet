@@ -1,8 +1,12 @@
 #include "ACTIONet.h"
 
+#undef FC_LEN_T
+
 namespace ACTIONet {
 	// Adopted from the irlba R package
-	field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
+	field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
+		printf("\t\t* IRLB (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		
 		double eps = 3e-13;
 		//double eps = 2.22e-16;
 		double tol = 1e-05, svtol = 1e-5;
@@ -144,29 +148,24 @@ namespace ACTIONet {
 					B[j * work + j] = S;
 				}
 
-				//mat tt(B, work, work, true);			
-				//tt(span(0, 10), span(0, 10)).print("B");
-			
 				
 				j++;
 			}
 			
-			
-			mat tmp(B, work, work, true);			
+			/*
+			mat tmp(B, work, work, false);			
 			mat Umat(BU, work, work, false);
 			vec svec(BS, work, false);
 			mat Vmat(BV, work, work, false);
-
-			svd(Umat, svec, Vmat, tmp);
 			
-			
-			/*
-			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
+			arma::svd(Umat, svec, Vmat, tmp, "dc");
+			*/
+		
+			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B		
 			int *BI = (int *) T;
 			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
-			*/
-
-
+					
+						
 			R_F = cblas_dnrm2(n, F, inc);
 			R = 1.0 / R_F;
 			cblas_dscal(n, R, F, inc);
@@ -250,8 +249,9 @@ namespace ACTIONet {
 	}
 	
 
-
-	field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
+	field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
+		printf("\t\t* IRLB (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		
 		double eps = 3e-13;
 		//double eps = 2.22e-16;
 		double tol = 1e-05, svtol = 1e-5;
@@ -393,26 +393,24 @@ namespace ACTIONet {
 					B[j * work + j] = S;
 				}
 
-				//mat tt(B, work, work, true);			
-				//tt(span(0, 10), span(0, 10)).print("B");
-			
-				
+
 				j++;
 			}
 			
-			
-			mat tmp(B, work, work, true);			
+			/*
+			mat tmp(B, work, work, false);			
 			mat Umat(BU, work, work, false);
 			vec svec(BS, work, false);
 			mat Vmat(BV, work, work, false);
 
-			svd(Umat, svec, Vmat, tmp);
-
-/*						
-			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B		
+			arma::svd(Umat, svec, Vmat, tmp, "dc");
+			*/
+			
+			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
 			int *BI = (int *) T;
 			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
-*/
+			
+
 			R_F = cblas_dnrm2(n, F, inc);
 			R = 1.0 / R_F;
 			cblas_dscal(n, R, F, inc);
@@ -506,7 +504,7 @@ namespace ACTIONet {
 		int m = A.n_rows;
 		int n = A.n_cols;
 		
-		printf("\t\tRunning randomized SVD. Matrix size: %d x %d (# iters = %d)\n", m, n, iters); fflush(stdout);
+		printf("\t\t* Feng (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 				
 		vec S;
 		mat Q, L, U, V;
@@ -614,7 +612,7 @@ namespace ACTIONet {
 		int m = A.n_rows;
 		int n = A.n_cols;
 		
-		printf("\t\tRunning randomized SVD (full matrix version). Matrix size: %d x %d (# iters = %d)\n", m, n, iters); fflush(stdout);
+		printf("\t\t* Feng (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 				
 		vec S;
 		mat Q, L, U, V;
@@ -729,7 +727,7 @@ namespace ACTIONet {
 		mat R, Q;
 		mat U, V, X;
 		
-		printf("\t\tRunning randomized SVD. Matrix size: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		printf("\t\t* Halko (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 		
 		if (m < n) {
 			//R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
@@ -818,7 +816,7 @@ namespace ACTIONet {
 		mat R, Q;
 		mat U, V, X;
 		
-		printf("\t\tRunning randomized SVD. Matrix size: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		printf("\t\t* Halko (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 		
 		if (m < n) {
 			//R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);

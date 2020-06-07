@@ -231,9 +231,9 @@ List HalkoSVD_full(mat& A, int dim, int iters = 5, int seed = 0) {
 //' reduction.out = reduce(S, reduced_dim = 50)
 //' S_r = reduction.out$S_r
 // [[Rcpp::export]]
-List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int reduction_algorithm = 1, int SVD_algorithm = 1) {
+List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int reduction_algorithm = 0, int SVD_algorithm = 0, bool prenormalize = false) {
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm);				
+	ACTIONet::ReducedKernel reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize);				
 			
 	List res;	
 	res["S_r"] = reduction.S_r;		
@@ -266,9 +266,9 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, 
 //' reduction.out = reduce(S, reduced_dim = 50)
 //' S_r = reduction.out$S_r
 // [[Rcpp::export]]
-List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int reduction_algorithm = 1, int SVD_algorithm = 1) {
+List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int reduction_algorithm = 1, int SVD_algorithm = 1, bool prenormalize = false) {
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm);				
+	ACTIONet::ReducedKernel reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize);				
 			
 	List res;	
 	res["S_r"] = reduction.S_r;		

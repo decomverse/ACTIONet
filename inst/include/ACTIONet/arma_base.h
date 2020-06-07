@@ -6,7 +6,7 @@
 
 #include <cblas.h>
 
-#undef ARMA_USE_MKL_TYPES
+//#undef ARMA_USE_MKL_TYPES
 //#define ARMA_64BIT_WORD
 //#define ARMA_BLAS_LONG_LONG
 //#define ARMA_USE_FORTRAN_HIDDEN_ARGS
