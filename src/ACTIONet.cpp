@@ -46,9 +46,9 @@ List IRLB_SVD(sp_mat& A, int dim, int iters = 1000, int seed = 0) {
 	
 	List res;
 	
-	res["U"] = SVD_out(0);	
-	res["sigma"] = SVD_out(1);	
-	res["V"] = SVD_out(2);	
+	res["u"] = SVD_out(0);	
+	res["d"] = SVD_out(1);	
+	res["v"] = SVD_out(2);	
 	
 	return res;
 }
@@ -77,9 +77,9 @@ List IRLB_SVD_full(mat& A, int dim, int iters = 1000, int seed = 0) {
 	
 	List res;
 	
-	res["U"] = SVD_out(0);	
-	res["sigma"] = SVD_out(1);	
-	res["V"] = SVD_out(2);	
+	res["u"] = SVD_out(0);	
+	res["d"] = SVD_out(1);	
+	res["v"] = SVD_out(2);	
 	
 	return res;
 }
