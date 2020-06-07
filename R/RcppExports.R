@@ -830,8 +830,8 @@ SVD2ACTIONred_full <- function(S, u, d, v) {
 #' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
 #' red.out = PCA2ACTIONred_full(S, irlba.out$x, irlba.out$rotation, as.matrix(irlba.out$sdev))
 #' Sr = red.out$S_r
-PCA2ACTIONred <- function(S, x, rotation, sdev) {
-    .Call(`_ACTIONet_PCA2ACTIONred`, S, x, rotation, sdev)
+PCA2ACTIONred <- function(S, x, sdev, rotation) {
+    .Call(`_ACTIONet_PCA2ACTIONred`, S, x, sdev, rotation)
 }
 
 #' Computes reduced kernel matrix for a given (single-cell) profile and prior SVD
@@ -852,8 +852,8 @@ PCA2ACTIONred <- function(S, x, rotation, sdev) {
 #' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
 #' red.out = PCA2ACTIONred_full(S, irlba.out$x, irlba.out$rotation, as.matrix(irlba.out$sdev))
 #' Sr = red.out$S_r
-PCA2ACTIONred_full <- function(S, x, rotation, sdev) {
-    .Call(`_ACTIONet_PCA2ACTIONred_full`, S, x, rotation, sdev)
+PCA2ACTIONred_full <- function(S, x, sdev, rotation) {
+    .Call(`_ACTIONet_PCA2ACTIONred_full`, S, x, sdev, rotation)
 }
 
 PCA2SVD <- function(S, x, sdev, rotation) {

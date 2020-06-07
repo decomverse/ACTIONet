@@ -4,8 +4,8 @@
 \alias{cluster.ACTIONet}
 \title{A wrapper function For Leiden algorithm applied to an ACE object}
 \usage{
-cluster.ACTIONet(ace, resolution_parameter = 0.5, arch.init = TRUE,
-  seed = 0)
+cluster.ACTIONet(ace, resolution_parameter = 1, net.slot = "ACTIONet",
+  init.slot = "assigned_archetype", seed = 0)
 }
 \arguments{
 \item{ace}{Input results to be clustered}
@@ -13,9 +13,9 @@ cluster.ACTIONet(ace, resolution_parameter = 0.5, arch.init = TRUE,
 \item{resolution_parameter}{Resolution of the clustering.
 The higher the resolution, the more clusters we will get (default=0.5).}
 
-\item{arch.init}{Whether to use archetype-assignments to initialize clustering (default=TRUE)}
-
 \item{seed}{Random seed}
+
+\item{arch.init}{Whether to use archetype-assignments to initialize clustering (default=TRUE)}
 }
 \value{
 ace with added annotation
