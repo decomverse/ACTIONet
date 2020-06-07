@@ -8,7 +8,8 @@ namespace ACTIONet {
 	mat randNorm(int l, int m, int seed);
 	
 	mat zscore(mat A);
-	
+	mat robust_zscore(mat A);
+
 	// Used in IRLB
 	void randNorm_inplace(int n, double *out, int seed);
 	void convtests (int Bsz, int n, double tol, double svtol, double Smax, double *svratio, double *residuals, int *k, int *converged, double S);

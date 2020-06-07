@@ -164,7 +164,7 @@ namespace ACTIONet {
 			
 		field<mat> res(3);
 
-		mat init_coors = S_r;
+		mat init_coors = trans(robust_zscore(trans(S_r.rows(0, 2))));
 		
 		printf("Running layout with: compactness=%d, # epochs = %d\n", compactness_level, n_epochs);
 		
@@ -245,7 +245,7 @@ namespace ACTIONet {
 
 		
 		/****************************
-		 *  Now compute node colors *
+		 *  Compute 3D Embedding	*
 		 ***************************/	
 		mat initial_coor3D = join_vert(coordinates, init_coors.row(2));
 		head_vec.clear(); 
@@ -267,11 +267,37 @@ namespace ACTIONet {
 		coordinates_3D = trans(coordinates_3D);				
 	  
 	  
-		printf("Estimating node colors ... "); fflush(stdout);
-		mat Z = zscore(coordinates_3D);
+		/****************************
+		 *  Now compute node colors *
+		 ***************************/	
+		printf("Estimating node colors ... \n"); fflush(stdout);
+
+		/*
+		mat coeff;
+		mat score;
+		vec latent;
+		vec tsquared;
+		princomp(coeff, score, latent, tsquared, coordinates_3D);		
+		mat Z = robust_zscore(score);
+*/
 		
-		vec a = 128*Z.col(0) / max(abs(Z.col(0)));
-		vec b = 128*Z.col(1) / max(abs(Z.col(1)));
+		mat U;
+		vec s;
+		mat V;
+		svd_econ(U, s, V, coordinates_3D);		
+		mat Z = zscore(U);
+
+
+/*
+ 		mat Ct = trans(coordinates_3D);
+		ReducedKernel reduction = reduce_kernel(Ct, 3, 1000, 1, -1, 0, false);				
+		printf("Coor3D Sr: %d x %d\n", reduction.S_r.n_rows, reduction.S_r.n_cols);
+		
+		mat Z = zscore(trans(reduction.S_r));
+*/
+			
+		vec a = 50*Z.col(0);
+		vec b = 50*Z.col(1);
 
 		vec L = Z.col(2);
 		L = 25.0 + 70.0*(L - min(L)) / (max(L) - min(L));

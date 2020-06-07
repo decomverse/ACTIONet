@@ -34,6 +34,7 @@
 #include <hdbscan.hpp>
 
 // SVD algorithms
+#define FULL_SVD -1
 #define IRLB_ALG 0
 #define HALKO_ALG 1
 #define FENG_ALG 2
@@ -128,8 +129,8 @@ namespace ACTIONet {
 		field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
 
 		// ACTION-based kernel reduction algorithms
-		ReducedKernel ACTION_reduction(sp_mat &A, int dim, int iter, int seed, int SVD_algorithm);
-		ReducedKernel ACTION_reduction(mat &A, int dim, int iter, int seed, int SVD_algorithm);
+		ReducedKernel ACTION_reduction(sp_mat &A, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+		ReducedKernel ACTION_reduction(mat &A, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
 		
 		// Successive Projection Algorithm (SPA) to solve separable NMF
 		SPA_results run_SPA(mat M, int k);
@@ -153,8 +154,8 @@ namespace ACTIONet {
 		
 		
 	// Entry-points to compute a reduced kernel matrix	
-		ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
-		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
+		ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
+		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
 		
 		ReducedKernel SVD2ACTIONred(sp_mat &S, field<mat> SVD_results);
 		ReducedKernel SVD2ACTIONred(mat &S, field<mat> SVD_results);

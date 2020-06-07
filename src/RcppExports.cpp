@@ -102,8 +102,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // reduce_kernel
-List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
-RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP) {
+List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
+RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -113,13 +113,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type reduction_algorithm(reduction_algorithmSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
-    rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm));
+    Rcpp::traits::input_parameter< bool >::type prenormalize(prenormalizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize));
     return rcpp_result_gen;
 END_RCPP
 }
 // reduce_kernel_full
-List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm);
-RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP) {
+List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
+RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -129,7 +130,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type reduction_algorithm(reduction_algorithmSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
-    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm));
+    Rcpp::traits::input_parameter< bool >::type prenormalize(prenormalizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -778,8 +780,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_FengSVD_full", (DL_FUNC) &_ACTIONet_FengSVD_full, 4},
     {"_ACTIONet_HalkoSVD", (DL_FUNC) &_ACTIONet_HalkoSVD, 4},
     {"_ACTIONet_HalkoSVD_full", (DL_FUNC) &_ACTIONet_HalkoSVD_full, 4},
-    {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 6},
-    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 6},
+    {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 7},
+    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 7},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 2},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
