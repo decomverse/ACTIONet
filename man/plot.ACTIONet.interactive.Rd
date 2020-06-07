@@ -41,5 +41,5 @@ Main ACTIONet interactive plotting function
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet.interactive(ace, ace$unfied_archetypes)
+plot.ACTIONet.interactive(ace, ace$assigned_archetype)
 }

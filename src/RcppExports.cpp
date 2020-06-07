@@ -686,30 +686,30 @@ BEGIN_RCPP
 END_RCPP
 }
 // PCA2ACTIONred
-List PCA2ACTIONred(sp_mat& S, mat x, mat rotation, vec sdev);
-RcppExport SEXP _ACTIONet_PCA2ACTIONred(SEXP SSEXP, SEXP xSEXP, SEXP rotationSEXP, SEXP sdevSEXP) {
+List PCA2ACTIONred(sp_mat& S, mat x, vec sdev, mat rotation);
+RcppExport SEXP _ACTIONet_PCA2ACTIONred(SEXP SSEXP, SEXP xSEXP, SEXP sdevSEXP, SEXP rotationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< mat >::type rotation(rotationSEXP);
     Rcpp::traits::input_parameter< vec >::type sdev(sdevSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCA2ACTIONred(S, x, rotation, sdev));
+    Rcpp::traits::input_parameter< mat >::type rotation(rotationSEXP);
+    rcpp_result_gen = Rcpp::wrap(PCA2ACTIONred(S, x, sdev, rotation));
     return rcpp_result_gen;
 END_RCPP
 }
 // PCA2ACTIONred_full
-List PCA2ACTIONred_full(mat& S, mat x, mat rotation, vec sdev);
-RcppExport SEXP _ACTIONet_PCA2ACTIONred_full(SEXP SSEXP, SEXP xSEXP, SEXP rotationSEXP, SEXP sdevSEXP) {
+List PCA2ACTIONred_full(mat& S, mat x, vec sdev, mat rotation);
+RcppExport SEXP _ACTIONet_PCA2ACTIONred_full(SEXP SSEXP, SEXP xSEXP, SEXP sdevSEXP, SEXP rotationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< mat >::type rotation(rotationSEXP);
     Rcpp::traits::input_parameter< vec >::type sdev(sdevSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCA2ACTIONred_full(S, x, rotation, sdev));
+    Rcpp::traits::input_parameter< mat >::type rotation(rotationSEXP);
+    rcpp_result_gen = Rcpp::wrap(PCA2ACTIONred_full(S, x, sdev, rotation));
     return rcpp_result_gen;
 END_RCPP
 }
