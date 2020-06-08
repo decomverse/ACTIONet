@@ -1659,5 +1659,11 @@ List SVD2PCA_full(mat &S, mat u, vec d, mat v) {
 	return res;
 }
 
+// [[Rcpp::export]]
+mat computeFullSim(mat &H, int thread_no) {
 
+	mat G = ACTIONet::computeFullSim(H, thread_no);
+	
+	return(G);
+}
 

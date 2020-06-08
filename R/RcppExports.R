@@ -872,3 +872,7 @@ SVD2PCA_full <- function(S, u, d, v) {
     .Call(`_ACTIONet_SVD2PCA_full`, S, u, d, v)
 }
 
+computeFullSim <- function(H, thread_no) {
+    .Call(`_ACTIONet_computeFullSim`, H, thread_no)
+}
+

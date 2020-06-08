@@ -296,8 +296,8 @@ namespace ACTIONet {
 		mat Z = zscore(trans(reduction.S_r));
 */
 			
-		vec a = 50*Z.col(0);
-		vec b = 50*Z.col(1);
+		vec a = 75*Z.col(0);
+		vec b = 75*Z.col(1);
 
 		vec L = Z.col(2);
 		L = 25.0 + 70.0*(L - min(L)) / (max(L) - min(L));
