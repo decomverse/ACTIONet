@@ -97,7 +97,7 @@ batch.correct.sce.Harmony <- function(sce, batch.vec, reduction.slot = "ACTION")
 #' sce = import.sce.from.10X(input_path)
 #' batch.vec = sce$Batch # Assumes sample annotations are in the input_path with "Batch" attribute being provided
 #' sce = reduce.and.batch.correct.sce.Harmony(sce)
-reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction_name = "ACTION", seed = 0, SVD_algorithm = 0) {
+reduce.and.batch.correct.sce.Harmony <- function(sce, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 	if( !("harmony" %in% rownames(installed.packages())) ) {
 		message("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.")
 		return

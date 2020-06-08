@@ -753,7 +753,23 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 
     node.size = node.size * 0.3
 
-    coors = reducedDims(ace)[[coordinate.slot]]
+    if(class(ace) == "ACTIONetExperiment") {
+		if(is.character(coordinate.slot)) {
+			coors = reducedDims(ace)[[coordinate.slot]]
+		} else {
+			coors = as.matrix(coordinate.slot)
+		}
+	} else {
+		alpha_val = 0
+		if(is.matrix(ace) | is.sparseMatrix(ace)) {
+			coors = as.matrix(ace)
+		}
+		else {
+			print("Unknown type for ace")
+			return()
+		}
+	}    
+    
 
     NA.col = "#eeeeee"
         
@@ -853,8 +869,8 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
 }
 
 
-select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = F) {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = F, specificity.slot.name = "H_unified_upper_significance") {	
+	feature.enrichment.table = as.matrix(rowFactors(ace)[[specificity.slot.name]])
 	
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -866,10 +882,10 @@ select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.patter
 }
 
 
-plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
+plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black", specificity.slot.name = "H_unified_upper_significance") {
 	require(ComplexHeatmap)
 	
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+	feature.enrichment.table = as.matrix(rowFactors(ace)[[specificity.slot.name]])
 	
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -882,7 +898,7 @@ plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern 
 }
 
 
-plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
+plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black", specificity.slot.name = "H_unified_upper_significance") {
 	feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
 	
 	filtered.rows = match(intersect(rownames(ace), genes), rownames(ace))
