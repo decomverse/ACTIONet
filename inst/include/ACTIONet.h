@@ -193,7 +193,9 @@ namespace ACTIONet {
 		
 		sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
 
-
+		mat computeFullSim(mat &H, int thread_no);
+		
+		
 	// SGD-based force-directed layout (adopted and modified from the UMAP implementation)
 		field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level, unsigned int n_epochs, int thread_no);	
 	
