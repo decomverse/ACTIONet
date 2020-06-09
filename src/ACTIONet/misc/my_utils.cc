@@ -84,7 +84,7 @@ namespace ACTIONet {
 */
 	
 	void randN_normsinv(double* values, int n) {
-        for ( int i = 0; i < n; i += 2 ) {
+        for ( int i = 0; i < n; i ++) {
             long double u = rand() / (double)RAND_MAX;
             long double z = normsinv(u);
             values[i]   = (double) z;
