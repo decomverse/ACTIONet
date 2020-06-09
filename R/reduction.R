@@ -12,7 +12,7 @@
 #' @examples
 #' sce = import.sce.from.10X(input_path)
 #' sce = reduce.sce(sce)
-reduce.sce <- function(sce, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+reduce.sce <- function(sce, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1) {
     if (!(data.slot %in% names(assays(sce)))) {
 		if(normalization.method != "none") {
 			print("Normalizing sce object ... ");

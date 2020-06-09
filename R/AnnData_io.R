@@ -188,7 +188,11 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 }
 
 ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", minimal.export = F, compression.level = 0) {
-	if(file.exists(fname)) {
+	if (!requireNamespace('hdf5r', quietly = TRUE)) {
+		stop("Please install hdf5r to wrote HDF5 files")
+	}
+	
+  	if(file.exists(fname)) {
 		file.remove(fname)
 	}	
 	
@@ -295,7 +299,10 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 }
 
 AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minimal.export = T, compression.level = 0) {
-
+	if (!requireNamespace('hdf5r', quietly = TRUE)) {
+		stop("Please install hdf5r to read HDF5 files")
+	}
+	
 	h5file = H5File$new(fname, mode = "r")
 
 	objs = names(h5file)

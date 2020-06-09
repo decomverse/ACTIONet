@@ -1,17 +1,20 @@
 #include "ACTIONet.h"
 
-#undef FC_LEN_T
 
 namespace ACTIONet {
 	// Adopted from the irlba R package
 	field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
 		printf("\t\t* IRLB (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 		
+		
+		
 		double eps = 3e-13;
 		//double eps = 2.22e-16;
 		double tol = 1e-05, svtol = 1e-5;
 
-		srand(seed);
+		//srand(seed);
+		std::default_random_engine gen (seed);	
+		std::normal_distribution<double> normDist(0.0, 1.0);		
 		
 		int m = A.n_rows;
 		int n = A.n_cols;
@@ -59,8 +62,11 @@ namespace ACTIONet {
 
 	
 		// Initialize first column of V
-		randN_BM(V, n);
-		
+		//randN_BM(V, n);
+        for ( int i = 0; i < n; i ++ ) {
+            V[i]   = normDist(gen);;
+        }   		
+
 		/* Main iteration */
 		while (iter < iters) {			
 			j = 0;
@@ -104,7 +110,10 @@ namespace ACTIONet {
 					R = 1.0 / R_F;
 				  
 					if (R_F < eps) {        // near invariant subspace
-						randN_BM(F, n);
+						//randN_BM(F, n);
+						for ( int i = 0; i < n; i ++ ) {
+							F[i]   = normDist(gen);;
+						}   						
 
 						orthog (V, F, T, n, j + 1, 1);
 						R_F = cblas_dnrm2(n, F, inc);
@@ -133,8 +142,11 @@ namespace ACTIONet {
 					
 					if (S < eps) {
 						jj = (j + 1) * m;
-						randN_BM(W+jj, m);
-
+						//randN_BM(W+jj, m);
+						for ( int i = 0; i < m; i ++ ) {
+							W[jj+i]   = normDist(gen);;
+						}   						
+						
 						orthog (W, W + (j + 1) * m, T, m, j + 1, 1);
 						S = cblas_dnrm2(m, W + (j + 1) * m, inc);
 						SS = 1.0 / S;
@@ -150,22 +162,32 @@ namespace ACTIONet {
 
 				
 				j++;
-			}
+			}			
 			
-			/*
 			mat tmp(B, work, work, false);			
 			mat Umat(BU, work, work, false);
 			vec svec(BS, work, false);
 			mat Vmat(BV, work, work, false);
-			
+
 			arma::svd(Umat, svec, Vmat, tmp, "dc");
+			/*
+			Umat(span(0, 5), span(0, 5)).print("tmp (after)");
+			for(int i = 0; i < 20; i++) {
+				printf("%d- %f\n", i, BU[i]);
+			}	
 			*/
-		
-			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B		
+			
+			
+			/*
+			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
 			int *BI = (int *) T;
-			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
+			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);			
+			
+			for(int i = 0; i < 20; i++) {
+				printf("%d, %d- %f\n", iter, i, BU[i]);
+			}	
+			*/
 					
-						
 			R_F = cblas_dnrm2(n, F, inc);
 			R = 1.0 / R_F;
 			cblas_dscal(n, R, F, inc);
@@ -397,19 +419,22 @@ namespace ACTIONet {
 				j++;
 			}
 			
-			/*
+			
 			mat tmp(B, work, work, false);			
 			mat Umat(BU, work, work, false);
 			vec svec(BS, work, false);
 			mat Vmat(BV, work, work, false);
 
 			arma::svd(Umat, svec, Vmat, tmp, "dc");
-			*/
 			
+			/*
 			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
 			int *BI = (int *) T;
 			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
-			
+			for(int i = 0; i < work; i++) {
+				printf("%d- %f\n", BS[i]);
+			}
+			*/
 
 			R_F = cblas_dnrm2(n, F, inc);
 			R = 1.0 / R_F;

@@ -59,10 +59,10 @@ namespace ACTIONet {
 	}
 	
 	// Solves the weighted Archetypal Analysis (AA) problem
-	field<mat> run_weighted_AA(mat &A, mat &W0, vec w, int max_it = 50, double min_delta = 0.01) {	
-		field<mat> decomposition(2,1);
-		
+	field<mat> run_weighted_AA(mat &A, mat &W0, vec w, int max_it = 50, double min_delta = 0.01) {			
 		int N = A.n_cols;
+		field<mat> decomposition(2);
+		
 		if(N != w.n_elem) {
 			fprintf(stderr, "Number of elements in the weight vector should match the total number of samples (columns in A)\n");
 			return(decomposition);
@@ -76,18 +76,23 @@ namespace ACTIONet {
 		}		
 		decomposition = run_AA(A_scaled, W0, max_it, min_delta);
 		
-		
+		/*
 		for(int i = 0; i < N; i++) {
 			decomposition(0).row(i) /= w[i];
 			decomposition(1).col(i) *= w[i];
 		}		
-		
+		*/
+		mat C = decomposition(0);
+		mat weighted_archs = A_scaled * C;
+		mat H = run_simplex_regression(weighted_archs, A);
+		decomposition(1) = H;		
+
 		return(decomposition);
 		
 	}
 	
 	
-	ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01) {
+	ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
 		int feature_no = S_r.n_rows;
 				
 		printf("Running ACTION\n");
@@ -118,8 +123,10 @@ namespace ACTIONet {
 				
 		w = clamp(w, 0, 1);
 		mat X_r = normalise(S_r, 1); // ATTENTION!
+		
+		mat X_r_scaled = X_r;
 		for(int i = 0; i < N; i++) {
-			X_r.col(i) *= w[i];
+			X_r_scaled.col(i) *= w[i];
 		}		
 		
 				 		
@@ -129,18 +136,17 @@ namespace ACTIONet {
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {			
 			total++;
 			printf("\tk = %d\n", total);
-			SPA_results SPA_res = run_SPA(X_r, kk);
+			SPA_results SPA_res = run_SPA(X_r_scaled, kk);
 			trace.selected_cols[kk] = SPA_res.selected_columns;
 			
-			mat W = X_r.cols(trace.selected_cols[kk]);
+			mat W = X_r_scaled.cols(trace.selected_cols[kk]);
 			
-			field<mat> AA_res;			
-			AA_res = run_AA(X_r, W, max_it, min_delta);
+			field<mat> AA_res = run_AA(X_r_scaled, W, max_it, min_delta);
 
-			for(int i = 0; i < N; i++) {
-				AA_res(0).row(i) /= w[i];
-				AA_res(1).col(i) *= w[i];
-			}		
+			mat C = AA_res(0);
+			mat weighted_archs = X_r_scaled * C;
+			mat H = run_simplex_regression(weighted_archs, X_r);
+			AA_res(1) = H;
 
 
 			trace.C[kk] = AA_res(0);

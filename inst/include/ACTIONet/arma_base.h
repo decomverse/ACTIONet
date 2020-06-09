@@ -2,6 +2,7 @@
 #define ARMA_BASE_H
 
 
+//#undef FC_LEN_T
 
 
 #include <cblas.h>
