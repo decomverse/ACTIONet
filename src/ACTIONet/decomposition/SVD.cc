@@ -170,19 +170,30 @@ namespace ACTIONet {
 			mat Vmat(BV, work, work, false);
 
 			arma::svd(Umat, svec, Vmat, tmp, "dc");
+			Vmat = trans(Vmat);
+			
 			/*
+			Umat(span(0, 5), span(0, 5)).print("U1");
+			Vmat(span(0, 5), span(0, 5)).print("V1");
+			* 
 			Umat(span(0, 5), span(0, 5)).print("tmp (after)");
+			
 			for(int i = 0; i < 20; i++) {
 				printf("%d- %f\n", i, BU[i]);
 			}	
-			*/
-			
-			
-			/*
+									
 			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
 			int *BI = (int *) T;
 			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);			
+
+			mat Umat2(BU, work, work, false);
+			mat Vmat2(BV, work, work, false);
+			Umat2(span(0, 5), span(0, 5)).print("U2");
+			Vmat2(span(0, 5), span(0, 5)).print("V2");
+			*/
+
 			
+			/*
 			for(int i = 0; i < 20; i++) {
 				printf("%d, %d- %f\n", iter, i, BU[i]);
 			}	
@@ -426,15 +437,28 @@ namespace ACTIONet {
 			mat Vmat(BV, work, work, false);
 
 			arma::svd(Umat, svec, Vmat, tmp, "dc");
+			Vmat = trans(Vmat);
 			
 			/*
+			Umat(span(0, 5), span(0, 5)).print("U1");
+			Vmat(span(0, 5), span(0, 5)).print("V1");
+			* 
+			Umat(span(0, 5), span(0, 5)).print("tmp (after)");
+			
+			for(int i = 0; i < 20; i++) {
+				printf("%d- %f\n", i, BU[i]);
+			}	
+									
 			memmove (BU, B, work * work * sizeof (double));   // Make a working copy of B
 			int *BI = (int *) T;
-			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);
-			for(int i = 0; i < work; i++) {
-				printf("%d- %f\n", BS[i]);
-			}
+			F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS, BU, &work, BV, &work, BW, &lwork, BI, &info);			
+
+			mat Umat2(BU, work, work, false);
+			mat Vmat2(BV, work, work, false);
+			Umat2(span(0, 5), span(0, 5)).print("U2");
+			Vmat2(span(0, 5), span(0, 5)).print("V2");
 			*/
+
 
 			R_F = cblas_dnrm2(n, F, inc);
 			R = 1.0 / R_F;
