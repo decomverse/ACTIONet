@@ -9,11 +9,11 @@
 #' slot.
 
 #' @rdname ACTIONetExperiment
+#' @export
 #' @import methods
 #' @importFrom stats setNames
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
 #' @importClassesFrom S4Vectors SimpleList
-#' @export
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
 .ACTIONetExperiment <- setClass("ACTIONetExperiment",
 		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowFactors = "SimpleList", colFactors = "SimpleList"),
 		contains = "SingleCellExperiment"        
@@ -28,14 +28,13 @@
 #'
 #' @return An ACTIONetExperiment (ACE) object, derived from SingleCellExperiment, with additional slots to store ACTIONet results
 #'
-#' @import SingleCellExperiment SummarizedExperiment
-#'
 #' @export
-ACTIONetExperiment <- function(...,
-    rowNets=S4Vectors::SimpleList(), 
+#' @import SingleCellExperiment SummarizedExperiment
+ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(), 
     colNets=S4Vectors::SimpleList(), 
     rowFactors=S4Vectors::SimpleList(), 
-    colFactors=S4Vectors::SimpleList())
+    colFactors=S4Vectors::SimpleList(),
+    ...)
 {
 	sce <- SingleCellExperiment::SingleCellExperiment(...)
 	out <- .ACTIONetExperiment(sce, rowNets=rowNets, colNets=colNets, rowFactors=rowFactors, colFactors=colFactors)
