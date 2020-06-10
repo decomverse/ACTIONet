@@ -212,8 +212,33 @@ run_SPA <- function(A, k) {
 #' ACTION.out = run_ACTION(S_r, k_max = 10)
 #' H8 = ACTION.out$H[[8]]
 #' cell.assignments = apply(H8, 2, which.max)
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50L, min_delta = 1e-6) {
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50L, min_delta = 1e-16) {
     .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
+}
+
+run_ACTION_old <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50L, min_delta = 1e-16) {
+    .Call(`_ACTIONet_run_ACTION_old`, S_r, k_min, k_max, thread_no, max_it, min_delta)
+}
+
+run_simplex_regression_proxdist <- function(X, Y, pmaxiter = 100L, pincmaxiter = 200L) {
+    .Call(`_ACTIONet_run_simplex_regression_proxdist`, X, Y, pmaxiter, pincmaxiter)
+}
+
+#' Runs multi-level ACTION decomposition method
+#'
+#' @param S_r Reduced kernel matrix
+#' @param k_min Minimum number of archetypes to consider (default=2)
+#' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
+#' @param thread_no Number of parallel threads (default=4)
+#' @param max_it,min_delta Convergence parameters for archetypal analysis
+#' 
+#' @return A named list with entries 'C' and 'H', each a list for different values of k
+#' @examples
+#' ACTION.out = run_ACTION(S_r, k_max = 10)
+#' H8 = ACTION.out$H[[8]]
+#' cell.assignments = apply(H8, 2, which.max)
+run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 50L, min_delta = 1e-16, max_trial = 3L) {
+    .Call(`_ACTIONet_run_ACTION_plus`, S_r, k_min, k_max, max_it, min_delta, max_trial)
 }
 
 #' Runs multi-level ACTION decomposition method

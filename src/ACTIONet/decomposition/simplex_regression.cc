@@ -4,6 +4,7 @@
 
 // Re-implemented from: Fast and Robust Archetypal Analysis for Representation Learning
 namespace ACTIONet {
+		
 	/* **************************
 	 * Active-Set Method with direct inversion, with update(matrix inversion lemma)
 	 * **************************/
