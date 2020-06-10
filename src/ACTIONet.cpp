@@ -342,7 +342,7 @@ List run_SPA(mat A, int k) {
 //' H8 = ACTION.out$H[[8]]
 //' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int max_it = 50, double min_delta = 1e-6) {	
+List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int max_it = 50, double min_delta = 1e-16) {	
 
 	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
 
@@ -363,6 +363,76 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int ma
 		
 	return res;
 }
+
+
+// [[Rcpp::export]]
+List run_ACTION_old(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int max_it = 50, double min_delta = 1e-16) {	
+
+	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_old(S_r, k_min, k_max, thread_no, max_it, min_delta);
+
+	List res;
+	
+	List C(k_max);
+	for (int i = k_min; i <= k_max; i++) {
+		C[i-1] = trace.C[i];
+	}
+	res["C"] = C;	
+
+	List H(k_max);
+	for (int i = k_min; i <= k_max; i++) {
+		H[i-1] = trace.H[i];
+	}
+	res["H"] = H;
+	
+		
+	return res;
+}
+
+
+// [[Rcpp::export]]
+mat run_simplex_regression_proxdist(mat &X, mat &Y, int pmaxiter = 100, int pincmaxiter = 200) {
+	mat Z = ACTIONet::run_simplex_regression_proxdist(X, Y, pmaxiter, pincmaxiter);
+	
+	return(Z);	
+}
+
+
+//' Runs multi-level ACTION decomposition method
+//'
+//' @param S_r Reduced kernel matrix
+//' @param k_min Minimum number of archetypes to consider (default=2)
+//' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
+//' @param thread_no Number of parallel threads (default=4)
+//' @param max_it,min_delta Convergence parameters for archetypal analysis
+//' 
+//' @return A named list with entries 'C' and 'H', each a list for different values of k
+//' @examples
+//' ACTION.out = run_ACTION(S_r, k_max = 10)
+//' H8 = ACTION.out$H[[8]]
+//' cell.assignments = apply(H8, 2, which.max)
+// [[Rcpp::export]]
+List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max=30, int max_it = 50, double min_delta = 1e-16, int max_trial = 3) {	
+
+	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_plus(S_r, k_min, k_max, max_it, min_delta, max_trial);
+
+	List res;
+
+	List C(trace.H.n_elem-1);
+	for (int i = k_min; i < trace.H.n_elem; i++) {
+		C[i-1] = trace.C[i];
+	}
+	res["C"] = C;	
+
+	List H(trace.H.n_elem-1);
+	for (int i = k_min; i < trace.H.n_elem; i++) {
+		H[i-1] = trace.H[i];
+	}
+	res["H"] = H;
+
+
+	return res;
+}
+
 
 //' Runs multi-level ACTION decomposition method
 //'

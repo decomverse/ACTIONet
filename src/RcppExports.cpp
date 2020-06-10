@@ -175,6 +175,52 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_ACTION_old
+List run_ACTION_old(mat& S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+RcppExport SEXP _ACTIONet_run_ACTION_old(SEXP S_rSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_ACTION_old(S_r, k_min, k_max, thread_no, max_it, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_simplex_regression_proxdist
+mat run_simplex_regression_proxdist(mat& X, mat& Y, int pmaxiter, int pincmaxiter);
+RcppExport SEXP _ACTIONet_run_simplex_regression_proxdist(SEXP XSEXP, SEXP YSEXP, SEXP pmaxiterSEXP, SEXP pincmaxiterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< int >::type pmaxiter(pmaxiterSEXP);
+    Rcpp::traits::input_parameter< int >::type pincmaxiter(pincmaxiterSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_simplex_regression_proxdist(X, Y, pmaxiter, pincmaxiter));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_ACTION_plus
+List run_ACTION_plus(mat& S_r, int k_min, int k_max, int max_it, double min_delta, int max_trial);
+RcppExport SEXP _ACTIONet_run_ACTION_plus(SEXP S_rSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP, SEXP max_trialSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_trial(max_trialSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_ACTION_plus(S_r, k_min, k_max, max_it, min_delta, max_trial));
+    return rcpp_result_gen;
+END_RCPP
+}
 // run_AA
 List run_AA(mat& A, mat& W0, int max_it, double min_delta);
 RcppExport SEXP _ACTIONet_run_AA(SEXP ASEXP, SEXP W0SEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
@@ -797,6 +843,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 2},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
+    {"_ACTIONet_run_ACTION_old", (DL_FUNC) &_ACTIONet_run_ACTION_old, 6},
+    {"_ACTIONet_run_simplex_regression_proxdist", (DL_FUNC) &_ACTIONet_run_simplex_regression_proxdist, 4},
+    {"_ACTIONet_run_ACTION_plus", (DL_FUNC) &_ACTIONet_run_ACTION_plus, 6},
     {"_ACTIONet_run_AA", (DL_FUNC) &_ACTIONet_run_AA, 4},
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},

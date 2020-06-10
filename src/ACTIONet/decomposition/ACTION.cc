@@ -1,8 +1,37 @@
 #include "ACTIONet.h"
 
 namespace ACTIONet {
+	void AA (double *A_ptr, int A_rows, int A_cols, double *W0_ptr, int W0_cols, double *C_ptr, double *H_ptr, int stepsAS);
+	field<mat> AA (mat &A, mat &W0, int iter) {
+		double *A_ptr = A.memptr();
+		double *W0_ptr = W0.memptr();
+		
+		int A_rows = A.n_rows;
+		int A_cols = A.n_cols;
+		int W0_cols = W0.n_cols;
+		
+		double *C_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
+		double *H_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
+
+		AA(A_ptr, A_rows, A_cols, W0_ptr, W0_cols, C_ptr, H_ptr, iter);
+		
+		mat C = mat(C_ptr, A_cols, W0_cols);
+		mat H = mat(H_ptr, W0_cols, A_cols);
+
+		C = clamp(C, 0, 1);
+		C = normalise(C, 1);
+		H = clamp(H, 0, 1);
+		H = normalise(H, 1);
+		
+		field<mat> decomposition(2,1);
+		decomposition(0) = C;
+		decomposition(1) = H;
+		
+		return decomposition;
+	}
+	
 	// Solves the standard Archetypal Analysis (AA) problem
-	field<mat> run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 0.01) {	
+	field<mat> run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-16) {	
 		
 		int sample_no = A.n_cols;
 		int d = A.n_rows; // input dimension
@@ -17,34 +46,43 @@ namespace ACTIONet {
 
 		//printf("(New) %d- %d\n", k, max_it);
 
-		for (int it = 0; it < max_it; it++) {		
+		for (int it = 0; it < max_it; it++) {	
+		   printf("%d\n", it);
+	
 			H = run_simplex_regression(W, A);
 			
-			mat C_old = C;
-			mat R = A - W*H;	
+			//mat C_old = C;
+			mat R = A - W*H;
+			mat Ht = trans(H);	
 			for(int i = 0; i < k; i++) {
 				vec w = W.col(i);
-				rowvec h = H.row(i);
-				vec ht = trans(h);
+				vec h = Ht.col(i);
 				
 				double norm_sq = arma::dot(h, h);
-				if(norm_sq < double(10e-8)) {
-					printf("%d- Ooops @<%d, %d>\n",k, it, i);
-					
+				if(norm_sq < double(10e-8)) {					
 					// singular
 					int max_res_idx = index_max(rowvec(sum(square(R), 0)));
 					W.col(i) = A.col(max_res_idx);
 					c.zeros();
 					c(max_res_idx) = 1;
 					C.col(i) = c;					
-				} else {				 				
-					vec b = (1.0 / norm_sq) *R*ht + w;
-					c = run_simplex_regression(A, b);		
-					R += (w - A*c)*h; // Rank-1 update
-					W.col(i) = A*c;
-					C.col(i) = c;			
+				} else {	
+					// b = (1.0 / norm_sq) *R*ht + w;	
+					vec b = w;
+					cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols, (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1, b.memptr(), 1);
+									
+					C.col(i) = run_simplex_regression(A, b);	
+						
+					vec w_new = A*C.col(i);
+					vec delta = (w - w_new);					
+					
+					// Rank-1 update: R += delta*h
+					cblas_dger(CblasColMajor, R.n_rows, R.n_cols, 1.0, delta.memptr(), 1, h.memptr(), 1, R.memptr(), R.n_rows);
+					
+					W.col(i) = w_new;
 				}
-			}				
+			}
+			/*
 			double delta = arma::max(rowvec(sum(abs(C - C_old)))) / 2.0;
 
 			//double RSS = norm(R, "fro"); RSS *= RSS;
@@ -52,6 +90,7 @@ namespace ACTIONet {
 			
 			if(delta < min_delta)
 				break;
+			*/
 		}
 		
 
@@ -177,10 +216,10 @@ namespace ACTIONet {
 		return res;
 	}
 
-	ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 0.01) {
+	ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
 		int feature_no = S_r.n_rows;
 				
-		printf("Running ACTION\n");
+		printf("Running ACTION (%d threads)\n", thread_no);
 		
 		if(k_max == -1)
 			k_max = (int)S_r.n_cols;
@@ -223,4 +262,129 @@ namespace ACTIONet {
 		
 		return trace;
 	}	
+
+
+
+	ACTION_results run_ACTION_old(mat &S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
+		int feature_no = S_r.n_rows;
+				
+		printf("Running ACTION (%d threads)\n", thread_no);
+		
+		if(k_max == -1)
+			k_max = (int)S_r.n_cols;
+			
+		k_min = std::max(k_min, 2);
+		k_max = std::min(k_max, (int)S_r.n_cols);	
+					
+		ACTION_results trace; 
+		/*
+		trace.H.resize(k_max + 1);
+		trace.C.resize(k_max + 1);
+		trace.selected_cols.resize(k_max + 1);
+		*/
+
+		trace.H = field<mat>(k_max + 1);
+		trace.C = field<mat>(k_max + 1);
+		trace.selected_cols = field<uvec>(k_max + 1);
+
+
+		
+		mat X_r = normalise(S_r, 1); // ATTENTION!
+		 		
+		int current_k = 0;		
+		int total = k_min-1;
+		printf("Iterating from k=%d ... %d\n", k_min, k_max);
+		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {			
+			total++;
+			printf("\tk = %d\n", total);
+			SPA_results SPA_res = run_SPA(X_r, kk);
+			trace.selected_cols[kk] = SPA_res.selected_columns;
+			
+			mat W = X_r.cols(trace.selected_cols[kk]);
+			
+			field<mat> AA_res;			
+			AA_res = AA(X_r, W, max_it);
+
+			trace.C[kk] = AA_res(0);
+			trace.H[kk] = AA_res(1);			
+		});
+		
+		return trace;
+	}	
+
+
+
+	
+	ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 50, double min_delta = 1e-16, int max_trial = 3) {
+		printf("Running ACTION++\n");
+		
+		int D = std::min((int)S_r.n_rows, (int)S_r.n_cols);
+		if(k_max == -1)
+			k_max = D;
+			
+		k_min = std::max(k_min, 2);
+		k_max = std::min(k_max, D);	
+					
+		ACTION_results trace; 
+
+
+		trace.H = field<mat>(k_max + 1, 1);
+		trace.C = field<mat>(k_max + 1, 1);
+		trace.selected_cols = field<uvec>(k_max + 1, 1);
+
+		
+		mat X_r = normalise(S_r, 1); // ATTENTION!
+		SPA_results SPA_res = run_SPA(X_r, D);
+		uvec selected_cols = SPA_res.selected_columns;		 		
+		
+		mat W = mat(X_r.col(selected_cols(0)));
+		
+		field<mat> AA_res;					
+		int cur_idx = 0, jj, kk;
+		printf("Iterating from k=%d ... %d (max trial = %d)\n", k_min, k_max, max_trial);		
+		for(kk = k_min; kk <= k_max; kk++) {			
+			printf("\tk = %d\n", kk);			
+			
+			
+			for(jj = 0; jj < max_trial; jj++) {
+				cur_idx++;
+				printf("\t\tTrial %d: candidate %d = %d ... ", jj+1, cur_idx +1, selected_cols(cur_idx));
+				mat W_tmp = join_rows(W, X_r.col(selected_cols(cur_idx)));
+				
+				AA_res = run_AA(X_r, W_tmp, max_it, min_delta);
+				
+				vec influential_cells = vec(trans(sum(spones(sp_mat(AA_res(0))), 0)));
+				int trivial_counts = (int)sum(influential_cells <= 1);
+				
+				if( (trivial_counts == 0) ) {
+					printf("success\n");
+					selected_cols(kk-1) = selected_cols(cur_idx);
+					break;
+				}
+				
+				printf("failed\n");				
+				if( (cur_idx == (D-1)) ) {
+					printf("Reached end of the line!\n");
+					break;
+				}				
+			}
+			
+			if( (jj == max_trial) || (cur_idx == (D-1)) ) {	
+				break;
+			}
+
+			trace.C[kk] = AA_res(0);
+			trace.H[kk] = AA_res(1);			
+			trace.selected_cols(kk) = selected_cols(span(0, kk-1));
+			
+			W = X_r * AA_res(0);
+		}
+		
+		trace.C = trace.C.rows(0, kk-1);
+		trace.H = trace.H.rows(0, kk-1);
+		trace.selected_cols = trace.selected_cols.rows(0, kk-1);
+		
+		return trace;
+	}		
+	
 }

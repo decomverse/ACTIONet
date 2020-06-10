@@ -171,9 +171,13 @@ namespace ACTIONet {
 
 	// ACTION decomposition
 		ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+		ACTION_results run_ACTION_old(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+
 		ACTION_results run_ACTION_dev(mat &S_r, int k_min, int k_max, int thread_no, bool auto_stop, int max_it, double min_delta);
 
 		ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+		
+		ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it, double min_delta, int max_trial);
 
 	// Pre-ACTIONet archetype filtering/aggregation
 	// To prune archetypes across different levels and concatenate the resulting archetypes
