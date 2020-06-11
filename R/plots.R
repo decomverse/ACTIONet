@@ -487,6 +487,9 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, 
+	require(igraph)
+	require(plotly)
+	
 	node.size = 1, CPal = CPal20, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet", coordinate.slot = "ACTIONet2D") {
     require(plotly)
     require(ACTIONet)
@@ -585,7 +588,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 			GT = apply(enrichment.table, 2, function(x) rownames(enrichment.table)[order(x, decreasing = T)[1:min(100, nrow(enrichment.table))]])
 			selected.features = sort(unique(as.character(GT)))
 			
-			cell.scores = t(enrichment.table[selected.features, ] %*% colFactors(ace)[["H_unified"]])
+			cell.scores = Matrix::t(enrichment.table[selected.features, ] %*% colFactors(ace)[["H_unified"]])
 		} else {
 			cell.scores = NULL
 		}	
