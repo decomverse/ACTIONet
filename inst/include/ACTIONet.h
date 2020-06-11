@@ -136,7 +136,9 @@ namespace ACTIONet {
 		SPA_results run_SPA(mat M, int k);
 		
 		// min_{X} (|| AX - B ||) s.t. simplex constraint using ACTIVE Set Method
-		mat run_simplex_regression(mat &A, mat &B);
+		//mat run_simplex_regression(mat &A, mat &B);
+		mat run_simplex_regression(mat &A, mat &B, bool computeXtX);
+		
 		mat run_simplex_regression_proxdist(mat &X, mat &Y, int pmaxiter, int pincmaxiter);
 
 

@@ -4,62 +4,69 @@
 
 // Re-implemented from: Fast and Robust Archetypal Analysis for Representation Learning
 namespace ACTIONet {
-		
+	
 	/* **************************
 	 * Active-Set Method with direct inversion, with update(matrix inversion lemma)
 	 * **************************/
-
 	vec activeSet_arma(arma::mat& M, arma::vec& b, double lambda2 = double(1e-5), double epsilon = double(1e-5)) {
-	   int m = M.n_rows;
-	   int p = M.n_cols;
-	   int L = min(m,p)+1;
-	   
-	   mat Mt = trans(M);
+		int m = M.n_rows;
+		int p = M.n_cols;
+		int L = min(m,p)+1;
 
-	   arma::vec c = -Mt*b;
-	   
-	   
-	   double lam2sq =lambda2*lambda2;
+		/*	   
+		mat Mt = trans(M);
+		arma::vec c0 = -Mt*b;
+		*/	   
+		arma::vec c(M.n_cols);
+		cblas_dgemv(CblasColMajor, CblasTrans, M.n_rows, M.n_cols, -1, M.memptr(), M.n_rows, b.memptr(), 1, 0, c.memptr(), 1);
 
-	   arma::vec x(p);
-	   double* pr_M = M.memptr();
-	   // constraint matrix
-	   arma::vec A = ones(L);	   
-	   double* pr_A = A.memptr();
-	   
-	   // Non-Active Constraints Set
-	   arma::ivec NASet(L); NASet.ones(); NASet = -NASet;
-	   arma::ivec NAMask(p); NAMask.zeros();
-	   
-	   int na;
-	   arma::vec xRed(L);
-	   arma::vec cRed(L);
-	   arma::mat MRed(m,L);
-	   double* pr_MRed = MRed.memptr();
-	   arma::mat GRed(L,L);
-	   double* pr_GRed = GRed.memptr();
-	   arma::mat GRedinv(L, L);
-	   double* pr_GRedinv = GRedinv.memptr();
-	   
-	   // cold-start
-	  x.zeros();
-	  x[0] = double(1.0);
-	  // Non-Active Constraints Set
-	  NASet[0] = 0;
-	  NAMask[0] = 1;
-	  na = 1;
-	  xRed[0] = x[0];
-	  cRed[0] = c[0];
-	  cblas_dcopy(m, pr_M, 1, pr_MRed, 1);
+		double lam2sq =lambda2*lambda2;
 
-	  // BLAS GRed = MRedT * MRed + lam2sq (na = 1 for now)
-	  double coeff = cblas_ddot(m,pr_MRed,1,pr_MRed,1) + lam2sq;
-	  GRed(0,0) = coeff;
-	  GRedinv(0,0)= double(1.0) / GRed(0,0);
+		arma::vec x(p);
+		double* pr_M = M.memptr();
+		// constraint matrix
+		arma::vec A = ones(L);	   
+		double* pr_A = A.memptr();
+
+		// Non-Active Constraints Set
+		arma::ivec NASet(L); NASet.ones(); NASet = -NASet;
+		arma::ivec NAMask(p); NAMask.zeros();
+
+		int na;
+		arma::vec xRed(L);
+		arma::vec cRed(L);
+		arma::mat MRed(m,L);
+		double* pr_MRed = MRed.memptr();
+		arma::mat GRed(L,L);
+		double* pr_GRed = GRed.memptr();
+		arma::mat GRedinv(L, L);
+		double* pr_GRedinv = GRedinv.memptr();
+
+		// cold-start
+		x.zeros();
+		x[0] = double(1.0);
+		// Non-Active Constraints Set
+		NASet[0] = 0;
+		NAMask[0] = 1;
+		na = 1;
+		xRed[0] = x[0];
+		cRed[0] = c[0];
+		cblas_dcopy(m, pr_M, 1, pr_MRed, 1);
+
+		// BLAS GRed = MRedT * MRed + lam2sq (na = 1 for now)
+		double coeff = cblas_ddot(m,pr_MRed,1,pr_MRed,1) + lam2sq;
+		GRed(0,0) = coeff;
+		GRedinv(0,0)= double(1.0) / GRed(0,0);
 
 
-	   arma::vec Gplus = Mt*(M*x) + lam2sq*x + c;
-	   double* pr_Gplus = Gplus.memptr();
+		//arma::vec Gplus = Mt*(M*x) + lam2sq*x + c;	   
+		arma::vec Mx(M.n_rows);
+		arma::vec Gplus(size(c));
+		cblas_dgemv(CblasColMajor, CblasNoTrans, M.n_rows, M.n_cols, 1, M.memptr(), M.n_rows, x.memptr(), 1, 0, Mx.memptr(), 1);
+		cblas_dgemv(CblasColMajor, CblasTrans, M.n_rows, M.n_cols, 1, M.memptr(), M.n_rows, Mx.memptr(), 1, 0, Gplus.memptr(), 1);
+		Gplus += (lam2sq*x + c);
+
+		double* pr_Gplus = Gplus.memptr();
 	   
 	   
 
@@ -79,6 +86,7 @@ namespace ACTIONet {
 	   double* pr_UB = UB.memptr();
 	   arma::vec UAiB(L);
 	   double* pr_UAiB = UAiB.memptr();
+	   
 	   // main loop active set
 	   int iter = 0;
 	   while(iter <= 100*p) {
@@ -98,6 +106,7 @@ namespace ACTIONet {
 		  // GinvA
 		  // BLAS GinvA = GRedinv * A (ARed == A)
 		  cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_A,1,double(),pr_GinvA,1);
+		  
 		  // Ginvg
 		  // BLAS Ginvg = GRedinv * gRed
 		  cblas_dsymv(CblasColMajor,CblasUpper,na,double(1.0),pr_GRedinv,L,pr_gRed,1,double(),pr_Ginvg,1);
@@ -240,9 +249,14 @@ namespace ACTIONet {
 	   double lam2sq =lambda2*lambda2;
 	   double* pr_G = G.memptr();
 	   
-	   mat Mt = arma::trans(M);
-	   
-	   arma::vec c = -Mt*b;
+		/*	   
+		mat Mt = trans(M);
+		arma::vec c0 = -Mt*b;
+		*/	   
+		arma::vec c(M.n_cols);
+		cblas_dgemv(CblasColMajor, CblasTrans, M.n_rows, M.n_cols, -1, M.memptr(), M.n_rows, b.memptr(), 1, 0, c.memptr(), 1);
+
+
 
 	   arma::vec x(p);
 	   double* pr_M = M.memptr();
@@ -282,7 +296,11 @@ namespace ACTIONet {
 	  cblas_dcopy(p, pr_G, 1, pr_MTMRed, 1);
 
 
-	   arma::vec Gplus = G*x + c;
+	   // arma::vec Gplus = G*x + c;
+	   arma::vec Gplus = c; 
+	   cblas_dgemv(CblasColMajor, CblasNoTrans, G.n_rows, G.n_cols, 1, G.memptr(), G.n_rows, x.memptr(), 1, 1, Gplus.memptr(), 1);
+
+	   
 	   double* pr_Gplus = Gplus.memptr();
 
 	   arma::vec gRed(L);
@@ -455,11 +473,11 @@ namespace ACTIONet {
 	
 	
 	// min(|| AX - B ||) s.t. simplex constraint
-	mat run_simplex_regression(mat &A, mat &B) {
+	mat run_simplex_regression(mat &A, mat &B, bool computeXtX = false) {
 		double lambda2 = 1e-5, epsilon = 1e-5;
 		
 		mat X = zeros(A.n_cols, B.n_cols);		
-		if(A.n_cols < 1000) {
+		if(computeXtX) {
 			double lam2sq =lambda2*lambda2;
 			mat G = trans(A)*A + lam2sq;
 			for(int i = 0; i < B.n_cols; i++) {
@@ -480,5 +498,14 @@ namespace ACTIONet {
 		return(X);
 	}	
 	
+	void activeSet_arma_ptr(double *M_ptr, int m, int n, double* b_ptr, double *x_ptr) {
+		mat M = mat(M_ptr, m, n, false);
+		vec b = vec(b_ptr, m, false);
+		
+		vec x = activeSet_arma(M, b);
+		memcpy(x_ptr, x.memptr(), x.n_elem*sizeof(double));
+		
+		return;		
+	}	
 }
 

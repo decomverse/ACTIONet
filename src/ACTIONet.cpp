@@ -294,8 +294,8 @@ List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5, int seed = 0
 //' B = S_r
 //' H = run_simplex_regression(A, B)
 // [[Rcpp::export]]
-mat run_simplex_regression(mat &A, mat &B) {	
-	mat X = ACTIONet::run_simplex_regression(A, B);
+mat run_simplex_regression(mat &A, mat &B, bool computeXtX = false) {	
+	mat X = ACTIONet::run_simplex_regression(A, B, computeXtX);
 
 	return X;
 }
