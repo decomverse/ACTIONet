@@ -4,7 +4,7 @@
 \alias{run_simplex_regression}
 \title{Solves min_{X} (|| AX - B ||) s.t. simplex constraint}
 \usage{
-run_simplex_regression(A, B)
+run_simplex_regression(A, B, computeXtX = FALSE)
 }
 \arguments{
 \item{A}{Input matrix}
