@@ -92,7 +92,8 @@ namespace ACTIONet {
 	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overlap = 10.0, double resolution = 1.0) {
 		unification_results output;
 
-		/*
+		//mat A_full = trans(C_stacked) * C_stacked;
+		
 		mat A_full = compute_overlap_matrix(C_stacked);
 		
 		
@@ -100,9 +101,13 @@ namespace ACTIONet {
 		if(0 < idx.n_elem)
 			A_full(idx).zeros();
 			
-		*/
+		
+		
+		/*
 		mat W_r = S_r * C_stacked;
 		mat A_full = exp(5*cor(W_r));		
+		*/
+		
 		sp_mat A(A_full);
 		
 		
