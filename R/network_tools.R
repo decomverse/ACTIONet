@@ -5,31 +5,30 @@
 #' The higher the resolution, the more clusters we will get (default=0.5).
 #' @param initial.clustering Used as the inital clustering
 #' @param seed Random seed
-#' 
+#'
 #' @return ace with added annotation
-#' 
+#'
 #' @examples
 #' clusters = cluster.graph(G, 1.0)
 cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NULL, seed = 0) {
 	if(is.matrix(G)) {
 		G = as(G, 'sparseMatrix')
 	}
-	
+
 	is.signed = FALSE
 	if(min(G) < 0) {
 		is.signed = TRUE;
 		print("Graph is signed. Switching to signed graph clustering mode.")
 	}
-	
+
     if (!is.null(initial.clustering)) {
         print("Perform graph clustering with *prior* initialization")
-		initial.clusters = ace$assigned_archetype
 
-		if(is.signed) {
-			clusters = as.numeric(signed_cluster(G, resolution_parameter, initial.clustering, seed))
-		} else {
-			clusters = as.numeric(unsigned_cluster(G, resolution_parameter, initial.clustering, seed))
-		}
+			if(is.signed) {
+				clusters = as.numeric(signed_cluster(G, resolution_parameter, initial.clustering, seed))
+			} else {
+				clusters = as.numeric(unsigned_cluster(G, resolution_parameter, initial.clustering, seed))
+			}
     } else {
         print("Perform graph clustering with *uniform* initialization")
 
@@ -38,8 +37,8 @@ cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NU
 		} else {
 			clusters = as.numeric(unsigned_cluster(G, resolution_parameter, NULL, seed))
 		}
-    }    
-	
+    }
+
 }
 
 #' A wrapper function For Leiden algorithm applied to an ACE object
@@ -50,23 +49,23 @@ cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NU
 #' The higher the resolution, the more clusters we will get (default=0.5).
 #' @param arch.init Whether to use archetype-assignments to initialize clustering (default=TRUE)
 #' @param seed Random seed
-#' 
+#'
 #' @return ace with added annotation
-#' 
+#'
 #' @examples
 #' clusters = cluster.ACTIONet(ace)
 #' plot.ACTIONet(ace, clusters)
-cluster.ACTIONet <- function(ace, resolution_parameter = 1, net.slot = "ACTIONet", init.slot = "assigned_archetype", seed = 0) {	
+cluster.ACTIONet <- function(ace, resolution_parameter = 1, net.slot = "ACTIONet", init.slot = "assigned_archetype", seed = 0) {
     initial.clusters = NULL
     if ( !is.null(init.slot) ) {
 		initial.clusters = ace[[init.slot]]
 	}
-	
+
 	G = colNets(ace)[[net.slot]]
-	
+
 	clusters = cluster.graph(G, resolution_parameter, initial.clusters, seed)
     names(clusters) = paste("C", as.character(clusters), sep = "")
-	
+
 	return(clusters)
 }
 
@@ -81,15 +80,15 @@ cluster.ACTIONet <- function(ace, resolution_parameter = 1, net.slot = "ACTIONet
 #' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
 #' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
 #' @param adjust.levels Whether or not re-adjust labels at the end
-#' 
+#'
 #' @return ace with updated annotations added to ace$annotations
-#' 
+#'
 #' @examples
 #' ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
-infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, max_iter = 3, adjust.levels = T) {    
-    Adj = colNets(ace)$ACTIONet 
+infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, max_iter = 3, adjust.levels = T) {
+    Adj = colNets(ace)$ACTIONet
     A = as(Adj, 'dgTMatrix')
-    
+
     eps = 1e-16
     rs = Matrix::rowSums(A)
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
@@ -98,38 +97,38 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
         W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
         P = W %*% Matrix::t(W)
     }
-    
-    
-	Labels = preprocess.labels(annotation.in, ace)			
+
+
+	Labels = preprocess.labels(annotation.in, ace)
 	if(is.null(Labels)) {
 		return(ace)
 	}
-	
+
 	Annot = sort(unique(Labels))
 	idx = match(Annot, Labels)
 	names(Annot) = names(Labels)[idx]
-    
+
     na.mask = is.na(Labels)
-    
+
     i = 1
     while (sum(na.mask) > 0) {
         R.utils::printf("iter %d\n", i)
-    	
+
         new.Labels = assess.label.local.enrichment(P, Labels)
-        
+
         mask = na.mask & (new.Labels$Labels.confidence > 3 + log(length(Labels)))
         Labels[mask] = new.Labels$Labels[mask]
 
         na.mask = is.na(Labels)
-        if (i == max_iter) 
+        if (i == max_iter)
             break
-        
+
         i = i + 1
     }
     new.Labels = assess.label.local.enrichment(P, Labels)
     Labels[na.mask] = new.Labels$Labels[na.mask]
 	Labels.conf = new.Labels$Labels.confidence
-    
+
     updated.Labels = as.numeric(Labels)
     names(updated.Labels) = names(Annot)[match(Labels, Annot)]
     if(adjust.levels == T) {
@@ -139,7 +138,7 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
 	}
 
 	colData(ace)[[annotation.out]] = Labels
-	
+
 	return(ace)
 }
 
@@ -154,16 +153,16 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
 #' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
 #' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
 #' @param min.cell.fraction Annotations with less that this fraction will be removed
-#' 
+#'
 #' @return ace with updated annotations added to ace$annotations
-#' 
+#'
 #' @examples
 #' ace = add.cell.annotations(ace, cell.labels, "input_annotations")
 #' ace = correct.cell.annotations(ace, "input_annotations", "updated_annotations")
 correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.threshold = 2, double.stochastic = FALSE, max_iter = 3, adjust.levels = T, min.cell.fraction = 0.001) {
-     Adj = colNets(ace)$ACTIONet 
+     Adj = colNets(ace)$ACTIONet
     A = as(Adj, 'dgTMatrix')
-    
+
     eps = 1e-16
     rs = Matrix::rowSums(A)
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
@@ -172,13 +171,13 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
         W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
         P = W %*% Matrix::t(W)
     }
-    
-    
-	Labels = preprocess.labels(annotation.in, ace)			
+
+
+	Labels = preprocess.labels(annotation.in, ace)
 	if(is.null(Labels)) {
 		return(ace)
 	}
-    
+
 
 	# Prunes "trivial" annotations and merges them to larger ones
 	min.cells = round(min.cell.fraction*length(Labels))
@@ -189,21 +188,21 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
 		Labels[mask] = NA
 		ace = infer.missing.cell.annotations(ace, annotation.in = Labels, annotation.out = annotation.out)
 
-		Labels = colData(ace)[[annotation.out]]		
+		Labels = colData(ace)[[annotation.out]]
 	}
-	
+
 	Annot = sort(unique(Labels))
 	idx = match(Annot, Labels)
 	names(Annot) = names(Labels)[idx]
-        
-    
-	for(i in 1:max_iter) {    
+
+
+	for(i in 1:max_iter) {
         R.utils::printf("iter %d\n", i)
-    	
+
         new.Labels = assess.label.local.enrichment(P, Labels)
         Enrichment = new.Labels$Enrichment
         curr.enrichment = sapply(1:nrow(Enrichment), function(k) Enrichment[k, names(Labels)[k]])
-        
+
         Diff.LFR = log2((new.Labels$Labels.confidence / curr.enrichment))
         Diff.LFR[is.na(Diff.LFR)] = 0
 
@@ -213,15 +212,14 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
 	Labels.conf = new.Labels$Labels.confidence
     updated.Labels = as.numeric(Labels)
     names(updated.Labels) = names(Annot)[match(Labels, Annot)]
-    
+
     if(adjust.levels == T) {
 		Labels = reannotate.labels(ace, updated.Labels)
 	} else {
 		Labels = updated.Labels
 	}
-    
+
 	colData(ace)[[annotation.out]] = Labels
 
 	return(ace)
 }
-
