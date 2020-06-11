@@ -16,19 +16,19 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
                 i, rownames(x), fmt
             )
         }
-        i <- as.vector(i)    
-        
-        if(length(rn) > 0) {  
+        i <- as.vector(i)
+
+        if(length(rn) > 0) {
 			for (k in 1:length(rn)) {
 				tmp =  rn[[k]]
 				rn[[k]] = tmp[i, i]
-			}			
+			}
 		}
 		if(length(rf) > 0) {
 			for (k in 1:length(rf)) {
 				tmp = rf[[k]]
 				rf[[k]] = tmp[i, , drop=FALSE]
-			}        
+			}
 		}
 	}
 
@@ -40,18 +40,18 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
             )
         }
         j <- as.vector(j)
-        
+
         if(length(cn) > 0) {
 			for (k in 1:length(cn)) {
 				tmp =  cn[[k]]
 				cn[[k]] = tmp[j, j]
-			}			
-		}		
+			}
+		}
 		if(length(cf) > 0) {
 			for (k in 1:length(cf)) {
-				v = cf[[k]]
+        tmp = cf[[k]]
 				cf[[k]] = tmp[, j, drop=FALSE]
-			}        
+			}
 		}
 	}
 
