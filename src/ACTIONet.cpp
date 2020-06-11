@@ -365,38 +365,6 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int ma
 }
 
 
-// [[Rcpp::export]]
-List run_ACTION_old(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int max_it = 50, double min_delta = 1e-16) {	
-
-	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_old(S_r, k_min, k_max, thread_no, max_it, min_delta);
-
-	List res;
-	
-	List C(k_max);
-	for (int i = k_min; i <= k_max; i++) {
-		C[i-1] = trace.C[i];
-	}
-	res["C"] = C;	
-
-	List H(k_max);
-	for (int i = k_min; i <= k_max; i++) {
-		H[i-1] = trace.H[i];
-	}
-	res["H"] = H;
-	
-		
-	return res;
-}
-
-
-// [[Rcpp::export]]
-mat run_simplex_regression_proxdist(mat &X, mat &Y, int pmaxiter = 100, int pincmaxiter = 200) {
-	mat Z = ACTIONet::run_simplex_regression_proxdist(X, Y, pmaxiter, pincmaxiter);
-	
-	return(Z);	
-}
-
-
 //' Runs multi-level ACTION decomposition method
 //'
 //' @param S_r Reduced kernel matrix
