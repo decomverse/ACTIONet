@@ -45,24 +45,6 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 	colFactors(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')
 	colFactors(ace)[["C_stacked"]] = as(Matrix::t(pruning.out$C_stacked), 'sparseMatrix')
 
-
-	# Compute gene specificity for all pruned archetype	
-	if(is.matrix(S)) {
-		pruned.specificity.out = compute_archetype_feature_specificity_full(S, pruning.out$H_stacked)
-	} else {
-		pruned.specificity.out = compute_archetype_feature_specificity(S, pruning.out$H_stacked)
-	}
-	
-	pruned.specificity.out = lapply(pruned.specificity.out, function(specificity.scores) {
-		rownames(specificity.scores) = rownames(ace)
-		colnames(specificity.scores) = paste("AA", 1:ncol(specificity.scores), sep = "") # AA: All Archetypes!
-		return(specificity.scores)
-	})
-	rowFactors(ace)[["H_stacked_profile"]] = pruned.specificity.out[["archetypes"]]
-	rowFactors(ace)[["H_stacked_upper_significance"]] = pruned.specificity.out[["upper_significance"]]
-	rowFactors(ace)[["H_stacked_lower_significance"]] = pruned.specificity.out[["lower_significance"]]
-
-
     
     # Build ACTIONet
     set.seed(0)
@@ -231,5 +213,43 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 	rowFactors(ace)[[sprintf("H_%s_upper_significance", unified_suffix)]] = specificity.out[["upper_significance"]]
 	rowFactors(ace)[[sprintf("H_%s_lower_significance", unified_suffix)]] = specificity.out[["lower_significance"]]
 	
+	return(ace)
+}
+
+regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION") {
+	S = assays(ace)[[data.slot]]
+	S_r = Matrix::t(reducedDims(ace)[[reduction.slot]])
+	
+	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
+	C_stacked = as.matrix(Matrix::t(colFactors(ace)[["C_stacked"]]))
+	G = colNets(ace)$ACTIONet
+	
+	# Identiy equivalent classes of archetypes and group them together
+	unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, min_overlap = 0, resolution = unification.resolution)
+
+	colFactors(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
+	colFactors(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
+	ace$assigned_archetype = unification.out$assigned_archetype
+
+	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
+	ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+    
+
+	# Compute gene specificity for each archetype	
+	if(is.matrix(S)) {
+		specificity.out = compute_archetype_feature_specificity_full(S, unification.out$H_unified)
+	} else {
+		specificity.out = compute_archetype_feature_specificity(S, unification.out$H_unified)
+	}
+	
+	specificity.out = lapply(specificity.out, function(specificity.scores) {
+		rownames(specificity.scores) = rownames(ace)
+		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
+		return(specificity.scores)
+	})
+	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
+	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
+
 	return(ace)
 }
