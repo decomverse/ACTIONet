@@ -183,8 +183,8 @@ reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, reduc
 #' A = S_r %*% C
 #' B = S_r
 #' H = run_simplex_regression(A, B)
-run_simplex_regression <- function(A, B) {
-    .Call(`_ACTIONet_run_simplex_regression`, A, B)
+run_simplex_regression <- function(A, B, computeXtX = FALSE) {
+    .Call(`_ACTIONet_run_simplex_regression`, A, B, computeXtX)
 }
 
 #' Runs Successive Projection Algorithm (SPA) to solve separable NMF

@@ -1,7 +1,11 @@
 #include "arch.h"
+
 #define NEW_VERSION
 
+
 namespace ACTIONet {
+	void activeSet_arma_ptr(double *M_ptr, int m, int n, double* b_ptr, double *x_ptr);
+	
 	void arch_dense(SPAMS_Matrix<double>& X, SPAMS_Matrix<double>& Z0, SPAMS_Matrix<double>& Z,  SPAMS_Matrix<double>& A, SPAMS_Matrix<double>& B, int I1, int I2, double lambda2, double epsilon, bool computeXtX) {	
 	   const int m = X.m();
 	   const int n = X.n();
@@ -20,7 +24,6 @@ namespace ACTIONet {
 
 
 	   for(int t=0; t<I2; ++t) {
-		   printf("%d\n", t);
 		  SPAMS_Matrix<double> G;
 		  if (computeXtX) {
 			 Z.XtX(G);
@@ -36,6 +39,7 @@ namespace ACTIONet {
 				activeSetS<double>(Z,refColX, refColAlphaT, G, lambda2, epsilon);
 			 } else {
 				activeSet<double>(Z,refColX, refColAlphaT, lambda2, epsilon);
+				//activeSet_arma_ptr((double *)Z.rawX(), (int)Z.m(), (int)Z.n(), (double*)refColX.rawX(), (double*)refColAlphaT.rawX());
 			 }
 		  }
 		  // step 2: fix Alpha, fix all but one to compute Zi
@@ -64,6 +68,9 @@ namespace ACTIONet {
 				// least square to get Beta
 				BetaT.refCol(l, refColBetaT);
 				activeSet<double>(X, vBarre, refColBetaT, lambda2, epsilon);
+				//activeSet_arma_ptr((double*)X.rawX(), (int)X.m(), (int)X.n(), (double*)vBarre.rawX(), (double*)refColBetaT.rawX());
+
+				
 				X.mult(refColBetaT, refColZ);
 				tmp.sub(refColZ);
 				matRSS.rank1Update(tmp, copRowAlphaT);

@@ -1,5 +1,0 @@
-CXX=dpcpp
-LIBS=-fsycl-device-code-split=per_kernel -foffload-static-lib=${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl
-CXXFLAGS=-O2 -std=c++17 -fsycl -pthread -fPIC -w
-EXTFLAGS=-fsycl-unnamed-lambda
-
