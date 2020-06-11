@@ -1,0 +1,3 @@
+CXX=clang++
+CXXFLAGS+=-O3 -march=native -flto -frename-registers -w -DACCELERATE
+LINALG=-framework accelerate
