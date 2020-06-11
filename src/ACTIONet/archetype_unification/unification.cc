@@ -160,7 +160,7 @@ namespace ACTIONet {
 		C_unified = normalise(C_unified, 1, 0);
 		
 		mat W_unified = S_r * C_unified;
-		mat H_unified = run_simplex_regression(W_unified, S_r);
+		mat H_unified = run_simplex_regression(W_unified, S_r, false);
 		
 		uvec assigned_archetypes = trans(index_max( H_unified, 0 ));
 		

@@ -136,14 +136,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_simplex_regression
-mat run_simplex_regression(mat& A, mat& B);
-RcppExport SEXP _ACTIONet_run_simplex_regression(SEXP ASEXP, SEXP BSEXP) {
+mat run_simplex_regression(mat& A, mat& B, bool computeXtX);
+RcppExport SEXP _ACTIONet_run_simplex_regression(SEXP ASEXP, SEXP BSEXP, SEXP computeXtXSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< mat& >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_simplex_regression(A, B));
+    Rcpp::traits::input_parameter< bool >::type computeXtX(computeXtXSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_simplex_regression(A, B, computeXtX));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -840,7 +841,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_HalkoSVD_full", (DL_FUNC) &_ACTIONet_HalkoSVD_full, 4},
     {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 7},
     {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 7},
-    {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 2},
+    {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 3},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
     {"_ACTIONet_run_ACTION_old", (DL_FUNC) &_ACTIONet_run_ACTION_old, 6},

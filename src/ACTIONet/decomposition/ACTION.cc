@@ -46,10 +46,8 @@ namespace ACTIONet {
 
 		//printf("(New) %d- %d\n", k, max_it);
 
-		for (int it = 0; it < max_it; it++) {	
-		   printf("%d\n", it);
-	
-			H = run_simplex_regression(W, A);
+		for (int it = 0; it < max_it; it++) {		
+			H = run_simplex_regression(W, A, true);
 			
 			//mat C_old = C;
 			mat R = A - W*H;
@@ -71,7 +69,7 @@ namespace ACTIONet {
 					vec b = w;
 					cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols, (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1, b.memptr(), 1);
 									
-					C.col(i) = run_simplex_regression(A, b);	
+					C.col(i) = run_simplex_regression(A, b, false);	
 						
 					vec w_new = A*C.col(i);
 					vec delta = (w - w_new);					
@@ -105,6 +103,89 @@ namespace ACTIONet {
 		
 		return decomposition;
 	}
+
+
+
+
+
+	field<mat> run_AA_old(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-16) {	
+		
+		int sample_no = A.n_cols;
+		int d = A.n_rows; // input dimension
+		int k = W0.n_cols; // AA components
+		   
+		
+		mat C = zeros(sample_no, k);
+		mat H = zeros(k, sample_no);
+		
+		mat W = W0;
+		vec c(sample_no);	
+
+		//printf("(New) %d- %d\n", k, max_it);
+
+		for (int it = 0; it < max_it; it++) {	
+		   printf("%d\n", it);
+	
+			//H = run_simplex_regression(W, A, true);
+			H = run_simplex_regression(W, A, false);
+			
+			//mat C_old = C;
+			mat R = A - W*H;
+			mat Ht = trans(H);	
+			for(int i = 0; i < k; i++) {
+				vec w = W.col(i);
+				vec h = Ht.col(i);
+				
+				double norm_sq = arma::dot(h, h);
+				if(norm_sq < double(10e-8)) {					
+					// singular
+					int max_res_idx = index_max(rowvec(sum(square(R), 0)));
+					W.col(i) = A.col(max_res_idx);
+					c.zeros();
+					c(max_res_idx) = 1;
+					C.col(i) = c;					
+				} else {	
+					// b = (1.0 / norm_sq) *R*ht + w;	
+					vec b = w;
+					cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols, (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1, b.memptr(), 1);
+									
+					C.col(i) = run_simplex_regression(A, b, false);	
+						
+					vec w_new = A*C.col(i);
+					vec delta = (w - w_new);					
+					
+					// Rank-1 update: R += delta*h
+					cblas_dger(CblasColMajor, R.n_rows, R.n_cols, 1.0, delta.memptr(), 1, h.memptr(), 1, R.memptr(), R.n_rows);
+					
+					W.col(i) = w_new;
+				}
+			}
+			/*
+			double delta = arma::max(rowvec(sum(abs(C - C_old)))) / 2.0;
+
+			//double RSS = norm(R, "fro"); RSS *= RSS;
+			//printf("\t<%d, %d>- RSS = %.3e, delta = %.3e\n", l, it, RSS, delta);
+			
+			if(delta < min_delta)
+				break;
+			*/
+		}
+		
+
+		C = clamp(C, 0, 1);
+		C = normalise(C, 1);
+		H = clamp(H, 0, 1);
+		H = normalise(H, 1);
+		
+		field<mat> decomposition(2,1);
+		decomposition(0) = C;
+		decomposition(1) = H;
+		
+		return decomposition;
+	}
+
+
+
 
 	template<class Function>
 	inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {

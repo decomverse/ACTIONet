@@ -84,7 +84,7 @@ namespace ACTIONet {
 		*/
 		mat C = decomposition(0);
 		mat weighted_archs = A_scaled * C;
-		mat H = run_simplex_regression(weighted_archs, A);
+		mat H = run_simplex_regression(weighted_archs, A, false);
 		decomposition(1) = H;		
 
 		return(decomposition);
@@ -145,7 +145,7 @@ namespace ACTIONet {
 
 			mat C = AA_res(0);
 			mat weighted_archs = X_r_scaled * C;
-			mat H = run_simplex_regression(weighted_archs, X_r);
+			mat H = run_simplex_regression(weighted_archs, X_r, false);
 			AA_res(1) = H;
 
 
@@ -243,7 +243,7 @@ namespace ACTIONet {
 	field<mat> Online_update_AA(mat& Xt, mat& D, mat& A, mat& B) {
 
 		// Compute archetype coefficients using the last learned dictionary
-		mat Ct = run_simplex_regression(D, Xt);		
+		mat Ct = run_simplex_regression(D, Xt, false);		
 		
 		// Just in case!
 		Ct = clamp(Ct, 0, 1);
@@ -293,7 +293,7 @@ namespace ACTIONet {
 			mat Xt = X.cols(idx);			
 			
 			// Compute archetype coefficients using the last learned dictionary
-			Ct = run_simplex_regression(Dt, Xt);		
+			Ct = run_simplex_regression(Dt, Xt, false);		
 			Ct_T = trans(Ct);
 					
 			// Update sufficient statistics

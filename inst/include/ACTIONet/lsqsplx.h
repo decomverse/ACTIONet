@@ -198,6 +198,7 @@ void activeSet(const SPAMS_Matrix<T>& M, const Vector<T>& b, Vector<T>& xCurr, c
    T* const pr_UAiB = UAiB.rawX();
    // main loop active set
    int iter = 0;
+   
    while(iter <= 100*p) {
       ++iter;
       // update of na, NASet, NAMask, xRed, cRed, Gplus, GRedinv, already done
