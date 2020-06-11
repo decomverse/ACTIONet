@@ -486,13 +486,12 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
-plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, 
-	require(igraph)
-	require(plotly)
-	
+plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1, trans.fact = 1, 	
 	node.size = 1, CPal = CPal20, enrichment.table = NULL, top.features = 7, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", threeD = FALSE, title = "ACTIONet", coordinate.slot = "ACTIONet2D") {
+		
     require(plotly)
     require(ACTIONet)
+	require(igraph)
 
     nV = ncol(ace)
     node.size = node.size * 3

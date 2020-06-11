@@ -8,17 +8,17 @@
 \title{An extension of the SingleCellExperiment class to store
 the results of ACTIONet method}
 \usage{
-ACTIONetExperiment(..., rowNets = S4Vectors::SimpleList(),
+ACTIONetExperiment(rowNets = S4Vectors::SimpleList(),
   colNets = S4Vectors::SimpleList(),
   rowFactors = S4Vectors::SimpleList(),
-  colFactors = S4Vectors::SimpleList())
+  colFactors = S4Vectors::SimpleList(), ...)
 }
 \arguments{
-\item{...}{SingleCellExperiment and SummarizedExperiment components}
-
 \item{rowNets, colNets}{gene-gene and cell-cell networks, respectively}
 
 \item{rowFactors, colFactors}{Factorization results (W and H matrices)}
+
+\item{...}{SingleCellExperiment and SummarizedExperiment components}
 }
 \value{
 an ACTIONetExperiment (ACE) object
