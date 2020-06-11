@@ -42,7 +42,10 @@ ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
 }
 
 
-#' @export .DollarNames.ACTIONetExperiment
+
+
+
+#' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
 	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)), names(reducedDims(x)) )
     grep(pattern, ll, value=TRUE)

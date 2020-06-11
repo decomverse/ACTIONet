@@ -5,7 +5,7 @@
 \title{Computes reduced kernel matrix for a given (single-cell) profile}
 \usage{
 reduce_kernel(S, reduced_dim = 50L, iter = 5L, seed = 0L,
-  reduction_algorithm = 1L, SVD_algorithm = 1L)
+  reduction_algorithm = 0L, SVD_algorithm = 0L, prenormalize = FALSE)
 }
 \arguments{
 \item{S}{Input matrix ("sparseMatrix")}
