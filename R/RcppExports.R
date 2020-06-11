@@ -216,14 +216,6 @@ run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50
     .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
 }
 
-run_ACTION_old <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50L, min_delta = 1e-16) {
-    .Call(`_ACTIONet_run_ACTION_old`, S_r, k_min, k_max, thread_no, max_it, min_delta)
-}
-
-run_simplex_regression_proxdist <- function(X, Y, pmaxiter = 100L, pincmaxiter = 200L) {
-    .Call(`_ACTIONet_run_simplex_regression_proxdist`, X, Y, pmaxiter, pincmaxiter)
-}
-
 #' Runs multi-level ACTION decomposition method
 #'
 #' @param S_r Reduced kernel matrix
