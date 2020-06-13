@@ -4,8 +4,10 @@
 \name{CellMarkerDB_human_markers}
 \alias{CellMarkerDB_human_markers}
 \title{Pre-processed cell type markers from the CellMarker database (Human)}
-\format{:
-  A list of marker genes for different cell types}
+\format{
+:
+  A list of marker genes for different cell types
+}
 \source{
 \url{http://biocc.hrbmu.edu.cn/CellMarker/}
 }

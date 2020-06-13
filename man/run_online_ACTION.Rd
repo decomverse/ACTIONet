@@ -4,8 +4,7 @@
 \alias{run_online_ACTION}
 \title{Runs multi-level Online ACTION decomposition method}
 \usage{
-run_online_ACTION(S_r, samples, k_min = 2L, k_max = 30L,
-  thread_no = 8L)
+run_online_ACTION(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 8L)
 }
 \arguments{
 \item{S_r}{Reduced kernel matrix}
