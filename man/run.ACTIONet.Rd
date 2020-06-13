@@ -4,12 +4,22 @@
 \alias{run.ACTIONet}
 \title{A wrapper function to call all main functions of the ACTIONet}
 \usage{
-run.ACTIONet(sce, k_max = 30, min.cells.per.arch = 2,
-  min_specificity_z_threshold = -1, network_density = 1,
-  mutual_edges_only = TRUE, layout_compactness = 50,
-  layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 8,
-  data.slot = "logcounts", reduction.slot = "ACTION",
-  unification.resolution = 1, AA_delta = 1e-300)
+run.ACTIONet(
+  sce,
+  k_max = 30,
+  min.cells.per.arch = 2,
+  min_specificity_z_threshold = -1,
+  network_density = 1,
+  mutual_edges_only = TRUE,
+  layout_compactness = 50,
+  layout_epochs = 500,
+  layout.in.parallel = FALSE,
+  thread_no = 8,
+  data.slot = "logcounts",
+  reduction.slot = "ACTION",
+  unification.resolution = 1,
+  AA_delta = 1e-300
+)
 }
 \arguments{
 \item{sce}{Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).}

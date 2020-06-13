@@ -4,8 +4,12 @@
 \alias{assess.geneset.enrichment}
 \title{Performs geneset enrichment analysis on archetypes}
 \usage{
-assess.geneset.enrichment(ace, associations, L = 1000,
-  specificity.slot = "H_unified_upper_significance")
+assess.geneset.enrichment(
+  ace,
+  associations,
+  L = 1000,
+  specificity.slot = "H_unified_upper_significance"
+)
 }
 \arguments{
 \item{ace}{ACTIONetExperiment (ACE) output object}
