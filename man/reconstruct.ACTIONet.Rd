@@ -4,10 +4,16 @@
 \alias{reconstruct.ACTIONet}
 \title{Reconstructs the ACTIONet graph with the new parameters (uses prior decomposition)}
 \usage{
-reconstruct.ACTIONet(ace, network_density = 1,
-  mutual_edges_only = TRUE, layout_compactness = 50,
-  layout_epochs = 500, thread_no = 8, layout.in.parallel = FALSE,
-  reduction.slot = "ACTION")
+reconstruct.ACTIONet(
+  ace,
+  network_density = 1,
+  mutual_edges_only = TRUE,
+  layout_compactness = 50,
+  layout_epochs = 500,
+  thread_no = 8,
+  layout.in.parallel = FALSE,
+  reduction.slot = "ACTION"
+)
 }
 \arguments{
 \item{ace}{ACTIONetExperiment object containing the results}
