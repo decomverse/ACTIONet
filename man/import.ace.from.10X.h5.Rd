@@ -4,9 +4,15 @@
 \alias{import.ace.from.10X.h5}
 \title{A simple wrapper to import data from a 10X experiment folder (v2 or v3) and constructs an `SingleCellExeriment` object}
 \usage{
-import.ace.from.10X.h5(fname, version = 3, genome = NULL,
-  prefilter = FALSE, min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500, use.names = TRUE)
+import.ace.from.10X.h5(
+  fname,
+  version = 3,
+  genome = NULL,
+  prefilter = FALSE,
+  min.cell.frac.per.gene = 0.005,
+  min.genes.per.cell = 500,
+  use.names = TRUE
+)
 }
 \arguments{
 \item{fname}{Input HDF5 file}

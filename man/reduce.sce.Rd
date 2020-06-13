@@ -4,9 +4,16 @@
 \alias{reduce.sce}
 \title{Takes a `SingleCellExperiment` object and adds the reduced kernel matrix}
 \usage{
-reduce.sce(sce, reduced_dim = 50, max.iter = 5,
-  data.slot = "logcounts", normalization.method = "default",
-  reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1)
+reduce.sce(
+  sce,
+  reduced_dim = 50,
+  max.iter = 5,
+  data.slot = "logcounts",
+  normalization.method = "default",
+  reduction.slot = "ACTION",
+  seed = 0,
+  SVD_algorithm = 1
+)
 }
 \arguments{
 \item{sce}{Input sce object}
