@@ -105,10 +105,10 @@ import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc
 
     if (prefilter) {
 		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
         ace = ace[cell.counts.mat > min.cells.per.gene, ]
 
-        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
         ace = ace[, feature.counts.mat > min.genes.per.cell]
     }
 
@@ -236,10 +236,10 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, prefilter 
 
 	if (prefilter) {
 		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-		cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+		cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
 		ace = ace[cell.counts.mat > min.cells.per.gene, ]
 
-		feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+		feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
 		ace = ace[, feature.counts.mat > min.genes.per.cell]
 	}
 
@@ -275,10 +275,10 @@ import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotati
 
     if (prefilter) {
 		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
         ace = ace[cell.counts.mat > min.cells.per.gene, ]
 
-        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
         ace = ace[, feature.counts.mat > min.genes.per.cell]
     }
 
@@ -315,10 +315,10 @@ import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, min.cell
 
     if (prefilter) {
 		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
         ace = ace[cell.counts.mat > min.cells.per.gene, ]
 
-        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts.mat > 0)
+        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
         ace = ace[, feature.counts.mat > min.genes.per.cell]
     }
 
