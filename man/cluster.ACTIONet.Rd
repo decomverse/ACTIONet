@@ -4,8 +4,13 @@
 \alias{cluster.ACTIONet}
 \title{A wrapper function For Leiden algorithm applied to an ACE object}
 \usage{
-cluster.ACTIONet(ace, resolution_parameter = 1, net.slot = "ACTIONet",
-  init.slot = "assigned_archetype", seed = 0)
+cluster.ACTIONet(
+  ace,
+  resolution_parameter = 1,
+  net.slot = "ACTIONet",
+  init.slot = "assigned_archetype",
+  seed = 0
+)
 }
 \arguments{
 \item{ace}{Input results to be clustered}

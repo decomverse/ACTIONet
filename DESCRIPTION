@@ -20,4 +20,4 @@ Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer,
 LinkingTo: Rcpp,RcppArmadillo
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
