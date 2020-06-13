@@ -3,19 +3,21 @@ Type: Package
 Title: Robust multi-resolution analysis of single-cell datasets
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
 Version: 1.0
-Date: 2020-01-01
+Date: 2020-06-13
 Authors@R: c(
-    person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com", 
+    person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com",
         role = c("cre", "aut"), comment = c(ORCID = "0000-0001-8734-2326")),
-    person("Jose", "Davila-Velderrain", email = "jdjosedavila@gmail.com", 
-        role = "aut", comment = c(ORCID = ""))
+    person("Jose", "Davila-Velderrain", email = "jdjosedavila@gmail.com",
+        role = "aut", comment = c(ORCID = "")),
+    person("Sebastian", "Pineda", email = "sebastianpineda95@gmail.com",
+        role = "ctb", comment = c(ORCID = "0000-0002-8903-0550"))
     )
 Maintainer: Shahin Mohammadi <mohammadi@broadinstitute.org>
 Description: 
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: Rcpp, RcppArmadillo, Matrix, SingleCellExperiment, hdf5r, scater
-Imports: Matrix, SingleCellExperiment, hdf5r, ComplexHeatmap, scater
+Depends: R (>= 3.6.0), Rcpp, RcppArmadillo, Matrix, SingleCellExperiment, hdf5r, scater, R.utils
+Imports: Matrix, SingleCellExperiment, hdf5r, ComplexHeatmap, scater, R.utils
 Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer,ComplexHeatmap
 LinkingTo: Rcpp,RcppArmadillo
 Encoding: UTF-8

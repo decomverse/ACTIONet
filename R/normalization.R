@@ -63,7 +63,7 @@ scone.normalize <- function(sce) {
     return(sce)
 }
 
-normalize.sce <- function(sce, norm.method = "default") {
+normalize.sce <- function(sce, norm.method = "default", BPPARAM = SerialParam()) {
 
   if (norm.method == "scran") {
       sce.norm = scran.normalize(sce,  BPPARAM = BPPARAM)
@@ -98,19 +98,19 @@ normalize.sce <- function(sce, norm.method = "default") {
     return(sce.norm)
 }
 
-renormalize.sce <- function(sce) {
-	library(scater)
-
-	system.time({sce <- computeSumFactors(sce, clusters=sce$unification.out$assignments.core)})
-	summary(sizeFactors(sce))
-
-	final.sce = normalize(sce)
-    
-	final.sce = add.count.metadata(final.sce)
-
-    metadata(final.sce)$normalization.method = 'renormalized'
-    metadata(final.sce)$sizeFactors = sizeFactors(final.sce)
-    metadata(final.sce)$normalization.time = Sys.time()
-
-	return(final.sce)
-}
+# renormalize.sce <- function(sce) {
+# 	library(scater)
+#
+# 	system.time({sce <- computeSumFactors(sce, clusters=sce$unification.out$assignments.core)})
+# 	summary(sizeFactors(sce))
+#
+# 	final.sce = normalize(sce)
+#
+# 	final.sce = add.count.metadata(final.sce)
+#
+#     metadata(final.sce)$normalization.method = 'renormalized'
+#     metadata(final.sce)$sizeFactors = sizeFactors(final.sce)
+#     metadata(final.sce)$normalization.time = Sys.time()
+#
+# 	return(final.sce)
+# }
