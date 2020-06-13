@@ -4,8 +4,12 @@
 \alias{select.top.k.features}
 \title{Report the top-rank features from a given enrichment table}
 \usage{
-select.top.k.features(feature.enrichment.table, top.features = 3,
-  normalize = F, reorder.columns = T)
+select.top.k.features(
+  feature.enrichment.table,
+  top.features = 3,
+  normalize = F,
+  reorder.columns = T
+)
 }
 \arguments{
 \item{top.features}{Number of features to return}

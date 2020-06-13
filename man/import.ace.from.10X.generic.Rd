@@ -4,12 +4,18 @@
 \alias{import.ace.from.10X.generic}
 \title{Imports data from a 10X experiment folder and constructs an `SingleCellExeriment` object}
 \usage{
-import.ace.from.10X.generic(input_path,
-  sub_path = "filtered_gene_bc_matrices", mtx_file = "matrix.mtx.gz",
+import.ace.from.10X.generic(
+  input_path,
+  sub_path = "filtered_gene_bc_matrices",
+  mtx_file = "matrix.mtx.gz",
   feature_annotations = "features.tsv.gz",
-  sample_annotations = "barcodes.tsv.gz", sep = "\\t",
-  prefilter = FALSE, min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500, use.names = TRUE)
+  sample_annotations = "barcodes.tsv.gz",
+  sep = "\\t",
+  prefilter = FALSE,
+  min.cell.frac.per.gene = 0.005,
+  min.genes.per.cell = 500,
+  use.names = TRUE
+)
 }
 \arguments{
 \item{input_path}{Folder containing input files}
