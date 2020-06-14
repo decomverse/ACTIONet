@@ -1,47 +1,43 @@
 #' Imports data from a 10X experiment folder and constructs an `SingleCellExeriment` object
 #'
-#' @param input_path Folder containing input files
-#' @param mtx_file Count file in Matrix Market format (default="matrix.mtx.gz")
-#' @param feature_annotations Table of the same size as number of rows in the count matrix (default="features.tsv.gz")
-#' @param sample_annotations Table of the same size as number of columns in the count matrix (default="barcodes.tsv.gz")
-#' @param sep Column-separator used in the row/column annotations files (default='\\t')
-#' @param prefilter Whether to prefilter genes/cells based on the counts.mat
-#' @param min.cell.frac.per.gene Minimum fraction of cells capturing a gene for it to be retained, if prefilter=TRUE (default=0.005)
-#' @param min.genes.per.cell Minimum number of required captured genes per cell, if prefilter=TRUE (default=500)
+#' @param input_path Folder containing input files.
+#' @param mtx_file Count file in Matrix Market format (default="matrix.mtx.gz").
+#' @param feature_annotations Table of the same size as number of rows in the count matrix (default="features.tsv.gz").
+#' @param sample_annotations Table of the same size as number of columns in the count matrix (default="barcodes.tsv.gz").
+#' @param sep Column-separator used in the row/column annotations files (default='\\t').
+#' @param prefilter Whether to prefilter rows/columns of input counts matrix. Must specify filtering parameters to pass to filter.ace().
 #'
 #' @return `SingleCellExeriment` object
 #'
 #' @examples
-#' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE)
-import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc_matrices", mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", sample_annotations = "barcodes.tsv.gz",
-    sep = "\t", prefilter = FALSE, min.cell.frac.per.gene = 0.005, min.genes.per.cell = 500, use.names = TRUE) {
-    require(ACTIONet)
-    require(S4Vectors)
+#' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE, min_feats_per_cell = 500)
+import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", sample_annotations = "barcodes.tsv.gz", sep = "\t", prefilter = FALSE, ...)
+  require(ACTIONet)
+  require(S4Vectors)
 
-    count.file = paste(input_path, mtx_file, sep = "/")
+  count.file = paste(input_path, mtx_file, sep = "/")
 	if( !file.exists(count.file) ) {
-		R.utils::printf("File %s not found. Consider changing `mtx_file` or `input_path` options.", count.file)
-		return()
+		err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", count.file)
+		stop(err)
 	}
 
-    feature.file = paste(input_path, feature_annotations, sep = "/")
-    if( !file.exists(feature.file) ) {
-		R.utils::printf("File %s not found. Consider changing `mtx_file` or `input_path` options.", feature.file)
-		return()
+  feature.file = paste(input_path, feature_annotations, sep = "/")
+  if( !file.exists(feature.file) ) {
+		err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", feature.file)
+		stop(err)
 	}
 
-    barcode.file = paste(input_path, sample_annotations, sep = "/")
-    if( !file.exists(barcode.file) ) {
-		R.utils::printf("File %s not found. Consider changing `mtx_file` or `input_path` options.", barcode.file)
-		return()
+  barcode.file = paste(input_path, sample_annotations, sep = "/")
+  if( !file.exists(barcode.file) ) {
+		err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", barcode.file)
+		stop(err)
 	}
 
-	print("Reading counts ...")
-    counts.mat = Matrix::readMM(count.file)
+	message(sptinf("Reading counts ...\n"))
+  counts.mat = Matrix::readMM(count.file)
 
-
-    feature_table = read.table(feature.file, header = F, sep = sep, as.is = TRUE)
-    if(nrow(feature_table) == (nrow(counts.mat) + 1)) {
+  feature_table = read.table(feature.file, header = F, sep = sep, as.is = TRUE)
+  if(nrow(feature_table) == (nrow(counts.mat) + 1)) {
 		rowAnnot = S4Vectors::DataFrame(feature_table[-1, ])
 		colnames(rowAnnot) = feature_table[1, ]
 	} else {
@@ -56,7 +52,7 @@ import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc
 	}
 
     sample_annotations = read.table(barcode.file, header = F, sep = sep, as.is = TRUE)
-    if(ncol(sample_annotations) == (ncol(counts.mat) + 1)) {
+  if(ncol(sample_annotations) == (ncol(counts.mat) + 1)) {
 		colAnnot = S4Vectors::DataFrame(sample_annotations[-1, ])
 		colnames(colAnnot) = sample_annotations[1, ]
 	} else {
@@ -64,7 +60,7 @@ import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc
 	}
 
 	# Feature-barcoding
-    if(ncol(rowAnnot) > 2) {
+  if(ncol(rowAnnot) > 2) {
 		IDX = split(1:nrow(rowAnnot), rowAnnot[, 3])
 		expression.counts.mat = counts.mat[IDX$`Gene Expression`, ]
 		gene.table = rowAnnot[IDX$`Gene Expression`, 1:2]
@@ -75,7 +71,7 @@ import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc
 		IDX = list()
 	}
 
-    if(use.names == T && (ncol(rowAnnot) >= 2)) {
+  if(use.names == T && (ncol(rowAnnot) >= 2)) {
 		rownames(expression.counts.mat) = gene.table[, 2]
 	} else {
 		rownames(expression.counts.mat) = gene.table[, 1]
@@ -93,26 +89,17 @@ import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc
     # Load additional barcoded features
     for(feature.name in names(IDX)) {
 		feature.counts.mat = counts.mat[IDX[[feature.name]], ]
-
 		row.annotations = rowAnnot[IDX[[feature.name]], ]
-
 		rownames(feature.counts.mat) = rowAnnot[IDX[[feature.name]], 1]
 		colnames(feature.counts.mat) = colAnnot[, 1]
-
 		colFactors(ace)[[feature.name]] = feature.counts.mat
 	}
 
+  if (prefilter) {
+    ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+  }
 
-    if (prefilter) {
-		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
-        ace = ace[cell.counts.mat > min.cells.per.gene, ]
-
-        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
-        ace = ace[, feature.counts.mat > min.genes.per.cell]
-    }
-
-    return(ace)
+  return(ace)
 }
 
 
@@ -127,8 +114,8 @@ import.ace.from.10X.generic <- function(input_path, sub_path = "filtered_gene_bc
 #' @return `SingleCellExeriment` object
 #'
 #' @examples
-#' ace = import.ace.from.10X(input_path, prefilter=TRUE)
-import.ace.from.10X <- function(input_path, version = 3, prefilter = F, min.cell.frac.per.gene = 0.005, min.genes.per.cell = 500) {
+#' ace = import.ace.from.10X(input_path, prefilter=TRUE, min_feats_per_cell = 500)
+import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...) {
 	if (file.exists(paste(input_path, "genes.tsv", sep = "/"))) {
 		version = 2
 	}
@@ -138,6 +125,7 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = F, min.cell
 		feature_annotations = "genes.tsv"
 		sample_annotations = "barcodes.tsv"
 	} else
+
 	if((3 <= version) & (version < 4)) {
 		mtx_file = "matrix.mtx.gz"
 		feature_annotations = "features.tsv.gz"
@@ -146,7 +134,7 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = F, min.cell
 		message("Unknown version")
 	}
 
-	ace = import.ace.from.10X.generic(input_path = input_path, sub_path = sub_path, mtx_file = mtx_file, feature_annotations = feature_annotations, sample_annotations = sample_annotations)
+	ace = import.ace.from.10X.generic(input_path = input_path, mtx_file = mtx_file, feature_annotations = feature_annotations, sample_annotations = sample_annotations, prefilter = prefilter, ...)
 
 	return(ace)
 }
@@ -165,7 +153,7 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = F, min.cell
 #'
 #' @examples
 #' ace = import.ace.from.10X.h5(fname = fname, prefilter=TRUE)
-import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, prefilter = FALSE, min.cell.frac.per.gene = 0.005, min.genes.per.cell = 500, use.names = TRUE) {
+import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names = TRUE, prefilter = FALSE, ...) {
 	if (!requireNamespace('hdf5r', quietly = TRUE)) {
 		stop("Please install hdf5r to read HDF5 files")
 	}
@@ -233,15 +221,9 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, prefilter 
 		colFactors(ace)[[feature.name]] = mats[[feature.name]]
 	}
 
-
-	if (prefilter) {
-		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-		cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
-		ace = ace[cell.counts.mat > min.cells.per.gene, ]
-
-		feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
-		ace = ace[, feature.counts.mat > min.genes.per.cell]
-	}
+  if (prefilter) {
+    ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+  }
 
 	return(ace)
 }
@@ -261,7 +243,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, prefilter 
 #'
 #' @examples
 #' ace = import.ace.from.count.matrix(counts.mat.mat, gene_names, prefilter=TRUE)
-import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotations = NULL, prefilter = FALSE, min.cell.frac.per.gene = 0.005, min.genes.per.cell = 500) {
+import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotations = NULL, prefilter = FALSE, ...) {
 	if(!is.sparseMatrix(counts.mat)) {
 		counts.mat = as(counts.mat, "sparseMatrix")
 	}
@@ -273,14 +255,9 @@ import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotati
         ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_annotations)
 	}
 
-    if (prefilter) {
-		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
-        ace = ace[cell.counts.mat > min.cells.per.gene, ]
-
-        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
-        ace = ace[, feature.counts.mat > min.genes.per.cell]
-    }
+  if (prefilter) {
+    ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+  }
 
     return(ace)
 }
@@ -297,7 +274,7 @@ import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotati
 #'
 #' @examples
 #' ace = import.ace.from.table(file_name, prefilter=TRUE)
-import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, min.cell.frac.per.gene = 0.001, min.genes.per.cell = 300) {
+import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, ...) {
     require(Matrix)
     require(ACTIONetExperiment)
 
@@ -314,12 +291,7 @@ import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, min.cell
     ace <- ACTIONetExperiment(assays = list(counts = counts.mat))
 
     if (prefilter) {
-		min.cells.per.gene = round(ncol(ace) * min.cell.frac.per.gene)
-        cell.counts.mat = Matrix::rowSums(SummarizedExperiment::assays(ace)$counts > 0)
-        ace = ace[cell.counts.mat > min.cells.per.gene, ]
-
-        feature.counts.mat = Matrix::colSums(SummarizedExperiment::assays(ace)$counts > 0)
-        ace = ace[, feature.counts.mat > min.genes.per.cell]
+      ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
     }
 
     return(ace)
