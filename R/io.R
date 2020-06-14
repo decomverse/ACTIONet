@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE, min_feats_per_cell = 500)
-import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", sample_annotations = "barcodes.tsv.gz", sep = "\t", prefilter = FALSE, ...)
+import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", sample_annotations = "barcodes.tsv.gz", sep = "\t", prefilter = FALSE, ...){
   require(ACTIONet)
   require(S4Vectors)
 
