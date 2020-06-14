@@ -6,12 +6,12 @@ reduce.and.batch.correct.sce.fastMNN <- function(sce, batch.attr = NULL, reduced
   colData(sce) = droplevels(colData(sce))
   SummarizedExperiment::assays(sce)[["counts"]] = as(SummarizedExperiment::assays(sce)[["counts"]], 'sparseMatrix')
 
-
-  if( length(batch.attr) ==  1) {
-    IDX = split(1:dim(sce)[2], colData(sce)[[batch.attr]])
-  } else {
-    IDX = split(1:dim(sce)[2], batch.attr)
-  }
+  # if( length(batch.attr) ==  1) {
+  #   IDX = split(1:dim(sce)[2], colData(sce)[[batch.attr]])
+  # } else {
+  #   IDX = split(1:dim(sce)[2], batch.attr)
+  # }
+  IDX = .get_ace_split_IDX(ace, attr)
 
   sce.list = lapply(IDX, function(idx) computeSumFactors(sce[, idx], BPPARAM = BPPARAM ) )
   sce.list.norm = do.call(batchelor::multiBatchNorm, list(sce.list, BPPARAM = BPPARAM))
