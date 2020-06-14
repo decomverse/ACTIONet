@@ -1,9 +1,7 @@
-CSOURCES+=$(shell find ACTIONet/ -type f -name "*.c")
 SOURCES+=$(shell find ACTIONet/ -type f -name "*.cc")
-OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o) $(CSOURCES:.c=.o)
+OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o)
 PKG_LIBS=$(LINALG)
-PKG_CPPFLAGS=`find ../inst/include -type d | xargs realpath | sed s/^/-I/` -w -m64 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS -DARMA_64BIT_WORD -fpermissive
-PKG_CXXFLAGS=`find ../inst/include -type d | xargs realpath | sed s/^/-I/` -w -m64 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS -DARMA_64BIT_WORD -fpermissive
+PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS -DARMA_64BIT_WORD -fpermissive
 NPROC=$(shell nproc)
 MAKEFLAGS+="-j $(NPROC)
 
