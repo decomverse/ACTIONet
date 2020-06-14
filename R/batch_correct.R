@@ -6,7 +6,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
   colData(ace) = droplevels(colData(ace))
   SummarizedExperiment::assays(ace)[["counts"]] = as(SummarizedExperiment::assays(ace)[["counts"]], 'sparseMatrix')
 
-  IDX = get_ace_split_IDX(ace, attr)
+  IDX = get_ace_split_IDX(ace, batch.attr)
 
   ace.list = lapply(IDX, function(idx) computeSumFactors(ace[, idx], BPPARAM = BPPARAM ) )
   ace.list.norm = do.call(batchelor::multiBatchNorm, list(ace.list, BPPARAM = BPPARAM))
