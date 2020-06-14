@@ -9,8 +9,7 @@ import.ace.from.count.matrix(
   gene.names,
   sample_annotations = NULL,
   prefilter = FALSE,
-  min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500
+  ...
 )
 }
 \arguments{
