@@ -41,33 +41,6 @@ cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NU
 
 }
 
-#' A wrapper function For Leiden algorithm applied to an ACE object
-#'
-#' @param ace Input results to be clustered
-
-#' @param resolution_parameter Resolution of the clustering.
-#' The higher the resolution, the more clusters we will get (default=0.5).
-#' @param arch.init Whether to use archetype-assignments to initialize clustering (default=TRUE)
-#' @param seed Random seed
-#'
-#' @return ace with added annotation
-#'
-#' @examples
-#' clusters = cluster.ACTIONet(ace)
-#' plot.ACTIONet(ace, clusters)
-cluster.ACTIONet <- function(ace, resolution_parameter = 1, net.slot = "ACTIONet", init.slot = "assigned_archetype", seed = 0) {
-    initial.clusters = NULL
-    if ( !is.null(init.slot) ) {
-		initial.clusters = ace[[init.slot]]
-	}
-
-	G = colNets(ace)[[net.slot]]
-
-	clusters = cluster.graph(G, resolution_parameter, initial.clusters, seed)
-    names(clusters) = paste("C", as.character(clusters), sep = "")
-
-	return(clusters)
-}
 
 
 #' Uses a variant of the label propagation algorithm to infer missing labels
