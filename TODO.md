@@ -9,6 +9,5 @@ Graph"](https://github.com/tommylee3003/SDBSCAN)
 * Construct cell-state ontology graph using 
 * Fix tab autocomplete issue for the ACE class
 * Fix/reimplement normalize fuinctions
-* Fix visualize.markers with input length  = 1
 * Remove R.utils dependencies
 * Add require() statements where appropriate

@@ -2,8 +2,11 @@
 
 S3method(.DollarNames,ACTIONetExperiment)
 export(ACTIONetExperiment)
+export(batch.correct.ace.Harmony)
 export(colFactors)
 export(colNets)
+export(get_ace_split_IDX)
+export(reduce.and.batch.correct.ace.fastMNN)
 export(rowFactors)
 exportClasses(ACTIONetExperiment)
 exportMethods("$")

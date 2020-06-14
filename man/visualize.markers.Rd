@@ -13,7 +13,7 @@ visualize.markers(
   trans.fact = 3,
   node.size = 1,
   CPal = "magma",
-  alpha_val = 0.95
+  alpha_val = 0
 )
 }
 \arguments{

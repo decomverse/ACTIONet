@@ -8,10 +8,9 @@ import.ace.from.10X.h5(
   fname,
   version = 3,
   genome = NULL,
+  use.names = TRUE,
   prefilter = FALSE,
-  min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500,
-  use.names = TRUE
+  ...
 )
 }
 \arguments{
