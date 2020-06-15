@@ -1,114 +1,114 @@
-scran.normalize <- function(sce, BPPARAM = SerialParam()) {
+scran.normalize <- function(ace, BPPARAM = SerialParam()) {
     require(scran)
     require(scater)
 
-    sce = scran::computeSumFactors(sce, BPPARAM = BPPARAM)
-    sce = scater::logNormCounts(sce)
-    return(sce)
+    ace = scran::computeSumFactors(ace, BPPARAM = BPPARAM)
+    ace = scater::logNormCounts(ace)
+    return(ace)
 }
 
-# DESeq2.normalize <- function(sce, BPPARAM = SerialParam()) {
+# DESeq2.normalize <- function(ace, BPPARAM = SerialParam()) {
 #     library(DESeq2)
 #     require(scater)
 #
-#     sizeFactors(sce) <- estimateSizeFactorsForMatrix(counts(sce))
-#     sce <- scater::logNormCounts(sce)
+#     sizeFactors(ace) <- estimateSizeFactorsForMatrix(counts(ace))
+#     ace <- scater::logNormCounts(ace)
 #
-#     return(sce)
+#     return(ace)
 # }
 #
-# TMM.normalize <- function(sce, BPPARAM = SerialParam()) {
+# TMM.normalize <- function(ace, BPPARAM = SerialParam()) {
 #     library(edgeR)
 #     require(scater)
 #
-#     sizeFactors(sce) <- calcNormFactors(counts(sce), method = "TMM")
-#     sce <- scater::logNormCounts(sce)
+#     sizeFactors(ace) <- calcNormFactors(counts(ace), method = "TMM")
+#     ace <- scater::logNormCounts(ace)
 #
-#     return(sce)
+#     return(ace)
 # }
 
-# logCPM.normalize <- function(sce) {
+# logCPM.normalize <- function(ace) {
 #     library(edgeR)
 #
-#     logcounts(sce) = log2(edgeR::cpm(counts(sce)) + 1)
+#     logcounts(ace) = log2(edgeR::cpm(counts(ace)) + 1)
 #
-#     return(sce)
+#     return(ace)
 # }
 #
-linnorm.normalize <- function(sce) {
+linnorm.normalize <- function(ace) {
     require(Linnorm)
 
-    SummarizedExperiment::assays(sce)[["logcounts"]] = Linnorm(counts(sce))
-    return(sce)
+    SummarizedExperiment::assays(ace)[["logcounts"]] = Linnorm(counts(ace))
+    return(ace)
 }
 #
-# SCnorm.normalize <- function(sce) {
-#     SCnorm_out = SCnorm(Data = counts(sce), Conditions = rep(1, ncol(sce)), FilterCellNum = 10, NCores = NUM_OF_THREAD)
-#     logcounts(sce) = log2(normcounts(SCnorm_out) + 1)
+# SCnorm.normalize <- function(ace) {
+#     SCnorm_out = SCnorm(Data = counts(ace), Conditions = rep(1, ncol(ace)), FilterCellNum = 10, NCores = NUM_OF_THREAD)
+#     logcounts(ace) = log2(normcounts(SCnorm_out) + 1)
 #
-#     return(sce)
+#     return(ace)
 # }
 #
-# scone.normalize <- function(sce) {
+# scone.normalize <- function(ace) {
 #     library(scone)
 #
 #     scaling = list(none = identity, sum = SUM_FN, tmm = TMM_FN, uq = UQ_FN, fq = FQT_FN, deseq = DESEQ_FN)
-#     results = scone(SconeExperiment(counts(sce)), scaling = scaling, run = TRUE, k_qc = 0, k_ruv = 0, return.normalize = "in_memory",
+#     results = scone(SconeExperiment(counts(ace)), scaling = scaling, run = TRUE, k_qc = 0, k_ruv = 0, return.normalize = "in_memory",
 #         zero = "postadjust", bpparam = BiocParallel::SerialParam())
 #     out.normalize = get.normalizealized(results, method = rownames(get_params(results))[1])
-#     logcounts(sce) = log2(out.normalize + 1)
+#     logcounts(ace) = log2(out.normalize + 1)
 #
-#     return(sce)
+#     return(ace)
 # }
 
-normalize.sce <- function(sce, norm.method = "default", BPPARAM = SerialParam()) {
+normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam()) {
 
   if (norm.method == "scran") {
-      sce.norm = scran.normalize(sce,  BPPARAM = BPPARAM)
+      ace.norm = scran.normalize(ace,  BPPARAM = BPPARAM)
   # } else if (norm.method == "DESeq2") {
-  #     sce.norm = DESeq2.normalize(sce, BPPARAM = BPPARAM)
+  #     ace.norm = DESeq2.normalize(ace, BPPARAM = BPPARAM)
   # } else if (norm.method == "TMM") {
-  #     sce.norm = TMM.normalize(sce, BPPARAM = BPPARAM)
+  #     ace.norm = TMM.normalize(ace, BPPARAM = BPPARAM)
   #   } else if (norm.method == "logCPM") {
-  #       sce.norm = logCPM.normalize(sce)
+  #       ace.norm = logCPM.normalize(ace)
     } else if (norm.method == "linnorm") {
-        sce.norm = linnorm.normalize(sce)
+        ace.norm = linnorm.normalize(ace)
     # } else if (norm.method == "SCnorm") {
-    #     sce.norm = SCnorm.normalize(sce)
+    #     ace.norm = SCnorm.normalize(ace)
     # } else if (norm.method == "scone") {
-    #     sce.norm = scone.normalize(sce)
+    #     ace.norm = scone.normalize(ace)
     } else {
-        sce.norm = sce
-        A = as(SummarizedExperiment::assays(sce.norm)[["counts"]], "dgTMatrix")
+        ace.norm = ace
+        A = as(SummarizedExperiment::assays(ace.norm)[["counts"]], "dgTMatrix")
         cs = Matrix::colSums(A)
         cs[cs == 0] = 1
         B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = log1p(median(cs) * (A@x/cs[A@j + 1])), dims = dim(A))
-        rownames(B) = rownames(sce.norm)
-        colnames(B) = colnames(sce.norm)
-        SummarizedExperiment::assays(sce.norm)[["logcounts"]] = B
+        rownames(B) = rownames(ace.norm)
+        colnames(B) = colnames(ace.norm)
+        SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
     }
 
-    metadata(sce.norm)$normalization.method = norm.method
-    # metadata(sce.norm)$normalization.time = Sys.time()
+    metadata(ace.norm)$normalization.method = norm.method
+    # metadata(ace.norm)$normalization.time = Sys.time()
 
-	sce.norm = add.count.metadata(sce.norm)
+	   ace.norm = add.count.metadata(ace.norm)
 
-    return(sce.norm)
+    return(ace.norm)
 }
 
-# renormalize.sce <- function(sce) {
+# renormalize.ace <- function(ace) {
 # 	library(scater)
 #
-# 	system.time({sce <- computeSumFactors(sce, clusters=sce$unification.out$assignments.core)})
-# 	summary(sizeFactors(sce))
+# 	system.time({ace <- computeSumFactors(ace, clusters=ace$unification.out$assignments.core)})
+# 	summary(sizeFactors(ace))
 #
-# 	final.sce = normalize(sce)
+# 	final.ace = normalize(ace)
 #
-# 	final.sce = add.count.metadata(final.sce)
+# 	final.ace = add.count.metadata(final.ace)
 #
-#     metadata(final.sce)$normalization.method = 'renormalized'
-#     metadata(final.sce)$sizeFactors = sizeFactors(final.sce)
-#     metadata(final.sce)$normalization.time = Sys.time()
+#     metadata(final.ace)$normalization.method = 'renormalized'
+#     metadata(final.ace)$sizeFactors = sizeFactors(final.ace)
+#     metadata(final.ace)$normalization.time = Sys.time()
 #
-# 	return(final.sce)
+# 	return(final.ace)
 # }
