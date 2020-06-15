@@ -4,13 +4,7 @@
 \alias{import.ace.from.10X}
 \title{A simple wrapper to import data from a 10X experiment folder (v2 or v3) and constructs an `SingleCellExeriment` object}
 \usage{
-import.ace.from.10X(
-  input_path,
-  version = 3,
-  prefilter = F,
-  min.cell.frac.per.gene = 0.005,
-  min.genes.per.cell = 500
-)
+import.ace.from.10X(input_path, version = 3, prefilter = FALSE, ...)
 }
 \arguments{
 \item{input_path}{Folder containing input files}
@@ -30,5 +24,5 @@ import.ace.from.10X(
 A simple wrapper to import data from a 10X experiment folder (v2 or v3) and constructs an `SingleCellExeriment` object
 }
 \examples{
-ace = import.ace.from.10X(input_path, prefilter=TRUE)
+ace = import.ace.from.10X(input_path, prefilter=TRUE, min_feats_per_cell = 500)
 }
