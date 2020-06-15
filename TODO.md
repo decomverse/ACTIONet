@@ -19,3 +19,5 @@
 * Fix/reimplement normalize fuinctions
 * Remove R.utils dependencies
 * Add require() statements where appropriate
+* Autocorrelation to find continuous cell-states
+* joint analysis with multi-resolution application of Leiden to identify clustered archetypes
