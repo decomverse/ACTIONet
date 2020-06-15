@@ -151,3 +151,22 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
 
 	return(ace)
 }
+
+EnhAdj <- function(Adj) {
+	Adj[is.na(Adj)] = 0
+	Adj[Adj < 0] = 0
+	# Adj = exp((Adj - median(Adj)) / (mad(Adj)))
+	A = as(Adj, 'dgTMatrix')
+	diag(A) = 0
+	eps = 1e-16
+	rs = Matrix::rowSums(A)
+	rs[rs == 0] = 1
+	P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
+	w = sqrt(Matrix::colSums(P) + eps)
+	W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
+	P = W %*% Matrix::t(W)
+	P = as.matrix(P)
+	diag(P) = 0
+	
+	return(P)
+}
