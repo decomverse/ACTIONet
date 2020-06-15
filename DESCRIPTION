@@ -12,14 +12,14 @@ Authors@R: c(
     person("Sebastian", "Pineda", email = "sebastianpineda95@gmail.com",
         role = "ctb", comment = c(ORCID = "0000-0002-8903-0550"))
     )
-Maintainer: Shahin Mohammadi <mohammadi@broadinstitute.org>
+Maintainer: Shahin Mohammadi <shahin.mohammadi@gmail.com>
 Description: 
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, SingleCellExperiment, hdf5r, scater, R.utils
-Imports: Matrix, SingleCellExperiment, hdf5r, ComplexHeatmap, scater, R.utils
-Suggests: scran,wordcloud,plotly,threejs,viridis,colorspace,scales,RColorBrewer,ComplexHeatmap
+Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, R.utils, SingleCellExperiment, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer
+Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SingleCellExperiment, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer
 LinkingTo: Rcpp,RcppArmadillo
+biocViews: SingleCell
 Encoding: UTF-8
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0

@@ -5,12 +5,12 @@
 #include <atomic>
 
 template<class Function>
-inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
-    if (numThreads <= 0) {
-        numThreads = std::thread::hardware_concurrency();
+inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
+    if (thread_no <= 0) {
+        thread_no = std::thread::hardware_concurrency();
     }
 
-    if (numThreads == 1) {
+    if (thread_no == 1) {
         for (size_t id = start; id < end; id++) {
             fn(id, 0);
         }
@@ -23,7 +23,7 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn
         std::exception_ptr lastException = nullptr;
         std::mutex lastExceptMutex;
 
-        for (size_t threadId = 0; threadId < numThreads; ++threadId) {
+        for (size_t threadId = 0; threadId < thread_no; ++threadId) {
             threads.push_back(std::thread([&, threadId] {
                 while (true) {
                     size_t id = current.fetch_add(1);
@@ -117,8 +117,12 @@ namespace ACTIONet {
 	}	
 		
 	// k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
-	sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		double LC = 1.0 / density;
+		
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
 
 		printf("Building adaptive network (density = %.2f)\n", density);
 
@@ -245,8 +249,12 @@ namespace ACTIONet {
 		return(G_sym);		
 	}
 
-	sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		double LC = 1.0 / density;
+		
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
 
 		printf("Building adaptive network (density = %.2f) -- Updated\n", density);
 
@@ -344,9 +352,11 @@ namespace ACTIONet {
 		return(G_sym);		
 	}
 
-	sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
-
+	sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		printf("Building fixed-degree network (k = %d)\n", (int)k);
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
 
 		H_stacked = clamp(H_stacked, 0, 1);
 		//H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
@@ -420,7 +430,11 @@ namespace ACTIONet {
 
 
 	
-	sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
+		
 		sp_mat G = build_ACTIONet_JS_KstarNN_v2(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
 		
 		return(G);
