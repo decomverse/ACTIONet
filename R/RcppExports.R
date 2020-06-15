@@ -204,7 +204,7 @@ run_SPA <- function(A, k) {
 #' @param S_r Reduced kernel matrix
 #' @param k_min Minimum number of archetypes to consider (default=2)
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-#' @param thread_no Number of parallel threads (default=4)
+#' @param thread_no Number of parallel threads (default = 0)
 #' @param max_it,min_delta Convergence parameters for archetypal analysis
 #' 
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
@@ -212,7 +212,7 @@ run_SPA <- function(A, k) {
 #' ACTION.out = run_ACTION(S_r, k_max = 10)
 #' H8 = ACTION.out$H[[8]]
 #' cell.assignments = apply(H8, 2, which.max)
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50L, min_delta = 1e-16) {
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 50L, min_delta = 1e-16) {
     .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
 }
 
@@ -221,66 +221,63 @@ run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50
 #' @param S_r Reduced kernel matrix
 #' @param k_min Minimum number of archetypes to consider (default=2)
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-#' @param thread_no Number of parallel threads (default=4)
 #' @param max_it,min_delta Convergence parameters for archetypal analysis
+#' @param max_trial Maximum number of trials before termination
 #' 
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
-#' ACTION.out = run_ACTION(S_r, k_max = 10)
+#' ACTION.out = run_ACTION_plus(S_r, k_max = 10)
 #' H8 = ACTION.out$H[[8]]
 #' cell.assignments = apply(H8, 2, which.max)
 run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 50L, min_delta = 1e-16, max_trial = 3L) {
     .Call(`_ACTIONet_run_ACTION_plus`, S_r, k_min, k_max, max_it, min_delta, max_trial)
 }
 
-#' Runs multi-level ACTION decomposition method
+#' Runs basic archetypal analysis
 #'
-#' @param S_r Reduced kernel matrix
-#' @param k_min Minimum number of archetypes to consider (default=2)
-#' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-#' @param thread_no Number of parallel threads (default=4)
+#' @param A Inpu matrix
+#' @param W0 Starting archetypes
 #' @param max_it,min_delta Convergence parameters for archetypal analysis
 #' 
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
-#' ACTION.out = run_ACTION(S_r, k_max = 10)
-#' H8 = ACTION.out$H[[8]]
-#' cell.assignments = apply(H8, 2, which.max)
-run_AA <- function(A, W0, max_it = 50L, min_delta = 1e-7) {
+#' S_r = t(reducedDims(ace)$ACTION)
+#' SPA.out = run_SPA(S_r, 10)
+#' W0 = S_r[, SPA.out$selected_columns]
+#' AA.out = run_AA(S_r, W0)
+#' H = AA.out$H
+#' cell.assignments = apply(H, 2, which.max)
+run_AA <- function(A, W0, max_it = 50L, min_delta = 1e-16) {
     .Call(`_ACTIONet_run_AA`, A, W0, max_it, min_delta)
 }
 
-#' Runs multi-level Online ACTION decomposition method
+#' Runs multi-level Online ACTION decomposition method (under development)
 #'
 #' @param S_r Reduced kernel matrix
 #' @param k_min Minimum number of archetypes to consider (default=2)
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
 #' @param samples List of sampled cells to use for updating archetype decomposition
-#' @param thread_no Number of parallel threads (default=4)
+#' @param thread_no Number of parallel threads (default = 0)
 #' 
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
 #' ACTION.out = run_online_ACTION(S_r, k_max = 10)
-#' H8 = ACTION.out$H[[8]]
-#' cell.assignments = apply(H8, 2, which.max)
-run_online_ACTION <- function(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 8L) {
+run_online_ACTION <- function(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 0L) {
     .Call(`_ACTIONet_run_online_ACTION`, S_r, samples, k_min, k_max, thread_no)
 }
 
-#' Runs multi-level ACTION decomposition method
+#' Runs multi-level weighted ACTION decomposition method (under development)
 #'
 #' @param S_r Reduced kernel matrix
 #' @param w Weight vector for each observation
 #' @param k_min Minimum number of archetypes to consider (default=2)
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-#' @param thread_no Number of parallel threads (default=4)
+#' @param thread_no Number of parallel threads (default=0)
 #' 
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
-#' ACTION.out = run_ACTION(S_r, k_max = 10)
-#' H8 = ACTION.out$H[[8]]
-#' cell.assignments = apply(H8, 2, which.max)
-run_weighted_ACTION <- function(S_r, w, k_min = 2L, k_max = 30L, thread_no = 8L, max_it = 50L, min_delta = 0.01) {
+#' ACTION.out = run_weighted_ACTION(S_r, w, k_max = 20)
+run_weighted_ACTION <- function(S_r, w, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 50L, min_delta = 1e-16) {
     .Call(`_ACTIONet_run_weighted_ACTION`, S_r, w, k_min, k_max, thread_no, max_it, min_delta)
 }
 
@@ -333,7 +330,7 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, min_overlap = 10.0, reso
 #'
 #' @param H_stacked Output of the prune_archetypes() function.
 #' @param density Overall density of constructed graph. The higher the density, the more edges are retained (default = 1.0).
-#' @param thread_no Number of parallel threads (default = 4).
+#' @param thread_no Number of parallel threads (default = 0).
 #' @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges. 
 #' If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
 #' 
@@ -342,7 +339,7 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, min_overlap = 10.0, reso
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
-build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 8L, mutual_edges_only = TRUE) {
+build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edges_only = TRUE) {
     .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only)
 }
 
@@ -352,7 +349,7 @@ build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 8L, mutual_edge
 #' @param S_r Reduced kernel matrix (is used for reproducible initialization).
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 #' @param n_epochs Number of epochs for SGD algorithm (default=100).
-#' @param thread_no Number of threads.
+#' @param thread_no Number of threads (default = 0).
 #' 
 #' @return A named list \itemize{
 #' \item coordinates 2D coordinates of vertices.
@@ -363,7 +360,7 @@ build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 8L, mutual_edge
 #' @examples
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #'	vis.out = layout_ACTIONet(G, S_r)
-layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, thread_no = 8L) {
+layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, thread_no = 0L) {
     .Call(`_ACTIONet_layout_ACTIONet`, G, S_r, compactness_level, n_epochs, thread_no)
 }
 
@@ -619,7 +616,7 @@ compute_archetype_core_centrality <- function(G, sample_assignments) {
 #'
 #' @param G Input graph
 #' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
-#' @param thread_no Number of parallel threads
+#' @param thread_no Number of parallel threads (default=0)
 #' @param alpha Random-walk depth ( between [0, 1] )
 #' @param max_it PageRank iterations
 #' 
@@ -629,7 +626,7 @@ compute_archetype_core_centrality <- function(G, sample_assignments) {
 #' G = colNets(ace)$ACTIONet
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
 #' smoothed.expression = compute_network_diffusion(G, gene.expression)
-compute_network_diffusion <- function(G, X0, thread_no = 8L, alpha = 0.85, max_it = 3L) {
+compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 3L) {
     .Call(`_ACTIONet_compute_network_diffusion`, G, X0, thread_no, alpha, max_it)
 }
 
@@ -754,7 +751,7 @@ Prune_PageRank <- function(U, density = 1.0) {
     .Call(`_ACTIONet_Prune_PageRank`, U, density)
 }
 
-transform_layout <- function(W, coor2D, coor3D, colRGB, compactness_level = 50L, n_epochs = 500L, thread_no = 8L) {
+transform_layout <- function(W, coor2D, coor3D, colRGB, compactness_level = 50L, n_epochs = 500L, thread_no = 0L) {
     .Call(`_ACTIONet_transform_layout`, W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no)
 }
 
@@ -889,7 +886,7 @@ SVD2PCA_full <- function(S, u, d, v) {
     .Call(`_ACTIONet_SVD2PCA_full`, S, u, d, v)
 }
 
-computeFullSim <- function(H, thread_no) {
+computeFullSim <- function(H, thread_no = 0L) {
     .Call(`_ACTIONet_computeFullSim`, H, thread_no)
 }
 

@@ -22,23 +22,24 @@ auto worker_thread(Worker &worker, const IndexRange &range) -> void {
 }
 
 // Function to calculate the ranges for a given input
-inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
+inline auto split_input_range(const IndexRange &range, std::size_t thread_no,
                               std::size_t grain_size)
     -> std::vector<IndexRange> {
 
   // determine max number of threads
-  if (n_threads == 0) {
-    n_threads = std::thread::hardware_concurrency();
+  if (thread_no <= 0) {
+	thread_no = std::thread::hardware_concurrency();
   }
+
 
   // compute grain_size (including enforcing requested minimum)
   std::size_t length = range.second - range.first;
-  if (n_threads == 1)
+  if (thread_no == 1)
     grain_size = length;
-  else if ((length % n_threads) == 0) // perfect division
-    grain_size = (std::max)(length / n_threads, grain_size);
+  else if ((length % thread_no) == 0) // perfect division
+    grain_size = (std::max)(length / thread_no, grain_size);
   else // imperfect division, divide by threads - 1
-    grain_size = (std::max)(length / (n_threads - 1), grain_size);
+    grain_size = (std::max)(length / (thread_no - 1), grain_size);
 
   // allocate ranges
   std::vector<IndexRange> ranges;
@@ -55,11 +56,11 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
 // Execute the Worker over the IndexRange in parallel
 template <typename Worker>
 inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
-                         std::size_t n_threads, std::size_t grain_size = 1) {
+                         std::size_t thread_no, std::size_t grain_size = 1) {
   // split the work
   IndexRange input_range(begin, end);
   std::vector<IndexRange> ranges =
-      split_input_range(input_range, n_threads, grain_size);
+      split_input_range(input_range, thread_no, grain_size);
 
   std::vector<std::thread> threads;
   for (auto &range : ranges) {
