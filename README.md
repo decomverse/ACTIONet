@@ -97,10 +97,48 @@ devtools::install_github(repo = 'satijalab/seurat', ref = 'develop')
 ACTIONet contains a method to import data from a Seurat object: `import.ace.from.Seurat()`.
 
 # Running ACTIONet
+Here is a simple example to get you started:
+
+```r
+# Download example dataset from the 10X Genomics website
+download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5', 'pbmc_10k_v3.h5') 
+
+require(ACTIONet)
+# Run ACTIONet
+ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 50, min_umis_per_cell = 1000)
+ace = reduce.sce(ace)
+ACTIONet_results = run.ACTIONet(ace)
+ace = ACTIONet_results$ace
+
+# Annotate cell-types
+data("curatedMarkers_human")
+markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+annot.out = annotate.cells.from.archetypes.using.markers(ace, markers)
+ace$celltypes = annot.out$Labels
+
+# Visualize output
+plot.ACTIONet(ace, "celltypes", transparency.attr = ace$node_centrality)
+
+# Export results as AnnData
+ACE2AnnData(ace, fname = "pbmc_10k_v3.h5ad")
+```
+You can further visualize the network using `cellxgene`:
+
+```bash
+cellxgene launch pbmc_10k_v3.h5ad
+```
 
 # Additional tutorials
 You can access ACTIONet tutorials from:
-* X
+* [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/min_intro.html)
+* [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/intro.html)
+* [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/clustering.html)
+* [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/batch.html)
+* [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/porting_data.html)
+* [Interactive visualization, annotation, and exploration](http://compbio.mit.edu/ACTIONet/annotation.html)
+* [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/scinet.html)
+
+You can also find a [Step-by-step guide](http://compbio.mit.edu/ACTIONet/guide.html) for the main step of running ACTIONet, as well as a detailed description of the [ACTIONetExperiment (ACE) object](http://compbio.mit.edu/ACTIONet/ace.html).
 
 
 # Visualizing ACTIONet results using cellxgene

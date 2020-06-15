@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(sce)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = -1, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300) {		
+run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300) {		
     if (!(data.slot %in% names(assays(sce)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -119,7 +119,7 @@ run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificit
 #' plot.ACTIONet(ace)
 #' ace.updated = reconstruct.ACTIONet(ace, network_density = 0.1)
 #' plot.ACTIONet(ace.updated)
-reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 0, layout.in.parallel = FALSE, reduction.slot = "ACTION") {
+reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, thread_no = 0, layout.in.parallel = FALSE, reduction.slot = "ACTION2D") {
     set.seed(0)
 	
     # re-Build ACTIONet
@@ -160,7 +160,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' plot.ACTIONet(ace)
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1, reduction.slot = "ACTION") {
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1, reduction.slot = "ACTION2D") {
     G = colNets(ace)[["ACTIONet"]]
     	
     # re-Layout ACTIONet
