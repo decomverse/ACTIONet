@@ -3,6 +3,7 @@
 reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced_dim = 50, MNN.k = 20, return_V = FALSE, reduction_name = "MNN", BPPARAM = SerialParam()) {
   require(scran)
   require(batchelor)
+  ace <- check_if_ace(ace)
   colData(ace) = droplevels(colData(ace))
   SummarizedExperiment::assays(ace)[["counts"]] = as(SummarizedExperiment::assays(ace)[["counts"]], 'sparseMatrix')
 
@@ -53,6 +54,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
 #' batch.vec = ace$Batch # Assumes sample annotations are in the input_path with "Batch" attribute being provided
 #' ace = reduce.and.batch.correct.ace.Harmony(ace)
 reduce.and.batch.correct.ace.Harmony <- function(ace, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+  ace <- check_if_ace(ace)
 	if( !("harmony" %in% rownames(installed.packages())) ) {
 		message("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.")
 		return
@@ -74,6 +76,8 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch.vec = NULL, reduced_
 #' @export
 batch.correct.ace.Harmony <- function(ace, batch.vec, reduction.slot = "ACTION") {
     require(harmony)
+    ace <- check_if_ace(ace)
+    batch.vec = get_ace_split_IDX(ace, batch.vec, return_split_vec = TRUE)
     reducedDims(ace)[[reduction.slot]] = harmony::HarmonyMatrix(reducedDims(ace)[[reduction.slot]], batch.vec, do_pca = FALSE)
     return(ace)
 }

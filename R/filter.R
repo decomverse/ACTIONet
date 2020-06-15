@@ -41,29 +41,31 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
   if(return_fil_ace)
     return(ace.fil)
   else{
-    fil_cells_mask = !(colnames(ace) %in% colnames(ace.fil))
-    fil_feats_mask = !(rownames(ace) %in% rownames(ace.fil))
-    fil_cells_list = data.frame(name = colnames(ace)[fil_cells_mask], idx = which(fil_cells_mask))
-    fil_feats_list = data.frame(name = rownames(ace)[fil_feats_mask], idx = which(fil_feats_mask))
+    fil_cols_mask = !(colnames(ace) %in% colnames(ace.fil))
+    fil_rows_mask = !(rownames(ace) %in% rownames(ace.fil))
+    fil_cols_list = data.frame(name = colnames(ace)[fil_cols_mask], idx = which(fil_cols_mask))
+    fil_rows_list = data.frame(name = rownames(ace)[fil_rows_mask], idx = which(fil_rows_mask))
 
-    fil_list = list(cells_filtered = fil_cells_list, features_filtered = fil_feats_list)
+    fil_list = list(cols_filtered = fil_cols_list, rows_filtered = fil_rows_list)
     return(fil_list)
   }
 }
 
 filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL){
 
-  if( length(by) ==  1) {
-    IDX = split(1:dim(ace)[2], droplevels(colData(ace))[[by]])
-  } else {
-    IDX = split(1:dim(ace)[2], by)
-  }
+  #if( length(by) ==  1) {
+  #  IDX = split(1:dim(ace)[2], droplevels(colData(ace))[[by]])
+  #} else {
+  #  IDX = split(1:dim(ace)[2], by)
+  #}
+  IDX = get_ace_split_IDX(ace, by)
 
   if(any(duplicated(rownames(ace)))){
     msg = sprintf("Adding suffix to duplicate rownames.")
     warning(msg)
     rownames(ace) = make.names(rownames(ace), unique = T)
-  } else if(any(duplicated(rownames(ace)))){
+  }
+  if(any(duplicated(colnames(ace)))){
     msg = sprintf("Adding suffix to duplicate colnames.")
     warning(msg)
     colnames(ace) = make.names(colnames(ace), unique = T)
@@ -75,7 +77,7 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
                            min_umis_per_cell = min_umis_per_cell,
                            max_umis_per_cell = max_umis_per_cell,
                            min_feats_per_cell = min_feats_per_cell,
-                           return_fil_ace = T)
+                           return_fil_ace = F)
     return(fil_list)
   })
 
