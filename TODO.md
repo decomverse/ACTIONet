@@ -21,3 +21,4 @@
 * Add require() statements where appropriate
 * Autocorrelation to find continuous cell-states
 * joint analysis with multi-resolution application of Leiden to identify clustered archetypes
+* Multi-resolution batch-correction inspired by Harmony

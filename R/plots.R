@@ -94,7 +94,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
-plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1,
+plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1.5,
 	node.size = 1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, coordinate.slot = "ACTIONet2D") {
 
     text.halo.width = 0.1
