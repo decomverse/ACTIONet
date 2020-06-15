@@ -29,12 +29,14 @@ std::vector<double>  optimize_layout_umap(
     
     
 template<class Function>
-inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
-    if (numThreads <= 0) {
-        numThreads = std::thread::hardware_concurrency();
+inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
+    if (thread_no <= 0) {
+        thread_no = std::thread::hardware_concurrency();
+        printf("# Threads = %d\n", thread_no);
     }
+    
 
-    if (numThreads == 1) {
+    if (thread_no == 1) {
         for (size_t id = start; id < end; id++) {
             fn(id, 0);
         }
@@ -47,7 +49,7 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn
         std::exception_ptr lastException = nullptr;
         std::mutex lastExceptMutex;
 
-        for (size_t threadId = 0; threadId < numThreads; ++threadId) {
+        for (size_t threadId = 0; threadId < thread_no; ++threadId) {
             threads.push_back(std::thread([&, threadId] {
                 while (true) {
                     size_t id = current.fetch_add(1);
@@ -159,7 +161,7 @@ namespace ACTIONet {
 		mat S_r,
 		int compactness_level = 50,
 		unsigned int n_epochs = 500,
-		int thread_no = 8) { 
+		int thread_no = 0) { 
 
 			
 		field<mat> res(3);

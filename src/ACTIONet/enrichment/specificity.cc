@@ -151,7 +151,7 @@ namespace ACTIONet {
 		mat logPvals_upper = square(Lambda)/(2*(Nu + (Lambda%A/3)));
 		uvec lidx = find(Lambda<=0);
 		logPvals_upper(lidx) = zeros(lidx.n_elem);
-		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
+		logPvals_upper.replace(datum::nan, 0);  // replace each NaN with 0
 		
 		
 		logPvals_lower /= log(10);
@@ -224,7 +224,7 @@ namespace ACTIONet {
 		mat logPvals_upper = square(Lambda)/(2*(Nu + (Lambda%A/3)));
 		uvec lidx = find(Lambda<=0);
 		logPvals_upper(lidx) = zeros(lidx.n_elem);
-		logPvals_lower.replace(datum::nan, 0);  // replace each NaN with 0
+		logPvals_upper.replace(datum::nan, 0);  // replace each NaN with 0
 		
 		
 		
