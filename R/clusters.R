@@ -5,21 +5,21 @@
 #' @param output.slot.name Name of the output in rowFactors(ace) to store results
 #' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
 #' Typically it is either "logcounts" or "logcounts"
- 
+
 #' @return `ACE` object with specificity scores of each cluster added to rowFactors(ace) as a matrix with name defined by output.slot.name
-#' 
+#'
 #' @examples
 #' ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name, data.slot = "logcounts") {			
+compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name, data.slot = "logcounts") {
 	S = assays(ace)[[data.slot]]
-	
+
 	if(is.factor(clusters)) {
 		UL = levels(clusters)
 	} else {
 		UL = sort(unique(clusters))
 	}
 	lables = match(clusters, UL)
-	
+
 	# Compute gene specificity for each cluster
 	specificity.out = compute_cluster_feature_specificity(S, lables)
 	specificity.out = lapply(specificity.out, function(specificity.scores) {
@@ -27,40 +27,40 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
 		return(specificity.scores)
 	})
-	
+
 	X = specificity.out[["upper_significance"]]
 	colnames(X) = UL
-	
+
 	rowFactors(ace)[[output.slot.name]] = X
-		
+
 	return(ace)
 }
 
 
-#' Annotate clusters using prior cell annotations 
+#' Annotate clusters using prior cell annotations
 #' (It uses Fisher's exact test for computing overlaps -- approximate HGT is used)
 #'
 #' @param ace ACTIONet output object
 #' @param clusters Cluster
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to test enrichment
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
 #' arch.annot = annotate.clusters.using.labels(ace, ace$clusters, sce$celltypes)
 annotate.clusters.using.labels <- function(ace, clusters, labels) {
-	
+
 	clusters = preprocess.labels(clusters, ace)
 	Labels = preprocess.labels(labels, ace)
 
 
     pop.size = length(Labels)
     pos.size = table(Labels)
-    
+
     logPvals = sapply(sort(unique(clusters)), function(i) {
         idx = which(clusters == i)
         sample.size = length(idx)
@@ -69,45 +69,45 @@ annotate.clusters.using.labels <- function(ace, clusters, labels) {
         })
 
         logPval = HGT_tail(pop.size, pos.size, sample.size, success.size)
-        
+
         return(logPval)
     })
-    
+
 
     cl.Annot = names(clusters)[match(sort(unique(clusters)), clusters)]
     Annot = names(Labels)[match(sort(unique(Labels)), Labels)]
 
 	colnames(logPvals) = cl.Annot
 	rownames(logPvals) = Annot
-    
+
     clusterLabels = Annot[apply(logPvals, 2, which.max)]
-    
+
     cellLabels = match(clusterLabels[clusters], Annot)
     names(cellLabels) = clusterLabels[clusters]
-    
+
 
     res = list(Labels = clusterLabels, cellLabels = cellLabels, Enrichment = logPvals)
-    
+
     #ace$annotations[[cl.idx]]$labelEnrichment = res
     #return(ace)
     return(res)
 }
 
 
-#' Annotate clusters using known marker genes 
+#' Annotate clusters using known marker genes
 #' (It uses permutation test on cluster specificity scores)
 #'
 #' @param ace ACTIONet output object
 #' @param marker.genes A list of lists (each a set of markers for a given cell type)
 #' @param specificity.slot.name An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function
 #' @param rand.sample.no Number of random permutations (default=1000)
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
@@ -156,7 +156,7 @@ annotate.clusters.using.markers <- function(ace, marker.genes, specificity.slot.
     if (dim(markers.table)[1] == 0) {
         print("No markers are left")
         return()
-    }   
+    }
     specificity.panel = specificity.panel[, markers.table$Gene]
 
     IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
@@ -204,19 +204,19 @@ annotate.clusters.using.markers <- function(ace, marker.genes, specificity.slot.
 
 
 
-#' Annotate arbitary feature score matrix using known marker genes 
+#' Annotate arbitary feature score matrix using known marker genes
 #' (It uses permutation test on cluster specificity scores)
 #'
 #' @param feature.scores An arbitrary matrix with rows corresponding to features and columns to any given annotation/grouping of cells
 #' @param marker.genes A list of lists (each a set of markers for a given cell type)
 #' @param rand.sample.no Number of random permutations (default=1000)
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
@@ -266,7 +266,7 @@ annotate.profile.using.markers <- function(feature.scores, marker.genes, rand.sa
     if (dim(markers.table)[1] == 0) {
         print("No markers are left")
         return()
-    }   
+    }
     specificity.panel = specificity.panel[, markers.table$Gene]
 
     IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
@@ -328,15 +328,15 @@ annotate.profile.using.markers <- function(feature.scores, marker.genes, rand.sa
 #' clusters = Leiden.clustering(ace)
 #' plot.ACTIONet(ace, clusters)
 Leiden.clustering <- function(ace, resolution_parameter = 1, net.slot = "ACTIONet", init.slot = "assigned_archetype", seed = 0) {
-    initial.clusters = NULL
-    if ( !is.null(init.slot) ) {
+  initial.clusters = NULL
+  if ( !is.null(init.slot) ) {
 		initial.clusters = ace[[init.slot]]
 	}
 
 	G = colNets(ace)[[net.slot]]
 
 	clusters = cluster.graph(G, resolution_parameter, initial.clusters, seed)
-    names(clusters) = paste("C", as.character(clusters), sep = "")
+  names(clusters) = paste("C", as.character(clusters), sep = "")
 
 	return(clusters)
 }

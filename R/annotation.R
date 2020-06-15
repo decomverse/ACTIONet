@@ -1,15 +1,15 @@
-#' Annotate archetypes using prior cell annotations 
+#' Annotate archetypes using prior cell annotations
 #' (It uses t-test on the archetype footprint matrix (H))
 #'
 #' @param ace ACTIONet output object
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to test enrichment
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
 #' arch.annot = annotate.archetypes.using.labels(ace, sce$celltypes)
 annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_unified") {
@@ -18,61 +18,61 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
 	if(is.matrix(ace) | is.sparseMatrix(ace)) {
 		profile = as.matrix(ace)
 	} else {
-		profile = colFactors(ace)[[archetype.slot]]		
+		profile = colFactors(ace)[[archetype.slot]]
 	}
     Annot = names(Labels)[match(sort(unique(Labels)), Labels)]
-	
+
 	# Using t-statistics
     Enrichment.Z = sapply(Annot, function(label) {
         mask = names(Labels) == label
         class.profile = profile[, mask]
         null.profile = profile[, !mask]
-        
+
         N.class = sum(mask)
         N.null = sum(!mask)
-        
+
         if( (N.class < 3) | (N.null < 3) ) {
 			return(rep(0, nrow(profile)))
 		}
-		
+
         mu.class = Matrix::rowMeans(class.profile)
         mu.null = Matrix::rowMeans(null.profile)
-        
+
         sigma_sq.class = apply(class.profile, 1, var)
         sigma_sq.null = apply(null.profile, 1, var)
-        
-        
+
+
         delta.mean = mu.class - mu.null
         t.stat = delta.mean/sqrt((sigma_sq.class/N.class) + (sigma_sq.null/N.null))
         return(t.stat)
     })
 
-    
+
     archetypeLabels = Annot[apply(Enrichment.Z, 1, which.max)]
     Labels.confidence = apply(Enrichment.Z, 1, max)
-    
-    
+
+
     rownames(Enrichment.Z) = paste("A", 1:nrow(Enrichment.Z), "-", archetypeLabels, sep = "")
-    
+
     out.list = list(Labels = archetypeLabels, Labels.confidence = Labels.confidence, Enrichment = Enrichment.Z)
-    
+
     return(out.list)
 }
 
 
-#' Annotate clusters using known marker genes 
+#' Annotate clusters using known marker genes
 #' (It uses permutation test on cluster specificity scores)
 #'
 #' @param ace ACTIONet output object
 #' @param marker.genes A list of lists (each a set of markers for a given cell type)
 #' @param rand.sample.no Number of random permutations (default=1000)
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
@@ -88,7 +88,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 	}
 
 	specificity.panel = as.matrix(log1p(t(rowFactors(ace)[[significance.slot]])))
-
+	specificity.panel[is.na(specificity.panel)] = 0
 
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
@@ -122,7 +122,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
     if (dim(markers.table)[1] == 0) {
         print("No markers are left")
         return()
-    }   
+    }
     specificity.panel = specificity.panel[, markers.table$Gene]
 
     IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
@@ -143,7 +143,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
             rand.A = as.matrix(specificity.panel[, rand.samples])
             rand.stat = rand.A %*% sgn
         })
-
+				# rand.stats[is.na(rand.stats)] = 0
         cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 1, sd))
 
         return(cell.zscores)
@@ -176,13 +176,13 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 #' @param alpha_val Random-walk parameter for gene imputation (if imputation = "PageRank")
 #' @param imputation Gene imputation method. Can be either "PageRank" (default) or "archImpute"
 #' @param thread_no Number of parallel threads used for gene imputation (if imputation = "PageRank")
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
@@ -193,33 +193,33 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
     require(igraph)
     require(Matrix)
     require(stringr)
-    
+
     rownames(ace) = (rownames(ace))
-    
+
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
         GS.names = sapply(1:length(GS), function(i) sprintf("Celltype %s", i))
     }
-    
+
     markers.table = do.call(rbind, lapply(names(marker.genes), function(celltype) {
         genes = marker.genes[[celltype]]
-        if (length(genes) == 0) 
+        if (length(genes) == 0)
             return(data.frame())
-        
-        
+
+
         signed.count = sum(sapply(genes, function(gene) grepl("\\+$|-$", gene)))
         is.signed = signed.count > 0
-        
+
         if (!is.signed) {
             df = data.frame(Gene = (genes), Direction = +1, Celltype = celltype)
         } else {
-            
-            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene, 
+
+            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene,
                 stringr::fixed("+"), ""))))
-            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene, 
+            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene,
                 stringr::fixed("-"), ""))))
-            
-            df = data.frame(Gene = c(pos.genes, neg.genes), Direction = c(rep(+1, length(pos.genes)), rep(-1, length(neg.genes))), 
+
+            df = data.frame(Gene = c(pos.genes, neg.genes), Direction = c(rep(+1, length(pos.genes)), rep(-1, length(neg.genes))),
                 Celltype = celltype)
         }
     }))
@@ -228,7 +228,7 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
         print("No markers are left")
         return()
     }
-    
+
     rows = match(markers.table$Gene, rownames(ace))
     if (imputation == "PageRank") {
         # PageRank-based imputation
@@ -241,80 +241,80 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
     } else {
 		imputed.marker.expression = ace@assays[[data.slot]]
 	}
-    
-    
+
+
     IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
-    
+
     print("Computing significance scores")
     set.seed(0)
     Z = sapply(IDX, function(idx) {
         markers = (as.character(markers.table$Gene[idx]))
         directions = markers.table$Direction[idx]
         mask = markers %in% colnames(imputed.marker.expression)
-        
+
         A = as.matrix(imputed.marker.expression[, markers[mask]])
         sgn = as.numeric(directions[mask])
         stat = A %*% sgn
-        
+
         rand.stats = sapply(1:rand.sample.no, function(i) {
             rand.samples = sample.int(dim(imputed.marker.expression)[2], sum(mask))
             rand.A = as.matrix(imputed.marker.expression[, rand.samples])
             rand.stat = rand.A %*% sgn
         })
-        
+
         cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 1, sd))
-        
+
         return(cell.zscores)
     })
-    
+
     Z[is.na(Z)] = 0
     Labels = apply(Z, 1, which.max)
     names(Labels) = colnames(Z)[Labels]
-    
+
 	Labels = reannotate.labels(ace, Labels)
     Labels.conf = apply(Z, 1, max)
 
-	
-	res = list(Labels = Labels, Labels.confidence = Labels.conf, Enrichment = Z)	
+
+	res = list(Labels = Labels, Labels.confidence = Labels.conf, Enrichment = Z)
 
     return(res)
 }
 
-	
+
 #' Annotates cells by interpolating marker-based archetype annotations
 #'
 #' @param ace ACTIONet output object
 #' @param marker.genes A list of lists (each a set of markers for a given cell type)
 #' @param rand.sample.no Number of random permutations (default=1000)
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
-#' 
+#'
 #' @examples
-#' 
+#'
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
 #' labels = cell.annotations$Labels
 annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, unified_suffix = "unified") {
 
-	significance.slot = sprintf("H_%s_upper_significance", unified_suffix)	
+	significance.slot = sprintf("H_%s_upper_significance", unified_suffix)
 	arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, rand.sample.no = rand.sample.no, significance.slot = significance.slot)
-	
+
 	enrichment.mat = arch.annot$Enrichment
 
-	H.slot = sprintf("H_%s", unified_suffix)	
+	H.slot = sprintf("H_%s", unified_suffix)
 	cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat, normalize = T, H.slot = H.slot)
 	cell.annotations = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
-	
+
 	Labels = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
 	Labels.confidence = apply(cell.enrichment.mat, 1, max)
-	
+
 	res = list(Labels = Labels, Labels.confidence = Labels.confidence, Enrichment = cell.enrichment.mat)
-	
+
 	return(res)
 }
 
@@ -323,11 +323,11 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 #' @param ace ACTIONet output object
 #' @param enrichment.matrix Enrichment matrix with rows corresponding to archetypes and columns to an arbitrary annotation
 #' @param normalize If TRUE, enrichment matrix will be first doubly-normalized
-#' 
+#'
 #' @return Enrichment map of size cell x annotation
-#' 
+#'
 #' @examples
-#' 
+#'
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
@@ -336,7 +336,7 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 #' cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
 map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F, H.slot = "H_unified") {
 	cell.scores.mat = Matrix::t(colFactors(ace)[[H.slot]])
-	
+
     if (nrow(enrichment.matrix) != ncol(cell.scores.mat)) {
 		print("Flipping enrichment matrix")
         enrichment.matrix = t(enrichment.matrix)
@@ -351,11 +351,11 @@ map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, no
 			enrichment.scaled = log1p(enrichment.scaled)
 		}
 	}
-    
+
     cell.enrichment.mat = cell.scores.mat %*% enrichment.scaled
     colnames(cell.enrichment.mat) = colnames(enrichment.matrix)
     rownames(cell.enrichment.mat) = colnames(ace)
-    
+
     return(cell.enrichment.mat)
 }
 
