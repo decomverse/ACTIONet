@@ -96,7 +96,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
 	}
 
   if (prefilter) {
-    ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+    ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
   }
 
   return(ace)
@@ -222,7 +222,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
 	}
 
   if (prefilter) {
-    ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+    ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
   }
 
 	return(ace)
@@ -256,7 +256,7 @@ import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotati
 	}
 
   if (prefilter) {
-    ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+    ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
   }
 
     return(ace)
@@ -291,7 +291,7 @@ import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, ...) {
     ace <- ACTIONetExperiment(assays = list(counts = counts.mat))
 
     if (prefilter) {
-      ace = filter.sce(ace, assay.name = "counts", return_fil_sce = TRUE, ...)
+      ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
     }
 
     return(ace)
@@ -417,11 +417,11 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
     return(df)
 }
 
-import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.all = F) {
-    ace = as(sce, "ACTIONetExperiment")
+import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.all = F) {
+    ace = as(ace, "ACTIONetExperiment")
 
-    if("S_r" %in% names(reducedDims(sce))) {
-		reducedDims(ace)[["ACTION"]] = reducedDims(sce)[["S_r"]]
+    if("S_r" %in% names(reducedDims(ace))) {
+		reducedDims(ace)[["ACTION"]] = reducedDims(ace)[["S_r"]]
 	}
 
 	ACTION.out = ACTIONet.out$ACTION.out
