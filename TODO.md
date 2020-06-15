@@ -11,3 +11,4 @@ Graph"](https://github.com/tommylee3003/SDBSCAN)
 * Fix/reimplement normalize fuinctions
 * Remove R.utils dependencies
 * Add require() statements where appropriate
+* run.ACTION produces H_unified_upper_significance with NaN
