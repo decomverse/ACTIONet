@@ -312,6 +312,49 @@ annotate.profile.using.markers <- function(feature.scores, marker.genes, rand.sa
     return(out.list)
 }
 
+#' A wrapper function For Leiden algorithm
+#'
+#' @param G Adjacency matrix of the input graph
+#' @param resolution_parameter Resolution of the clustering.
+#' The higher the resolution, the more clusters we will get (default=0.5).
+#' @param initial.clustering Used as the inital clustering
+#' @param seed Random seed
+#'
+#' @return ace with added annotation
+#'
+#' @examples
+#' clusters = cluster.graph(G, 1.0)
+cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NULL, seed = 0) {
+	if(is.matrix(G)) {
+		G = as(G, 'sparseMatrix')
+	}
+
+	is.signed = FALSE
+	if(min(G) < 0) {
+		is.signed = TRUE;
+		print("Graph is signed. Switching to signed graph clustering mode.")
+	}
+
+    if (!is.null(initial.clustering)) {
+        print("Perform graph clustering with *prior* initialization")
+
+			if(is.signed) {
+				clusters = as.numeric(signed_cluster(G, resolution_parameter, initial.clustering, seed))
+			} else {
+				clusters = as.numeric(unsigned_cluster(G, resolution_parameter, initial.clustering, seed))
+			}
+    } else {
+        print("Perform graph clustering with *uniform* initialization")
+
+		if(is.signed) {
+			clusters = as.numeric(signed_cluster(G, resolution_parameter, NULL, seed))
+		} else {
+			clusters = as.numeric(unsigned_cluster(G, resolution_parameter, NULL, seed))
+		}
+    }
+
+}
+
 
 #' A wrapper function For Leiden algorithm applied to an ACE object
 #'
@@ -345,21 +388,18 @@ Leiden.clustering <- function(ace, resolution_parameter = 1, net.slot = "ACTIONe
 #' A wrapper function For HDBSCAN algorithm applied to an ACE object
 #'
 #' @param ace Input results to be clustered
-
-#' @param resolution_parameter Resolution of the clustering.
-#' The higher the resolution, the more clusters we will get (default=0.5).
-#' @param arch.init Whether to use archetype-assignments to initialize clustering (default=TRUE)
-#' @param seed Random seed
+#' minPoints, minClusterSize HDBSCAN parameters (default = 30,30)
+#' archetype.slot Slot of archeypte to use for clustering (default="H_unified");
 #'
 #' @return clusters
 #'
 #' @examples
 #' clusters = HDBSCAN.clustering(ace)
 #' plot.ACTIONet(ace, clusters)
-HDBSCAN.clustering <- function(ace, minPoints = 30, minClusterSize = 30, cluster.factor = "H_unified", reduction.slot) {
-	S_r = Matrix::t(reducedDims(ace)[[reduction.slot]])
-	X = Matrix::t(as.matrix(colFactors(ace)[[cluster.factor]]))
+HDBSCAN.clustering <- function(ace, minPoints = 30, minClusterSize = 30, archetype.slot = "H_unified") {
+	X = Matrix::t(as.matrix(colFactors(ace)[[archetype.slot]]))
     out_list = run_HDBSCAN(X, minPoints, minClusterSize)
 
 	return(out_list)
 }
+
