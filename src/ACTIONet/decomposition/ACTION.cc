@@ -77,12 +77,12 @@ namespace ACTIONet {
 
 
 	template<class Function>
-	inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
-		if (numThreads <= 0) {
-			numThreads = std::thread::hardware_concurrency();
+	inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
 		}
 
-		if (numThreads == 1) {
+		if (thread_no == 1) {
 			for (size_t id = start; id < end; id++) {
 				fn(id, 0);
 			}
@@ -95,7 +95,7 @@ namespace ACTIONet {
 			std::exception_ptr lastException = nullptr;
 			std::mutex lastExceptMutex;
 
-			for (size_t threadId = 0; threadId < numThreads; ++threadId) {
+			for (size_t threadId = 0; threadId < thread_no; ++threadId) {
 				threads.push_back(std::thread([&, threadId] {
 					while (true) {
 						size_t id = current.fetch_add(1);

@@ -16,7 +16,7 @@ auto optimize_layout(const T &gradient, std::vector<double> &head_embedding,
                      unsigned int n_epochs, unsigned int n_vertices,
                      const std::vector<double> &epochs_per_sample,
                      double initial_alpha, double negative_sample_rate,
-                     std::size_t n_threads = 0, std::size_t grain_size = 1, unsigned int seed = 0) -> std::vector<double> {
+                     std::size_t thread_no = 0, std::size_t grain_size = 1, unsigned int seed = 0) -> std::vector<double> {
   uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
 
   uwot::SgdWorker<T, DoMove> worker(
@@ -25,12 +25,18 @@ auto optimize_layout(const T &gradient, std::vector<double> &head_embedding,
 
   const auto n_epochs_per_sample = epochs_per_sample.size();
   double alpha = initial_alpha;
-	
+
+	if (thread_no <= 0) {
+		thread_no = std::thread::hardware_concurrency();
+	}
+
+		
+
   for (auto n = 0U; n < n_epochs; n++) {	  
     worker.set_alpha(alpha);
     worker.set_n(n);
-    if (n_threads > 0) {
-      Perpendicular::parallel_for(0, n_epochs_per_sample, worker, n_threads,
+    if (thread_no > 1) {
+      Perpendicular::parallel_for(0, n_epochs_per_sample, worker, thread_no,
                                       grain_size);
     } else {
       worker(0, n_epochs_per_sample);
@@ -48,7 +54,7 @@ std::vector<double>  optimize_layout_umap(
     unsigned int n_vertices, const std::vector<double> epochs_per_sample,
     double a, double b, double gamma, double initial_alpha,
     double negative_sample_rate, bool approx_pow,
-    std::size_t n_threads = 0, std::size_t grain_size = 1,
+    std::size_t thread_no = 0, std::size_t grain_size = 1,
     bool move_other = true) {
 
 
@@ -59,12 +65,12 @@ std::vector<double>  optimize_layout_umap(
         result = optimize_layout<uwot::apumap_gradient, true>(
             gradient, head_vec, tail_vec, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size);
+            negative_sample_rate, thread_no, grain_size);
     } else {
 		result = optimize_layout<uwot::apumap_gradient, false>(
 			gradient, head_vec, tail_vec, positive_head, positive_tail,
 			n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-			negative_sample_rate, n_threads, grain_size);
+			negative_sample_rate, thread_no, grain_size);
     }
   } else {
     const uwot::umap_gradient gradient(a, b, gamma);
@@ -72,12 +78,12 @@ std::vector<double>  optimize_layout_umap(
         result = optimize_layout<uwot::umap_gradient, true>(
             gradient, head_vec, tail_vec, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size);
+            negative_sample_rate, thread_no, grain_size);
     } else {
         result = optimize_layout<uwot::umap_gradient, false>(
             gradient, head_vec, tail_vec, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size);      
+            negative_sample_rate, thread_no, grain_size);      
     }
   }
 
@@ -91,7 +97,7 @@ std::vector<double> optimize_layout_tumap(
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<double> epochs_per_sample,
     double initial_alpha, double negative_sample_rate,
-    std::size_t n_threads = 0, std::size_t grain_size = 1,
+    std::size_t thread_no = 0, std::size_t grain_size = 1,
     bool move_other = true) {
 		
   std::vector<double> result;
@@ -101,12 +107,12 @@ std::vector<double> optimize_layout_tumap(
 	  result = optimize_layout<uwot::tumap_gradient, true>(
 		  gradient, head_vec, tail_vec, positive_head, positive_tail,
 		  n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-		  negative_sample_rate, n_threads, grain_size);
+		  negative_sample_rate, thread_no, grain_size);
   } else {
       result = optimize_layout<uwot::tumap_gradient, false>(
           gradient, head_vec, tail_vec, positive_head, positive_tail,
           n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-          negative_sample_rate, n_threads, grain_size);
+          negative_sample_rate, thread_no, grain_size);
   }
 
   return(result);
@@ -118,14 +124,14 @@ std::vector<double>  optimize_layout_largevis(
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<double> epochs_per_sample,
     double gamma, double initial_alpha, double negative_sample_rate,
-    std::size_t n_threads = 0, std::size_t grain_size = 1) {
+    std::size_t thread_no = 0, std::size_t grain_size = 1) {
 
   const uwot::largevis_gradient gradient(gamma);
 
   std::vector<double> result = optimize_layout<uwot::largevis_gradient, true>(
         gradient, head_vec, head_vec, positive_head, positive_tail, n_epochs,
         n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-        n_threads, grain_size);
+        thread_no, grain_size);
 
 
   return(result);
