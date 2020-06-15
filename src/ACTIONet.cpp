@@ -333,7 +333,7 @@ List run_SPA(mat A, int k) {
 //' @param S_r Reduced kernel matrix
 //' @param k_min Minimum number of archetypes to consider (default=2)
 //' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-//' @param thread_no Number of parallel threads (default=4)
+//' @param thread_no Number of parallel threads (default = 0)
 //' @param max_it,min_delta Convergence parameters for archetypal analysis
 //' 
 //' @return A named list with entries 'C' and 'H', each a list for different values of k
@@ -342,7 +342,7 @@ List run_SPA(mat A, int k) {
 //' H8 = ACTION.out$H[[8]]
 //' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int max_it = 50, double min_delta = 1e-16) {	
+List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 0, int max_it = 50, double min_delta = 1e-16) {	
 
 	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
 
@@ -370,12 +370,12 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max=30, int thread_no = 8, int ma
 //' @param S_r Reduced kernel matrix
 //' @param k_min Minimum number of archetypes to consider (default=2)
 //' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-//' @param thread_no Number of parallel threads (default=4)
 //' @param max_it,min_delta Convergence parameters for archetypal analysis
+//' @param max_trial Maximum number of trials before termination
 //' 
 //' @return A named list with entries 'C' and 'H', each a list for different values of k
 //' @examples
-//' ACTION.out = run_ACTION(S_r, k_max = 10)
+//' ACTION.out = run_ACTION_plus(S_r, k_max = 10)
 //' H8 = ACTION.out$H[[8]]
 //' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
@@ -401,22 +401,22 @@ List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max=30, int max_it = 50, dou
 	return res;
 }
 
-
-//' Runs multi-level ACTION decomposition method
+//' Runs basic archetypal analysis
 //'
-//' @param S_r Reduced kernel matrix
-//' @param k_min Minimum number of archetypes to consider (default=2)
-//' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-//' @param thread_no Number of parallel threads (default=4)
+//' @param A Inpu matrix
+//' @param W0 Starting archetypes
 //' @param max_it,min_delta Convergence parameters for archetypal analysis
 //' 
 //' @return A named list with entries 'C' and 'H', each a list for different values of k
 //' @examples
-//' ACTION.out = run_ACTION(S_r, k_max = 10)
-//' H8 = ACTION.out$H[[8]]
-//' cell.assignments = apply(H8, 2, which.max)
+//' S_r = t(reducedDims(ace)$ACTION)
+//' SPA.out = run_SPA(S_r, 10)
+//' W0 = S_r[, SPA.out$selected_columns]
+//' AA.out = run_AA(S_r, W0)
+//' H = AA.out$H
+//' cell.assignments = apply(H, 2, which.max)
 // [[Rcpp::export]]
-List run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-7) {	
+List run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-16) {	
 	
 
 	field<mat> res = ACTIONet::run_AA(A, W0, max_it, min_delta);
@@ -430,21 +430,19 @@ List run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-7) {
 }
 
 
-//' Runs multi-level Online ACTION decomposition method
+//' Runs multi-level Online ACTION decomposition method (under development)
 //'
 //' @param S_r Reduced kernel matrix
 //' @param k_min Minimum number of archetypes to consider (default=2)
 //' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
 //' @param samples List of sampled cells to use for updating archetype decomposition
-//' @param thread_no Number of parallel threads (default=4)
+//' @param thread_no Number of parallel threads (default = 0)
 //' 
 //' @return A named list with entries 'C' and 'H', each a list for different values of k
 //' @examples
 //' ACTION.out = run_online_ACTION(S_r, k_max = 10)
-//' H8 = ACTION.out$H[[8]]
-//' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_online_ACTION(mat &S_r, field<uvec> samples, int k_min = 2, int k_max=30, int thread_no = 8) {	
+List run_online_ACTION(mat &S_r, field<uvec> samples, int k_min = 2, int k_max=30, int thread_no = 0) {	
 
 	ACTIONet::Online_ACTION_results trace = ACTIONet::run_online_ACTION(S_r, samples, k_min, k_max, thread_no);
 
@@ -478,21 +476,19 @@ List run_online_ACTION(mat &S_r, field<uvec> samples, int k_min = 2, int k_max=3
 	return res;
 }
 
-//' Runs multi-level ACTION decomposition method
+//' Runs multi-level weighted ACTION decomposition method (under development)
 //'
 //' @param S_r Reduced kernel matrix
 //' @param w Weight vector for each observation
 //' @param k_min Minimum number of archetypes to consider (default=2)
 //' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
-//' @param thread_no Number of parallel threads (default=4)
+//' @param thread_no Number of parallel threads (default=0)
 //' 
 //' @return A named list with entries 'C' and 'H', each a list for different values of k
 //' @examples
-//' ACTION.out = run_ACTION(S_r, k_max = 10)
-//' H8 = ACTION.out$H[[8]]
-//' cell.assignments = apply(H8, 2, which.max)
+//' ACTION.out = run_weighted_ACTION(S_r, w, k_max = 20)
 // [[Rcpp::export]]
-List run_weighted_ACTION(mat &S_r, vec w, int k_min = 2, int k_max=30, int thread_no = 8, int max_it = 50, double min_delta = 0.01) {	
+List run_weighted_ACTION(mat &S_r, vec w, int k_min = 2, int k_max=30, int thread_no = 0, int max_it = 50, double min_delta = 1e-16) {	
 
 	ACTIONet::ACTION_results trace = ACTIONet::run_weighted_ACTION(S_r, w, k_min, k_max, thread_no, max_it, min_delta);
 
@@ -611,7 +607,7 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overl
 //'
 //' @param H_stacked Output of the prune_archetypes() function.
 //' @param density Overall density of constructed graph. The higher the density, the more edges are retained (default = 1.0).
-//' @param thread_no Number of parallel threads (default = 4).
+//' @param thread_no Number of parallel threads (default = 0).
 //' @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges. 
 //' If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
 //' 
@@ -621,7 +617,7 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overl
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = build_ACTIONet(prune.out$H_stacked)
 // [[Rcpp::export]]
-sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, bool mutual_edges_only = true) {
+sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=0, bool mutual_edges_only = true) {
 	double M = 16, ef_construction = 200, ef = 50;
 	sp_mat G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
 	
@@ -636,7 +632,7 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, bool
 //' @param S_r Reduced kernel matrix (is used for reproducible initialization).
 //' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 //' @param n_epochs Number of epochs for SGD algorithm (default=100).
-//' @param thread_no Number of threads.
+//' @param thread_no Number of threads (default = 0).
 //' 
 //' @return A named list \itemize{
 //' \item coordinates 2D coordinates of vertices.
@@ -648,7 +644,7 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, bool
 //'	G = build_ACTIONet(prune.out$H_stacked)
 //'	vis.out = layout_ACTIONet(G, S_r)
 // [[Rcpp::export]]
-List layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level= 50, unsigned int n_epochs = 500, int thread_no = 8) {
+List layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level= 50, unsigned int n_epochs = 500, int thread_no = 0) {
 
 	field<mat> res = ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no);
     
@@ -1037,7 +1033,7 @@ vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments) {
 //'
 //' @param G Input graph
 //' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
-//' @param thread_no Number of parallel threads
+//' @param thread_no Number of parallel threads (default=0)
 //' @param alpha Random-walk depth ( between [0, 1] )
 //' @param max_it PageRank iterations
 //' 
@@ -1048,7 +1044,7 @@ vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments) {
 //' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
 //' smoothed.expression = compute_network_diffusion(G, gene.expression)
 // [[Rcpp::export]]
-mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no = 8, double alpha = 0.85, int max_it = 3) {
+mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no = 0, double alpha = 0.85, int max_it = 3) {
 
 	mat Diff = ACTIONet::compute_network_diffusion(G, X0, thread_no, alpha, max_it);
 
@@ -1268,7 +1264,7 @@ mat Prune_PageRank(mat &U, double density = 1.0) {
 
 
 // [[Rcpp::export]]
-List transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compactness_level = 50, unsigned int n_epochs = 500, int thread_no = 8) {
+List transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compactness_level = 50, unsigned int n_epochs = 500, int thread_no = 0) {
 
 	field<mat> res = ACTIONet::transform_layout(W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no);
     
@@ -1698,7 +1694,7 @@ List SVD2PCA_full(mat &S, mat u, vec d, mat v) {
 }
 
 // [[Rcpp::export]]
-mat computeFullSim(mat &H, int thread_no) {
+mat computeFullSim(mat &H, int thread_no = 0) {
 
 	mat G = ACTIONet::computeFullSim(H, thread_no);
 	
