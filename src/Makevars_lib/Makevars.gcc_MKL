@@ -1,3 +1,6 @@
 CXX=g++
-CXXFLAGS+=-O3 -w -std=c++11 -march=native -flto -msse2 -m64 -I${MKLROOT}/include
+CFLAGS+=-O3 -march=native -mtune=native -flto -frename-registers -msse2 -m64 -w -I${MKLROOT}/include
+CXXFLAGS+=-O3 -march=native -mtune=native -flto -frename-registers -msse2 -m64 -std=c++11 -w -I${MKLROOT}/include
 LINALG=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+
+

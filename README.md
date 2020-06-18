@@ -122,26 +122,8 @@ plot.ACTIONet(ace, "celltypes", transparency.attr = ace$node_centrality)
 # Export results as AnnData
 ACE2AnnData(ace, fname = "pbmc_10k_v3.h5ad")
 ```
-You can further visualize the network using `cellxgene`:
+## Visualizing results using cellxgene
 
-```bash
-cellxgene launch pbmc_10k_v3.h5ad
-```
-
-# Additional tutorials
-You can access ACTIONet tutorials from:
-* [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/min_intro.html)
-* [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/intro.html)
-* [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/clustering.html)
-* [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/batch.html)
-* [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/porting_data.html)
-* [Interactive visualization, annotation, and exploration](http://compbio.mit.edu/ACTIONet/annotation.html)
-* [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/scinet.html)
-
-You can also find a [Step-by-step guide](http://compbio.mit.edu/ACTIONet/guide.html) for the main step of running ACTIONet, as well as a detailed description of the [ACTIONetExperiment (ACE) object](http://compbio.mit.edu/ACTIONet/ace.html).
-
-
-# Visualizing ACTIONet results using cellxgene
 ACTIONet framework introduces an extension of the `SingleCellExperiment` object that can be closely mapped to [AnnData](https://anndata.readthedocs.io/en/stable/index.html) object. In fact, output of ACTIONet in the python implementation is internally stored as as `AnnData` object, and R `ACE` objects can be imported from/exported to `AnnData` using functions `AnnData2ACE()` and `ACE2AnnData()` functions, respectively. `AnnData` objects can be directly loaded into [cellxgene](https://github.com/chanzuckerberg/cellxgene) package, an open-source viewer for interactive single-cell data visualization. `cellxgene` can be installed as:
 
 ```bash
@@ -149,29 +131,25 @@ pip install cellxgene
 
 ```
 
-and `*.h5ad` files exported via `ACE2AnnData()` can be loaded into `cellxgene` as:
-
-```r
-cellxgene launch [ACTIONet.h5ad]
-
-```
-
-where `ACTIONet.h5ad` can be replaced with the filename of interest. Furthermore, `AnnData` objects are native to [Scanpy](https://scanpy.readthedocs.io/en/latest/index.html) package. To install `Scanpy` and its dependencies, run:
-
+Then to visualize the results of ACTIONet, run:
 ```bash
-conda install seaborn scikit-learn statsmodels numba pytables
-conda install -c conda-forge python-igraph leiden
-
-pip install scanpy
+cellxgene launch pbmc_10k_v3.h5ad
 ```
 
-and use the following to import and have an initial inspection of the results:
+where *pbmc_10k_v3.h5ad* is the name of the file we exported using `ACE2AnnData()` function.
 
-```python
-import scanpy as sc
 
-ACTIONet = sc.read("ACTIONet.h5ad")
-sc.pl.embedding(ACTIONet, "ACTIONet2D", color="assigned_archetype")
-```
 
-The key point to remember is that ACTIONet framework is inherently designed to avoid disjoint clustering, but the above listed command visualizes the discretized form of archetypes for illustration purposes. 
+
+
+# Additional tutorials
+You can access ACTIONet tutorials from:
+1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/min_intro.html)
+2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/intro.html)
+3. [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/clustering.html)
+4. [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/batch.html)
+5. [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/porting_data.html)
+6. [Interactive visualization, annotation, and exploration](http://compbio.mit.edu/ACTIONet/annotation.html)
+7. [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/scinet.html)
+
+You can also find a [step-by-step guide](http://compbio.mit.edu/ACTIONet/guide.html) to learning the core functionalities of the ACTIONet framework, as well as a detailed description of the [ACTIONetExperiment (ACE)](http://compbio.mit.edu/ACTIONet/ace.html) object.

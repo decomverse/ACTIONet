@@ -1,5 +1,6 @@
 # TODO
 
+* Debug node_centrality computation
 * Test and debug weighted AA
 * Deflated SVD with A*B being prior archetypal analysis
 * Implement subACTIONet construction method (and use in reACTION)
@@ -22,3 +23,7 @@
 * Autocorrelation to find continuous cell-states
 * joint analysis with multi-resolution application of Leiden to identify clustered archetypes
 * Multi-resolution batch-correction inspired by Harmony
+* Weighted pseudo-bulk computation
+* Variance-adjusted Limma to the main ACTIONet
+* Incorporate CellMESH (https://github.com/shunfumao/cellmesh)
+* Supervized marker suggestion
