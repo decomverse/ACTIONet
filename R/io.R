@@ -420,8 +420,8 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
 import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.all = F) {
     ace = as(ace, "ACTIONetExperiment")
 
-    if("S_r" %in% names(reducedDims(ace))) {
-		reducedDims(ace)[["ACTION"]] = reducedDims(ace)[["S_r"]]
+    if("S_r" %in% names(colFactors(ace))) {
+		colFactors(ace)[["ACTION"]] = colFactors(ace)[["S_r"]]
 	}
 
 	ACTION.out = ACTIONet.out$ACTION.out
@@ -431,9 +431,9 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
 	colNets(ace)$ACTIONet = G
     vis.out = ACTIONet.out$vis.out
 
-    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
-    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    reducedDims(ace)$denovo_color = vis.out$colors
+    colFactors(ace)$ACTIONet2D = vis.out$coordinates
+    colFactors(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colFactors(ace)$denovo_color = vis.out$colors
 
 
 
