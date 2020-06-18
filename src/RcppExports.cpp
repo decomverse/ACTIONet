@@ -800,6 +800,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// csr_sort_indices
+void csr_sort_indices(vec& Ap, vec& Aj, vec& Ax);
+RcppExport SEXP _ACTIONet_csr_sort_indices(SEXP ApSEXP, SEXP AjSEXP, SEXP AxSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< vec& >::type Ap(ApSEXP);
+    Rcpp::traits::input_parameter< vec& >::type Aj(AjSEXP);
+    Rcpp::traits::input_parameter< vec& >::type Ax(AxSEXP);
+    csr_sort_indices(Ap, Aj, Ax);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -860,6 +872,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_SVD2PCA", (DL_FUNC) &_ACTIONet_SVD2PCA, 4},
     {"_ACTIONet_SVD2PCA_full", (DL_FUNC) &_ACTIONet_SVD2PCA_full, 4},
     {"_ACTIONet_computeFullSim", (DL_FUNC) &_ACTIONet_computeFullSim, 2},
+    {"_ACTIONet_csr_sort_indices", (DL_FUNC) &_ACTIONet_csr_sort_indices, 3},
     {NULL, NULL, 0}
 };
 

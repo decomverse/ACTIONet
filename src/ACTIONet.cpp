@@ -1701,3 +1701,8 @@ mat computeFullSim(mat &H, int thread_no = 0) {
 	return(G);
 }
 
+
+// [[Rcpp::export]]
+void csr_sort_indices(vec &Ap, vec &Aj, vec &Ax) {
+	ACTIONet::csr_sort_indices(Ap.memptr(), Aj.memptr(), Ax.memptr(), Ap.n_elem);
+}

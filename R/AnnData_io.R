@@ -178,16 +178,22 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 	indices = h5group[["indices"]]$read()
 	indptr = h5group[["indptr"]]$read()
 
-	perm = order(indices);
+	#perm = order(indices);
+	Dims = attr$shape
 	if(attr[["encoding-type"]] == "csc_matrix") {
-		#X = Matrix::t(new("dgCMatrix", i = indices[perm], p = indptr, x = data[perm], Dim = attr$shape))
-		X = Matrix::t(sparseMatrix(i = indices, p = indptr, x = data, dims = attr$shape))
+		#Xt = new("dgCMatrix", i = indices, p = indptr, x = data, Dim = Dims)
+		Xt = sparseMatrix(i = indices, p = indptr, x = data, dims = Dims)
+		X = Matrix::t(Xt)
+		#X = Matrix::t(sparseMatrix(i = indices, p = indptr, x = data, dims = c(Dims[1], Dims[2])))
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
-		#X = Matrix::t(new("dgRMatrix", j = indices[perm], p = indptr, x = data[perm], Dim = attr$shape))
-		X = Matrix::t(sparseMatrix(j = indices, p = indptr, x = data, dims = attr$shape))
+		# Old scipy exports indices in unsorted format sometimes 		
+
+		Xt = new("dgRMatrix", j = indices, p = indptr, x = data, Dim = Dims)
+		X = as(Matrix::t(X), 'dgCMatrix')
+		#X = Matrix::t(sparseMatrix(j = indices, p = indptr, x = data, dims = c(Dims[2], Dims[1])))
 	}
 
-	X = Matrix::t(new("dgRMatrix", j = indices, p = indptr, x = data, Dim = attr$shape))
+	#X = Matrix::t(new("dgRMatrix", j = indices, p = indptr, x = data, Dim = c(attr$shape[1], attr$shape[0])))
 	
 	return(X)
 }
