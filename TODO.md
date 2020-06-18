@@ -8,6 +8,7 @@
 * Finish tutorials
 * Release docker
 * Garbage-collection with SCE object
+* update-alternatives to run R with MKL without compiling it from scratch
 
 ## New features to be tested
 * `renormalize_input_matrix` for post-ACTIONet normalization
