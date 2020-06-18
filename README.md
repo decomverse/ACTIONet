@@ -31,6 +31,11 @@ cd ACTIONet
 R CMD INSTALL .
 ```
 
+To install all R dependencies (if you prefer to not use devtools):
+
+```R
+install.packages(c('Rcpp', RcppArmadillo', 'R.utils', 'SingleCellExperiment', 'hdf5r', 'igraph', 'ComplexHeatmap', 'ggpubr', 'corrplot', 'wordcloud', 'threejs', 'plotly', 'RColorBrewer', 'R.methodsS3', 'GenomicRanges', 'Biobase', 'DelayedArray', 'BiocGenerics', 'S4Vectors', 'IRanges', 'GenomeInfoDb', 'matrixStats', 'RCurl', 'GenomeInfoDbData', 'XVector', 'bitops', 'zlibbioc', 'bit', 'GlobalOptions', 'shape', 'colorspace', 'rjson', 'gtable', 'isoband', 'scales', 'farver', 'labeling', 'munsell', 'viridisLite', 'ggplot2', 'dplyr', 'tidyselect', 'generics', 'tidyr', 'broom', 'car', 'reshape2', 'carData', 'abind', 'pbkrtest', 'quantreg', 'maptools', 'rio', 'lme4', 'minqa', 'nloptr', 'statmod', 'RcppEigen', 'sp', 'SparseM', 'MatrixModels', 'plyr', 'haven', 'data.table', 'readxl', 'openxlsx', 'forcats', 'hms', 'readr', 'zip', 'cellranger', 'progress', 'rematch', 'base64enc', 'R.oo', 'SummarizedExperiment', 'bit64', 'circlize', 'GetoptLong', 'clue', 'png', 'ggrepel', 'ggsci', 'cowplot', 'ggsignif', 'gridExtra', 'polynom', 'rstatix', 'hexbin'))
+```
 
 ## Install optional packages
 #### Batch correction
@@ -106,7 +111,7 @@ download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc
 require(ACTIONet)
 # Run ACTIONet
 ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 50, min_umis_per_cell = 1000)
-ace = reduce.sce(ace)
+ace = reduce.ace(ace)
 ACTIONet_results = run.ACTIONet(ace)
 ace = ACTIONet_results$ace
 

@@ -166,7 +166,7 @@ namespace ACTIONet {
 			uvec idx = find(mask > 0);
 			vec v = conv_to<vec>::from(induced_coreness(idx));
 			double sigma = stddev(v);
-			vec z = (v - mean(v))/ (sigma == 0? 1:sigma);
+			vec z = v/ (sigma == 0? 1:sigma);
 			
 			conn(idx) = z;
 		}
