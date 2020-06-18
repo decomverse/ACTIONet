@@ -8,4 +8,4 @@ See [ACTIONet-R](https://github.com/shmohammadi86/ACTIONet/tree/R) for more info
 See [ACTIONet-Python](https://github.com/shmohammadi86/ACTIONet/tree/python) for more information about installing/using ACTIONet Python package
 
 ## ACTIONet Legacy R Package
-See [ACTIONet-Docker](https://github.com/shmohammadi86/ACTIONet/tree/legacy) for more information about installing/using ACTIONet R package (legacy)
+See [ACTIONet-Legacy](https://github.com/shmohammadi86/ACTIONet/tree/legacy) for more information about installing/using ACTIONet R package (legacy)
