@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(ace)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300) {		
+run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300, full.trace = T) {		
     if (!(data.slot %in% names(assays(ace)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -92,14 +92,18 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
 	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
 
-	
-	# Prepare output
-	trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
-    trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
-         
-    out = list(ace = ace, trace = trace)
-    
-    return(out)
+
+	if(full.trace == T) {
+		# Prepare output
+		trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
+		trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
+			 
+		out = list(ace = ace, trace = trace)
+		
+		return(out)
+	} else {
+		return(ace)
+	}
 }
 
 
