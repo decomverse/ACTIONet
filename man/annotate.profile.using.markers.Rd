@@ -2,7 +2,7 @@
 % Please edit documentation in R/clusters.R
 \name{annotate.profile.using.markers}
 \alias{annotate.profile.using.markers}
-\title{Annotate arbitary feature score matrix using known marker genes 
+\title{Annotate arbitary feature score matrix using known marker genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
 annotate.profile.using.markers(
@@ -26,7 +26,7 @@ A named list: \itemize{
 }
 }
 \description{
-Annotate arbitary feature score matrix using known marker genes 
+Annotate arbitary feature score matrix using known marker genes
 (It uses permutation test on cluster specificity scores)
 }
 \examples{

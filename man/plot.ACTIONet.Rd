@@ -9,7 +9,7 @@
   labels = NULL,
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
-  trans.fact = 1,
+  trans.fact = 1.5,
   node.size = 1,
   CPal = CPal20,
   add.text = TRUE,
@@ -43,7 +43,7 @@
 
 \item{border.contrast.factor}{How much the node and its border should contrast}
 
-\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")}
 
 \item{add.states}{Whether or not to include interpolated cell state positions in the plot}
 }

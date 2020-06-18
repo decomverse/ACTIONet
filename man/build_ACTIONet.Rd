@@ -7,7 +7,7 @@
 build_ACTIONet(
   H_stacked,
   density = 1,
-  thread_no = 8L,
+  thread_no = 0L,
   mutual_edges_only = TRUE
 )
 }
@@ -16,7 +16,7 @@ build_ACTIONet(
 
 \item{density}{Overall density of constructed graph. The higher the density, the more edges are retained (default = 1.0).}
 
-\item{thread_no}{Number of parallel threads (default = 4).}
+\item{thread_no}{Number of parallel threads (default = 0).}
 
 \item{mutual_edges_only}{Symmetrization strategy for nearest-neighbor edges. 
 If it is true, only mutual-nearest-neighbors are returned (default=TRUE).}

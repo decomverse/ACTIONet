@@ -1,4 +1,4 @@
-#' An extension of the RangedSummarizedExperiment class to store
+#' An extension of the SingleCellExperiment class to store
 #' the results of ACTIONet method
 #'
 #' @slot rowNets,colNets gene-gene and cell-cell networks, respectively
@@ -13,41 +13,41 @@
 #' @import methods
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
-#' @importClassesFrom RangedSummarizedExperiment RangedSummarizedExperiment
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
 .ACTIONetExperiment <- setClass("ACTIONetExperiment",
 		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowFactors = "SimpleList", colFactors = "SimpleList"),
-		contains = "RangedSummarizedExperiment"        
+		contains = "SingleCellExperiment"
 )
-         
-         
+
+
 #' Creates an ACTIONetExperiment (ACE) object
 #'
-#' @param ... RangedSummarizedExperiment and SummarizedExperiment components
+#' @param ... SingleCellExperiment and SummarizedExperiment components
 #' @param rowNets,colNets gene-gene and cell-cell networks, respectively
 #' @param rowFactors,colFactors Factorization results (W and H matrices)
 #'
-#' @return An ACTIONetExperiment (ACE) object, derived from RangedSummarizedExperiment, with additional slots to store ACTIONet results
+#' @return An ACTIONetExperiment (ACE) object, derived from SingleCellExperiment, with additional slots to store ACTIONet results
 #'
 #' @export
-#' @import RangedSummarizedExperiment SummarizedExperiment
-ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(), 
-    colNets=S4Vectors::SimpleList(), 
-    rowFactors=S4Vectors::SimpleList(), 
+#' @import SingleCellExperiment SummarizedExperiment
+ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
+    colNets=S4Vectors::SimpleList(),
+    rowFactors=S4Vectors::SimpleList(),
     colFactors=S4Vectors::SimpleList(),
     ...)
 {
-	SE <- SummarizedExperiment::RangedSummarizedExperiment(...)
-	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowFactors=rowFactors, colFactors=colFactors)
+	sce <- SingleCellExperiment::SingleCellExperiment(...)
+	out <- .ACTIONetExperiment(sce, rowNets=rowNets, colNets=colNets, rowFactors=rowFactors, colFactors=colFactors)
 	return(out)
 }
 
 
 
 
-
+#' @export
 #' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
-	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)))
+	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)), names(reducedDims(x)) )
     grep(pattern, ll, value=TRUE)
 }
 
@@ -70,10 +70,12 @@ setMethod("$", "ACTIONetExperiment",
 		colNets(x)[[name]]
 	} else if(name %in% names(rowNets(x))) {
 		rowNets(x)[[name]]
+	} else if(name %in% names(reducedDims(x))) {
+		reducedDims(x)[[name]]
 	} else {
 		message(sprintf("Attribute %s not found", name))
 	}
-	
+
 })
 
 #' @export

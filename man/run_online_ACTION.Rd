@@ -2,9 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_online_ACTION}
 \alias{run_online_ACTION}
-\title{Runs multi-level Online ACTION decomposition method}
+\title{Runs multi-level Online ACTION decomposition method (under development)}
 \usage{
-run_online_ACTION(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 8L)
+run_online_ACTION(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 0L)
 }
 \arguments{
 \item{S_r}{Reduced kernel matrix}
@@ -15,16 +15,14 @@ run_online_ACTION(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 8L)
 
 \item{k_max}{Maximum number of archetypes to consider, or "depth" of decomposition (default=30)}
 
-\item{thread_no}{Number of parallel threads (default=4)}
+\item{thread_no}{Number of parallel threads (default = 0)}
 }
 \value{
 A named list with entries 'C' and 'H', each a list for different values of k
 }
 \description{
-Runs multi-level Online ACTION decomposition method
+Runs multi-level Online ACTION decomposition method (under development)
 }
 \examples{
 ACTION.out = run_online_ACTION(S_r, k_max = 10)
-H8 = ACTION.out$H[[8]]
-cell.assignments = apply(H8, 2, which.max)
 }

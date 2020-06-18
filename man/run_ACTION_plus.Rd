@@ -22,7 +22,7 @@ run_ACTION_plus(
 
 \item{max_it, min_delta}{Convergence parameters for archetypal analysis}
 
-\item{thread_no}{Number of parallel threads (default=4)}
+\item{max_trial}{Maximum number of trials before termination}
 }
 \value{
 A named list with entries 'C' and 'H', each a list for different values of k
@@ -31,7 +31,7 @@ A named list with entries 'C' and 'H', each a list for different values of k
 Runs multi-level ACTION decomposition method
 }
 \examples{
-ACTION.out = run_ACTION(S_r, k_max = 10)
+ACTION.out = run_ACTION_plus(S_r, k_max = 10)
 H8 = ACTION.out$H[[8]]
 cell.assignments = apply(H8, 2, which.max)
 }

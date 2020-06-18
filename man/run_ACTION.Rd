@@ -8,7 +8,7 @@ run_ACTION(
   S_r,
   k_min = 2L,
   k_max = 30L,
-  thread_no = 8L,
+  thread_no = 0L,
   max_it = 50L,
   min_delta = 1e-16
 )
@@ -20,7 +20,7 @@ run_ACTION(
 
 \item{k_max}{Maximum number of archetypes to consider, or "depth" of decomposition (default=30)}
 
-\item{thread_no}{Number of parallel threads (default=4)}
+\item{thread_no}{Number of parallel threads (default = 0)}
 
 \item{max_it, min_delta}{Convergence parameters for archetypal analysis}
 }

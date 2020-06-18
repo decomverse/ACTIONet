@@ -5,24 +5,25 @@
 \title{A wrapper function to call all main functions of the ACTIONet}
 \usage{
 run.ACTIONet(
-  sce,
+  ace,
   k_max = 30,
   min.cells.per.arch = 2,
-  min_specificity_z_threshold = -1,
+  min_specificity_z_threshold = 0,
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 500,
   layout.in.parallel = FALSE,
-  thread_no = 8,
+  thread_no = 0,
   data.slot = "logcounts",
   reduction.slot = "ACTION",
   unification.resolution = 1,
-  AA_delta = 1e-300
+  AA_delta = 1e-300,
+  full.trace = T
 )
 }
 \arguments{
-\item{sce}{Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).}
+\item{ace}{Reduced `ACTIONetExperiment (ACE)` object (output of reduce.ace() function).}
 
 \item{k_max}{Maximum depth of decompositions (default=30).}
 
@@ -33,22 +34,22 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
-\item{thread_no}{Number of parallel threads (default=8)}
+\item{thread_no}{Number of parallel threads (default=0)}
 
 \item{data.slot}{Corresponding slot in the `ace` object the normalized counts (default="logcounts")}
 
-\item{reduction.slot}{Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")}
+\item{reduction.slot}{Slot in the colFactors(ace) that holds reduced kernel (default="S_r")}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 
 \item{n_epochs}{Number of epochs for SGD algorithm (default=500).}
 
 \item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
-If it is NULL, values of logcounts(sce) would be directly used without renormalization for computing speicificity scores}
+If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores}
 }
 \value{
 A named list: \itemize{
-\item ace: ACTIONetExperiment object (derived from SingleCellExperiment)
+\item ace: ACTIONetExperiment object (derived from RangedSummarizedExperiment)
 \item ACTIONet.trace: Log of ACTIONet function calls 
 }
 }
@@ -56,8 +57,8 @@ A named list: \itemize{
 A wrapper function to call all main functions of the ACTIONet
 }
 \examples{
-sce = reduce(sce)
-ACTIONet.out = run.ACTIONet(sce)
+ace = reduce(ace)
+ACTIONet.out = run.ACTIONet(ace)
 ace = ACTIONet.out$ace # main output
 trace = ACTIONet.out$trace # for backup
 }
