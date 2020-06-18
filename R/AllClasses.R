@@ -47,7 +47,7 @@ ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
 
 #' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
-	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)), names(reducedDims(x)) )
+	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)))
     grep(pattern, ll, value=TRUE)
 }
 
@@ -70,8 +70,6 @@ setMethod("$", "ACTIONetExperiment",
 		colNets(x)[[name]]
 	} else if(name %in% names(rowNets(x))) {
 		rowNets(x)[[name]]
-	} else if(name %in% names(reducedDims(x))) {
-		reducedDims(x)[[name]]
 	} else {
 		message(sprintf("Attribute %s not found", name))
 	}
