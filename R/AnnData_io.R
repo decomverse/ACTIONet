@@ -178,10 +178,11 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 	indices = h5group[["indices"]]$read()
 	indptr = h5group[["indptr"]]$read()
 
+	perm = order(indices);
 	if(attr[["encoding-type"]] == "csc_matrix") {
-		X = Matrix::t(new("dgCMatrix", i = indices, p = indptr, x = data, Dim = attr$shape))
+		X = Matrix::t(new("dgCMatrix", i = indices[perm], p = indptr, x = data[perm], Dim = attr$shape))
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
-		X = Matrix::t(new("dgRMatrix", j = indices, p = indptr, x = data, Dim = attr$shape))
+		X = Matrix::t(new("dgRMatrix", j = indices[perm], p = indptr, x = data[perm], Dim = attr$shape))
 	}
 
 	return(X)

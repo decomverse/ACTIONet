@@ -1,6 +1,6 @@
 #' A wrapper function to call all main functions of the ACTIONet
 #'
-#' @param sce Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).
+#' @param ace Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).
 #' @param k_max Maximum depth of decompositions (default=30).
 #' @param min_specificity_z_threshold Defines the stringency of pruning nonspecific archetypes. 
 #' The larger the value, the more archetypes will be filtered out (default=-1).
@@ -12,7 +12,7 @@
 #' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
 #' @param data.slot Corresponding slot in the `ace` object the normalized counts (default="logcounts")
 #' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
-#' If it is NULL, values of logcounts(sce) would be directly used without renormalization for computing speicificity scores
+#' If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores
 #' 
 #' @return A named list: \itemize{
 #' \item ace: ACTIONetExperiment object (derived from SingleCellExperiment)
@@ -20,17 +20,17 @@
 #'}
 #' 
 #' @examples
-#' sce = reduce(sce)
-#' ACTIONet.out = run.ACTIONet(sce)
+#' ace = reduce(ace)
+#' ACTIONet.out = run.ACTIONet(ace)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(sce, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300) {		
-    if (!(data.slot %in% names(assays(sce)))) {
+run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, AA_delta = 1e-300) {		
+    if (!(data.slot %in% names(assays(ace)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
     }
     
-    ace = as(sce, "ACTIONetExperiment") 
+    ace = as(ace, "ACTIONetExperiment") 
 
     
 	S = assays(ace)[[data.slot]]
