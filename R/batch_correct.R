@@ -6,12 +6,11 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
   ace <- check_if_ace(ace)
   colData(ace) = droplevels(colData(ace))
   SummarizedExperiment::assays(ace)[["counts"]] = as(SummarizedExperiment::assays(ace)[["counts"]], 'sparseMatrix')
-
+  m_data = metadata(ace)
   IDX = get_ace_split_IDX(ace, batch.attr)
 
   ace.list = lapply(IDX, function(idx) computeSumFactors(ace[, idx], BPPARAM = BPPARAM ) )
   ace.list.norm = do.call(batchelor::multiBatchNorm, list(ace.list, BPPARAM = BPPARAM))
-
   # Sort based on 'complexity'
   merge_order = order(sapply(ace.list.norm, function(ace) dim(ace)[2]), decreasing = TRUE)
 
@@ -33,7 +32,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
     colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
     rowData(ace.norm)[["rotation"]] = V
   }
-
+  metadata(ace.norm) = m_data
   return(ace.norm)
 }
 
@@ -78,6 +77,6 @@ batch.correct.ace.Harmony <- function(ace, batch.vec, reduction.slot = "ACTION")
     require(harmony)
     ace <- check_if_ace(ace)
     batch.vec = get_ace_split_IDX(ace, batch.vec, return_split_vec = TRUE)
-    reducedDims(ace)[[reduction.slot]] = harmony::HarmonyMatrix(reducedDims(ace)[[reduction.slot]], batch.vec, do_pca = FALSE)
+    reducedDims(ace)[[reduction.slot]] = harmony::HarmonyMatrix(reducedDims(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
     return(ace)
 }
