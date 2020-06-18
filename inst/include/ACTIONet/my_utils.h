@@ -18,9 +18,7 @@ namespace ACTIONet {
 	void randN_Marsaglia(double* values, int n);
 	void randN_BM(double* values, int n);
 	void randN_normsinv(double* values, int n);
-	
-	void csr_sort_indices(double *Ap, double *Aj, double *Ax, int n_row);
-	
+		
 }
 
 #endif

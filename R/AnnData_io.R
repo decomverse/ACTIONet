@@ -187,7 +187,9 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 		#X = Matrix::t(sparseMatrix(i = indices, p = indptr, x = data, dims = c(Dims[1], Dims[2])))
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
 		# Old scipy exports indices in unsorted format sometimes 		
-
+		
+		csr_sort_indices_inplace(indptr, indices, data)
+		#Xt = new("dgRMatrix", j = as.integer(sorted_indices[, 1]), p = indptr, x = sorted_indices[, 2], Dim = Dims)
 		Xt = new("dgRMatrix", j = indices, p = indptr, x = data, Dim = Dims)
 		X = Matrix::t(Xt)
 		#X = Matrix::t(sparseMatrix(j = indices, p = indptr, x = data, dims = c(Dims[2], Dims[1])))
