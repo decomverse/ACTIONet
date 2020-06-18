@@ -1,6 +1,6 @@
 #' A wrapper function to call all main functions of the ACTIONet
 #'
-#' @param ace Reduced `SingleCellExperiment (SCE)` object (output of reduce.ace() function).
+#' @param ace Reduced `ACTIONetExperiment (ACE)` object (output of reduce.ace() function).
 #' @param k_max Maximum depth of decompositions (default=30).
 #' @param min_specificity_z_threshold Defines the stringency of pruning nonspecific archetypes. 
 #' The larger the value, the more archetypes will be filtered out (default=-1).
@@ -15,7 +15,7 @@
 #' If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores
 #' 
 #' @return A named list: \itemize{
-#' \item ace: ACTIONetExperiment object (derived from SingleCellExperiment)
+#' \item ace: ACTIONetExperiment object (derived from RangedSummarizedExperiment)
 #' \item ACTIONet.trace: Log of ACTIONet function calls 
 #'}
 #' 
@@ -34,7 +34,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     
 	S = assays(ace)[[data.slot]]
-    S_r = t(SingleCellExperiment::colFactors(ace)[[reduction.slot]])
+    S_r = t(ACTIONet::colFactors(ace)[[reduction.slot]])
     
     # Run ACTION
 	ACTION.out = run_ACTION(S_r, k_min = 2, k_max = k_max, thread_no = thread_no, max_it = 50, min_delta = AA_delta)
@@ -134,7 +134,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 	
 	
     # Layout ACTIONet
-	initial.coordinates = t(scale(SingleCellExperiment::colFactors(ace)[[reduction.slot]]))
+	initial.coordinates = t(scale(ACTIONet::colFactors(ace)[[reduction.slot]]))
 	if(layout.in.parallel == FALSE) {		
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
     } else { # WARNING! This makes the results none reproducible
@@ -168,7 +168,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
     G = colNets(ace)[["ACTIONet"]]
     	
     # re-Layout ACTIONet
-    S_r = t(SingleCellExperiment::colFactors(ace)[[reduction.slot]])
+    S_r = t(ACTIONet::colFactors(ace)[[reduction.slot]])
     
 	initial.coordinates = t(scale(t(S_r)))
 	vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
@@ -183,7 +183,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 
 rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION", unified_suffix = "unified") {
 	S = assays(ace)[[data.slot]]
-    S_r = t(SingleCellExperiment::colFactors(ace)[[reduction.slot]])
+    S_r = t(ACTIONet::colFactors(ace)[[reduction.slot]])
 	C_stacked = Matrix::t(as.matrix(colFactors(ace)[["C_stacked"]]))
 	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
     G = colNets(ace)[["ACTIONet"]]

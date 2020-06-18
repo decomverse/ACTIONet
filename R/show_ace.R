@@ -3,7 +3,7 @@
 #' @param object ACTIONetExperiment object
 #'
 #' @export
-#' @importMethodsFrom SingleCellExperiment show
+#' @importMethodsFrom SummarizedExperiment show
 setMethod("show", "ACTIONetExperiment", function(object) {
     callNextMethod()
     cat(		

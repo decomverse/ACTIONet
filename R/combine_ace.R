@@ -1,5 +1,5 @@
 #' @export
-#' @importFrom SingleCellExperiment rbind cbind
+#' @importFrom RangedSummarizedExperiment rbind cbind
 setMethod("cbind", "ACTIONetExperiment", function(..., deparse.level=1) {
   args <- list(...)
   args <- lapply(args, updateObject)
@@ -9,7 +9,7 @@ setMethod("cbind", "ACTIONetExperiment", function(..., deparse.level=1) {
 })
 
 #' @export
-#' @importFrom SingleCellExperiment rbind cbind
+#' @importFrom RangedSummarizedExperiment rbind cbind
 setMethod("rbind", "ACTIONetExperiment", function(..., deparse.level=1) {
   args <- list(...)
   args <- lapply(args, updateObject)
