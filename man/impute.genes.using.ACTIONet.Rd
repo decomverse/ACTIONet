@@ -4,14 +4,8 @@
 \alias{impute.genes.using.ACTIONet}
 \title{Gene expression imputation using network diffusion.}
 \usage{
-impute.genes.using.ACTIONet(
-  ace,
-  genes,
-  alpha_val = 0.85,
-  thread_no = 8,
-  diffusion_iters = 5,
-  data.slot = "logcounts"
-)
+impute.genes.using.ACTIONet(ace, genes, alpha_val = 0.85,
+  thread_no = 8, diffusion_iters = 5, data.slot = "logcounts")
 }
 \arguments{
 \item{ace}{Input results to be clustered
