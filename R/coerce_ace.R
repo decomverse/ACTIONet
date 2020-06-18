@@ -12,12 +12,14 @@ setAs("RangedSummarizedExperiment", "ACTIONetExperiment", function(from) {
 })
 
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {	
-    new("SingleCellExperiment", as(from, "RangedSummarizedExperiment"), 
-    reducedDims=colFactors(from))
+    sce = new("SingleCellExperiment", as(from, "RangedSummarizedExperiment")) 
+    reducedDims(sce)=colFactors(from)
+    return(sce)
 })
 
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {	
-    new("ACTIONetExperiment", as(from, "RangedSummarizedExperiment"), 
-    colFactors=reducedDims(from))
+    ace = new("ACTIONetExperiment", as(from, "RangedSummarizedExperiment"))
+    colFactors(ace)=reducedDims(from)
+    return(ace)
 })
 
