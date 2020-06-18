@@ -12,14 +12,17 @@ setAs("RangedSummarizedExperiment", "ACTIONetExperiment", function(from) {
 })
 
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {	
-    sce = new("SingleCellExperiment", as(from, "RangedSummarizedExperiment")) 
-    reducedDims(sce)=colFactors(from)
+	sce = as(as(from, "RangedSummarizedExperiment"), "SingleCellExperiment")
+    #sce = as(from, "SingleCellExperiment")
+    reducedDims(sce)=SimpleList(lapply(colFactors(from), function(x) Matrix::t(x)))
     return(sce)
 })
 
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {	
-    ace = new("ACTIONetExperiment", as(from, "RangedSummarizedExperiment"))
-    colFactors(ace)=reducedDims(from)
+	ace = as(as(from, "RangedSummarizedExperiment"), "ACTIONetExperiment")
+    #ace = as(from, "ACTIONetExperiment")
+    
+    colFactors(ace)=SimpleList(lapply(reducedDims(from), function(x) Matrix::t(x)))
     return(ace)
 })
 
