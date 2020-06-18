@@ -1,4 +1,4 @@
-#' An extension of the RangedSummarizedExperiment class to store
+#' An extension of the SummarizedExperiment class to store
 #' the results of ACTIONet method
 #'
 #' @slot rowNets,colNets gene-gene and cell-cell networks, respectively
@@ -13,30 +13,30 @@
 #' @import methods
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
-#' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
 .ACTIONetExperiment <- setClass("ACTIONetExperiment",
 		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowFactors = "SimpleList", colFactors = "SimpleList"),
-		contains = "RangedSummarizedExperiment"        
+		contains = "SummarizedExperiment"        
 )
          
          
 #' Creates an ACTIONetExperiment (ACE) object
 #'
-#' @param ... RangedSummarizedExperiment and SummarizedExperiment components
+#' @param ... SummarizedExperiment and SummarizedExperiment components
 #' @param rowNets,colNets gene-gene and cell-cell networks, respectively
 #' @param rowFactors,colFactors Factorization results (W and H matrices)
 #'
-#' @return An ACTIONetExperiment (ACE) object, derived from RangedSummarizedExperiment, with additional slots to store ACTIONet results
+#' @return An ACTIONetExperiment (ACE) object, derived from SummarizedExperiment, with additional slots to store ACTIONet results
 #'
 #' @export
-#' @import RangedSummarizedExperiment SummarizedExperiment
+#' @import SummarizedExperiment SummarizedExperiment
 ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(), 
     colNets=S4Vectors::SimpleList(), 
     rowFactors=S4Vectors::SimpleList(), 
     colFactors=S4Vectors::SimpleList(),
     ...)
 {
-	SE <- SummarizedExperiment::RangedSummarizedExperiment(...)
+	SE <- SummarizedExperiment::SummarizedExperiment(...)
 	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowFactors=rowFactors, colFactors=colFactors)
 	return(out)
 }
@@ -45,6 +45,7 @@ ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
 
 
 
+#' @export
 #' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
 	ll = c( names(colData(x)), names(rowFactors(x)), names(colFactors(x)), names(colNets(x)), names(rowNets(x)))

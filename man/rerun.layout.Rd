@@ -4,20 +4,15 @@
 \alias{rerun.layout}
 \title{Rerun layout on the ACTIONet graph with new parameters}
 \usage{
-rerun.layout(
-  ace,
-  layout_compactness = 50,
-  layout_epochs = 500,
-  thread_no = 1,
-  reduction.slot = "ACTION"
-)
+rerun.layout(ace, layout_compactness = 50, layout_epochs = 500,
+  thread_no = 1, reduction.slot = "ACTION2D")
 }
 \arguments{
 \item{ace}{ACTIONetExperiment object containing the results}
 
 \item{thread_no}{Number of parallel threads (default=8)}
 
-\item{reduction.slot}{Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")}
+\item{reduction.slot}{Slot in the colFactors(ace) that holds reduced kernel (default="S_r")}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 

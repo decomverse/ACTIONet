@@ -7,7 +7,7 @@
 #' @param max.iter Number of SVD iterations
 #' @param passphrase Passphrase for encrypting column names of the ace object for anonymization
 #'
-#' @return ACTIONetExperiment object (ACE), derived from RangedSummarizedExperiment (ace), with added ReducedDims(ace)[["S_r"]]
+#' @return ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added ReducedDims(ace)[["S_r"]]
 #'
 #' @examples
 #' ace = import.ace.from.10X(input_path)
