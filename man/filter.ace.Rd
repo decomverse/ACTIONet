@@ -2,9 +2,9 @@
 % Please edit documentation in R/filter.R
 \name{filter.ace}
 \alias{filter.ace}
-\title{Filter columns and rows of `ACTIONetExperiment` or `SingleCellExperiment` object.}
+\title{Filter columns and rows of `ACTIONetExperiment` or `RangedSummarizedExperiment` object.}
 \usage{
-filter.ace(
+\method{filter}{ace}(
   ace,
   assay.name = "counts",
   min_cells_per_feat = NULL,
@@ -15,5 +15,5 @@ filter.ace(
 )
 }
 \description{
-Filter columns and rows of `ACTIONetExperiment` or `SingleCellExperiment` object.
+Filter columns and rows of `ACTIONetExperiment` or `RangedSummarizedExperiment` object.
 }

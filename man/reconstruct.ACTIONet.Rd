@@ -10,9 +10,9 @@ reconstruct.ACTIONet(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 500,
-  thread_no = 8,
+  thread_no = 0,
   layout.in.parallel = FALSE,
-  reduction.slot = "ACTION"
+  reduction.slot = "ACTION2D"
 )
 }
 \arguments{
@@ -22,9 +22,9 @@ reconstruct.ACTIONet(
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
-\item{thread_no}{Number of parallel threads (default=8)}
+\item{thread_no}{Number of parallel threads (default=0)}
 
-\item{reduction.slot}{Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")}
+\item{reduction.slot}{Slot in the colFactors(ace) that holds reduced kernel (default="S_r")}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 
