@@ -1,7 +1,6 @@
 # TODO
 
 ## Primary
-* Debug node_centrality computation
 * Metadata export
 * col/row-Factor metadata
 * Test unification process
@@ -9,6 +8,7 @@
 * Release docker
 * Garbage-collection with SCE object
 * update-alternatives to run R with MKL without compiling it from scratch
+* Python porting and testing
 
 ## New features to be tested
 * `renormalize_input_matrix` for post-ACTIONet normalization
