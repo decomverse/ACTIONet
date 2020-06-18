@@ -7,7 +7,7 @@
 #' @param max.iter Number of SVD iterations
 #' @param passphrase Passphrase for encrypting column names of the ace object for anonymization
 #'
-#' @return ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added ReducedDims(ace)[["S_r"]]
+#' @return ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added colFactors(ace)[["S_r"]]
 #'
 #' @examples
 #' ace = import.ace.from.10X(input_path)
@@ -65,7 +65,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcoun
     S_r = t(reduction.out$S_r)
     rownames(S_r) = colnames(ace.norm)
     colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("Dim%d", i))
-    reducedDims(ace.norm)[[reduction.slot]] <- S_r
+    colFactors(ace.norm)[[reduction.slot]] <- S_r
 
 
     metadata(ace.norm)$reduction.time = Sys.time()

@@ -26,3 +26,13 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     return(ace)
 })
 
+reconstruct_ace <- function(from) {	
+	ace = as(as(from, "SummarizedExperiment"), "ACTIONetExperiment")
+	
+    rowNets(ace)=rowNets(from)
+    colNets(ace)=colNets(from)
+    rowFactors(ace)=rowFactors(from)
+    colFactors(ace)=colFactors(from)
+
+	return(ace)
+}
