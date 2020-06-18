@@ -13,7 +13,7 @@
 #' @import methods
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
-#' @importClassesFrom RangedSummarizedExperiment RangedSummarizedExperiment
+#' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 .ACTIONetExperiment <- setClass("ACTIONetExperiment",
 		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowFactors = "SimpleList", colFactors = "SimpleList"),
 		contains = "RangedSummarizedExperiment"        
