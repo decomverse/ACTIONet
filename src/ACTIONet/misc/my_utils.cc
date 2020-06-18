@@ -33,11 +33,6 @@
 /* P_high = 1 - p_low*/
 #define P_HIGH  0.97575
 
-template< class T1, class T2 >
-bool kv_pair_less(const std::pair<T1,T2>& x, const std::pair<T1,T2>& y){
-    return x.first < y.first;
-}
-
 long double normsinv(long double p) {
 	long double x;
 	long double q, r, u, e;
@@ -293,29 +288,5 @@ namespace ACTIONet {
 		a = -1.0;
 		b = 1.0;
 		cblas_dgemv(CblasColMajor, CblasNoTrans, xm, xn, a, X, xm, T, inc, b, Y, inc);
-	}	
-	
-		
-	void csr_sort_indices(double *Ap, double *Aj, double *Ax, int n_row){
-		std::vector< std::pair<int,double> > temp;
-
-		for(int i = 0; i < n_row; i++){
-			int row_start = (int)Ap[i];
-			int row_end   = (int)Ap[i+1];
-
-			temp.resize(row_end - row_start);
-			for (int jj = row_start, n = 0; jj < row_end; jj++, n++){
-				temp[n].first  = Aj[jj];
-				temp[n].second = Ax[jj];
-			}
-
-			std::sort(temp.begin(),temp.end(),kv_pair_less<int,double>);
-
-			for(int jj = row_start, n = 0; jj < row_end; jj++, n++){
-				Aj[jj] = temp[n].first;
-				Ax[jj] = temp[n].second;
-			}
-		}
-	}	
-	
+	}		
 }

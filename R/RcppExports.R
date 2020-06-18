@@ -890,7 +890,7 @@ computeFullSim <- function(H, thread_no = 0L) {
     .Call(`_ACTIONet_computeFullSim`, H, thread_no)
 }
 
-csr_sort_indices <- function(Ap, Aj, Ax) {
-    invisible(.Call(`_ACTIONet_csr_sort_indices`, Ap, Aj, Ax))
+csr_sort_indices_inplace <- function(Ap, Aj, Ax) {
+    invisible(.Call(`_ACTIONet_csr_sort_indices_inplace`, Ap, Aj, Ax))
 }
 
