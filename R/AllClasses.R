@@ -1,4 +1,4 @@
-#' An extension of the SingleCellExperiment class to store
+#' An extension of the RangedSummarizedExperiment class to store
 #' the results of ACTIONet method
 #'
 #' @slot rowNets,colNets gene-gene and cell-cell networks, respectively
@@ -13,31 +13,31 @@
 #' @import methods
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importClassesFrom RangedSummarizedExperiment RangedSummarizedExperiment
 .ACTIONetExperiment <- setClass("ACTIONetExperiment",
 		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowFactors = "SimpleList", colFactors = "SimpleList"),
-		contains = "SingleCellExperiment"        
+		contains = "RangedSummarizedExperiment"        
 )
          
          
 #' Creates an ACTIONetExperiment (ACE) object
 #'
-#' @param ... SingleCellExperiment and SummarizedExperiment components
+#' @param ... RangedSummarizedExperiment and SummarizedExperiment components
 #' @param rowNets,colNets gene-gene and cell-cell networks, respectively
 #' @param rowFactors,colFactors Factorization results (W and H matrices)
 #'
-#' @return An ACTIONetExperiment (ACE) object, derived from SingleCellExperiment, with additional slots to store ACTIONet results
+#' @return An ACTIONetExperiment (ACE) object, derived from RangedSummarizedExperiment, with additional slots to store ACTIONet results
 #'
 #' @export
-#' @import SingleCellExperiment SummarizedExperiment
+#' @import RangedSummarizedExperiment SummarizedExperiment
 ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(), 
     colNets=S4Vectors::SimpleList(), 
     rowFactors=S4Vectors::SimpleList(), 
     colFactors=S4Vectors::SimpleList(),
     ...)
 {
-	sce <- SingleCellExperiment::SingleCellExperiment(...)
-	out <- .ACTIONetExperiment(sce, rowNets=rowNets, colNets=colNets, rowFactors=rowFactors, colFactors=colFactors)
+	SE <- SummarizedExperiment::RangedSummarizedExperiment(...)
+	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowFactors=rowFactors, colFactors=colFactors)
 	return(out)
 }
 
