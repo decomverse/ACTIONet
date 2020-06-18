@@ -1,4 +1,4 @@
-#' Takes a `SingleCellExperiment` object and adds the reduced kernel matrix
+#' Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix
 #'
 #' @param ace Input ace object
 #' @param norm.method Normalization method to use. See normalize.ace() function (default:"default")
@@ -7,7 +7,7 @@
 #' @param max.iter Number of SVD iterations
 #' @param passphrase Passphrase for encrypting column names of the ace object for anonymization
 #'
-#' @return ACTIONetExperiment object (ACE), derived from SingleCellExperiment (ace), with added ReducedDims(ace)[["S_r"]]
+#' @return ACTIONetExperiment object (ACE), derived from RangedSummarizedExperiment (ace), with added ReducedDims(ace)[["S_r"]]
 #'
 #' @examples
 #' ace = import.ace.from.10X(input_path)

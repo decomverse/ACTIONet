@@ -28,17 +28,17 @@ get_ace_split_IDX <- function(ace, attr, groups_use = NULL, return_split_vec = F
 }
 
 check_if_ace <- function(sce_like){
-  if(class(sce_like) %in% c("ACTIONetExperiment", "SingleCellExperiment")){
-    if(class(sce_like) == "SingleCellExperiment"){
+  if(class(sce_like) %in% c("ACTIONetExperiment", "RangedSummarizedExperiment", "SingleCellExperiment")){
+    if(class(sce_like) != "ACTIONetExperiment"){
       ace = as(sce_like, "ACTIONetExperiment")
-      msg = sprintf("Converting SingleCellExperiment input to ACTIONetExperiment class.\n")
+      msg = sprintf("Converting to ACTIONetExperiment class.\n")
       message(msg)
       return(ace)
     } else{
       return(sce_like)
     }
   } else{
-      err = sprintf("Input must type ACTIONetExperiment or SingleCellExperiment.\n")
+      err = sprintf("Input must type ACTIONetExperiment, SingleCellExperiment, or RangedSummarizedExperiment.\n")
       stop(err)
   }
 }

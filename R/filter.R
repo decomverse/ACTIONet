@@ -1,4 +1,4 @@
-#' Filter columns and rows of `ACTIONetExperiment` or `SingleCellExperiment` object.
+#' Filter columns and rows of `ACTIONetExperiment` or `RangedSummarizedExperiment` object.
 
 filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE){
   org_dim = dim(ace)
