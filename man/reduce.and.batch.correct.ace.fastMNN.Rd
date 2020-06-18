@@ -4,15 +4,9 @@
 \alias{reduce.and.batch.correct.ace.fastMNN}
 \title{Perform batch correction on `ACTIONetExperiment` and `SingleCellExperiment` objects.}
 \usage{
-reduce.and.batch.correct.ace.fastMNN(
-  ace,
-  batch.attr = NULL,
-  reduced_dim = 50,
-  MNN.k = 20,
-  return_V = FALSE,
-  reduction_name = "MNN",
-  BPPARAM = SerialParam()
-)
+reduce.and.batch.correct.ace.fastMNN(ace, batch.attr = NULL,
+  reduced_dim = 50, MNN.k = 20, return_V = FALSE,
+  reduction_name = "MNN", BPPARAM = SerialParam())
 }
 \description{
 Perform batch correction on `ACTIONetExperiment` and `SingleCellExperiment` objects.

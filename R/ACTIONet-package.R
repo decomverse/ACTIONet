@@ -5,8 +5,8 @@
 #' @section Usage: 
 #' 
 #' \enumerate{
-#' \item ?reduce.sce to reduce raw count matrix in an RangedSummarizedExperiment objects.
-#' \item ?run.ACTIONet to run ACTIONet on RangedSummarizedExperiment objects.
+#' \item ?reduce.sce to reduce raw count matrix in an SummarizedExperiment objects.
+#' \item ?run.ACTIONet to run ACTIONet on SummarizedExperiment objects.
 #' }
 #' @section Useful links:
 #' 

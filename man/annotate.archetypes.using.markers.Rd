@@ -2,15 +2,12 @@
 % Please edit documentation in R/annotation.R
 \name{annotate.archetypes.using.markers}
 \alias{annotate.archetypes.using.markers}
-\title{Annotate clusters using known marker genes 
+\title{Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
-annotate.archetypes.using.markers(
-  ace,
-  marker.genes,
+annotate.archetypes.using.markers(ace, marker.genes,
   rand.sample.no = 1000,
-  significance.slot = "H_unified_upper_significance"
-)
+  significance.slot = "H_unified_upper_significance")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -27,7 +24,7 @@ A named list: \itemize{
 }
 }
 \description{
-Annotate clusters using known marker genes 
+Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)
 }
 \examples{
