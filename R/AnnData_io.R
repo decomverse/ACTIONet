@@ -189,7 +189,7 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 		# Old scipy exports indices in unsorted format sometimes 		
 
 		Xt = new("dgRMatrix", j = indices, p = indptr, x = data, Dim = Dims)
-		X = as(Matrix::t(X), 'dgCMatrix')
+		X = as(Matrix::t(Xt), 'dgCMatrix')
 		#X = Matrix::t(sparseMatrix(j = indices, p = indptr, x = data, dims = c(Dims[2], Dims[1])))
 	}
 
