@@ -2,7 +2,7 @@
 % Please edit documentation in R/annotation.R
 \name{annotate.archetypes.using.labels}
 \alias{annotate.archetypes.using.labels}
-\title{Annotate archetypes using prior cell annotations 
+\title{Annotate archetypes using prior cell annotations
 (It uses t-test on the archetype footprint matrix (H))}
 \usage{
 annotate.archetypes.using.labels(ace, labels, archetype.slot = "H_unified")
@@ -20,7 +20,7 @@ A named list: \itemize{
 }
 }
 \description{
-Annotate archetypes using prior cell annotations 
+Annotate archetypes using prior cell annotations
 (It uses t-test on the archetype footprint matrix (H))
 }
 \examples{

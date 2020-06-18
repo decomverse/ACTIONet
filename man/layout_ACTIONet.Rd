@@ -9,7 +9,7 @@ layout_ACTIONet(
   S_r,
   compactness_level = 50L,
   n_epochs = 500L,
-  thread_no = 8L
+  thread_no = 0L
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ layout_ACTIONet(
 
 \item{n_epochs}{Number of epochs for SGD algorithm (default=100).}
 
-\item{thread_no}{Number of threads.}
+\item{thread_no}{Number of threads (default = 0).}
 }
 \value{
 A named list \itemize{

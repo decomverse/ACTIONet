@@ -31,7 +31,7 @@ visualize.markers(
 
 \item{x}{Score vector}
 
-\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")}
 }
 \value{
 Visualized ACTIONet with projected scores

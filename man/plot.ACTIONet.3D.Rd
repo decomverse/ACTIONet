@@ -28,7 +28,7 @@
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
-\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")}
 
 \item{title}{Main title of the plot}
 }

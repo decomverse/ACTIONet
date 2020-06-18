@@ -7,6 +7,7 @@
 ~*
 *.so
 *.a
+.fuse*
 tests/tmp
 build
 dist

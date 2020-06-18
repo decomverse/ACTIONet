@@ -11,8 +11,8 @@ Joint archetypal/network-based analysis for multi-resolution decomposition of si
  
 
 \enumerate{
-\item ?reduce.sce to reduce raw count matrix in an SingleCellExperiment objects.
-\item ?run.ACTIONet to run ACTIONet on SingleCellExperiment objects.
+\item ?reduce.sce to reduce raw count matrix in an RangedSummarizedExperiment objects.
+\item ?run.ACTIONet to run ACTIONet on RangedSummarizedExperiment objects.
 }
 }
 
