@@ -9,7 +9,7 @@
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 #' @param n_epochs Number of epochs for SGD algorithm (default=500).
 #' @param thread_no Number of parallel threads (default=0)
-#' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
+#' @param reduction.slot Slot in the colFactors(ace) that holds reduced kernel (default="S_r")
 #' @param data.slot Corresponding slot in the `ace` object the normalized counts (default="logcounts")
 #' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
 #' If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores
@@ -34,7 +34,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     
 	S = assays(ace)[[data.slot]]
-    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+    S_r = t(SingleCellExperiment::colFactors(ace)[[reduction.slot]])
     
     # Run ACTION
 	ACTION.out = run_ACTION(S_r, k_min = 2, k_max = k_max, thread_no = thread_no, max_it = 50, min_delta = AA_delta)
@@ -60,9 +60,9 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	}
 	
-    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
-    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    reducedDims(ace)$denovo_color = vis.out$colors
+    colFactors(ace)$ACTIONet2D = vis.out$coordinates
+    colFactors(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colFactors(ace)$denovo_color = vis.out$colors
 
 
 	# Identiy equivalent classes of archetypes and group them together
@@ -115,7 +115,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 #' @param n_epochs Number of epochs for SGD algorithm (default=500).
 #' @param thread_no Number of parallel threads (default=0)
-#' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
+#' @param reduction.slot Slot in the colFactors(ace) that holds reduced kernel (default="S_r")
 #' 
 #' @return ace Updated ace object
 #' 
@@ -134,16 +134,16 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 	
 	
     # Layout ACTIONet
-	initial.coordinates = t(scale(SingleCellExperiment::reducedDims(ace)[[reduction.slot]]))
+	initial.coordinates = t(scale(SingleCellExperiment::colFactors(ace)[[reduction.slot]]))
 	if(layout.in.parallel == FALSE) {		
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
     } else { # WARNING! This makes the results none reproducible
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	}
 	
-    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
-    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    reducedDims(ace)$denovo_color = vis.out$colors
+    colFactors(ace)$ACTIONet2D = vis.out$coordinates
+    colFactors(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colFactors(ace)$denovo_color = vis.out$colors
 
 	return(ace)
 }
@@ -156,7 +156,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 #' @param n_epochs Number of epochs for SGD algorithm (default=500).
 #' @param thread_no Number of parallel threads (default=8)
-#' @param reduction.slot Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")
+#' @param reduction.slot Slot in the colFactors(ace) that holds reduced kernel (default="S_r")
 #' 
 #' @return ace Updated ace object
 #' 
@@ -168,14 +168,14 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
     G = colNets(ace)[["ACTIONet"]]
     	
     # re-Layout ACTIONet
-    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+    S_r = t(SingleCellExperiment::colFactors(ace)[[reduction.slot]])
     
 	initial.coordinates = t(scale(t(S_r)))
 	vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	    
-    reducedDims(ace)$ACTIONet2D = vis.out$coordinates
-    reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
-    reducedDims(ace)$denovo_color = vis.out$colors
+    colFactors(ace)$ACTIONet2D = vis.out$coordinates
+    colFactors(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colFactors(ace)$denovo_color = vis.out$colors
 
 	return(ace)
 }
@@ -183,7 +183,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 
 rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION", unified_suffix = "unified") {
 	S = assays(ace)[[data.slot]]
-    S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
+    S_r = t(SingleCellExperiment::colFactors(ace)[[reduction.slot]])
 	C_stacked = Matrix::t(as.matrix(colFactors(ace)[["C_stacked"]]))
 	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
     G = colNets(ace)[["ACTIONet"]]
@@ -222,7 +222,7 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 
 regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION") {
 	S = assays(ace)[[data.slot]]
-	S_r = Matrix::t(reducedDims(ace)[[reduction.slot]])
+	S_r = Matrix::t(colFactors(ace)[[reduction.slot]])
 	
 	H_stacked = as.matrix(colFactors(ace)[["H_stacked"]])
 	C_stacked = as.matrix(Matrix::t(colFactors(ace)[["C_stacked"]]))
