@@ -106,7 +106,7 @@ download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc
 require(ACTIONet)
 # Run ACTIONet
 ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 50, min_umis_per_cell = 1000)
-ace = reduce.sce(ace)
+ace = reduce.ace(ace)
 ACTIONet_results = run.ACTIONet(ace)
 ace = ACTIONet_results$ace
 
