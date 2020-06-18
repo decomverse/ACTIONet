@@ -87,7 +87,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' @param title Main title of the plot
 #' @param border.contrast.factor How much the node and its border should contrast
 #' @param add.states Whether or not to include interpolated cell state positions in the plot
-#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")
 #'
 #' @return Visualized ACTIONet
 #'
@@ -105,7 +105,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
     if(class(ace) == "ACTIONetExperiment") {
 		labels = preprocess.labels(labels, ace)
 		if(is.character(coordinate.slot)) {
-			coors = reducedDims(ace)[[coordinate.slot]]
+			coors = colFactors(ace)[[coordinate.slot]]
 		} else {
 			coors = as.matrix(coordinate.slot)
 		}
@@ -121,7 +121,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 	}
 	if(is.null(labels)) {
 		if(class(ace) == "ACTIONetExperiment") {
-			vCol = rgb(reducedDims(ace)$denovo_color)
+			vCol = rgb(colFactors(ace)$denovo_color)
 		} else {
 			vCol = rep("tomato", nrow(coors))
 		}
@@ -240,7 +240,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' @param node.size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param title Main title of the plot
-#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")
 #'
 #' @return Visualized ACTIONet
 #'
@@ -261,7 +261,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     if(class(ace) == "ACTIONetExperiment") {
 		labels = preprocess.labels(labels, ace)
 		if(is.character(coordinate.slot)) {
-			coors = reducedDims(ace)[[coordinate.slot]]
+			coors = colFactors(ace)[[coordinate.slot]]
 		} else {
 			coors = as.matrix(coordinate.slot)
 		}
@@ -278,7 +278,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 
 	if(is.null(labels)) {
 		if(class(ace) == "ACTIONetExperiment") {
-			vCol = rgb(reducedDims(ace)$denovo_color)
+			vCol = rgb(colFactors(ace)$denovo_color)
 		} else {
 			vCol = rep("tomato", nrow(coors))
 		}
@@ -389,7 +389,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 	X = t(select.top.k.features(feature.enrichment.table, 3, normalize = renormalize, reorder.columns = F))
 	selected.features = colnames(X)
 
-	core.coors = t(t(reducedDims(ace)[["ACTIONet2D"]]) %*% M)
+	core.coors = t(t(colFactors(ace)[["ACTIONet2D"]]) %*% M)
 	cs = colSums(X)
 	cs[cs == 0] = 1
 	X = scale(X, center = F, scale = cs)
@@ -397,7 +397,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 
     if (is.null(CPal)) {
         #Pal = ace$unification.out$Pal
-			cells.Lab = grDevices::convertColor(color = reducedDims(ace)$denovo_color, from = "sRGB", to = "Lab")
+			cells.Lab = grDevices::convertColor(color = colFactors(ace)$denovo_color, from = "sRGB", to = "Lab")
 			arch.Lab = Matrix::t(M) %*% cells.Lab
 			arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 			core.Pal = rgb(arch.RGB)
@@ -501,7 +501,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     if(class(ace) == "ACTIONetExperiment") {
 		labels = preprocess.labels(labels, ace)
 		if(is.character(coordinate.slot)) {
-			coors = reducedDims(ace)[[coordinate.slot]]
+			coors = colFactors(ace)[[coordinate.slot]]
 		} else {
 			coors = as.matrix(coordinate.slot)
 		}
@@ -518,7 +518,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 
 	if(is.null(labels)) {
 		if(class(ace) == "ACTIONetExperiment") {
-			vCol = rgb(reducedDims(ace)$denovo_color)
+			vCol = rgb(colFactors(ace)$denovo_color)
 		} else {
 			vCol = rep("tomato", nrow(coors))
 		}
@@ -745,7 +745,7 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
 #' @param node.size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
-#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
 #'
 #' @return Visualized ACTIONet with projected scores
@@ -760,7 +760,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 
     if(class(ace) == "ACTIONetExperiment") {
 		if(is.character(coordinate.slot)) {
-			coors = reducedDims(ace)[[coordinate.slot]]
+			coors = colFactors(ace)[[coordinate.slot]]
 		} else {
 			coors = as.matrix(coordinate.slot)
 		}
@@ -830,7 +830,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
 #' @param node.size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
-#' @param coordinate.slot Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")
+#' @param coordinate.slot Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
 #'
 #' @return Visualized ACTIONet with projected scores
@@ -923,7 +923,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma"
 	U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
 
 	node.size = node.size * 0.3
-    coors = reducedDims(ace)[[coordinate.slot]]
+    coors = colFactors(ace)[[coordinate.slot]]
 
     if (CPal %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
 		require(viridis)

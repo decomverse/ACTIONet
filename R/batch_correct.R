@@ -25,7 +25,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
   colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("PC%d", i))
 
 
-  SingleCellExperiment::reducedDims(ace.norm)[[reduction_name]] <- S_r
+  ACTIONet::colFactors(ace.norm)[[reduction_name]] <- S_r
 
   if(return_V){
     V = rowData(mnn.out)[["rotation"]]
@@ -46,7 +46,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
 #' @param max.iter Number of SVD iterations
 #' @param passphrase Passphrase for encrypting column names of the ace object for anonymization
 #'
-#' @return Reduced ace object with added ReducedDims(ace)
+#' @return Reduced ace object with added colFactors(ace)
 #'
 #' @examples
 #' ace = import.ace.from.10X(input_path)
@@ -77,6 +77,6 @@ batch.correct.ace.Harmony <- function(ace, batch.vec, reduction.slot = "ACTION")
     require(harmony)
     ace <- check_if_ace(ace)
     batch.vec = get_ace_split_IDX(ace, batch.vec, return_split_vec = TRUE)
-    reducedDims(ace)[[reduction.slot]] = harmony::HarmonyMatrix(reducedDims(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
+    ACTIONet::colFactors(ace)[[reduction.slot]] = harmony::HarmonyMatrix(ACTIONet::colFactors(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
     return(ace)
 }
