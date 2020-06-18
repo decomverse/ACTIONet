@@ -21,7 +21,7 @@ reduce.ace(ace, reduced_dim = 50, max.iter = 5,
 \item{passphrase}{Passphrase for encrypting column names of the ace object for anonymization}
 }
 \value{
-ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added ReducedDims(ace)[["S_r"]]
+ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added colFactors(ace)[["S_r"]]
 }
 \description{
 Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix
