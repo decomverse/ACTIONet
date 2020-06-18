@@ -21,11 +21,3 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     colFactors=reducedDims(from))
 })
 
-
-setAs("ACTIONetExperiment", "ACTIONetExperiment", function(from) {
-    new("ACTIONetExperiment", as(from, "RangedSummarizedExperiment"), 
-    rowNets=rowNets(from), 
-    colNets=colNets(from), 
-    rowFactors=rowFactors(from), 
-    colFactors=colFactors(from))
-})
