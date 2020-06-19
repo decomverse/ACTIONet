@@ -4,35 +4,66 @@
 #'
 #' @exportMethod coerce
 setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
-    new("ACTIONetExperiment", from, 
-    rowNets=S4Vectors::SimpleList(), 
+    ace = .ACTIONetExperiment(from, rowNets=S4Vectors::SimpleList(), 
     colNets=S4Vectors::SimpleList(), 
     rowMaps=S4Vectors::SimpleList(), 
     colMaps=S4Vectors::SimpleList())
+
+    #rowData(ace) = DataFrame(as.data.frame(rowData(ace)))
+    #colData(ace) = DataFrame(as.data.frame(colData(ace)))
+
+    return(ace)  
 })
 
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {	
-	sce = as(as(from, "SummarizedExperiment"), "SingleCellExperiment")
+	SE = as(from, "SummarizedExperiment")	
+	sce = as(SE, "SingleCellExperiment")
+	
     transposed_factors = SimpleList(lapply(colMaps(from), function(x) Matrix::t(x)))
     reducedDims(sce) = transposed_factors
+    
+    #rowData(sce) = DataFrame(as.data.frame(rowData(from)))
+    #colData(sce) = DataFrame(as.data.frame(colData(from)))
+        
     return(sce)
 })
 
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {	
-	ace = as(as(from, "SummarizedExperiment"), "ACTIONetExperiment")
+	SE = as(from, "SummarizedExperiment")
+	rownames(SE) = rownames(from)
+	rowData(SE) = rowData(from)
+	
+	
+	ace = as(SE, "ACTIONetExperiment")
     #ace = as(from, "ACTIONetExperiment")
+    
     transposed_factors = SimpleList(lapply(reducedDims(from), function(x) Matrix::t(x)))
     colMaps(ace) = transposed_factors
+    
+    rowData(ace) = DataFrame(as.data.frame(rowData(ace)))
+    colData(ace) = DataFrame(as.data.frame(colData(ace)))
+    
     return(ace)
 })
 
 reconstruct_ace <- function(from) {	
-	ace = as(as(from, "SummarizedExperiment"), "ACTIONetExperiment")
+	SE = as(from, "SummarizedExperiment")	
+	ace = as(SE, "ACTIONetExperiment")
 	
+    rowData(ace) = DataFrame(as.data.frame(rowData(ace)))
+    colData(ace) = DataFrame(as.data.frame(colData(ace)))
+    
+    
     rowNets(ace)=rowNets(from)
     colNets(ace)=colNets(from)
-    rowMaps(ace)=rowMaps(from)
-    colMaps(ace)=colMaps(from)
+    if('rowMaps' %in% slotNames(SE)) {
+		rowMaps(ace)=rowMaps(from)
+		colMaps(ace)=colMaps(from)
+	} else {
+		rowMaps(ace)=from@rowFactors
+		colMaps(ace)=from@colFactors
+	}
 
+    
 	return(ace)
 }
