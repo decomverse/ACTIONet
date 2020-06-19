@@ -242,7 +242,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
 	obsm = h5file$create_group("obsm")
 	CF = colMaps(ace)
-	embeddings.idx = which(sapply(CF, ncol) %in% c(2, 3))
+	embeddings.idx = which(sapply(ACE@colMapsAnnot, function(x) x$type == "embedding"))
 	if(length(embeddings.idx) > 0) {
 		subCF = CF[embeddings.idx]
 		names(subCF) = paste("X", names(subCF), sep = "_")
@@ -253,7 +253,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	}
 	if(!minimal.export) {
 		# Export additional "obsm" matrices. Anything that doesn't start with "X_" in obsm will be map to colMaps() upon reading.
-		nonembeddings.idx = setdiff(1:length(colMaps(ace)), embeddings.idx)
+		nonembeddings.idx = setdiff(1:length(CF), embeddings.idx)
 		if((length(nonembeddings.idx) > 0)) {
 			subCF = CF[nonembeddings.idx]
 			subCF = lapply(subCF, function(x) as.matrix(x))
@@ -262,8 +262,8 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 			}
 		}
 		
-		# Export "varm"-associated matrices, i.e. rowFactors(): variables in AnnData ~ rows in SCE ~ genes => such as DE matrices
-		RF = rowFactors(ace)
+		# Export "varm"-associated matrices, i.e. rowMaps(): variables in AnnData ~ rows in SCE ~ genes => such as DE matrices
+		RF = rowMaps(ace)
 		if((length(RF) > 0)) {
 			varm = h5file$create_group("varm")
 			RF = lapply(RF, function(x) as.matrix(x))
@@ -362,12 +362,16 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		obsm = h5file[["obsm"]]
 		for(mn in names(obsm)) {
 			Xr = obsm[[mn]]$read()
-			if(sum(grepl(pattern = "^X_", mn))) { # It is an embedding/dimension reduction
-				reducedDims(ACE)[[stringr::str_sub(mn, start = 3)]] = Matrix::t(Xr)
-			} else if(nrow(Xr) <= 100 & (sum(grepl(pattern = "^C_", mn)|grepl(pattern = "^H_", mn))==0)) { # Keep small factors as reducedDims() -- i.e., "ACTION" or "PCA" reductions
-				reducedDims(ACE)[[mn]] = Matrix::t(Xr)
+			if(sum(grepl(pattern = "^X_", mn))) { # # Keep the smallest factors as "embeddings"
+				nn = stringr::str_sub(mn, start = 3)
+				colMaps(ACE)[[nn]] = Xr
+				ACE@colMapsAnnot[[nn]] = list(type = "embedding")
+			} else if(nrow(Xr) <= 100 & (sum(grepl(pattern = "^C_", mn)|grepl(pattern = "^H_", mn))==0)) { # Keep small factors as "reductions"
+				colMaps(ACE)[[mn]] = Xr
+				ACE@colMapsAnnot[[mn]] = list(type = "reduction")								
 			} else {
 				colMaps(ACE)[[mn]] = Xr
+				ACE@colMapsAnnot[[mn]] = list(type = "generic")								
 			}
 		}
 	}
@@ -376,7 +380,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		varm = h5file[["varm"]]
 		for(mn in names(varm)) {
 			Xr = Matrix::t(varm[[mn]]$read())
-			rowFactors(ACE)[[mn]] = Xr
+			rowMaps(ACE)[[mn]] = Xr
 		}
 	}
 
