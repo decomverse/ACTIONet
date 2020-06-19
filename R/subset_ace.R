@@ -6,8 +6,8 @@
 setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., drop=TRUE) {
     rn <- rowNets(x, withDimnames=FALSE)
     cn <- colNets(x, withDimnames=FALSE)
-    rf <- rowFactors(x, withDimnames=FALSE)
-    cf <- colFactors(x, withDimnames=FALSE)
+    rf <- rowMaps(x, withDimnames=FALSE)
+    cf <- colMaps(x, withDimnames=FALSE)
 
     if (!missing(i)) {
         if (is.character(i)) {
@@ -57,5 +57,5 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
 
     out <- callNextMethod()
     BiocGenerics:::replaceSlots(out, rowNets=rn, colNets=cn,
-        rowFactors=rf, colFactors=cf, check=FALSE)
+        rowMaps=rf, colMaps=cf, check=FALSE)
 })

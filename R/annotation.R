@@ -18,7 +18,7 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
 	if(is.matrix(ace) | is.sparseMatrix(ace)) {
 		profile = as.matrix(ace)
 	} else {
-		profile = colFactors(ace)[[archetype.slot]]
+		profile = colMaps(ace)[[archetype.slot]]
 	}
     Annot = names(Labels)[match(sort(unique(Labels)), Labels)]
 
@@ -87,7 +87,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 			marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
 	}
 
-	specificity.panel = as.matrix(log1p(t(rowFactors(ace)[[significance.slot]])))
+	specificity.panel = as.matrix(log1p(t(rowMaps(ace)[[significance.slot]])))
 	specificity.panel[is.na(specificity.panel)] = 0
 
     GS.names = names(marker.genes)
@@ -335,7 +335,7 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 #' cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat)
 #' cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
 map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F, H.slot = "H_unified") {
-	cell.scores.mat = Matrix::t(colFactors(ace)[[H.slot]])
+	cell.scores.mat = Matrix::t(colMaps(ace)[[H.slot]])
 
     if (nrow(enrichment.matrix) != ncol(cell.scores.mat)) {
 		print("Flipping enrichment matrix")

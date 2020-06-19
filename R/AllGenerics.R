@@ -15,23 +15,23 @@ setGeneric("rowNets", function(x, ...) standardGeneric("rowNets"))
 #' @export
 setGeneric("colNets", function(x, ...) standardGeneric("colNets"))
 
-#' Get rowFactors
+#' Get rowMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod rowFactors
+#' @exportMethod rowMaps
 #' @export
-setGeneric("rowFactors", function(x, ...) standardGeneric("rowFactors"))
+setGeneric("rowMaps", function(x, ...) standardGeneric("rowMaps"))
 
-#' Get colFactors
+#' Get colMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod colFactors
+#' @exportMethod colMaps
 #' @export
-setGeneric("colFactors", function(x, ...) standardGeneric("colFactors"))
+setGeneric("colMaps", function(x, ...) standardGeneric("colMaps"))
 
 #' Set rowNets
 #'
@@ -49,21 +49,21 @@ setGeneric("rowNets<-", function(x, ...) standardGeneric("rowNets<-"))
 #' @exportMethod colNets<-
 setGeneric("colNets<-", function(x, ...) standardGeneric("colNets<-"))
 
-#' Set rowFactors
+#' Set rowMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod rowFactors<-
-setGeneric("rowFactors<-", function(x, ...) standardGeneric("rowFactors<-"))
+#' @exportMethod rowMaps<-
+setGeneric("rowMaps<-", function(x, ...) standardGeneric("rowMaps<-"))
 
-#' Set colFactors
+#' Set colMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod colFactors<-
-setGeneric("colFactors<-", function(x, ...) standardGeneric("colFactors<-"))
+#' @exportMethod colMaps<-
+setGeneric("colMaps<-", function(x, ...) standardGeneric("colMaps<-"))
 
 
 

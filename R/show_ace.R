@@ -9,8 +9,8 @@ setMethod("show", "ACTIONetExperiment", function(object) {
     cat(		
         "rowNets(", (length(rowNets(object, withDimnames=F))), "): ", paste(names(rowNets(object, withDimnames=F)), collapse = ' '), "\n",
         "colNets(", (length(colNets(object, withDimnames=F))), "): ", paste(names(colNets(object, withDimnames=F)), collapse = ' '), "\n",
-        "rowFactors(", (length(rowFactors(object, withDimnames=F))), "): ", paste(names(rowFactors(object, withDimnames=F)), collapse = ' '), "\n",
-        "colFactors(", (length(colFactors(object, withDimnames=F))), "): ", paste(names(colFactors(object, withDimnames=F)), collapse = ' '), "\n",
+        "rowMaps(", (length(rowMaps(object, withDimnames=F))), "): ", paste(names(rowMaps(object, withDimnames=F)), collapse = ' '), "\n",
+        "colMaps(", (length(colMaps(object, withDimnames=F))), "): ", paste(names(colMaps(object, withDimnames=F)), collapse = ' '), "\n",
         sep=""
     )
 })

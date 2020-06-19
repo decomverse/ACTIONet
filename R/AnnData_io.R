@@ -241,7 +241,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 	## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
 	obsm = h5file$create_group("obsm")
-	CF = colFactors(ace)
+	CF = colMaps(ace)
 	embeddings.idx = which(sapply(CF, ncol) %in% c(2, 3))
 	if(length(embeddings.idx) > 0) {
 		subCF = CF[embeddings.idx]
@@ -252,8 +252,8 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 		}
 	}
 	if(!minimal.export) {
-		# Export additional "obsm" matrices. Anything that doesn't start with "X_" in obsm will be map to colFactors() upon reading.
-		nonembeddings.idx = setdiff(1:length(colFactors(ace)), embeddings.idx)
+		# Export additional "obsm" matrices. Anything that doesn't start with "X_" in obsm will be map to colMaps() upon reading.
+		nonembeddings.idx = setdiff(1:length(colMaps(ace)), embeddings.idx)
 		if((length(nonembeddings.idx) > 0)) {
 			subCF = CF[nonembeddings.idx]
 			subCF = lapply(subCF, function(x) as.matrix(x))
@@ -367,7 +367,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			} else if(nrow(Xr) <= 100 & (sum(grepl(pattern = "^C_", mn)|grepl(pattern = "^H_", mn))==0)) { # Keep small factors as reducedDims() -- i.e., "ACTION" or "PCA" reductions
 				reducedDims(ACE)[[mn]] = Matrix::t(Xr)
 			} else {
-				colFactors(ACE)[[mn]] = Xr
+				colMaps(ACE)[[mn]] = Xr
 			}
 		}
 	}

@@ -7,22 +7,22 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
     new("ACTIONetExperiment", from, 
     rowNets=S4Vectors::SimpleList(), 
     colNets=S4Vectors::SimpleList(), 
-    rowFactors=S4Vectors::SimpleList(), 
-    colFactors=S4Vectors::SimpleList())
+    rowMaps=S4Vectors::SimpleList(), 
+    colMaps=S4Vectors::SimpleList())
 })
 
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {	
 	sce = as(as(from, "SummarizedExperiment"), "SingleCellExperiment")
-    #sce = as(from, "SingleCellExperiment")
-    reducedDims(sce)=SimpleList(lapply(colFactors(from), function(x) Matrix::t(x)))
+    transposed_factors = SimpleList(lapply(colMaps(from), function(x) Matrix::t(x)))
+    reducedDims(sce) = transposed_factors
     return(sce)
 })
 
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {	
 	ace = as(as(from, "SummarizedExperiment"), "ACTIONetExperiment")
     #ace = as(from, "ACTIONetExperiment")
-    
-    colFactors(ace)=SimpleList(lapply(reducedDims(from), function(x) Matrix::t(x)))
+    transposed_factors = SimpleList(lapply(reducedDims(from), function(x) Matrix::t(x)))
+    colMaps(ace) = transposed_factors
     return(ace)
 })
 
@@ -31,8 +31,8 @@ reconstruct_ace <- function(from) {
 	
     rowNets(ace)=rowNets(from)
     colNets(ace)=colNets(from)
-    rowFactors(ace)=rowFactors(from)
-    colFactors(ace)=colFactors(from)
+    rowMaps(ace)=rowMaps(from)
+    colMaps(ace)=colMaps(from)
 
 	return(ace)
 }

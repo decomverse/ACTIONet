@@ -34,9 +34,9 @@ setMethod("colNets", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
 #'
 #' @return List of matrices
 #'
-#' @rdname rowFactors
-setMethod("rowFactors", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
-    out <- x@rowFactors
+#' @rdname rowMaps
+setMethod("rowMaps", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
+    out <- x@rowMaps
     if (withDimnames & (length(out) > 0)) {
         for (i in 1:length(out)) {
             rownames(out[[i]]) <- rownames(x)
@@ -49,9 +49,9 @@ setMethod("rowFactors", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
 #'
 #' @return List of matrices
 #'
-#' @rdname colFactors
-setMethod("colFactors", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
-    out <- x@colFactors
+#' @rdname colMaps
+setMethod("colMaps", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
+    out <- x@colMaps
     if (withDimnames & (length(out) > 0)) {
         for (i in 1:length(out)) {
             colnames(out[[i]]) <- colnames(x)
@@ -59,3 +59,39 @@ setMethod("colFactors", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
 	}
     out
 })
+
+
+GET_FUN <- function(exprs_values, ...) {
+    (exprs_values) # To ensure evaluation
+    function(object, ...) {
+        assay(object, i=exprs_values, ...)
+    }
+}
+
+SET_FUN <- function(exprs_values, ...) {
+    (exprs_values) # To ensure evaluation
+    function(object, ..., value) {
+        assay(object, i=exprs_values, ...) <- value
+        object
+    }
+}
+
+#' @export
+#' @importFrom BiocGenerics counts
+setMethod("counts", "ACTIONetExperiment", GET_FUN("counts"))
+
+#' @export
+#' @importFrom BiocGenerics "counts<-"
+setReplaceMethod("counts", c("ACTIONetExperiment", "ANY"), SET_FUN("counts"))
+
+#' @export
+setMethod("logcounts", "ACTIONetExperiment", GET_FUN("logcounts"))
+
+#' @export
+setReplaceMethod("logcounts", c("ACTIONetExperiment", "ANY"), SET_FUN("logcounts"))
+
+#' @export
+setMethod("normcounts", "ACTIONetExperiment", GET_FUN("normcounts"))
+
+#' @export
+setReplaceMethod("normcounts", c("ACTIONetExperiment", "ANY"), SET_FUN("normcounts"))

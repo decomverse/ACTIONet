@@ -26,20 +26,21 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @return List of matrices
 #'
-#' @rdname rowFactors
-setReplaceMethod("rowFactors", "ACTIONetExperiment", function(x, value) {
-    x@rowFactors <- value
+#' @rdname rowMaps
+setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
+	x@rowMaps <- value
     validObject(x)
     x
 })
+
 
 #' Set column-associated factors
 #'
 #' @return List of matrices
 #'
-#' @rdname colFactors
-setReplaceMethod("colFactors", "ACTIONetExperiment", function(x, value) {
-    x@colFactors <- value
-    validObject(x)
-    x
+#' @rdname colMaps
+setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {	
+	x@colMaps <- value
+    validObject(x)	
+	x
 })

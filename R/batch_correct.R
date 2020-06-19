@@ -1,9 +1,14 @@
 #' Perform batch correction on `ACTIONetExperiment` and `SingleCellExperiment` objects.
 #' @export
 reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced_dim = 50, MNN.k = 20, return_V = FALSE, reduction_name = "MNN", BPPARAM = SerialParam()) {
-  require(scran)
-  require(batchelor)
-  ace <- check_if_ace(ace)
+	if( !("bachelor" %in% rownames(installed.packages())) ) {
+		message("You need to install bachelor package first.")
+		return
+	} else {
+		require(bachelor)
+	}
+  
+  sce = as(ace, "SingleCellExperiment")
   colData(ace) = droplevels(colData(ace))
   SummarizedExperiment::assays(ace)[["counts"]] = as(SummarizedExperiment::assays(ace)[["counts"]], 'sparseMatrix')
   m_data = metadata(ace)
@@ -25,12 +30,12 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
   colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("PC%d", i))
 
 
-  ACTIONet::colFactors(ace.norm)[[reduction_name]] <- S_r
+  ACTIONet::colMaps(ace.norm)[[reduction_name]] <- Matrix::t(S_r)
 
   if(return_V){
     V = rowData(mnn.out)[["rotation"]]
     colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
-    rowData(ace.norm)[["rotation"]] = V
+    rowMaps(ace.norm)[["rotation"]] = V
   }
   metadata(ace.norm) = m_data
   return(ace.norm)
@@ -46,7 +51,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
 #' @param max.iter Number of SVD iterations
 #' @param passphrase Passphrase for encrypting column names of the ace object for anonymization
 #'
-#' @return Reduced ace object with added colFactors(ace)
+#' @return Reduced ace object with added colMaps(ace)
 #'
 #' @examples
 #' ace = import.ace.from.10X(input_path)
@@ -77,6 +82,6 @@ batch.correct.ace.Harmony <- function(ace, batch.vec, reduction.slot = "ACTION")
     require(harmony)
     ace <- check_if_ace(ace)
     batch.vec = get_ace_split_IDX(ace, batch.vec, return_split_vec = TRUE)
-    ACTIONet::colFactors(ace)[[reduction.slot]] = harmony::HarmonyMatrix(ACTIONet::colFactors(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
+    ACTIONet::reducedDims(ace)[[reduction.slot]] = harmony::HarmonyMatrix(ACTIONet::reducedDims(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
     return(ace)
 }
