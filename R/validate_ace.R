@@ -9,7 +9,7 @@ setValidity2("ACTIONetExperiment", function(object) {
     msg <- NULL
 
     # 2D
-    value = rowNets(object, withDimnames=FALSE)
+    value = rowNets(object)
 	for (i in seq_along(value)) {
 			if ( (NROW(value[[i]]) != NR) | (NCOL(value[[i]]) != NR) ) {
 			msg <- c(
@@ -18,7 +18,7 @@ setValidity2("ACTIONetExperiment", function(object) {
 		}                        
     }
     
-    value = colNets(object, withDimnames=FALSE)
+    value = colNets(object)
 	for (i in seq_along(value)) {
 		if ( (NROW(value[[i]]) != NC) | (NCOL(value[[i]]) != NC) ) {
 			msg <- c(
@@ -27,7 +27,7 @@ setValidity2("ACTIONetExperiment", function(object) {
 		}    
 	}
 	
-    value = rowMaps(object, withDimnames=FALSE)
+    value = rowMaps(object)
 	for (i in seq_along(value)) {
 		if ( (NROW(value[[i]]) != NR) ) {
 			msg <- c(
@@ -37,7 +37,7 @@ setValidity2("ACTIONetExperiment", function(object) {
 	}
 	
 	
-    value = colMaps(object, withDimnames=FALSE)
+    value = colMaps(object)
 	for (i in seq_along(value)) {
 		if ( (NCOL(value[[i]]) != NC) ) {
 			msg <- c(
