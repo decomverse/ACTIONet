@@ -9,7 +9,7 @@
 \usage{
 rowNets(x, ...)
 
-\S4method{rowNets}{ACTIONetExperiment}(x, withDimnames = TRUE)
+\S4method{rowNets}{ACTIONetExperiment}(x)
 
 \S4method{rowNets}{ACTIONetExperiment}(x) <- value
 }

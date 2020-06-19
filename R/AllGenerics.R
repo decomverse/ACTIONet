@@ -65,5 +65,3 @@ setGeneric("rowMaps<-", function(x, ...) standardGeneric("rowMaps<-"))
 #' @exportMethod colMaps<-
 setGeneric("colMaps<-", function(x, ...) standardGeneric("colMaps<-"))
 
-
-

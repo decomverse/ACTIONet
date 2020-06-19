@@ -9,7 +9,7 @@
 \usage{
 colNets(x, ...)
 
-\S4method{colNets}{ACTIONetExperiment}(x, withDimnames = TRUE)
+\S4method{colNets}{ACTIONetExperiment}(x)
 
 \S4method{colNets}{ACTIONetExperiment}(x) <- value
 }

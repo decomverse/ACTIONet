@@ -9,8 +9,7 @@ run.ACTIONet(ace, k_max = 30, min.cells.per.arch = 2,
   mutual_edges_only = TRUE, layout_compactness = 50,
   layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0,
   data.slot = "logcounts", reduction.slot = "ACTION",
-  unification.resolution = 1, AA_delta = 1e-300,
-  max_iter_ACTION = 50, full.trace = T)
+  unification.resolution = 1, max_iter_ACTION = 50, full.trace = T)
 }
 \arguments{
 \item{ace}{Reduced `ACTIONetExperiment (ACE)` object (output of reduce.ace() function).}
