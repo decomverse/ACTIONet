@@ -33,10 +33,9 @@
 ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(), 
     colNets=S4Vectors::SimpleList(), 
     rowMaps=S4Vectors::SimpleList(), 
-    colMaps=S4Vectors::SimpleList(),
-    ...)
+    colMaps=S4Vectors::SimpleList(), ...)
 {
-	SE <- SummarizedExperiment::SummarizedExperiment(...)
+	SE <- SummarizedExperiment::RangedSummarizedExperiment(...)
 	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowMaps=rowMaps, colMaps=colMaps)
 	return(out)
 }
