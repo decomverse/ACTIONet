@@ -1,6 +1,6 @@
 #' A wrapper function to call all main functions of the ACTIONet
 #'
-#' @param ace Reduced `ACTIONetExperiment (ACE)` object (output of reduce.ace() function).
+#' @param ace Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).
 #' @param k_max Maximum depth of decompositions (default=30).
 #' @param min_specificity_z_threshold Defines the stringency of pruning nonspecific archetypes.
 #' The larger the value, the more archetypes will be filtered out (default=-1).
@@ -43,7 +43,10 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold, min_cells = min.cells.per.arch)
 
 	colMaps(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')
+	ace@colMapsAnnot[["H_stacked"]] = list(type = "internal")								
+		
 	colMaps(ace)[["C_stacked"]] = as(Matrix::t(pruning.out$C_stacked), 'sparseMatrix')
+	ace@colMapsAnnot[["C_stacked"]] = list(type = "internal")								
 
 
     # Build ACTIONet
@@ -54,6 +57,8 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     # Layout ACTIONet
 	initial.coordinates = t(scale(t(S_r)))
+	colMaps(ace)[["ACTIONred"]] = initial.coordinates[1:3, ]
+	
 	if(layout.in.parallel == FALSE) {
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
     } else { # WARNING! This makes the results none reproducible
@@ -61,15 +66,24 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 	}
 
     colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+	ace@colMapsAnnot[["ACTIONet2D"]] = list(type = "embedding")								
+    
     colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
+	ace@colMapsAnnot[["ACTIONet3D"]] = list(type = "embedding")								
+	
     colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
+	ace@colMapsAnnot[["denovo_color"]] = list(type = "generic")								
 
 
 	# Identiy equivalent classes of archetypes and group them together
 	unification.out = unify_archetypes(S_r, pruning.out$C_stacked, pruning.out$H_stacked, min_overlap = 0, resolution = unification.resolution)
 
 	colMaps(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
+	ace@colMapsAnnot[["H_unified"]] = list(type = "internal")								
+	
 	colMaps(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
+	ace@colMapsAnnot[["C_unified"]] = list(type = "internal")								
+	
 	ace$assigned_archetype = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
