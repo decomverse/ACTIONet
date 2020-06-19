@@ -1,6 +1,6 @@
 #' Perform batch correction on `ACTIONetExperiment` and `SingleCellExperiment` objects.
 #' @export
-reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced_dim = 50, MNN.k = 20, return_V = FALSE, reduction_name = "MNN", BPPARAM = SerialParam()) {
+reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced_dim = 50, MNN.k = 20, return_V = FALSE, reduction.slot = "MNN", BPPARAM = SerialParam()) {
 	if( !("bachelor" %in% rownames(installed.packages())) ) {
 		message("You need to install bachelor package first.")
 		return
@@ -30,12 +30,15 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
   colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("PC%d", i))
 
 
-  ACTIONet::colMaps(ace.norm)[[reduction_name]] <- Matrix::t(S_r)
+  ACTIONet::colMaps(ace.norm)[[reduction.slot]] <- Matrix::t(S_r)
+  ace.norm@colMapsAnnot[[reduction.slot]] = list(type = "reduction")								
+  
 
   if(return_V){
     V = rowData(mnn.out)[["rotation"]]
     colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
     rowMaps(ace.norm)[["rotation"]] = V
+    ace.norm@rowMapsAnnot[["rotation"]] = list(type = "internal")								
   }
   metadata(ace.norm) = m_data
   return(ace.norm)

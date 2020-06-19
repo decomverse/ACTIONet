@@ -12,7 +12,7 @@
 #' @examples
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
-reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1) {
+reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1, return_V = FALSE) {
     ace <- check_if_ace(ace)
     if (!(data.slot %in% names(assays(ace)))) {
 		if(normalization.method != "none") {
@@ -44,7 +44,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcoun
 		}
 	}
 
-  for(n in names(assays(ace.norm))) {
+	for(n in names(assays(ace.norm))) {
 		rownames(assays(ace.norm)[[n]]) = rownames(ace.norm)
 		colnames(assays(ace.norm)[[n]]) = colnames(ace.norm)
 	}
@@ -66,7 +66,15 @@ reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcoun
     colnames(S_r) = colnames(ace.norm)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
     colMaps(ace.norm)[[reduction.slot]] <- S_r
+	ace.norm@colMapsAnnot[[reduction.slot]] = list(type = "reduction")								
+    
 
+	if(return_V){
+		V = reduction.out[["V"]]
+		colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
+		rowMaps(ace.norm)[["rotation"]] = V
+		ace.norm@rowMapsAnnot[["rotation"]] = list(type = "internal")								
+	}
 
     metadata(ace.norm)$reduction.time = Sys.time()
     return(ace.norm)
