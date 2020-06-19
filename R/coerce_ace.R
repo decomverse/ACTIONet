@@ -15,6 +15,11 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
     return(ace)  
 })
 
+#' Coerces a ACTIONetExperiment (ACE) method as an SingleCellExperiment (SCE) object
+#'
+#' @param from ACTIONetExperiment object
+#'
+#' @exportMethod coerce
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {	
 	SE = as(from, "SummarizedExperiment")	
 	sce = as(SE, "SingleCellExperiment")
@@ -28,6 +33,11 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
     return(sce)
 })
 
+#' Coerces a SingleCellExperiment (SCE) method as an ACTIONetExperiment (ACE) object
+#'
+#' @param from SingleCellExperiment object
+#'
+#' @exportMethod coerce
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {	
 	SE = as(from, "SummarizedExperiment")
 	rownames(SE) = rownames(from)
@@ -56,12 +66,45 @@ reconstruct_ace <- function(from) {
     
     rowNets(ace)=rowNets(from)
     colNets(ace)=colNets(from)
-    if('rowMaps' %in% slotNames(SE)) {
-		rowMaps(ace)=rowMaps(from)
-		colMaps(ace)=colMaps(from)
+    
+    if('rowMaps' %in% slotNames(from)) {
+		allRowMaps(ace)=allRowMaps(from)
+		allColMaps(ace)=allColMaps(from)
 	} else {
-		rowMaps(ace)=from@rowFactors
-		colMaps(ace)=from@colFactors
+		allRowMaps(ace)=from@rowFactors
+		allColMaps(ace)=from@colFactors
+	}
+
+	if(! ('rowMapsAnnot' %in% slotNames(from) ) ) {
+		nn = names(rowMaps(ace))
+		Annot = lapply(1:length(nn), function(i) list(type="reduction"))
+		names(Annot) = nn
+		
+		for(i in grep("^C_|^H_", nn)) {
+			Annot[[i]]$type = "internal"
+		}
+
+		for(i in which(sapply(rowMaps(ace), ncol) <= 3)) {
+			Annot[[i]]$type = "embedding"
+		}
+
+		ace@rowMapsAnnot = Annot
+	}
+
+	if(! ('colMapsAnnot' %in% slotNames(from) ) ) {
+		nn = names(colMaps(ace))
+		Annot = lapply(1:length(nn), function(i) list(type="reduction"))
+		names(Annot) = nn
+		
+		for(i in grep("^C_|^H_", nn)) {
+			Annot[[i]]$type = "internal"
+		}
+
+		for(i in which(sapply(colMaps(ace), ncol) <= 3)) {
+			Annot[[i]]$type = "embedding"
+		}
+
+		ace@colMapsAnnot = Annot
 	}
 
     

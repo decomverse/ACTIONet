@@ -3,13 +3,9 @@
 #' @return List of adjacency matrices
 #'
 #' @rdname rowNets
-setMethod("rowNets", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
+setMethod("rowNets", "ACTIONetExperiment", function(x) {
     out <- x@rowNets
-    if (withDimnames & (length(out) > 0)) {
-        for (i in 1:length(out)) {
-            rownames(out[[i]]) <- colnames(out[[i]]) <- rownames(x)
-        }                        
-	}
+
     out
 })
 
@@ -19,13 +15,9 @@ setMethod("rowNets", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
 #' @return List of adjacency matrices
 #'
 #' @rdname colNets
-setMethod("colNets", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
+setMethod("colNets", "ACTIONetExperiment", function(x) {
     out <- x@colNets
-    if (withDimnames & (length(out) > 0)) {
-        for (i in 1:length(out)) {
-            rownames(out[[i]]) <- colnames(out[[i]]) <- colnames(x)
-        }                        
-	}
+
     out
 })
 
@@ -35,13 +27,13 @@ setMethod("colNets", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
 #' @return List of matrices
 #'
 #' @rdname rowMaps
-setMethod("rowMaps", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
+setMethod("rowMaps", "ACTIONetExperiment", function(x, all=TRUE) {
     out <- x@rowMaps
-    if (withDimnames & (length(out) > 0)) {
-        for (i in 1:length(out)) {
-            rownames(out[[i]]) <- rownames(x)
-        }                        
-	}
+    if((all == FALSE) & ("rowMapsAnnot" %in% slotNames(x))) {
+		mask = sapply(x@rowMapsAnnot, function(x) x$type != "internal")
+		out = out[mask]
+	}    
+	
     out
 })
 
@@ -50,15 +42,16 @@ setMethod("rowMaps", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
 #' @return List of matrices
 #'
 #' @rdname colMaps
-setMethod("colMaps", "ACTIONetExperiment", function(x, withDimnames=TRUE) {
+setMethod("colMaps", "ACTIONetExperiment", function(x, all=TRUE) {
     out <- x@colMaps
-    if (withDimnames & (length(out) > 0)) {
-        for (i in 1:length(out)) {
-            colnames(out[[i]]) <- colnames(x)
-        }                        
+    if((all == FALSE) & ("colMapsAnnot" %in% slotNames(x))) {
+		mask = sapply(x@colMapsAnnot, function(x) x$type != "internal")
+		out = out[mask]
 	}
+
     out
 })
+
 
 
 GET_FUN <- function(exprs_values, ...) {
