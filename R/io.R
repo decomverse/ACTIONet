@@ -92,7 +92,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
 		row.annotations = rowAnnot[IDX[[feature.name]], ]
 		rownames(feature.counts.mat) = rowAnnot[IDX[[feature.name]], 1]
 		colnames(feature.counts.mat) = colAnnot[, 1]
-		colFactors(ace)[[feature.name]] = feature.counts.mat
+		colMaps(ace)[[feature.name]] = feature.counts.mat
 	}
 
   if (prefilter) {
@@ -218,7 +218,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
 
 	# Load additional barcoded features
 	for(feature.name in names(mats)[-1]) {
-		colFactors(ace)[[feature.name]] = mats[[feature.name]]
+		colMaps(ace)[[feature.name]] = mats[[feature.name]]
 	}
 
   if (prefilter) {
@@ -420,8 +420,8 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
 import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.all = F) {
     ace = as(ace, "ACTIONetExperiment")
 
-    if("S_r" %in% names(colFactors(ace))) {
-		colFactors(ace)[["ACTION"]] = colFactors(ace)[["S_r"]]
+    if("S_r" %in% names(colMaps(ace))) {
+		colMaps(ace)[["ACTION"]] = colMaps(ace)[["S_r"]]
 	}
 
 	ACTION.out = ACTIONet.out$ACTION.out
@@ -431,20 +431,20 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
 	colNets(ace)$ACTIONet = G
     vis.out = ACTIONet.out$vis.out
 
-    colFactors(ace)$ACTIONet2D = vis.out$coordinates
-    colFactors(ace)$ACTIONet3D = vis.out$coordinates_3D
-    colFactors(ace)$denovo_color = vis.out$colors
+    colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+    colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
+    colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
 
 
 
 	if(full.import == T) {
-		colFactors(ace)[["H_stacked"]] = as(ACTIONet.out$reconstruct.out$H_stacked, 'sparseMatrix')
-		colFactors(ace)[["C_stacked"]] = as(t(ACTIONet.out$reconstruct.out$C_stacked), 'sparseMatrix')
+		colMaps(ace)[["H_stacked"]] = as(ACTIONet.out$reconstruct.out$H_stacked, 'sparseMatrix')
+		colMaps(ace)[["C_stacked"]] = as(t(ACTIONet.out$reconstruct.out$C_stacked), 'sparseMatrix')
 	}
 
 	unification.out = ACTIONet.out$unification.out
-	colFactors(ace)[["H_unified"]] = as(ACTIONet.out$unification.out$H.core, 'sparseMatrix')
-	colFactors(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), 'sparseMatrix')
+	colMaps(ace)[["H_unified"]] = as(ACTIONet.out$unification.out$H.core, 'sparseMatrix')
+	colMaps(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), 'sparseMatrix')
 
 	ace$assigned_archetype = ACTIONet.out$unification.out$assignments.core
 	ace$node_centrality = compute_archetype_core_centrality(colNets(ace)$ACTIONet, sample_assignments = ace$assigned_archetype)

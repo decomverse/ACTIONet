@@ -27,21 +27,21 @@ setValidity2("ACTIONetExperiment", function(object) {
 		}    
 	}
 	
-    value = rowFactors(object, withDimnames=FALSE)
+    value = rowMaps(object, withDimnames=FALSE)
 	for (i in seq_along(value)) {
 		if ( (NROW(value[[i]]) != NR) ) {
 			msg <- c(
-				msg, "'nrow(rowFactors[[..]])' should be equal to the number of rows"
+				msg, "'nrow(rowMaps[[..]])' should be equal to the number of rows"
 			)		
 		}    
 	}
 	
 	
-    value = colFactors(object, withDimnames=FALSE)
+    value = colMaps(object, withDimnames=FALSE)
 	for (i in seq_along(value)) {
 		if ( (NCOL(value[[i]]) != NC) ) {
 			msg <- c(
-				msg, "'nrow(colFactors[[..]])' should be equal to the number of columns"
+				msg, "'nrow(colMaps[[..]])' should be equal to the number of columns"
 			)		
 		}
 	}  

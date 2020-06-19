@@ -397,7 +397,7 @@ Leiden.clustering <- function(ace, resolution_parameter = 1, net.slot = "ACTIONe
 #' clusters = HDBSCAN.clustering(ace)
 #' plot.ACTIONet(ace, clusters)
 HDBSCAN.clustering <- function(ace, minPoints = 30, minClusterSize = 30, archetype.slot = "H_unified") {
-	X = Matrix::t(as.matrix(colFactors(ace)[[archetype.slot]]))
+	X = Matrix::t(as.matrix(colMaps(ace)[[archetype.slot]]))
     out_list = run_HDBSCAN(X, minPoints, minClusterSize)
 
 	return(out_list)

@@ -24,7 +24,7 @@ reduce.and.batch.correct.ace.Harmony(ace, batch.vec = NULL,
 \item{passphrase}{Passphrase for encrypting column names of the ace object for anonymization}
 }
 \value{
-Reduced ace object with added colFactors(ace)
+Reduced ace object with added colMaps(ace)
 }
 \description{
 (It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)

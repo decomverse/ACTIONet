@@ -24,7 +24,7 @@ visualize.markers(ace, marker.genes, transparency.attr = NULL,
 
 \item{x}{Score vector}
 
-\item{coordinate.slot}{Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:"ACTIONet2D")}
 }
 \value{
 Visualized ACTIONet with projected scores
