@@ -20,10 +20,10 @@ setMethod("rbind", "ACTIONetExperiment", function(..., deparse.level=1) {
 
 clear_ACTIONet_slots <- function(args) {
   used_slots = c()
-  AN_slots = c("colFactors", "rowFactors", "colNets", "rowNets")
+  AN_slots = c("colMaps", "rowMaps", "colNets", "rowNets")
   used_slots = sapply(args, function(x){
-    sl = c(length(ACTIONet::colFactors(x)) > 0,
-      length(ACTIONet::rowFactors(x)) > 0,
+    sl = c(length(ACTIONet::colMaps(x)) > 0,
+      length(ACTIONet::rowMaps(x)) > 0,
       length(ACTIONet::colNets(x)) > 0,
       length(ACTIONet::rowNets(x)) > 0
     )
@@ -41,6 +41,6 @@ clear_ACTIONet_slots <- function(args) {
   nc_rep = S4Vectors::SimpleList()
   args = lapply(args, function(a){
   BiocGenerics:::replaceSlots(a, rowNets=nc_rep, colNets=nc_rep,
-    rowFactors=nc_rep, colFactors=nc_rep, check=FALSE)})
+    rowMaps=nc_rep, colMaps=nc_rep, check=FALSE)})
   return(args)
 }

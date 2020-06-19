@@ -33,7 +33,7 @@ plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
 
 \item{border.contrast.factor}{How much the node and its border should contrast}
 
-\item{coordinate.slot}{Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:"ACTIONet2D")}
 
 \item{add.states}{Whether or not to include interpolated cell state positions in the plot}
 }

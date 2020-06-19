@@ -24,7 +24,7 @@ plot.ACTIONet.gradient(ace, x, transparency.attr = NULL,
 
 \item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
 
-\item{coordinate.slot}{Entry in colFactors(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:"ACTIONet2D")}
 }
 \value{
 Visualized ACTIONet with projected scores

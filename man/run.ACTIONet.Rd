@@ -28,7 +28,7 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{data.slot}{Corresponding slot in the `ace` object the normalized counts (default="logcounts")}
 
-\item{reduction.slot}{Slot in the colFactors(ace) that holds reduced kernel (default="S_r")}
+\item{reduction.slot}{Slot in the colMaps(ace) that holds reduced kernel (default="S_r")}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 

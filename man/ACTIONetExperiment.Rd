@@ -9,14 +9,13 @@
 the results of ACTIONet method}
 \usage{
 ACTIONetExperiment(rowNets = S4Vectors::SimpleList(),
-  colNets = S4Vectors::SimpleList(),
-  rowFactors = S4Vectors::SimpleList(),
-  colFactors = S4Vectors::SimpleList(), ...)
+  colNets = S4Vectors::SimpleList(), rowMaps = S4Vectors::SimpleList(),
+  colMaps = S4Vectors::SimpleList(), ...)
 }
 \arguments{
 \item{rowNets, colNets}{gene-gene and cell-cell networks, respectively}
 
-\item{rowFactors, colFactors}{Factorization results (W and H matrices)}
+\item{rowMaps, colMaps}{Factorization results (W and H matrices)}
 
 \item{...}{SummarizedExperiment and SummarizedExperiment components}
 }
@@ -37,6 +36,6 @@ Creates an ACTIONetExperiment (ACE) object
 \describe{
 \item{\code{rowNets,colNets}}{gene-gene and cell-cell networks, respectively}
 
-\item{\code{rowFactors,colFactors}}{Factorization results (W and H matrices)}
+\item{\code{rowMaps,colMaps}}{Factorization results (W and H matrices)}
 }}
 
