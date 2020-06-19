@@ -67,15 +67,15 @@ reconstruct_ace <- function(from) {
     rowNets(ace)=rowNets(from)
     colNets(ace)=colNets(from)
     
-    if('rowMaps' %in% slotNames(from)) {
-		allRowMaps(ace)=allRowMaps(from)
-		allColMaps(ace)=allColMaps(from)
+    if(.hasSlot(from, "rowFactors")) {
+		rowMaps(ace)=from@rowFactors
+		colMaps(ace)=from@colFactors		
 	} else {
-		allRowMaps(ace)=from@rowFactors
-		allColMaps(ace)=from@colFactors
+		rowMaps(ace)=rowMaps(from)
+		colMaps(ace)=colMaps(from)
 	}
 
-	if(! ('rowMapsAnnot' %in% slotNames(from) ) ) {
+	if( length(ace@rowMapsAnnot) == 0 ) {
 		nn = names(rowMaps(ace))
 		Annot = lapply(1:length(nn), function(i) list(type="reduction"))
 		names(Annot) = nn
@@ -88,10 +88,10 @@ reconstruct_ace <- function(from) {
 			Annot[[i]]$type = "embedding"
 		}
 
-		ace@rowMapsAnnot = Annot
+		ace@rowMapsAnnot = SimpleList(Annot)
 	}
 
-	if(! ('colMapsAnnot' %in% slotNames(from) ) ) {
+	if( length(ace@colMapsAnnot) == 0 ) {
 		nn = names(colMaps(ace))
 		Annot = lapply(1:length(nn), function(i) list(type="reduction"))
 		names(Annot) = nn
@@ -104,7 +104,7 @@ reconstruct_ace <- function(from) {
 			Annot[[i]]$type = "embedding"
 		}
 
-		ace@colMapsAnnot = Annot
+		ace@colMapsAnnot = SimpleList(Annot)
 	}
 
     
