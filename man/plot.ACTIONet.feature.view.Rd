@@ -4,9 +4,15 @@
 \alias{plot.ACTIONet.feature.view}
 \title{Plots projection of features onto the ACTIONet plot}
 \usage{
-plot.ACTIONet.feature.view(ace, feature.enrichment.table,
-  top.features = 5, CPal = NULL, title = "Feature view",
-  label.text.size = 1, renormalize = F)
+\method{plot}{ACTIONet.feature.view}(
+  ace,
+  feature.enrichment.table,
+  top.features = 5,
+  CPal = NULL,
+  title = "Feature view",
+  label.text.size = 1,
+  renormalize = F
+)
 }
 \arguments{
 \item{ace}{ACTIONet output}

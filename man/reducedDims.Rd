@@ -12,10 +12,6 @@ reducedDims(x, ...)
 \item{x}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
-
-\item{x}{ACTIONetExperiment object}
-
-\item{...}{other parameters}
 }
 \description{
 Get colMaps() as reducedDims()
