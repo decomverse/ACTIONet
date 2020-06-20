@@ -30,7 +30,7 @@ run.SCINET.archetype <- function(ace, G=NULL, core = T, min.edge.weight = 2, spe
 		Adj = as(get.adjacency(G), 'sparseMatrix')
 	}
 	
-	gene.scores = rowFactors(ace)[["H_unified_upper_significance"]]
+	gene.scores = rowFactors(ace)[["unified_feature_specificity"]]
 		
 	
 	common.genes = intersect(rownames(gene.scores), rownames(PCNet))

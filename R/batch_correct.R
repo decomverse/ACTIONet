@@ -31,7 +31,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
 
 
   ACTIONet::colMaps(ace.norm)[[reduction.slot]] <- Matrix::t(S_r)
-  ace.norm@colMapsAnnot[[reduction.slot]] = list(type = "reduction")								
+  colMapTypes[[reduction.slot]] = "reduction"
   
 
   if(return_V){
@@ -85,6 +85,6 @@ batch.correct.ace.Harmony <- function(ace, batch.vec, reduction.slot = "ACTION")
     require(harmony)
     ace <- check_if_ace(ace)
     batch.vec = get_ace_split_IDX(ace, batch.vec, return_split_vec = TRUE)
-    ACTIONet::reducedDims(ace)[[reduction.slot]] = harmony::HarmonyMatrix(ACTIONet::reducedDims(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
+    ACTIONet::colMaps(ace)[[reduction.slot]] = harmony::HarmonyMatrix(ACTIONet::colMaps(ace)[[reduction.slot]], meta_data = batch.vec, do_pca = FALSE)
     return(ace)
 }
