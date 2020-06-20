@@ -73,7 +73,7 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMapTypes
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
 	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@colMaps))
-  print(common_names)
+	
 	for(n in common_names) {
 		metadata(x@colMaps[[n]])$type = value[[n]]
 	}
