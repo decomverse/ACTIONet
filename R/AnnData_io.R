@@ -115,7 +115,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 }
 
 write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.level) {
-	X = as(X, 'dgCMatrix')
+	X = Matrix::t(as(X, 'dgCMatrix'))
 	Xgroup = h5file$create_group(gname)
 
 
@@ -181,11 +181,11 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 	Dims = attr$shape
 	if(attr[["encoding-type"]] == "csc_matrix") {
 		csc_sort_indices_inplace(indptr, indices, data)		
-		Xt = sparseMatrix(i = indices+1, p = indptr+1, x = data, dims = Dims)
+		Xt = sparseMatrix(i = indices+1, p = indptr, x = data, dims = Dims)
 		X = Matrix::t(Xt)
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
 		csr_sort_indices_inplace(indptr, indices, data)
-		Xt = new("dgRMatrix", j = indices+1, p = indptr+1, x = data, Dim = Dims)
+		Xt = new("dgRMatrix", j = indices+1, p = indptr, x = data, Dim = Dims)
 		X = Matrix::t(Xt)
 	}
 	
@@ -222,6 +222,10 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	}
 
 
+	uns = h5file$create_group("uns")
+	obsm_annot = uns$create_group("obsm_annot")
+	varm_annot = uns$create_group("varm_annot")
+	
 
 	## Write obs (colData() in ace)
 	obs.DF = as.data.frame(colData(ace))
@@ -241,6 +245,14 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 		subCF = lapply(subCF, function(x) as.matrix(x))
 		for(i in 1:length(subCF)) {
 			obsm$create_dataset(names(subCF)[[i]], subCF[[i]], gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+			
+			nnn = names(CF[embeddings.idx])[[i]]
+			factor_info = obsm_annot$create_group(nnn)
+			factor_info[["type"]] = ace@colMapsTypes[[nn]]
+			factor.meta.DF = ace@colMapsMeta[[nn]]
+			if(ncol(factor.meta.DF) > 0) {
+				write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
+			}
 		}
 	}
 	if(!minimal.export) {
@@ -251,6 +263,16 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 			subCF = lapply(subCF, function(x) as.matrix(x))
 			for(i in 1:length(subCF)) {
 				obsm$create_dataset(names(subCF)[[i]], subCF[[i]], gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+				
+
+				nnn = names(CF[nonembeddings.idx])[[i]]
+				factor_info = obsm_annot$create_group(nnn)
+				factor_info[["type"]] = ace@colMapsTypes[[nn]]
+				factor.meta.DF = ace@colMapsMeta[[nn]]
+				if(ncol(factor.meta.DF) > 0) {
+					write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
+				}								
+				
 			}
 		}
 		
@@ -261,8 +283,19 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 			RF = lapply(RF, function(x) as.matrix(x))
 			for(i in 1:length(RF)) {
 				varm$create_dataset(names(RF)[[i]], Matrix::t(RF[[i]]), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+				
+
+				nnn = names(RF)[[i]]
+				factor_info = obsm_annot$create_group(nnn)
+				factor_info[["type"]] = ace@rowMapsTypes[[nn]]
+				factor.meta.DF = ace@rowMapsMeta[[nn]]
+				if(ncol(factor.meta.DF) > 0) {
+					write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
+				}				
+								
 			}
 		}
+
 
 
 		# Export "obsp"-associated matrices, i.e. colNets(): obs in AnnData ~ cols in SCE ~ cells => cell-cell networks (such as ACTIONet)
@@ -350,30 +383,25 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 
 	ace = ACTIONetExperiment(assays = assays, rowData = var.DF, colData = obs.DF)
 
+	
 	if("obsm" %in% objs) {
 		obsm = h5file[["obsm"]]
 		for(mn in names(obsm)) {
 			Xr = obsm[[mn]]$read()
 			if(sum(grepl(pattern = "^X_", mn))) { # # Keep the smallest factors as "embeddings"
 				nn = stringr::str_sub(mn, start = 3)
-				colMaps(ace)[[nn]] = Xr
-				ace@colMapsAnnot[[nn]] = list(type = "embedding")
-			} else if(nrow(Xr) <= 100 & (sum(grepl(pattern = "^C_", mn)|grepl(pattern = "^H_", mn))==0)) { # Keep small factors as "reductions"
-				colMaps(ace)[[mn]] = Xr
-				ace@colMapsAnnot[[mn]] = list(type = "reduction")								
 			} else {
-				colMaps(ace)[[mn]] = Xr
-				ace@colMapsAnnot[[mn]] = list(type = "internal")								
+				nn = mn
 			}
+			colMaps(ace)[[nn]] = Xr
 		}
 	}
 
 	if("varm" %in% objs) {
 		varm = h5file[["varm"]]
-		for(mn in names(varm)) {
+		for(nn in names(varm)) {
 			Xr = Matrix::t(varm[[mn]]$read())
-			rowMaps(ace)[[mn]] = Xr
-			ace@rowMapsAnnot[[mn]] = list(type = "internal")
+			rowMaps(ace)[[nn]] = Xr
 		}
 	}
 
@@ -392,6 +420,32 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			rowNets(ace)[[pn]] = Net
 		}
 	}
+
+
+	if("uns" %in% objs) {
+		uns = h5file[["uns"]]
+		if("obsm_annot" %in% names(uns)) { # Import obs annotations
+			obsm_annot = uns[["obsm_annot"]]
+			for(nn in names(obsm_annot)) {
+				factor_annot = obsm_annot[[nn]]
+				colMapTypes[[nn]] = factor_annot$type
+				if("annotation" %in% names(factor_annot)) {
+					rowMapMeta[[nn]] = factor_annot$annotation
+				}
+			}
+		}
+		if("varm_annot" %in% names(uns)) { # Import obs annotations
+			var_annot = uns[["varm_annot"]]
+			for(nn in names(var_annot)) {
+				factor_annot = var_annot[[nn]]
+				colMapTypes[[nn]] = factor_annot$type
+				if("annotation" %in% names(factor_annot)) {
+					rowMapMeta[[nn]] = factor_annot$annotation
+				}
+			}			
+		}
+	}
+	
 
 	h5file$close_all()
 
