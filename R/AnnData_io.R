@@ -363,7 +363,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 				ace@colMapsAnnot[[mn]] = list(type = "reduction")								
 			} else {
 				colMaps(ace)[[mn]] = Xr
-				ace@colMapsAnnot[[mn]] = list(type = "generic")								
+				ace@colMapsAnnot[[mn]] = list(type = "internal")								
 			}
 		}
 	}
@@ -373,7 +373,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		for(mn in names(varm)) {
 			Xr = Matrix::t(varm[[mn]]$read())
 			rowMaps(ace)[[mn]] = Xr
-			ace@rowMapsAnnot[[mn]] = list(type = "generic")
+			ace@rowMapsAnnot[[mn]] = list(type = "internal")
 		}
 	}
 
