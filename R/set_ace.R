@@ -63,7 +63,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   input_names = names(value)
   value = lapply(value, .coerce_mapping_to_SE)
   dropped = sapply(value, function(v){
-      is.null(v) | (dim(v)[d] != dim(x)[d]
+      is.null(v) | (dim(v)[d] != dim(x)[d])
   }) | names(value) == ""
   value = value[!dropped]
   .dropped_vals_warning( setdiff(input_names, names(values)) )
