@@ -77,7 +77,7 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
-annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, significance.slot = "H_unified_upper_significance") {
+annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, significance.slot = "unified_feature_specificity") {
     require(ACTIONet)
     require(igraph)
     require(Matrix)
