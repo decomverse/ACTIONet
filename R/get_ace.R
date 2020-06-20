@@ -27,13 +27,13 @@ setMethod("colNets", "ACTIONetExperiment", function(x) {
 #' @return List of matrices
 #'
 #' @rdname rowMaps
-setMethod("rowMaps", "ACTIONetExperiment", function(x, all=TRUE) {
-    out <- x@rowMaps
-    if((all == FALSE) & ("rowMapsAnnot" %in% slotNames(x))) {
-		mask = sapply(x@rowMapsAnnot, function(x) x$type != "internal")
+setMethod("rowMaps", "ACTIONetExperiment", function(x, all = T) {
+	out = lapply(x@rowMaps, function(M) assays(M)$X)
+	if(all == F & length(out) > 0) {
+		mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
 		out = out[mask]
-	}    
-	
+	}
+
     out
 })
 
@@ -42,15 +42,79 @@ setMethod("rowMaps", "ACTIONetExperiment", function(x, all=TRUE) {
 #' @return List of matrices
 #'
 #' @rdname colMaps
-setMethod("colMaps", "ACTIONetExperiment", function(x, all=TRUE) {
-    out <- x@colMaps
-    if((all == FALSE) & ("colMapsAnnot" %in% slotNames(x))) {
-		mask = sapply(x@colMapsAnnot, function(x) x$type != "internal")
+setMethod("colMaps", "ACTIONetExperiment", function(x, all = T) {
+	out = lapply(x@colMaps, function(M) assays(M)$X)
+	if(all == F & length(out) > 0) {
+		mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
 		out = out[mask]
 	}
 
     out
 })
+
+#' Get row-associated factor types
+#'
+#' @return List of types
+#'
+#' @rdname rowMapTypes
+setMethod("rowMapTypes", "ACTIONetExperiment", function(x, all = T) {
+	out = lapply(x@rowMaps, function(M) metadata(M)$type)
+	if(all == F & length(out) > 0) {
+		mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
+		out = out[mask]
+	}
+
+    out
+})
+
+#' Get column-associated factor types
+#'
+#' @return List of types
+#'
+#' @rdname colMapTypes
+setMethod("colMapTypes", "ACTIONetExperiment", function(x, all = T) {
+	out = lapply(x@colMaps, function(M) metadata(M)$type)
+	if(all == F & length(out) > 0) {
+		mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
+		out = out[mask]
+	}
+
+    out
+})
+
+
+
+#' Get row-associated factor metadata
+#'
+#' @return List of types
+#'
+#' @rdname rowMapTypes
+setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
+	out = lapply(x@rowMaps, function(M) colData(M))
+	if(all == F & length(out) > 0) {
+		mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
+		out = out[mask]
+	}
+
+    out
+})
+
+#' Get column-associated factor metadata
+#'
+#' @return List of types
+#'
+#' @rdname colMapTypes
+setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
+	out = lapply(x@colMaps, function(M) rowData(M))
+	if(all == F & length(out) > 0) {
+		mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
+		out = out[mask]
+	}
+
+    out
+})
+
+
 
 
 
