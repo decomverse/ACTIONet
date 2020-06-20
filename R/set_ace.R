@@ -81,7 +81,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   } else{
       X = as.matrix(value)
       if(is.numeric(X))
-        SE = SummarizedExperiment(assays=list(X=value))
+        SE = SummarizedExperiment(assays=list(X=X))
       else
         return(SummarizedExperiment())
   }
