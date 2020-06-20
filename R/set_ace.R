@@ -4,11 +4,11 @@
 #'
 #' @rdname rowNets
 setReplaceMethod("rowNets", "ACTIONetExperiment", function(x, value) {
-
     x@rowNets <- value
     validObject(x)
     x
 })
+
 
 #' Set column-associated networks
 #'
@@ -28,10 +28,15 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
-  x <- .check_new_map(x)
-	x@rowMaps <- value
-  validObject(x)
-  x
+	SEs = lapply(value, function(X) {
+		SE = SummarizedExperiment(assays=list(X=X))
+		metadata(SE)$type = "internal"
+		return(SE)
+	}
+	x@rowMaps <- SEs
+
+    validObject(x)
+    x
 })
 
 
@@ -41,19 +46,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
-  x <- .check_new_map(x)
 	x@colMaps <- value
-  validObject(x)
+    validObject(x)
 	x
 })
-
-.check_new_map <- function(x){
-  err = sprintf("Mapping must be a named list.\n")
-  if(!(class(x) %in% c("list", "SimpleList")))
-    stop(err)
-  if(is.null(names(x)))
-    stop(err)
-
-  x = as(x, "SimpleList")
-  return(x)
-}
