@@ -66,14 +66,13 @@ reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcoun
     colnames(S_r) = colnames(ace.norm)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
     colMaps(ace.norm)[[reduction.slot]] <- S_r
-	ace.norm@colMapsAnnot[[reduction.slot]] = list(type = "reduction")								
+	colMapTypes(ace)[[reduction.slot]] = "reduction"
     
 
 	if(return_V){
 		V = reduction.out[["V"]]
 		colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
 		rowMaps(ace.norm)[["rotation"]] = V
-		ace.norm@rowMapsAnnot[["rotation"]] = list(type = "internal")								
 	}
 
     metadata(ace.norm)$reduction.time = Sys.time()
