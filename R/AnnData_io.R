@@ -238,7 +238,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
 	obsm = h5file$create_group("obsm")
 	CF = colMaps(ace)
-	embeddings.idx = which(sapply(colMapsType(ace) == "embedding"))
+	embeddings.idx = which(sapply(colMapTypes(ace) == "embedding"))
 	if(length(embeddings.idx) > 0) {
 		subCF = CF[embeddings.idx]
 		names(subCF) = paste("X", names(subCF), sep = "_")
