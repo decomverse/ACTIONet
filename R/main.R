@@ -31,6 +31,37 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     }
 
     ace = as(ace, "ACTIONetExperiment")
+    
+	# Fit in the [remaining] row/col-MapAnnot slots
+	nn = names(colMaps(ace))
+	if(length(nn) > 0) {
+		Annot = lapply(1:length(nn), function(i) list(type="generic"))
+		names(Annot) = nn	
+		embedding.names = nn[sapply(nn, function(n) nrow(colMaps(ace)[[n]]) <= 3)]	
+		for(n in embedding.names) {
+			Annot[[n]]$type = "embedding"
+		}				
+		existing.idx = match(names(ace@colMapsAnnot), nn)
+		if(length(existing.idx) > 0)
+			Annot[existing.idx] = as.list(ace@colMapsAnnot)	
+		ace@colMapsAnnot = SimpleList(Annot)
+	}	
+	
+	nn = names(rowMaps(ace))
+	if(length(nn) > 0) {
+		Annot = lapply(1:length(nn), function(i) list(type="generic"))
+		names(Annot) = nn	
+		embedding.names = nn[sapply(nn, function(n) nrow(rowMaps(ace)[[n]]) <= 3)]	
+		for(n in embedding.names) {
+			Annot[[n]]$type = "embedding"
+		}				
+		existing.idx = match(names(ace@rowMapsAnnot), nn)
+		if(length(existing.idx) > 0)
+			Annot[existing.idx] = as.list(ace@rowMapsAnnot)	
+			
+		ace@rowMapsAnnot = SimpleList(Annot)
+	}
+	   
 
 
 	S = assays(ace)[[data.slot]]
@@ -58,6 +89,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     # Layout ACTIONet
 	initial.coordinates = t(scale(t(S_r)))
 	colMaps(ace)[["ACTIONred"]] = initial.coordinates[1:3, ]
+	ace@colMapsAnnot[["ACTIONred"]] = list(type = "internal")								
 	
 	if(layout.in.parallel == FALSE) {
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
@@ -103,8 +135,13 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		return(specificity.scores)
 	})
 	rowMaps(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
+	ace@rowMapsAnnot[["H_unified_profile"]] = list(type = "internal")
+	
 	rowMaps(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
+	ace@rowMapsAnnot[["H_unified_upper_significance"]] = list(type = "internal")
+
 	rowMaps(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
+	ace@rowMapsAnnot[["H_unified_lower_significance"]] = list(type = "internal")
 
 
 	if(full.trace == T) {

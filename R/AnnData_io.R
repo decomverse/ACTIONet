@@ -115,7 +115,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 }
 
 write.HD5SpMat <- function(h5file, gname, X, compression.level = compression.level) {
-	X = Matrix::t(as(X, 'dgCMatrix'))
+	X = as(X, 'dgCMatrix')
 	Xgroup = h5file$create_group(gname)
 
 
@@ -178,24 +178,16 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 	indices = h5group[["indices"]]$read()
 	indptr = h5group[["indptr"]]$read()
 
-	#perm = order(indices);
 	Dims = attr$shape
 	if(attr[["encoding-type"]] == "csc_matrix") {
-		#Xt = new("dgCMatrix", i = indices, p = indptr, x = data, Dim = Dims)
-		Xt = sparseMatrix(i = indices, p = indptr, x = data, dims = Dims)
+		csc_sort_indices_inplace(indptr, indices, data)		
+		Xt = sparseMatrix(i = indices+1, p = indptr+1, x = data, dims = Dims)
 		X = Matrix::t(Xt)
-		#X = Matrix::t(sparseMatrix(i = indices, p = indptr, x = data, dims = c(Dims[1], Dims[2])))
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
-		# Old scipy exports indices in unsorted format sometimes 		
-		
 		csr_sort_indices_inplace(indptr, indices, data)
-		#Xt = new("dgRMatrix", j = as.integer(sorted_indices[, 1]), p = indptr, x = sorted_indices[, 2], Dim = Dims)
-		Xt = new("dgRMatrix", j = indices, p = indptr, x = data, Dim = Dims)
+		Xt = new("dgRMatrix", j = indices+1, p = indptr+1, x = data, Dim = Dims)
 		X = Matrix::t(Xt)
-		#X = Matrix::t(sparseMatrix(j = indices, p = indptr, x = data, dims = c(Dims[2], Dims[1])))
 	}
-
-	#X = Matrix::t(new("dgRMatrix", j = indices, p = indptr, x = data, Dim = c(attr$shape[1], attr$shape[0])))
 	
 	return(X)
 }
@@ -211,7 +203,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	
 	h5file = H5File$new(fname, mode = "w")
 
-	## Write X (logcounts() in ACE, in either sparse or dense format)
+	## Write X (logcounts() in ace, in either sparse or dense format)
 	X = assays(ace)[[main.assay]]
 	if(is.sparseMatrix(X)) {
 		write.HD5SpMat(h5file, gname = "X", X, compression.level = compression.level)
@@ -231,18 +223,18 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 
 
-	## Write obs (colData() in ACE)
+	## Write obs (colData() in ace)
 	obs.DF = as.data.frame(colData(ace))
 	write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
 
-	## Write var (matching rowData() in ACE)
+	## Write var (matching rowData() in ace)
 	var.DF = as.data.frame(rowData(ace))
 	write.HD5DF(h5file, "var", var.DF, compression.level = compression.level)
 
 	## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
 	obsm = h5file$create_group("obsm")
 	CF = colMaps(ace)
-	embeddings.idx = which(sapply(ACE@colMapsAnnot, function(x) x$type == "embedding"))
+	embeddings.idx = which(sapply(ace@colMapsAnnot, function(x) x$type == "embedding"))
 	if(length(embeddings.idx) > 0) {
 		subCF = CF[embeddings.idx]
 		names(subCF) = paste("X", names(subCF), sep = "_")
@@ -356,7 +348,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		return(X)
 	})
 
-	ACE = ACTIONetExperiment(assays = assays, rowData = var.DF, colData = obs.DF)
+	ace = ACTIONetExperiment(assays = assays, rowData = var.DF, colData = obs.DF)
 
 	if("obsm" %in% objs) {
 		obsm = h5file[["obsm"]]
@@ -364,14 +356,14 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			Xr = obsm[[mn]]$read()
 			if(sum(grepl(pattern = "^X_", mn))) { # # Keep the smallest factors as "embeddings"
 				nn = stringr::str_sub(mn, start = 3)
-				colMaps(ACE)[[nn]] = Xr
-				ACE@colMapsAnnot[[nn]] = list(type = "embedding")
+				colMaps(ace)[[nn]] = Xr
+				ace@colMapsAnnot[[nn]] = list(type = "embedding")
 			} else if(nrow(Xr) <= 100 & (sum(grepl(pattern = "^C_", mn)|grepl(pattern = "^H_", mn))==0)) { # Keep small factors as "reductions"
-				colMaps(ACE)[[mn]] = Xr
-				ACE@colMapsAnnot[[mn]] = list(type = "reduction")								
+				colMaps(ace)[[mn]] = Xr
+				ace@colMapsAnnot[[mn]] = list(type = "reduction")								
 			} else {
-				colMaps(ACE)[[mn]] = Xr
-				ACE@colMapsAnnot[[mn]] = list(type = "generic")								
+				colMaps(ace)[[mn]] = Xr
+				ace@colMapsAnnot[[mn]] = list(type = "generic")								
 			}
 		}
 	}
@@ -380,7 +372,8 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		varm = h5file[["varm"]]
 		for(mn in names(varm)) {
 			Xr = Matrix::t(varm[[mn]]$read())
-			rowMaps(ACE)[[mn]] = Xr
+			rowMaps(ace)[[mn]] = Xr
+			ace@rowMapsAnnot[[mn]] = list(type = "generic")
 		}
 	}
 
@@ -388,7 +381,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		obsp = h5file[["obsp"]]
 		for(pn in names(obsp)) {
 			Net = read.HD5SpMat(obsp, pn)
-			colNets(ACE)[[pn]] = Net
+			colNets(ace)[[pn]] = Net
 		}
 	}
 
@@ -396,11 +389,11 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 		varp = h5file[["varp"]]
 		for(pn in names(varp)) {
 			Net = read.HD5SpMat(varp, pn)
-			rowNets(ACE)[[pn]] = Net
+			rowNets(ace)[[pn]] = Net
 		}
 	}
 
 	h5file$close_all()
 
-	return(ACE)
+	return(ace)
 }

@@ -6,7 +6,8 @@
 \usage{
 reduce.ace(ace, reduced_dim = 50, max.iter = 5,
   data.slot = "logcounts", normalization.method = "default",
-  reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1)
+  reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1,
+  return_V = FALSE)
 }
 \arguments{
 \item{ace}{Input ace object}
