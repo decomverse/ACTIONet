@@ -238,7 +238,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
 	obsm = h5file$create_group("obsm")
 	CF = colMaps(ace)
-	embeddings.idx = which(sapply(ace@colMapsAnnot, function(x) x$type == "embedding"))
+	embeddings.idx = which(sapply(colMapsType(ace) == "embedding"))
 	if(length(embeddings.idx) > 0) {
 		subCF = CF[embeddings.idx]
 		names(subCF) = paste("X", names(subCF), sep = "_")
@@ -248,8 +248,8 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 			
 			nnn = names(CF[embeddings.idx])[[i]]
 			factor_info = obsm_annot$create_group(nnn)
-			factor_info[["type"]] = ace@colMapsTypes[[nn]]
-			factor.meta.DF = ace@colMapsMeta[[nn]]
+			factor_info[["type"]] = colMapTypes(ace)[[nn]]
+			factor.meta.DF = colMapMeta(ace)[[nn]]
 			if(ncol(factor.meta.DF) > 0) {
 				write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
 			}
@@ -267,8 +267,8 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 				nnn = names(CF[nonembeddings.idx])[[i]]
 				factor_info = obsm_annot$create_group(nnn)
-				factor_info[["type"]] = ace@colMapsTypes[[nn]]
-				factor.meta.DF = ace@colMapsMeta[[nn]]
+				factor_info[["type"]] = colMapTypes(ace)[[nn]]
+				factor.meta.DF = colMapMeta(ace)[[nn]]
 				if(ncol(factor.meta.DF) > 0) {
 					write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
 				}								
@@ -287,8 +287,8 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 				nnn = names(RF)[[i]]
 				factor_info = obsm_annot$create_group(nnn)
-				factor_info[["type"]] = ace@rowMapsTypes[[nn]]
-				factor.meta.DF = ace@rowMapsMeta[[nn]]
+				factor_info[["type"]] = rowMapTypes(ace)[[nn]]
+				factor.meta.DF = rowMapMeta(ace)[[nn]]
 				if(ncol(factor.meta.DF) > 0) {
 					write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
 				}				
@@ -428,9 +428,9 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			obsm_annot = uns[["obsm_annot"]]
 			for(nn in names(obsm_annot)) {
 				factor_annot = obsm_annot[[nn]]
-				colMapTypes[[nn]] = factor_annot$type
+				colMapTypes(ace)[[nn]] = factor_annot$type
 				if("annotation" %in% names(factor_annot)) {
-					rowMapMeta[[nn]] = factor_annot$annotation
+					rowMapMeta(ace)[[nn]] = factor_annot$annotation
 				}
 			}
 		}
@@ -438,9 +438,9 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			var_annot = uns[["varm_annot"]]
 			for(nn in names(var_annot)) {
 				factor_annot = var_annot[[nn]]
-				colMapTypes[[nn]] = factor_annot$type
+				rowMapTypes(ace)[[nn]] = factor_annot$type
 				if("annotation" %in% names(factor_annot)) {
-					rowMapMeta[[nn]] = factor_annot$annotation
+					rowMapMeta(ace)[[nn]] = factor_annot$annotation
 				}
 			}			
 		}

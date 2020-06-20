@@ -48,6 +48,117 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 	x
 })
 
+
+#' Set column-associated factor types
+#'
+#' @return List of matrices
+#'
+#' @rdname colMapTypes
+setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
+	common_names = intersect(names(values)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@colMaps))
+
+	for(n in common_names) {
+		metadata(x@colMaps[[n]])$type = value[[n]]
+	}
+	validObject(x)
+	x
+})
+
+
+#' Set row-associated factor types
+#'
+#' @return List of matrices
+#'
+#' @rdname rowMapTypes
+setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
+	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@rowMaps))
+
+	for(n in common_names) {
+		metadata(x@rowMaps[[n]])$type = value[[n]]
+	}
+	validObject(x)
+	x
+})
+
+
+
+
+
+#' Set column-associated factor annotations
+#'
+#' @return List of matrices
+#'
+#' @rdname colMapTypes
+setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
+	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@colMaps))
+
+	for(n in common_names) {
+		metadata(x@colMaps[[n]]) = value[[n]]
+	}
+	validObject(x)
+	x
+})
+
+
+#' Set column-associated factor annotations
+#'
+#' @return List of matrices
+#'
+#' @rdname colMapMeta
+setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
+	value = value[names(value) != ""]
+	
+	for(n in names(value)) {
+		DF = value[[n]]
+		if(is.data.frame(DF))
+			DF = DataFrame(DF)
+		
+		if((length(which(is(DF) == "DataFrame")) != 0)) {
+			if(nrow(DF) == nrow(x)) {
+				mask = (n == names(x@colMaps))
+				if(sum(mask) == 1) {
+					rowData(x@colMaps[[which(mask)]]) = DF
+				}
+			}
+		}
+	}
+	
+	validObject(x)
+	x
+})
+
+
+
+
+#' Set row-associated factor annotations
+#'
+#' @return List of matrices
+#'
+#' @rdname rowMapTypes
+setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
+	value = value[names(value) != ""]
+	
+	
+	for(n in names(value)) {
+		DF = value[[n]]
+		if(is.data.frame(DF))
+			DF = DataFrame(DF)
+		
+		if((length(which(is(DF) == "DataFrame")) != 0)) {
+			if(nrow(DF) == nrow(x)) {
+				mask = (n == names(x@rowMaps))
+				if(sum(mask) == 1) {
+					colData(x@rowMaps[[which(mask)]]) = DF
+				}
+			}
+		}
+	}
+	
+	validObject(x)
+	x
+})
+
+
 .check_if_mapping_list <- function(value){
   err = sprintf("New mappings must be a named list.\n")
   if(!(class(value) %in% c("list", "SimpleList")))
@@ -77,7 +188,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   if(class(value) == "SummarizedExperiment"){
     SE = value
   } else if(is.matrix(value) | is.sparseMatrix(value)){
-    SE = SummarizedExperiment(assays=list(X=X))
+    SE = SummarizedExperiment(assays=list(X=value))
   } else{
       X = as.matrix(value)
       if(is.numeric(X))
@@ -108,10 +219,10 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   if(length(value) == 0)
     return
   else{
-    sapply(value, function(v){
+    sapply(value, function(v) {
       par_func = as.character(sys.call(-2)[1])
       w = sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v)
       warning(w, call. = FALSE)
-    }
+    })
   }
 }
