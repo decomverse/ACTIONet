@@ -4,8 +4,14 @@
 \alias{compute_sparse_network_diffusion}
 \title{Computes sparse network diffusion over a given network, starting with an arbitrarty set of initial scores}
 \usage{
-compute_sparse_network_diffusion(G, X0, alpha = 0.85, rho = 1e-04,
-  epsilon = 0.001, max_iter = 20L)
+compute_sparse_network_diffusion(
+  G,
+  X0,
+  alpha = 0.85,
+  rho = 1e-04,
+  epsilon = 0.001,
+  max_iter = 20L
+)
 }
 \arguments{
 \item{G}{Input graph}
