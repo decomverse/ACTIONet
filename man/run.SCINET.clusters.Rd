@@ -11,7 +11,7 @@ run.SCINET.clusters(ace, specificity.slot.name, G = NULL,
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{specificity.slot.name}{An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
 
 \item{G}{Baseline network as an adjacency matrix or igraph object. 
 If it is NULL, PCNet is loaded as the baseline from SCINET package.}

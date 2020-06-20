@@ -6,7 +6,7 @@
 #' @return Matrix of TF x cell type/state indicating inferred TF activity scores
 #' 
 #' @examples
-#' scores = rowFactors(ace)$unified_feature_specificity
+#' scores = rowMaps(ace)$unified_feature_specificity
 #' TF.scores = assess.TF.activities.from.scores(scores)
 assess.TF.activities.from.scores <- function(scores) {
 	if(!exists("ChEA3plusDB")) {
@@ -40,7 +40,7 @@ assess.TF.activities.from.scores <- function(scores) {
 #' @examples
 #' TF.scores = assess.TF.activities.from.archetypes(ace)
 assess.TF.activities.from.archetypes <- function(ace) {
-	scores = rowFactors(ace)$unified_feature_specificity
+	scores = rowMaps(ace)$unified_feature_specificity
 
 	TF.scores = assess.TF.activities.from.scores(scores)
 	
@@ -60,7 +60,7 @@ assess.TF.activities.from.archetypes <- function(ace) {
 #' @examples
 #' data("gProfilerDB_human")
 #' associations = gProfilerDB_human$SYMBOL$WP
-#' scores = rowFactors(ace)$unified_feature_specificity
+#' scores = rowMaps(ace)$unified_feature_specificity
 #' Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
 assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000) {
 	if(is.list(associations)) {
@@ -93,7 +93,7 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
 assess.geneset.enrichment <- function(ace, associations, L = 1000, specificity.slot = 'unified_feature_specificity') {
-	scores = as.matrix(rowFactors(ace)[[specificity.slot]]);
+	scores = as.matrix(rowMaps(ace)[[specificity.slot]]);
 
 	Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations, L)
 	

@@ -10,9 +10,7 @@ the results of ACTIONet method}
 \usage{
 ACTIONetExperiment(rowNets = S4Vectors::SimpleList(),
   colNets = S4Vectors::SimpleList(), rowMaps = S4Vectors::SimpleList(),
-  colMaps = S4Vectors::SimpleList(),
-  rowMapsAnnot = S4Vectors::SimpleList(),
-  colMapsAnnot = S4Vectors::SimpleList(), ...)
+  colMaps = S4Vectors::SimpleList(), ...)
 }
 \arguments{
 \item{rowNets, colNets}{gene-gene and cell-cell networks, respectively}

@@ -21,7 +21,7 @@ If it is NULL, PCNet is loaded as the baseline from SCINET package.}
 
 \item{compute.topo.specificity}{Whether to compute topological specificity scores (will be stores as V(G)$specificity)}
 
-\item{specificity.slot.name}{An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
 }
 \value{
 A list of igraph objects

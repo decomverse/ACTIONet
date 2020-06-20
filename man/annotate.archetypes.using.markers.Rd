@@ -7,7 +7,7 @@
 \usage{
 annotate.archetypes.using.markers(ace, marker.genes,
   rand.sample.no = 1000,
-  significance.slot = "H_unified_upper_significance")
+  significance.slot = "unified_feature_specificity")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

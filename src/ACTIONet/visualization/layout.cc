@@ -243,7 +243,7 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
 		mat coordinates(result.data(), 2, nV);
-		coordinates = trans(zscore(trans(coordinates)));
+		coordinates = zscore(trans(coordinates));
 		
 		printf("Done\n"); fflush(stdout);
 
@@ -251,7 +251,7 @@ namespace ACTIONet {
 		/****************************
 		 *  Compute 3D Embedding	*
 		 ***************************/	
-		mat initial_coor3D = join_vert(coordinates, init_coors.row(2));
+		mat initial_coor3D = join_vert(trans(coordinates), init_coors.row(2));
 		head_vec.clear(); 
 		head_vec.resize(initial_coor3D.n_elem);
 		std::copy(initial_coor3D.memptr(), initial_coor3D.memptr() + initial_coor3D.n_elem, head_vec.begin());		
@@ -264,7 +264,7 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
 		mat coordinates_3D(result.data(), 3, nV);	
-		coordinates_3D = trans(zscore(trans(coordinates_3D)));
+		coordinates_3D = zscore(trans(coordinates_3D));
 		
 		printf("Done\n"); fflush(stdout);
 			
