@@ -5,7 +5,7 @@
 \title{Performs geneset enrichment analysis on archetypes}
 \usage{
 assess.geneset.enrichment(ace, associations, L = 1000,
-  specificity.slot = "H_unified_upper_significance")
+  specificity.slot = "unified_feature_specificity")
 }
 \arguments{
 \item{ace}{ACTIONetExperiment (ACE) output object}

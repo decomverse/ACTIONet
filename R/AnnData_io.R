@@ -184,15 +184,18 @@ read.HD5SpMat <- function(h5file, gname, compression.level = compression.level) 
 		Xt = sparseMatrix(i = indices+1, p = indptr, x = data, dims = Dims)
 		X = Matrix::t(Xt)
 	} else if(attr[["encoding-type"]] == "csr_matrix") {
-		csr_sort_indices_inplace(indptr, indices, data)
-		Xt = new("dgRMatrix", j = indices+1, p = indptr, x = data, Dim = Dims)
+		#csr_sort_indices_inplace(indptr, indices, data)
+		#Xt = new("dgRMatrix", j = indices, p = indptr, x = data, Dim = Dims)
+		#X = Matrix::t(Xt)		
+		csc_sort_indices_inplace(indptr, indices, data)		
+		Xt = sparseMatrix(j = indices+1, p = indptr, x = data, dims = Dims)
 		X = Matrix::t(Xt)
 	}
 	
 	return(X)
 }
 
-ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", minimal.export = F, compression.level = 0) {
+ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", full.export = T, compression.level = 0) {
 	if (!requireNamespace('hdf5r', quietly = TRUE)) {
 		stop("Please install hdf5r to wrote HDF5 files")
 	}
@@ -212,7 +215,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	}
 
 	remaining.assays = setdiff(names(assays(ace)), main.assay)
-	if( (minimal.export == F) & (0 < length(remaining.assays)) ) {
+	if( (full.export == T) & (0 < length(remaining.assays)) ) {
 		layers = h5file$create_group("layers")
 
 		for(an in remaining.assays) {
@@ -237,17 +240,26 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 	## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
 	obsm = h5file$create_group("obsm")
-	CF = colMaps(ace)
-	embeddings.idx = which(sapply(colMapTypes(ace) == "embedding"))
-	if(length(embeddings.idx) > 0) {
-		subCF = CF[embeddings.idx]
-		names(subCF) = paste("X", names(subCF), sep = "_")
-		subCF = lapply(subCF, function(x) as.matrix(x))
-		for(i in 1:length(subCF)) {
-			obsm$create_dataset(names(subCF)[[i]], subCF[[i]], gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+	obsm.mats = colMaps(ace)
+	obsm.public.idx = which(colMapTypes(ace) != "internal")
+	if(length(obsm.public.idx) > 0) {
+		obsm.subset = obsm.mats[obsm.public.idx]
+		for(i in 1:length(obsm.subset)) {
+			nn = names(obsm.subset)[[i]]
+			Y = obsm.subset[[i]]
+			if(nrow(Y) <= 3) {
+				AD_nn = paste("X", nn, sep = "_")
+			} else {
+				AD_nn = nn
+			}
 			
-			nnn = names(CF[embeddings.idx])[[i]]
-			factor_info = obsm_annot$create_group(nnn)
+			if(is.matrix(Y)) {
+				obsm$create_dataset(AD_nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+			} else {				
+				write.HD5SpMat(obsm, AD_nn, Y, compression.level)
+			}
+
+			factor_info = obsm_annot$create_group(AD_nn)
 			factor_info[["type"]] = colMapTypes(ace)[[nn]]
 			factor.meta.DF = colMapMeta(ace)[[nn]]
 			if(ncol(factor.meta.DF) > 0) {
@@ -255,44 +267,75 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 			}
 		}
 	}
-	if(!minimal.export) {
-		# Export additional "obsm" matrices. Anything that doesn't start with "X_" in obsm will be map to colMaps() upon reading.
-		nonembeddings.idx = setdiff(1:length(CF), embeddings.idx)
-		if((length(nonembeddings.idx) > 0)) {
-			subCF = CF[nonembeddings.idx]
-			subCF = lapply(subCF, function(x) as.matrix(x))
-			for(i in 1:length(subCF)) {
-				obsm$create_dataset(names(subCF)[[i]], subCF[[i]], gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
-				
+	
+	varm = h5file$create_group("varm")
+	varm.mats = rowMaps(ace)
+	varm.public.idx = which(rowMapTypes(ace) != "internal")
+	if(length(varm.public.idx) > 0) {
+		varm.subset = varm.mats[varm.public.idx]
+		for(i in 1:length(varm.subset)) {
+			nn = names(varm.subset)[[i]]
+			Y = Matrix::t(varm.subset[[i]])
 
-				nnn = names(CF[nonembeddings.idx])[[i]]
-				factor_info = obsm_annot$create_group(nnn)
+			if(is.matrix(Y)) {
+				varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+			} else {				
+				write.HD5SpMat(varm, nn, Y, compression.level)
+			}
+			
+			
+			factor_info = varm_annot$create_group(nn)
+			factor_info[["type"]] = rowMapTypes(ace)[[nn]]
+			factor.meta.DF = rowMapMeta(ace)[[nn]]
+			if(ncol(factor.meta.DF) > 0) {
+				write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
+			}
+		}
+	}	
+	
+	if(full.export) {
+		print("Full export mode")
+		
+		obsm.private.idx = setdiff(1:length(obsm.mats), obsm.public.idx)
+		if(length(obsm.private.idx) > 0) {
+			obsm.subset = obsm.mats[obsm.private.idx]
+			for(i in 1:length(obsm.subset)) {
+				nn = names(obsm.subset)[[i]]
+				Y = obsm.subset[[i]]
+				if(is.matrix(Y)) {
+					obsm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+				} else {				
+					write.HD5SpMat(obsm, nn, Y, compression.level)
+				}	
+								
+				factor_info = obsm_annot$create_group(nn)
 				factor_info[["type"]] = colMapTypes(ace)[[nn]]
 				factor.meta.DF = colMapMeta(ace)[[nn]]
 				if(ncol(factor.meta.DF) > 0) {
 					write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
-				}								
-				
+				}
 			}
 		}
 		
-		# Export "varm"-associated matrices, i.e. rowMaps(): variables in AnnData ~ rows in SCE ~ genes => such as DE matrices
-		RF = rowMaps(ace)
-		if((length(RF) > 0)) {
-			varm = h5file$create_group("varm")
-			RF = lapply(RF, function(x) as.matrix(x))
-			for(i in 1:length(RF)) {
-				varm$create_dataset(names(RF)[[i]], Matrix::t(RF[[i]]), gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+		varm.private.idx = setdiff(1:length(varm.mats), varm.public.idx)
+		if(length(varm.private.idx) > 0) {
+			varm.subset = varm.mats[varm.private.idx]
+			for(i in 1:length(varm.subset)) {
+				nn = names(varm.subset)[[i]]
+				Y = Matrix::t(varm.subset[[i]])
 				
-
-				nnn = names(RF)[[i]]
-				factor_info = obsm_annot$create_group(nnn)
+				if(is.matrix(Y)) {
+					varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+				} else {				
+					write.HD5SpMat(varm, nn, Y, compression.level)
+				}				
+				
+				factor_info = varm_annot$create_group(nn)
 				factor_info[["type"]] = rowMapTypes(ace)[[nn]]
 				factor.meta.DF = rowMapMeta(ace)[[nn]]
 				if(ncol(factor.meta.DF) > 0) {
 					write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
-				}				
-								
+				}
 			}
 		}
 
@@ -326,7 +369,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 }
 
-AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minimal.export = T, compression.level = 0) {
+AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
 	if (!requireNamespace('hdf5r', quietly = TRUE)) {
 		stop("Please install hdf5r to read HDF5 files")
 	}
@@ -345,10 +388,10 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 	if(length(X.attr) == 0) { # Full matrix
 		X = h5file[["X"]]$read()
 	} else {
-		X = read.HD5SpMat(h5file = h5file, gname = "X", compression.level = compression.level)
+		X = read.HD5SpMat(h5file = h5file, gname = "X")
 	}
-	assays = list(X)
-	names(assays) = main.assay
+	input_assays = list(X)
+	names(input_assays) = main.assay
 
 	if("layers" %in% objs) {
 		layers = h5file[["layers"]]
@@ -360,35 +403,49 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			if(length(attr) == 0) { # Dense matrix
 				additional_assays[[an]] = layers[[an]]$read()
 			} else {
-				additional_assays[[an]] = read.HD5SpMat(h5file = layers, gname = an, compression.level = compression.level)
+				additional_assays[[an]] = read.HD5SpMat(h5file = layers, gname = an)
 			}
 		}
-		assays = c(assays, additional_assays)
+		input_assays = c(input_assays, additional_assays)
 	}
 
 
 	if("obs" %in% objs) {
-		obs.DF = read.HD5DF(h5file = h5file, gname = "obs", compression.level = compression.level)			
+		obs.DF = read.HD5DF(h5file = h5file, gname = "obs")			
 	}
 
 	if("var" %in% objs) {
-		var.DF = read.HD5DF(h5file = h5file, gname = "var", compression.level = compression.level)
+		var.DF = read.HD5DF(h5file = h5file, gname = "var")
 	}
 	
-	assays = lapply(assays, function(X) {
+	input_assays = lapply(input_assays, function(X) {
 		rownames(X) = rownames(var.DF)
 		colnames(X) = rownames(obs.DF)
 		return(X)
 	})
 
-	ace = ACTIONetExperiment(assays = assays, rowData = var.DF, colData = obs.DF)
+	ace = ACTIONetExperiment(assays = input_assays, rowData = var.DF, colData = obs.DF)
 
 	
 	if("obsm" %in% objs) {
 		obsm = h5file[["obsm"]]
 		for(mn in names(obsm)) {
-			Xr = obsm[[mn]]$read()
-			if(sum(grepl(pattern = "^X_", mn))) { # # Keep the smallest factors as "embeddings"
+			attr = h5attributes(obsm[[mn]])
+			if( "encoding-type" %in% names(attr) ) {
+				if(attr[["encoding-type"]] %in% c("csc_matrix", "csr_matrix") ) {
+					Xr = read.HD5SpMat(obsm, mn, compression.level)
+				}
+				else {
+					msg = sprintf("Error reading obsm %s", mn)
+					printf(msg)
+					print(attr)
+					return()
+				}
+			} else {
+				Xr = obsm[[mn]]$read()
+			}
+
+			if(sum(grepl(pattern = "^X_", mn))) { 
 				nn = stringr::str_sub(mn, start = 3)
 			} else {
 				nn = mn
@@ -400,8 +457,24 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 	if("varm" %in% objs) {
 		varm = h5file[["varm"]]
 		for(nn in names(varm)) {
-			Xr = Matrix::t(varm[[mn]]$read())
-			rowMaps(ace)[[nn]] = Xr
+			attr = h5attributes(varm[[nn]])
+			if( "encoding-type" %in% names(attr) ) {
+				if(attr[["encoding-type"]] %in% c("csc_matrix", "csr_matrix") ) {
+					Xr = read.HD5SpMat(varm, nn, compression.level)
+				}
+				else {
+					msg = sprintf("Error reading obsm %s", nn)
+					printf(msg)
+					print(attr)
+					return()
+				}
+			} else {
+				Xr = varm[[nn]]$read()
+			}
+		
+						
+			
+			rowMaps(ace)[[nn]] = Matrix::t(Xr)
 		}
 	}
 
@@ -428,9 +501,10 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			obsm_annot = uns[["obsm_annot"]]
 			for(nn in names(obsm_annot)) {
 				factor_annot = obsm_annot[[nn]]
-				colMapTypes(ace)[[nn]] = factor_annot$type
+				colMapTypes(ace)[[nn]] = factor_annot[["type"]]$read()
 				if("annotation" %in% names(factor_annot)) {
-					rowMapMeta(ace)[[nn]] = factor_annot$annotation
+					DF = read.HD5DF(factor_annot, "annotation")
+					colMapMeta(ace)[[nn]] = DF
 				}
 			}
 		}
@@ -438,9 +512,10 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts", minim
 			var_annot = uns[["varm_annot"]]
 			for(nn in names(var_annot)) {
 				factor_annot = var_annot[[nn]]
-				rowMapTypes(ace)[[nn]] = factor_annot$type
+				rowMapTypes(ace)[[nn]] = factor_annot[["type"]]$read()
 				if("annotation" %in% names(factor_annot)) {
-					rowMapMeta(ace)[[nn]] = factor_annot$annotation
+					DF = read.HD5DF(factor_annot, "annotation")
+					rowMapMeta(ace)[[nn]] = DF
 				}
 			}			
 		}

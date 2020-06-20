@@ -335,7 +335,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 #' @return Enrichment heatmap
 #'
 #' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["unified_feature_specificity"]])
+#' feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' plot.top.k.features(feature.enrichment.table, 3)
 plot.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = T, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
 
@@ -372,7 +372,7 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' @return Featur view
 #'
 #' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["unified_feature_specificity"]])
+#' feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5, CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F) {
 	M = Matrix::t(as(colMaps(ace)[["H_unified"]], 'sparseMatrix'))
@@ -457,7 +457,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", title = "", label.text.size = 0.8, renormalize = F) {
 	require(wordcloud)
 
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["unified_feature_specificity"]])
+	feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -576,7 +576,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 			cell.scores = enrichment.table
 		}
 	} else {
-		temp.enrichment.table = as.matrix(rowFactors(ace)[["unified_feature_specificity"]])
+		temp.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 		if( !is.null(row.names(temp.enrichment.table)) ) {
 			filtered.rows = grep(blacklist.pattern, rownames(temp.enrichment.table))
 			if(length(filtered.rows) > 0)
@@ -875,7 +875,7 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
 
 
 select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = F, specificity.slot.name = "unified_feature_specificity") {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[[specificity.slot.name]])
+	feature.enrichment.table = as.matrix(rowMaps(ace)[[specificity.slot.name]])
 
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -890,7 +890,7 @@ select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.patter
 plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black", specificity.slot.name = "unified_feature_specificity") {
 	require(ComplexHeatmap)
 
-	feature.enrichment.table = as.matrix(rowFactors(ace)[[specificity.slot.name]])
+	feature.enrichment.table = as.matrix(rowMaps(ace)[[specificity.slot.name]])
 
 	filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
 	if(length(filtered.rows) > 0)
@@ -904,7 +904,7 @@ plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern 
 
 
 plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black", specificity.slot.name = "unified_feature_specificity") {
-	feature.enrichment.table = as.matrix(rowFactors(ace)[["unified_feature_specificity"]])
+	feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 
 	filtered.rows = match(intersect(rownames(ace), genes), rownames(ace))
 	if(length(filtered.rows) > 0)
@@ -978,7 +978,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma"
 #' @return Sorted table with the selected top-ranked
 #'
 #' @examples
-#' feature.enrichment.table = as.matrix(rowFactors(ace)[["unified_feature_specificity"]])
+#' feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
 select.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = F, reorder.columns = T) {
 

@@ -13,7 +13,7 @@ annotate.clusters.using.markers(ace, marker.genes, specificity.slot.name,
 
 \item{marker.genes}{A list of lists (each a set of markers for a given cell type)}
 
-\item{specificity.slot.name}{An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
 
 \item{rand.sample.no}{Number of random permutations (default=1000)}
 }

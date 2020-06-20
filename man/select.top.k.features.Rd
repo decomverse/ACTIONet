@@ -19,6 +19,6 @@ Sorted table with the selected top-ranked
 Report the top-rank features from a given enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
 }

@@ -13,7 +13,7 @@
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
 reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1, return_V = FALSE) {
-    ace <- check_if_ace(ace)
+    ace <- as(ace, "ACTIONetExperiment")
     if (!(data.slot %in% names(assays(ace)))) {
 		if(normalization.method != "none") {
 			msg = sprintf("Normalizing ace object ...\n")

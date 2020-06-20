@@ -9,7 +9,7 @@
 \usage{
 rowMaps(x, ...)
 
-\S4method{rowMaps}{ACTIONetExperiment}(x, all = TRUE)
+\S4method{rowMaps}{ACTIONetExperiment}(x, all = T)
 
 \S4method{rowMaps}{ACTIONetExperiment}(x) <- value
 }
