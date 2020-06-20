@@ -77,11 +77,11 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   if(class(value) == "SummarizedExperiment"){
     SE = value
   } else if(is.matrix(value) | is.sparseMatrix(value)){
-    SE = SummarizedExperiment(assays=list(X=X))
+    SE = SummarizedExperiment(assays=list(X=value))
   } else{
       X = as.matrix(value)
       if(is.numeric(X))
-        SE = SummarizedExperiment(assays=list(X=X))
+        SE = SummarizedExperiment(assays=list(X=value))
       else
         return(SummarizedExperiment())
   }
