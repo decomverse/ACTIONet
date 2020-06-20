@@ -29,14 +29,8 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
-  value = .check_if_mapping_list(value)
-	SEs = lapply(value, function(X) {
-		SE = SummarizedExperiment(assays=list(X=X))
-		metadata(SE)$type = "internal"
-		return(SE)
-	}
-	x@rowMaps <- SEs
-
+  value <- .check_if_mapping_list(value)
+  x <- .insert_and_validate_mapping(x, value, 1)
   validObject(x)
   x
 })
@@ -49,19 +43,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   value <- .check_if_mapping_list(value)
-
-  .insert_and_validate_mapping(x, value, 2)
-  input_names = names(value)
-
-
-  value = lapply(value, .coerce_mapping_to_SE)
-  dropped_vals = sapply(value, function(v) is.null(v) | ncol(x) != ncol(x)) %>%
-    names(.) == ""
-  dropped_names = input_names[dropped_vals]
-  value = value[!dropped]
-
-  x = .insert_SE_to_mapping(x, value, 2)
-
+  x <- .insert_and_validate_mapping(x, value, 2)
   validObject(x)
 	x
 })
@@ -75,6 +57,18 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 
   value = as(value, "SimpleList")
   return(value)
+}
+
+.insert_and_validate_mapping <- function(x, value, d){
+  input_names = names(value)
+  value = lapply(value, .coerce_mapping_to_SE)
+  dropped = sapply(value, function(v){
+      is.null(v) | (dim(v)[d] != dim(x)[d]
+  }) | names(value) == ""
+  value = value[!dropped]
+  .dropped_vals_warning( setdiff(input_names, names(values)) )
+  x = .insert_SE_to_mapping(x, value, d)
+  return(x)
 }
 
 .coerce_mapping_to_SE <- function(value){
@@ -99,42 +93,24 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   return(SE)
 }
 
-.insert_SE_to_mapping <- function(x, value, dim){
+.insert_SE_to_mapping <- function(x, value, insert_dim){
   for(i in seq_along(value)){
-    if(dim == 1)
+    if(insert_dim == 1)
       x@rowMaps[[names(value)[i]]] <- value[[i]]
-    if(dim == 2)
+    else if(insert_dim == 2)
       x@colMaps[[names(value)[i]]] <- value[[i]]
   }
   return(x)
 }
 
-.insert_and_validate_mapping <- function(x, value, 2){\
-  input_names = names(value)
-  value = lapply(value, .coerce_mapping_to_SE)
-  dropped_vals = sapply(value, function(v) is.null(v) | ncol(x) != ncol(x)) %>%
-    names(.) == ""
-  dropped_names = input_names[dropped_vals]
-  .dropped_vals_warning(x)
-  value = value[!dropped]
-  x = .insert_SE_to_mapping(x, value, 2)
-
+.dropped_vals_warning <- function(value){
+  if(length(value) == 0)
+    return
+  else{
+    sapply(value, function(v){
+      par_func = as.character(sys.call(-2)[1])
+      w = paste(sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v)
+      warning(w, call. = FALSE)
+    }
+  }
 }
-
-
-
-
-
-
-
-.dropped_vals_warning <- function(x){
-
-
-}
-
-
-
-# par_func = as.character(sys.call(-1)[1])
-# w = paste(sprintf("In %s: ", par_func), "Non-concatable slot <(",
-#           used_slots, sprintf(")> will not be preserved.\n"), sep ="")
-# warning(w, call. = FALSE)
