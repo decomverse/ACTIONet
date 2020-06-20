@@ -35,8 +35,8 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 	}
 	x@rowMaps <- SEs
 
-    validObject(x)
-    x
+  validObject(x)
+  x
 })
 
 
@@ -47,6 +47,6 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 	x@colMaps <- value
-    validObject(x)
+  validObject(x)
 	x
 })
