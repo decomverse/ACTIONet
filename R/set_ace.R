@@ -112,6 +112,6 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
       par_func = as.character(sys.call(-2)[1])
       w = sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v)
       warning(w, call. = FALSE)
-    }}
+    })
   }
 }
