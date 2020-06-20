@@ -15,7 +15,7 @@
 #' @importClassesFrom S4Vectors SimpleList
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 .ACTIONetExperiment <- setClass("ACTIONetExperiment",
-		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowMaps = "SimpleList", colMaps = "SimpleList", rowMapsAnnot="SimpleList", colMapsAnnot="SimpleList"),
+		slots= representation(rowNets = "SimpleList", colNets = "SimpleList", rowMaps = "SimpleList", colMaps = "SimpleList"),
 		contains = "SummarizedExperiment"        
 )
          
@@ -34,12 +34,10 @@ ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
     colNets=S4Vectors::SimpleList(), 
     rowMaps=S4Vectors::SimpleList(), 
     colMaps=S4Vectors::SimpleList(), 
-    rowMapsAnnot=S4Vectors::SimpleList(), 
-    colMapsAnnot=S4Vectors::SimpleList(), 
     ...)
 {
 	SE <- SummarizedExperiment::SummarizedExperiment(...)
-	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowMaps=rowMaps, colMaps=colMaps, rowMapsAnnot=rowMapsAnnot, colMapsAnnot=colMapsAnnot)
+	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowMaps=rowMaps, colMaps=colMaps)
 	return(out)
 }
 

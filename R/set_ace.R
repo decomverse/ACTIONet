@@ -28,7 +28,13 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
-	x@rowMaps <- value
+	SEs = lapply(value, function(X) {
+		SE = SummarizedExperiment(assays=list(X=X))
+		metadata(SE)$type = "internal"
+		return(SE)
+	}
+	x@rowMaps <- SEs
+
     validObject(x)
     x
 })
