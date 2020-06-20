@@ -14,38 +14,38 @@ setValidity2("ACTIONetExperiment", function(object) {
 			if ( (NROW(value[[i]]) != NR) | (NCOL(value[[i]]) != NR) ) {
 			msg <- c(
 				msg, "'nrow(rowNets[[...]])' and 'ncol(rowNets[[...]])' should be equal to the number of rows"
-			)		
-		}                        
+			)
+		}
     }
-    
+
     value = colNets(object)
 	for (i in seq_along(value)) {
 		if ( (NROW(value[[i]]) != NC) | (NCOL(value[[i]]) != NC) ) {
 			msg <- c(
 				msg, "'nrow(colNets[[...]])' and 'ncol(colNets[[...]])' should be equal to the number of columns"
-			)		
-		}    
+			)
+		}
 	}
-	
+
     value = rowMaps(object)
 	for (i in seq_along(value)) {
 		if ( (NROW(value[[i]]) != NR) ) {
 			msg <- c(
 				msg, "'nrow(rowMaps[[..]])' should be equal to the number of rows"
-			)		
-		}    
+			)
+		}
 	}
-	
-	
-    value = colMaps(object)
+
+
+  value = colMaps(object)
 	for (i in seq_along(value)) {
 		if ( (NCOL(value[[i]]) != NC) ) {
 			msg <- c(
 				msg, "'nrow(colMaps[[..]])' should be equal to the number of columns"
-			)		
+			)
 		}
-	}  
-		
+	}
+
     if (length(msg)) {
         msg
     } else TRUE
