@@ -32,40 +32,6 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     ace = as(ace, "ACTIONetExperiment")
     
-	# Fit in the [remaining] row/col-MapAnnot slots
-	nn = names(colMaps(ace))
-	if(length(nn) > 0) {
-		Annot = lapply(1:length(nn), function(i) list(type="generic"))
-		names(Annot) = nn	
-		embedding.names = nn[sapply(nn, function(n) nrow(colMaps(ace)[[n]]) <= 3)]	
-		for(n in embedding.names) {
-			Annot[[n]]$type = "embedding"
-		}				
-		existing.idx = match(names(ace@colMapsAnnot), nn)
-		if(length(existing.idx) > 0)
-			Annot[existing.idx] = as.list(ace@colMapsAnnot)	
-		
-		for(n in nn)
-			colMapTypes[[n]] = Annot[[nn]]
-	}	
-	
-	nn = names(rowMaps(ace))
-	if(length(nn) > 0) {
-		Annot = lapply(1:length(nn), function(i) list(type="generic"))
-		names(Annot) = nn	
-		embedding.names = nn[sapply(nn, function(n) nrow(rowMaps(ace)[[n]]) <= 3)]	
-		for(n in embedding.names) {
-			Annot[[n]]$type = "embedding"
-		}				
-		existing.idx = match(names(ace@rowMapsAnnot), nn)
-		if(length(existing.idx) > 0)
-			Annot[existing.idx] = as.list(ace@rowMapsAnnot)	
-			
-		for(n in nn)
-			colMapTypes[[n]] = Annot[[nn]]
-	}
-	   
-
 
 	S = assays(ace)[[data.slot]]
     S_r = ACTIONet::colMaps(ace)[[reduction.slot]]

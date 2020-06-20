@@ -31,14 +31,13 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
 
 
   ACTIONet::colMaps(ace.norm)[[reduction.slot]] <- Matrix::t(S_r)
-  colMapTypes[[reduction.slot]] = "reduction"
+  colMapTypes(ace)[[reduction.slot]] = "reduction"
   
 
   if(return_V){
     V = rowData(mnn.out)[["rotation"]]
     colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
     rowMaps(ace.norm)[["rotation"]] = V
-    ace.norm@rowMapsAnnot[["rotation"]] = list(type = "internal")								
   }
   metadata(ace.norm) = m_data
   return(ace.norm)
