@@ -117,7 +117,7 @@ setGeneric("rowMapMeta", function(x, ...) standardGeneric("rowMapMeta"))
 #' @param ... other parameters
 #'
 #' @exportMethod colMapTypes
-setGeneric("colMapTypes", function(x, ...) standardGeneric("colMapTypes"))
+setGeneric("colMapMeta", function(x, ...) standardGeneric("colMapMeta"))
 
 
 #' Set rowMapMeta
@@ -128,10 +128,10 @@ setGeneric("colMapTypes", function(x, ...) standardGeneric("colMapTypes"))
 #' @exportMethod rowMapMeta<-
 setGeneric("rowMapMeta<-", function(x, ...) standardGeneric("rowMapMeta<-"))
 
-#' Set colMapTypes
+#' Set colMapMeta
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod colMapTypes<-
-setGeneric("colMapTypes<-", function(x, ...) standardGeneric("colMapTypes<-"))
+#' @exportMethod colMapMeta<-
+setGeneric("colMapMeta<-", function(x, ...) standardGeneric("colMapMeta<-"))
