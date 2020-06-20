@@ -62,11 +62,13 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 .insert_and_validate_mapping <- function(x, value, d){
   input_names = names(value)
   value = lapply(value, .coerce_mapping_to_SE)
-  dropped = sapply(value, function(v){
+  dropped_vals = sapply(value, function(v){
       is.null(v) | (dim(v)[d] != dim(x)[d])
   }) | names(value) == ""
-  value = value[!dropped]
-  .dropped_vals_warning( setdiff(input_names, names(values)) )
+  value = value[!dropped_vals]
+  dropped_names = setdiff(input_names, names(values))
+  if(length(dropped_names) > 0)
+    .dropped_vals_warning(dropped_names)
   x = .insert_SE_to_mapping(x, value, d)
   return(x)
 }
@@ -85,11 +87,10 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   }
 
   mdata = S4Vectors::metadata(SE)
-  if(!("type" %in% names(mdata))){
+  if( !("type" %in% names(mdata)) ){
     mdata$type = "generic"
     S4Vectors::metadata(SE) <- mdata
   }
-
   return(SE)
 }
 
@@ -109,7 +110,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   else{
     sapply(value, function(v){
       par_func = as.character(sys.call(-2)[1])
-      w = paste(sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v))
+      w = sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v)
       warning(w, call. = FALSE)
     }
   }
