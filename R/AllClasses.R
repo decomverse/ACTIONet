@@ -38,7 +38,7 @@ ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
     colMapsAnnot=S4Vectors::SimpleList(), 
     ...)
 {
-	SE <- SummarizedExperiment::RangedSummarizedExperiment(...)
+	SE <- SummarizedExperiment::SummarizedExperiment(...)
 	out <- .ACTIONetExperiment(SE, rowNets=rowNets, colNets=colNets, rowMaps=rowMaps, colMaps=colMaps, rowMapsAnnot=rowMapsAnnot, colMapsAnnot=colMapsAnnot)
 	return(out)
 }
@@ -85,9 +85,9 @@ setReplaceMethod("$", "ACTIONetExperiment",
 {
 	if(name %in% names(colData(x))) {
 		colData(x)[[name]] <- value
-	} else if (name %in% names(rowMaps(x, all = F))) {
+	} else if (name %in% names(rowMaps(x))) {
 		rowMaps(x)[[name]] <- value
-	} else if (name %in% names(colMaps(x, all = F))) {
+	} else if (name %in% names(colMaps(x))) {
 		colMaps(x)[[name]] <- value
 	} else if (name %in% names(colNets(x))) {
 		colNets(x)[[name]] <- value

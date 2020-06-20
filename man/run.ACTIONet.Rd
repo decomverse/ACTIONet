@@ -12,7 +12,7 @@ run.ACTIONet(ace, k_max = 30, min.cells.per.arch = 2,
   unification.resolution = 1, max_iter_ACTION = 50, full.trace = T)
 }
 \arguments{
-\item{ace}{Reduced `ACTIONetExperiment (ACE)` object (output of reduce.ace() function).}
+\item{ace}{Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).}
 
 \item{k_max}{Maximum depth of decompositions (default=30).}
 

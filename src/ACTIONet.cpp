@@ -1744,5 +1744,43 @@ void csr_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Aj, NumericVecto
 		}
 		printf("done\n");
 	}
+}
 
+	// [[Rcpp::export]]
+void csc_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Ai, NumericVector &Ax) {
+	int n_col = Ap.size()-1;
+	
+	bool sorted = true;
+	for(int i = 0; i < n_col, sorted; i++) {
+		for (int k = Ap[i] + 1; k < Ap[i + 1]; k++) {
+			if (Ai[k] < Ai[k - 1]) {
+				sorted = false;
+				break;
+			}
+		}
+	}
+	if(!sorted) {
+		printf("Indices of CSC object are not sorted! Trying to sort them now ... ");
+		std::vector< std::pair<int,double> > temp;
+		
+		for(int i = 0; i < n_col; i++){
+			int col_start = (int)Ap[i];
+			int col_end   = (int)Ap[i+1];
+			int len = col_end - col_start;
+			
+			temp.resize(len);
+			for (int jj = col_start, n = 0; jj < col_end; jj++, n++){
+				temp[n].first  =(int) Ai(jj);
+				temp[n].second = Ax(jj);
+			}
+
+			std::sort(temp.begin(),temp.begin()+len,kv_pair_less<int,double>);
+
+			for(int jj = col_start, n = 0; jj < col_end; jj++, n++){
+				Ai(jj) = temp[n].first;
+				Ax(jj) = temp[n].second;
+			}
+		}
+		printf("done\n");
+	}
 }
