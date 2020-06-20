@@ -73,9 +73,9 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMapTypes
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
 	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@colMaps))
-
+  print(common_names)
 	for(n in common_names) {
-		metadata(x@colMaps[[n]]) = value[[n]]
+		metadata(x@colMaps[[n]])$type = value[[n]]
 	}
 	validObject(x)
 	x
@@ -96,7 +96,7 @@ setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
 			DF = DataFrame(DF)
 
 		if((length(which(is(DF) == "DataFrame")) != 0)) {
-			if(nrow(DF) == nrow(x)) {
+			if(nrow(DF) == nrow(x@colMaps[[n]])) {
 				mask = (n == names(x@colMaps))
 				if(sum(mask) == 1) {
 					rowData(x@colMaps[[which(mask)]]) = DF
@@ -126,7 +126,7 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 			DF = DataFrame(DF)
 
 		if((length(which(is(DF) == "DataFrame")) != 0)) {
-			if(nrow(DF) == nrow(x)) {
+			if(nrow(DF) == ncol(x@rowMaps[[n]])) {
 				mask = (n == names(x@rowMaps))
 				if(sum(mask) == 1) {
 					colData(x@rowMaps[[which(mask)]]) = DF
@@ -158,7 +158,7 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
       is.null(v) | (dim(v)[d] != dim(x)[d])
   }) | names(value) == ""
   value = value[!dropped_vals]
-  dropped_names = setdiff(input_names, names(values))
+  dropped_names = setdiff(input_names, names(value))
   if(length(dropped_names) > 0)
     .dropped_vals_warning(dropped_names)
   x = .insert_SE_to_mapping(x, value, d)

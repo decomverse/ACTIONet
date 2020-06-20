@@ -66,7 +66,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max.iter = 5, data.slot = "logcoun
     colnames(S_r) = colnames(ace.norm)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
     colMaps(ace.norm)[[reduction.slot]] <- S_r
-	colMapTypes(ace)[[reduction.slot]] = "reduction"
+	colMapTypes(ace.norm)[[reduction.slot]] = "reduction"
     
 
 	if(return_V){
