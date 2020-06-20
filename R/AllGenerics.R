@@ -65,3 +65,73 @@ setGeneric("rowMaps<-", function(x, ...) standardGeneric("rowMaps<-"))
 #' @exportMethod colMaps<-
 setGeneric("colMaps<-", function(x, ...) standardGeneric("colMaps<-"))
 
+
+
+########################### Type functions ################################
+#' Get rowMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapTypes
+setGeneric("rowMapTypes", function(x, ...) standardGeneric("rowMapTypes"))
+
+#' Get colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes
+setGeneric("colMapTypes", function(x, ...) standardGeneric("colMapTypes"))
+
+
+#' Set rowMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapTypes<-
+setGeneric("rowMapTypes<-", function(x, ...) standardGeneric("rowMapTypes<-"))
+
+#' Set colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes<-
+setGeneric("colMapTypes<-", function(x, ...) standardGeneric("colMapTypes<-"))
+
+########################### Metadata functions ##############################
+
+#' Get rowMapMeta
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapMeta
+setGeneric("rowMapMeta", function(x, ...) standardGeneric("rowMapMeta"))
+
+#' Get colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes
+setGeneric("colMapTypes", function(x, ...) standardGeneric("colMapTypes"))
+
+
+#' Set rowMapMeta
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapMeta<-
+setGeneric("rowMapMeta<-", function(x, ...) standardGeneric("rowMapMeta<-"))
+
+#' Set colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes<-
+setGeneric("colMapTypes<-", function(x, ...) standardGeneric("colMapTypes<-"))
