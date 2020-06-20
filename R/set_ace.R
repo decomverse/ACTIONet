@@ -49,28 +49,13 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 })
 
 
-#' Set column-associated factor types
-#'
-#' @return List of matrices
-#'
-#' @rdname colMapTypes
-setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
-	common_names = intersect(names(values)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@colMaps))
-
-	for(n in common_names) {
-		metadata(x@colMaps[[n]])$type = value[[n]]
-	}
-	validObject(x)
-	x
-})
-
 
 #' Set row-associated factor types
 #'
 #' @return List of matrices
 #'
 #' @rdname rowMapTypes
-setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
+setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
 	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@rowMaps))
 
 	for(n in common_names) {
@@ -79,9 +64,6 @@ setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
 	validObject(x)
 	x
 })
-
-
-
 
 
 #' Set column-associated factor annotations
@@ -107,12 +89,12 @@ setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMapMeta
 setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
 	value = value[names(value) != ""]
-	
+
 	for(n in names(value)) {
 		DF = value[[n]]
 		if(is.data.frame(DF))
 			DF = DataFrame(DF)
-		
+
 		if((length(which(is(DF) == "DataFrame")) != 0)) {
 			if(nrow(DF) == nrow(x)) {
 				mask = (n == names(x@colMaps))
@@ -122,11 +104,10 @@ setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
 			}
 		}
 	}
-	
+
 	validObject(x)
 	x
 })
-
 
 
 
@@ -137,13 +118,13 @@ setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
 #' @rdname rowMapTypes
 setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 	value = value[names(value) != ""]
-	
-	
+
+
 	for(n in names(value)) {
 		DF = value[[n]]
 		if(is.data.frame(DF))
 			DF = DataFrame(DF)
-		
+
 		if((length(which(is(DF) == "DataFrame")) != 0)) {
 			if(nrow(DF) == nrow(x)) {
 				mask = (n == names(x@rowMaps))
@@ -153,7 +134,7 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 			}
 		}
 	}
-	
+
 	validObject(x)
 	x
 })
