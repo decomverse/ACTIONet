@@ -2,8 +2,8 @@
 #' @importFrom SummarizedExperiment rbind cbind
 setMethod("cbind", "ACTIONetExperiment", function(..., deparse.level=1) {
   args <- list(...)
-  args <- lapply(args, updateObject)
-  args <- clear_ACTIONet_slots(args)
+  # args <- lapply(args, updateObject)
+  args <- .clear_ace_slots_bind(args)
   out <- do.call(callNextMethod, args)
   return(out)
 })
@@ -12,13 +12,13 @@ setMethod("cbind", "ACTIONetExperiment", function(..., deparse.level=1) {
 #' @importFrom SummarizedExperiment rbind cbind
 setMethod("rbind", "ACTIONetExperiment", function(..., deparse.level=1) {
   args <- list(...)
-  args <- lapply(args, updateObject)
-  args <- clear_ACTIONet_slots(args)
+  # args <- lapply(args, updateObject)
+  args <- .clear_ace_slots_bind(args)
   out <- do.call(callNextMethod, args)
   return(out)
 })
 
-clear_ACTIONet_slots <- function(args) {
+.clear_ace_slots_bind <- function(args) {
   used_slots = c()
   AN_slots = c("colMaps", "rowMaps", "colNets", "rowNets")
   used_slots = sapply(args, function(x){
