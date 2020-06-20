@@ -50,7 +50,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 
 .check_if_mapping_list <- function(value){
   err = sprintf("New mappings must be a named list.\n")
-  if(!(class(value) %in% c("list", "SimpleList")))
+  if( !(class(value) %in% c("list", "SimpleList")) )
     stop(err)
   if(is.null(names(value)))
     stop(value)
@@ -112,6 +112,6 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
       par_func = as.character(sys.call(-2)[1])
       w = sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v)
       warning(w, call. = FALSE)
-    }
+    }}
   }
 }
