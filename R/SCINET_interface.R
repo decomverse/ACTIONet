@@ -30,7 +30,7 @@ run.SCINET.archetype <- function(ace, G=NULL, core = T, min.edge.weight = 2, spe
 		Adj = as(get.adjacency(G), 'sparseMatrix')
 	}
 	
-	gene.scores = rowFactors(ace)[["unified_feature_specificity"]]
+	gene.scores = rowMaps(ace)[["unified_feature_specificity"]]
 		
 	
 	common.genes = intersect(rownames(gene.scores), rownames(PCNet))
@@ -73,7 +73,7 @@ run.SCINET.archetype <- function(ace, G=NULL, core = T, min.edge.weight = 2, spe
 #' Computes a list of cluster-specific interactomes
 #'
 #' @param ace ACTIONet output object
-#' @param specificity.slot.name An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function
+#' @param specificity.slot.name An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function
 #' @param G Baseline network as an adjacency matrix or igraph object. 
 #' If it is NULL, PCNet is loaded as the baseline from SCINET package.
 #' @param min.edge.weight Used in post-processing to remove insignificant edges
@@ -107,11 +107,11 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G=NULL, min.edge.wei
 	}
 
 
-	if(! (specificity.slot.name %in% names(rowFactors(ace))) ) {
-		message(sprintf("%s does not exist in rowFactors(ace)", specificity.slot.name))
+	if(! (specificity.slot.name %in% names(rowMaps(ace))) ) {
+		message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
 	}
 
-	gene.scores = Matrix::t(as.matrix(log1p(t(rowFactors(ace)[[specificity.slot.name]]))))
+	gene.scores = Matrix::t(as.matrix(log1p(t(rowMaps(ace)[[specificity.slot.name]]))))
 
 
 	common.genes = intersect(rownames(gene.scores), rownames(PCNet))
@@ -154,7 +154,7 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G=NULL, min.edge.wei
 #' Computes a list of specific interactomes for an arbitrary gene score matrix
 #'
 #' @param gene.scores gene.scores
-#' @param specificity.slot.name An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function
+#' @param specificity.slot.name An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function
 #' @param G Baseline network as an adjacency matrix or igraph object. 
 #' If it is NULL, PCNet is loaded as the baseline from SCINET package.
 #' @param min.edge.weight Used in post-processing to remove insignificant edges

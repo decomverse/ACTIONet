@@ -5,7 +5,7 @@
 \title{A wrapper function to call all main functions of the ACTIONet}
 \usage{
 run.ACTIONet(ace, k_max = 30, min.cells.per.arch = 2,
-  min_specificity_z_threshold = 0, network_density = 1,
+  min_specificity_z_threshold = -1, network_density = 1,
   mutual_edges_only = TRUE, layout_compactness = 50,
   layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0,
   data.slot = "logcounts", reduction.slot = "ACTION",

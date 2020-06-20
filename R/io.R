@@ -452,9 +452,12 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
 	#ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
 
 	specificity.out = ACTIONet.out$unification.out$DE.core
-	rowFactors(ace)[["unified_feature_profile"]] = specificity.out[["profile"]]
-	rowFactors(ace)[["unified_feature_specificity"]] = specificity.out[["significance"]]
-
+	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
+	rowMapsTypes(ace)[["unified_feature_profile"]] = "internal"
+	
+	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
+	rowMapsTypes(ace)[["unified_feature_specificity"]] = "reduction"	
+	
 
 	# Prepare output
 	if(return.all) {

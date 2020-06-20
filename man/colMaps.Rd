@@ -9,7 +9,7 @@
 \usage{
 colMaps(x, ...)
 
-\S4method{colMaps}{ACTIONetExperiment}(x, all = TRUE)
+\S4method{colMaps}{ACTIONetExperiment}(x, all = T)
 
 \S4method{colMaps}{ACTIONetExperiment}(x) <- value
 }

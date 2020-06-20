@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(ace)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = 0, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, max_iter_ACTION = 50, full.trace = T) {
+run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", unification.resolution = 1, max_iter_ACTION = 50, full.trace = T) {
     if (!(data.slot %in% names(assays(ace)))) {
         R.utils::printf("Attribute %s is not an assay of the input ace\n", data.slot)
         return()
@@ -84,7 +84,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 	colMapTypes(ace)[["H_unified"]] = "internal"
 	
 	colMaps(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
-	colMapTypes(ace)[["H_unified"]] = "internal"
+	colMapTypes(ace)[["C_unified"]] = "internal"
 	
 	ace$assigned_archetype = unification.out$assigned_archetype
 
@@ -105,8 +105,10 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		return(specificity.scores)
 	})
 	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
+	rowMapsTypes(ace)[["unified_feature_profile"]] = "internal"
+	
 	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-
+	rowMapsTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
 	if(full.trace == T) {
 		# Prepare output
@@ -244,7 +246,10 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 	})
 
 	rowMaps(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = specificity.out[["archetypes"]]
-	rowFactors(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
+	rowMapsTypes(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = "internal"
+	
+	rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
+	rowMapsTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
 
 	return(ace)
 }
@@ -265,7 +270,7 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "log
 	colMapTypes(ace)[["H_unified"]] = "internal"
 	
 	colMaps(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
-	colMapTypes(ace)[["H_unified"]] = "internal"
+	colMapTypes(ace)[["C_unified"]] = "internal"
 
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
@@ -284,8 +289,11 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "log
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
-	rowFactors(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
-	rowFactors(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-
+	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
+	rowMapsTypes(ace)[["unified_feature_profile"]] = "internal"
+	
+	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
+	rowMapsTypes(ace)[["unified_feature_specificity"]] = "reduction"
+	
 	return(ace)
 }

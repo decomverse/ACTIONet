@@ -28,7 +28,8 @@ setMethod("colNets", "ACTIONetExperiment", function(x) {
 #'
 #' @rdname rowMaps
 setMethod("rowMaps", "ACTIONetExperiment", function(x, all = T) {
-	out = lapply(x@rowMaps, function(M) assays(M)$X)
+	out = as(lapply(x@rowMaps, function(M) assays(M)$X), "SimpleList")
+	
 	if(all == F & length(out) > 0) {
 		mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
 		out = out[mask]
@@ -43,7 +44,7 @@ setMethod("rowMaps", "ACTIONetExperiment", function(x, all = T) {
 #'
 #' @rdname colMaps
 setMethod("colMaps", "ACTIONetExperiment", function(x, all = T) {
-	out = lapply(x@colMaps, function(M) assays(M)$X)
+	out = as(lapply(x@colMaps, function(M) assays(M)$X), "SimpleList")
 	if(all == F & length(out) > 0) {
 		mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
 		out = out[mask]
@@ -150,39 +151,36 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
 
 
 
-
-
-GET_FUN <- function(exprs_values, ...) {
-    (exprs_values) # To ensure evaluation
-    function(object, ...) {
-        assay(object, i=exprs_values, ...)
-    }
-}
-
-SET_FUN <- function(exprs_values, ...) {
-    (exprs_values) # To ensure evaluation
-    function(object, ..., value) {
-        assay(object, i=exprs_values, ...) <- value
-        object
-    }
-}
-
 #' @export
 #' @importFrom BiocGenerics counts
-setMethod("counts", "ACTIONetExperiment", GET_FUN("counts"))
+setMethod("counts", "ACTIONetExperiment", function(x) assays(x)$counts)
 
 #' @export
-#' @importFrom BiocGenerics "counts<-"
-setReplaceMethod("counts", c("ACTIONetExperiment", "ANY"), SET_FUN("counts"))
+setMethod("logcounts", "ACTIONetExperiment", function(x) assays(x)$logcounts)
 
 #' @export
-setMethod("logcounts", "ACTIONetExperiment", GET_FUN("logcounts"))
+setMethod("normcounts", "ACTIONetExperiment", function(x) assays(x)$normcounts)
+
 
 #' @export
-setReplaceMethod("logcounts", c("ACTIONetExperiment", "ANY"), SET_FUN("logcounts"))
+setMethod("reducedDims", "ACTIONetExperiment", function(x, full = F) { 
+	Xs = colMaps(x)
+	if(!full) {
+		Xs = Xs[colMapTypes(x) != "internal"]
+	}	
+	
+    transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")	
+    
+    return(transposed_factors)
+})
+
 
 #' @export
-setMethod("normcounts", "ACTIONetExperiment", GET_FUN("normcounts"))
-
-#' @export
-setReplaceMethod("normcounts", c("ACTIONetExperiment", "ANY"), SET_FUN("normcounts"))
+setMethod("reducedDimNames", "ACTIONetExperiment", function(x, full = F) { 
+	Xs = colMaps(x)
+	if(!full) {
+		Xs = Xs[colMapTypes(x) != "internal"]
+	}	
+    
+    return(names(Xs))
+})

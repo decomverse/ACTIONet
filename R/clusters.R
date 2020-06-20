@@ -2,11 +2,11 @@
 #'
 #' @param ace ACTIONet output object
 #' @param clusters Cluster
-#' @param output.slot.name Name of the output in rowFactors(ace) to store results
+#' @param output.slot.name Name of the output in rowMaps(ace) to store results
 #' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
 #' Typically it is either "logcounts" or "logcounts"
 
-#' @return `ACE` object with specificity scores of each cluster added to rowFactors(ace) as a matrix with name defined by output.slot.name
+#' @return `ACE` object with specificity scores of each cluster added to rowMaps(ace) as a matrix with name defined by output.slot.name
 #'
 #' @examples
 #' ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
@@ -31,8 +31,9 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
 	X = specificity.out[["upper_significance"]]
 	colnames(X) = UL
 
-	rowFactors(ace)[[output.slot.name]] = X
-
+	rowMaps(ace)[[output.slot.name]] = X
+	rowMapTypes(ace)[[output.slot.name]] = "reduction"
+	
 	return(ace)
 }
 
@@ -99,7 +100,7 @@ annotate.clusters.using.labels <- function(ace, clusters, labels) {
 #'
 #' @param ace ACTIONet output object
 #' @param marker.genes A list of lists (each a set of markers for a given cell type)
-#' @param specificity.slot.name An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function
+#' @param specificity.slot.name An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function
 #' @param rand.sample.no Number of random permutations (default=1000)
 #'
 #' @return A named list: \itemize{
@@ -118,11 +119,11 @@ annotate.clusters.using.markers <- function(ace, marker.genes, specificity.slot.
 			marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
 	}
 
-	if(! (specificity.slot.name %in% names(rowFactors(ace))) ) {
-		message(sprintf("%s does not exist in rowFactors(ace)", specificity.slot.name))
+	if(! (specificity.slot.name %in% names(rowMaps(ace))) ) {
+		message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
 	}
 
-	specificity.panel = as.matrix(log1p(t(rowFactors(ace)[[specificity.slot.name]])))
+	specificity.panel = as.matrix(log1p(t(rowMaps(ace)[[specificity.slot.name]])))
 
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
