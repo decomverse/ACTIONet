@@ -38,7 +38,7 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
     genes = intersect(unique(genes), rownames(ace))
 
 
-	Z = log1p(rowFactors(ace)[["H_unified_upper_significance"]][genes, ])
+	Z = log1p(rowFactors(ace)[["unified_feature_specificity"]][genes, ])
 	H = colMaps(ace)[["H_unified"]]
 
 	imputed.gene.expression = t(Z %*% H)

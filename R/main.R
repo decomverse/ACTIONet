@@ -44,7 +44,9 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		existing.idx = match(names(ace@colMapsAnnot), nn)
 		if(length(existing.idx) > 0)
 			Annot[existing.idx] = as.list(ace@colMapsAnnot)	
-		ace@colMapsAnnot = SimpleList(Annot)
+		
+		for(n in nn)
+			colMapTypes[[n]] = Annot[[nn]]
 	}	
 	
 	nn = names(rowMaps(ace))
@@ -59,7 +61,8 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		if(length(existing.idx) > 0)
 			Annot[existing.idx] = as.list(ace@rowMapsAnnot)	
 			
-		ace@rowMapsAnnot = SimpleList(Annot)
+		for(n in nn)
+			colMapTypes[[n]] = Annot[[nn]]
 	}
 	   
 
@@ -73,12 +76,10 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     # Prune nonspecific and/or unreliable archetypes
     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold, min_cells = min.cells.per.arch)
 
-	colMaps(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')
-	ace@colMapsAnnot[["H_stacked"]] = list(type = "internal")								
-		
+	colMaps(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')		
 	colMaps(ace)[["C_stacked"]] = as(Matrix::t(pruning.out$C_stacked), 'sparseMatrix')
-	ace@colMapsAnnot[["C_stacked"]] = list(type = "internal")								
 
+	
 
     # Build ACTIONet
     set.seed(0)
@@ -89,7 +90,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     # Layout ACTIONet
 	initial.coordinates = t(scale(t(S_r)))
 	colMaps(ace)[["ACTIONred"]] = initial.coordinates[1:3, ]
-	ace@colMapsAnnot[["ACTIONred"]] = list(type = "internal")								
+	colMapsType(ace)[["ACTIONred"]] = "embedding"
 	
 	if(layout.in.parallel == FALSE) {
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
@@ -98,23 +99,20 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 	}
 
     colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
-	ace@colMapsAnnot[["ACTIONet2D"]] = list(type = "embedding")								
+	colMapsType(ace)[["ACTIONet2D"]] = "embedding"
     
     colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
-	ace@colMapsAnnot[["ACTIONet3D"]] = list(type = "embedding")								
+	colMapsType(ace)[["ACTIONet3D"]] = "embedding"
 	
     colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
-	ace@colMapsAnnot[["denovo_color"]] = list(type = "generic")								
+	colMapsType(ace)[["denovo_color"]] = "embedding"
 
 
 	# Identiy equivalent classes of archetypes and group them together
 	unification.out = unify_archetypes(S_r, pruning.out$C_stacked, pruning.out$H_stacked, min_overlap = 0, resolution = unification.resolution)
 
 	colMaps(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
-	ace@colMapsAnnot[["H_unified"]] = list(type = "internal")								
-	
 	colMaps(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
-	ace@colMapsAnnot[["C_unified"]] = list(type = "internal")								
 	
 	ace$assigned_archetype = unification.out$assigned_archetype
 
@@ -134,14 +132,8 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
-	rowMaps(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
-	ace@rowMapsAnnot[["H_unified_profile"]] = list(type = "internal")
-	
-	rowMaps(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
-	ace@rowMapsAnnot[["H_unified_upper_significance"]] = list(type = "internal")
-
-	rowMaps(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
-	ace@rowMapsAnnot[["H_unified_lower_significance"]] = list(type = "internal")
+	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
+	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
 
 
 	if(full.trace == T) {
@@ -185,7 +177,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 
 
     # Layout ACTIONet
-	initial.coordinates = t(scale(ACTIONet::reducedDims(ace)[[reduction.slot]]))
+	initial.coordinates = t(scale(ACTIONet::colMaps(ace)[[reduction.slot]]))
 	if(layout.in.parallel == FALSE) {
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
     } else { # WARNING! This makes the results none reproducible
@@ -193,8 +185,13 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 	}
 
     colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+	colMapsType(ace)[["ACTIONet2D"]] = "embedding"
+    
     colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
+	colMapsType(ace)[["ACTIONet3D"]] = "embedding"
+
     colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
+	colMapsType(ace)[["denovo_color"]] = "embedding"
 
 	return(ace)
 }
@@ -219,14 +216,20 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
     G = colNets(ace)[["ACTIONet"]]
 
     # re-Layout ACTIONet
-    S_r = t(ACTIONet::reducedDims(ace)[[reduction.slot]])
+    S_r = ACTIONet::colMaps(ace)[[reduction.slot]]
 
 	initial.coordinates = t(scale(t(S_r)))
 	vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 
     colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+	colMapsType(ace)[["ACTIONet2D"]] = "embedding"
+    
     colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
+	colMapsType(ace)[["ACTIONet3D"]] = "embedding"
+	
     colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
+	colMapsType(ace)[["denovo_color"]] = "embedding"
+
 
 	return(ace)
 }
@@ -234,7 +237,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 
 rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION", unified_suffix = "unified") {
 	S = assays(ace)[[data.slot]]
-    S_r = t(ACTIONet::reducedDims(ace)[[reduction.slot]])
+    S_r = t(ACTIONet::colMaps(ace)[[reduction.slot]])
 	C_stacked = Matrix::t(as.matrix(colMaps(ace)[["C_stacked"]]))
 	H_stacked = as.matrix(colMaps(ace)[["H_stacked"]])
     G = colNets(ace)[["ACTIONet"]]
@@ -264,16 +267,15 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 		return(specificity.scores)
 	})
 
-	rowMaps(ace)[[sprintf("H_%s_profile", unified_suffix)]] = specificity.out[["archetypes"]]
-	rowFactors(ace)[[sprintf("H_%s_upper_significance", unified_suffix)]] = specificity.out[["upper_significance"]]
-	rowFactors(ace)[[sprintf("H_%s_lower_significance", unified_suffix)]] = specificity.out[["lower_significance"]]
+	rowMaps(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
 
 	return(ace)
 }
 
 regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "logcounts", reduction.slot = "ACTION") {
 	S = assays(ace)[[data.slot]]
-	S_r = Matrix::t(reducedDims(ace)[[reduction.slot]])
+	S_r = Matrix::t(colMaps(ace)[[reduction.slot]])
 
 	H_stacked = as.matrix(colMaps(ace)[["H_stacked"]])
 	C_stacked = as.matrix(Matrix::t(colMaps(ace)[["C_stacked"]]))
@@ -302,9 +304,8 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "log
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
-	rowFactors(ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
-	rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
-	rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
+	rowFactors(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
+	rowFactors(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
 
 	return(ace)
 }
