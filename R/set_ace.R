@@ -109,7 +109,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
   else{
     sapply(value, function(v){
       par_func = as.character(sys.call(-2)[1])
-      w = paste(sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v)
+      w = paste(sprintf("In %s: Object '%s' has incompatible format and will be dropped.\n", par_func, v))
       warning(w, call. = FALSE)
     }
   }
