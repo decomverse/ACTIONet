@@ -4,15 +4,9 @@
 \alias{annotate.cells.using.markers}
 \title{Directly inferring cell annotations from imputed gene expressions using permutation test}
 \usage{
-annotate.cells.using.markers(
-  ace,
-  marker.genes,
-  rand.sample.no = 100,
-  alpha_val = 0.9,
-  thread_no = 8,
-  imputation = "PageRank",
-  data.slot = "logcounts"
-)
+annotate.cells.using.markers(ace, marker.genes, rand.sample.no = 100,
+  alpha_val = 0.9, thread_no = 8, imputation = "PageRank",
+  data.slot = "logcounts")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

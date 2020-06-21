@@ -4,16 +4,9 @@
 \alias{plot.ACTIONet.3D}
 \title{Main ACTIONet 3D plotting functions}
 \usage{
-\method{plot}{ACTIONet.3D}(
-  ace,
-  labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node.size = 1,
-  CPal = CPal20,
-  coordinate.slot = "ACTIONet3D"
-)
+plot.ACTIONet.3D(ace, labels = NULL, transparency.attr = NULL,
+  trans.z.threshold = -1, trans.fact = 1, node.size = 1,
+  CPal = CPal20, coordinate.slot = "ACTIONet3D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
