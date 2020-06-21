@@ -31,7 +31,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     }
 
     ace = as(ace, "ACTIONetExperiment")
-    
+
 
 	S = assays(ace)[[data.slot]]
     S_r = ACTIONet::colMaps(ace)[[reduction.slot]]
@@ -42,13 +42,13 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     # Prune nonspecific and/or unreliable archetypes
     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold, min_cells = min.cells.per.arch)
 
-	colMaps(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')		
+	colMaps(ace)[["H_stacked"]] = as(pruning.out$H_stacked, 'sparseMatrix')
 	colMapTypes(ace)[["H_stacked"]] = "internal"
-	
+
 	colMaps(ace)[["C_stacked"]] = as(Matrix::t(pruning.out$C_stacked), 'sparseMatrix')
 	colMapTypes(ace)[["C_stacked"]] = "internal"
 
-	
+
 
     # Build ACTIONet
     set.seed(0)
@@ -60,7 +60,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 	initial.coordinates = t(scale(t(S_r)))
 	colMaps(ace)[["ACTIONred"]] = initial.coordinates[1:3, ]
 	colMapTypes(ace)[["ACTIONred"]] = "embedding"
-	
+
 	if(layout.in.parallel == FALSE) {
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = 1)
     } else { # WARNING! This makes the results none reproducible
@@ -69,19 +69,19 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 	X = Matrix::t(vis.out$coordinates)
 	rownames(X) = c("x", "y")
-	colnames(X) = rownames(ace)
-    colMaps(ace)$ACTIONet2D = X    
+	colnames(X) = colnames(ace)
+    colMaps(ace)$ACTIONet2D = X
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
-    
+
 	X = Matrix::t(vis.out$coordinates_3D)
 	rownames(X) = c("x", "y", "z")
-	colnames(X) = rownames(ace)
+	colnames(X) = colnames(ace)
     colMaps(ace)$ACTIONet3D = X
     colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
 	X = Matrix::t(vis.out$colors)
 	rownames(X) = c("r", "g", "b")
-	colnames(X) = rownames(ace)
+	colnames(X) = colnames(ace)
     colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
 
@@ -91,10 +91,10 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 	colMaps(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
 	colMapTypes(ace)[["H_unified"]] = "internal"
-	
+
 	colMaps(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
 	colMapTypes(ace)[["C_unified"]] = "internal"
-	
+
 	ace$assigned_archetype = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
@@ -113,9 +113,9 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
-	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
+	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
 	rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
-	
+
 	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
 	rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
@@ -169,22 +169,22 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 
 	X = Matrix::t(vis.out$coordinates)
 	rownames(X) = c("x", "y")
-	colnames(X) = rownames(ace)
-    colMaps(ace)$ACTIONet2D = X    
+	colnames(X) = colnames(ace)
+    colMaps(ace)$ACTIONet2D = X
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
-    
+
 	X = Matrix::t(vis.out$coordinates_3D)
 	rownames(X) = c("x", "y", "z")
-	colnames(X) = rownames(ace)
+	colnames(X) = colnames(ace)
     colMaps(ace)$ACTIONet3D = X
     colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
 	X = Matrix::t(vis.out$colors)
 	rownames(X) = c("r", "g", "b")
-	colnames(X) = rownames(ace)
+	colnames(X) = colnames(ace)
     colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
-	
+
 	return(ace)
 }
 
@@ -215,19 +215,19 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 
 	X = Matrix::t(vis.out$coordinates)
 	rownames(X) = c("x", "y")
-	colnames(X) = rownames(ace)
-    colMaps(ace)$ACTIONet2D = X    
+	colnames(X) = colnames(ace)
+    colMaps(ace)$ACTIONet2D = X
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
-    
+
 	X = Matrix::t(vis.out$coordinates_3D)
 	rownames(X) = c("x", "y", "z")
-	colnames(X) = rownames(ace)
+	colnames(X) = colnames(ace)
     colMaps(ace)$ACTIONet3D = X
     colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
 	X = Matrix::t(vis.out$colors)
 	rownames(X) = c("r", "g", "b")
-	colnames(X) = rownames(ace)
+	colnames(X) = colnames(ace)
     colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
 
@@ -248,10 +248,10 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 
 	colMaps(ace)[[sprintf("H_%s", unified_suffix)]] = as(unification.out$H_unified, 'sparseMatrix')
 	colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] = "internal"
-	
+
 	colMaps(ace)[[sprintf("C_%s", unified_suffix)]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
 	colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] = "internal"
-	
+
 	colData(ace)[[sprintf("assigned_archetypes_%s", unified_suffix)]]  = unification.out$assigned_archetype
 
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
@@ -273,7 +273,7 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 
 	rowMaps(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = specificity.out[["archetypes"]]
 	rowMapTypes(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = "internal"
-	
+
 	rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
 	rowMapTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
 
@@ -294,7 +294,7 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "log
 
 	colMaps(ace)[["H_unified"]] = as(unification.out$H_unified, 'sparseMatrix')
 	colMapTypes(ace)[["H_unified"]] = "internal"
-	
+
 	colMaps(ace)[["C_unified"]] = as(Matrix::t(unification.out$C_unified), 'sparseMatrix');
 	colMapTypes(ace)[["C_unified"]] = "internal"
 
@@ -315,11 +315,11 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "log
 		colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
 		return(specificity.scores)
 	})
-	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
+	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
 	rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
-	
+
 	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
 	rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
-	
+
 	return(ace)
 }
