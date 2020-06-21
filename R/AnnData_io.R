@@ -26,8 +26,6 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
     
     N = nrow(DF)
     
-
-    
     h5group = h5file$create_group(gname)
     
     h5addAttr.str(h5group, "_index", "index")
@@ -144,7 +142,7 @@ read.HD5DF <- function(h5file, gname, compression.level = 0) {
     }
     rn = h5group[[h5group$attr_open_by_name("_index", ".")$read()]]$read()
     
-    if("column-order" %in% names(h5group)) {
+    if(h5file$attr_exists_by_name(obj_name = gname, attr_name = "column-order")) {
 		cn = h5group$attr_open_by_name("column-order", ".")
 		if (cn$get_storage_size() == 0) {
 			DF = DataFrame(row.names = rn)
