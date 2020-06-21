@@ -305,22 +305,22 @@ setReplaceMethod("rowEmbeddings", "ACTIONetExperiment", function(x, value) {
 
 #' @export
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
-    (x)
-    assays(x)$counts = value
-    x
+    (object)
+    assays(object)$counts = value
+    object
 })
 
 #' @export
 setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
-    (x)
-    assays(x)$logcounts = value
-    x
+    (object)
+    assays(object)$logcounts = value
+    object
 })
 
 
 #' @export
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
-    (x)
-    assays(x)$normcounts = value
-    x
+    (object)
+    assays(object)$normcounts = value
+    object
 })
