@@ -4,12 +4,8 @@
 \alias{map.cell.scores.from.archetype.enrichment}
 \title{Interpolates cell scores from archetype enrichment matrix}
 \usage{
-map.cell.scores.from.archetype.enrichment(
-  ace,
-  enrichment.matrix,
-  normalize = F,
-  H.slot = "H_unified"
-)
+map.cell.scores.from.archetype.enrichment(ace, enrichment.matrix,
+  normalize = F, H.slot = "H_unified")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

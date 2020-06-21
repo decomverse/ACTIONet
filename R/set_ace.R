@@ -4,10 +4,10 @@
 #'
 #' @rdname rowNets
 setReplaceMethod("rowNets", "ACTIONetExperiment", function(x, value) {
-  value <- as(value, "SimpleList")  
-  x@rowNets <- value
-  validObject(x)
-  x
+    value <- as(value, "SimpleList")
+    x@rowNets <- value
+    validObject(x)
+    x
 })
 
 #' Set column-associated networks
@@ -16,10 +16,10 @@ setReplaceMethod("rowNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname colNets
 setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
-  value <- as(value, "SimpleList")  
-  x@colNets <- value
-  validObject(x)
-  x
+    value <- as(value, "SimpleList")
+    x@colNets <- value
+    validObject(x)
+    x
 })
 
 
@@ -29,51 +29,48 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
-	value=as(value, "SimpleList")
-	value = value[names(value) != "", drop = F]
-	if(length(value) > 0) {
-		value = lapply(value, function(M) {
-			if(length(which(is(M) == "SummarizedExperiment")) != 0) {
-				if("X" %in% names(assays(M))) {
-					assays(M)$X	
-				}
-				else {
-					return(NULL)
-				}
-			} else if(is.matrix(M) | is.sparseMatrix(M)) {
-				return(M)
-			} else {
-				return(NULL)
-			}
-		})
-		value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
-		
-		if(length(value) > 0) {
-			nn = intersect(names(value), names(x@rowMaps))
-			for(n in nn) {
-				assays(x@rowMaps[[n]])$X = value[[n]]
-			}
-		
-			nn = setdiff(names(value), names(x@rowMaps))
-			for(n in nn) {
-				X = value[[n]]
-				if(is.null(colnames(X)))
-					colnames(X) = 1:ncol(X)
-				rownames(X) = rownames(x)
-								
-				SE = SummarizedExperiment(assays = list(X = X))
-				if(nrow(SE) <= 3)
-					metadata(SE)$type = "embedding"
-				else
-					metadata(SE)$type = "generic"
-				
-				x@rowMaps[[n]] = SE
-			}
-		}
-	}
-
-  validObject(x)
-	x
+    value = as(value, "SimpleList")
+    value = value[names(value) != "", drop = F]
+    if (length(value) > 0) {
+        value = lapply(value, function(M) {
+            if (length(which(is(M) == "SummarizedExperiment")) != 0) {
+                if ("X" %in% names(assays(M))) {
+                  assays(M)$X
+                } else {
+                  return(NULL)
+                }
+            } else if (is.matrix(M) | is.sparseMatrix(M)) {
+                return(M)
+            } else {
+                return(NULL)
+            }
+        })
+        value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
+        
+        if (length(value) > 0) {
+            nn = intersect(names(value), names(x@rowMaps))
+            for (n in nn) {
+                assays(x@rowMaps[[n]])$X = value[[n]]
+            }
+            
+            nn = setdiff(names(value), names(x@rowMaps))
+            for (n in nn) {
+                X = value[[n]]
+                if (is.null(colnames(X))) 
+                  colnames(X) = 1:ncol(X)
+                rownames(X) = rownames(x)
+                
+                SE = SummarizedExperiment(assays = list(X = X))
+                if (nrow(SE) <= 3) 
+                  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
+                
+                x@rowMaps[[n]] = SE
+            }
+        }
+    }
+    
+    validObject(x)
+    x
 })
 
 
@@ -84,51 +81,48 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
-	value=as(value, "SimpleList")
-	value = value[names(value) != "", drop = F]
-	if(length(value) > 0) {
-		value = lapply(value, function(M) {
-			if(length(which(is(M) == "SummarizedExperiment")) != 0) {
-				if("X" %in% names(assays(M))) {
-					assays(M)$X	
-				}
-				else {
-					return(NULL)
-				}
-			} else if(is.matrix(M) | is.sparseMatrix(M)) {
-				return(M)
-			} else {
-				return(NULL)
-			}
-		})
-		value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
-		
-		if(length(value) > 0) {
-			nn = intersect(names(value), names(x@colMaps))
-			for(n in nn) {
-				assays(x@colMaps[[n]])$X = value[[n]]
-			}
-		
-			nn = setdiff(names(value), names(x@colMaps))
-			for(n in nn) {
-				X = value[[n]]
-				if(is.null(rownames(X)))
-					rownames(X) = 1:nrow(X)
-				colnames(X) = colnames(x)
-				
-				SE = SummarizedExperiment(assays = list(X = X))
-				if(nrow(SE) <= 3)
-					metadata(SE)$type = "embedding"
-				else
-					metadata(SE)$type = "generic"
-				
-				x@colMaps[[n]] = SE
-			}
-		}
-	}
-
-  validObject(x)
-	x
+    value = as(value, "SimpleList")
+    value = value[names(value) != "", drop = F]
+    if (length(value) > 0) {
+        value = lapply(value, function(M) {
+            if (length(which(is(M) == "SummarizedExperiment")) != 0) {
+                if ("X" %in% names(assays(M))) {
+                  assays(M)$X
+                } else {
+                  return(NULL)
+                }
+            } else if (is.matrix(M) | is.sparseMatrix(M)) {
+                return(M)
+            } else {
+                return(NULL)
+            }
+        })
+        value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
+        
+        if (length(value) > 0) {
+            nn = intersect(names(value), names(x@colMaps))
+            for (n in nn) {
+                assays(x@colMaps[[n]])$X = value[[n]]
+            }
+            
+            nn = setdiff(names(value), names(x@colMaps))
+            for (n in nn) {
+                X = value[[n]]
+                if (is.null(rownames(X))) 
+                  rownames(X) = 1:nrow(X)
+                colnames(X) = colnames(x)
+                
+                SE = SummarizedExperiment(assays = list(X = X))
+                if (nrow(SE) <= 3) 
+                  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
+                
+                x@colMaps[[n]] = SE
+            }
+        }
+    }
+    
+    validObject(x)
+    x
 })
 
 
@@ -140,13 +134,13 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMapTypes
 setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
-	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@rowMaps))
-
-	for(n in common_names) {
-		metadata(x@rowMaps[[n]])$type = value[[n]]
-	}
-	validObject(x)
-	x
+    common_names = intersect(names(value)[sapply(value, function(x) is.character(x) & length(x) == 1)], names(x@rowMaps))
+    
+    for (n in common_names) {
+        metadata(x@rowMaps[[n]])$type = value[[n]]
+    }
+    validObject(x)
+    x
 })
 
 
@@ -156,13 +150,13 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname colMapTypes
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
-	common_names = intersect(names(value)[sapply(value, function(x) is.character(x)& length(x) == 1 )], names(x@colMaps))
-	
-	for(n in common_names) {
-		metadata(x@colMaps[[n]])$type = value[[n]]
-	}
-	validObject(x)
-	x
+    common_names = intersect(names(value)[sapply(value, function(x) is.character(x) & length(x) == 1)], names(x@colMaps))
+    
+    for (n in common_names) {
+        metadata(x@colMaps[[n]])$type = value[[n]]
+    }
+    validObject(x)
+    x
 })
 
 
@@ -172,25 +166,25 @@ setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname colMapMeta
 setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
-	value = value[names(value) != ""]
-
-	for(n in names(value)) {
-		DF = value[[n]]
-		if(is.data.frame(DF))
-			DF = DataFrame(DF)
-
-		if((length(which(is(DF) == "DataFrame")) != 0)) {
-			if(nrow(DF) == nrow(x@colMaps[[n]])) {
-				mask = (n == names(x@colMaps))
-				if(sum(mask) == 1) {
-					rowData(x@colMaps[[which(mask)]]) = DF
-				}
-			}
-		}
-	}
-
-	validObject(x)
-	x
+    value = value[names(value) != ""]
+    
+    for (n in names(value)) {
+        DF = value[[n]]
+        if (is.data.frame(DF)) 
+            DF = DataFrame(DF)
+        
+        if ((length(which(is(DF) == "DataFrame")) != 0)) {
+            if (nrow(DF) == nrow(x@colMaps[[n]])) {
+                mask = (n == names(x@colMaps))
+                if (sum(mask) == 1) {
+                  rowData(x@colMaps[[which(mask)]]) = DF
+                }
+            }
+        }
+    }
+    
+    validObject(x)
+    x
 })
 
 
@@ -201,26 +195,26 @@ setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMapTypes
 setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
-	value = value[names(value) != ""]
-
-
-	for(n in names(value)) {
-		DF = value[[n]]
-		if(is.data.frame(DF))
-			DF = DataFrame(DF)
-
-		if((length(which(is(DF) == "DataFrame")) != 0)) {
-			if(nrow(DF) == ncol(x@rowMaps[[n]])) {
-				mask = (n == names(x@rowMaps))
-				if(sum(mask) == 1) {
-					colData(x@rowMaps[[which(mask)]]) = DF
-				}
-			}
-		}
-	}
-
-	validObject(x)
-	x
+    value = value[names(value) != ""]
+    
+    
+    for (n in names(value)) {
+        DF = value[[n]]
+        if (is.data.frame(DF)) 
+            DF = DataFrame(DF)
+        
+        if ((length(which(is(DF) == "DataFrame")) != 0)) {
+            if (nrow(DF) == ncol(x@rowMaps[[n]])) {
+                mask = (n == names(x@rowMaps))
+                if (sum(mask) == 1) {
+                  colData(x@rowMaps[[which(mask)]]) = DF
+                }
+            }
+        }
+    }
+    
+    validObject(x)
+    x
 })
 
 
@@ -229,22 +223,22 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 
 #' @export
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
-	(x)	
-	assays(x)$counts = value	
-	x
+    (x)
+    assays(x)$counts = value
+    x
 })
 
 #' @export
 setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
-	(x)	
-	assays(x)$logcounts = value	
-	x
+    (x)
+    assays(x)$logcounts = value
+    x
 })
 
 
 #' @export
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
-	(x)	
-	assays(x)$normcounts = value	
-	x
+    (x)
+    assays(x)$normcounts = value
+    x
 })
