@@ -67,13 +67,22 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	}
 
-    colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+	X = Matrix::t(vis.out$coordinates)
+	colnames(X) = c("x", "y")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$ACTIONet2D = X    
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
     
-    colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
-	colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
-	
-    colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
+	X = Matrix::t(vis.out$coordinates_3D)
+	colnames(X) = c("x", "y", "z")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$ACTIONet3D = X
+    colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
+
+	X = Matrix::t(vis.out$colors)
+	colnames(X) = c("r", "g", "b")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
 
 
@@ -158,15 +167,24 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 		vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 	}
 
-    colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+	X = Matrix::t(vis.out$coordinates)
+	colnames(X) = c("x", "y")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$ACTIONet2D = X    
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
     
-    colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
-	colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
+	X = Matrix::t(vis.out$coordinates_3D)
+	colnames(X) = c("x", "y", "z")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$ACTIONet3D = X
+    colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
-    colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
+	X = Matrix::t(vis.out$colors)
+	colnames(X) = c("r", "g", "b")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
-
+	
 	return(ace)
 }
 
@@ -195,15 +213,23 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 	initial.coordinates = t(scale(t(S_r)))
 	vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 
-    colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
+	X = Matrix::t(vis.out$coordinates)
+	colnames(X) = c("x", "y")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$ACTIONet2D = X    
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
     
-    colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
-	colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
-	
-    colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
-	colMapTypes(ace)[["denovo_color"]] = "embedding"
+	X = Matrix::t(vis.out$coordinates_3D)
+	colnames(X) = c("x", "y", "z")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$ACTIONet3D = X
+    colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
+	X = Matrix::t(vis.out$colors)
+	colnames(X) = c("r", "g", "b")
+	rownames(X) = rownames(ace)
+    colMaps(ace)$denovo_color = X
+	colMapTypes(ace)[["denovo_color"]] = "embedding"
 
 	return(ace)
 }
