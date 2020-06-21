@@ -38,7 +38,6 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 
     value = as(value, "SimpleList")
     value = value[names(value) != "", drop = F]
-
     if (length(value) > 0) {
         value = lapply(value, function(M) {
             if (length(which(is(M) == "SummarizedExperiment")) != 0) {
@@ -56,20 +55,39 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
         value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
 
         if (length(value) > 0) {
-            nn = intersect(names(value), names(x@rowMaps))
-			mismatched_dims = names(which(!sapply(nn, function(n) all(dim(rowMaps(x)[[n]]) == dim(value[[n]])))))			
-            nn = setdiff(nn, mismatched_dims)
-            
-            
+            nn = intersect(names(value), names(x@rowMaps)) # Items to update     
             for (n in nn) {
-                assays(x@rowMaps[[n]])$X = value[[n]]
+				X.old = rowMaps(x)[[n]]
+				X.new = value[[n]]
+				if(all(dim(X.old) == dim(X.new))) {
+					rownames(X.new) = rownames(x)
+					if(is.null(colnames(X.new))) {
+						colnames(X.new) = colnames(X.old)
+					}
+					if(all(colnames(X.new) == colnames(X.old))) {
+						assays(x@rowMaps[[n]])$X = X.new								
+					} else {
+						SE = x@rowMaps[[n]]
+						colnames(SE) = colnames(X.new)
+						assays(SE)$X = X.new
+						x@rowMaps[[n]] = SE
+					}
+				} else { # Dimensions don't match! Create a brand new entry
+					SE = SummarizedExperiment(assays = list(X = X.new))
+					if (nrow(SE) <= 3)
+					  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
+
+					x@rowMaps[[n]] = SE					
+				}
+
             }
 
-            nn = union(setdiff(names(value), names(x@rowMaps)), mismatched_dims)
+            nn = setdiff(names(value), names(x@rowMaps)) # Items to add
+
             for (n in nn) {
                 X = value[[n]]
-                if (is.null(colnames(X)))
-                  colnames(X) = 1:ncol(X)
+                if (is.null(colames(X)))
+                  colames(X) = 1:nrow(X)
                 rownames(X) = rownames(x)
 
                 SE = SummarizedExperiment(assays = list(X = X))
@@ -79,15 +97,16 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
                 x@rowMaps[[n]] = SE
             }
 
-            nn = setdiff(names(x@rowMaps), names(value))
+
+            nn = setdiff(names(x@rowMaps), names(value)) # Items to remove
             x@rowMaps = x@rowMaps[! (names(x@rowMaps) %in% nn) ]
+
         }
     }
 
     validObject(x)
-    return(x)
+    x
 })
-
 
 
 #' Set column-associated factors
@@ -122,15 +141,35 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
         value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
 
         if (length(value) > 0) {
-            nn = intersect(names(value), names(x@colMaps))
-			mismatched_dims = names(which(!sapply(nn, function(n) all(dim(colMaps(x)[[n]]) == dim(value[[n]])))))			
-            nn = setdiff(nn, mismatched_dims)
-            
+            nn = intersect(names(value), names(x@colMaps)) # Items to update     
             for (n in nn) {
-                assays(x@colMaps[[n]])$X = value[[n]]
+				X.old = colMaps(x)[[n]]
+				X.new = value[[n]]
+				if(all(dim(X.old) == dim(X.new))) {
+					colnames(X.new) = colnames(x)
+					if(is.null(rownames(X.new))) {
+						rownames(X.new) = rownames(X.old)
+					}
+					if(all(rownames(X.new) == rownames(X.old))) {
+						assays(x@colMaps[[n]])$X = X.new								
+					} else {
+						SE = x@colMaps[[n]]
+						rownames(SE) = rownames(X.new)
+						assays(SE)$X = X.new
+						x@colMaps[[n]] = SE
+					}
+				} else { # Dimensions don't match! Create a brand new entry
+					SE = SummarizedExperiment(assays = list(X = X.new))
+					if (nrow(SE) <= 3)
+					  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
+
+					x@colMaps[[n]] = SE					
+				}
+
             }
 
-            nn = union(setdiff(names(value), names(x@colMaps)), mismatched_dims)
+            nn = setdiff(names(value), names(x@colMaps)) # Items to add
+
             for (n in nn) {
                 X = value[[n]]
                 if (is.null(rownames(X)))
@@ -145,7 +184,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
             }
 
 
-            nn = setdiff(names(x@colMaps), names(value))
+            nn = setdiff(names(x@colMaps), names(value)) # Items to remove
             x@colMaps = x@colMaps[! (names(x@colMaps) %in% nn) ]
 
         }
