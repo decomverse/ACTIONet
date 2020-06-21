@@ -66,6 +66,9 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
                 
                 x@rowMaps[[n]] = SE
             }
+            
+            nn = setdiff(names(x@colMaps), names(value))
+            x = x[! (names(x) %in% nn) ]            
         }
     }
     
@@ -118,6 +121,11 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
                 
                 x@colMaps[[n]] = SE
             }
+            
+            
+            nn = setdiff(names(x@colMaps), names(value))
+            x = x[! (names(x) %in% nn) ]
+            
         }
     }
     
