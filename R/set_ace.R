@@ -56,7 +56,12 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 		
 			nn = setdiff(names(value), names(x@rowMaps))
 			for(n in nn) {
-				SE = SummarizedExperiment(assays = list(X = value[[n]]))
+				X = value[[n]]
+				if(is.null(colnames(X)))
+					colnames(X) = 1:ncol(X)
+				rownames(X) = rownames(x)
+								
+				SE = SummarizedExperiment(assays = list(X = X))
 				if(nrow(SE) <= 3)
 					metadata(SE)$type = "embedding"
 				else
@@ -106,7 +111,12 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 		
 			nn = setdiff(names(value), names(x@colMaps))
 			for(n in nn) {
-				SE = SummarizedExperiment(assays = list(X = value[[n]]))
+				X = value[[n]]
+				if(is.null(rownames(X)))
+					rownames(X) = 1:nrow(X)
+				colnames(X) = colnames(x)
+				
+				SE = SummarizedExperiment(assays = list(X = X))
 				if(nrow(SE) <= 3)
 					metadata(SE)$type = "embedding"
 				else
