@@ -153,21 +153,27 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
 
 #' @export
 #' @importFrom BiocGenerics counts
-setMethod("counts", "ACTIONetExperiment", function(x) assays(x)$counts)
+setMethod("counts", "ACTIONetExperiment", function(object) {
+	(object)
+	assays(object)$counts
+})
 
 #' @export
-setMethod("logcounts", "ACTIONetExperiment", function(x) assays(x)$logcounts)
+setMethod("logcounts", "ACTIONetExperiment", function(object) {
+	(object)
+	assays(object)$logcounts
+})
 
 #' @export
-setMethod("normcounts", "ACTIONetExperiment", function(x) assays(x)$normcounts)
+setMethod("normcounts", "ACTIONetExperiment", function(object) { 
+	(object)
+	assays(object)$normcounts
+})
 
 
 #' @export
 setMethod("reducedDims", "ACTIONetExperiment", function(x, full = F) { 
 	Xs = colMaps(x)
-	if(!full) {
-		Xs = Xs[colMapTypes(x) != "internal"]
-	}	
 	
     transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")	
     
@@ -176,11 +182,8 @@ setMethod("reducedDims", "ACTIONetExperiment", function(x, full = F) {
 
 
 #' @export
-setMethod("reducedDimNames", "ACTIONetExperiment", function(x, full = F) { 
+setMethod("reducedDimNames", "ACTIONetExperiment", function(x) { 
 	Xs = colMaps(x)
-	if(!full) {
-		Xs = Xs[colMapTypes(x) != "internal"]
-	}	
-    
+
     return(names(Xs))
 })

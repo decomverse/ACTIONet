@@ -453,10 +453,10 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
 
 	specificity.out = ACTIONet.out$unification.out$DE.core
 	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
-	rowMapsTypes(ace)[["unified_feature_profile"]] = "internal"
+	rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
 	
 	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-	rowMapsTypes(ace)[["unified_feature_specificity"]] = "reduction"	
+	rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"	
 	
 
 	# Prepare output
