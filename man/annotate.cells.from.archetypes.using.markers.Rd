@@ -4,12 +4,8 @@
 \alias{annotate.cells.from.archetypes.using.markers}
 \title{Annotates cells by interpolating marker-based archetype annotations}
 \usage{
-annotate.cells.from.archetypes.using.markers(
-  ace,
-  marker.genes,
-  rand.sample.no = 1000,
-  unified_suffix = "unified"
-)
+annotate.cells.from.archetypes.using.markers(ace, marker.genes,
+  rand.sample.no = 1000, unified_suffix = "unified")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

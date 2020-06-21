@@ -4,15 +4,9 @@
 \alias{run.SCINET.clusters}
 \title{Computes a list of cluster-specific interactomes}
 \usage{
-run.SCINET.clusters(
-  ace,
-  specificity.slot.name,
-  G = NULL,
-  min.edge.weight = 2,
-  spec.sample_no = 1000,
-  thread_no = 8,
-  compute.topo.specificity = T
-)
+run.SCINET.clusters(ace, specificity.slot.name, G = NULL,
+  min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8,
+  compute.topo.specificity = T)
 }
 \arguments{
 \item{ace}{ACTIONet output object}

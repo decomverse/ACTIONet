@@ -4,15 +4,12 @@
 #'
 #' @exportMethod coerce
 setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
-    ace = .ACTIONetExperiment(from, rowNets=S4Vectors::SimpleList(), 
-    colNets=S4Vectors::SimpleList(), 
-    rowMaps=S4Vectors::SimpleList(), 
-    colMaps=S4Vectors::SimpleList())
-
-    #rowData(ace) = DataFrame(as.data.frame(rowData(ace)))
-    #colData(ace) = DataFrame(as.data.frame(colData(ace)))
-
-    return(ace)  
+    ace = .ACTIONetExperiment(from, rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(), rowMaps = S4Vectors::SimpleList(), 
+        colMaps = S4Vectors::SimpleList())
+    
+    # rowData(ace) = DataFrame(as.data.frame(rowData(ace))) colData(ace) = DataFrame(as.data.frame(colData(ace)))
+    
+    return(ace)
 })
 
 #' Coerces a ACTIONetExperiment (ACE) method as an SingleCellExperiment (SCE) object
@@ -20,19 +17,18 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
 #' @param from ACTIONetExperiment object
 #'
 #' @exportMethod coerce
-setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {	
-	SE = as(from, "SummarizedExperiment")	
-	sce = as(SE, "SingleCellExperiment")
-	
-	Xs = colMaps(from)
-	Xs = Xs[colMapTypes(from) != "internal"]
-	
+setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
+    SE = as(from, "SummarizedExperiment")
+    sce = as(SE, "SingleCellExperiment")
+    
+    Xs = colMaps(from)
+    Xs = Xs[colMapTypes(from) != "internal"]
+    
     transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")
     reducedDims(sce) = transposed_factors
     
-    #rowData(sce) = DataFrame(as.data.frame(rowData(from)))
-    #colData(sce) = DataFrame(as.data.frame(colData(from)))
-        
+    # rowData(sce) = DataFrame(as.data.frame(rowData(from))) colData(sce) = DataFrame(as.data.frame(colData(from)))
+    
     return(sce)
 })
 
@@ -41,14 +37,14 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
 #' @param from SingleCellExperiment object
 #'
 #' @exportMethod coerce
-setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {	
-	SE = as(from, "SummarizedExperiment")
-	rownames(SE) = rownames(from)
-	rowData(SE) = rowData(from)
-	
-	
-	ace = as(SE, "ACTIONetExperiment")
-    #ace = as(from, "ACTIONetExperiment")
+setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
+    SE = as(from, "SummarizedExperiment")
+    rownames(SE) = rownames(from)
+    rowData(SE) = rowData(from)
+    
+    
+    ace = as(SE, "ACTIONetExperiment")
+    # ace = as(from, 'ACTIONetExperiment')
     
     transposed_factors = as(lapply(reducedDims(from), function(x) SummarizedExperiment(assays = list(X = Matrix::t(x)))), "SimpleList")
     colMaps(ace) = transposed_factors
