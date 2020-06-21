@@ -62,7 +62,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch.attr = NULL, reduced
 #' batch.vec = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
 #' ace = reduce.and.batch.correct.ace.Harmony(ace)
 reduce.and.batch.correct.ace.Harmony <- function(ace, batch.vec = NULL, reduced_dim = 50, max.iter = 5, data.slot = "logcounts", normalization.method = "default", 
-    reduction.slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+    reduction.slot = "ACTION", seed = 0, SVD_algorithm = 1) {
     ace <- check_if_ace(ace)
     if (!("harmony" %in% rownames(installed.packages()))) {
         message("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.")
