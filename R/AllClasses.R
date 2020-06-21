@@ -44,8 +44,6 @@ ACTIONetExperiment <- function(rowNets=S4Vectors::SimpleList(),
 
 
 
-
-#' @export
 #' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
 	ll = c( names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)), names(colNets(x)), names(rowNets(x)))

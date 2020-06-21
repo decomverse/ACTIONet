@@ -68,20 +68,20 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 	}
 
 	X = Matrix::t(vis.out$coordinates)
-	colnames(X) = c("x", "y")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("x", "y")
+	colnames(X) = rownames(ace)
     colMaps(ace)$ACTIONet2D = X    
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
     
 	X = Matrix::t(vis.out$coordinates_3D)
-	colnames(X) = c("x", "y", "z")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("x", "y", "z")
+	colnames(X) = rownames(ace)
     colMaps(ace)$ACTIONet3D = X
     colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
 	X = Matrix::t(vis.out$colors)
-	colnames(X) = c("r", "g", "b")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("r", "g", "b")
+	colnames(X) = rownames(ace)
     colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
 
@@ -168,20 +168,20 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 	}
 
 	X = Matrix::t(vis.out$coordinates)
-	colnames(X) = c("x", "y")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("x", "y")
+	colnames(X) = rownames(ace)
     colMaps(ace)$ACTIONet2D = X    
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
     
 	X = Matrix::t(vis.out$coordinates_3D)
-	colnames(X) = c("x", "y", "z")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("x", "y", "z")
+	colnames(X) = rownames(ace)
     colMaps(ace)$ACTIONet3D = X
     colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
 	X = Matrix::t(vis.out$colors)
-	colnames(X) = c("r", "g", "b")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("r", "g", "b")
+	colnames(X) = rownames(ace)
     colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
 	
@@ -214,20 +214,20 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 	vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs, thread_no = thread_no)
 
 	X = Matrix::t(vis.out$coordinates)
-	colnames(X) = c("x", "y")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("x", "y")
+	colnames(X) = rownames(ace)
     colMaps(ace)$ACTIONet2D = X    
 	colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
     
 	X = Matrix::t(vis.out$coordinates_3D)
-	colnames(X) = c("x", "y", "z")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("x", "y", "z")
+	colnames(X) = rownames(ace)
     colMaps(ace)$ACTIONet3D = X
     colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
 
 	X = Matrix::t(vis.out$colors)
-	colnames(X) = c("r", "g", "b")
-	rownames(X) = rownames(ace)
+	rownames(X) = c("r", "g", "b")
+	colnames(X) = rownames(ace)
     colMaps(ace)$denovo_color = X
 	colMapTypes(ace)[["denovo_color"]] = "embedding"
 
