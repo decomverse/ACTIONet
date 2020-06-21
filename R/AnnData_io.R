@@ -293,49 +293,52 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
     if (full.export) {
         print("Full export mode")
         
-        obsm.private.idx = setdiff(1:length(obsm.mats), obsm.public.idx)
-        if (length(obsm.private.idx) > 0) {
-            obsm.subset = obsm.mats[obsm.private.idx]
-            for (i in 1:length(obsm.subset)) {
-                nn = names(obsm.subset)[[i]]
-                Y = obsm.subset[[i]]
-                if (is.matrix(Y)) {
-                  obsm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
-                } else {
-                  write.HD5SpMat(obsm, nn, Y, compression.level)
-                }
-                
-                factor_info = obsm_annot$create_group(nn)
-                factor_info[["type"]] = colMapTypes(ace)[[nn]]
-                factor.meta.DF = colMapMeta(ace)[[nn]]
-                if (ncol(factor.meta.DF) > 0) {
-                  write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
-                }
-            }
-        }
-        
-        varm.private.idx = setdiff(1:length(varm.mats), varm.public.idx)
-        if (length(varm.private.idx) > 0) {
-            varm.subset = varm.mats[varm.private.idx]
-            for (i in 1:length(varm.subset)) {
-                nn = names(varm.subset)[[i]]
-                Y = Matrix::t(varm.subset[[i]])
-                
-                if (is.matrix(Y)) {
-                  varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
-                } else {
-                  write.HD5SpMat(varm, nn, Y, compression.level)
-                }
-                
-                factor_info = varm_annot$create_group(nn)
-                factor_info[["type"]] = rowMapTypes(ace)[[nn]]
-                factor.meta.DF = rowMapMeta(ace)[[nn]]
-                if (ncol(factor.meta.DF) > 0) {
-                  write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
-                }
-            }
-        }
-        
+        if(length(obsm.public.idx) < length(obsm.mats)) {
+			obsm.private.idx = setdiff(1:length(obsm.mats), obsm.public.idx)
+			if (length(obsm.private.idx) > 0) {
+				obsm.subset = obsm.mats[obsm.private.idx]
+				for (i in 1:length(obsm.subset)) {
+					nn = names(obsm.subset)[[i]]
+					Y = obsm.subset[[i]]
+					if (is.matrix(Y)) {
+					  obsm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+					} else {
+					  write.HD5SpMat(obsm, nn, Y, compression.level)
+					}
+					
+					factor_info = obsm_annot$create_group(nn)
+					factor_info[["type"]] = colMapTypes(ace)[[nn]]
+					factor.meta.DF = colMapMeta(ace)[[nn]]
+					if (ncol(factor.meta.DF) > 0) {
+					  write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
+					}
+				}
+			}
+		}
+		
+		if(length(varm.public.idx) < length(varm.mats)) {
+			varm.private.idx = setdiff(1:length(varm.mats), varm.public.idx)
+			if (length(varm.private.idx) > 0) {
+				varm.subset = varm.mats[varm.private.idx]
+				for (i in 1:length(varm.subset)) {
+					nn = names(varm.subset)[[i]]
+					Y = Matrix::t(varm.subset[[i]])
+					
+					if (is.matrix(Y)) {
+					  varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+					} else {
+					  write.HD5SpMat(varm, nn, Y, compression.level)
+					}
+					
+					factor_info = varm_annot$create_group(nn)
+					factor_info[["type"]] = rowMapTypes(ace)[[nn]]
+					factor.meta.DF = rowMapMeta(ace)[[nn]]
+					if (ncol(factor.meta.DF) > 0) {
+					  write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
+					}
+				}
+			}
+		}
         
         
         # Export 'obsp'-associated matrices, i.e. colNets(): obs in AnnData ~ cols in SCE ~ cells => cell-cell networks (such as ACTIONet)
