@@ -139,10 +139,6 @@ setGeneric("colMapMeta<-", function(x, ...) standardGeneric("colMapMeta<-"))
 
 
 
-
-
-
-
 #' Get row embeddings
 #'
 #' @param x ACTIONetExperiment object
@@ -160,6 +156,24 @@ setGeneric("rowEmbeddings", function(x, ...) standardGeneric("rowEmbeddings"))
 #'
 #' @exportMethod colEmbeddings
 setGeneric("colEmbeddings", function(x, ...) standardGeneric("colEmbeddings"))
+
+#' Set row embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowEmbeddings
+setGeneric("rowEmbeddings<-", function(x, ...) standardGeneric("rowEmbeddings<-"))
+
+
+
+#' Set column embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colEmbeddings
+setGeneric("colEmbeddings<-", function(x, ...) standardGeneric("colEmbeddings<-"))
 
 
 #' Get row reductions
@@ -180,7 +194,7 @@ setGeneric("rowReductions", function(x, ...) standardGeneric("rowReductions"))
 #' @exportMethod colReductions
 setGeneric("colReductions", function(x, ...) standardGeneric("colReductions"))
 
-#' Set colReductions
+#' Set column reductions
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
@@ -188,15 +202,7 @@ setGeneric("colReductions", function(x, ...) standardGeneric("colReductions"))
 #' @exportMethod colReductions<-
 setGeneric("colReductions<-", function(x, ...) standardGeneric("colReductions<-"))
 
-#' Set rowReductions
-#'
-#' @param x ACTIONetExperiment object
-#' @param ... other parameters
-#'
-#' @exportMethod rowReductions<-
-setGeneric("rowReductions<-", function(x, ...) standardGeneric("rowReductions<-"))
-
-#' Set rowReductions
+#' Set row reductions
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
