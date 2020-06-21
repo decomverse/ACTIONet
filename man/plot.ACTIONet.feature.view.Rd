@@ -28,6 +28,6 @@ Featur view
 Plots projection of features onto the ACTIONet plot
 }
 \examples{
-feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 }

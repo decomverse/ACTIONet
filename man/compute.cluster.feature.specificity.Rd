@@ -15,7 +15,7 @@ compute.cluster.feature.specificity(ace, clusters, output.slot.name,
 \item{output.slot.name}{Name of the output in rowMaps(ace) to store results}
 
 \item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
-Typically it is either "logcounts" or "logcounts"}
+Typically it is either 'logcounts' or 'logcounts'}
 }
 \value{
 `ACE` object with specificity scores of each cluster added to rowMaps(ace) as a matrix with name defined by output.slot.name
@@ -24,5 +24,5 @@ Typically it is either "logcounts" or "logcounts"}
 Computes feature (i.e. gene) specificity scores for each cluster
 }
 \examples{
-ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
+ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
 }

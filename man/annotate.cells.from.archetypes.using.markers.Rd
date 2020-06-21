@@ -26,7 +26,7 @@ Annotates cells by interpolating marker-based archetype annotations
 }
 \examples{
 
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
 labels = cell.annotations$Labels

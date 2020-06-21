@@ -32,6 +32,6 @@ ace with updated annotations added to ace$annotations
 Uses a variant of the label propagation algorithm to correct likely noisy labels
 }
 \examples{
-ace = add.cell.annotations(ace, cell.labels, "input_annotations")
-ace = correct.cell.annotations(ace, "input_annotations", "updated_annotations")
+ace = add.cell.annotations(ace, cell.labels, 'input_annotations')
+ace = correct.cell.annotations(ace, 'input_annotations', 'updated_annotations')
 }

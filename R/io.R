@@ -125,8 +125,7 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...)
         mtx_file = "matrix.mtx"
         feature_annotations = "genes.tsv"
         sample_annotations = "barcodes.tsv"
-    } else 
-    if ((3 <= version) & (version < 4)) {
+    } else if ((3 <= version) & (version < 4)) {
         mtx_file = "matrix.mtx.gz"
         feature_annotations = "features.tsv.gz"
         sample_annotations = "barcodes.tsv.gz"

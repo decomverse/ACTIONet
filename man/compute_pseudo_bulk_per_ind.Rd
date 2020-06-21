@@ -7,7 +7,7 @@
 compute_pseudo_bulk_per_ind(S, sample_assignments, individuals)
 }
 \arguments{
-\item{S}{Input matrix ("sparseMatrix")}
+\item{S}{Input matrix ('sparseMatrix')}
 
 \item{sample_assignments}{Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})}
 
@@ -21,8 +21,8 @@ Computes pseudobulk profiles (groups[k1] x individuals[k2])
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-G = build_ACTIONet(prune.out$H_stacked)
+\\tG = build_ACTIONet(prune.out$H_stacked)
 unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 cell.clusters = unification.out$sample_assignments
-pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
+\\tpbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
 }
