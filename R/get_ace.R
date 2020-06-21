@@ -5,7 +5,7 @@
 #' @rdname rowNets
 setMethod("rowNets", "ACTIONetExperiment", function(x) {
     out <- x@rowNets
-    
+
     out
 })
 
@@ -17,7 +17,7 @@ setMethod("rowNets", "ACTIONetExperiment", function(x) {
 #' @rdname colNets
 setMethod("colNets", "ACTIONetExperiment", function(x) {
     out <- x@colNets
-    
+
     out
 })
 
@@ -29,12 +29,12 @@ setMethod("colNets", "ACTIONetExperiment", function(x) {
 #' @rdname rowMaps
 setMethod("rowMaps", "ACTIONetExperiment", function(x, all = T) {
     out = as(lapply(x@rowMaps, function(M) assays(M)$X), "SimpleList")
-    
+
     if (all == F & length(out) > 0) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -49,7 +49,7 @@ setMethod("colMaps", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -64,7 +64,7 @@ setMethod("rowMapTypes", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -79,7 +79,7 @@ setMethod("colMapTypes", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -96,7 +96,7 @@ setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -111,7 +111,7 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -130,7 +130,7 @@ setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -145,7 +145,7 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -174,10 +174,10 @@ setMethod("normcounts", "ACTIONetExperiment", function(object) {
 #' @export
 setMethod("reducedDims", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
-    Xs[colMapTypes(x) %in% c("embedding", "reduction")]
-    
+    Xs = Xs[colMapTypes(x) %in% c("embedding", "reduction")]
+
     transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")
-    
+
     return(transposed_factors)
 })
 
@@ -185,8 +185,8 @@ setMethod("reducedDims", "ACTIONetExperiment", function(x) {
 #' @export
 setMethod("reducedDimNames", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
-    Xs[colMapTypes(x) %in% c("embedding", "reduction")]
-    
+    Xs = Xs[colMapTypes(x) %in% c("embedding", "reduction")]
+
     return(names(Xs))
 })
 
@@ -197,16 +197,16 @@ setMethod("reducedDimNames", "ACTIONetExperiment", function(x) {
 #' @export
 setMethod("rowEmbeddings", "ACTIONetExperiment", function(x) {
     Xs = rowMaps(x)
-    Xs[rowMapTypes(x) %in% c("embedding")]
-    
+    Xs = Xs[rowMapTypes(x) %in% c("embedding")]
+
     return(Xs)
 })
 
 #' @export
 setMethod("colEmbeddings", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
-    Xs[colMapTypes(x) %in% c("embedding")]
-    
+    Xs = Xs[colMapTypes(x) %in% c("embedding")]
+
     return(Xs)
 })
 
@@ -214,8 +214,8 @@ setMethod("colEmbeddings", "ACTIONetExperiment", function(x) {
 #' @export
 setMethod("rowReductions", "ACTIONetExperiment", function(x) {
     Xs = rowMaps(x)
-    Xs[rowMapTypes(x) %in% c("reduction")]
-    
+    Xs = Xs[rowMapTypes(x) %in% c("reduction")]
+
     return(Xs)
 })
 
@@ -223,7 +223,7 @@ setMethod("rowReductions", "ACTIONetExperiment", function(x) {
 #' @export
 setMethod("colReductions", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
-    Xs[colMapTypes(x) %in% c("reduction")]
-    
+    Xs = Xs[colMapTypes(x) %in% c("reduction")]
+
     return(Xs)
 })
