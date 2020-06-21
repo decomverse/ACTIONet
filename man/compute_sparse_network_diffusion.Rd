@@ -26,6 +26,6 @@ Computes sparse network diffusion over a given network, starting with an arbitra
 }
 \examples{
 G = colNets(ace)$ACTIONet
-gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+gene.expression = Matrix::t(logcounts(ace))[c('CD19', 'CD14', 'CD16'), ]
 smoothed.expression = compute_sparse_network_diffusion(G, gene.expression)
 }

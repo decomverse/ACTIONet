@@ -15,11 +15,11 @@ annotate.cells.using.markers(ace, marker.genes, rand.sample.no = 100,
 
 \item{rand.sample.no}{Number of random permutations (default=1000)}
 
-\item{alpha_val}{Random-walk parameter for gene imputation (if imputation = "PageRank")}
+\item{alpha_val}{Random-walk parameter for gene imputation (if imputation = 'PageRank')}
 
-\item{thread_no}{Number of parallel threads used for gene imputation (if imputation = "PageRank")}
+\item{thread_no}{Number of parallel threads used for gene imputation (if imputation = 'PageRank')}
 
-\item{imputation}{Gene imputation method. Can be either "PageRank" (default) or "archImpute"}
+\item{imputation}{Gene imputation method. Can be either 'PageRank' (default) or 'archImpute'}
 }
 \value{
 A named list: \itemize{
@@ -32,7 +32,7 @@ A named list: \itemize{
 Directly inferring cell annotations from imputed gene expressions using permutation test
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 arch.annot = annotate.cells.using.markers(ace, marker.genes = marker.genes)
 cell.labels = arch.annot$Labels

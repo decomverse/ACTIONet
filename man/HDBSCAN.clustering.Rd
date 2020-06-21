@@ -10,7 +10,7 @@ HDBSCAN.clustering(ace, minPoints = 30, minClusterSize = 30,
 \arguments{
 \item{ace}{Input results to be clustered
 minPoints, minClusterSize HDBSCAN parameters (default = 30,30)
-archetype.slot Slot of archeypte to use for clustering (default="H_unified");}
+archetype.slot Slot of archeypte to use for clustering (default='H_unified');}
 }
 \value{
 clusters

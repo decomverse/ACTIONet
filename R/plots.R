@@ -1017,31 +1017,18 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
 
 
 gate.archetypes <- function(ace, i, j, H.slot = "H_unified") {
-	require(plotly)
-	H = colMaps(ace)[[H.slot]]
-	hx = H[i, ]
-	hy = H[j, ]
-	
-	fig <- plot_ly(x = hx, y = hy) 
-	
-	fig <- fig %>%
-	  add_trace(type='histogram2dcontour')
-	
-	fig
-	
-	# library(dash)
-	# library(dashCoreComponents)
-	# library(dashHtmlComponents)
-	# 
-	# app <- Dash$new()
-	# app$layout(
-	#     htmlDiv(
-	#         list(
-	#             dccGraph(figure=fig) 
-	#         )
-	#      )
-	# )
-	# 
-	# app$run_server(debug=TRUE, dev_tools_hot_reload=FALSE)	
+    require(plotly)
+    H = colMaps(ace)[[H.slot]]
+    hx = H[i, ]
+    hy = H[j, ]
+    
+    fig <- plot_ly(x = hx, y = hy)
+    
+    fig <- fig %>% add_trace(type = "histogram2dcontour")
+    
+    fig
+    
+    # library(dash) library(dashCoreComponents) library(dashHtmlComponents) app <- Dash$new() app$layout( htmlDiv( list( dccGraph(figure=fig)
+    # ) ) ) app$run_server(debug=TRUE, dev_tools_hot_reload=FALSE)
 }
 

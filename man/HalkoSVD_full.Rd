@@ -7,7 +7,7 @@
 HalkoSVD_full(A, dim, iters = 5L, seed = 0L)
 }
 \arguments{
-\item{A}{Input matrix ("matrix")}
+\item{A}{Input matrix ('matrix')}
 
 \item{dim}{Dimension of SVD decomposition}
 
