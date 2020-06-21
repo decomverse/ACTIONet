@@ -227,11 +227,13 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
     
     ## Write obs (colData() in ace)
     obs.DF = as.data.frame(colData(ace))
-    write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
+    if(ncol(obs.DF) > 0)
+		write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
     
     ## Write var (matching rowData() in ace)
     var.DF = as.data.frame(rowData(ace))
-    write.HD5DF(h5file, "var", var.DF, compression.level = compression.level)
+    if(ncol(var.DF) > 0)
+		write.HD5DF(h5file, "var", var.DF, compression.level = compression.level)
     
     ## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
     obsm = h5file$create_group("obsm")
@@ -372,12 +374,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     h5file = H5File$new(fname, mode = "r")
     
     objs = names(h5file)
-    missing.elemenets = setdiff(list("X", "obs", "var"), objs)
-    if (0 < length(missing.elemenets)) {
-        R.utils::printf("[%s] missing from the h5ad file. Abort.\n", paste(missing.elemenets, sep = ","))
-        return()
-    }
-    
+
     
     X.attr = h5attributes(h5file[["X"]])
     if (length(X.attr) == 0) {
