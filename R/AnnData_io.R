@@ -409,11 +409,15 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     
     if ("obs" %in% objs) {
         obs.DF = read.HD5DF(h5file = h5file, gname = "obs")
-    }
+    } else {
+		obs.DF = DataFrame(row.names = paste("Cell", 1:ncol(X), sep = ""))		
+	}
     
     if ("var" %in% objs) {
         var.DF = read.HD5DF(h5file = h5file, gname = "var")
-    }
+    } else {
+		var.DF = DataFrame(row.names = paste("Gene", 1:nrow(X), sep = ""))		
+	}
     
     input_assays = lapply(input_assays, function(X) {
         rownames(X) = rownames(var.DF)
@@ -523,3 +527,4 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     
     return(ace)
 }
+
