@@ -105,10 +105,10 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 		return(specificity.scores)
 	})
 	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
-	rowMapsTypes(ace)[["unified_feature_profile"]] = "internal"
+	rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
 	
 	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-	rowMapsTypes(ace)[["unified_feature_specificity"]] = "reduction"
+	rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
 	if(full.trace == T) {
 		# Prepare output
@@ -246,10 +246,10 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data.slot = "logcou
 	})
 
 	rowMaps(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = specificity.out[["archetypes"]]
-	rowMapsTypes(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = "internal"
+	rowMapTypes(ace)[[sprintf("%s_feature_profile", unified_suffix)]] = "internal"
 	
 	rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
-	rowMapsTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
+	rowMapTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
 
 	return(ace)
 }
@@ -290,10 +290,10 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data.slot = "log
 		return(specificity.scores)
 	})
 	rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]	
-	rowMapsTypes(ace)[["unified_feature_profile"]] = "internal"
+	rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
 	
 	rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-	rowMapsTypes(ace)[["unified_feature_specificity"]] = "reduction"
+	rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 	
 	return(ace)
 }

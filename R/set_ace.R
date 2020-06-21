@@ -218,23 +218,23 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 
 
 #' @export
-setReplaceMethod("counts", "ACTIONetExperiment", function(x, value) {
-	assays(x)$counts = value
-	
+setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
+	(x)	
+	assays(x)$counts = value	
 	x
 })
 
 #' @export
-setReplaceMethod("logcounts", "ACTIONetExperiment", function(x, value) {
-	assays(x)$logcounts = value
-	
+setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
+	(x)	
+	assays(x)$logcounts = value	
 	x
 })
 
 
 #' @export
-setReplaceMethod("normcounts", "ACTIONetExperiment", function(x, value) {
-	assays(x)$normcounts = value
-	
+setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
+	(x)	
+	assays(x)$normcounts = value	
 	x
 })
