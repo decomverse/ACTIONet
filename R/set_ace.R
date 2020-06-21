@@ -56,9 +56,11 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
         value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
 
         if (length(value) > 0) {
-			mismatched_dims = names(which(!sapply(nn, function(n) all(dim(rowMaps(x)[[n]]) == dim(value[[n]])))))
-			
-            nn = setdiff(intersect(names(value), names(x@rowMaps)), mismatched_dims)           
+            nn = intersect(names(value), names(x@rowMaps))
+			mismatched_dims = names(which(!sapply(nn, function(n) all(dim(rowMaps(x)[[n]]) == dim(value[[n]])))))			
+            nn = setdiff(nn, mismatched_dims)
+            
+            
             for (n in nn) {
                 assays(x@rowMaps[[n]])$X = value[[n]]
             }
@@ -120,11 +122,11 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
         value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
 
         if (length(value) > 0) {
-			mismatched_dims = names(which(!sapply(nn, function(n) all(dim(colMaps(x)[[n]]) == dim(value[[n]])))))
-			
-            nn = setdiff(intersect(names(value), names(x@colMaps)), mismatched_dims)
+            nn = intersect(names(value), names(x@colMaps))
+			mismatched_dims = names(which(!sapply(nn, function(n) all(dim(colMaps(x)[[n]]) == dim(value[[n]])))))			
+            nn = setdiff(nn, mismatched_dims)
+            
             for (n in nn) {
-				print(n)
                 assays(x@colMaps[[n]])$X = value[[n]]
             }
 

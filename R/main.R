@@ -24,7 +24,7 @@
 #' ACTIONet.out = run.ACTIONet(ace)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, 
+run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 5, min_specificity_z_threshold = -1, network_density = 1, mutual_edges_only = TRUE, 
     layout_compactness = 50, layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0, data.slot = "logcounts", reduction.slot = "ACTION", 
     unification.resolution = 1, max_iter_ACTION = 50, full.trace = T) {
     if (!(data.slot %in% names(assays(ace)))) {
