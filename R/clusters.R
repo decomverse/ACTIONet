@@ -21,7 +21,11 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
     lables = match(clusters, UL)
     
     # Compute gene specificity for each cluster
-    specificity.out = compute_cluster_feature_specificity(S, lables)
+    if(is.matrix(S)) {
+		specificity.out = compute_cluster_feature_specificity_full(S, lables)
+	} else {
+		specificity.out = compute_cluster_feature_specificity(S, lables)
+	}
     specificity.out = lapply(specificity.out, function(specificity.scores) {
         rownames(specificity.scores) = rownames(ace)
         colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))

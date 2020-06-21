@@ -12,7 +12,7 @@
 #' @examples
 #' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE, min_feats_per_cell = 500)
 import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", sample_annotations = "barcodes.tsv.gz", 
-    sep = "\t", prefilter = FALSE, ...) {
+    sep = "\t", use.names = T, prefilter = FALSE, ...) {
     require(ACTIONet)
     require(S4Vectors)
     
@@ -34,7 +34,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
         stop(err)
     }
     
-    message(sptinf("Reading counts ...\n"))
+    message(sprintf("Reading counts ...\n"))
     counts.mat = Matrix::readMM(count.file)
     
     feature_table = read.table(feature.file, header = F, sep = sep, as.is = TRUE)
