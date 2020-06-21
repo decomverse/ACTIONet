@@ -66,9 +66,9 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 
                 x@rowMaps[[n]] = SE
             }
-            
-            nn = setdiff(names(x@colMaps), names(value))
-            x = x[! (names(x) %in% nn) ]            
+
+            nn = setdiff(names(x@rowMaps), names(value))
+            x@rowMaps = x@rowMaps[! (names(x@rowMaps) %in% nn) ]
         }
     }
 
@@ -121,11 +121,11 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 
                 x@colMaps[[n]] = SE
             }
-            
-            
+
+
             nn = setdiff(names(x@colMaps), names(value))
-            x = x[! (names(x) %in% nn) ]
-            
+            x@colMaps = x@colMaps[! (names(x@colMaps) %in% nn) ]
+
         }
     }
 
@@ -229,7 +229,7 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 #'
 #' @return List of matrices
 #'
-#' @rdname rowMapMeta
+#' @rdname colReductions
 setReplaceMethod("colReductions", "ACTIONetExperiment", function(x, value) {
     (x)
     for(i in seq_along(value)){
@@ -239,7 +239,47 @@ setReplaceMethod("colReductions", "ACTIONetExperiment", function(x, value) {
     x
 })
 
+#' Set row-associated reductions
+#'
+#' @return List of matrices
+#'
+#' @rdname rowReductions
+setReplaceMethod("rowReductions", "ACTIONetExperiment", function(x, value) {
+    (x)
+    for(i in seq_along(value)){
+      rowMaps(x)[[names(value)[i]]] = value[[i]]
+      rowMapTypes(x)[[names(value)[i]]] = "reduction"
+    }
+    x
+})
 
+#' Set column-associated embeddings
+#'
+#' @return List of matrices
+#'
+#' @rdname colEmbeddings
+setReplaceMethod("colEmbeddings", "ACTIONetExperiment", function(x, value) {
+    (x)
+    for(i in seq_along(value)){
+      colMaps(x)[[names(value)[i]]] = value[[i]]
+      colMapTypes(x)[[names(value)[i]]] = "embedding"
+    }
+    x
+})
+
+#' Set row-associated embeddings
+#'
+#' @return List of matrices
+#'
+#' @rdname colEmbeddings
+setReplaceMethod("rowEmbeddings", "ACTIONetExperiment", function(x, value) {
+    (x)
+    for(i in seq_along(value)){
+      rowMaps(x)[[names(value)[i]]] = value[[i]]
+      rowMapTypes(x)[[names(value)[i]]] = "embedding"
+    }
+    x
+})
 
 #' @export
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
