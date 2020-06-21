@@ -29,8 +29,16 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
+
+    if(length(value) == 0){
+      x@rowMaps = SimpleList()
+      validObject(x)
+      return(x)
+    }
+
     value = as(value, "SimpleList")
     value = value[names(value) != "", drop = F]
+
     if (length(value) > 0) {
         value = lapply(value, function(M) {
             if (length(which(is(M) == "SummarizedExperiment")) != 0) {
@@ -73,7 +81,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
     }
 
     validObject(x)
-    x
+    return(x)
 })
 
 
@@ -84,6 +92,13 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #'
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
+
+    if(length(value) == 0){
+      x@colMaps = SimpleList()
+      validObject(x)
+      return(x)
+    }
+
     value = as(value, "SimpleList")
     value = value[names(value) != "", drop = F]
     if (length(value) > 0) {
