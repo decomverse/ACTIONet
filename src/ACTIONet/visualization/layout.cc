@@ -243,7 +243,7 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
 		mat coordinates(result.data(), 2, nV);
-		coordinates = zscore(trans(coordinates));
+		coordinates = robust_zscore(trans(coordinates));
 		
 		printf("Done\n"); fflush(stdout);
 
@@ -264,7 +264,7 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
 		mat coordinates_3D(result.data(), 3, nV);	
-		coordinates_3D = zscore(trans(coordinates_3D));
+		coordinates_3D = robust_zscore(trans(coordinates_3D));
 		
 		printf("Done\n"); fflush(stdout);
 			
