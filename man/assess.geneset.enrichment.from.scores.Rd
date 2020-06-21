@@ -20,7 +20,7 @@ Matrix pathway x cell type/states
 PErforms geneset enrichment analysis on arbitrary gene scores
 }
 \examples{
-data("gProfilerDB_human")
+data('gProfilerDB_human')
 associations = gProfilerDB_human$SYMBOL$WP
 scores = rowMaps(ace)$unified_feature_specificity
 Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)

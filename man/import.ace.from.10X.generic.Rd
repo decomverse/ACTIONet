@@ -12,11 +12,11 @@ import.ace.from.10X.generic(input_path, mtx_file = "matrix.mtx.gz",
 \arguments{
 \item{input_path}{Folder containing input files.}
 
-\item{mtx_file}{Count file in Matrix Market format (default="matrix.mtx.gz").}
+\item{mtx_file}{Count file in Matrix Market format (default='matrix.mtx.gz').}
 
-\item{feature_annotations}{Table of the same size as number of rows in the count matrix (default="features.tsv.gz").}
+\item{feature_annotations}{Table of the same size as number of rows in the count matrix (default='features.tsv.gz').}
 
-\item{sample_annotations}{Table of the same size as number of columns in the count matrix (default="barcodes.tsv.gz").}
+\item{sample_annotations}{Table of the same size as number of columns in the count matrix (default='barcodes.tsv.gz').}
 
 \item{sep}{Column-separator used in the row/column annotations files (default='\\t').}
 

@@ -8,7 +8,7 @@ reduce_kernel(S, reduced_dim = 50L, iter = 5L, seed = 0L,
   reduction_algorithm = 0L, SVD_algorithm = 0L, prenormalize = FALSE)
 }
 \arguments{
-\item{S}{Input matrix ("sparseMatrix")}
+\item{S}{Input matrix ('sparseMatrix')}
 
 \item{reduced_dim}{Dimension of the reduced kernel matrix (default=50)}
 

@@ -29,6 +29,6 @@ Imputed gene expression matrix. Column names are set with imputed genes names an
 Gene expression imputation using network diffusion.
 }
 \examples{
-imputed.genes = impute.genes.using.ACTIONet(ace, c("CD14", "CD19", "CD3G"))
+imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
 plot.ACTIONet.gradient(ace, imputed.genes[, 1])
 }

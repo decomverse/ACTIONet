@@ -29,6 +29,6 @@ A named list \itemize{
 Performs stochastic force-directed layout on the input graph (ACTIONet)
 }
 \examples{
-G = build_ACTIONet(prune.out$H_stacked)
-vis.out = layout_ACTIONet(G, S_r)
+\\tG = build_ACTIONet(prune.out$H_stacked)
+\\tvis.out = layout_ACTIONet(G, S_r)
 }

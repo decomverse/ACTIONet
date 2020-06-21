@@ -21,7 +21,7 @@ plot.ACTIONet.3D(ace, labels = NULL, transparency.attr = NULL,
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
-\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 
 \item{title}{Main title of the plot}
 }

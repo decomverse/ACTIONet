@@ -25,5 +25,5 @@ Builds an interaction network from the multi-level archetypal decompositions
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-G = build_ACTIONet(prune.out$H_stacked)
+\\tG = build_ACTIONet(prune.out$H_stacked)
 }

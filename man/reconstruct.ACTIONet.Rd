@@ -18,7 +18,7 @@ reconstruct.ACTIONet(ace, network_density = 1,
 
 \item{thread_no}{Number of parallel threads (default=0)}
 
-\item{reduction.slot}{Slot in the colMaps(ace) that holds reduced kernel (default="S_r")}
+\item{reduction.slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r')}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 

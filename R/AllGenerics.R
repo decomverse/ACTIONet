@@ -137,3 +137,48 @@ setGeneric("rowMapMeta<-", function(x, ...) standardGeneric("rowMapMeta<-"))
 setGeneric("colMapMeta<-", function(x, ...) standardGeneric("colMapMeta<-"))
 
 
+
+
+
+
+
+
+#' Get row embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowEmbeddings
+setGeneric("rowEmbeddings", function(x, ...) standardGeneric("rowEmbeddings"))
+
+
+
+#' Get column embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colEmbeddings
+setGeneric("colEmbeddings", function(x, ...) standardGeneric("colEmbeddings"))
+
+
+
+
+#' Get row reductions
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowReductions
+setGeneric("rowReductions", function(x, ...) standardGeneric("rowReductions"))
+
+
+
+#' Get column reductions
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colReductions
+setGeneric("colReductions", function(x, ...) standardGeneric("colReductions"))
+

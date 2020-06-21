@@ -16,13 +16,13 @@ reduce.ace(ace, reduced_dim = 50, max.iter = 5,
 
 \item{max.iter}{Number of SVD iterations}
 
-\item{norm.method}{Normalization method to use. See normalize.ace() function (default:"default")
+\item{norm.method}{Normalization method to use. See normalize.ace() function (default:'default')
 (used only if the ace object is not already normalized)}
 
 \item{passphrase}{Passphrase for encrypting column names of the ace object for anonymization}
 }
 \value{
-ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added colMaps(ace)[["S_r"]]
+ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added colMaps(ace)[['S_r']]
 }
 \description{
 Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix

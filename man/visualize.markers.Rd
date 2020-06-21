@@ -24,7 +24,7 @@ visualize.markers(ace, marker.genes, transparency.attr = NULL,
 
 \item{x}{Score vector}
 
-\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 }
 \value{
 Visualized ACTIONet with projected scores
@@ -35,6 +35,6 @@ It also optionally imputes the markers.
 }
 \examples{
 ace = run.ACTIONet(sce)
-x = logcounts(ace)["CD14", ]
-visualize.markers(ace, c("CD14", "CD19", "CD3G"), transparency.attr = ace$node_centrality)
+x = logcounts(ace)['CD14', ]
+visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
 }

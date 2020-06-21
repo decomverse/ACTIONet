@@ -29,8 +29,8 @@ Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-arch.annot = annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = "cluster_specificity_scores")
+ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+arch.annot = annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = 'cluster_specificity_scores')
 }

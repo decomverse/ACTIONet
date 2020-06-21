@@ -11,9 +11,9 @@ assess.geneset.enrichment.gProfiler(genes, category = c("GO:BP", "REAC",
 \arguments{
 \item{genes}{Set of genes}
 
-\item{category}{List of functional categories to analyze (default: c("GO:BP", "REAC", "KEGG"))}
+\item{category}{List of functional categories to analyze (default: c('GO:BP', 'REAC', 'KEGG'))}
 
-\item{organism}{Species name (default = "hsapiens")}
+\item{organism}{Species name (default = 'hsapiens')}
 
 \item{top.terms}{Number of terms to sho}
 

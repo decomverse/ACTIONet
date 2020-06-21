@@ -34,7 +34,7 @@ Identifies and aggregates redundant archetypes into equivalent classes
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-G = build_ACTIONet(prune.out$H_stacked)
+\\tG = build_ACTIONet(prune.out$H_stacked)
 unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 cell.clusters = unification.out$sample_assignments
 }

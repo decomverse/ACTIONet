@@ -12,7 +12,7 @@ run_ACTION_plus(S_r, k_min = 2L, k_max = 30L, max_it = 50L,
 
 \item{k_min}{Minimum number of archetypes to consider (default=2)}
 
-\item{k_max}{Maximum number of archetypes to consider, or "depth" of decomposition (default=30)}
+\item{k_max}{Maximum number of archetypes to consider, or 'depth' of decomposition (default=30)}
 
 \item{max_it, min_delta}{Convergence parameters for archetypal analysis}
 

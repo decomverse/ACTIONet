@@ -18,7 +18,7 @@ reduce.and.batch.correct.ace.Harmony(ace, batch.vec = NULL,
 
 \item{max.iter}{Number of SVD iterations}
 
-\item{norm.method}{Normalization method to use. See normalize.ace() function (default:"default")
+\item{norm.method}{Normalization method to use. See normalize.ace() function (default:'default')
 (used only if the ace object is not already normalized)}
 
 \item{passphrase}{Passphrase for encrypting column names of the ace object for anonymization}
@@ -31,6 +31,6 @@ Reduced ace object with added colMaps(ace)
 }
 \examples{
 ace = import.ace.from.10X(input_path)
-batch.vec = ace$Batch # Assumes sample annotations are in the input_path with "Batch" attribute being provided
+batch.vec = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
 ace = reduce.and.batch.correct.ace.Harmony(ace)
 }

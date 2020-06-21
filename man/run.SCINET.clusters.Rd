@@ -31,10 +31,10 @@ A list of igraph objects
 Computes a list of cluster-specific interactomes
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-network.list = run.SCINET.clusters(ace, "cluster_specificity_scores")
+ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+network.list = run.SCINET.clusters(ace, 'cluster_specificity_scores')
 G = network.list[[1]]
 V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
 }

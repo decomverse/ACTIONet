@@ -11,11 +11,11 @@ convert.ace.rownames(ace, from = "ENSEMBL", to = "SYMBOL",
 \arguments{
 \item{ace}{Input `ace` object}
 
-\item{from}{Source annotation (default="ENSEMBL")}
+\item{from}{Source annotation (default='ENSEMBL')}
 
-\item{to}{Target annotation (default="SYMBOL")}
+\item{to}{Target annotation (default='SYMBOL')}
 
-\item{species}{Either "mouse" or "human" (default="human")}
+\item{species}{Either 'mouse' or 'human' (default='human')}
 }
 \value{
 `SingleCellExeriment` object with renamed rows

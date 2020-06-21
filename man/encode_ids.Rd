@@ -18,5 +18,5 @@ A string array of encoded ids
 Encrypts a set of given input ids
 }
 \examples{
-encoded.ids = encode_ids(colnames(sce))
+\\tencoded.ids = encode_ids(colnames(sce))
 }

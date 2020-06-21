@@ -22,6 +22,6 @@ Enrichment heatmap
 Plots heatmap of the top-ranked features of an enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 plot.top.k.features(feature.enrichment.table, 3)
 }

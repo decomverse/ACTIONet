@@ -172,8 +172,9 @@ setMethod("normcounts", "ACTIONetExperiment", function(object) {
 
 
 #' @export
-setMethod("reducedDims", "ACTIONetExperiment", function(x, full = F) {
+setMethod("reducedDims", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
+    Xs[colMapTypes(x) %in% c("embedding", "reduction")]
     
     transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")
     
@@ -184,6 +185,45 @@ setMethod("reducedDims", "ACTIONetExperiment", function(x, full = F) {
 #' @export
 setMethod("reducedDimNames", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
+    Xs[colMapTypes(x) %in% c("embedding", "reduction")]
     
     return(names(Xs))
+})
+
+
+
+
+
+#' @export
+setMethod("rowEmbeddings", "ACTIONetExperiment", function(x) {
+    Xs = rowMaps(x)
+    Xs[rowMapTypes(x) %in% c("embedding")]
+    
+    return(Xs)
+})
+
+#' @export
+setMethod("colEmbeddings", "ACTIONetExperiment", function(x) {
+    Xs = colMaps(x)
+    Xs[colMapTypes(x) %in% c("embedding")]
+    
+    return(Xs)
+})
+
+
+#' @export
+setMethod("rowReductions", "ACTIONetExperiment", function(x) {
+    Xs = rowMaps(x)
+    Xs[rowMapTypes(x) %in% c("reduction")]
+    
+    return(Xs)
+})
+
+
+#' @export
+setMethod("colReductions", "ACTIONetExperiment", function(x) {
+    Xs = colMaps(x)
+    Xs[colMapTypes(x) %in% c("reduction")]
+    
+    return(Xs)
 })
