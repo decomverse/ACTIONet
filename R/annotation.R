@@ -298,7 +298,7 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 #' labels = cell.annotations$Labels
 annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, unified_suffix = "unified") {
     
-    significance.slot = sprintf("H_%s_upper_significance", unified_suffix)
+    significance.slot = sprintf("%s_feature_specificity", unified_suffix)
     arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, rand.sample.no = rand.sample.no, significance.slot = significance.slot)
     
     enrichment.mat = arch.annot$Enrichment
