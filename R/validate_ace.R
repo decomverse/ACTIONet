@@ -29,7 +29,7 @@ setValidity2("ACTIONetExperiment", function(object) {
             msg <- c(msg, "'nrow(rowMaps[[..]])' should be equal to the number of rows.")
         }
 
-        if ((rownames(value[[i]]) != rownames(object))) {
+        if (any(rownames(value[[i]]) != rownames(object))) {
             msg <- c(msg, "'rownames(rowMaps[[..]])' must match the rownames of ace object.")
         }
     }
@@ -41,7 +41,7 @@ setValidity2("ACTIONetExperiment", function(object) {
             msg <- c(msg, "'nrow(colMaps[[..]])' should be equal to the number of columns.")
         }
 
-        if ((colnames(value[[i]]) != colnames(object))) {
+        if (any(colnames(value[[i]]) != colnames(object))) {
             msg <- c(msg, "'colnames(colMaps[[..]])' must match the colnames of ace object.")
         }
     }
