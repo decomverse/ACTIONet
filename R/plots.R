@@ -864,7 +864,11 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
         celltype.name = names(marker.genes)[idx]
         
         x = imputed.marker.expression[, gene]
-        
+        nnz = round(sum(x^2)^2/sum(x^4))
+        x.threshold = sort(x,decreasing = T)[nnz]
+        x[x < x.threshold] = 0
+        x = x / max(x)
+                
         plot.ACTIONet.gradient(ace, x, transparency.attr, trans.z.threshold, trans.fact, node.size, CPal = CPal, title = gene, alpha_val = 0)
     })
 }
