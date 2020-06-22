@@ -70,7 +70,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 
 BiocManager::install("scater", "scran")
 ```
-ACTIONet interfaces to scran normalization via `scran.normalize()` function.
+ACTIONet interfaces to scran normalization via `normalize.scran()` function.
 
 * [Linnorm](https://bioconductor.riken.jp/packages/3.4/bioc/html/Linnorm.html) is another commonly used normalization technique. You can install it via:
 
@@ -83,7 +83,7 @@ biocLite("Linnorm")
 ```
 
 
-ACTIONet interfaces to scran normalization via `linnorm.normalize()` function.
+ACTIONet interfaces to scran normalization via `normalize.Linnorm()` function.
 
 
 #### General Single-cell processing

@@ -4,9 +4,16 @@
 \alias{correct.cell.annotations}
 \title{Uses a variant of the label propagation algorithm to correct likely noisy labels}
 \usage{
-correct.cell.annotations(ace, annotation.in, annotation.out,
-  LFR.threshold = 2, double.stochastic = FALSE, max_iter = 3,
-  adjust.levels = T, min.cell.fraction = 0.001)
+correct.cell.annotations(
+  ace,
+  annotation.in,
+  annotation.out,
+  LFR.threshold = 2,
+  double.stochastic = FALSE,
+  max_iter = 3,
+  adjust.levels = T,
+  min.cell.fraction = 0.001
+)
 }
 \arguments{
 \item{ace}{Input results to be clustered
