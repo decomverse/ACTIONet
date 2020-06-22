@@ -4,15 +4,21 @@
 \alias{run_ACTION}
 \title{Runs multi-level ACTION decomposition method}
 \usage{
-run_ACTION(S_r, k_min = 2L, k_max = 30L, thread_no = 0L,
-  max_it = 50L, min_delta = 1e-16)
+run_ACTION(
+  S_r,
+  k_min = 2L,
+  k_max = 30L,
+  thread_no = 0L,
+  max_it = 50L,
+  min_delta = 1e-16
+)
 }
 \arguments{
 \item{S_r}{Reduced kernel matrix}
 
 \item{k_min}{Minimum number of archetypes to consider (default=2)}
 
-\item{k_max}{Maximum number of archetypes to consider, or 'depth' of decomposition (default=30)}
+\item{k_max}{Maximum number of archetypes to consider, or "depth" of decomposition (default=30)}
 
 \item{thread_no}{Number of parallel threads (default = 0)}
 

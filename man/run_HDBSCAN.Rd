@@ -20,7 +20,7 @@ A list with \itemize{
 Clusters data points using the hierarchical DBSCAN algorithm.
 }
 \examples{
-S_r = t(reducedDims(ace)[['S_r']])
+S_r = t(reducedDims(ace)[["S_r"]])
 W_r = S_r \%*\% trace$pruning.out$C_stacked
 X = Matrix::t(W_r)
 HDBSCAN.out = run_HDBSCAN(X)

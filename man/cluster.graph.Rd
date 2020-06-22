@@ -4,8 +4,12 @@
 \alias{cluster.graph}
 \title{A wrapper function For Leiden algorithm}
 \usage{
-cluster.graph(G, resolution_parameter = 0.5, initial.clustering = NULL,
-  seed = 0)
+cluster.graph(
+  G,
+  resolution_parameter = 0.5,
+  initial.clustering = NULL,
+  seed = 0
+)
 }
 \arguments{
 \item{G}{Adjacency matrix of the input graph}

@@ -5,8 +5,7 @@
 \title{Identifies and aggregates redundant archetypes into equivalent classes
 (Post-ACTIONet archetype processing)}
 \usage{
-unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 10,
-  resolution = 1)
+unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 10, resolution = 1)
 }
 \arguments{
 \item{S_r}{Reduced kernel profile}
@@ -34,7 +33,7 @@ Identifies and aggregates redundant archetypes into equivalent classes
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-\\tG = build_ACTIONet(prune.out$H_stacked)
+G = build_ACTIONet(prune.out$H_stacked)
 unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 cell.clusters = unification.out$sample_assignments
 }

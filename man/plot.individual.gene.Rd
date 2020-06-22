@@ -4,7 +4,7 @@
 \alias{plot.individual.gene}
 \title{Plot gene expression violin plot}
 \usage{
-plot.individual.gene(ace, labels, gene.name, CPal = CPal20)
+\method{plot}{individual.gene}(ace, labels, gene.name, CPal = CPal20)
 }
 \arguments{
 \item{ace}{ACTIONet output object}

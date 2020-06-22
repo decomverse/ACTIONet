@@ -14,7 +14,7 @@
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-.ACTIONetExperiment <- setClass("ACTIONetExperiment", slots = representation(rowNets = "SimpleList", colNets = "SimpleList", rowMaps = "SimpleList", 
+.ACTIONetExperiment <- setClass("ACTIONetExperiment", slots = representation(rowNets = "SimpleList", colNets = "SimpleList", rowMaps = "SimpleList",
     colMaps = "SimpleList"), contains = "SummarizedExperiment")
 
 
@@ -28,7 +28,7 @@
 #'
 #' @export
 #' @import SummarizedExperiment SummarizedExperiment
-ACTIONetExperiment <- function(rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(), rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList(), 
+ACTIONetExperiment <- function(rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(), rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList(),
     ...) {
     SE <- SummarizedExperiment::SummarizedExperiment(...)
     out <- .ACTIONetExperiment(SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
@@ -37,9 +37,9 @@ ACTIONetExperiment <- function(rowNets = S4Vectors::SimpleList(), colNets = S4Ve
 
 
 
-
+# @S3method .DollarNames ACTIONetExperiment
+#' @method .DollarNames ACTIONetExperiment
 #' @export
-#' @S3method .DollarNames ACTIONetExperiment
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
     ll = c(names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)), names(colNets(x)), names(rowNets(x)))
     grep(pattern, ll, value = TRUE)
@@ -65,7 +65,7 @@ setMethod("$", "ACTIONetExperiment", function(x, name) {
     } else {
         message(sprintf("Attribute %s not found", name))
     }
-    
+
 })
 
 #' @export
@@ -83,6 +83,6 @@ setReplaceMethod("$", "ACTIONetExperiment", function(x, name, value) {
     } else {
         colData(x)[[name]] <- value
     }
-    
+
     x
 })

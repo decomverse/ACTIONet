@@ -7,7 +7,7 @@
 PCA2ACTIONred_full(S, x, sdev, rotation)
 }
 \arguments{
-\item{S}{Input matrix ('sparseMatrix')}
+\item{S}{Input matrix ("sparseMatrix")}
 
 \item{U}{Left singular vectors}
 

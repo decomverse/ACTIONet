@@ -18,6 +18,6 @@ A list with the over/under-logPvals
 Compute feature specificity (from archetype footprints and binary input)
 }
 \examples{
-\\tlogPvals.list = compute_archetype_feature_specificity_bin(S.bin, unification.out$H_unified)
+logPvals.list = compute_archetype_feature_specificity_bin(S.bin, unification.out$H_unified)
 specificity.scores = logPvals.list$upper_significance
 }

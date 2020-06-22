@@ -4,19 +4,26 @@
 \alias{reduce.and.batch.correct.ace.Harmony}
 \title{(It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)}
 \usage{
-reduce.and.batch.correct.ace.Harmony(ace, batch.vec = NULL,
-  reduced_dim = 50, max.iter = 5, data.slot = "logcounts",
-  normalization.method = "default", reduction.slot = "ACTION",
-  seed = 0, SVD_algorithm = 0)
+reduce.and.batch.correct.ace.Harmony(
+  ace,
+  batch_attr,
+  reduced_dim = 50,
+  max_iter = 5,
+  data.slot = "logcounts",
+  norm_method = c("default", "scran", "Linnorm"),
+  reduction_slot = "ACTION",
+  seed = 0,
+  SVD_algorithm = 1
+)
 }
 \arguments{
 \item{ace}{Input ace object}
 
-\item{batch.vec}{Vector of batches per sample}
+\item{batch_attr}{Vector of batches per sample}
 
 \item{reduced_dim}{Dimension of SVD used for reducing kernel matrix}
 
-\item{max.iter}{Number of SVD iterations}
+\item{max_iter}{Number of SVD iterations}
 
 \item{norm.method}{Normalization method to use. See normalize.ace() function (default:'default')
 (used only if the ace object is not already normalized)}
@@ -31,6 +38,6 @@ Reduced ace object with added colMaps(ace)
 }
 \examples{
 ace = import.ace.from.10X(input_path)
-batch.vec = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
+batch_attr = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
 ace = reduce.and.batch.correct.ace.Harmony(ace)
 }

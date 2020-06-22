@@ -59,7 +59,7 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
     max_umis_per_cell = NULL) {
     
     # if( length(by) == 1) { IDX = split(1:dim(ace)[2], droplevels(colData(ace))[[by]]) } else { IDX = split(1:dim(ace)[2], by) }
-    IDX = get_ace_split_IDX(ace, by)
+    IDX = .get_ace_split_IDX(ace, by)
     
     if (any(duplicated(rownames(ace)))) {
         msg = sprintf("Adding suffix to duplicate rownames.")

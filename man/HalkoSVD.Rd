@@ -7,7 +7,7 @@
 HalkoSVD(A, dim, iters = 5L, seed = 0L)
 }
 \arguments{
-\item{A}{Input matrix ('sparseMatrix')}
+\item{A}{Input matrix ("sparseMatrix")}
 
 \item{dim}{Dimension of SVD decomposition}
 

@@ -7,7 +7,7 @@
 FengSVD_full(A, dim, iters = 5L, seed = 0L)
 }
 \arguments{
-\item{A}{Input matrix ('matrix')}
+\item{A}{Input matrix ("matrix")}
 
 \item{dim}{Dimension of SVD decomposition}
 
@@ -20,7 +20,7 @@ A named list with U, sigma, and V components
 }
 \description{
 This is direct implementation of the randomized SVD algorithm for sparse matrices:
-Xu Feng, Yuyang Xie, and Yaohang Li, 'Fast Randomzied SVD for Sparse Data,' in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
+Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
 }
 \examples{
 A = randn(100, 20)
