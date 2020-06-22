@@ -55,7 +55,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
         value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
 
         if (length(value) > 0) {
-            nn = intersect(names(value), names(x@rowMaps)) # Items to update     
+            nn = intersect(names(value), names(x@rowMaps)) # Items to update
             for (n in nn) {
 				X.old = rowMaps(x)[[n]]
 				X.new = value[[n]]
@@ -65,7 +65,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 						colnames(X.new) = colnames(X.old)
 					}
 					if(all(colnames(X.new) == colnames(X.old))) {
-						assays(x@rowMaps[[n]])$X = X.new								
+						assays(x@rowMaps[[n]])$X = X.new
 					} else {
 						SE = x@rowMaps[[n]]
 						colnames(SE) = colnames(X.new)
@@ -77,7 +77,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 					if (nrow(SE) <= 3)
 					  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
 
-					x@rowMaps[[n]] = SE					
+					x@rowMaps[[n]] = SE
 				}
 
             }
@@ -141,7 +141,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
         value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
 
         if (length(value) > 0) {
-            nn = intersect(names(value), names(x@colMaps)) # Items to update     
+            nn = intersect(names(value), names(x@colMaps)) # Items to update
             for (n in nn) {
 				X.old = colMaps(x)[[n]]
 				X.new = value[[n]]
@@ -151,7 +151,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 						rownames(X.new) = rownames(X.old)
 					}
 					if(all(rownames(X.new) == rownames(X.old))) {
-						assays(x@colMaps[[n]])$X = X.new								
+						assays(x@colMaps[[n]])$X = X.new
 					} else {
 						SE = x@colMaps[[n]]
 						rownames(SE) = rownames(X.new)
@@ -163,7 +163,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 					if (nrow(SE) <= 3)
 					  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
 
-					x@colMaps[[n]] = SE					
+					x@colMaps[[n]] = SE
 				}
 
             }
@@ -361,5 +361,14 @@ setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     assays(object)$normcounts = value
+    object
+})
+
+#' @export
+#' @rdname sizeFactors
+#' @importFrom SummarizedExperiment colData<- colData
+#' @importFrom BiocGenerics sizeFactors<-
+setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., value) {
+    colData(object)[["sizeFactors"]] <- value
     object
 })
