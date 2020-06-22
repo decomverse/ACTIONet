@@ -19,10 +19,10 @@ Compute feature specificity (from archetype footprints)
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-\\tG = build_ACTIONet(prune.out$H_stacked)
+G = build_ACTIONet(prune.out$H_stacked)
 unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 cell.clusters = unification.out$sample_assignments
-\\tS.norm = renormalize_input_matrix(S, cell.clusters)
-\\tlogPvals.list = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
+S.norm = renormalize_input_matrix(S, cell.clusters)
+logPvals.list = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
 specificity.scores = logPvals.list$upper_significance
 }

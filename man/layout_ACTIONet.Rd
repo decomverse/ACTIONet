@@ -4,8 +4,13 @@
 \alias{layout_ACTIONet}
 \title{Performs stochastic force-directed layout on the input graph (ACTIONet)}
 \usage{
-layout_ACTIONet(G, S_r, compactness_level = 50L, n_epochs = 500L,
-  thread_no = 0L)
+layout_ACTIONet(
+  G,
+  S_r,
+  compactness_level = 50L,
+  n_epochs = 500L,
+  thread_no = 0L
+)
 }
 \arguments{
 \item{G}{Adjacency matrix of the ACTIONet graph}
@@ -29,6 +34,6 @@ A named list \itemize{
 Performs stochastic force-directed layout on the input graph (ACTIONet)
 }
 \examples{
-\\tG = build_ACTIONet(prune.out$H_stacked)
-\\tvis.out = layout_ACTIONet(G, S_r)
+G = build_ACTIONet(prune.out$H_stacked)
+vis.out = layout_ACTIONet(G, S_r)
 }

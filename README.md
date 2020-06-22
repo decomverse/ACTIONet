@@ -34,7 +34,7 @@ R CMD INSTALL .
 To install all R dependencies (if you prefer to not use devtools):
 
 ```R
-install.packages(c('Rcpp', RcppArmadillo', 'R.utils', 'SingleCellExperiment', 'hdf5r', 'igraph', 'ComplexHeatmap', 'ggpubr', 'corrplot', 'wordcloud', 'threejs', 'plotly', 'RColorBrewer', 'R.methodsS3', 'GenomicRanges', 'Biobase', 'DelayedArray', 'BiocGenerics', 'S4Vectors', 'IRanges', 'GenomeInfoDb', 'matrixStats', 'RCurl', 'GenomeInfoDbData', 'XVector', 'bitops', 'zlibbioc', 'bit', 'GlobalOptions', 'shape', 'colorspace', 'rjson', 'gtable', 'isoband', 'scales', 'farver', 'labeling', 'munsell', 'viridisLite', 'ggplot2', 'dplyr', 'tidyselect', 'generics', 'tidyr', 'broom', 'car', 'reshape2', 'carData', 'abind', 'pbkrtest', 'quantreg', 'maptools', 'rio', 'lme4', 'minqa', 'nloptr', 'statmod', 'RcppEigen', 'sp', 'SparseM', 'MatrixModels', 'plyr', 'haven', 'data.table', 'readxl', 'openxlsx', 'forcats', 'hms', 'readr', 'zip', 'cellranger', 'progress', 'rematch', 'base64enc', 'R.oo', 'SummarizedExperiment', 'bit64', 'circlize', 'GetoptLong', 'clue', 'png', 'ggrepel', 'ggsci', 'cowplot', 'ggsignif', 'gridExtra', 'polynom', 'rstatix', 'hexbin'))
+install.packages(c('Rcpp', 'RcppArmadillo', 'R.utils', 'SingleCellExperiment', 'hdf5r', 'igraph', 'ComplexHeatmap', 'ggpubr', 'corrplot', 'wordcloud', 'threejs', 'plotly', 'RColorBrewer', 'R.methodsS3', 'GenomicRanges', 'Biobase', 'DelayedArray', 'BiocGenerics', 'S4Vectors', 'IRanges', 'GenomeInfoDb', 'matrixStats', 'RCurl', 'GenomeInfoDbData', 'XVector', 'bitops', 'zlibbioc', 'bit', 'GlobalOptions', 'shape', 'colorspace', 'rjson', 'gtable', 'isoband', 'scales', 'farver', 'labeling', 'munsell', 'viridisLite', 'ggplot2', 'dplyr', 'tidyselect', 'generics', 'tidyr', 'broom', 'car', 'reshape2', 'carData', 'abind', 'pbkrtest', 'quantreg', 'maptools', 'rio', 'lme4', 'minqa', 'nloptr', 'statmod', 'RcppEigen', 'sp', 'SparseM', 'MatrixModels', 'plyr', 'haven', 'data.table', 'readxl', 'openxlsx', 'forcats', 'hms', 'readr', 'zip', 'cellranger', 'progress', 'rematch', 'base64enc', 'R.oo', 'SummarizedExperiment', 'bit64', 'circlize', 'GetoptLong', 'clue', 'png', 'ggrepel', 'ggsci', 'cowplot', 'ggsignif', 'gridExtra', 'polynom', 'rstatix', 'hexbin'))
 ```
 
 ## Install optional packages
@@ -70,7 +70,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 
 BiocManager::install("scater", "scran")
 ```
-ACTIONet interfaces to scran normalization via `scran.normalize()` function.
+ACTIONet interfaces to scran normalization via `normalize.scran()` function.
 
 * [Linnorm](https://bioconductor.riken.jp/packages/3.4/bioc/html/Linnorm.html) is another commonly used normalization technique. You can install it via:
 
@@ -83,7 +83,7 @@ biocLite("Linnorm")
 ```
 
 
-ACTIONet interfaces to scran normalization via `linnorm.normalize()` function.
+ACTIONet interfaces to scran normalization via `normalize.Linnorm()` function.
 
 
 #### General Single-cell processing
