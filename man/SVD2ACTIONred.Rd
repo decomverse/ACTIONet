@@ -7,7 +7,7 @@
 SVD2ACTIONred(S, u, d, v)
 }
 \arguments{
-\item{S}{Input matrix ('sparseMatrix')}
+\item{S}{Input matrix ("sparseMatrix")}
 
 \item{U}{Left singular vectors}
 

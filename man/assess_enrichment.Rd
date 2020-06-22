@@ -20,11 +20,11 @@ Matrix of log-pvalues
 Computes feature enrichment wrt a given annotation
 }
 \examples{
-data('gProfilerDB_human')
+data("gProfilerDB_human")
 G = colNets(ace)$ACTIONet
 associations = gProfilerDB_human$SYMBOL$REAC
 common.genes = intersect(rownames(ace), rownames(associations))
-specificity_scores = rowFactors(ace)[['H_unified_upper_significance']]
+specificity_scores = rowFactors(ace)[["H_unified_upper_significance"]]
 logPvals = compute_feature_specificity(specificity_scores[common.genes, ], annotations[common.genes, ])
 rownames(logPvals) = colnames(specificity_scores)
 colnames(logPvals) = colnames(annotations)
