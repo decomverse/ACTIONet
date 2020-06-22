@@ -18,5 +18,5 @@ A string array of decrypted ids
 Decrypts a set of given encrypted ids
 }
 \examples{
-\\tids = decode_ids(encoded.ids)
+ids = decode_ids(encoded.ids)
 }

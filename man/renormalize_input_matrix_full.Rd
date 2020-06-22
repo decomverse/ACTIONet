@@ -7,7 +7,7 @@
 renormalize_input_matrix_full(S, sample_assignments)
 }
 \arguments{
-\item{S}{Input matrix ('matrix' type)}
+\item{S}{Input matrix ("matrix" type)}
 
 \item{sample_assignments}{Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})}
 }
@@ -19,8 +19,8 @@ Renormalized input matrix to minimize differences in means
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-\\tG = build_ACTIONet(prune.out$H_stacked)
+G = build_ACTIONet(prune.out$H_stacked)
 unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 cell.clusters = unification.out$sample_assignments
-\\tS.norm = renormalize_input_matrix(S, cell.clusters)
+S.norm = renormalize_input_matrix(S, cell.clusters)
 }

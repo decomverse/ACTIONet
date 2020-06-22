@@ -7,7 +7,7 @@
 compute_pseudo_bulk_full(S, sample_assignments)
 }
 \arguments{
-\item{S}{Input matrix ('matrix')}
+\item{S}{Input matrix ("matrix")}
 
 \item{sample_assignments}{Any sample clustering/annotation (it has to be in {1, ..., max_class_num})}
 }
@@ -19,8 +19,8 @@ Computes pseudobulk profiles
 }
 \examples{
 prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-\\tG = build_ACTIONet(prune.out$H_stacked)
+G = build_ACTIONet(prune.out$H_stacked)
 unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 cell.clusters = unification.out$sample_assignments
-\\tpbs = compute_pseudo_bulk(S, cell.clusters)
+pbs = compute_pseudo_bulk(S, cell.clusters)
 }
