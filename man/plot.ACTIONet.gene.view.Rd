@@ -4,9 +4,15 @@
 \alias{plot.ACTIONet.gene.view}
 \title{Plots projection of genes onto the ACTIONet plot}
 \usage{
-plot.ACTIONet.gene.view(ace, top.genes = 5, CPal = NULL,
+\method{plot}{ACTIONet.gene.view}(
+  ace,
+  top.genes = 5,
+  CPal = NULL,
   blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-  title = "", label.text.size = 0.8, renormalize = F)
+  title = "",
+  label.text.size = 0.8,
+  renormalize = F
+)
 }
 \arguments{
 \item{ace}{ACTIONet output}
