@@ -227,3 +227,12 @@ setMethod("colReductions", "ACTIONetExperiment", function(x) {
 
     return(Xs)
 })
+
+#' @export
+#' @rdname sizeFactors
+#' @importFrom SummarizedExperiment colData
+#' @importFrom BiocGenerics sizeFactors
+setMethod("sizeFactors", "ACTIONetExperiment", function(object) {
+    output <- colData(object)[["sizeFactors"]]
+    output
+})
