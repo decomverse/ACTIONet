@@ -1,5 +1,5 @@
 normalize.scran <- function(ace, BPPARAM = SerialParam()) {
-    .check_and_load_package("scran", "scater")
+    .check_and_load_package(c("scran", "scater"))
     ace = scran::computeSumFactors(ace, BPPARAM = BPPARAM)
     ace = scater::logNormCounts(ace)
     return(ace)
