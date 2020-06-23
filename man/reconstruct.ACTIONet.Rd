@@ -4,16 +4,10 @@
 \alias{reconstruct.ACTIONet}
 \title{Reconstructs the ACTIONet graph with the new parameters (uses prior decomposition)}
 \usage{
-reconstruct.ACTIONet(
-  ace,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 500,
-  thread_no = 8,
-  layout.in.parallel = FALSE,
-  reduction.slot = "ACTION"
-)
+reconstruct.ACTIONet(ace, network_density = 1,
+  mutual_edges_only = TRUE, layout_compactness = 50,
+  layout_epochs = 500, thread_no = 0, layout.in.parallel = FALSE,
+  reduction_slot = "ACTION2D")
 }
 \arguments{
 \item{ace}{ACTIONetExperiment object containing the results}
@@ -22,9 +16,9 @@ reconstruct.ACTIONet(
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
-\item{thread_no}{Number of parallel threads (default=8)}
+\item{thread_no}{Number of parallel threads (default=0)}
 
-\item{reduction.slot}{Slot in the ReducedDims(ace) that holds reduced kernel (default="S_r")}
+\item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r')}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 

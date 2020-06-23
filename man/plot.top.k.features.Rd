@@ -4,15 +4,9 @@
 \alias{plot.top.k.features}
 \title{Plots heatmap of the top-ranked features of an enrichment table}
 \usage{
-\method{plot}{top.k.features}(
-  feature.enrichment.table,
-  top.features = 3,
-  normalize = T,
-  reorder.columns = T,
-  row.title = "Archetypes",
-  column.title = "Genes",
-  rowPal = "black"
-)
+plot.top.k.features(feature.enrichment.table, top.features = 3,
+  normalize = T, reorder.columns = T, row.title = "Archetypes",
+  column.title = "Genes", rowPal = "black")
 }
 \arguments{
 \item{feature.enrichment.table}{An arbitrary enrichment table with columns being archetypes and rows being specificity of features}
@@ -28,6 +22,6 @@ Enrichment heatmap
 Plots heatmap of the top-ranked features of an enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 plot.top.k.features(feature.enrichment.table, 3)
 }

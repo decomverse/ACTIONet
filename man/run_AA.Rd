@@ -2,29 +2,28 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_AA}
 \alias{run_AA}
-\title{Runs multi-level ACTION decomposition method}
+\title{Runs basic archetypal analysis}
 \usage{
-run_AA(A, W0, max_it = 50L, min_delta = 1e-07)
+run_AA(A, W0, max_it = 50L, min_delta = 1e-16)
 }
 \arguments{
+\item{A}{Inpu matrix}
+
+\item{W0}{Starting archetypes}
+
 \item{max_it, min_delta}{Convergence parameters for archetypal analysis}
-
-\item{S_r}{Reduced kernel matrix}
-
-\item{k_min}{Minimum number of archetypes to consider (default=2)}
-
-\item{k_max}{Maximum number of archetypes to consider, or "depth" of decomposition (default=30)}
-
-\item{thread_no}{Number of parallel threads (default=4)}
 }
 \value{
 A named list with entries 'C' and 'H', each a list for different values of k
 }
 \description{
-Runs multi-level ACTION decomposition method
+Runs basic archetypal analysis
 }
 \examples{
-ACTION.out = run_ACTION(S_r, k_max = 10)
-H8 = ACTION.out$H[[8]]
-cell.assignments = apply(H8, 2, which.max)
+S_r = t(reducedDims(ace)$ACTION)
+SPA.out = run_SPA(S_r, 10)
+W0 = S_r[, SPA.out$selected_columns]
+AA.out = run_AA(S_r, W0)
+H = AA.out$H
+cell.assignments = apply(H, 2, which.max)
 }

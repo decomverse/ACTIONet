@@ -3,6 +3,7 @@
 \docType{package}
 \name{ACTIONet}
 \alias{ACTIONet}
+\alias{ACTIONet-package}
 \title{ACTIONet: Robust multi-resolution analysis of single-cell datasets}
 \description{
 Joint archetypal/network-based analysis for multi-resolution decomposition of single-cell states.
@@ -11,8 +12,8 @@ Joint archetypal/network-based analysis for multi-resolution decomposition of si
  
 
 \enumerate{
-\item ?reduce.sce to reduce raw count matrix in an SingleCellExperiment objects.
-\item ?run.ACTIONet to run ACTIONet on SingleCellExperiment objects.
+\item ?reduce.sce to reduce raw count matrix in an SummarizedExperiment objects.
+\item ?run.ACTIONet to run ACTIONet on SummarizedExperiment objects.
 }
 }
 

@@ -4,20 +4,14 @@
 \alias{run.SCINET.clusters}
 \title{Computes a list of cluster-specific interactomes}
 \usage{
-run.SCINET.clusters(
-  ace,
-  specificity.slot.name,
-  G = NULL,
-  min.edge.weight = 2,
-  spec.sample_no = 1000,
-  thread_no = 8,
-  compute.topo.specificity = T
-)
+run.SCINET.clusters(ace, specificity.slot.name, G = NULL,
+  min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8,
+  compute.topo.specificity = T)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{specificity.slot.name}{An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
 
 \item{G}{Baseline network as an adjacency matrix or igraph object. 
 If it is NULL, PCNet is loaded as the baseline from SCINET package.}
@@ -37,10 +31,10 @@ A list of igraph objects
 Computes a list of cluster-specific interactomes
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-network.list = run.SCINET.clusters(ace, "cluster_specificity_scores")
+ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+network.list = run.SCINET.clusters(ace, 'cluster_specificity_scores')
 G = network.list[[1]]
 V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
 }

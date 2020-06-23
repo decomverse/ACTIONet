@@ -1,23 +1,19 @@
 # TODO
 
 ## Primary
-* Metadata export
-* col/row-Factor metadata
-* Test unification process
 * Finish tutorials
-* Release docker
-* Garbage-collection with SCE object
 * update-alternatives to run R with MKL without compiling it from scratch
 * Python porting and testing
+* Release docker
 
 ## New features to be tested
 * `renormalize_input_matrix` for post-ACTIONet normalization
-* `sgd2_layout_weighted()` for [S_GD2 layout](https://github.com/jxz12/s_gd2) layout
-* `HDBSCAN.clustering` for clustering ACTIONet
 * `compute_sparse_network_diffusion` for  **L1-regularized PageRank** algorithm algorithm from: ["Variational perspective on local graph clustering"](https://github.com/kfoynt/LocalGraphClustering)
-* `compute_AA_coreset()` for AA coreset construction + wAA for fast sketching
 * `transform_layout()` for embedding datasets into ACTIONet plot
 * `compute_pseudo_bulk_per_archetype, compute_pseudo_bulk_per_cluster, compute_pseudo_bulk_per_ind` functions for pseudo-bulk. 
+* `sgd2_layout_weighted()` for [S_GD2 layout](https://github.com/jxz12/s_gd2) layout
+* `HDBSCAN.clustering` for clustering ACTIONet
+* `compute_AA_coreset()` for AA coreset construction + wAA for fast sketching
 
 
 ## Extensions
@@ -40,5 +36,4 @@
 ## Minor
 * Remove R.utils dependencies
 * Add require() statements where appropriate
-* Replace printf with #define PRINT ...
 * Contact BioTurning and debug `AnnData` import bug

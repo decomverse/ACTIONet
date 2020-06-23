@@ -2,7 +2,7 @@
 % Please edit documentation in R/clusters.R
 \name{annotate.clusters.using.labels}
 \alias{annotate.clusters.using.labels}
-\title{Annotate clusters using prior cell annotations 
+\title{Annotate clusters using prior cell annotations
 (It uses Fisher's exact test for computing overlaps -- approximate HGT is used)}
 \usage{
 annotate.clusters.using.labels(ace, clusters, labels)
@@ -22,7 +22,7 @@ A named list: \itemize{
 }
 }
 \description{
-Annotate clusters using prior cell annotations 
+Annotate clusters using prior cell annotations
 (It uses Fisher's exact test for computing overlaps -- approximate HGT is used)
 }
 \examples{

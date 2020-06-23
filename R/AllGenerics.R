@@ -15,23 +15,23 @@ setGeneric("rowNets", function(x, ...) standardGeneric("rowNets"))
 #' @export
 setGeneric("colNets", function(x, ...) standardGeneric("colNets"))
 
-#' Get rowFactors
+#' Get rowMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod rowFactors
+#' @exportMethod rowMaps
 #' @export
-setGeneric("rowFactors", function(x, ...) standardGeneric("rowFactors"))
+setGeneric("rowMaps", function(x, ...) standardGeneric("rowMaps"))
 
-#' Get colFactors
+#' Get colMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod colFactors
+#' @exportMethod colMaps
 #' @export
-setGeneric("colFactors", function(x, ...) standardGeneric("colFactors"))
+setGeneric("colMaps", function(x, ...) standardGeneric("colMaps"))
 
 #' Set rowNets
 #'
@@ -49,21 +49,163 @@ setGeneric("rowNets<-", function(x, ...) standardGeneric("rowNets<-"))
 #' @exportMethod colNets<-
 setGeneric("colNets<-", function(x, ...) standardGeneric("colNets<-"))
 
-#' Set rowFactors
+#' Set rowMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod rowFactors<-
-setGeneric("rowFactors<-", function(x, ...) standardGeneric("rowFactors<-"))
+#' @exportMethod rowMaps<-
+setGeneric("rowMaps<-", function(x, ...) standardGeneric("rowMaps<-"))
 
-#' Set colFactors
+#' Set colMaps
 #'
 #' @param x ACTIONetExperiment object
 #' @param ... other parameters
 #'
-#' @exportMethod colFactors<-
-setGeneric("colFactors<-", function(x, ...) standardGeneric("colFactors<-"))
+#' @exportMethod colMaps<-
+setGeneric("colMaps<-", function(x, ...) standardGeneric("colMaps<-"))
 
 
 
+########################### Type functions ################################
+#' Get rowMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapTypes
+setGeneric("rowMapTypes", function(x, ...) standardGeneric("rowMapTypes"))
+
+#' Get colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes
+setGeneric("colMapTypes", function(x, ...) standardGeneric("colMapTypes"))
+
+
+#' Set rowMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapTypes<-
+setGeneric("rowMapTypes<-", function(x, ...) standardGeneric("rowMapTypes<-"))
+
+#' Set colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes<-
+setGeneric("colMapTypes<-", function(x, ...) standardGeneric("colMapTypes<-"))
+
+########################### Metadata functions ##############################
+
+#' Get rowMapMeta
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapMeta
+setGeneric("rowMapMeta", function(x, ...) standardGeneric("rowMapMeta"))
+
+#' Get colMapTypes
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapTypes
+setGeneric("colMapMeta", function(x, ...) standardGeneric("colMapMeta"))
+
+
+#' Set rowMapMeta
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowMapMeta<-
+setGeneric("rowMapMeta<-", function(x, ...) standardGeneric("rowMapMeta<-"))
+
+#' Set colMapMeta
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colMapMeta<-
+setGeneric("colMapMeta<-", function(x, ...) standardGeneric("colMapMeta<-"))
+
+
+
+
+#' Get row embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowEmbeddings
+setGeneric("rowEmbeddings", function(x, ...) standardGeneric("rowEmbeddings"))
+
+
+
+#' Get column embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colEmbeddings
+setGeneric("colEmbeddings", function(x, ...) standardGeneric("colEmbeddings"))
+
+#' Set row embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowEmbeddings
+setGeneric("rowEmbeddings<-", function(x, ...) standardGeneric("rowEmbeddings<-"))
+
+
+
+#' Set column embeddings
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colEmbeddings
+setGeneric("colEmbeddings<-", function(x, ...) standardGeneric("colEmbeddings<-"))
+
+
+#' Get row reductions
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowReductions
+setGeneric("rowReductions", function(x, ...) standardGeneric("rowReductions"))
+
+
+
+#' Get column reductions
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colReductions
+setGeneric("colReductions", function(x, ...) standardGeneric("colReductions"))
+
+#' Set column reductions
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod colReductions<-
+setGeneric("colReductions<-", function(x, ...) standardGeneric("colReductions<-"))
+
+#' Set row reductions
+#'
+#' @param x ACTIONetExperiment object
+#' @param ... other parameters
+#'
+#' @exportMethod rowReductions<-
+setGeneric("rowReductions<-", function(x, ...) standardGeneric("rowReductions<-"))

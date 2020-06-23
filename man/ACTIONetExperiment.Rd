@@ -5,32 +5,28 @@
 \alias{ACTIONetExperiment-class}
 \alias{.ACTIONetExperiment}
 \alias{ACTIONetExperiment}
-\title{An extension of the SingleCellExperiment class to store
+\title{An extension of the SummarizedExperiment class to store
 the results of ACTIONet method}
 \usage{
-ACTIONetExperiment(
-  rowNets = S4Vectors::SimpleList(),
-  colNets = S4Vectors::SimpleList(),
-  rowFactors = S4Vectors::SimpleList(),
-  colFactors = S4Vectors::SimpleList(),
-  ...
-)
+ACTIONetExperiment(rowNets = S4Vectors::SimpleList(),
+  colNets = S4Vectors::SimpleList(), rowMaps = S4Vectors::SimpleList(),
+  colMaps = S4Vectors::SimpleList(), ...)
 }
 \arguments{
 \item{rowNets, colNets}{gene-gene and cell-cell networks, respectively}
 
-\item{rowFactors, colFactors}{Factorization results (W and H matrices)}
+\item{rowMaps, colMaps}{Factorization results (W and H matrices)}
 
-\item{...}{SingleCellExperiment and SummarizedExperiment components}
+\item{...}{SummarizedExperiment and SummarizedExperiment components}
 }
 \value{
 an ACTIONetExperiment (ACE) object
 slot.
 
-An ACTIONetExperiment (ACE) object, derived from SingleCellExperiment, with additional slots to store ACTIONet results
+An ACTIONetExperiment (ACE) object, derived from SummarizedExperiment, with additional slots to store ACTIONet results
 }
 \description{
-An extension of the SingleCellExperiment class to store
+An extension of the SummarizedExperiment class to store
 the results of ACTIONet method
 
 Creates an ACTIONetExperiment (ACE) object
@@ -40,6 +36,6 @@ Creates an ACTIONetExperiment (ACE) object
 \describe{
 \item{\code{rowNets,colNets}}{gene-gene and cell-cell networks, respectively}
 
-\item{\code{rowFactors,colFactors}}{Factorization results (W and H matrices)}
+\item{\code{rowMaps,colMaps}}{Factorization results (W and H matrices)}
 }}
 

@@ -1,4 +1,0 @@
-CXX=g++
-CFLAGS+=-O3 -march=native -mtune=native -flto -frename-registers -msse2 -m64 -w
-CXXFLAGS+=-O3 -march=native -mtune=native -flto -frename-registers -msse2 -m64 -std=c++11 -w
-LINALG=$(BLAS_LIBS) $(LAPACK_LIBS)

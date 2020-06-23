@@ -3,14 +3,13 @@
 #' @param object ACTIONetExperiment object
 #'
 #' @export
-#' @importMethodsFrom SingleCellExperiment show
+#' @importMethodsFrom SummarizedExperiment show
 setMethod("show", "ACTIONetExperiment", function(object) {
     callNextMethod()
-    cat(		
-        "rowNets(", (length(rowNets(object, withDimnames=F))), "): ", paste(names(rowNets(object, withDimnames=F)), collapse = ' '), "\n",
-        "colNets(", (length(colNets(object, withDimnames=F))), "): ", paste(names(colNets(object, withDimnames=F)), collapse = ' '), "\n",
-        "rowFactors(", (length(rowFactors(object, withDimnames=F))), "): ", paste(names(rowFactors(object, withDimnames=F)), collapse = ' '), "\n",
-        "colFactors(", (length(colFactors(object, withDimnames=F))), "): ", paste(names(colFactors(object, withDimnames=F)), collapse = ' '), "\n",
-        sep=""
-    )
+    cat("rowMaps(", (length(rowMaps(object, all = F))), "): ", paste(names(rowMaps(object, 
+        all = F)), collapse = " "), "\n", "colMaps(", (length(colMaps(object, all = F))), 
+        "): ", paste(names(colMaps(object, all = F)), collapse = " "), "\n", "rowNets(", 
+        (length(rowNets(object))), "): ", paste(names(rowNets(object)), collapse = " "), 
+        "\n", "colNets(", (length(colNets(object))), "): ", paste(names(colNets(object)), 
+            collapse = " "), "\n", sep = "")
 })

@@ -2,18 +2,13 @@
 % Please edit documentation in R/filter.R
 \name{filter.ace}
 \alias{filter.ace}
-\title{Filter columns and rows of `ACTIONetExperiment` or `SingleCellExperiment` object.}
+\title{Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.}
 \usage{
-filter.ace(
-  ace,
-  assay.name = "counts",
-  min_cells_per_feat = NULL,
-  min_feats_per_cell = NULL,
-  min_umis_per_cell = NULL,
-  max_umis_per_cell = NULL,
-  return_fil_ace = TRUE
-)
+\method{filter}{ace}(ace, assay.name = "counts",
+  min_cells_per_feat = NULL, min_feats_per_cell = NULL,
+  min_umis_per_cell = NULL, max_umis_per_cell = NULL,
+  return_fil_ace = TRUE)
 }
 \description{
-Filter columns and rows of `ACTIONetExperiment` or `SingleCellExperiment` object.
+Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.
 }

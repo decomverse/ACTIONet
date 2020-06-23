@@ -4,16 +4,9 @@
 \alias{plot.ACTIONet.3D}
 \title{Main ACTIONet 3D plotting functions}
 \usage{
-\method{plot}{ACTIONet.3D}(
-  ace,
-  labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node.size = 1,
-  CPal = CPal20,
-  coordinate.slot = "ACTIONet3D"
-)
+plot.ACTIONet.3D(ace, labels = NULL, transparency.attr = NULL,
+  trans.z.threshold = -1, trans.fact = 1, node.size = 1,
+  CPal = CPal20, coordinate_slot = "ACTIONet3D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -28,7 +21,7 @@
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
-\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 
 \item{title}{Main title of the plot}
 }
