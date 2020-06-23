@@ -7,7 +7,7 @@ UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
     $(info Using Linux configurations)    
     NPROC=$(shell nproc)
-    ifeq ($(MKLROOT),"") 
+    ifeq ($(MKLROOT),) 
         $(warning Can not find MKL)    
         PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS)
     else
@@ -18,7 +18,7 @@ ifeq ($(UNAME),Linux)
 else ifeq ($(UNAME),Darwin)
     echo 'Using Mac OS X configurations'
     NPROC=$(shell sysctl -n hw.logicalcpu)
-    ifeq ($(MKLROOT),"") 
+    ifeq ($(MKLROOT),) 
         $(warning Can not find MKL)    
         PKG_CPPFLAGS+=-DACCELERATE
         PKG_LIBS=-framework accelerate
@@ -30,7 +30,7 @@ else ifeq ($(UNAME),Darwin)
 else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
     echo 'Using Windows configurations'
     NPROC=${NUMBER_OF_PROCESSORS}
-    ifeq ($(MKLROOT),"") 
+    ifeq ($(MKLROOT),) 
         $(warning Can not find MKL)    
         PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS)
     else
