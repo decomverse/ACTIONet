@@ -4,10 +4,8 @@
 \name{PanglaoDB_mouse_markers}
 \alias{PanglaoDB_mouse_markers}
 \title{Pre-processed cell type markers from the PanglaoDB database (Mouse)}
-\format{
-:
-  A list of marker genes for different cell types
-}
+\format{:
+  A list of marker genes for different cell types}
 \source{
 \url{https://panglaodb.se/}
 }

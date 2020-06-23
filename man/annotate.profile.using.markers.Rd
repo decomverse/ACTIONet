@@ -5,11 +5,8 @@
 \title{Annotate arbitary feature score matrix using known marker genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
-annotate.profile.using.markers(
-  feature.scores,
-  marker.genes,
-  rand.sample.no = 1000
-)
+annotate.profile.using.markers(feature.scores, marker.genes,
+  rand.sample.no = 1000)
 }
 \arguments{
 \item{feature.scores}{An arbitrary matrix with rows corresponding to features and columns to any given annotation/grouping of cells}
