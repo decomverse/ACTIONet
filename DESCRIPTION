@@ -15,7 +15,7 @@ Maintainer: Shahin Mohammadi <shahin.mohammadi@gmail.com>
 Description: 
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, R.utils, SingleCellExperiment, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, scran, scater
+Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, R.utils, SingleCellExperiment, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer
 Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SingleCellExperiment, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
