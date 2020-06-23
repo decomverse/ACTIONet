@@ -88,7 +88,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
             for (n in nn) {
                 X = value[[n]]
                 if (is.null(colnames(X))) 
-                  colnames(X) = 1:nrow(X)
+                  colnames(X) = 1:ncol(X)
                 rownames(X) = rownames(x)
                 
                 SE = SummarizedExperiment(assays = list(X = X))
