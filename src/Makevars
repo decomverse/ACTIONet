@@ -1,10 +1,44 @@
 CSOURCES+=$(shell find ACTIONet/ -type f -name "*.c")
 SOURCES+=$(shell find ACTIONet/ -type f -name "*.cc")
 OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o) $(CSOURCES:.c=.o)
-PKG_LIBS=$(LINALG)
-PKG_CPPFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD
-PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD
-NPROC=$(shell nproc)
+PKG_CPPFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++11 -m64 -fno-strict-aliasing
+PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++11 -m64 -fno-strict-aliasing
+UNAME=$(shell uname -s)
+ifeq ($(UNAME),Linux)
+    $(info Using Linux configurations)    
+    NPROC=$(shell nproc)
+    ifeq ($(MKLROOT),"") 
+        $(warning Can not find MKL)    
+        PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS)
+    else
+        $(info Found MKL)    
+        PKG_CPPFLAGS+=-I${MKLROOT}/include
+        PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+    endif 
+else ifeq ($(UNAME),Darwin)
+    echo 'Using Mac OS X configurations'
+    NPROC=$(shell sysctl -n hw.logicalcpu)
+    ifeq ($(MKLROOT),"") 
+        $(warning Can not find MKL)    
+        PKG_CPPFLAGS+=-DACCELERATE
+        PKG_LIBS=-framework accelerate
+    else
+        $(info Found MKL)    
+        PKG_CPPFLAGS+=-I${MKLROOT}/include
+        PKG_LIBS=${MKLROOT}/lib/libmkl_intel_ilp64.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_core.a -liomp5 -lpthread -lm -ldl
+    endif  
+else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
+    echo 'Using Windows configurations'
+    NPROC=${NUMBER_OF_PROCESSORS}
+    ifeq ($(MKLROOT),"") 
+        $(warning Can not find MKL)    
+        PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS)
+    else
+        $(info Found MKL)    
+        PKG_CPPFLAGS+=-I"%MKLROOT%"\include
+        PKG_LIBS=mkl_intel_lp64.lib mkl_tbb_thread.lib mkl_core.lib tbb.lib
+    endif      
+else
+    $(error Unsupported OS ${UNAME})    
+endif
 MAKEFLAGS+="-j $(NPROC)
-
-
