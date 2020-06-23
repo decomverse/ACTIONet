@@ -16,7 +16,7 @@ ifeq ($(UNAME),Linux)
         PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
     endif 
 else ifeq ($(UNAME),Darwin)
-    echo 'Using Mac OS X configurations'
+    $(info Using Mac OS configurations)    
     NPROC=$(shell sysctl -n hw.logicalcpu)
     ifeq ($(MKLROOT),) 
         $(warning Can not find MKL)    
@@ -28,7 +28,7 @@ else ifeq ($(UNAME),Darwin)
         PKG_LIBS=${MKLROOT}/lib/libmkl_intel_ilp64.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_core.a -liomp5 -lpthread -lm -ldl
     endif  
 else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
-    echo 'Using Windows configurations'
+    $(info Using Windows configurations)
     NPROC=${NUMBER_OF_PROCESSORS}
     ifeq ($(MKLROOT),) 
         $(warning Can not find MKL)    
