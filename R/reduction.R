@@ -12,7 +12,7 @@
 #' @examples
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
-reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts", norm_method = c("default", "scran", "Linnorm"), reduction_slot = "ACTION",
+reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts", norm_method = "default", reduction_slot = "ACTION",
     seed = 0, SVD_algorithm = 1, return_V = FALSE) {
     ace <- as(ace, "ACTIONetExperiment")
     if (!(data_slot %in% names(assays(ace)))) {
