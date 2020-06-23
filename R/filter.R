@@ -1,7 +1,7 @@
 #' Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.
 
-filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, 
-    return_fil_ace = TRUE) {
+filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, 
+    min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
     org_dim = dim(ace)
     ace.fil = ace
     
@@ -22,7 +22,8 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
         }
         
         if (!is.null(min_feats_per_cell)) {
-            feature_mask = Matrix::colSums(assays(ace.fil)[[assay.name]] > 0) >= min_feats_per_cell
+            feature_mask = Matrix::colSums(assays(ace.fil)[[assay.name]] > 0) >= 
+                min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
         
@@ -31,7 +32,8 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
                 min_cells_per_feat = min_cells_per_feat * org_dim[2]
             }
             
-            cell_count_mask = Matrix::rowSums(assays(ace.fil)[[assay.name]] > 0) >= min_cells_per_feat
+            cell_count_mask = Matrix::rowSums(assays(ace.fil)[[assay.name]] > 0) >= 
+                min_cells_per_feat
             rows_mask = rows_mask & cell_count_mask
         }
         ace.fil <- ace.fil[rows_mask, cols_mask]
@@ -55,10 +57,11 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
     }
 }
 
-filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, 
-    max_umis_per_cell = NULL) {
+filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_feat = NULL, 
+    min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL) {
     
-    # if( length(by) == 1) { IDX = split(1:dim(ace)[2], droplevels(colData(ace))[[by]]) } else { IDX = split(1:dim(ace)[2], by) }
+    # if( length(by) == 1) { IDX = split(1:dim(ace)[2],
+    # droplevels(colData(ace))[[by]]) } else { IDX = split(1:dim(ace)[2], by) }
     IDX = .get_ace_split_IDX(ace, by)
     
     if (any(duplicated(rownames(ace)))) {
@@ -73,13 +76,16 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
     }
     
     fil_names <- lapply(IDX, function(idx) {
-        fil_list <- filter.ace(ace[, idx], assay.name = assay_name, min_cells_per_feat = min_cells_per_feat, min_umis_per_cell = min_umis_per_cell, 
-            max_umis_per_cell = max_umis_per_cell, min_feats_per_cell = min_feats_per_cell, return_fil_ace = F)
+        fil_list <- filter.ace(ace[, idx], assay.name = assay_name, min_cells_per_feat = min_cells_per_feat, 
+            min_umis_per_cell = min_umis_per_cell, max_umis_per_cell = max_umis_per_cell, 
+            min_feats_per_cell = min_feats_per_cell, return_fil_ace = F)
         return(fil_list)
     })
     
-    fil_col = lapply(fil_names, function(i) i[["cols_filtered"]]$name) %>% Reduce(union, .)
-    fil_row = lapply(fil_names, function(i) i[["rows_filtered"]]$name) %>% Reduce(intersect, .)
+    fil_col = lapply(fil_names, function(i) i[["cols_filtered"]]$name) %>% Reduce(union, 
+        .)
+    fil_row = lapply(fil_names, function(i) i[["rows_filtered"]]$name) %>% Reduce(intersect, 
+        .)
     keep_row = which(!(rownames(ace) %in% fil_row))
     keep_col = which(!(colnames(ace) %in% fil_col))
     

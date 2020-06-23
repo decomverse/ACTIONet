@@ -12,8 +12,9 @@
 #' @examples
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
-reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts", norm_method = "default", reduction_slot = "ACTION",
-    seed = 0, SVD_algorithm = 1, return_V = FALSE) {
+reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts", 
+    norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 1, 
+    return_V = FALSE) {
     ace <- as(ace, "ACTIONetExperiment")
     if (!(data_slot %in% names(assays(ace)))) {
         if (norm_method != "none") {
@@ -21,61 +22,66 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
             message(msg)
             ace = normalize.ace(ace, norm_method)
         } else {
-            err = sprintf("Slot %s not found. This can be potentially due to missing normalization step.\n", data_slot)
+            err = sprintf("Slot %s not found. This can be potentially due to missing normalization step.\n", 
+                data_slot)
             stop(err)
         }
     }
-
+    
     ace.norm = ace
     if (is.null(rownames(ace.norm))) {
-        rownames(ace.norm) = sapply(1:nrow(ace.norm), function(i) sprintf("Gene%d", i))
+        rownames(ace.norm) = sapply(1:nrow(ace.norm), function(i) sprintf("Gene%d", 
+            i))
     } else {
         rn = rownames(ace.norm)
         if (length(unique(rn)) < length(rn)) {
             rownames(ace.norm) = make.names(rn, unique = TRUE)
         }
     }
-
+    
     if (is.null(colnames(ace.norm))) {
-        colnames(ace.norm) = sapply(1:ncol(ace.norm), function(i) sprintf("Cell%d", i))
+        colnames(ace.norm) = sapply(1:ncol(ace.norm), function(i) sprintf("Cell%d", 
+            i))
     } else {
         cn = colnames(ace.norm)
         if (length(unique(cn)) < length(cn)) {
             colnames(ace.norm) = make.names(cn, unique = TRUE)
         }
     }
-
+    
     for (n in names(assays(ace.norm))) {
         rownames(assays(ace.norm)[[n]]) = rownames(ace.norm)
         colnames(assays(ace.norm)[[n]]) = colnames(ace.norm)
     }
-
+    
     msg = sprintf("Running main reduction.\n")
     message(msg)
     # reduction_algorithm=ACTION (1), SVD_algorithm=IRLB (0)
-    if (SVD_algorithm == 0)
+    if (SVD_algorithm == 0) 
         max_iter = max_iter * 100
-
+    
     S = assays(ace.norm)[[data_slot]]
     if (is.matrix(S)) {
-        reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max_iter, seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
+        reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max_iter, 
+            seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
     } else {
-        reduction.out = reduce_kernel(S, reduced_dim = reduced_dim, iter = max_iter, seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
+        reduction.out = reduce_kernel(S, reduced_dim = reduced_dim, iter = max_iter, 
+            seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
     }
-
+    
     S_r = reduction.out$S_r
     colnames(S_r) = colnames(ace.norm)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
     colMaps(ace.norm)[[reduction_slot]] <- S_r
     colMapTypes(ace.norm)[[reduction_slot]] = "reduction"
-
-
+    
+    
     if (return_V) {
         V = reduction.out[["V"]]
         colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
         rowMaps(ace.norm)[["rotation"]] = V
     }
-
+    
     # metadata(ace.norm)$reduction.time = Sys.time()
     return(ace.norm)
 }

@@ -5,12 +5,8 @@
 \title{Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
-annotate.clusters.using.markers(
-  ace,
-  marker.genes,
-  specificity.slot.name,
-  rand.sample.no = 1000
-)
+annotate.clusters.using.markers(ace, marker.genes, specificity.slot.name,
+  rand.sample.no = 1000)
 }
 \arguments{
 \item{ace}{ACTIONet output object}

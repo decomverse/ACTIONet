@@ -4,12 +4,8 @@
 \alias{signed_cluster}
 \title{Computes graph clustering using Leiden algorith over signed graphs}
 \usage{
-signed_cluster(
-  A,
-  resolution_parameter = 1,
-  initial_clusters_ = NULL,
-  seed = 0L
-)
+signed_cluster(A, resolution_parameter = 1, initial_clusters_ = NULL,
+  seed = 0L)
 }
 \arguments{
 \item{resolution_parameter}{Granularity of clustering. Larger values result in more clusters (default = 1.0)}

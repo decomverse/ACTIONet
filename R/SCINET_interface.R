@@ -14,7 +14,8 @@
 #' network.list = run.SCINET.archetype(ace)
 #' G = network.list[[1]]
 #' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
-run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 4, compute.topo.specificity = T) {
+run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, spec.sample_no = 1000, 
+    thread_no = 4, compute.topo.specificity = T) {
     library(SCINET)
     
     print("Preprocessing the baseline interactome")
@@ -44,14 +45,16 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
     
     print("Constructing networks")
     gene.activity.scores = SCINET::compute_gene_activities_full(A = A, thread_no = thread_no)
-    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, thread_no = thread_no)
+    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, 
+        thread_no = thread_no)
     cellstate.nets.list = as.list(cellstate.nets)
     
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
         filter.mask = Matrix::colSums(G.Adj) == 0
-        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], mode = "undirected", weighted = T)
+        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], 
+            mode = "undirected", weighted = T)
         V(G)$name = common.genes[!filter.mask]
         if (compute.topo.specificity == TRUE) {
             z.scores = topo.spec(G, spec.sample_no)
@@ -90,7 +93,8 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
 #' network.list = run.SCINET.clusters(ace, 'cluster_specificity_scores')
 #' G = network.list[[1]]
 #' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
-run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
+run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.weight = 2, 
+    spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
     library(SCINET)
     
     print("Preprocessing the baseline interactome")
@@ -125,14 +129,16 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.w
     
     print("Constructing networks")
     gene.activity.scores = SCINET::compute_gene_activities_full(A = A, thread_no = thread_no)
-    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, thread_no = thread_no)
+    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, 
+        thread_no = thread_no)
     cellstate.nets.list = as.list(cellstate.nets)
     
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
         filter.mask = Matrix::colSums(G.Adj) == 0
-        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], mode = "undirected", weighted = T)
+        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], 
+            mode = "undirected", weighted = T)
         V(G)$name = common.genes[!filter.mask]
         if (compute.topo.specificity == TRUE) {
             z.scores = topo.spec(G, spec.sample_no)
@@ -168,7 +174,8 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.w
 #' network.list = run.SCINET.gene.scores(gene.scores)
 #' G = network.list[[1]]
 #' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
-run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
+run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, spec.sample_no = 1000, 
+    thread_no = 8, compute.topo.specificity = T) {
     require(SCINET)
     
     print("Preprocessing the baseline interactome")
@@ -197,14 +204,16 @@ run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, s
     
     print("Constructing networks")
     gene.activity.scores = SCINET::RIN_transform(A = A, thread_no = thread_no)
-    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, thread_no = thread_no)
+    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, 
+        thread_no = thread_no)
     cellstate.nets.list = as.list(cellstate.nets)
     
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
         filter.mask = Matrix::colSums(G.Adj) == 0
-        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], mode = "undirected", weighted = T)
+        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], 
+            mode = "undirected", weighted = T)
         V(G)$name = common.genes[!filter.mask]
         if (compute.topo.specificity == TRUE) {
             z.scores = topo.spec(G, spec.sample_no)

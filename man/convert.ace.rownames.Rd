@@ -5,7 +5,8 @@
 \title{Translates rownames() of the `ace` object for mouse and human datasets.
 A typical use-case is when input ids are in ENSEMBL format, but user is interested to work with gene symbols.}
 \usage{
-convert.ace.rownames(ace, from = "ENSEMBL", to = "SYMBOL", species = "human")
+convert.ace.rownames(ace, from = "ENSEMBL", to = "SYMBOL",
+  species = "human")
 }
 \arguments{
 \item{ace}{Input `ace` object}

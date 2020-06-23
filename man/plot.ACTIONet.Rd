@@ -4,21 +4,11 @@
 \alias{plot.ACTIONet}
 \title{Main ACTIONet plotting functions}
 \usage{
-\method{plot}{ACTIONet}(
-  ace,
-  labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 1.5,
-  node.size = 1,
-  CPal = CPal20,
-  add.text = TRUE,
-  suppress.legend = TRUE,
-  legend.pos = "bottomright",
-  title = "",
-  border.contrast.factor = 0.1,
-  coordinate.slot = "ACTIONet2D"
-)
+plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
+  trans.z.threshold = -0.5, trans.fact = 1.5, node.size = 1,
+  CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
+  legend.pos = "bottomright", title = "",
+  border.contrast.factor = 0.1, coordinate_slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -43,7 +33,7 @@
 
 \item{border.contrast.factor}{How much the node and its border should contrast}
 
-\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
+\item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 
 \item{add.states}{Whether or not to include interpolated cell state positions in the plot}
 }

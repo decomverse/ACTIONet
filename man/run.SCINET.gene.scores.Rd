@@ -4,14 +4,8 @@
 \alias{run.SCINET.gene.scores}
 \title{Computes a list of specific interactomes for an arbitrary gene score matrix}
 \usage{
-run.SCINET.gene.scores(
-  gene.scores,
-  G = NULL,
-  min.edge.weight = 2,
-  spec.sample_no = 1000,
-  thread_no = 8,
-  compute.topo.specificity = T
-)
+run.SCINET.gene.scores(gene.scores, G = NULL, min.edge.weight = 2,
+  spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T)
 }
 \arguments{
 \item{gene.scores}{gene.scores}

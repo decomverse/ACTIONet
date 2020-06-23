@@ -11,26 +11,30 @@
 #'
 #' @examples
 #' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE, min_feats_per_cell = 500)
-import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", sample_annotations = "barcodes.tsv.gz", 
-    sep = "\t", use.names = T, prefilter = FALSE, ...) {
+import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz", 
+    sample_annotations = "barcodes.tsv.gz", sep = "\t", use.names = T, prefilter = FALSE, 
+    ...) {
     require(ACTIONet)
     require(S4Vectors)
     
     count.file = paste(input_path, mtx_file, sep = "/")
     if (!file.exists(count.file)) {
-        err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", count.file)
+        err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", 
+            count.file)
         stop(err)
     }
     
     feature.file = paste(input_path, feature_annotations, sep = "/")
     if (!file.exists(feature.file)) {
-        err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", feature.file)
+        err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", 
+            feature.file)
         stop(err)
     }
     
     barcode.file = paste(input_path, sample_annotations, sep = "/")
     if (!file.exists(barcode.file)) {
-        err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", barcode.file)
+        err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.", 
+            barcode.file)
         stop(err)
     }
     
@@ -82,7 +86,8 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
     
     
     if (ncol(sample_annotations) > 1) {
-        ace <- ACTIONetExperiment(assays = list(counts = expression.counts.mat), colData = colAnnot, rowData = rowAnnot)
+        ace <- ACTIONetExperiment(assays = list(counts = expression.counts.mat), 
+            colData = colAnnot, rowData = rowAnnot)
     } else {
         ace <- ACTIONetExperiment(assays = list(counts = expression.counts.mat))
     }
@@ -133,7 +138,8 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...)
         message("Unknown version")
     }
     
-    ace = import.ace.from.10X.generic(input_path = input_path, mtx_file = mtx_file, feature_annotations = feature_annotations, sample_annotations = sample_annotations, 
+    ace = import.ace.from.10X.generic(input_path = input_path, mtx_file = mtx_file, 
+        feature_annotations = feature_annotations, sample_annotations = sample_annotations, 
         prefilter = prefilter, ...)
     
     return(ace)
@@ -153,7 +159,8 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...)
 #'
 #' @examples
 #' ace = import.ace.from.10X.h5(fname = fname, prefilter=TRUE)
-import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names = TRUE, prefilter = FALSE, ...) {
+import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names = TRUE, 
+    prefilter = FALSE, ...) {
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
         stop("Please install hdf5r to read HDF5 files")
     }
@@ -188,7 +195,8 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
     shp <- h5file[[paste0(genome, "/shape")]]
     features <- h5file[[paste0(genome, "/", feature_slot)]][]
     barcodes <- h5file[[paste0(genome, "/barcodes")]]
-    sparse.mat <- sparseMatrix(i = indices[] + 1, p = indptr[], x = as.numeric(x = counts.mat[]), dims = shp[], giveCsparse = FALSE)
+    sparse.mat <- sparseMatrix(i = indices[] + 1, p = indptr[], x = as.numeric(x = counts.mat[]), 
+        dims = shp[], giveCsparse = FALSE)
     if (length(unique(features)) < length(features)) {
         features <- make.names(names = features, unique = T)
     }
@@ -242,7 +250,8 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
 #'
 #' @examples
 #' ace = import.ace.from.count.matrix(counts.mat.mat, gene_names, prefilter=TRUE)
-import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotations = NULL, prefilter = FALSE, ...) {
+import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotations = NULL, 
+    prefilter = FALSE, ...) {
     if (!is.sparseMatrix(counts.mat)) {
         counts.mat = as(counts.mat, "sparseMatrix")
     }
@@ -352,7 +361,8 @@ import.ace.from.CDS <- function(monocle_cds) {
     gene_annotations = fData(monocle_cds)
     sample_annotations = pData(monocle_cds)
     
-    ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_annotations, rowData = gene_annotations)
+    ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_annotations, 
+        rowData = gene_annotations)
     
     return(ace)
 }
@@ -373,7 +383,8 @@ import.ace.from.CDS <- function(monocle_cds) {
 convert.ace.rownames <- function(ace, from = "ENSEMBL", to = "SYMBOL", species = "human") {
     if (species == "human") {
         library(org.Hs.eg.db)
-        suppressWarnings(ids <- mapIds(org.Hs.eg.db, keys = row.names(ace), keytype = from, column = to, multiVals = "first"))
+        suppressWarnings(ids <- mapIds(org.Hs.eg.db, keys = row.names(ace), keytype = from, 
+            column = to, multiVals = "first"))
         ids[is.na(ids)] = ""
         
         ace$original_rownames = rownames(ace)
@@ -381,7 +392,8 @@ convert.ace.rownames <- function(ace, from = "ENSEMBL", to = "SYMBOL", species =
         rownames(ace) = ids
     } else if (species == "mouse") {
         library(org.Mm.eg.db)
-        suppressWarnings(ids <- mapIds(org.Mm.eg.db, keys = row.names(ace), keytype = from, column = to, multiVals = "first"))
+        suppressWarnings(ids <- mapIds(org.Mm.eg.db, keys = row.names(ace), keytype = from, 
+            column = to, multiVals = "first"))
         ids[is.na(ids)] = ""
         
         ace$original_rownames = rownames(ace)
@@ -409,7 +421,8 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
     if (drop_single_values) {
         k_singular <- sapply(df, function(x) length(unique(x)) == 1)
         if (sum(k_singular) > 0) 
-            warning(paste("Dropping single category variables:"), paste(colnames(df)[k_singular], collapse = ", "))
+            warning(paste("Dropping single category variables:"), paste(colnames(df)[k_singular], 
+                collapse = ", "))
         df <- df[, !k_singular, drop = F]
         if (ncol(df) == 0) 
             df[["name"]] <- rownames(df)
@@ -438,8 +451,10 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
     
     
     if (full.import == T) {
-        colMaps(ace)[["H_stacked"]] = as(ACTIONet.out$reconstruct.out$H_stacked, "sparseMatrix")
-        colMaps(ace)[["C_stacked"]] = as(t(ACTIONet.out$reconstruct.out$C_stacked), "sparseMatrix")
+        colMaps(ace)[["H_stacked"]] = as(ACTIONet.out$reconstruct.out$H_stacked, 
+            "sparseMatrix")
+        colMaps(ace)[["C_stacked"]] = as(t(ACTIONet.out$reconstruct.out$C_stacked), 
+            "sparseMatrix")
     }
     
     unification.out = ACTIONet.out$unification.out
@@ -447,9 +462,11 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
     colMaps(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), "sparseMatrix")
     
     ace$assigned_archetype = ACTIONet.out$unification.out$assignments.core
-    ace$node_centrality = compute_archetype_core_centrality(colNets(ace)$ACTIONet, sample_assignments = ace$assigned_archetype)
+    ace$node_centrality = compute_archetype_core_centrality(colNets(ace)$ACTIONet, 
+        sample_assignments = ace$assigned_archetype)
     
-    # ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+    # ace$node_centrality = compute_archetype_core_centrality(G,
+    # ace$assigned_archetype)
     
     specificity.out = ACTIONet.out$unification.out$DE.core
     rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
@@ -461,7 +478,8 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
     
     # Prepare output
     if (return.all) {
-        trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, unification.out = unification.out)
+        trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out, 
+            unification.out = unification.out)
         trace$log = list(genes = rownames(ace), cells = colnames(ace), time = Sys.time())
         
         out = list(ace = ace, trace = trace)

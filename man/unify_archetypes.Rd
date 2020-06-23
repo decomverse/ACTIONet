@@ -5,7 +5,8 @@
 \title{Identifies and aggregates redundant archetypes into equivalent classes
 (Post-ACTIONet archetype processing)}
 \usage{
-unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 10, resolution = 1)
+unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 10,
+  resolution = 1)
 }
 \arguments{
 \item{S_r}{Reduced kernel profile}
