@@ -1,10 +1,16 @@
 # TODO
 
 ## Primary
-* Finish tutorials
-* update-alternatives to run R with MKL without compiling it from scratch
+* Finish tutorials (2 more to go, 1 hands-on tutorial, poke Jose to go through them).
+* Help Madhvi install ACTIONet
+* Test, debug, and run code on Windows
 * Python porting and testing
-* Release docker
+* Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter. 1- Minimal (Alpine)
+* Write, test, and release singularity-lite and singularity-full
+* Fixing  rowMaps/colMaps
+* "gating" on archetypes
+* Interactive cell selection
+
 
 ## New features to be tested
 * `renormalize_input_matrix` for post-ACTIONet normalization
