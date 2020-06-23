@@ -1,5 +1,5 @@
 ## ACTIONet Docker
-See [ACTIONet-Docker](https://github.com/shmohammadi86/ACTIONet/tree/Docker) for more information about installing/using ACTIONet docker.
+See [ACTIONet-Docker](https://github.com/shmohammadi86/ACTIONet/tree/docker) for more information about installing/using ACTIONet docker.
 
 ## ACTIONet R Package
 See [ACTIONet-R](https://github.com/shmohammadi86/ACTIONet/tree/R-release) for more information about installing/using ACTIONet R package
