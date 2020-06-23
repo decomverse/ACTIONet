@@ -4,14 +4,8 @@
 \alias{run.SCINET.gene.scores}
 \title{Computes a list of specific interactomes for an arbitrary gene score matrix}
 \usage{
-run.SCINET.gene.scores(
-  gene.scores,
-  G = NULL,
-  min.edge.weight = 2,
-  spec.sample_no = 1000,
-  thread_no = 8,
-  compute.topo.specificity = T
-)
+run.SCINET.gene.scores(gene.scores, G = NULL, min.edge.weight = 2,
+  spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T)
 }
 \arguments{
 \item{gene.scores}{gene.scores}
@@ -27,7 +21,7 @@ If it is NULL, PCNet is loaded as the baseline from SCINET package.}
 
 \item{compute.topo.specificity}{Whether to compute topological specificity scores (will be stores as V(G)$specificity)}
 
-\item{specificity.slot.name}{An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
 }
 \value{
 A list of igraph objects

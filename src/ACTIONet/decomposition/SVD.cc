@@ -796,8 +796,8 @@ namespace ACTIONet {
 
 
 		// Form a matrix Q whose columns constitute a well-conditioned basis for the columns of the earlier Q.			
-		gram_schmidt(Q);
-		//Q = orth(Q);
+		////gram_schmidt(Q);
+		Q = orth(Q);
 		
 		if (m < n) {
 			// Conduct normalized power iterations.
@@ -806,12 +806,12 @@ namespace ACTIONet {
 				
 				
 				Q = A*Q; 
-				gram_schmidt(Q);
-				//Q = orth(Q);
+				//gram_schmidt(Q);
+				Q = orth(Q);
 
 				Q = A.t()*Q; 
-				gram_schmidt(Q);								
-				//Q = orth(Q);
+				//gram_schmidt(Q);								
+				Q = orth(Q);
 			}
 
 			X = mat(A*Q);
@@ -826,12 +826,12 @@ namespace ACTIONet {
 				printf("\t\tIteration %d\n", it);
 				
 				Q = A.t()*Q;
-				gram_schmidt(Q);
-				//Q = orth(Q);
+				////gram_schmidt(Q);
+				Q = orth(Q);
 					
 				Q = A*Q; // Apply A to a random matrix, obtaining Q.
-				gram_schmidt(Q);			
-				//Q = orth(Q);
+				////gram_schmidt(Q);			
+				Q = orth(Q);
 			}
 			
 			// SVD Q' applied to the centered A to obtain approximations to the singular values and right singular vectors of the A;
@@ -885,8 +885,8 @@ namespace ACTIONet {
 
 
 		// Form a matrix Q whose columns constitute a well-conditioned basis for the columns of the earlier Q.			
-		gram_schmidt(Q);
-		//Q = orth(Q);
+		//gram_schmidt(Q);
+		Q = orth(Q);
 		
 		if (m < n) {
 			// Conduct normalized power iterations.
@@ -895,12 +895,12 @@ namespace ACTIONet {
 				
 				
 				Q = A*Q; 
-				gram_schmidt(Q);
-				//Q = orth(Q);
+				//gram_schmidt(Q);
+				Q = orth(Q);
 
 				Q = A.t()*Q; 
-				gram_schmidt(Q);								
-				//Q = orth(Q);
+				//gram_schmidt(Q);								
+				Q = orth(Q);
 			}
 
 			X = mat(A*Q);
@@ -915,12 +915,12 @@ namespace ACTIONet {
 				printf("\t\tIteration %d\n", it);
 				
 				Q = A.t()*Q;
-				gram_schmidt(Q);
-				//Q = orth(Q);
+				//gram_schmidt(Q);
+				Q = orth(Q);
 					
 				Q = A*Q; // Apply A to a random matrix, obtaining Q.
-				gram_schmidt(Q);			
-				//Q = orth(Q);
+				//gram_schmidt(Q);			
+				Q = orth(Q);
 			}
 			
 			// SVD Q' applied to the centered A to obtain approximations to the singular values and right singular vectors of the A;
