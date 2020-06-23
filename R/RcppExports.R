@@ -894,3 +894,7 @@ csr_sort_indices_inplace <- function(Ap, Aj, Ax) {
     invisible(.Call(`_ACTIONet_csr_sort_indices_inplace`, Ap, Aj, Ax))
 }
 
+csc_sort_indices_inplace <- function(Ap, Ai, Ax) {
+    invisible(.Call(`_ACTIONet_csc_sort_indices_inplace`, Ap, Ai, Ax))
+}
+

@@ -5,16 +5,17 @@
 \title{Translates rownames() of the `ace` object for mouse and human datasets.
 A typical use-case is when input ids are in ENSEMBL format, but user is interested to work with gene symbols.}
 \usage{
-convert.ace.rownames(ace, from = "ENSEMBL", to = "SYMBOL", species = "human")
+convert.ace.rownames(ace, from = "ENSEMBL", to = "SYMBOL",
+  species = "human")
 }
 \arguments{
 \item{ace}{Input `ace` object}
 
-\item{from}{Source annotation (default="ENSEMBL")}
+\item{from}{Source annotation (default='ENSEMBL')}
 
-\item{to}{Target annotation (default="SYMBOL")}
+\item{to}{Target annotation (default='SYMBOL')}
 
-\item{species}{Either "mouse" or "human" (default="human")}
+\item{species}{Either 'mouse' or 'human' (default='human')}
 }
 \value{
 `SingleCellExeriment` object with renamed rows

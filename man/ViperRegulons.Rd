@@ -4,10 +4,8 @@
 \name{ViperRegulons}
 \alias{ViperRegulons}
 \title{Regulons for Viper analysis}
-\format{
-:
-  A list of regulons as input to the Viper method
-}
+\format{:
+  A list of regulons as input to the Viper method}
 \source{
 \url{https://www.bioconductor.org/packages/release/bioc/html/viper.html}
 }

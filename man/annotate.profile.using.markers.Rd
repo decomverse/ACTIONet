@@ -2,14 +2,11 @@
 % Please edit documentation in R/clusters.R
 \name{annotate.profile.using.markers}
 \alias{annotate.profile.using.markers}
-\title{Annotate arbitary feature score matrix using known marker genes 
+\title{Annotate arbitary feature score matrix using known marker genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
-annotate.profile.using.markers(
-  feature.scores,
-  marker.genes,
-  rand.sample.no = 1000
-)
+annotate.profile.using.markers(feature.scores, marker.genes,
+  rand.sample.no = 1000)
 }
 \arguments{
 \item{feature.scores}{An arbitrary matrix with rows corresponding to features and columns to any given annotation/grouping of cells}
@@ -26,11 +23,11 @@ A named list: \itemize{
 }
 }
 \description{
-Annotate arbitary feature score matrix using known marker genes 
+Annotate arbitary feature score matrix using known marker genes
 (It uses permutation test on cluster specificity scores)
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 arch.annot = annotate.profile.using.markers(my.gene.scores.profile, marker.genes = marker.genes)
 }

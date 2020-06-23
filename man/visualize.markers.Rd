@@ -5,16 +5,9 @@
 \title{Projects a set of markers on the ACTIONet
 It also optionally imputes the markers.}
 \usage{
-visualize.markers(
-  ace,
-  marker.genes,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 3,
-  node.size = 1,
-  CPal = "magma",
-  alpha_val = 0
-)
+visualize.markers(ace, marker.genes, transparency.attr = NULL,
+  trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
+  CPal = "magma", alpha_val = 0)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -31,7 +24,7 @@ visualize.markers(
 
 \item{x}{Score vector}
 
-\item{coordinate.slot}{Entry in reducedDims(ace) containing the plot coordinates (default:"ACTIONet2D")}
+\item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 }
 \value{
 Visualized ACTIONet with projected scores
@@ -42,6 +35,6 @@ It also optionally imputes the markers.
 }
 \examples{
 ace = run.ACTIONet(sce)
-x = logcounts(ace)["CD14", ]
-visualize.markers(ace, c("CD14", "CD19", "CD3G"), transparency.attr = ace$node_centrality)
+x = logcounts(ace)['CD14', ]
+visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
 }

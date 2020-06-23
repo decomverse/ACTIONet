@@ -4,12 +4,8 @@
 \alias{select.top.k.features}
 \title{Report the top-rank features from a given enrichment table}
 \usage{
-select.top.k.features(
-  feature.enrichment.table,
-  top.features = 3,
-  normalize = F,
-  reorder.columns = T
-)
+\method{select}{top.k.features}(feature.enrichment.table,
+  top.features = 3, normalize = F, reorder.columns = T)
 }
 \arguments{
 \item{top.features}{Number of features to return}
@@ -23,6 +19,6 @@ Sorted table with the selected top-ranked
 Report the top-rank features from a given enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
 }
