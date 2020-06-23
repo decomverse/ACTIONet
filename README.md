@@ -198,12 +198,12 @@ $ docker run -v /your/data/file/path/:/data -w /data -p 8787:8787 shmohammadi86/
 
 # Additional tutorials
 You can access ACTIONet tutorials from:
-1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/min_intro.html)
-2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/intro.html)
-3. [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/clustering.html)
-4. [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/batch.html)
-5. [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/porting_data.html)
-6. [Interactive visualization, annotation, and exploration](http://compbio.mit.edu/ACTIONet/annotation.html)
-7. [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/scinet.html)
+1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/tutorial/min_intro.html)
+2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/tutorial/ACTIONet/intro.html)
+3. [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorial/clustering.html)
+4. [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/tutorial/batch.html)
+5. [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorial/porting_data.html)
+6. [Interactive visualization, annotation, and exploration](http://compbio.mit.edu/ACTIONet/tutorial/annotation.html)
+7. [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/tutorial/scinet.html)
 
 You can also find a [step-by-step guide](http://compbio.mit.edu/ACTIONet/guide.html) to learning the core functionalities of the ACTIONet framework.
