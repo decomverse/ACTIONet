@@ -13,7 +13,8 @@
 #'
 #' @examples
 #' ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, 'updated_archetype_annotations')
-infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, max_iter = 3, adjust.levels = T) {
+infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, 
+    max_iter = 3, adjust.levels = T) {
     Adj = colNets(ace)$ACTIONet
     A = as(Adj, "dgTMatrix")
     
@@ -87,8 +88,8 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
 #' @examples
 #' ace = add.cell.annotations(ace, cell.labels, 'input_annotations')
 #' ace = correct.cell.annotations(ace, 'input_annotations', 'updated_annotations')
-correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.threshold = 2, double.stochastic = FALSE, max_iter = 3, adjust.levels = T, 
-    min.cell.fraction = 0.001) {
+correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.threshold = 2, 
+    double.stochastic = FALSE, max_iter = 3, adjust.levels = T, min.cell.fraction = 0.001) {
     Adj = colNets(ace)$ACTIONet
     A = as(Adj, "dgTMatrix")
     

@@ -4,23 +4,12 @@
 \alias{run.ACTIONet}
 \title{A wrapper function to call all main functions of the ACTIONet}
 \usage{
-run.ACTIONet(
-  ace,
-  k_max = 30,
-  min.cells.per.arch = 10,
-  min_specificity_z_threshold = -1,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 500,
-  layout.in.parallel = FALSE,
-  thread_no = 0,
-  data.slot = "logcounts",
-  reduction.slot = "ACTION",
-  unification.resolution = 0.1,
-  max_iter_ACTION = 50,
-  full.trace = T
-)
+run.ACTIONet(ace, k_max = 30, min.cells.per.arch = 10,
+  min_specificity_z_threshold = -1, network_density = 1,
+  mutual_edges_only = TRUE, layout_compactness = 50,
+  layout_epochs = 500, layout.in.parallel = FALSE, thread_no = 0,
+  data_slot = "logcounts", reduction_slot = "ACTION",
+  unification.resolution = 0.1, max_iter_ACTION = 50, full.trace = T)
 }
 \arguments{
 \item{ace}{Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).}
@@ -36,9 +25,9 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{thread_no}{Number of parallel threads (default=0)}
 
-\item{data.slot}{Corresponding slot in the `ace` object the normalized counts (default='logcounts')}
+\item{data_slot}{Corresponding slot in the `ace` object the normalized counts (default='logcounts')}
 
-\item{reduction.slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r')}
+\item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r')}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 

@@ -4,15 +4,8 @@
 \alias{reduce_kernel_full}
 \title{Computes reduced kernel matrix for a given (single-cell) profile}
 \usage{
-reduce_kernel_full(
-  S,
-  reduced_dim = 50L,
-  iter = 5L,
-  seed = 0L,
-  reduction_algorithm = 1L,
-  SVD_algorithm = 1L,
-  prenormalize = FALSE
-)
+reduce_kernel_full(S, reduced_dim = 50L, iter = 5L, seed = 0L,
+  reduction_algorithm = 1L, SVD_algorithm = 1L, prenormalize = FALSE)
 }
 \arguments{
 \item{S}{Input matrix ("matrix")}

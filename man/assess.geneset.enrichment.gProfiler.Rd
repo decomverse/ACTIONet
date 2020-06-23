@@ -5,13 +5,8 @@
 \title{Performs geneset enrichment analysis on a given set of genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
-assess.geneset.enrichment.gProfiler(
-  genes,
-  category = c("GO:BP", "REAC", "KEGG"),
-  organism = "hsapiens",
-  top.terms = 10,
-  col = "tomato"
-)
+assess.geneset.enrichment.gProfiler(genes, category = c("GO:BP", "REAC",
+  "KEGG"), organism = "hsapiens", top.terms = 10, col = "tomato")
 }
 \arguments{
 \item{genes}{Set of genes}

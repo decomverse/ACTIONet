@@ -14,7 +14,7 @@ normalize.Linnorm <- function(ace) {
 
 
 normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam()) {
-
+    
     if (norm.method == "scran") {
         ace.norm = normalize.scran(ace, BPPARAM = BPPARAM)
     } else if (norm.method == "linnorm") {
@@ -24,16 +24,17 @@ normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam())
         A = as(SummarizedExperiment::assays(ace.norm)[["counts"]], "dgTMatrix")
         cs = Matrix::colSums(A)
         cs[cs == 0] = 1
-        B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = log1p(median(cs) * (A@x/cs[A@j + 1])), dims = dim(A))
+        B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = log1p(median(cs) * 
+            (A@x/cs[A@j + 1])), dims = dim(A))
         rownames(B) = rownames(ace.norm)
         colnames(B) = colnames(ace.norm)
         SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
     }
-
+    
     metadata(ace.norm)$normalization.method = norm.method
     # metadata(ace.norm)$normalization.time = Sys.time()
-
+    
     # ace.norm = add.count.metadata(ace.norm)
-
+    
     return(ace.norm)
 }

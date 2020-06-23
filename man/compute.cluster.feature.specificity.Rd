@@ -4,12 +4,8 @@
 \alias{compute.cluster.feature.specificity}
 \title{Computes feature (i.e. gene) specificity scores for each cluster}
 \usage{
-compute.cluster.feature.specificity(
-  ace,
-  clusters,
-  output.slot.name,
-  data.slot = "logcounts"
-)
+compute.cluster.feature.specificity(ace, clusters, output.slot.name,
+  data_slot = "logcounts")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

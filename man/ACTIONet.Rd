@@ -3,6 +3,7 @@
 \docType{package}
 \name{ACTIONet}
 \alias{ACTIONet}
+\alias{ACTIONet-package}
 \title{ACTIONet: Robust multi-resolution analysis of single-cell datasets}
 \description{
 Joint archetypal/network-based analysis for multi-resolution decomposition of single-cell states.

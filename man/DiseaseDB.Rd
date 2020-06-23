@@ -4,10 +4,8 @@
 \name{DiseaseDB}
 \alias{DiseaseDB}
 \title{Collection of Disease-associated genesets}
-\format{
-:
-  A list of genesets
-}
+\format{:
+  A list of genesets}
 \source{
 \url{https://amp.pharm.mssm.edu/Enrichr/}
 }

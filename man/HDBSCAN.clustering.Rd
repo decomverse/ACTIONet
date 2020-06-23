@@ -4,12 +4,8 @@
 \alias{HDBSCAN.clustering}
 \title{A wrapper function For HDBSCAN algorithm applied to an ACE object}
 \usage{
-HDBSCAN.clustering(
-  ace,
-  minPoints = 30,
-  minClusterSize = 30,
-  archetype.slot = "H_unified"
-)
+HDBSCAN.clustering(ace, minPoints = 30, minClusterSize = 30,
+  archetype.slot = "H_unified")
 }
 \arguments{
 \item{ace}{Input results to be clustered

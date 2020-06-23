@@ -4,10 +4,8 @@
 \name{Hs2Mm}
 \alias{Hs2Mm}
 \title{Human-Mouse orthologs}
-\format{
-:
-  data.frame with two columns corresponding to human and mouse genes, respectively
-}
+\format{:
+  data.frame with two columns corresponding to human and mouse genes, respectively}
 \source{
 \url{http://www.informatics.jax.org/downloads/reports/HMD_HumanPhenotype.rpt}
 }

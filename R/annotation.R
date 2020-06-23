@@ -52,9 +52,11 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
     Labels.confidence = apply(Enrichment.Z, 1, max)
     
     
-    rownames(Enrichment.Z) = paste("A", 1:nrow(Enrichment.Z), "-", archetypeLabels, sep = "")
+    rownames(Enrichment.Z) = paste("A", 1:nrow(Enrichment.Z), "-", archetypeLabels, 
+        sep = "")
     
-    out.list = list(Labels = archetypeLabels, Labels.confidence = Labels.confidence, Enrichment = Enrichment.Z)
+    out.list = list(Labels = archetypeLabels, Labels.confidence = Labels.confidence, 
+        Enrichment = Enrichment.Z)
     
     return(out.list)
 }
@@ -77,14 +79,16 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
 #' data('curatedMarkers_human') # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
-annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, significance.slot = "unified_feature_specificity") {
+annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, 
+    significance.slot = "unified_feature_specificity") {
     require(ACTIONet)
     require(igraph)
     require(Matrix)
     require(stringr)
     
     if (is.matrix(marker.genes) | is.sparseMatrix(marker.genes)) {
-        marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
+        marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 
+            0])
     }
     
     specificity.panel = as.matrix(log1p(t(rowMaps(ace)[[significance.slot]])))
@@ -92,7 +96,8 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
     
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
-        GS.names = sapply(1:length(GS.names), function(i) sprintf("Celltype %s", i))
+        GS.names = sapply(1:length(GS.names), function(i) sprintf("Celltype %s", 
+            i))
     }
     
     markers.table = do.call(rbind, lapply(names(marker.genes), function(celltype) {
@@ -105,19 +110,22 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
         is.signed = signed.count > 0
         
         if (!is.signed) {
-            df = data.frame(Gene = (genes), Direction = +1, Celltype = celltype, stringsAsFactors = F)
+            df = data.frame(Gene = (genes), Direction = +1, Celltype = celltype, 
+                stringsAsFactors = F)
         } else {
             
-            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene, stringr::fixed("+"), 
-                ""))))
-            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene, stringr::fixed("-"), 
-                ""))))
+            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)], 
+                function(gene) stringr::str_replace(gene, stringr::fixed("+"), ""))))
+            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)], 
+                function(gene) stringr::str_replace(gene, stringr::fixed("-"), ""))))
             
-            df = data.frame(Gene = c(pos.genes, neg.genes), Direction = c(rep(+1, length(pos.genes)), rep(-1, length(neg.genes))), Celltype = celltype, 
+            df = data.frame(Gene = c(pos.genes, neg.genes), Direction = c(rep(+1, 
+                length(pos.genes)), rep(-1, length(neg.genes))), Celltype = celltype, 
                 stringsAsFactors = F)
         }
     }))
-    markers.table = markers.table[markers.table$Gene %in% colnames(specificity.panel), ]
+    markers.table = markers.table[markers.table$Gene %in% colnames(specificity.panel), 
+        ]
     
     if (dim(markers.table)[1] == 0) {
         print("No markers are left")
@@ -144,7 +152,8 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
             rand.stat = rand.A %*% sgn
         })
         # rand.stats[is.na(rand.stats)] = 0
-        cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 1, sd))
+        cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 
+            1, sd))
         
         return(cell.zscores)
     })
@@ -152,8 +161,8 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
     Z[is.na(Z)] = 0
     Labels = colnames(Z)[apply(Z, 1, which.max)]
     
-    # L = names(marker.genes) L.levels = L[L %in% Labels] Labels = match(L, L.levels) names(Labels) = L.levels Labels = factor(Labels, levels
-    # = L)
+    # L = names(marker.genes) L.levels = L[L %in% Labels] Labels = match(L, L.levels)
+    # names(Labels) = L.levels Labels = factor(Labels, levels = L)
     Labels.conf = apply(Z, 1, max)
     
     names(Labels) = rownames(specificity.panel)
@@ -185,8 +194,8 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.cells.using.markers(ace, marker.genes = marker.genes)
 #' cell.labels = arch.annot$Labels
-annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100, alpha_val = 0.9, thread_no = 8, imputation = "PageRank", 
-    data.slot = "logcounts") {
+annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100, 
+    alpha_val = 0.9, thread_no = 8, imputation = "PageRank", data_slot = "logcounts") {
     require(ACTIONet)
     require(igraph)
     require(Matrix)
@@ -212,12 +221,13 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
             df = data.frame(Gene = (genes), Direction = +1, Celltype = celltype)
         } else {
             
-            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene, stringr::fixed("+"), 
-                ""))))
-            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)], function(gene) stringr::str_replace(gene, stringr::fixed("-"), 
-                ""))))
+            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)], 
+                function(gene) stringr::str_replace(gene, stringr::fixed("+"), ""))))
+            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)], 
+                function(gene) stringr::str_replace(gene, stringr::fixed("-"), ""))))
             
-            df = data.frame(Gene = c(pos.genes, neg.genes), Direction = c(rep(+1, length(pos.genes)), rep(-1, length(neg.genes))), Celltype = celltype)
+            df = data.frame(Gene = c(pos.genes, neg.genes), Direction = c(rep(+1, 
+                length(pos.genes)), rep(-1, length(neg.genes))), Celltype = celltype)
         }
     }))
     markers.table = markers.table[markers.table$Gene %in% rownames(ace), ]
@@ -230,13 +240,14 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
     if (imputation == "PageRank") {
         # PageRank-based imputation
         print("Using PageRank for imptation of marker genes")
-        imputed.marker.expression = impute.genes.using.ACTIONet(ace, markers.table$Gene, alpha_val, thread_no, data.slot = data.slot)
+        imputed.marker.expression = impute.genes.using.ACTIONet(ace, markers.table$Gene, 
+            alpha_val, thread_no, data_slot = data_slot)
     } else if (imputation == "archImpute") {
         # PCA-based imputation
         print("Using archImpute for imptation of marker genes")
         imputed.marker.expression = impute.specific.genes.using.archetypes(ace, markers.table$Gene)
     } else {
-        imputed.marker.expression = ace@assays[[data.slot]]
+        imputed.marker.expression = ace@assays[[data_slot]]
     }
     
     
@@ -259,7 +270,8 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
             rand.stat = rand.A %*% sgn
         })
         
-        cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 1, sd))
+        cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 
+            1, sd))
         
         return(cell.zscores)
     })
@@ -296,16 +308,20 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
 #' labels = cell.annotations$Labels
-annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, unified_suffix = "unified") {
+annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000, 
+    unified_suffix = "unified") {
     
     significance.slot = sprintf("%s_feature_specificity", unified_suffix)
-    arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, rand.sample.no = rand.sample.no, significance.slot = significance.slot)
+    arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes, 
+        rand.sample.no = rand.sample.no, significance.slot = significance.slot)
     
     enrichment.mat = arch.annot$Enrichment
     
     H.slot = sprintf("H_%s", unified_suffix)
-    cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat, normalize = T, H.slot = H.slot)
-    cell.annotations = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
+    cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat, 
+        normalize = T, H.slot = H.slot)
+    cell.annotations = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, 
+        which.max)]
     
     Labels = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
     Labels.confidence = apply(cell.enrichment.mat, 1, max)
@@ -331,7 +347,8 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 #' enrichment.mat = arch.annot$enrichment
 #' cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat)
 #' cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
-map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F, H.slot = "H_unified") {
+map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F, 
+    H.slot = "H_unified") {
     cell.scores.mat = Matrix::t(colMaps(ace)[[H.slot]])
     
     if (nrow(enrichment.matrix) != ncol(cell.scores.mat)) {

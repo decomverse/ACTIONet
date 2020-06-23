@@ -56,14 +56,15 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
 #' The larger it is, the deeper the diffusion, which results in less nonzeros (default = 0.85).
 #' @param thread_no Number of parallel threads
 #' @param diffusion_iters Number of diffusion iterations (default = 5)
-#' @param data.slot Slot in the ace object with normalized counts.
+#' @param data_slot Slot in the ace object with normalized counts.
 #' 
 #' @return Imputed gene expression matrix. Column names are set with imputed genes names and rows are cells.
 #' 
 #' @examples
 #' imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
 #' plot.ACTIONet.gradient(ace, imputed.genes[, 1])
-impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no = 8, diffusion_iters = 5, data.slot = "logcounts") {
+impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no = 8, 
+    diffusion_iters = 5, data_slot = "logcounts") {
     genes = unique(genes)
     
     
@@ -71,12 +72,13 @@ impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no 
     matched.idx = match(matched.genes, rownames(ace))
     
     # Smooth/impute gene expressions
-    if (!(data.slot %in% names(SummarizedExperiment::assays(ace)))) {
-        R.utils::printf("%s is not in assays of ace\n", data.slot)
+    if (!(data_slot %in% names(SummarizedExperiment::assays(ace)))) {
+        R.utils::printf("%s is not in assays of ace\n", data_slot)
     }
     
     if (length(matched.idx) > 1) {
-        raw.gene.expression = Matrix::t(as(SummarizedExperiment::assays(ace)[[data.slot]][matched.idx, ], "dgTMatrix"))
+        raw.gene.expression = Matrix::t(as(SummarizedExperiment::assays(ace)[[data_slot]][matched.idx, 
+            ], "dgTMatrix"))
         U = raw.gene.expression
         U[U < 0] = 0
         cs = Matrix::colSums(U)
@@ -84,14 +86,16 @@ impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no 
         U = U[, cs > 0]
         gg = matched.genes[cs > 0]
     } else {
-        raw.gene.expression = SummarizedExperiment::assays(ace)[[data.slot]][matched.idx, ]
+        raw.gene.expression = SummarizedExperiment::assays(ace)[[data_slot]][matched.idx, 
+            ]
         U = raw.gene.expression/sum(raw.gene.expression)
         gg = matched.genes
     }
     
     # Perform network-diffusion
     G = colNets(ace)$ACTIONet
-    imputed.gene.expression = compute_network_diffusion(G, as(U, "sparseMatrix"), alpha = alpha_val, max_it = diffusion_iters)
+    imputed.gene.expression = compute_network_diffusion(G, as(U, "sparseMatrix"), 
+        alpha = alpha_val, max_it = diffusion_iters)
     
     imputed.gene.expression[is.na(imputed.gene.expression)] = 0
     

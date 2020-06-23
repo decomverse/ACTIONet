@@ -4,19 +4,10 @@
 \alias{plot.ACTIONet.gradient}
 \title{Projects a given continuous score on the ACTIONet plot}
 \usage{
-\method{plot}{ACTIONet.gradient}(
-  ace,
-  x,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 3,
-  node.size = 1,
-  CPal = "magma",
-  title = "",
-  alpha_val = 0.85,
-  nonparameteric = FALSE,
-  coordinate.slot = "ACTIONet2D"
-)
+plot.ACTIONet.gradient(ace, x, transparency.attr = NULL,
+  trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
+  CPal = "magma", title = "", alpha_val = 0.85,
+  nonparameteric = FALSE, coordinate_slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}
@@ -33,7 +24,7 @@
 
 \item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
 
-\item{coordinate.slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
+\item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 }
 \value{
 Visualized ACTIONet with projected scores

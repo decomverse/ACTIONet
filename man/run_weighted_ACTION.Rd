@@ -4,15 +4,8 @@
 \alias{run_weighted_ACTION}
 \title{Runs multi-level weighted ACTION decomposition method (under development)}
 \usage{
-run_weighted_ACTION(
-  S_r,
-  w,
-  k_min = 2L,
-  k_max = 30L,
-  thread_no = 0L,
-  max_it = 50L,
-  min_delta = 1e-16
-)
+run_weighted_ACTION(S_r, w, k_min = 2L, k_max = 30L, thread_no = 0L,
+  max_it = 50L, min_delta = 1e-16)
 }
 \arguments{
 \item{S_r}{Reduced kernel matrix}
