@@ -1,43 +1,82 @@
 # Installation
-## Setting up environment
-First decide on which compiler/BLAS/LAPACK configuration to use. Depending on the choice, create (if it doesn't exist) a .R/Makevars (linux and mac) or .R/Makevars.win (windows) file in your home directory and copy the content of the following files into it:
+### Setting Up the Environment (Preinstallation)
+The first step befor instaling `ACTIONet` is to decide which BLAS/LAPACK (math kernel) configuration to use. This choice is mostly driven by ease of installation versus compute time of ACTIONet. For the optimal performance on Intel-based architectures, especially on Linux-based systems, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is highly recommended. After installing, make sure to `MKL_ROOT` is defined by running [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
-* **Linux/Windows (OS) + oneAPI (dpcpp compiler + MKL)**: `src/Makevars_lib/Makevars.dpcpp` **--** Best / Fastest (if using Intel architechture)
-* **Linux/Mac/Windows (OS) + gcc (compiler) + MKL**: `src/Makevars_lib/Makevars.gcc_MKL` **--** Second best / Fast enough
-* **Mac (OS) + clang (compiler) + accelerate**: `src/Makevars_lib/Makevars.clang` **--** Easy on Mac / Fast-ish
-* **Linux/Mac/Windows (OS) + gcc (compiler) + default BLAS/LAPACK**: `src/Makevars_lib/Makevars.gcc` **--** Easiest / [likely] Slowest
+Additionally, `ACTIONet` package depends on the HDF5 library to import/export results to standard formats compatible with other packages. To install the related package on debian-based linux machines, run:
 
-#### > PS:
-* For further installation instruction for oneAPI and/or oneMKL, visit: [Installation Guide for Intel® oneAPI Toolkits](https://software.intel.com/content/www/us/en/develop/articles/installation-guide-for-intel-oneapi-toolkits.html).
-* The fastest speed will be achieved if R itself is also compiled with oneMKL/oneAPI. For compiling R, follow instructions in [Install R with MKL](X)
-* If your Mac architecture doesn't use Intel processors, using is not suggested.
+```bash
+sudo apt-get install libhdf5-dev
+```
 
+For Mac-based systems, you can use [brew](https://brew.sh/) to install HDF5 library:
 
-## Installing ACTIONet R package
-If insalling using oneMKL/oneAPI, make sure correct paths are set by running `/opt/intel/inteloneapi/setvars.sh`.
+```bash
+brew install hdf5
+```
 
-### From within R
+### Installing ACTIONet R Package
+
+#### Using `devtools`
+This is the easiest way to install the package, and it automatically installs all package dependencies (except optional packages described below):
 
 ```r
 install.packages("devtools")
-devtools::install_github("shmohammadi86/ACTIONet")
+devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
+
 ```
 
-### Directly from the clone
+#### Directly from the clone
+This is the more flexible approach and allows for easily pulling the latest updates/changes. This can be done as follows:
+
+* **Instaling dependencies**: Unlike devtools, `R` script does not automatically install dependencies. To install all dependencies, run:
+
+```r
+install.packages(c('Matrix', 'Rcpp', 'RcppArmadillo', 'R.utils', 'hdf5r', 'plotly', 'ggpubr', 'corrplot', 'wordcloud', 'threejs', 'RColorBrewer'))
+BiocManager::install(c("SingleCellExperiment", "ComplexHeatmap"))
+```
+
+* **Clone `ACTIONet` repository**:
+If you don't already have git, install it first. On debian-based linux machines, run:
 
 ```bash
-git clone git@github.com:shmohammadi86/ACTIONet.git
+sudo apt-get install git
+```
+
+For Mac-based systems:
+
+```bash
+brew install git
+```
+
+Now clone a fresh copy of the repository:
+
+```bash
+git clone https://github.com/shmohammadi86/ACTIONet.git
+```
+
+
+* ** Install `ACTIONet`**:
+ACTIONet contains many different branchs. For installing the stable version, switch to the `R-release` branch:
+
+```bash
 cd ACTIONet
+git checkout R-release
+```
+
+If you want to install the latest updates, switch to the `R-devel` branch:
+
+```bash
+cd ACTIONet
+git checkout R-devel
+```
+
+and now you can install ACTIONet using the following command in the `ACTIONet` directory:
+
+```bash
 R CMD INSTALL .
 ```
 
-To install all R dependencies (if you prefer to not use devtools):
-
-```R
-install.packages(c('Rcpp', 'RcppArmadillo', 'R.utils', 'SingleCellExperiment', 'hdf5r', 'igraph', 'ComplexHeatmap', 'ggpubr', 'corrplot', 'wordcloud', 'threejs', 'plotly', 'RColorBrewer', 'R.methodsS3', 'GenomicRanges', 'Biobase', 'DelayedArray', 'BiocGenerics', 'S4Vectors', 'IRanges', 'GenomeInfoDb', 'matrixStats', 'RCurl', 'GenomeInfoDbData', 'XVector', 'bitops', 'zlibbioc', 'bit', 'GlobalOptions', 'shape', 'colorspace', 'rjson', 'gtable', 'isoband', 'scales', 'farver', 'labeling', 'munsell', 'viridisLite', 'ggplot2', 'dplyr', 'tidyselect', 'generics', 'tidyr', 'broom', 'car', 'reshape2', 'carData', 'abind', 'pbkrtest', 'quantreg', 'maptools', 'rio', 'lme4', 'minqa', 'nloptr', 'statmod', 'RcppEigen', 'sp', 'SparseM', 'MatrixModels', 'plyr', 'haven', 'data.table', 'readxl', 'openxlsx', 'forcats', 'hms', 'readr', 'zip', 'cellranger', 'progress', 'rematch', 'base64enc', 'R.oo', 'SummarizedExperiment', 'bit64', 'circlize', 'GetoptLong', 'clue', 'png', 'ggrepel', 'ggsci', 'cowplot', 'ggsignif', 'gridExtra', 'polynom', 'rstatix', 'hexbin'))
-```
-
-## Install optional packages
+### Install optional packages
 #### Batch correction
 * [batchelor](https://bioconductor.org/packages/release/bioc/html/batchelor.html): This Implements a variety of methods for batch correction of single-cell (RNA sequencing) data, including mutually-nearest neighbor (MNN) method. You can install it using bioconductor:
 
@@ -86,22 +125,11 @@ biocLite("Linnorm")
 ACTIONet interfaces to scran normalization via `normalize.Linnorm()` function.
 
 
-#### General Single-cell processing
-* Another common package used in R for single-cell analysis is [Seurat](https://satijalab.org/seurat/). You can install the stable version from CRAN:
-
-```r
-install.packages('Seurat')
-
-```
-or the latest developmental version from github:
-
-```r
-install.packages('devtools')
-devtools::install_github(repo = 'satijalab/seurat', ref = 'develop')
-```
-ACTIONet contains a method to import data from a Seurat object: `import.ace.from.Seurat()`.
 
 # Running ACTIONet
+**Note** If you are using `MKL`, make sure to properly set the number of threads used by setting the environment variable `OMP_NUM_THREADS`.
+
+## Example Run
 Here is a simple example to get you started:
 
 ```r
@@ -144,7 +172,26 @@ cellxgene launch pbmc_10k_v3.h5ad
 where *pbmc_10k_v3.h5ad* is the name of the file we exported using `ACE2AnnData()` function.
 
 
+# Running `ACTIONet` with Docker
 
+With Docker, no installation is required and users can directly start experimenting with `ACTIONet` instantly! Sounds easy, right? Here is how it goes.
+
+* Download [Docker](https://store.docker.com/search?offering=community&type=edition) (if you don't already have, which in most linux distributions you do!)
+
+* Run `ACTIONet` docker: 
+
+```bash
+$ docker run -p 8787:8787 shmohammadi86/actionet
+```
+If you wish to access your local data inside the docker, modify the command as:
+
+```bash
+$ docker run -v /your/data/file/path/:/data -w /data -p 8787:8787 shmohammadi86/actionet
+```
+
+* Connect to the `RStudio Server` through your desktops browser on `http://127.0.0.1:8787`, and then enter "rstudio" as the username and password when prompted. `ACTIONet` and all of its dependencies, as well as a few other packages for single-cell analysis,  are already installed in this environment for you.
+
+* Have a cup of coffee and enjoy running ACTIONet!
 
 
 # Additional tutorials
@@ -157,4 +204,4 @@ You can access ACTIONet tutorials from:
 6. [Interactive visualization, annotation, and exploration](http://compbio.mit.edu/ACTIONet/annotation.html)
 7. [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/scinet.html)
 
-You can also find a [step-by-step guide](http://compbio.mit.edu/ACTIONet/guide.html) to learning the core functionalities of the ACTIONet framework, as well as a detailed description of the [ACTIONetExperiment (ACE)](http://compbio.mit.edu/ACTIONet/ace.html) object.
+You can also find a [step-by-step guide](http://compbio.mit.edu/ACTIONet/guide.html) to learning the core functionalities of the ACTIONet framework.
