@@ -5,8 +5,8 @@
 #' @section Usage: 
 #' 
 #' \enumerate{
-#' \item ?reduce.sce to reduce raw count matrix in an SingleCellExperiment objects.
-#' \item ?run.ACTIONet to run ACTIONet on SingleCellExperiment objects.
+#' \item ?reduce.sce to reduce raw count matrix in an SummarizedExperiment objects.
+#' \item ?run.ACTIONet to run ACTIONet on SummarizedExperiment objects.
 #' }
 #' @section Useful links:
 #' 

@@ -89,7 +89,8 @@ HGT_tail <- function(population.size, success.count, sample.size, observed.succe
 
 # define utility function to adjust fill-opacity using css
 fillOpacity <- function(., alpha = 0.5) {
-    css <- sprintf("<style> .js-fill { fill-opacity: %s !important; } </style>", alpha)
+    css <- sprintf("<style> .js-fill { fill-opacity: %s !important; } </style>", 
+        alpha)
     prependContent(., HTML(css))
 }
 
@@ -113,10 +114,11 @@ mycircle <- function(coords, v = NULL, params) {
         vertex.frame.width <- vertex.frame.width[v]
     }
     
-    mapply(coords[, 1], coords[, 2], vertex.color, vertex.frame.color, vertex.size, vertex.frame.width, FUN = function(x, y, bg, fg, 
-        size, lwd) {
-        symbols(x = x, y = y, bg = bg, fg = fg, lwd = lwd, circles = size, add = TRUE, inches = FALSE)
-    })
+    mapply(coords[, 1], coords[, 2], vertex.color, vertex.frame.color, vertex.size, 
+        vertex.frame.width, FUN = function(x, y, bg, fg, size, lwd) {
+            symbols(x = x, y = y, bg = bg, fg = fg, lwd = lwd, circles = size, add = TRUE, 
+                inches = FALSE)
+        })
 }
 
 DECODE = function(hash_str, settings) {
@@ -182,7 +184,8 @@ ENCODE = function(int, settings) {
         int[i]%%(100 + i - 1)
     }))
     # lottery character
-    lottery = substr(alphabet, (vec_hash%%alphabet_len) + 1, (vec_hash%%alphabet_len) + 1)
+    lottery = substr(alphabet, (vec_hash%%alphabet_len) + 1, (vec_hash%%alphabet_len) + 
+        1)
     encoded = lottery
     
     for (i in 1:length(int)) {
@@ -191,7 +194,8 @@ ENCODE = function(int, settings) {
         last = hash(int[i], alphabet)
         encoded = paste0(encoded, last)
         int[i] = int[i]%%(ascii_val(substr(last, 1, 1)) + (i - 1))
-        encoded = paste0(encoded, substr(separator, (int[i]%%sep_len + 1), (int[i]%%sep_len + 1)))
+        encoded = paste0(encoded, substr(separator, (int[i]%%sep_len + 1), (int[i]%%sep_len + 
+            1)))
     }
     
     encoded = substr(encoded, 1, nchar(encoded) - 1)
@@ -202,7 +206,8 @@ ENCODE = function(int, settings) {
     return(encoded)
 }
 
-hashid_settings = function(salt, min_length = 0, alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", sep = "cfhistuCFHISTU") {
+hashid_settings = function(salt, min_length = 0, alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 
+    sep = "cfhistuCFHISTU") {
     
     alphabet_vec = unique(strsplit(alphabet, split = "")[[1]])
     sep_vec = unique(strsplit(sep, split = "")[[1]])
@@ -238,7 +243,8 @@ hashid_settings = function(salt, min_length = 0, alphabet = "abcdefghijklmnopqrs
         alphabet_ = substr(alphabet_, num_guards + 1, nchar(alphabet_))
     }
     
-    return(list(alphabet = alphabet_, salt = salt, guards = guards_, separator = separator_, min_length = min_length))
+    return(list(alphabet = alphabet_, salt = salt, guards = guards_, separator = separator_, 
+        min_length = min_length))
 }
 
 ascii_val = function(char) {
@@ -290,14 +296,16 @@ enforce_min_length = function(encoded, min_length, alphabet, guards, values_hash
     encoded = paste0(substr(guards, guards_idx, guards_idx), encoded)
     
     if (nchar(encoded) < min_length) {
-        guards_idx = (values_hash + ascii_val(substr(encoded, 3, 3)))%%guards_len + 1
+        guards_idx = (values_hash + ascii_val(substr(encoded, 3, 3)))%%guards_len + 
+            1
         encoded = paste0(encoded, substr(guards, guards_idx, guards_idx))
     }
     
     split_at = nchar(alphabet)/2 + 1
     while (nchar(encoded) < min_length) {
         alphabet = shuffle(alphabet, alphabet)
-        encoded = paste0(substr(alphabet, split_at, nchar(alphabet)), encoded, substr(alphabet, 1, split_at - 1))
+        encoded = paste0(substr(alphabet, split_at, nchar(alphabet)), encoded, substr(alphabet, 
+            1, split_at - 1))
         excess = nchar(encoded) - min_length
         
         if (excess > 0) {
@@ -405,82 +413,81 @@ combine.logPvals <- function(logPvals, top.len = NULL, base = 10) {
 
 
 reannotate.labels <- function(ace, Labels) {
-	Labels = preprocess.labels(Labels, ace)			
-	
-	
-	Annot = sort(unique(Labels))
-	idx = match(Annot, Labels)
-	names(Annot) = names(Labels)[idx]
-	
-	new.Labels = match(names(Labels), names(Annot))
-	names(new.Labels) = as.character(names(Labels))
-	
-	return(new.Labels)	
+    Labels = preprocess.labels(Labels, ace)
+    
+    
+    Annot = sort(unique(Labels))
+    idx = match(Annot, Labels)
+    names(Annot) = names(Labels)[idx]
+    
+    new.Labels = match(names(Labels), names(Annot))
+    names(new.Labels) = as.character(names(Labels))
+    
+    return(new.Labels)
 }
 
 gen.colors <- function(Pal, color.no, plot.cols) {
-	color.no = min(color.no, length(Pal)-1)
+    color.no = min(color.no, length(Pal) - 1)
     colors.RGB = t(col2rgb(Pal)/256)
     colors.Lab = grDevices::convertColor(color = colors.RGB, from = "sRGB", to = "Lab")
     
     set.seed(0)
     W0 = t(kmeans(colors.Lab, color.no)$centers)
-	AA.out = ACTIONet::runAA(X, W0)
-	
+    AA.out = ACTIONet::runAA(X, W0)
+    
     C = AA.out$C
-	arch.colors = t(t(colors.Lab) %*% C)
-	
+    arch.colors = t(t(colors.Lab) %*% C)
+    
     new.colors = rgb(grDevices::convertColor(color = arch.colors, from = "Lab", to = "sRGB"))
-    if (plot.cols)
+    if (plot.cols) 
         scales::show_col(new.colors)
     return(new.colors)
 }
 
 
 doubleNorm <- function(Enrichment, log.transform = T, min.threshold = 0) {
-    #if(min(Enrichment) < 0) {
-	#	Enrichment = exp(Enrichment)
-	#}
-	Enrichment[Enrichment < min.threshold] = 0
-	
-	if( (max(Enrichment) > 100) & (log.transform == T) ) {
-		Enrichment = log1p(Enrichment)	
-	} 
-	Enrichment[is.na(Enrichment)] = 0
-
-	rs = sqrt(Matrix::rowSums(Enrichment))
-	rs[rs == 0] = 1
-	D_r = Matrix::Diagonal(nrow(Enrichment), 1/rs)
-	
-	cs = sqrt(Matrix::colSums(Enrichment))
-	cs[cs == 0] = 1
-	D_c = Matrix::Diagonal(ncol(Enrichment), 1/cs)
-	
-	Enrichment.scaled = as.matrix(D_r %*% Enrichment %*% D_c)
-	
-	Enrichment.scaled = Enrichment.scaled / max(Enrichment.scaled)
-	return(Enrichment.scaled)
+    # if(min(Enrichment) < 0) { Enrichment = exp(Enrichment) }
+    Enrichment[Enrichment < min.threshold] = 0
+    
+    if ((max(Enrichment) > 100) & (log.transform == T)) {
+        Enrichment = log1p(Enrichment)
+    }
+    Enrichment[is.na(Enrichment)] = 0
+    
+    rs = sqrt(Matrix::rowSums(Enrichment))
+    rs[rs == 0] = 1
+    D_r = Matrix::Diagonal(nrow(Enrichment), 1/rs)
+    
+    cs = sqrt(Matrix::colSums(Enrichment))
+    cs[cs == 0] = 1
+    D_c = Matrix::Diagonal(ncol(Enrichment), 1/cs)
+    
+    Enrichment.scaled = as.matrix(D_r %*% Enrichment %*% D_c)
+    
+    Enrichment.scaled = Enrichment.scaled/max(Enrichment.scaled)
+    return(Enrichment.scaled)
 }
 
 assess.label.local.enrichment <- function(P, Labels) {
-	if( is.null(names(Labels)) ){
-		names(Labels) = as.character(Labels)
-	}
+    if (is.null(names(Labels))) {
+        names(Labels) = as.character(Labels)
+    }
     counts = table(Labels)
     p = counts/sum(counts)
-	Annot = names(Labels)[match(as.numeric(names(counts)), Labels)]
+    Annot = names(Labels)[match(as.numeric(names(counts)), Labels)]
     
     X = sapply(names(p), function(label) {
         x = as.numeric(Matrix::sparseVector(x = 1, i = which(Labels == label), length = length(Labels)))
     })
-	colnames(X) = Annot
-	
+    colnames(X) = Annot
+    
     Exp = array(1, nrow(P)) %*% t(p)
     Obs = as(P %*% X, "dgTMatrix")
     
     # Need to rescale due to missing values within the neighborhood
     rs = Matrix::rowSums(Obs)
-    Obs = Matrix::sparseMatrix(i = Obs@i + 1, j = Obs@j + 1, x = Obs@x/rs[Obs@i + 1], dims = dim(Obs))
+    Obs = Matrix::sparseMatrix(i = Obs@i + 1, j = Obs@j + 1, x = Obs@x/rs[Obs@i + 
+        1], dims = dim(Obs))
     
     Lambda = Obs - Exp
     
@@ -499,30 +506,31 @@ assess.label.local.enrichment <- function(P, Labels) {
     
     colnames(logPval) = Annot
     
-
+    
     max.idx = apply(logPval, 1, which.max)
     updated.Labels = as.numeric(names(p))[max.idx]
     names(updated.Labels) = Annot[max.idx]
     
     updated.Labels.conf = apply(logPval, 1, max)
     
-    res = list(Labels = updated.Labels, Labels.confidence = updated.Labels.conf, Enrichment = logPval)
+    res = list(Labels = updated.Labels, Labels.confidence = updated.Labels.conf, 
+        Enrichment = logPval)
     
     return(res)
 }
 
 make.fname <- function(str) {
-	nn = stringr::str_replace(str, " ", "_")
-	nn = stringr::str_replace(nn, fixed("."), "_")
-	nn = stringr::str_replace(nn, fixed("/"), "_")
-	
-	return(nn)
+    nn = stringr::str_replace(str, " ", "_")
+    nn = stringr::str_replace(nn, fixed("."), "_")
+    nn = stringr::str_replace(nn, fixed("/"), "_")
+    
+    return(nn)
 }
 
 add.count.metadata <- function(ace) {
     ace$n_counts = Matrix::colSums(counts(ace))
     ace$n_genes = Matrix::colSums(counts(ace) > 0)
-    rowData(ace)$n_cells = Matrix::rowSums(counts(ace) > 0) 
+    rowData(ace)$n_cells = Matrix::rowSums(counts(ace) > 0)
     
     return(ace)
 }

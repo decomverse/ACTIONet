@@ -4,14 +4,8 @@
 \alias{impute.genes.using.ACTIONet}
 \title{Gene expression imputation using network diffusion.}
 \usage{
-impute.genes.using.ACTIONet(
-  ace,
-  genes,
-  alpha_val = 0.85,
-  thread_no = 8,
-  diffusion_iters = 5,
-  data.slot = "logcounts"
-)
+impute.genes.using.ACTIONet(ace, genes, alpha_val = 0.85,
+  thread_no = 8, diffusion_iters = 5, data_slot = "logcounts")
 }
 \arguments{
 \item{ace}{Input results to be clustered
@@ -26,7 +20,7 @@ The larger it is, the deeper the diffusion, which results in less nonzeros (defa
 
 \item{diffusion_iters}{Number of diffusion iterations (default = 5)}
 
-\item{data.slot}{Slot in the ace object with normalized counts.}
+\item{data_slot}{Slot in the ace object with normalized counts.}
 }
 \value{
 Imputed gene expression matrix. Column names are set with imputed genes names and rows are cells.
@@ -35,6 +29,6 @@ Imputed gene expression matrix. Column names are set with imputed genes names an
 Gene expression imputation using network diffusion.
 }
 \examples{
-imputed.genes = impute.genes.using.ACTIONet(ace, c("CD14", "CD19", "CD3G"))
+imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
 plot.ACTIONet.gradient(ace, imputed.genes[, 1])
 }

@@ -1,7 +1,0 @@
-SOURCES+=$(shell find ACTIONet/ -type f -name "*.cc")
-OBJECTS=ACTIONet.o RcppExports.o $(SOURCES:.cc=.o)
-PKG_LIBS=$(LINALG) -ligraph
-PKG_CXXFLAGS=`find ../inst/include -type d | sed s/^/-I/` -w -m64 -DUSE_BLAS_LIB -DAXPBY -DINT_64BITS -DARMA_64BIT_WORD
-MAKEFLAGS+="-j8
-
-

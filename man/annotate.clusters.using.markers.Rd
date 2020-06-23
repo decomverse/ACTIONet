@@ -2,22 +2,18 @@
 % Please edit documentation in R/clusters.R
 \name{annotate.clusters.using.markers}
 \alias{annotate.clusters.using.markers}
-\title{Annotate clusters using known marker genes 
+\title{Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)}
 \usage{
-annotate.clusters.using.markers(
-  ace,
-  marker.genes,
-  specificity.slot.name,
-  rand.sample.no = 1000
-)
+annotate.clusters.using.markers(ace, marker.genes, specificity.slot.name,
+  rand.sample.no = 1000)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
 \item{marker.genes}{A list of lists (each a set of markers for a given cell type)}
 
-\item{specificity.slot.name}{An entry in the rowFactors(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
 
 \item{rand.sample.no}{Number of random permutations (default=1000)}
 }
@@ -29,12 +25,12 @@ A named list: \itemize{
 }
 }
 \description{
-Annotate clusters using known marker genes 
+Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
+data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-ace = compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-arch.annot = annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = "cluster_specificity_scores")
+ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+arch.annot = annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = 'cluster_specificity_scores')
 }

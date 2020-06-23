@@ -4,22 +4,12 @@
 \alias{plot.ACTIONet.interactive}
 \title{Main ACTIONet interactive plotting function}
 \usage{
-\method{plot}{ACTIONet.interactive}(
-  ace,
-  labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node.size = 1,
-  CPal = CPal20,
-  enrichment.table = NULL,
-  top.features = 7,
+plot.ACTIONet.interactive(ace, labels = NULL, transparency.attr = NULL,
+  trans.z.threshold = -1, trans.fact = 1, node.size = 1,
+  CPal = CPal20, enrichment.table = NULL, top.features = 7,
   Alt_Text = NULL,
   blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-  threeD = FALSE,
-  title = "ACTIONet",
-  coordinate.slot = "ACTIONet2D"
-)
+  threeD = FALSE, title = "ACTIONet", coordinate_slot = "ACTIONet2D")
 }
 \arguments{
 \item{ace}{ACTIONet output object}

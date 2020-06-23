@@ -4,11 +4,9 @@
 \name{gProfilerDB_mouse}
 \alias{gProfilerDB_mouse}
 \title{Pre-processed genesets from the gProfiler database (Mouse)}
-\format{
-:
+\format{:
   SYMBOL: A list of gene x geneset indicator matrices in the sparseMatrix format (rownames are gene symbols)
-  ENSEMBL: A list of gene x geneset indicator matrices in the sparseMatrix format (rownames are ENSEMBL gene IDs)
-}
+  ENSEMBL: A list of gene x geneset indicator matrices in the sparseMatrix format (rownames are ENSEMBL gene IDs)}
 \source{
 \url{https://biit.cs.ut.ee/gprofiler}
 }

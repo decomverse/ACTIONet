@@ -4,15 +4,9 @@
 \alias{plot.ACTIONet.feature.view}
 \title{Plots projection of features onto the ACTIONet plot}
 \usage{
-\method{plot}{ACTIONet.feature.view}(
-  ace,
-  feature.enrichment.table,
-  top.features = 5,
-  CPal = NULL,
-  title = "Feature view",
-  label.text.size = 1,
-  renormalize = F
-)
+plot.ACTIONet.feature.view(ace, feature.enrichment.table,
+  top.features = 5, CPal = NULL, title = "Feature view",
+  label.text.size = 1, renormalize = F)
 }
 \arguments{
 \item{ace}{ACTIONet output}
@@ -34,6 +28,6 @@ Featur view
 Plots projection of features onto the ACTIONet plot
 }
 \examples{
-feature.enrichment.table = as.matrix(rowFactors(ace)[["H_unified_upper_significance"]])
+feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 }
