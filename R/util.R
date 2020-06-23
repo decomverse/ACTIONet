@@ -24,6 +24,27 @@
         return(split_vec) else return(IDX)
 }
 
+.check_and_convert_se_like <- function(object, convert_to = c("none", "ACE", "SCE", "SE")) {
+  if (class(object) %in% c("ACTIONetExperiment", "SummarizedExperiment", "SingleCellExperiment")) {
+    convert_type = match.arg(convert_to)
+    if(convert_type != "none"){
+      convert_type = switch(convert_type,
+                            "ACE" = "ACTIONetExperiment",
+                            "SCE" = "SingleCellExperiment",
+                            "SE" = "SummarizedExperiment")
+      msg = sprintf("Converting to %s class.\n", convert_type)
+      message(msg)
+      object = as(object, convert_type)
+      return(object)
+    } else{
+      return(object)
+    }
+  } else {
+    err = sprintf("Input must type ACTIONetExperiment, SingleCellExperiment, or SummarizedExperiment.\n")
+    stop(err)
+  }
+}
+
 .check_if_ace <- function(sce_like) {
     if (class(sce_like) %in% c("ACTIONetExperiment", "SummarizedExperiment", "SingleCellExperiment")) {
         if (class(sce_like) != "ACTIONetExperiment") {
