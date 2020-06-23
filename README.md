@@ -57,7 +57,7 @@ git clone https://github.com/shmohammadi86/ACTIONet.git
 ```
 
 
-* ** Install `ACTIONet`**:
+* **`Install ACTIONet`**:
 ACTIONet contains many different branchs. For installing the stable version, switch to the `R-release` branch:
 
 ```bash
