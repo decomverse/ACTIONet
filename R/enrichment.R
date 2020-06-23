@@ -15,7 +15,8 @@ assess.TF.activities.from.scores <- function(scores) {
     
     Enrichments = lapply(1:length(ChEA3plusDB), function(i) {
         associations = ChEA3plusDB[[i]]
-        associations.mat = sapply(associations, function(gs) as.numeric(rownames(ace) %in% gs))
+        associations.mat = sapply(associations, function(gs) as.numeric(rownames(ace) %in% 
+            gs))
         Enrichment.mat = t(assess_enrichment(scores, associations.mat, L))
     })
     
@@ -64,7 +65,8 @@ assess.TF.activities.from.archetypes <- function(ace) {
 #' Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
 assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000) {
     if (is.list(associations)) {
-        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in% gs))
+        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in% 
+            gs))
         rownames(associations) = rownames(scores)
     }
     associations = as.matrix(associations)
@@ -73,7 +75,8 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
     L = min(L, length(common.features))
     
     
-    Enrichment.mat = t(assess_enrichment(scores[common.features, ], associations[common.features, ], L))
+    Enrichment.mat = t(assess_enrichment(scores[common.features, ], associations[common.features, 
+        ], L))
     
     rownames(Enrichment.mat) = colnames(associations)
     
@@ -95,7 +98,8 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 assess.geneset.enrichment <- function(ace, associations, L = 1000, specificity.slot = "unified_feature_specificity") {
     scores = as.matrix(rowMaps(ace)[[specificity.slot]])
     
-    Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations, L)
+    Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations, 
+        L)
     
     return(Enrichment.mat)
 }
@@ -115,11 +119,13 @@ assess.geneset.enrichment <- function(ace, associations, L = 1000, specificity.s
 #' 
 #' @examples
 #' geneset.enrichment.gProfiler(my_genes)
-assess.geneset.enrichment.gProfiler <- function(genes, category = c("GO:BP", "REAC", "KEGG"), organism = "hsapiens", top.terms = 10, col = "tomato") {
+assess.geneset.enrichment.gProfiler <- function(genes, category = c("GO:BP", "REAC", 
+    "KEGG"), organism = "hsapiens", top.terms = 10, col = "tomato") {
     require(gprofiler2)
     require(ggpubr)
     
-    gp.out = gprofiler2::gost(genes, ordered_query = FALSE, exclude_iea = FALSE, correction_method = "fdr", sources = category, organism = organism)
+    gp.out = gprofiler2::gost(genes, ordered_query = FALSE, exclude_iea = FALSE, 
+        correction_method = "fdr", sources = category, organism = organism)
     if (is.null(gp.out)) 
         return()
     
@@ -128,14 +134,16 @@ assess.geneset.enrichment.gProfiler <- function(genes, category = c("GO:BP", "RE
     terms$logPval = -log10(terms$p_value)
     
     
-    too.long = which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
+    too.long = which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 
+        50)
     terms = terms[-too.long, ]
     
     terms = terms[order(terms$logPval, decreasing = TRUE), ]
     sub.terms = terms[1:min(top.terms, sum(terms$logPval > 1)), ]
     
-    p = ggbarplot(sub.terms, x = "term_name", y = "logPval", sort.val = "asc", orientation = "horiz", fill = col, xlab = "", ylab = "") + 
-        geom_hline(yintercept = -log10(0.05), col = "gray", lty = 2)
+    p = ggbarplot(sub.terms, x = "term_name", y = "logPval", sort.val = "asc", orientation = "horiz", 
+        fill = col, xlab = "", ylab = "") + geom_hline(yintercept = -log10(0.05), 
+        col = "gray", lty = 2)
     
     return(p)
 }
@@ -165,18 +173,20 @@ assess.genesets = function(arch.gs, terms.gs, N, min.pval = 1e-100, correct = T)
         if (length(idx) == 0) 
             return(v)
         
-        # p = phyper(x[idx]-1, n.success[idx], N - n.success[idx], n.sample, lower.tail = F) if(correct == T) { p = p.adjust(p, 'fdr') } p[p <
-        # min.pval] = min.pval v[idx] = -log10(p)
+        # p = phyper(x[idx]-1, n.success[idx], N - n.success[idx], n.sample, lower.tail =
+        # F) if(correct == T) { p = p.adjust(p, 'fdr') } p[p < min.pval] = min.pval
+        # v[idx] = -log10(p)
         
-        v[idx] = HGT_tail(population.size = N, success.count = n.success[idx], sample.size = n.sample, observed.success = x[idx])
+        v[idx] = HGT_tail(population.size = N, success.count = n.success[idx], sample.size = n.sample, 
+            observed.success = x[idx])
         
         return(v)
     })
     rownames(logPvals.out) = names(terms.gs)
     colnames(logPvals.out) = names(arch.gs)
     
-    # if(correct == T) { idx = which(logPvals.out > 0) pp = 10^(-logPvals.out[idx]) pp.adj = p.adjust(pp, 'BH') logPvals.out[idx] =
-    # -log10(pp.adj) }
+    # if(correct == T) { idx = which(logPvals.out > 0) pp = 10^(-logPvals.out[idx])
+    # pp.adj = p.adjust(pp, 'BH') logPvals.out[idx] = -log10(pp.adj) }
     
     return(t(logPvals.out))
 }
