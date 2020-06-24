@@ -30,83 +30,13 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 
-    if (length(value) == 0) {
-        x@rowMaps = SimpleList()
-        validObject(x)
-        return(x)
-    }
+    # if (length(value) == 0) {
+    #     x@rowMaps = SimpleList()
+    #     validObject(x)
+    #     return(x)
+    # }
 
-
-
-    value = as(value, "SimpleList")
-    value = value[names(value) != "", drop = F]
-    if (length(value) > 0) {
-        value = lapply(value, function(M) {
-            if (length(which(is(M) == "SummarizedExperiment")) != 0) {
-                if ("X" %in% names(assays(M))) {
-                  assays(M)$X
-                } else {
-                  return(NULL)
-                }
-            } else if (is.matrix(M) | is.sparseMatrix(M)) {
-                return(M)
-            } else {
-                return(NULL)
-            }
-        })
-        value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
-
-        if (length(value) > 0) {
-            nn = intersect(names(value), names(x@rowMaps))  # Items to update
-            for (n in nn) {
-                X.old = rowMaps(x)[[n]]
-                X.new = value[[n]]
-                if (all(dim(X.old) == dim(X.new))) {
-                  rownames(X.new) = rownames(x)
-                  if (is.null(colnames(X.new))) {
-                    colnames(X.new) = colnames(X.old)
-                  }
-                  if (all(colnames(X.new) == colnames(X.old))) {
-                    assays(x@rowMaps[[n]])$X = X.new
-                  } else {
-                    SE = x@rowMaps[[n]]
-                    colnames(SE) = colnames(X.new)
-                    assays(SE)$X = X.new
-                    x@rowMaps[[n]] = SE
-                  }
-                } else {
-                  # Dimensions don't match! Create a brand new entry
-                  SE = SummarizedExperiment(assays = list(X = X.new))
-                  if (nrow(SE) <= 3)
-                    metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
-
-                  x@rowMaps[[n]] = SE
-                }
-
-            }
-
-            nn = setdiff(names(value), names(x@rowMaps))  # Items to add
-
-            for (n in nn) {
-                X = value[[n]]
-                if (is.null(colnames(X)))
-                  colnames(X) = 1:ncol(X)
-                rownames(X) = rownames(x)
-
-                SE = SummarizedExperiment(assays = list(X = X))
-                if (nrow(SE) <= 3)
-                  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
-
-                x@rowMaps[[n]] = SE
-            }
-
-
-            nn = setdiff(names(x@rowMaps), names(value))  # Items to remove
-            x@rowMaps = x@rowMaps[!(names(x@rowMaps) %in% nn)]
-
-        }
-    }
-
+    x <- .insert_mapping(x, value, 1)
     validObject(x)
     x
 })
@@ -119,86 +49,16 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 
-    if (length(value) == 0) {
-        x@colMaps = SimpleList()
-        validObject(x)
-        return(x)
-    }
+    # if (length(val) == 0) {
+    #     x@colMaps = SimpleList()
+    #     validObject(x)
+    #     return(x)
+    # }
 
-    value = as(value, "SimpleList")
-    value = value[names(value) != "", drop = F]
-    if (length(value) > 0) {
-        value = lapply(value, function(M) {
-            if (length(which(is(M) == "SummarizedExperiment")) != 0) {
-                if ("X" %in% names(assays(M))) {
-                  assays(M)$X
-                } else {
-                  return(NULL)
-                }
-            } else if (is.matrix(M) | is.sparseMatrix(M)) {
-                return(M)
-            } else {
-                return(NULL)
-            }
-        })
-        value = value[sapply(value, function(SE) !is.null(SE)), drop = F]
-
-        if (length(value) > 0) {
-            nn = intersect(names(value), names(x@colMaps))  # Items to update
-            for (n in nn) {
-                X.old = colMaps(x)[[n]]
-                X.new = value[[n]]
-                if (all(dim(X.old) == dim(X.new))) {
-                  colnames(X.new) = colnames(x)
-                  if (is.null(rownames(X.new))) {
-                    rownames(X.new) = rownames(X.old)
-                  }
-                  if (all(rownames(X.new) == rownames(X.old))) {
-                    assays(x@colMaps[[n]])$X = X.new
-                  } else {
-                    SE = x@colMaps[[n]]
-                    rownames(SE) = rownames(X.new)
-                    assays(SE)$X = X.new
-                    x@colMaps[[n]] = SE
-                  }
-                } else {
-                  # Dimensions don't match! Create a brand new entry
-                  SE = SummarizedExperiment(assays = list(X = X.new))
-                  if (nrow(SE) <= 3)
-                    metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
-
-                  x@colMaps[[n]] = SE
-                }
-
-            }
-
-            nn = setdiff(names(value), names(x@colMaps))  # Items to add
-
-            for (n in nn) {
-                X = value[[n]]
-                if (is.null(rownames(X)))
-                  rownames(X) = 1:nrow(X)
-                colnames(X) = colnames(x)
-
-                SE = SummarizedExperiment(assays = list(X = X))
-                if (nrow(SE) <= 3)
-                  metadata(SE)$type = "embedding" else metadata(SE)$type = "generic"
-
-                x@colMaps[[n]] = SE
-            }
-
-
-            nn = setdiff(names(x@colMaps), names(value))  # Items to remove
-            x@colMaps = x@colMaps[!(names(x@colMaps) %in% nn)]
-
-        }
-    }
-
+    x <- .insert_mapping(x, value, 2)
     validObject(x)
     x
 })
-
-
 
 
 #' Set row-associated factor types
@@ -346,9 +206,10 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
     object
 })
 
-.insert_MapMeta <- function(obj, val, insert_dim){
-  val = val[names(val) != ""]
-  .check_for_duplicates(val)
+.insert_MapMeta <- function(obj, val, d){
+  # val = val[names(val) != ""]
+  # .check_for_duplicates(val)
+  .validate_names(val)
 
   for (n in names(val)) {
       DF = val[[n]]
@@ -357,37 +218,105 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
       if (any(is(DF) == "DataFrame")) {
 
-        if()
-          if (nrow(DF) == nrow(obj@colMaps[[n]])) {
+        if(d == 1){
+          if (nrow(DF) == ncol(obj@colMaps[[n]])) {
               mask = (n == names(obj@colMaps))
               if (sum(mask) == 1) {
-                rowData(obj@colMaps[[which(mask)]]) = DF
+                colData(obj@colMaps[[which(mask)]]) = DF
               }
           }
-
+        } else if(d == 2){
           if (nrow(DF) == ncol(obj@rowMaps[[n]])) {
               mask = (n == names(obj@rowMaps))
               if (sum(mask) == 1) {
                 colData(obj@rowMaps[[which(mask)]]) = DF
               }
           }
-
+        }
       }
   }
   return(obj)
 }
 
-.drop_invalid_elements <- function(val){
-  val = .check_if_mapping_list(val)
-  val_names = names(val)
-  val_names = val_names[val_names != ""]
-  val_names = val_names[!duplicated(val_names)]
+.insert_mapping <- function(obj, val, d){
 
-  if( length(val_names) < length(names(val)) ){
-    msg  = sprintf("Invalid list elements were passed and will be dropped.\n")
-    warning(msg)
+  .validate_names(val)
+  if(d == 1){
+    map_types = obj@rowMaps
+  } else if(d == 2){
+    map_types = obj@colMaps
   }
-  val = val[val_names]
+
+  val = .coerce_input_to_SE(val)
+
+  if (length(val) == 0) {
+      val = SimpleList()
+  } else{
+
+    val <- sapply(names(val), function(n){
+      v = val[[n]]
+      if(dim(v)[2] != dim(obj)[2]){
+        err = sprintf("ncol(val) must equal ncol(ace).\n")
+        stop(err)
+      }
+      colnames(v) <- colnames(obj)
+      if(is.null(rownames(v)))
+        rownames(v) <- 1:NROW(v)
+
+      if(is.null(S4Vectors::metadata(v)$type))
+          v <- .set_map_type(v, map_types[[n]])
+
+      return(v)
+    }, simplify = FALSE)
+  }
+
+  if(d == 1){
+    obj@rowMaps <- val
+  } else if(d == 2){
+    obj@colMaps <- val
+  }
+
+  return(obj)
+}
+
+.validate_names <- function(val){
+  val = .check_if_mapping_list(val)
+
+  if(any(names(val) == "")){
+    par_func = as.character(sys.call(-1)[1])
+    err = sprintf("Values passed to '%s' cannot be unnamed.\n", par_func)
+    stop(err)
+  }
+
+  if(any(duplicated(names(val)))){
+    par_func = as.character(sys.call(-1)[1])
+    err = sprintf("Values passed to '%s' have duplicate names.\n", par_func)
+    stop(err)
+  }
+  return
+}
+
+.coerce_input_to_SE <- function(val, drop_null = TRUE){
+  val = val[sapply(val, function(v){!is.null(v)})]
+  val = lapply(val, function(M) {
+      if (any(is(M) == "SummarizedExperiment")) {
+          return(M)
+      } else if (is.matrix(M) | is.sparseMatrix(M)) {
+          M = SummarizedExperiment(assays=list(X=value))
+          return(M)
+      } else {
+        M = as.matrix(val)
+        if(is.numeric(M))
+          M = SummarizedExperiment(assays=list(X=value))
+          return(M)
+        else{
+          par_func = as.character(sys.call(-1)[1])
+          err = sprintf("Values passed to '%s' must be coercible to matrix, of class 'SummarizedExperiment', or NULL.\n", par_func)
+          stop(err)
+        }
+      }
+    })
+
   return(val)
 }
 

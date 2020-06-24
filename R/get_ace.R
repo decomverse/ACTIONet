@@ -106,7 +106,7 @@ setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
 #'
 #' @rdname colMapTypes
 setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
-    out = lapply(x@colMaps, function(M) rowData(M))
+    out = lapply(x@colMaps, function(M) colData(M))
     if (all == F & length(out) > 0) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
@@ -115,39 +115,6 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
     out
 })
 
-
-
-
-
-#' Get row-associated factor metadata
-#'
-#' @return List of types
-#'
-#' @rdname rowMapTypes
-setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
-    out = lapply(x@rowMaps, function(M) colData(M))
-    if (all == F) {
-        mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
-        out = out[mask]
-    }
-
-    out
-})
-
-#' Get column-associated factor metadata
-#'
-#' @return List of types
-#'
-#' @rdname colMapTypes
-setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
-    out = lapply(x@colMaps, function(M) rowData(M))
-    if (all == F) {
-        mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
-        out = out[mask]
-    }
-
-    out
-})
 
 
 
