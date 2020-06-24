@@ -239,13 +239,15 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 }
 
 .insert_mapping <- function(obj, val, d){
-
+  val = .check_if_mapping_list(val)
   .validate_names(val)
-  if(d == 1){
-    map_types = obj@rowMaps
-  } else if(d == 2){
-    map_types = obj@colMaps
-  }
+  # if(d == 1){
+  #   map_types = obj@rowMapTypes
+  # } else if(d == 2){
+  #   map_types = obj@colMapTypes
+  # }
+
+  map_types <- switch(d, rowMapTypes(obj), colMapTypes(obj))
 
   val = .coerce_input_to_SE(val)
 
@@ -259,7 +261,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
         err = sprintf("ncol(val) must equal ncol(ace).\n")
         stop(err)
       }
-      colnames(v) <- colnames(obj)
+      colnames(v) <- dimnames(obj)[[d]]
       if(is.null(rownames(v)))
         rownames(v) <- 1:NROW(v)
 
@@ -271,16 +273,15 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   }
 
   if(d == 1){
-    obj@rowMaps <- val
+    obj@rowMaps <- as(val, "SimpleList")
   } else if(d == 2){
-    obj@colMaps <- val
+    obj@colMaps <- as(val, "SimpleList")
   }
 
   return(obj)
 }
 
 .validate_names <- function(val){
-  val = .check_if_mapping_list(val)
 
   if(any(names(val) == "")){
     par_func = as.character(sys.call(-1)[1])
@@ -331,9 +332,12 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   return(val)
 }
 
-.set_map_type <- function(val, map_type){
+.set_map_type <- function(val, map_type = NULL){
 
+  if(is.null(map_type))
+    S4Vectors::metadata(val)$type <- ifelse(NROW(val) <= 3, "embedding", "generic")
+  else
+    S4Vectors::metadata(val)$type <- map_type
 
-
-  
+  return(val)
 }
