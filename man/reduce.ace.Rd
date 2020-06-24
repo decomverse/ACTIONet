@@ -4,10 +4,17 @@
 \alias{reduce.ace}
 \title{Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix}
 \usage{
-reduce.ace(ace, reduced_dim = 50, max_iter = 5,
-  data_slot = "logcounts", norm_method = "default",
-  reduction_slot = "ACTION", seed = 0, SVD_algorithm = 1,
-  return_V = FALSE)
+reduce.ace(
+  ace,
+  reduced_dim = 50,
+  max_iter = 5,
+  data_slot = "logcounts",
+  norm_method = "default",
+  reduction_slot = "ACTION",
+  seed = 0,
+  SVD_algorithm = 1,
+  return_V = FALSE
+)
 }
 \arguments{
 \item{ace}{Input ace object}

@@ -4,10 +4,19 @@
 \alias{plot.ACTIONet.gradient}
 \title{Projects a given continuous score on the ACTIONet plot}
 \usage{
-plot.ACTIONet.gradient(ace, x, transparency.attr = NULL,
-  trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
-  CPal = "magma", title = "", alpha_val = 0.85,
-  nonparameteric = FALSE, coordinate_slot = "ACTIONet2D")
+\method{plot}{ACTIONet.gradient}(
+  ace,
+  x,
+  transparency.attr = NULL,
+  trans.z.threshold = -0.5,
+  trans.fact = 3,
+  node.size = 1,
+  CPal = "magma",
+  title = "",
+  alpha_val = 0.85,
+  nonparameteric = FALSE,
+  coordinate_slot = "ACTIONet2D"
+)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
