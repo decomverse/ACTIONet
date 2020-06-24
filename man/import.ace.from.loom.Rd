@@ -6,7 +6,7 @@
 This function depends on sceasy (https://github.com/cellgeni/sceasy) and
 LoomExperiment(BioC) for file conversion.}
 \usage{
-import.ace.from.loom(fname)
+import.ace.from.loom(fname, ...)
 }
 \arguments{
 \item{fname}{Path to the AnnData file}

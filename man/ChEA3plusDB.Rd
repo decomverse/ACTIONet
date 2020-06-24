@@ -4,8 +4,10 @@
 \name{ChEA3plusDB}
 \alias{ChEA3plusDB}
 \title{Collection of TF-TG assocations}
-\format{:
-  A list of TF-TG associations}
+\format{
+:
+  A list of TF-TG associations
+}
 \source{
 \url{https://amp.pharm.mssm.edu/chea3/}
 }

@@ -4,13 +4,20 @@
 \alias{run.SCINET.archetype}
 \title{Computes a list of archetype-specific interactomes}
 \usage{
-run.SCINET.archetype(ace, G = NULL, core = T, min.edge.weight = 2,
-  spec.sample_no = 1000, thread_no = 4, compute.topo.specificity = T)
+run.SCINET.archetype(
+  ace,
+  G = NULL,
+  core = T,
+  min.edge.weight = 2,
+  spec.sample_no = 1000,
+  thread_no = 4,
+  compute.topo.specificity = T
+)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{G}{Baseline network as an adjacency matrix or igraph object. 
+\item{G}{Baseline network as an adjacency matrix or igraph object.
 If it is NULL, PCNet is loaded as the baseline from SCINET package.}
 
 \item{min.edge.weight}{Used in post-processing to remove insignificant edges}

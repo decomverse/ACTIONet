@@ -4,10 +4,17 @@
 \alias{reduce.and.batch.correct.ace.Harmony}
 \title{(It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)}
 \usage{
-reduce.and.batch.correct.ace.Harmony(ace, batch_attr, reduced_dim = 50,
-  max_iter = 5, data_slot = "logcounts", norm_method = c("default",
-  "scran", "Linnorm"), reduction_slot = "ACTION", seed = 0,
-  SVD_algorithm = 1)
+reduce.and.batch.correct.ace.Harmony(
+  ace,
+  batch_attr,
+  reduced_dim = 50,
+  max_iter = 5,
+  data_slot = "logcounts",
+  norm_method = c("default", "scran", "Linnorm"),
+  reduction_slot = "ACTION",
+  seed = 0,
+  SVD_algorithm = 1
+)
 }
 \arguments{
 \item{ace}{Input ace object}
