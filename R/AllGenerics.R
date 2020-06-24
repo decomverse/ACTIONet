@@ -122,19 +122,19 @@ setGeneric("colMapMeta", function(x, ...) standardGeneric("colMapMeta"))
 
 #' Set rowMapMeta
 #'
-#' @param x ACTIONetExperiment object
+#' @param obj ACTIONetExperiment object
 #' @param ... other parameters
 #'
 #' @exportMethod rowMapMeta<-
-setGeneric("rowMapMeta<-", function(x, ...) standardGeneric("rowMapMeta<-"))
+setGeneric("rowMapMeta<-", function(obj, ...) standardGeneric("rowMapMeta<-"))
 
 #' Set colMapMeta
 #'
-#' @param x ACTIONetExperiment object
+#' @param obj ACTIONetExperiment object
 #' @param ... other parameters
 #'
 #' @exportMethod colMapMeta<-
-setGeneric("colMapMeta<-", function(x, ...) standardGeneric("colMapMeta<-"))
+setGeneric("colMapMeta<-", function(obj, ...) standardGeneric("colMapMeta<-"))
 
 
 
@@ -178,34 +178,34 @@ setGeneric("colEmbeddings<-", function(x, ...) standardGeneric("colEmbeddings<-"
 
 #' Get row reductions
 #'
-#' @param x ACTIONetExperiment object
+#' @param obj ACTIONetExperiment object
 #' @param ... other parameters
 #'
 #' @exportMethod rowReductions
-setGeneric("rowReductions", function(x, ...) standardGeneric("rowReductions"))
+setGeneric("rowReductions", function(obj, ...) standardGeneric("rowReductions"))
 
 
 
 #' Get column reductions
 #'
-#' @param x ACTIONetExperiment object
+#' @param obj ACTIONetExperiment object
 #' @param ... other parameters
 #'
 #' @exportMethod colReductions
-setGeneric("colReductions", function(x, ...) standardGeneric("colReductions"))
+setGeneric("colReductions", function(obj, ...) standardGeneric("colReductions"))
 
 #' Set column reductions
 #'
-#' @param x ACTIONetExperiment object
+#' @param obj ACTIONetExperiment object
 #' @param ... other parameters
 #'
 #' @exportMethod colReductions<-
-setGeneric("colReductions<-", function(x, ...) standardGeneric("colReductions<-"))
+setGeneric("colReductions<-", function(obj, ...) standardGeneric("colReductions<-"))
 
 #' Set row reductions
 #'
-#' @param x ACTIONetExperiment object
+#' @param obj ACTIONetExperiment object
 #' @param ... other parameters
 #'
 #' @exportMethod rowReductions<-
-setGeneric("rowReductions<-", function(x, ...) standardGeneric("rowReductions<-"))
+setGeneric("rowReductions<-", function(obj, ...) standardGeneric("rowReductions<-"))
