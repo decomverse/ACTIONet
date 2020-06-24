@@ -1,4 +1,4 @@
-obj#' Set row-associated networks
+#' Set row-associated networks
 #'
 #' @return List of adjacency matrices
 #'
@@ -306,10 +306,10 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
           return(M)
       } else {
         M = as.matrix(val)
-        if(is.numeric(M))
+        if(is.numeric(M)){
           M = SummarizedExperiment(assays=list(X=value))
           return(M)
-        else{
+        } else{
           par_func = as.character(sys.call(-1)[1])
           err = sprintf("Values passed to '%s' must be coercible to matrix, of class 'SummarizedExperiment', or NULL.\n", par_func)
           stop(err)
@@ -329,4 +329,11 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
   val = as(val, "SimpleList")
   return(val)
+}
+
+.set_map_type <- function(val, map_type){
+
+
+
+  
 }
