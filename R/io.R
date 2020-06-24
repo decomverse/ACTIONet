@@ -319,8 +319,11 @@ import.ace.from.Seurat <- function(Seurat.obj) {
     if (!requireNamespace("Seurat", quietly = TRUE)) {
         stop("Please install Seurat to read Seurat objects")
     }
-    ace <- as(Seurat::as.SingleCellExperiment(Seurat.obj), "ACTIONetExperiment")
     
+	Seurat.obj = Seurat::UpdateSeuratObject(Seurat.obj)
+	sce = Seurat::as.SingleCellExperiment(Seurat.obj)
+	ace <- as(sce, "ACTIONetExperiment")
+
     return(ace)
 }
 
@@ -335,11 +338,16 @@ import.ace.from.Seurat <- function(Seurat.obj) {
 #'
 #' @examples
 #' ace = import.ace.from.loom(file_name)
-import.ace.from.loom <- function(fname) {
-    if (!requireNamespace("sceasy", quietly = TRUE)) {
+import.ace.from.loom <- function(fname, ...) {
+    if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
         stop("Please install sceasy to read loom files")
     }
-    ace <- as(sceasy:::readExchangeableLoom(fname), "ACTIONetExperiment")
+    
+    
+	SE = SummarizedExperiment::makeSummarizedExperimentFromLoom(file, ...)    
+    ace = as(SE, "ACTIONetExperiment")
+    
+    #ace <- as(sceasy:::readExchangeableLoom(fname), "ACTIONetExperiment")
     
     return(ace)
 }
@@ -356,13 +364,19 @@ import.ace.from.loom <- function(fname) {
 #' @examples
 #' ace = import.ace.from.CDS(monocle_cds)
 import.ace.from.CDS <- function(monocle_cds) {
-    
+    if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+        stop("Please install sceasy to read loom files")
+    }
+        
     counts.mat = exprs(monocle_cds)
     gene_annotations = fData(monocle_cds)
     sample_annotations = pData(monocle_cds)
     
     ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_annotations, 
         rowData = gene_annotations)
+    
+    # This one is NOT stable. SORRY!
+    # sce = monocle::exportCDS(monocle_cds = CDS, export_to = "Scater", export_all = T)
     
     return(ace)
 }

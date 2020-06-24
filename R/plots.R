@@ -1090,7 +1090,16 @@ gate.archetypes <- function(ace, i, j, H.slot = "H_unified") {
     hx = H[i, ]
     hy = H[j, ]
     
-    fig <- plot_ly(x = hx, y = hy)
+    hx.nnz = sum(hx)^2/sum(hx^2)
+    hx.threshold = sort(hx, decreasing = T)[hx.nnz]
+
+    hy.nnz = sum(hy)^2/sum(hy^2)
+    hy.threshold = sort(hx, decreasing = T)[hy.nnz]
+    
+
+    mask = (hx > hx.threshold) | (hy > hy.threshold)
+    fig <- plot_ly(x = hx[mask], y = hy[mask])
+    
     
     fig <- fig %>% add_trace(type = "histogram2dcontour")
     
