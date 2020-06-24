@@ -80,6 +80,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
         V = reduction.out[["V"]]
         colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
         rowMaps(ace.norm)[["rotation"]] = Matrix::t(V)
+        rowMapTypes(ace.norm)[["rotation"]] = "reduction"
     }
 
     # metadata(ace.norm)$reduction.time = Sys.time()

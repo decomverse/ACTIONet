@@ -30,11 +30,11 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
 #' @rdname rowMaps
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 
-    # if (length(value) == 0) {
-    #     x@rowMaps = SimpleList()
-    #     validObject(x)
-    #     return(x)
-    # }
+     if (length(value) == 0) {
+         x@rowMaps = SimpleList()
+         validObject(x)
+         return(x)
+     }
 
     x <- .insert_mapping(x, value, 1)
     validObject(x)
@@ -49,11 +49,11 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 #' @rdname colMaps
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 
-    # if (length(val) == 0) {
-    #     x@colMaps = SimpleList()
-    #     validObject(x)
-    #     return(x)
-    # }
+     if (length(value) == 0) {
+         x@colMaps = SimpleList()
+         validObject(x)
+         return(x)
+     }
 
     x <- .insert_mapping(x, value, 2)
     validObject(x)
@@ -241,11 +241,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 .insert_mapping <- function(obj, val, d){
   val = .check_if_mapping_list(val)
   .validate_names(val)
-  # if(d == 1){
-  #   map_types = obj@rowMapTypes
-  # } else if(d == 2){
-  #   map_types = obj@colMapTypes
-  # }
 
   map_types <- switch(d, rowMapTypes(obj), colMapTypes(obj))
 
@@ -257,8 +252,8 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
     val <- sapply(names(val), function(n){
       v = val[[n]]
-      if(dim(v)[2] != dim(obj)[2]){
-        err = sprintf("ncol(val) must equal ncol(ace).\n")
+      if(dim(v)[2] != dim(obj)[d]){
+        err = sprintf("ncol(val) must equal %s.\n", dim(obj)[d])
         stop(err)
       }
       colnames(v) <- dimnames(obj)[[d]]
@@ -303,12 +298,12 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
       if (any(is(M) == "SummarizedExperiment")) {
           return(M)
       } else if (is.matrix(M) | is.sparseMatrix(M)) {
-          M = SummarizedExperiment(assays=list(X=value))
+          M = SummarizedExperiment(assays=list(X=M))
           return(M)
       } else {
         M = as.matrix(val)
         if(is.numeric(M)){
-          M = SummarizedExperiment(assays=list(X=value))
+          M = SummarizedExperiment(assays=list(X=M))
           return(M)
         } else{
           par_func = as.character(sys.call(-1)[1])
@@ -326,7 +321,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   if( !(class(val) %in% c("list", "SimpleList")) )
     stop(err)
   if(is.null(names(val)))
-    stop(val)
+    stop(err)
 
   val = as(val, "SimpleList")
   return(val)
