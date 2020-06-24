@@ -4,11 +4,21 @@
 \alias{plot.ACTIONet}
 \title{Main ACTIONet plotting functions}
 \usage{
-plot.ACTIONet(ace, labels = NULL, transparency.attr = NULL,
-  trans.z.threshold = -0.5, trans.fact = 1.5, node.size = 1,
-  CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
-  legend.pos = "bottomright", title = "",
-  border.contrast.factor = 0.1, coordinate_slot = "ACTIONet2D")
+\method{plot}{ACTIONet}(
+  ace,
+  labels = NULL,
+  transparency.attr = NULL,
+  trans.z.threshold = -0.5,
+  trans.fact = 1.5,
+  node.size = 1,
+  CPal = CPal20,
+  add.text = TRUE,
+  suppress.legend = TRUE,
+  legend.pos = "bottomright",
+  title = "",
+  border.contrast.factor = 0.1,
+  coordinate_slot = "ACTIONet2D"
+)
 }
 \arguments{
 \item{ace}{ACTIONet output object}

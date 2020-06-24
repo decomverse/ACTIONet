@@ -4,8 +4,10 @@
 \name{nanoStringDB_mouse}
 \alias{nanoStringDB_mouse}
 \title{Pre-processed genesets from the nanoString database (Mouse)}
-\format{:
-  A list of gene x geneset indicator matrices in the sparseMatrix format (rownames are gene symbols)}
+\format{
+:
+  A list of gene x geneset indicator matrices in the sparseMatrix format (rownames are gene symbols)
+}
 \source{
 \url{https://www.nanostring.com/}
 }

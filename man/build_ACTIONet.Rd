@@ -4,8 +4,12 @@
 \alias{build_ACTIONet}
 \title{Builds an interaction network from the multi-level archetypal decompositions}
 \usage{
-build_ACTIONet(H_stacked, density = 1, thread_no = 0L,
-  mutual_edges_only = TRUE)
+build_ACTIONet(
+  H_stacked,
+  density = 1,
+  thread_no = 0L,
+  mutual_edges_only = TRUE
+)
 }
 \arguments{
 \item{H_stacked}{Output of the prune_archetypes() function.}

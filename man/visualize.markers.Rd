@@ -5,9 +5,16 @@
 \title{Projects a set of markers on the ACTIONet
 It also optionally imputes the markers.}
 \usage{
-visualize.markers(ace, marker.genes, transparency.attr = NULL,
-  trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
-  CPal = "magma", alpha_val = 0)
+visualize.markers(
+  ace,
+  marker.genes,
+  transparency.attr = NULL,
+  trans.z.threshold = -0.5,
+  trans.fact = 3,
+  node.size = 1,
+  CPal = "magma",
+  alpha_val = 0
+)
 }
 \arguments{
 \item{ace}{ACTIONet output object}

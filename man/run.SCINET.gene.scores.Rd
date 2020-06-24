@@ -4,13 +4,19 @@
 \alias{run.SCINET.gene.scores}
 \title{Computes a list of specific interactomes for an arbitrary gene score matrix}
 \usage{
-run.SCINET.gene.scores(gene.scores, G = NULL, min.edge.weight = 2,
-  spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T)
+run.SCINET.gene.scores(
+  gene.scores,
+  G = NULL,
+  min.edge.weight = 2,
+  spec.sample_no = 1000,
+  thread_no = 8,
+  compute.topo.specificity = T
+)
 }
 \arguments{
 \item{gene.scores}{gene.scores}
 
-\item{G}{Baseline network as an adjacency matrix or igraph object. 
+\item{G}{Baseline network as an adjacency matrix or igraph object.
 If it is NULL, PCNet is loaded as the baseline from SCINET package.}
 
 \item{min.edge.weight}{Used in post-processing to remove insignificant edges}

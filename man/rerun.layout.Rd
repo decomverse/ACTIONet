@@ -4,8 +4,13 @@
 \alias{rerun.layout}
 \title{Rerun layout on the ACTIONet graph with new parameters}
 \usage{
-rerun.layout(ace, layout_compactness = 50, layout_epochs = 500,
-  thread_no = 1, reduction_slot = "ACTION2D")
+rerun.layout(
+  ace,
+  layout_compactness = 50,
+  layout_epochs = 500,
+  thread_no = 1,
+  reduction_slot = "ACTION2D"
+)
 }
 \arguments{
 \item{ace}{ACTIONetExperiment object containing the results}

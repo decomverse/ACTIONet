@@ -4,10 +4,10 @@
 #'
 #' @export
 setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., drop = TRUE) {
-    rn <- rowNets(x)
-    cn <- colNets(x)
-    rf <- rowMaps(x)
-    cf <- colMaps(x)
+    rn <- x@rowNets
+    cn <- x@colNets
+    rf <- x@rowMaps
+    cf <- x@colMaps
 
     if (!missing(i)) {
         if (is.character(i)) {

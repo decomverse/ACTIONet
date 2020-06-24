@@ -4,8 +4,10 @@
 \name{curatedMarkers_human}
 \alias{curatedMarkers_human}
 \title{Curated cell type markers for hand-selected cell types (Human)}
-\format{:
-  A list of gene symbols for different tissues/cell-types}
+\format{
+:
+  A list of gene symbols for different tissues/cell-types
+}
 \source{
 \url{http://compbio.mit.edu/ACTIONet/}
 }
