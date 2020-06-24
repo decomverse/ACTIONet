@@ -5,7 +5,7 @@
 #' @rdname rowNets
 setMethod("rowNets", "ACTIONetExperiment", function(x) {
     out <- x@rowNets
-    
+
     out
 })
 
@@ -17,7 +17,7 @@ setMethod("rowNets", "ACTIONetExperiment", function(x) {
 #' @rdname colNets
 setMethod("colNets", "ACTIONetExperiment", function(x) {
     out <- x@colNets
-    
+
     out
 })
 
@@ -29,12 +29,12 @@ setMethod("colNets", "ACTIONetExperiment", function(x) {
 #' @rdname rowMaps
 setMethod("rowMaps", "ACTIONetExperiment", function(x, all = T) {
     out = as(lapply(x@rowMaps, function(M) assays(M)$X), "SimpleList")
-    
+
     if (all == F & length(out) > 0) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -49,7 +49,7 @@ setMethod("colMaps", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -64,7 +64,7 @@ setMethod("rowMapTypes", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -79,7 +79,7 @@ setMethod("colMapTypes", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -96,7 +96,7 @@ setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -111,7 +111,7 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -130,7 +130,7 @@ setMethod("rowMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -145,7 +145,7 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(x, all = T) {
         mask = sapply(x@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
-    
+
     out
 })
 
@@ -175,9 +175,9 @@ setMethod("normcounts", "ACTIONetExperiment", function(object) {
 setMethod("reducedDims", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
     Xs = Xs[colMapTypes(x) %in% c("embedding", "reduction")]
-    
+
     transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")
-    
+
     return(transposed_factors)
 })
 
@@ -186,7 +186,7 @@ setMethod("reducedDims", "ACTIONetExperiment", function(x) {
 setMethod("reducedDimNames", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
     Xs = Xs[colMapTypes(x) %in% c("embedding", "reduction")]
-    
+
     return(names(Xs))
 })
 
@@ -198,7 +198,7 @@ setMethod("reducedDimNames", "ACTIONetExperiment", function(x) {
 setMethod("rowEmbeddings", "ACTIONetExperiment", function(x) {
     Xs = rowMaps(x)
     Xs = Xs[rowMapTypes(x) %in% c("embedding")]
-    
+
     return(Xs)
 })
 
@@ -206,26 +206,26 @@ setMethod("rowEmbeddings", "ACTIONetExperiment", function(x) {
 setMethod("colEmbeddings", "ACTIONetExperiment", function(x) {
     Xs = colMaps(x)
     Xs = Xs[colMapTypes(x) %in% c("embedding")]
-    
+
     return(Xs)
 })
 
 
 #' @export
-setMethod("rowReductions", "ACTIONetExperiment", function(x) {
-    Xs = rowMaps(x)
-    Xs = Xs[rowMapTypes(x) %in% c("reduction")]
-    
-    return(Xs)
+setMethod("rowReductions", "ACTIONetExperiment", function(obj) {
+    Maps = rowMaps(obj)
+    Maps = Maps[rowMapTypes(obj) %in% c("reduction")]
+
+    return(Maps)
 })
 
 
 #' @export
-setMethod("colReductions", "ACTIONetExperiment", function(x) {
-    Xs = colMaps(x)
-    Xs = Xs[colMapTypes(x) %in% c("reduction")]
-    
-    return(Xs)
+setMethod("colReductions", "ACTIONetExperiment", function(obj) {
+    Maps = colMaps(obj)
+    Maps = Maps[colMapTypes(obj) %in% c("reduction")]
+
+    return(Maps)
 })
 
 #' @export
