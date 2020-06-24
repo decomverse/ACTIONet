@@ -1,4 +1,4 @@
-#' Set row-associated networks
+obj#' Set row-associated networks
 #'
 #' @return List of adjacency matrices
 #'
@@ -240,26 +240,10 @@ setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
 #' @return List of matrices
 #'
 #' @rdname colMapMeta
-setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
-    value = value[names(value) != ""]
-
-    for (n in names(value)) {
-        DF = value[[n]]
-        if (is.data.frame(DF))
-            DF = DataFrame(DF)
-
-        if ((length(which(is(DF) == "DataFrame")) != 0)) {
-            if (nrow(DF) == nrow(x@colMaps[[n]])) {
-                mask = (n == names(x@colMaps))
-                if (sum(mask) == 1) {
-                  rowData(x@colMaps[[which(mask)]]) = DF
-                }
-            }
-        }
-    }
-
-    validObject(x)
-    x
+setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(obj, val) {
+    obj <- .insert_MapMeta(obj, val, 2)
+    validObject(obj)
+    obj
 })
 
 
@@ -269,27 +253,10 @@ setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(x, value) {
 #' @return List of matrices
 #'
 #' @rdname rowMapMeta
-setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
-    value = value[names(value) != ""]
-
-
-    for (n in names(value)) {
-        DF = value[[n]]
-        if (is.data.frame(DF))
-            DF = DataFrame(DF)
-
-        if ((length(which(is(DF) == "DataFrame")) != 0)) {
-            if (nrow(DF) == ncol(x@rowMaps[[n]])) {
-                mask = (n == names(x@rowMaps))
-                if (sum(mask) == 1) {
-                  colData(x@rowMaps[[which(mask)]]) = DF
-                }
-            }
-        }
-    }
-
-    validObject(x)
-    x
+setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(obj, val) {
+    obj <- .insert_MapMeta(obj, val, 1)
+    validObject(obj)
+    obj
 })
 
 #' Set column-associated reductions
@@ -297,13 +264,13 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(x, value) {
 #' @return List of matrices
 #'
 #' @rdname colReductions
-setReplaceMethod("colReductions", "ACTIONetExperiment", function(x, value) {
-    (x)
-    for (i in seq_along(value)) {
-        colMaps(x)[[names(value)[i]]] = value[[i]]
-        colMapTypes(x)[[names(value)[i]]] = "reduction"
+setReplaceMethod("colReductions", "ACTIONetExperiment", function(obj, val) {
+    (obj)
+    for (i in seq_along(val)) {
+        colMaps(obj)[[names(val)[i]]] = val[[i]]
+        colMapTypes(obj)[[names(val)[i]]] = "reduction"
     }
-    x
+    obj
 })
 
 #' Set row-associated reductions
@@ -311,13 +278,13 @@ setReplaceMethod("colReductions", "ACTIONetExperiment", function(x, value) {
 #' @return List of matrices
 #'
 #' @rdname rowReductions
-setReplaceMethod("rowReductions", "ACTIONetExperiment", function(x, value) {
-    (x)
-    for (i in seq_along(value)) {
-        rowMaps(x)[[names(value)[i]]] = value[[i]]
-        rowMapTypes(x)[[names(value)[i]]] = "reduction"
+setReplaceMethod("rowReductions", "ACTIONetExperiment", function(obj, val) {
+    (obj)
+    for (i in seq_along(val)) {
+        rowMaps(obj)[[names(val)[i]]] = val[[i]]
+        rowMapTypes(obj)[[names(val)[i]]] = "reduction"
     }
-    x
+    obj
 })
 
 #' Set column-associated embeddings
@@ -378,3 +345,59 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
     colData(object)[["sizeFactors"]] <- value
     object
 })
+
+.insert_MapMeta <- function(obj, val, insert_dim){
+  val = val[names(val) != ""]
+  .check_for_duplicates(val)
+
+  for (n in names(val)) {
+      DF = val[[n]]
+      if (is.data.frame(DF))
+          DF = DataFrame(DF)
+
+      if (any(is(DF) == "DataFrame")) {
+
+        if()
+          if (nrow(DF) == nrow(obj@colMaps[[n]])) {
+              mask = (n == names(obj@colMaps))
+              if (sum(mask) == 1) {
+                rowData(obj@colMaps[[which(mask)]]) = DF
+              }
+          }
+
+          if (nrow(DF) == ncol(obj@rowMaps[[n]])) {
+              mask = (n == names(obj@rowMaps))
+              if (sum(mask) == 1) {
+                colData(obj@rowMaps[[which(mask)]]) = DF
+              }
+          }
+
+      }
+  }
+  return(obj)
+}
+
+.drop_invalid_elements <- function(val){
+  val = .check_if_mapping_list(val)
+  val_names = names(val)
+  val_names = val_names[val_names != ""]
+  val_names = val_names[!duplicated(val_names)]
+
+  if( length(val_names) < length(names(val)) ){
+    msg  = sprintf("Invalid list elements were passed and will be dropped.\n")
+    warning(msg)
+  }
+  val = val[val_names]
+  return(val)
+}
+
+.check_if_mapping_list <- function(val){
+  err = sprintf("New mappings must be a named list.\n")
+  if( !(class(val) %in% c("list", "SimpleList")) )
+    stop(err)
+  if(is.null(names(val)))
+    stop(val)
+
+  val = as(val, "SimpleList")
+  return(val)
+}
