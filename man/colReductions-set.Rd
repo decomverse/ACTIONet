@@ -4,10 +4,10 @@
 \alias{colReductions<-}
 \title{Set column reductions}
 \usage{
-colReductions(x, ...) <- value
+colReductions(obj, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{obj}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

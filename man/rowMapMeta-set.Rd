@@ -4,10 +4,10 @@
 \alias{rowMapMeta<-}
 \title{Set rowMapMeta}
 \usage{
-rowMapMeta(x, ...) <- value
+rowMapMeta(obj, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{obj}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

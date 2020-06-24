@@ -4,10 +4,10 @@
 \alias{colMapMeta<-}
 \title{Set colMapMeta}
 \usage{
-colMapMeta(x, ...) <- value
+colMapMeta(obj, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{obj}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }
