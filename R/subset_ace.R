@@ -8,15 +8,15 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
     cn <- colNets(x)
     rf <- rowMaps(x)
     cf <- colMaps(x)
-    
+
     if (!missing(i)) {
         if (is.character(i)) {
             fmt <- paste0("<", class(x), ">[i,] index out of bounds: %s")
-            i <- SummarizedExperiment:::.SummarizedExperiment.charbound(i, rownames(x), 
+            i <- SummarizedExperiment:::.SummarizedExperiment.charbound(i, rownames(x),
                 fmt)
         }
         i <- as.vector(i)
-        
+
         if (length(rn) > 0) {
             for (k in 1:length(rn)) {
                 tmp = rn[[k]]
@@ -26,19 +26,19 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
         if (length(rf) > 0) {
             for (k in 1:length(rf)) {
                 tmp = rf[[k]]
-                rf[[k]] = tmp[i, , drop = FALSE]
+                rf[[k]] = tmp[, i, drop = FALSE]
             }
         }
     }
-    
+
     if (!missing(j)) {
         if (is.character(j)) {
             fmt <- paste0("<", class(x), ">[,j] index out of bounds: %s")
-            j <- SummarizedExperiment:::.SummarizedExperiment.charbound(j, colnames(x), 
+            j <- SummarizedExperiment:::.SummarizedExperiment.charbound(j, colnames(x),
                 fmt)
         }
         j <- as.vector(j)
-        
+
         if (length(cn) > 0) {
             for (k in 1:length(cn)) {
                 tmp = cn[[k]]
@@ -52,8 +52,8 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
             }
         }
     }
-    
+
     out <- callNextMethod()
-    BiocGenerics:::replaceSlots(out, rowNets = rn, colNets = cn, rowMaps = rf, colMaps = cf, 
+    BiocGenerics:::replaceSlots(out, rowNets = rn, colNets = cn, rowMaps = rf, colMaps = cf,
         check = FALSE)
 })
