@@ -26,7 +26,7 @@ setMethod("colNets", "ACTIONetExperiment", function(object) {
 #' @rdname rowMaps
 #' @export
 setMethod("rowMaps", "ACTIONetExperiment", function(object, all = T) {
-    out = as(lapply(object@rowMaps, function(M) assays(M)$object), "SimpleList")
+    out = as(lapply(object@rowMaps, function(M) assays(M)$X), "SimpleList")
 
     if (all == F & length(out) > 0) {
         mask = sapply(object@rowMaps, function(M) metadata(M)$type != "internal")
@@ -42,7 +42,7 @@ setMethod("rowMaps", "ACTIONetExperiment", function(object, all = T) {
 #' @rdname colMaps
 #' @export
 setMethod("colMaps", "ACTIONetExperiment", function(object, all = T) {
-    out = as(lapply(object@colMaps, function(M) assays(M)$object), "SimpleList")
+    out = as(lapply(object@colMaps, function(M) assays(M)$X), "SimpleList")
     if (all == F & length(out) > 0) {
         mask = sapply(object@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
