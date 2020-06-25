@@ -5,12 +5,12 @@
 \alias{rowMapMeta<-,ACTIONetExperiment-method}
 \title{Get rowMapMeta}
 \usage{
-rowMapMeta(x, ...)
+rowMapMeta(object, ...)
 
-\S4method{rowMapMeta}{ACTIONetExperiment}(obj, val) <- value
+\S4method{rowMapMeta}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

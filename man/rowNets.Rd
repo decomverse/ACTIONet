@@ -6,14 +6,14 @@
 \alias{rowNets<-,ACTIONetExperiment-method}
 \title{Get rowNets}
 \usage{
-rowNets(x, ...)
+rowNets(object, ...)
 
-\S4method{rowNets}{ACTIONetExperiment}(x)
+\S4method{rowNets}{ACTIONetExperiment}(object)
 
-\S4method{rowNets}{ACTIONetExperiment}(x) <- value
+\S4method{rowNets}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }
