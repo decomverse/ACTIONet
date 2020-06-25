@@ -8,15 +8,20 @@
 #' @return an ACTIONetExperiment (ACE) object
 #' slot.
 
-#' @rdname ACTIONetExperiment
 #' @export
+#' @rdname ACTIONetExperiment
 #' @import methods
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
-#' @importClassesFrom SummarizedExperiment SummarizedExperiment
-.ACTIONetExperiment <- setClass("ACTIONetExperiment", slots = representation(rowNets = "SimpleList", 
-    colNets = "SimpleList", rowMaps = "SimpleList", colMaps = "SimpleList"), contains = "SummarizedExperiment")
+#' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
+setClass("ACTIONetExperiment",
+  slots = c(rowNets = "SimpleList",
+  colNets = "SimpleList",
+  rowMaps = "SimpleList",
+  colMaps = "SimpleList"),
+  contains = "SummarizedExperiment")
 
+.slot_type = S4Vectors::SimpleList()
 
 #' Creates an ACTIONetExperiment (ACE) object
 #'
@@ -25,24 +30,30 @@
 #' @param rowMaps,colMaps Factorization results (W and H matrices)
 #'
 #' @return An ACTIONetExperiment (ACE) object, derived from SummarizedExperiment, with additional slots to store ACTIONet results
-#'
 #' @export
-#' @import SummarizedExperiment SummarizedExperiment
-ACTIONetExperiment <- function(rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(), 
-    rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList(), ...) {
-    SE <- SummarizedExperiment::SummarizedExperiment(...)
-    out <- .ACTIONetExperiment(SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, 
-        colMaps = colMaps)
-    return(out)
-}
+#' @importFrom methods new
+#' @importFrom S4Vectors SimpleList
+#' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
+ACTIONetExperiment <- function(...,
+  rowNets = .slot_type,
+  colNets = .slot_type,
+  rowMaps = .slot_type,
+  colMaps = .slot_type) {
 
+    SE <- SummarizedExperiment::SummarizedExperiment(...)
+    if(!is(SE, "RangedSummarizedExperiment")) {
+      SE <- as(SE, "RangedSummarizedExperiment")
+    }
+  out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
+  return(out)
+}
 
 
 # @S3method .DollarNames ACTIONetExperiment
 #' @method .DollarNames ACTIONetExperiment
 #' @export
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
-    ll = c(names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)), 
+    ll = c(names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)),
         names(colNets(x)), names(rowNets(x)))
     grep(pattern, ll, value = TRUE)
 }
@@ -67,7 +78,7 @@ setMethod("$", "ACTIONetExperiment", function(x, name) {
     } else {
         message(sprintf("Attribute %s not found", name))
     }
-    
+
 })
 
 #' @export
@@ -85,6 +96,6 @@ setReplaceMethod("$", "ACTIONetExperiment", function(x, name, value) {
     } else {
         colData(x)[[name]] <- value
     }
-    
+
     x
 })

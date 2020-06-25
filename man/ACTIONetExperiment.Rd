@@ -3,25 +3,24 @@
 \docType{class}
 \name{ACTIONetExperiment-class}
 \alias{ACTIONetExperiment-class}
-\alias{.ACTIONetExperiment}
 \alias{ACTIONetExperiment}
 \title{An extension of the SummarizedExperiment class to store
 the results of ACTIONet method}
 \usage{
 ACTIONetExperiment(
-  rowNets = S4Vectors::SimpleList(),
-  colNets = S4Vectors::SimpleList(),
-  rowMaps = S4Vectors::SimpleList(),
-  colMaps = S4Vectors::SimpleList(),
-  ...
+  ...,
+  rowNets = .slot_type,
+  colNets = .slot_type,
+  rowMaps = .slot_type,
+  colMaps = .slot_type
 )
 }
 \arguments{
+\item{...}{SummarizedExperiment and SummarizedExperiment components}
+
 \item{rowNets, colNets}{gene-gene and cell-cell networks, respectively}
 
 \item{rowMaps, colMaps}{Factorization results (W and H matrices)}
-
-\item{...}{SummarizedExperiment and SummarizedExperiment components}
 }
 \value{
 an ACTIONetExperiment (ACE) object
