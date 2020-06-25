@@ -177,7 +177,9 @@ setReplaceMethod("reducedDims", "ACTIONetExperiment", function(x, value) {
 
   value = as(lapply(value, function(X) Matrix::t(X)), "SimpleList")
   value = .coerce_input_to_SE(value)
-  value = .set_map_type(value, "reduction", force_embed = TRUE)
+  for(i in seq_along(value)){
+    value[[i]] = .set_map_type(value[[i]], "reduction", force_embed = TRUE)
+  }
 
   x <- .insert_mapping(x, value, 2)
 
@@ -190,7 +192,7 @@ setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(x, value) {
   .validate_names(value)
 
   mask = colMapTypes(x) %in% c("embedding", "reduction")
-  names(colMaps(x)[mask]) <- value
+  names(x@colMaps)[mask] <- value
 
   validObject(x)
   x
