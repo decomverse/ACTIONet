@@ -1,6 +1,40 @@
 #include "ACTIONet.h"
 
+
 namespace ACTIONet {
+	void simplexRegression(double *A_ptr, int A_cols, double *B_ptr, int B_rows, int B_cols, double *X_ptr);
+	void AA (double *A_ptr, int A_rows, int A_cols, double *W0_ptr, int W0_cols, double *C_ptr, double *H_ptr);
+
+	
+	// Solves the standard Archetypal Analysis (AA) problem
+	field<mat> run_AA_old (mat &A, mat &W0) {
+		double *A_ptr = A.memptr();
+		double *W0_ptr = W0.memptr();
+		
+		int A_rows = A.n_rows;
+		int A_cols = A.n_cols;
+		int W0_cols = W0.n_cols;
+		
+		double *C_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
+		double *H_ptr = (double *)calloc(A_cols*W0_cols, sizeof(double));
+
+		AA(A_ptr, A_rows, A_cols, W0_ptr, W0_cols, C_ptr, H_ptr);
+		
+		mat C = mat(C_ptr, A_cols, W0_cols);
+		mat H = mat(H_ptr, W0_cols, A_cols);
+
+		C = clamp(C, 0, 1);
+		C = normalise(C, 1);
+		H = clamp(H, 0, 1);
+		H = normalise(H, 1);
+		
+		field<mat> decomposition(2,1);
+		decomposition(0) = C;
+		decomposition(1) = H;
+		
+		return decomposition;
+	}
+		
 	// Solves the standard Archetypal Analysis (AA) problem
 	field<mat> run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-16) {
 
@@ -224,10 +258,13 @@ namespace ACTIONet {
 			mat W = X_r.cols(trace.selected_cols[kk]);
 
 			field<mat> AA_res;
-			AA_res = run_AA(X_r, W, max_it, min_delta);
-
+			
+			//AA_res = run_AA(X_r, W, max_it, min_delta);
+			AA_res = run_AA_old(X_r, W);
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);
+
+
 		});
 
 		return trace;
