@@ -796,7 +796,7 @@ namespace ACTIONet {
 
 
 		// Form a matrix Q whose columns constitute a well-conditioned basis for the columns of the earlier Q.			
-		//gram_schmidt(Q);
+		gram_schmidt(Q);
 		//Q = orth(Q);
 		
 		if (m < n) {
@@ -826,11 +826,11 @@ namespace ACTIONet {
 				printf("\t\tIteration %d\n", it);
 				
 				Q = A.t()*Q;
-				//gram_schmidt(Q);
+				gram_schmidt(Q);
 				//Q = orth(Q);
 					
 				Q = A*Q; // Apply A to a random matrix, obtaining Q.
-				//gram_schmidt(Q);			
+				gram_schmidt(Q);			
 				//Q = orth(Q);
 			}
 			

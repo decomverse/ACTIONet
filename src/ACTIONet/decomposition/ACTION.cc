@@ -259,8 +259,8 @@ namespace ACTIONet {
 
 			field<mat> AA_res;
 			
-			//AA_res = run_AA(X_r, W, max_it, min_delta);
-			AA_res = run_AA_old(X_r, W);
+			AA_res = run_AA(X_r, W, max_it, min_delta);
+			//AA_res = run_AA_old(X_r, W);
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);
 
