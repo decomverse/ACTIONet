@@ -8,7 +8,7 @@
 Joint archetypal/network-based analysis for multi-resolution decomposition of single-cell states.
 }
 \section{Usage}{
- 
+
 
 \enumerate{
 \item ?reduce.sce to reduce raw count matrix in an SummarizedExperiment objects.
@@ -21,7 +21,7 @@ Joint archetypal/network-based analysis for multi-resolution decomposition of si
 
 \enumerate{
 \item Report bugs at \url{https://github.com/shmohammadi86/ACTIONet/issues}
-\item Read the manuscript: 
+\item Read the manuscript:
 \href{https://www.biorxiv.org/content/10.1101/746339v2}{A multiresolution framework to characterize single-cell state landscapes}.
 }
 }
