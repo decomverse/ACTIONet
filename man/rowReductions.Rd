@@ -5,12 +5,12 @@
 \alias{rowReductions<-,ACTIONetExperiment-method}
 \title{Get row reductions}
 \usage{
-rowReductions(obj, ...)
+rowReductions(object, ...)
 
-\S4method{rowReductions}{ACTIONetExperiment}(obj, val) <- value
+\S4method{rowReductions}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{obj}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

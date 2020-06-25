@@ -6,14 +6,14 @@
 \alias{rowEmbeddings<-,ACTIONetExperiment-method}
 \title{Get column embeddings}
 \usage{
-colEmbeddings(x, ...)
+colEmbeddings(object, ...)
 
-\S4method{colEmbeddings}{ACTIONetExperiment}(x) <- value
+\S4method{colEmbeddings}{ACTIONetExperiment}(object) <- value
 
-\S4method{rowEmbeddings}{ACTIONetExperiment}(x) <- value
+\S4method{rowEmbeddings}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

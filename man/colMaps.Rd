@@ -6,14 +6,14 @@
 \alias{colMaps<-,ACTIONetExperiment-method}
 \title{Get colMaps}
 \usage{
-colMaps(x, ...)
+colMaps(object, ...)
 
-\S4method{colMaps}{ACTIONetExperiment}(x, all = T)
+\S4method{colMaps}{ACTIONetExperiment}(object, all = T)
 
-\S4method{colMaps}{ACTIONetExperiment}(x) <- value
+\S4method{colMaps}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }
