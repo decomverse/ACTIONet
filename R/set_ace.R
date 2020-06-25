@@ -1,8 +1,8 @@
 #' Set row-associated networks
-#'
+
 #' @return List of adjacency matrices
-#'
 #' @rdname rowNets
+#' @export
 setReplaceMethod("rowNets", "ACTIONetExperiment", function(x, value) {
     value <- as(value, "SimpleList")
     x@rowNets <- value
@@ -11,10 +11,10 @@ setReplaceMethod("rowNets", "ACTIONetExperiment", function(x, value) {
 })
 
 #' Set column-associated networks
-#'
+
 #' @return List of adjacency matrices
-#'
 #' @rdname colNets
+#' @export
 setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
     value <- as(value, "SimpleList")
     x@colNets <- value
@@ -22,12 +22,11 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(x, value) {
     x
 })
 
-
 #' Set row-associated factors
-#'
+
 #' @return List of matrices
-#'
 #' @rdname rowMaps
+#' @export
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
 
      if (length(value) == 0) {
@@ -41,12 +40,11 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(x, value) {
     x
 })
 
-
 #' Set column-associated factors
-#'
+
 #' @return List of matrices
-#'
 #' @rdname colMaps
+#' @export
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
 
      if (length(value) == 0) {
@@ -60,12 +58,11 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(x, value) {
     x
 })
 
-
 #' Set row-associated factor types
-#'
+
 #' @return List of matrices
-#'
 #' @rdname rowMapTypes
+#' @export
 setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
     common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
         length(x) == 1)], names(x@rowMaps))
@@ -77,12 +74,11 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(x, value) {
     x
 })
 
-
 #' Set column-associated factor annotations
-#'
+
 #' @return List of matrices
-#'
 #' @rdname colMapTypes
+#' @export
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
     common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
         length(x) == 1)], names(x@colMaps))
@@ -94,25 +90,22 @@ setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(x, value) {
     x
 })
 
-
 #' Set column-associated factor annotations
-#'
+
 #' @return List of matrices
-#'
 #' @rdname colMapMeta
+#' @export
 setReplaceMethod("colMapMeta", "ACTIONetExperiment", function(obj, val) {
     obj <- .insert_MapMeta(obj, val, 2)
     validObject(obj)
     obj
 })
 
-
-
 #' Set row-associated factor annotations
-#'
+
 #' @return List of matrices
-#'
 #' @rdname rowMapMeta
+#' @export
 setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(obj, val) {
     obj <- .insert_MapMeta(obj, val, 1)
     validObject(obj)
@@ -120,10 +113,10 @@ setReplaceMethod("rowMapMeta", "ACTIONetExperiment", function(obj, val) {
 })
 
 #' Set column-associated reductions
-#'
+
 #' @return List of matrices
-#'
 #' @rdname colReductions
+#' @export
 setReplaceMethod("colReductions", "ACTIONetExperiment", function(obj, val) {
     (obj)
     for (i in seq_along(val)) {
@@ -134,10 +127,10 @@ setReplaceMethod("colReductions", "ACTIONetExperiment", function(obj, val) {
 })
 
 #' Set row-associated reductions
-#'
+
 #' @return List of matrices
-#'
 #' @rdname rowReductions
+#' @export
 setReplaceMethod("rowReductions", "ACTIONetExperiment", function(obj, val) {
     (obj)
     for (i in seq_along(val)) {
@@ -148,10 +141,10 @@ setReplaceMethod("rowReductions", "ACTIONetExperiment", function(obj, val) {
 })
 
 #' Set column-associated embeddings
-#'
+
 #' @return List of matrices
-#'
 #' @rdname colEmbeddings
+#' @export
 setReplaceMethod("colEmbeddings", "ACTIONetExperiment", function(x, value) {
     (x)
     for (i in seq_along(value)) {
@@ -162,10 +155,10 @@ setReplaceMethod("colEmbeddings", "ACTIONetExperiment", function(x, value) {
 })
 
 #' Set row-associated embeddings
-#'
+
 #' @return List of matrices
-#'
 #' @rdname colEmbeddings
+#' @export
 setReplaceMethod("rowEmbeddings", "ACTIONetExperiment", function(x, value) {
     (x)
     for (i in seq_along(value)) {
@@ -176,16 +169,45 @@ setReplaceMethod("rowEmbeddings", "ACTIONetExperiment", function(x, value) {
 })
 
 #' @export
+setReplaceMethod("reducedDims", "ACTIONetExperiment", function(x, value) {
+  if (length(value) == 0) {
+    err = sprintf("value passed to 'reducedDims' cannot be empty. To clear column-associated reductions use 'colReductions'.\n")
+    stop(err)
+  }
+
+  value = as(lapply(value, function(X) Matrix::t(X)), "SimpleList")
+  value = .coerce_input_to_SE(value)
+  value = .set_map_type(value, "reduction", force_embed = TRUE)
+
+  x <- .insert_mapping(x, value, 2)
+
+  validObject(x)
+  x
+})
+
+#' @export
+setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(x, value) {
+  .validate_names(value)
+
+  mask = colMapTypes(x) %in% c("embedding", "reduction")
+  names(colMaps(x)[mask]) <- value
+
+  validObject(x)
+  x
+})
+
+#' @importFrom BiocGenerics counts
+#' @export
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
     (object)
-    assays(object)$counts = value
+    SummarizedExperiment::assays(object)$counts = value
     object
 })
 
 #' @export
 setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
     (object)
-    assays(object)$logcounts = value
+    SummarizedExperiment::assays(object)$logcounts = value
     object
 })
 
@@ -193,14 +215,15 @@ setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
 #' @export
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
     (object)
-    assays(object)$normcounts = value
+    SummarizedExperiment::assays(object)$normcounts = value
     object
 })
 
-#' @export
+#' Set column-associated size factors
 #' @rdname sizeFactors
-#' @importFrom SummarizedExperiment colData<- colData
+#' @importFrom SummarizedExperiment colData<-
 #' @importFrom BiocGenerics sizeFactors<-
+#' @export
 setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., value) {
     colData(object)[["sizeFactors"]] <- value
     object
@@ -277,7 +300,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 }
 
 .validate_names <- function(val){
-
   if(any(names(val) == "")){
     par_func = as.character(sys.call(-1)[1])
     err = sprintf("Values passed to '%s' cannot be unnamed.\n", par_func)
@@ -292,7 +314,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   return
 }
 
-.coerce_input_to_SE <- function(val, drop_null = TRUE){
+.coerce_input_to_SE <- function(val){
   val = val[sapply(val, function(v){!is.null(v)})]
   val = lapply(val, function(M) {
       if (any(is(M) == "SummarizedExperiment")) {
@@ -327,12 +349,15 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   return(val)
 }
 
-.set_map_type <- function(val, map_type = NULL){
+.set_map_type <- function(val, map_type = NULL, force_embed = FALSE){
 
   if(is.null(map_type))
     S4Vectors::metadata(val)$type <- ifelse(NROW(val) <= 3, "embedding", "generic")
-  else
+  else{
     S4Vectors::metadata(val)$type <- map_type
+    if(force_embed)
+      S4Vectors::metadata(val)$type <- ifelse(NROW(val) <= 3, "embedding", map_type)
+  }
 
   return(val)
 }

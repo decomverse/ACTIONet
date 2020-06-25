@@ -65,8 +65,6 @@ setGeneric("rowMaps<-", function(x, ...) standardGeneric("rowMaps<-"))
 #' @exportMethod colMaps<-
 setGeneric("colMaps<-", function(x, ...) standardGeneric("colMaps<-"))
 
-
-
 ########################### Type functions ################################
 #' Get rowMapTypes
 #'
@@ -136,9 +134,6 @@ setGeneric("rowMapMeta<-", function(obj, ...) standardGeneric("rowMapMeta<-"))
 #' @exportMethod colMapMeta<-
 setGeneric("colMapMeta<-", function(obj, ...) standardGeneric("colMapMeta<-"))
 
-
-
-
 #' Get row embeddings
 #'
 #' @param x ACTIONetExperiment object
@@ -146,8 +141,6 @@ setGeneric("colMapMeta<-", function(obj, ...) standardGeneric("colMapMeta<-"))
 #'
 #' @exportMethod rowEmbeddings
 setGeneric("rowEmbeddings", function(x, ...) standardGeneric("rowEmbeddings"))
-
-
 
 #' Get column embeddings
 #'
@@ -165,8 +158,6 @@ setGeneric("colEmbeddings", function(x, ...) standardGeneric("colEmbeddings"))
 #' @exportMethod rowEmbeddings
 setGeneric("rowEmbeddings<-", function(x, ...) standardGeneric("rowEmbeddings<-"))
 
-
-
 #' Set column embeddings
 #'
 #' @param x ACTIONetExperiment object
@@ -183,8 +174,6 @@ setGeneric("colEmbeddings<-", function(x, ...) standardGeneric("colEmbeddings<-"
 #'
 #' @exportMethod rowReductions
 setGeneric("rowReductions", function(obj, ...) standardGeneric("rowReductions"))
-
-
 
 #' Get column reductions
 #'
@@ -209,3 +198,27 @@ setGeneric("colReductions<-", function(obj, ...) standardGeneric("colReductions<
 #'
 #' @exportMethod rowReductions<-
 setGeneric("rowReductions<-", function(obj, ...) standardGeneric("rowReductions<-"))
+
+#' @export
+setGeneric("logcounts", function(object, ...) standardGeneric("logcounts"))
+
+#' @export
+setGeneric("logcounts<-", function(object, ..., value) standardGeneric("logcounts<-"))
+
+#' @export
+setGeneric("normcounts", function(object, ...) standardGeneric("normcounts"))
+
+#' @export
+setGeneric("normcounts<-", function(object, ..., value) standardGeneric("normcounts<-"))
+
+#' @export
+setGeneric("reducedDimNames", function(x) standardGeneric("reducedDimNames"))
+
+#' @export
+setGeneric("reducedDimNames<-", function(x, value) standardGeneric("reducedDimNames<-"))
+
+#' @export
+setGeneric("reducedDims", function(x, ...) standardGeneric("reducedDims"))
+
+#' @export
+setGeneric("reducedDims<-", function(x, value) standardGeneric("reducedDims<-"))
