@@ -106,7 +106,6 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(object, all = T) {
     out
 })
 
-#' @export
 setMethod("reducedDims", "ACTIONetExperiment", function(object) {
     Xs = colMaps(object)
     Xs = Xs[colMapTypes(object) %in% c("embedding", "reduction")]
@@ -115,7 +114,6 @@ setMethod("reducedDims", "ACTIONetExperiment", function(object) {
     return(transposed_factors)
 })
 
-#' @export
 setMethod("reducedDimNames", "ACTIONetExperiment", function(object) {
     Xs = colMaps(object)
     Xs = Xs[colMapTypes(object) %in% c("embedding", "reduction")]

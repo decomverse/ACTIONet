@@ -174,7 +174,6 @@ setReplaceMethod("rowEmbeddings", "ACTIONetExperiment", function(object, value) 
     object
 })
 
-#' @export
 setReplaceMethod("reducedDims", "ACTIONetExperiment", function(object, value) {
   if (length(value) == 0) {
     err = sprintf("value passed to 'reducedDims' cannot be empty. To clear column-associated reductions use 'colReductions'.\n")
@@ -193,7 +192,6 @@ setReplaceMethod("reducedDims", "ACTIONetExperiment", function(object, value) {
   object
 })
 
-#' @export
 setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(object, value) {
   .validate_names(value)
 
@@ -238,8 +236,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 })
 
 .insert_MapMeta <- function(object, value, d){
-  # value = value[names(value) != ""]
-  # .check_for_duplicates(value)
   valid_names = switch(d, names(object@rowMaps), names(object@colMaps))
   .validate_names(value, valid_names)
   value = lapply(value, function(v){
@@ -247,8 +243,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
       v = DataFrame(v)
     return(v)
   })
-
-  # maps <- switch(d, rowMapTypes(object), colMapTypes(object))
 
   for (n in names(value)) {
       DF = value[[n]]
@@ -261,22 +255,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
             colData(object@colMaps[[n]]) = DF
         }
       }
-        # if(d == 1){
-        #   if (nrow(DF) == ncol(object@colMaps[[n]])) {
-        #       mask = (n == names(object@colMaps))
-        #       if (sum(mask) == 1) {
-        #         colData(object@colMaps[[which(mask)]]) = DF
-        #       }
-        #   }
-        # } else if(d == 2){
-        #   if (nrow(DF) == ncol(object@rowMaps[[n]])) {
-        #       mask = (n == names(object@rowMaps))
-        #       if (sum(mask) == 1) {
-        #         colData(object@rowMaps[[which(mask)]]) = DF
-        #       }
-        #   }
-        # }
-      }
+    }
   return(object)
 }
 
