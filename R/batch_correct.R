@@ -2,7 +2,7 @@
 #' @export
 reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 50,
     MNN_k = 20, return_V = FALSE, reduction_slot = "MNN", V_slot = NULL, BPPARAM = SerialParam()) {
-    .check_and_load_package(c("scran", "batchelor"))
+    .check_and_load_package(c("scran", "batchelor", "BiocParallel"))
 
     ace = .check_and_convert_se_like(ace, "ACE")
     SummarizedExperiment::assays(ace)[["counts"]] = as(SummarizedExperiment::assays(ace)[["counts"]],
