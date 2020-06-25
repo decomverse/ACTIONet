@@ -238,7 +238,8 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 .insert_MapMeta <- function(object, value, d){
   # value = value[names(value) != ""]
   # .check_for_duplicates(value)
-  .validate_names(value)
+  valid_names = switch(d, names(object@rowMaps), names(object@colMaps))
+  .validate_names(value, valid_names)
   value = lapply(value, function(v){
     if(is.data.frame(v))
       v = DataFrame(v)
@@ -279,9 +280,10 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
 .insert_mapping <- function(object, value, d){
   value = .check_if_mapping_list(value)
-  .validate_names(value)
 
   map_types <- switch(d, rowMapTypes(object), colMapTypes(object))
+  elm_names
+  .validate_names(value)
 
   value = .coerce_input_to_SE(value)
 
@@ -315,18 +317,26 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   return(object)
 }
 
-.validate_names <- function(value){
+.validate_names <- function(value, valid_names = NULL){
+  par_func = as.character(sys.call(-1)[1])
   if(any(names(value) == "")){
-    par_func = as.character(sys.call(-1)[1])
     err = sprintf("Values passed to '%s' cannot be unnamed.\n", par_func)
     stop(err)
   }
 
   if(any(duplicated(names(value)))){
-    par_func = as.character(sys.call(-1)[1])
     err = sprintf("Values passed to '%s' have duplicate names.\n", par_func)
     stop(err)
   }
+
+  if(!is.null(valid_names)){
+    not_in_object = setdiff(names(value), valid_names)
+    if(length(not_in_object) > 0){
+      err = sprintf("No element named '%s'.\n", not_in_object)
+      stop(err)
+    }
+  }
+
   return
 }
 
