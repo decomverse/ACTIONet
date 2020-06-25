@@ -282,7 +282,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   value = .check_if_mapping_list(value)
 
   map_types <- switch(d, rowMapTypes(object), colMapTypes(object))
-  elm_names
   .validate_names(value)
 
   value = .coerce_input_to_SE(value)
@@ -346,12 +345,12 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
       if (any(is(M) == "SummarizedExperiment")) {
           return(M)
       } else if (is.matrix(M) | is.sparseMatrix(M)) {
-          M = SummarizedExperiment(assays=list(object=M))
+          M = SummarizedExperiment(assays=list(X=M))
           return(M)
       } else {
         M = as.matrix(value)
         if(is.numeric(M)){
-          M = SummarizedExperiment(assays=list(object=M))
+          M = SummarizedExperiment(assays=list(X=M))
           return(M)
         } else{
           par_func = as.character(sys.call(-1)[1])
