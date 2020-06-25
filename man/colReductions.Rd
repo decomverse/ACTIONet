@@ -5,12 +5,12 @@
 \alias{colReductions<-,ACTIONetExperiment-method}
 \title{Get column reductions}
 \usage{
-colReductions(obj, ...)
+colReductions(object, ...)
 
-\S4method{colReductions}{ACTIONetExperiment}(obj, val) <- value
+\S4method{colReductions}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{obj}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

@@ -9,21 +9,21 @@ setValidity2("ACTIONetExperiment", function(object) {
     msg <- NULL
 
     # 2D
-    value = rowNets(object)
+    value = object@rowNets
     for (i in seq_along(value)) {
         if ((NROW(value[[i]]) != NR) | (NCOL(value[[i]]) != NR)) {
             msg <- c(msg, "'nrow(rowNets[[...]])' and 'ncol(rowNets[[...]])' should be equal to the number of rows of ace object.")
         }
     }
 
-    value = colNets(object)
+    value = object@colNets
     for (i in seq_along(value)) {
         if ((NROW(value[[i]]) != NC) | (NCOL(value[[i]]) != NC)) {
             msg <- c(msg, "'nrow(colNets[[...]])' and 'ncol(colNets[[...]])' should be equal to the number of columns of ace object.")
         }
     }
 
-    value = rowMaps(object)
+    value = object@rowMaps
     for (i in seq_along(value)) {
         if ((NCOL(value[[i]]) != NR)) {
             msg <- c(msg, "'ncol(rowMaps[[..]])' should be equal to the number of rows of ace object..")
@@ -35,7 +35,7 @@ setValidity2("ACTIONetExperiment", function(object) {
     }
 
 
-    value = colMaps(object)
+    value = object@colMaps
     for (i in seq_along(value)) {
         if ((NCOL(value[[i]]) != NC)) {
             msg <- c(msg, "'nrow(colMaps[[..]])' should be equal to the number of columns of ace object..")

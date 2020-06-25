@@ -4,10 +4,10 @@
 \alias{rowEmbeddings<-}
 \title{Set row embeddings}
 \usage{
-rowEmbeddings(x, ...) <- value
+rowEmbeddings(object, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

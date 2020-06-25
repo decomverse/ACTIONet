@@ -6,14 +6,14 @@
 \alias{rowMaps<-,ACTIONetExperiment-method}
 \title{Get rowMaps}
 \usage{
-rowMaps(x, ...)
+rowMaps(object, ...)
 
-\S4method{rowMaps}{ACTIONetExperiment}(x, all = T)
+\S4method{rowMaps}{ACTIONetExperiment}(object, all = T)
 
-\S4method{rowMaps}{ACTIONetExperiment}(x) <- value
+\S4method{rowMaps}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

@@ -7,16 +7,16 @@
 \alias{colMapTypes<-,ACTIONetExperiment-method}
 \title{Get colMapTypes}
 \usage{
-colMapTypes(x, ...)
+colMapTypes(object, ...)
 
-\S4method{colMapTypes}{ACTIONetExperiment}(x, all = T)
+\S4method{colMapTypes}{ACTIONetExperiment}(object, all = T)
 
-\S4method{colMapMeta}{ACTIONetExperiment}(x, all = T)
+\S4method{colMapMeta}{ACTIONetExperiment}(object, all = T)
 
-\S4method{colMapTypes}{ACTIONetExperiment}(x) <- value
+\S4method{colMapTypes}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

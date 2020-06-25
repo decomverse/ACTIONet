@@ -5,12 +5,12 @@
 \alias{colMapMeta<-,ACTIONetExperiment-method}
 \title{Get colMapTypes}
 \usage{
-colMapMeta(x, ...)
+colMapMeta(object, ...)
 
-\S4method{colMapMeta}{ACTIONetExperiment}(obj, val) <- value
+\S4method{colMapMeta}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

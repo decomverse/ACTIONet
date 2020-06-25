@@ -4,10 +4,10 @@
 \alias{rowMapTypes<-}
 \title{Set rowMapTypes}
 \usage{
-rowMapTypes(x, ...) <- value
+rowMapTypes(object, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

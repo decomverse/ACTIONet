@@ -4,10 +4,10 @@
 \alias{rowEmbeddings}
 \title{Get row embeddings}
 \usage{
-rowEmbeddings(x, ...)
+rowEmbeddings(object, ...)
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

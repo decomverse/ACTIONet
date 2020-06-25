@@ -4,10 +4,10 @@
 \alias{rowReductions<-}
 \title{Set row reductions}
 \usage{
-rowReductions(obj, ...) <- value
+rowReductions(object, ...) <- value
 }
 \arguments{
-\item{obj}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

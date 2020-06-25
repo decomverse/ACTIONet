@@ -4,10 +4,10 @@
 \alias{rowNets<-}
 \title{Set rowNets}
 \usage{
-rowNets(x, ...) <- value
+rowNets(object, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

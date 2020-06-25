@@ -48,7 +48,7 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     ace = as(SE, "ACTIONetExperiment")
     # ace = as(from, 'ACTIONetExperiment')
 
-    transposed_factors = as(lapply(reducedDims(from), function(x) SummarizedExperiment(assays = list(X = Matrix::t(x)))),
+    transposed_factors = as(lapply(SingleCellExperiment::reducedDims(from), function(x) SummarizedExperiment(assays = list(X = Matrix::t(x)))),
         "SimpleList")
     colMaps(ace) = transposed_factors
 

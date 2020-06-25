@@ -4,10 +4,10 @@
 \alias{colEmbeddings<-}
 \title{Set column embeddings}
 \usage{
-colEmbeddings(x, ...) <- value
+colEmbeddings(object, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }
