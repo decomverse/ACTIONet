@@ -64,14 +64,15 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(object, value) {
 #' @rdname rowMapTypes
 #' @export
 setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
-    common_names = intersect(names(value)[sapply(value, function(object) is.character(object) &
-        length(object) == 1)], names(object@rowMaps))
+  # .validate_MapType(value)
+  common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
+      length(x) == 1)], names(object@rowMaps))
 
-    for (n in common_names) {
-        metadata(object@rowMaps[[n]])$type = value[[n]]
-    }
-    validObject(object)
-    object
+  for (n in common_names) {
+      metadata(object@rowMaps[[n]])$type = value[[n]]
+  }
+  validObject(object)
+  object
 })
 
 #' Set column-associated factor annotations
@@ -80,14 +81,15 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
 #' @rdname colMapTypes
 #' @export
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(object, value) {
-    common_names = intersect(names(value)[sapply(value, function(object) is.character(object) &
-        length(object) == 1)], names(object@colMaps))
+  # .validate_MapType(value)
+  common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
+      length(x) == 1)], names(object@colMaps))
 
-    for (n in common_names) {
-        metadata(object@colMaps[[n]])$type = value[[n]]
-    }
-    validObject(object)
-    object
+  for (n in common_names) {
+      metadata(object@colMaps[[n]])$type = value[[n]]
+  }
+  validObject(object)
+  object
 })
 
 #' Set column-associated factor annotations
@@ -316,29 +318,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   return(object)
 }
 
-.validate_names <- function(value, valid_names = NULL){
-  par_func = as.character(sys.call(-1)[1])
-  if(any(names(value) == "")){
-    err = sprintf("Values passed to '%s' cannot be unnamed.\n", par_func)
-    stop(err)
-  }
-
-  if(any(duplicated(names(value)))){
-    err = sprintf("Values passed to '%s' have duplicate names.\n", par_func)
-    stop(err)
-  }
-
-  if(!is.null(valid_names)){
-    not_in_object = setdiff(names(value), valid_names)
-    if(length(not_in_object) > 0){
-      err = sprintf("No element named '%s'.\n", not_in_object)
-      stop(err)
-    }
-  }
-
-  return
-}
-
 .coerce_input_to_SE <- function(value){
   value = value[sapply(value, function(v){!is.null(v)})]
   value = lapply(value, function(M) {
@@ -375,7 +354,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 }
 
 .set_map_type <- function(value, map_type = NULL, force_embed = FALSE){
-
   if(is.null(map_type))
     S4Vectors::metadata(value)$type <- ifelse(NROW(value) <= 3, "embedding", "generic")
   else{

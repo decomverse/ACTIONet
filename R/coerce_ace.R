@@ -4,9 +4,14 @@
 #'
 #' @exportMethod coerce
 setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
-    ace = .ACTIONetExperiment(from, rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(),
-        rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList())
+    # ace = ACTIONetExperiment(from, rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(),
+    #     rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList())
 
+    ace = ACTIONet::ACTIONetExperiment(
+      assays = SummarizedExperiment::assays(from),
+      rowData = from@elementMetadata,
+      colData = from@colData,
+      metadata = from@metadata)
     # rowData(ace) = DataFrame(as.data.frame(rowData(ace))) colData(ace) =
     # DataFrame(as.data.frame(colData(ace)))
 
@@ -19,7 +24,7 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
 #'
 #' @exportMethod coerce
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
-    SE = as(from, "SummarizedExperiment")
+    SE = as(from, "RangedSummarizedExperiment")
     sce = as(SE, "SingleCellExperiment")
 
     Xs = colMaps(from)
@@ -48,8 +53,7 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     ace = as(SE, "ACTIONetExperiment")
     # ace = as(from, 'ACTIONetExperiment')
 
-    transposed_factors = as(lapply(SingleCellExperiment::reducedDims(from), function(x) SummarizedExperiment(assays = list(X = Matrix::t(x)))),
-        "SimpleList")
+    transposed_factors = as(lapply(SingleCellExperiment::reducedDims(from), function(x) SummarizedExperiment(assays = list(X = Matrix::t(x)))), "SimpleList")
     colMaps(ace) = transposed_factors
 
     rowData(ace) = DataFrame(as.data.frame(rowData(ace)))
