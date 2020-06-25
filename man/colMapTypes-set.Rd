@@ -4,10 +4,10 @@
 \alias{colMapTypes<-}
 \title{Set colMapTypes}
 \usage{
-colMapTypes(x, ...) <- value
+colMapTypes(object, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

@@ -4,10 +4,10 @@
 \alias{colNets<-}
 \title{Set colNets}
 \usage{
-colNets(x, ...) <- value
+colNets(object, ...) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

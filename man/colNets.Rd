@@ -6,14 +6,14 @@
 \alias{colNets<-,ACTIONetExperiment-method}
 \title{Get colNets}
 \usage{
-colNets(x, ...)
+colNets(object, ...)
 
-\S4method{colNets}{ACTIONetExperiment}(x)
+\S4method{colNets}{ACTIONetExperiment}(object)
 
-\S4method{colNets}{ACTIONetExperiment}(x) <- value
+\S4method{colNets}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }

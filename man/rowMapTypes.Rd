@@ -7,16 +7,16 @@
 \alias{rowMapTypes<-,ACTIONetExperiment-method}
 \title{Get rowMapTypes}
 \usage{
-rowMapTypes(x, ...)
+rowMapTypes(object, ...)
 
-\S4method{rowMapTypes}{ACTIONetExperiment}(x, all = T)
+\S4method{rowMapTypes}{ACTIONetExperiment}(object, all = T)
 
-\S4method{rowMapMeta}{ACTIONetExperiment}(x, all = T)
+\S4method{rowMapMeta}{ACTIONetExperiment}(object, all = T)
 
-\S4method{rowMapTypes}{ACTIONetExperiment}(x) <- value
+\S4method{rowMapTypes}{ACTIONetExperiment}(object) <- value
 }
 \arguments{
-\item{x}{ACTIONetExperiment object}
+\item{object}{ACTIONetExperiment object}
 
 \item{...}{other parameters}
 }
