@@ -26,7 +26,7 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
     Xs = Xs[colMapTypes(from) != "internal"]
 
     transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")
-    reducedDims(sce) = transposed_factors
+    SingleCellExperiment::reducedDims(sce) = transposed_factors
 
     # rowData(sce) = DataFrame(as.data.frame(rowData(from))) colData(sce) =
     # DataFrame(as.data.frame(colData(from)))
