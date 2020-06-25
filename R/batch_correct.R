@@ -2,7 +2,7 @@
 #' @export
 reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 50,
     MNN_k = 20, return_V = FALSE, reduction_slot = "MNN", V_slot = NULL, BPPARAM = SerialParam()) {
-    .check_and_load_package(c("scran", "batchelor", "BiocParallel"))
+    .check_and_load_package(c("scran", "SingleCellExperiment", "batchelor", "BiocParallel"))
 
     ace = .check_and_convert_se_like(ace, "ACE")
     SummarizedExperiment::assays(ace)[["counts"]] = as(SummarizedExperiment::assays(ace)[["counts"]],
@@ -35,7 +35,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 
         auto.merge = FALSE, merge.order = merge_order, cos.norm = FALSE, assay.type = "logcounts",
         BPPARAM = BPPARAM)))
 
-    S_r = Matrix::t(reducedDims(mnn.out)[["corrected"]])
+    S_r = Matrix::t(SingleCellExperiment::reducedDims(mnn.out)[["corrected"]])
     if (!all(colnames(ace) == colnames(S_r)))
         S_r = S_r[, match(colnames(ace), colnames(S_r))]
 
