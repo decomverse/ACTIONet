@@ -140,15 +140,15 @@ download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc
 
 require(ACTIONet)
 # Run ACTIONet
-ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 50, min_umis_per_cell = 1000)
+ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 0.01, min_feats_per_cell = 1000)
 ace = reduce.ace(ace)
 ACTIONet_results = run.ACTIONet(ace)
 ace = ACTIONet_results$ace
 
 # Annotate cell-types
 data("curatedMarkers_human")
-markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-annot.out = annotate.cells.from.archetypes.using.markers(ace, markers)
+markers = curatedMarkers_human$Blood$PBMC$Ding2019$marker.genes
+annot.out = annotate.cells.using.markers(ace, markers)
 ace$celltypes = annot.out$Labels
 
 # Visualize output
