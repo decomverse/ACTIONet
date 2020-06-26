@@ -278,9 +278,9 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 
     Z[is.na(Z)] = 0
     Labels = apply(Z, 1, which.max)
-    names(Labels) = colnames(Z)[Labels]
+    Labels = colnames(Z)[Labels]
 
-    Labels = reannotate.labels(ace, Labels)
+    #Labels = reannotate.labels(ace, Labels)
     Labels.conf = apply(Z, 1, max)
 
 
