@@ -297,7 +297,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
         varm.subset = varm.mats[varm.public.idx]
         for (i in 1:length(varm.subset)) {
             nn = names(varm.subset)[[i]]
-            Y = Matrix::t(varm.subset[[i]])
+            Y = varm.subset[[i]]
             
             if (is.matrix(Y)) {
                 varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
@@ -347,7 +347,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
                 varm.subset = varm.mats[varm.private.idx]
                 for (i in 1:length(varm.subset)) {
                   nn = names(varm.subset)[[i]]
-                  Y = Matrix::t(varm.subset[[i]])
+                  Y = varm.subset[[i]]
                   
                   if (is.matrix(Y)) {
                     varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
@@ -500,7 +500,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
             
             
             
-            rowMaps(ace)[[nn]] = Matrix::t(Xr)
+            rowMaps(ace)[[nn]] = Xr
         }
     }
     
