@@ -24,10 +24,10 @@
 #' ACTIONet.out = run.ACTIONet(ace)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 10, min_specificity_z_threshold = -1,
+run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500,
     layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification.resolution = 0.1, max_iter_ACTION = 50, full.trace = FALSE) {
+    unification.resolution = 1, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
         stop(err)
@@ -258,7 +258,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcounts",
     reduction_slot = "ACTION", unified_suffix = "unified") {
     S = assays(ace)[[data_slot]]
-    S_r = t(ACTIONet::colMaps(ace)[[reduction_slot]])
+    S_r = ACTIONet::colMaps(ace)[[reduction_slot]]
     C_stacked = Matrix::t(as.matrix(colMaps(ace)[["C_stacked"]]))
     H_stacked = as.matrix(colMaps(ace)[["H_stacked"]])
     G = colNets(ace)[["ACTIONet"]]
@@ -308,7 +308,7 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
 regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "logcounts",
     reduction_slot = "ACTION") {
     S = assays(ace)[[data_slot]]
-    S_r = Matrix::t(colMaps(ace)[[reduction_slot]])
+    S_r = colMaps(ace)[[reduction_slot]]
 
     H_stacked = as.matrix(colMaps(ace)[["H_stacked"]])
     C_stacked = as.matrix(Matrix::t(colMaps(ace)[["C_stacked"]]))
