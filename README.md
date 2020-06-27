@@ -1,7 +1,7 @@
 # Installation
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users** 
-For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure to `MKL_ROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
+For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure to `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
 **Install library dependencies**
 Additionally, `ACTIONet` package depends on the HDF5 library to import/export results to standard formats compatible with other packages. To install the related package on debian-based linux machines, run:
@@ -140,15 +140,15 @@ download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc
 
 require(ACTIONet)
 # Run ACTIONet
-ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 50, min_umis_per_cell = 1000)
+ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 0.01, min_feats_per_cell = 1000)
 ace = reduce.ace(ace)
 ACTIONet_results = run.ACTIONet(ace)
 ace = ACTIONet_results$ace
 
 # Annotate cell-types
 data("curatedMarkers_human")
-markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-annot.out = annotate.cells.from.archetypes.using.markers(ace, markers)
+markers = curatedMarkers_human$Blood$PBMC$Ding2019$marker.genes
+annot.out = annotate.cells.using.markers(ace, markers)
 ace$celltypes = annot.out$Labels
 
 # Visualize output
