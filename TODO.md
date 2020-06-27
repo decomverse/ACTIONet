@@ -7,7 +7,6 @@
 * Python porting and testing
 * Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter. 1- Minimal (Alpine)
 * Write, test, and release singularity-lite and singularity-full
-* Fixing  rowMaps/colMaps
 * "gating" on archetypes
 * Interactive cell selection
 
