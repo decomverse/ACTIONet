@@ -175,7 +175,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 
 
     # Layout ACTIONet
-    initial.coordinates = t(scale(ACTIONet::colMaps(ace)[[reduction_slot]]))
+    initial.coordinates = t(scale(t(ACTIONet::colMaps(ace)[[reduction_slot]])))
     if (layout.in.parallel == FALSE) {
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
             n_epochs = layout_epochs, thread_no = 1)
@@ -223,8 +223,8 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
 rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1,
-    reduction_slot = "ACTION2D") {
-    G = colNets(ace)[["ACTIONet"]]
+    reduction_slot = "ACTIONet3D", net_slot = "ACTIONet") {
+    G = colNets(ace)[[net_slot]]
 
     # re-Layout ACTIONet
     S_r = ACTIONet::colMaps(ace)[[reduction_slot]]
