@@ -12,7 +12,7 @@ LABEL name="shmohammadi86/actionet:latest" \
 ENV DEBIAN_FRONTEND noninteractive
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE 1
 
-RUN Rscript -e "devtools::install_github("shmohammadi86/ACTIONet", ref = 'R-release')":
+RUN Rscript -e "devtools::install_github('shmohammadi86/ACTIONet', ref = 'R-release')":
 
 # Init command for s6-overlay
 CMD ["/init"]
