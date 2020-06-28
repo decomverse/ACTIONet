@@ -131,7 +131,7 @@ ACTIONet interfaces to scran normalization via `normalize.Linnorm()` function.
 
 
 # Running ACTIONet
-**Note** If you are using `MKL`, make sure to properly set the number of threads used by setting the environment variable `OMP_NUM_THREADS`.
+**Note** If you are using `MKL`, make sure to properly [set the number of threads](https://software.intel.com/content/www/us/en/develop/documentation/mkl-macos-developer-guide/top/managing-performance-and-memory/improving-performance-with-threading/techniques-to-set-the-number-of-threads.html) used prior to running `ACTIONet`.
 
 ## Example Run
 Here is a simple example to get you started:
