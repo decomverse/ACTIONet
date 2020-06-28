@@ -38,13 +38,15 @@ BiocManager::install(c("SingleCellExperiment", "ComplexHeatmap"))
 ```
 
 * **Clone `ACTIONet` repository**:
-If you don't already have git, install it first. On debian-based linux machines, run:
+If you don't already have git, install it first. 
+
+On (Debian) **Linux-based  machines**, run:
 
 ```bash
 sudo apt-get install git
 ```
 
-For Mac-based systems:
+For **Mac-based machines**, run:
 
 ```bash
 brew install git
