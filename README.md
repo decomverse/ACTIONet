@@ -197,8 +197,8 @@ $ docker run -v /your/data/file/path/:/data -w /data -p 8787:8787 shmohammadi86/
 
 # Additional tutorials
 You can access ACTIONet tutorials from:
-1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/tutorials/min_intro.html)
-2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/tutorials/ACTIONet/intro.html)
+1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/tutorials/mini_intro.html)
+2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/tutorials/intro.html)
 3. [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorials/clustering.html)
 4. [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/tutorials/batch.html)
 5. [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorials/porting_data.html)
