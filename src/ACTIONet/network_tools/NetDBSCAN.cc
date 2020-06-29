@@ -50,7 +50,6 @@ namespace ACTIONet {
 				clusters[v] = NOISE;				
 				continue;
 			}			
-			printf("\tv = %d -> %d unexplored neighbors (%d total)\n", v, N.size(), counts);
 
 			clusters[v] = ++C;	
 			

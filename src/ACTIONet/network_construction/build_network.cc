@@ -5,12 +5,12 @@
 #include <atomic>
 
 template<class Function>
-inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn) {
-    if (numThreads <= 0) {
-        numThreads = std::thread::hardware_concurrency();
+inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
+    if (thread_no <= 0) {
+        thread_no = std::thread::hardware_concurrency();
     }
 
-    if (numThreads == 1) {
+    if (thread_no == 1) {
         for (size_t id = start; id < end; id++) {
             fn(id, 0);
         }
@@ -23,7 +23,7 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn
         std::exception_ptr lastException = nullptr;
         std::mutex lastExceptMutex;
 
-        for (size_t threadId = 0; threadId < numThreads; ++threadId) {
+        for (size_t threadId = 0; threadId < thread_no; ++threadId) {
             threads.push_back(std::thread([&, threadId] {
                 while (true) {
                     size_t id = current.fetch_add(1);
@@ -117,8 +117,12 @@ namespace ACTIONet {
 	}	
 		
 	// k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
-	sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		double LC = 1.0 / density;
+		
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
 
 		printf("Building adaptive network (density = %.2f)\n", density);
 
@@ -185,7 +189,7 @@ namespace ACTIONet {
 		mat lambda = zeros(size(beta));
 		//lambda.col(0) = datum::inf*ones(sample_no);
 		//lambda.col(1) = beta.col(1) + 1;			
-		 int k;
+		int k;
 		for(k = 1; k <= kNN; k++) {
 			beta_sum += beta.col(k);
 			beta_sq_sum += square(beta.col(k));
@@ -203,8 +207,7 @@ namespace ACTIONet {
 		Delta = lambda - beta;		
 		Delta.shed_row(0);
 
-		
-		
+				
 		sp_mat G(sample_no, sample_no);		
 		//for(int v = 0; v < sample_no; v++) {				
 		ParallelFor(0, sample_no, 1, [&](size_t v, size_t threadId) {
@@ -213,6 +216,7 @@ namespace ACTIONet {
 			//uvec rows = find(delta > 0, 1, "last");
 			uvec rows = find(delta < 0, 1, "first");
 			int neighbor_no = rows.n_elem == 0?kNN:(rows(0));
+			
 			
 			int dst = v;								
 			rowvec v_dist = dist.row(v);
@@ -245,8 +249,12 @@ namespace ACTIONet {
 		return(G_sym);		
 	}
 
-	sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+	sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		double LC = 1.0 / density;
+		
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
 
 		printf("Building adaptive network (density = %.2f) -- Updated\n", density);
 
@@ -255,7 +263,7 @@ namespace ACTIONet {
 
 		double kappa = 5.0;
 		int sample_no = H_stacked.n_cols;		
-		int kNN = min(sample_no-1, (int)(kappa*round(sqrt(sample_no)))); // start with uniform k=sqrt(N) ["Pattern Classification" book by Duda et al.]
+		//int kNN = min(sample_no-1, (int)(kappa*round(sqrt(sample_no)))); // start with uniform k=sqrt(N) ["Pattern Classification" book by Duda et al.]
 	
 		
 		int dim = H_stacked.n_rows;
@@ -273,28 +281,52 @@ namespace ACTIONet {
 			
 		});
 		printf("Done\n");
-
-		sp_mat G(sample_no, sample_no);		
+		
 		
 		printf("\tConstructing k*-NN ... ");		
-		mat idx = zeros(sample_no, kNN+1);
-		mat dist = zeros(sample_no, kNN+1);
+		
+		vector<vector<int>> ii(thread_no);
+		vector<vector<int>> jj(thread_no);
+		vector<vector<double>> vv(thread_no);
+		
 //		for(int i = 0; i < sample_no; i++) {
 		ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
+			std::priority_queue<std::pair<double, hnswlib::labeltype>> results = appr_alg->searchKStarnn(H_stacked.colptr(i), LC);		
 			
-			std::priority_queue<std::pair<double, hnswlib::labeltype>> result = appr_alg->searchKStarnn(H_stacked.colptr(i), LC);		
-			
-			if (result.size() != (kNN+1)) {
-			  printf("Unable to find %d results. Probably ef (%f) or M (%f) is too small\n", kNN, ef, M);
-			}
-			
-			for (size_t j = 0; j < result.size(); j++) {
-				auto &result_tuple = result.top();
-				G(i, idx(i, kNN-j)) = 1.0 - dist(i, kNN-j);
-				result.pop();
-			}
+			while(!results.empty()) {
+				
+				auto &res = results.top();	
+				int j = res.second;
+				double v = 	1.0 - res.first;					
+				ii[threadId].push_back(i);
+				jj[threadId].push_back(j);
+				vv[threadId].push_back(v);
+
+				
+				results.pop();
+			}			
 
 		});
+		
+		vec values;
+		umat locations;
+		for(int threadId = 0; threadId < thread_no; threadId++) {
+			if(threadId == 0) {
+				values = conv_to<vec>::from(vv[threadId]);
+				
+				uvec iv = conv_to<uvec>::from(ii[threadId]);
+				uvec jv = conv_to<uvec>::from(jj[threadId]);
+				locations = trans(join_rows(iv, jv));
+			} else {
+				values = join_vert(values, conv_to<vec>::from(vv[threadId]));
+				
+				uvec iv = conv_to<uvec>::from(ii[threadId]);
+				uvec jv = conv_to<uvec>::from(jj[threadId]);
+				locations = join_rows(locations, trans(join_rows(iv, jv)));
+			}
+		}
+		sp_mat G(locations, values, sample_no, sample_no);
+		
 		printf("done\n");
 		
 		delete(appr_alg);
@@ -320,12 +352,14 @@ namespace ACTIONet {
 		return(G_sym);		
 	}
 
-	sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
-
+	sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
 		printf("Building fixed-degree network (k = %d)\n", (int)k);
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
 
 		H_stacked = clamp(H_stacked, 0, 1);
-		H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
+		//H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1			
 
 		double kappa = 5.0;
 		int sample_no = H_stacked.n_cols;		
@@ -396,8 +430,12 @@ namespace ACTIONet {
 
 
 	
-	sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=8, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
-		sp_mat G = build_ACTIONet_JS_KstarNN(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
+	sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no=0, double M = 16, double ef_construction = 200, double ef = 10, bool mutual_edges_only = true) {
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
+		
+		sp_mat G = build_ACTIONet_JS_KstarNN_v2(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
 		
 		return(G);
 	}
