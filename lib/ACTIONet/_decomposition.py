@@ -89,10 +89,10 @@ def reduce_kernel(
 
     if (issparse(X)):    
         print("Running reduction in sparse mode ...")    
-        reduction_out = an.reduce_kernel_sparse(X)
+        reduction_out = an.reduce_kernel(X)
     else:
         print("Running reduction in dense mode ...")    
-        reduction_out = an.reduce_kernel(X)
+        reduction_out = an.reduce_kernel_full(X)
         
     ACTION_S_r = reduction_out['S_r'].T
     if ACTION_S_r.dtype.descr != np.dtype(dtype).descr:
@@ -130,7 +130,8 @@ def reduce_kernel(
 
 def run_simplex_regression(
     A: np.ndarray,
-    B: np.ndarray
+    B: np.ndarray,
+    computeXtX: bool
 ) -> np.ndarray:
     """\
     Simplex-Constrained Regression (AX-B).
@@ -143,6 +144,9 @@ def run_simplex_regression(
         Matrix of independent variables (design matrix)
     B:
         Matrix of dependent variables (response variable)
+        
+    computeXtX:
+        Parameter to simplex regression
 
     Returns
     -------
@@ -150,7 +154,7 @@ def run_simplex_regression(
         Coefficient matrix
     """
     
-    X = an.run_simplex_regresion(A, B)        
+    X = an.run_simplex_regresion(A, B, computeXtX)        
     return X
 
 
@@ -224,7 +228,7 @@ def run_ACTION(
     k_max: Optional[int] = 30,
     thread_no: Optional[int] = 8,
     max_it: Optional[int] = 50,
-    min_delta: Optional[float] = 0.01
+    min_delta: Optional[float] = 1e-300
 ) -> [dict]:
     """\
     Run ACTION decomposition [Mohammadi2018]_.
@@ -266,10 +270,11 @@ def run_ACTION(
     
 
 def prune_archetypes(
-    ACTIONet_out: AnnData,
+    ACE: AnnData,
     C_trace: list,
     H_trace: list,
     min_specificity_z_threshold: Optional[float] = -1,
+    min_cells: Optional[int] = 3,    
     copy: Optional[bool] = False    
 ) -> Optional[AnnData]:
     """\
@@ -279,39 +284,39 @@ def prune_archetypes(
 
     Parameters
     ----------
-    ACTIONet_out:
+    ACE:
         Current AnnData object storing the ACTIONet results    
     C_trace, H_trace:
         Output of run_ACTION()
     min_specificity_z_threshold:
         Controls level of prunning for non-specific archetypes (larger values remove more archetypes)..
+    min_cells:
+        Minimum number of influential cells for each archetype to be considdered nontrivial
     copy
-        Determines whether a copy of ACTIONet_out is returned. 
+        Determines whether a copy of ACE is returned. 
     Returns
     -------
-        None, if copy is False, and ACTIONet_out: AnnData, otherwise. 
-        In either case, "C_stacked" and "H_stacked" are added to the ACTIONet_out.obsm.
+        None, if copy is False, and ACE: AnnData, otherwise. 
+        In either case, "C_stacked" and "H_stacked" are added to the ACE.obsm.
     """
 
     print("Running archetype pruning ...")    
     prune_out = an.prune_archetypes(C_trace, H_trace, min_specificity_z_threshold)
     print("Done")
     
-    ACTIONet_out.obsm['C_stacked'] = prune_out["C_stacked"]
-    ACTIONet_out.obsm['H_stacked'] = prune_out["H_stacked"].T
+    ACE.obsm['C_stacked'] = prune_out["C_stacked"]
+    ACE.obsm['H_stacked'] = prune_out["H_stacked"].T
     
-    ACTIONet_out.uns["ACTIONet_pruning"] = {}
-    reg = ACTIONet_out.uns["ACTIONet_pruning"]
+    ACE.uns["ACTIONet_pruning"] = {}
+    reg = ACE.uns["ACTIONet_pruning"]
     reg['selected_archs'] = prune_out["selected_archs"]    
     
-    return ACTIONet_out if copy else None
-
+    return ACE if copy else None
 
 def unify_archetypes(
-    ACTIONet_out: AnnData,
-    minPoints: Optional[int] = 10,
-    minClusterSize: Optional[int] = 10,
-    outlier_threshold: Optional[float] = 0, 
+    ACE: AnnData,
+    min_overlap: Optional[float] = 10.0,
+    resolution: Optional[int] = 1.0,
     copy: Optional[bool] = False       
 ) -> Optional[AnnData]:
     """\
@@ -321,56 +326,50 @@ def unify_archetypes(
 
     Parameters
     ----------
-    ACTIONet_out:
+    ACE:
         Current AnnData object storing the ACTIONet results    
-    int minPoints, int minClusterSize, double outlier_threshold:
-        HDBSCAN parameters
+    int min_overlap, resolution:
+        Define the total number of retained cell states
     copy
-        Determines whether a copy of ACTIONet_out is returned. 
+        Determines whether a copy of ACE is returned. 
     Returns
     -------
-        None, if copy is False, and ACTIONet_out: AnnData, otherwise. 
-        In either case, "C_pruned" and "H_pruned" are added to the ACTIONet_out.obsm.
+        None, if copy is False, and ACE: AnnData, otherwise. 
+        In either case, "C_pruned" and "H_pruned" are added to the ACE.obsm.
     """
-    if 'ACTION_S_r' not in ACTIONet_out.obsm.keys():
-        print("ACTION_S_r is not in ACTIONet_out.obsm. Please run reduce_kernel() first.")
-        return ACTIONet_out if copy else None
+    if 'ACTION_S_r' not in ACE.obsm.keys():
+        print("ACTION_S_r is not in ACE.obsm. Please run reduce_kernel() first.")
+        return ACE if copy else None
     else:
-        S_r = ACTIONet_out.obsm["ACTION_S_r"].T
+        S_r = ACE.obsm["ACTION_S_r"].T
       
-    if 'ACTIONet_connectivities' not in ACTIONet_out.obsp.keys():
-        print("ACTIONet_connectivities is not in ACTIONet_out.obsp. Please run build_ACTIONet() first.")
-        return ACTIONet_out if copy else None
+    
+    if 'H_stacked' not in ACE.obsm.keys():
+        print("H_stacked is not in ACE.obsm. Please run prune_archetypes() first.")
+        return ACE if copy else None
     else:
-        G = ACTIONet_out.obsp["ACTIONet_connectivities"]
-        
-    if 'H_stacked' not in ACTIONet_out.obsm.keys():
-        print("H_stacked is not in ACTIONet_out.obsm. Please run prune_archetypes() first.")
-        return ACTIONet_out if copy else None
-    else:
-        C_stacked = ACTIONet_out.obsm['C_stacked']
-        H_stacked = ACTIONet_out.obsm['H_stacked'].T  
+        C_stacked = ACE.obsm['C_stacked']
+        H_stacked = ACE.obsm['H_stacked'].T  
     
 
     
-    unification_out = an.unify_archetypes(G, S_r, C_stacked, H_stacked, minPoints, minClusterSize, outlier_threshold)
+    unification_out = an.unify_archetypes(S_r, C_stacked, H_stacked, min_overlap, resolution)
     
     
-    ACTIONet_out.obsm['C_unified'] = unification_out["C_unified"]
-    ACTIONet_out.obsm['H_unified'] = unification_out["H_unified"].T
+    ACE.obsm['C_unified'] = unification_out["C_unified"]
+    ACE.obsm['H_unified'] = unification_out["H_unified"].T
     
-    ACTIONet_out.uns["ACTIONet_unification"] = {}
-    reg = ACTIONet_out.uns["ACTIONet_unification"]
-    reg['minPoints'] = minPoints
-    reg['minClusterSize'] = minClusterSize
-    reg['outlier_threshold'] = outlier_threshold
-    reg['archetype_groupd'] = unification_out["archetype_groups"]
+    ACE.uns["ACTIONet_unification"] = {}
+    reg = ACE.uns["ACTIONet_unification"]
+    reg['min_overlap'] = min_overlap
+    reg['resolution'] = resolution
 
-    groups = unification_out["sample_assignments"]
-    ACTIONet_out.obs["assigned_archetype"] = pd.Categorical(
+
+    groups = unification_out["assigned_archetypes"]
+    ACE.obs["assigned_archetypes"] = pd.Categorical(
         values=groups.astype('U'),
         categories=natsorted(map(str, np.unique(groups))),
     )    
         
     
-    return ACTIONet_out if copy else None
+    return ACE if copy else None
