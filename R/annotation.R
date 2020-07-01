@@ -205,7 +205,7 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
-        GS.names = sapply(1:length(GS), function(i) sprintf("Celltype %s", i))
+        GS.names = sapply(1:length(marker.genes), function(i) sprintf("Celltype %s", i))
     }
 
     markers.table = do.call(rbind, lapply(names(marker.genes), function(celltype) {

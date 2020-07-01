@@ -27,7 +27,7 @@
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500,
     layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification.resolution = 1, max_iter_ACTION = 50, full.trace = TRUE) {
+    unification.resolution = 1, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
         stop(err)
