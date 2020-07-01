@@ -40,5 +40,6 @@
 
 ## Minor
 * Remove R.utils dependencies
+* Fix annotate with single cell type bug
 * Add require() statements where appropriate
 * Contact BioTurning and debug `AnnData` import bug

@@ -444,8 +444,8 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
     return(df)
 }
 
-import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.all = F) {
-    ace = as(ace, "ACTIONetExperiment")
+import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.all = F) {
+    ace = as(sce, "ACTIONetExperiment")
 
     if ("S_r" %in% names(colMaps(ace))) {
         colMaps(ace)[["ACTION"]] = colMaps(ace)[["S_r"]]
