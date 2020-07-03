@@ -71,6 +71,13 @@ if ("library_dirs" in blas_opt): ACTIONet_lib_dirs+=blas_opt['library_dirs']
 ACTIONet_libs=list()
 if ("libraries" in blas_opt): ACTIONet_libs+=blas_opt['libraries']
 
+ACTIONet_extra_args=list()
+if ("extra_compile_args" in blas_opt): ACTIONet_extra_args+=blas_opt['extra_compile_args']
+
+ACTIONet_extra_link_args=list()
+if ("extra_link_args" in blas_opt): ACTIONet_extra_link_args+=blas_opt['extra_link_args']
+
+
 os.environ['CC'] = "ccache gcc"
 os.environ['CFLAGS'] = " -w"
 
@@ -81,6 +88,8 @@ ACTIONet_module = Extension(
     include_dirs=[pybind11.get_include(False), pybind11.get_include(True)]+ACTIONet_header_dirs,    
     library_dirs=ACTIONet_lib_dirs,
     libraries=ACTIONet_libs,
+    extra_compile_args=ACTIONet_extra_args,
+    extra_link_args=ACTIONet_extra_link_args,
     language='c++'
 )
 
