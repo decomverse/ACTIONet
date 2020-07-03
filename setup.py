@@ -8,11 +8,11 @@ import distutils.ccompiler
 import sysconfig
 from numpy.distutils.system_info import get_info
 import pybind11
-#import multiprocessing
+import multiprocessing
 
 __version__ = '1.0'
 
-N=8#multiprocessing.cpu_count()
+N=multiprocessing.cpu_count()
 
 def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
     # those lines are copied from distutils.ccompiler.CCompiler directly
@@ -41,7 +41,7 @@ def has_flag(compiler, flagname):
     return True
 
 def cpp_flag(compiler):
-    flags = ['-std=c++17', '-std=c++14', '-std=c++11']
+    flags = ['-std=c++11']
 
     for flag in flags:
         if has_flag(compiler, flag): return flag
@@ -78,7 +78,7 @@ ACTIONet_extra_link_args=list()
 if ("extra_link_args" in blas_opt): ACTIONet_extra_link_args+=blas_opt['extra_link_args']
 
 
-os.environ['CC'] = "ccache gcc"
+#os.environ['CC'] = "ccache gcc"
 os.environ['CFLAGS'] = " -w"
 
 ACTIONet_module = Extension(
