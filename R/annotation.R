@@ -201,7 +201,6 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
     require(Matrix)
     require(stringr)
 
-    rownames(ace) = (rownames(ace))
 
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
