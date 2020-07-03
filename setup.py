@@ -78,7 +78,7 @@ ACTIONet_extra_link_args=list()
 if ("extra_link_args" in blas_opt): ACTIONet_extra_link_args+=blas_opt['extra_link_args']
 
 
-#os.environ['CC'] = "ccache gcc"
+os.environ['CC'] = "gcc"
 os.environ['CFLAGS'] = " -w"
 
 ACTIONet_module = Extension(
