@@ -19,7 +19,7 @@ setClass("ACTIONetExperiment",
   colNets = "SimpleList",
   rowMaps = "SimpleList",
   colMaps = "SimpleList"),
-  contains = "SummarizedExperiment")
+  contains = "RangedSummarizedExperiment")
 
 .slot_type = S4Vectors::SimpleList()
 

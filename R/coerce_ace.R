@@ -45,7 +45,7 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
 #'
 #' @exportMethod coerce
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
-    SE = as(from, "SummarizedExperiment")
+    SE = as(from, "RangedSummarizedExperiment")
     rownames(SE) = rownames(from)
     rowData(SE) = rowData(from)
 
