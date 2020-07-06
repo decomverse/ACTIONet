@@ -202,26 +202,35 @@ setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(object, value
   object
 })
 
-#' @importFrom BiocGenerics counts
-#' @export
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$counts = value
     object
 })
 
-#' @export
 setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$logcounts = value
     object
 })
 
-
-#' @export
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$normcounts = value
+    object
+})
+
+setReplaceMethod("rownames", "ACTIONetExperiment", function(object, value) {
+  (object)
+  object = callNextMethod()
+  object = .change_slot_dim_name(object, 2)
+  object
+})
+
+setReplaceMethod("colnames", "ACTIONetExperiment", function(object, value) {
+    (object)
+    object = callNextMethod()
+    object = .change_slot_dim_name(object, 2)
     object
 })
 
@@ -273,13 +282,13 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
     value <- sapply(names(value), function(n){
       v = value[[n]]
-      if(dim(v)[1] != dim(object)[d]){
-        err = sprintf("nrow(value) must equal %s.\n", dim(object)[d])
+      if(dim(v)[2] != dim(object)[d]){
+        err = sprintf("ncol(value) must equal %s.\n", dim(object)[d])
         stop(err)
       }
-      rownames(v) <- dimnames(object)[[d]]
-      if(is.null(colnames(v)))
-        colnames(v) <- 1:NCOL(v)
+      colnames(v) <- dimnames(object)[[d]]
+      if(is.null(rownames(v)))
+        rownames(v) <- 1:NROW(v)
 
       if(is.null(S4Vectors::metadata(v)$type))
           v <- .set_map_type(v, map_types[[n]])
@@ -342,4 +351,15 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   }
 
   return(value)
+}
+
+.change_slot_dim_name <- function(object, d){
+
+  if(d == 1){
+    object@rowMaps = lapply(object@rowMaps, function(x) rownames(x) = rownames(object))
+  } else if(d == 2){
+    object@colMaps = lapply(object@colMaps, function(x) rownames(x) = colnames(object))
+  }
+
+  return(object)
 }
