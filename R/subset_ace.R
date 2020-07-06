@@ -26,7 +26,7 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
         if (length(rf) > 0) {
             for (k in 1:length(rf)) {
                 tmp = rf[[k]]
-                rf[[k]] = tmp[, i, drop = FALSE]
+                rf[[k]] = tmp[i, , drop = FALSE]
             }
         }
     }
@@ -48,7 +48,7 @@ setMethod("[", c("ACTIONetExperiment", "ANY", "ANY"), function(x, i, j, ..., dro
         if (length(cf) > 0) {
             for (k in 1:length(cf)) {
                 tmp = cf[[k]]
-                cf[[k]] = tmp[, j, drop = FALSE]
+                cf[[k]] = tmp[j, , drop = FALSE]
             }
         }
     }

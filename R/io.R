@@ -401,16 +401,12 @@ convert.ace.rownames <- function(ace, from = "ENSEMBL", to = "SYMBOL", species =
             column = to, multiVals = "first"))
         ids[is.na(ids)] = ""
 
-        ace$original_rownames = rownames(ace)
-
         rownames(ace) = ids
     } else if (species == "mouse") {
         library(org.Mm.eg.db)
         suppressWarnings(ids <- mapIds(org.Mm.eg.db, keys = row.names(ace), keytype = from,
             column = to, multiVals = "first"))
         ids[is.na(ids)] = ""
-
-        ace$original_rownames = rownames(ace)
 
         rownames(ace) = ids
     }
