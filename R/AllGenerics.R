@@ -223,8 +223,8 @@ setGeneric("reducedDims", function(object, ...) standardGeneric("reducedDims"))
 #' @export
 setGeneric("reducedDims<-", function(object, value) standardGeneric("reducedDims<-"))
 
-#' @export
-setGeneric("rownames<-", function(object, ..., value) standardGeneric("rownames<-"))
-
-#' @export
-setGeneric("colnames<-", function(object, ..., value) standardGeneric("colnames<-"))
+# #' @export
+# setGeneric("rownames<-", function(object, ..., value) standardGeneric("rownames<-"))
+#
+# #' @export
+# setGeneric("colnames<-", function(object, ..., value) standardGeneric("colnames<-"))
