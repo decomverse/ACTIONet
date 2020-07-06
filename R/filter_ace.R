@@ -33,7 +33,7 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
                 min_cells_per_feat = min_cells_per_feat * org_dim[2]
             }
 
-            cell_count_mask = matrixStats::rowSums2(assays(ace.fil)[[assay.name]] > 0) >=
+            cell_count_mask = Matrix::rowSums(assays(ace.fil)[[assay.name]] > 0) >=
                 min_cells_per_feat
             rows_mask = rows_mask & cell_count_mask
         }
