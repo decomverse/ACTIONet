@@ -202,6 +202,7 @@ setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(object, value
   object
 })
 
+#' @importFrom BiocGenerics counts<-
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$counts = value
@@ -220,13 +221,15 @@ setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
     object
 })
 
+#' @importFrom BiocGenerics rownames<-
 setReplaceMethod("rownames", "ACTIONetExperiment", function(object, value) {
   (object)
   object = callNextMethod()
-  object = .change_slot_dim_name(object, 2)
+  object = .change_slot_dim_name(object, 1)
   object
 })
 
+#' @importFrom BiocGenerics colnames<-
 setReplaceMethod("colnames", "ACTIONetExperiment", function(object, value) {
     (object)
     object = callNextMethod()
