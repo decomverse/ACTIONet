@@ -359,10 +359,19 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 .change_slot_dim_name <- function(object, d){
 
   if(d == 1){
-    object@rowMaps = lapply(object@rowMaps, function(x) rownames(x) = rownames(object))
+    X = object@rowMaps
+    X = lapply(X, function(x){
+      rownames(x) = rownames(object)
+      return(x)
+    })
+    object@rowMaps <- as(X, "SimpleList")
   } else if(d == 2){
-    object@colMaps = lapply(object@colMaps, function(x) rownames(x) = colnames(object))
+    X = object@colMaps
+    X = lapply(X, function(x){
+      rownames(x) = colnames(object)
+      return(x)
+    })
+    object@colMaps <- as(X, "SimpleList")
   }
-
   return(object)
 }
