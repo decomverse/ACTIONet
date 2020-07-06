@@ -81,7 +81,7 @@ os.environ['CFLAGS']=" -w"
 os.environ['CPPFLAGS']=" -w"
 os.environ['CXXFLAGS']=" -w"
 
-ACTIONet_module_c = Extension(
+ACTIONet_c_module = Extension(
     '_ACTIONet',
     ACTIONet_c_files,
     define_macros=ACTIONet_macros,
@@ -93,7 +93,7 @@ ACTIONet_module_c = Extension(
     language='c'
 )
 
-ACTIONet_module_cc = Extension(
+ACTIONet_cc_module = Extension(
     '_ACTIONet',
     ACTIONet_cc_files,
     define_macros=ACTIONet_macros,
@@ -117,7 +117,7 @@ setup(
     long_description='',
     packages=setuptools.find_packages("lib"),
     package_dir={"": "lib"},
-    ext_modules=[ACTIONet_module],
+    ext_modules=[ACTIONet_cc_module, ACTIONet_c_module],
     install_requires=['numpy'],
     setup_requires=['numpy'],
     zip_safe=False
