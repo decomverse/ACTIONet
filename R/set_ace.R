@@ -273,13 +273,13 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
     value <- sapply(names(value), function(n){
       v = value[[n]]
-      if(dim(v)[2] != dim(object)[d]){
-        err = sprintf("ncol(value) must equal %s.\n", dim(object)[d])
+      if(dim(v)[1] != dim(object)[d]){
+        err = sprintf("nrow(value) must equal %s.\n", dim(object)[d])
         stop(err)
       }
-      colnames(v) <- dimnames(object)[[d]]
-      if(is.null(rownames(v)))
-        rownames(v) <- 1:NROW(v)
+      rownames(v) <- dimnames(object)[[d]]
+      if(is.null(colnames(v)))
+        colnames(v) <- 1:NCOL(v)
 
       if(is.null(S4Vectors::metadata(v)$type))
           v <- .set_map_type(v, map_types[[n]])
