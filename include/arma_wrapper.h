@@ -7,10 +7,11 @@
 #include <algorithm>
 #include <type_traits>
 #include <iterator>
-#include <arma/armadillo>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <numpy/npy_common.h>
+#include <npy_common.h>
+#include <armadillo>
 
 namespace std {
 
@@ -864,8 +865,10 @@ using std::enable_if_t;
 template<typename Type> 
 struct type_caster<Type, enable_if_t<(aw::is_Col<Type>::value || aw::is_Row<Type>::value) ||
                                      (aw::is_Mat<Type>::value || aw::is_Cube<Type>::value)>> {
-
+										 
+    //using Scalar = typename Type::elem_type;
     using Scalar = typename std::decay_t<typename Type::elem_type>;
+	//using Scalar = typename Type::Scalar;
     
     /* 
      * This function loads python arrays and coverts them to Armadillo columns. 
@@ -898,10 +901,7 @@ struct type_caster<Type, enable_if_t<(aw::is_Col<Type>::value || aw::is_Row<Type
     }
 
 
-	static constexpr const char name[] = npy_format_descriptor<Scalar>::name();
-	PYBIND11_TYPE_CASTER(Type, _("Numpy.ndarray[") + name + _("]"));
-
-
+    PYBIND11_TYPE_CASTER(Type, _("Numpy.ndarray[") + npy_format_descriptor<Scalar>::name() + _("]"));
 };
 
 
@@ -909,7 +909,10 @@ template<typename Type>
 struct type_caster<Type, enable_if_t<aw::is_SpMat<Type>::value>> {
 
 
+	//using Scalar = typename Type::Scalar;
+    //using Scalar = typename Type::elem_type;
     using Scalar = typename std::decay_t<typename Type::elem_type>;
+
     using StorageIndexType = typename std::decay_t<decltype(*std::declval<Type>().row_indices)>;
     using IndexType = typename std::decay_t<decltype(std::declval<Type>().n_nonzero)>;
 
@@ -987,10 +990,7 @@ struct type_caster<Type, enable_if_t<aw::is_SpMat<Type>::value>> {
  
     }
 
-	static constexpr const char name[] = npy_format_descriptor<std::decay_t<Scalar>>::name();
-
-	PYBIND11_TYPE_CASTER(Type, _("scipy.sparse.csc_matrix[") + name + _("]")); 
-    
+   PYBIND11_TYPE_CASTER(Type, _("scipy.sparse.csc_matrix[") + npy_format_descriptor<Scalar>::name() + _("]")); 
 
 };
 
