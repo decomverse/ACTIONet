@@ -13,8 +13,8 @@ impute.genes.using.archetypes <- function(ace, genes) {
     genes = intersect(unique(genes), rownames(ace))
 
 
-    Z = Matrix::t(rowMaps(ace)[["archetype_gene_profile"]][genes, ])
-    H = colMaps(ace)[["H_unified"]]
+    Z = rowMaps(ace)[["archetype_gene_profile"]][genes, ]
+    H = Matrix::t(colMaps(ace)[["H_unified"]])
 
     imputed.gene.expression = t(Z %*% H)
     colnames(imputed.gene.expression) = genes
@@ -38,8 +38,8 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
     genes = intersect(unique(genes), rownames(ace))
 
 
-    Z = log1p(Matrix::t(rowMaps(ace)[["unified_feature_specificity"]][genes, ]))
-    H = colMaps(ace)[["H_unified"]]
+    Z = log1p(rowMaps(ace)[["unified_feature_specificity"]][genes, ])
+    H = Matrix::t(colMaps(ace)[["H_unified"]])
 
     imputed.gene.expression = t(Z %*% H)
     colnames(imputed.gene.expression) = genes
