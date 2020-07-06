@@ -44,11 +44,17 @@ def has_flag(compiler, flagname):
                        
 blas_opt = get_info('lapack_opt')
 
-ACTIONet_source_files=["python_interface/wrapper.cc"]
+ACTIONet_cc_files=["python_interface/wrapper.cc"]
 for (dirpath, dirnames, filenames) in os.walk('src'):
     for file in filenames:
-        if file.endswith(".cc") or file.endswith(".c"):
-            ACTIONet_source_files+=[os.path.join(dirpath, file)]
+        if file.endswith(".cc") or file.endswith(".cpp"):
+            ACTIONet_cc_files+=[os.path.join(dirpath, file)]
+
+ACTIONet_c_files=["python_interface/wrapper.cc"]
+for (dirpath, dirnames, filenames) in os.walk('src'):
+    for file in filenames:
+        if file.endswith(".c"):
+            ACTIONet_c_files+=[os.path.join(dirpath, file)]
 
 ACTIONet_header_dirs=[np.get_include(), 'include']
 for (dirpath, dirnames, filenames) in os.walk('include'):
@@ -63,7 +69,7 @@ if ("library_dirs" in blas_opt): ACTIONet_lib_dirs+=blas_opt['library_dirs']
 ACTIONet_libs=list()
 if ("libraries" in blas_opt): ACTIONet_libs+=blas_opt['libraries']
 
-ACTIONet_extra_args=['-std=c++11', '-w']
+ACTIONet_extra_args=['-w']
 if ("extra_compile_args" in blas_opt): ACTIONet_extra_args+=blas_opt['extra_compile_args']
 
 ACTIONet_extra_link_args=list()
@@ -75,17 +81,30 @@ os.environ['CFLAGS']=" -w"
 os.environ['CPPFLAGS']=" -w"
 os.environ['CXXFLAGS']=" -w"
 
-ACTIONet_module = Extension(
+ACTIONet_module_c = Extension(
     '_ACTIONet',
-    ACTIONet_source_files,
+    ACTIONet_c_files,
     define_macros=ACTIONet_macros,
     include_dirs=ACTIONet_header_dirs,    
     library_dirs=ACTIONet_lib_dirs,
     libraries=ACTIONet_libs,
     extra_compile_args=ACTIONet_extra_args,
     extra_link_args=ACTIONet_extra_link_args,
+    language='c'
+)
+
+ACTIONet_module_cc = Extension(
+    '_ACTIONet',
+    ACTIONet_cc_files,
+    define_macros=ACTIONet_macros,
+    include_dirs=ACTIONet_header_dirs,    
+    library_dirs=ACTIONet_lib_dirs,
+    libraries=ACTIONet_libs,
+    extra_compile_args=ACTIONet_extra_args+['-std=c++11'],
+    extra_link_args=ACTIONet_extra_link_args,
     language='c++'
 )
+
 
 
 setup(
