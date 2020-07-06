@@ -72,14 +72,14 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
     S_r = reduction.out$S_r
     colnames(S_r) = colnames(ace.norm)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
-    colMaps(ace.norm)[[reduction_slot]] <- S_r
+    colMaps(ace.norm)[[reduction_slot]] <- Matrix::t(S_r)
     colMapTypes(ace.norm)[[reduction_slot]] = "reduction"
 
 
     if (return_V) {
         V = reduction.out[["V"]]
         colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
-        rowMaps(ace.norm)[["rotation"]] = Matrix::t(V)
+        rowMaps(ace.norm)[["rotation"]] = V
         rowMapTypes(ace.norm)[["rotation"]] = "reduction"
     }
 
