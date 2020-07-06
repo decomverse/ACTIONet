@@ -9,6 +9,7 @@ import sysconfig
 from numpy.distutils.system_info import get_info
 import pybind11
 import multiprocessing
+import numpy as np
 
 __version__ = '1.0'
 
@@ -49,7 +50,7 @@ for (dirpath, dirnames, filenames) in os.walk('src'):
         if file.endswith(".cc") or file.endswith(".c"):
             ACTIONet_source_files+=[os.path.join(dirpath, file)]
 
-ACTIONet_header_dirs=['include']
+ACTIONet_header_dirs=[np.get_include(), 'include']
 for (dirpath, dirnames, filenames) in os.walk('include'):
     for dirname in dirnames: ACTIONet_header_dirs += [os.path.join(dirpath, dirname)]
 
