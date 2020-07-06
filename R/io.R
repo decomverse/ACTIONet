@@ -444,8 +444,8 @@ preprocessDF <- function(df, drop_single_values = TRUE) {
     return(df)
 }
 
-import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.all = F) {
-    ace = as(ace, "ACTIONetExperiment")
+import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.all = F) {
+    ace = as(sce, "ACTIONetExperiment")
 
     if ("S_r" %in% names(colMaps(ace))) {
         colMaps(ace)[["ACTION"]] = colMaps(ace)[["S_r"]]
@@ -483,12 +483,18 @@ import.ace.from.legacy <- function(ACTIONet.out, ace, full.import = T, return.al
     # ace$assigned_archetype)
 
     specificity.out = ACTIONet.out$unification.out$DE.core
-    rowMaps(ace)[["unified_feature_profile"]] = Matrix::t(specificity.out[["archetypes"]])
-    rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
+    if(is.list(specificity.out)) {
+		rowMaps(ace)[["unified_feature_profile"]] = Matrix::t(specificity.out[["archetypes"]])
+		rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
 
-    rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-    rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
-
+		rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
+		rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
+	} else {
+		rowMaps(ace)[["unified_feature_profile"]] = Matrix::t(assays(specificity.out)[["profile"]])
+		rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
+		rowMaps(ace)[["unified_feature_specificity"]] = Matrix::t(assays(specificity.out)[["significance"]])
+		rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"		
+	}
 
     # Prepare output
     if (return.all) {
