@@ -36,8 +36,8 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
     X = specificity.out[["upper_significance"]]
     colnames(X) = UL
 
-    rowMaps(ace)[[output.slot.name]] = Matrix::t(X)
-    rowMapTypes(ace)[[output.slot.name]] = "reduction"
+    rowMaps(ace)[[sprintf("%s_feature_specificity", output.slot.name)]] = X
+    rowMapTypes(ace)[[sprintf("%s_feature_specificity", output.slot.name)]] = "reduction"
 
     return(ace)
 }
@@ -120,16 +120,21 @@ annotate.clusters.using.labels <- function(ace, clusters, labels) {
 #' arch.annot = annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = 'cluster_specificity_scores')
 annotate.clusters.using.markers <- function(ace, marker.genes, specificity.slot.name,
     rand.sample.no = 1000) {
+		
+	if(!grepl("_feature_specificity", specificity.slot.name)) {
+		specificity.slot.name = paste(specificity.slot.name, "feature_specificity", sep = "_")
+	}
+    if (!(specificity.slot.name %in% names(rowMaps(ace)))) {
+        message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
+    }
+	
     if (is.matrix(marker.genes) | is.sparseMatrix(marker.genes)) {
         marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x >
             0])
     }
 
-    if (!(specificity.slot.name %in% names(rowMaps(ace)))) {
-        message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
-    }
 
-    specificity.panel = as.matrix(log1p(rowMaps(ace)[[specificity.slot.name]]))
+    specificity.panel = Matrix::t(as.matrix(log1p(rowMaps(ace)[[specificity.slot.name]])))
 
     GS.names = names(marker.genes)
     if (is.null(GS.names)) {
