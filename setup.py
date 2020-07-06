@@ -40,15 +40,6 @@ def has_flag(compiler, flagname):
             return False
     return True
 
-def cpp_flag(compiler):
-    flags = ['-std=c++17', '-std=c++14', '-std=c++11']
-
-    for flag in flags:
-        if has_flag(compiler, flag): return flag
-
-    raise RuntimeError('Unsupported compiler -- at least C++11 support '
-                       'is needed!')
-
                        
 blas_opt = get_info('lapack_opt')
 
@@ -71,7 +62,7 @@ if ("library_dirs" in blas_opt): ACTIONet_lib_dirs+=blas_opt['library_dirs']
 ACTIONet_libs=list()
 if ("libraries" in blas_opt): ACTIONet_libs+=blas_opt['libraries']
 
-ACTIONet_extra_args=list()
+ACTIONet_extra_args=['-std=c++11', '-w']
 if ("extra_compile_args" in blas_opt): ACTIONet_extra_args+=blas_opt['extra_compile_args']
 
 ACTIONet_extra_link_args=list()
