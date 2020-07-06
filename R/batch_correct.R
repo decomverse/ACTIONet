@@ -42,7 +42,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 
     # rownames(S_r) = colnames(ace)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("PC%d", i))
 
-    ACTIONet::colMaps(ace)[[reduction_slot]] <- S_r
+    ACTIONet::colMaps(ace)[[reduction_slot]] <- Matrix::t(S_r)
     colMapTypes(ace)[[reduction_slot]] = "reduction"
 
 
@@ -52,7 +52,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 
         if (is.null(V_slot) | length(V_slot) > 1) {
             V_slot = paste(reduction_slot, "rotation", sep = "_")
         }
-        rowMaps(ace)[[V_slot]] = Matrix::t(V)
+        rowMaps(ace)[[V_slot]] = V
     }
     rm("sce.list.norm", "mnn.out")
     invisible(gc())

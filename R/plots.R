@@ -106,7 +106,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 1.5, node.size = 1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
+    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
     legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, coordinate_slot = "ACTIONet2D") {
 
     text.halo.width = 0.1
@@ -117,7 +117,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {
-            coors = Matrix::t(colMaps(ace)[[coordinate_slot]])
+            coors = colMaps(ace)[[coordinate_slot]]
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -132,7 +132,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
     }
     if (is.null(labels)) {
         if (class(ace) == "ACTIONetExperiment") {
-            vCol = rgb(Matrix::t(colMaps(ace)$denovo_color))
+            vCol = rgb(colMaps(ace)$denovo_color)
         } else {
             vCol = rep("tomato", nrow(coors))
         }
@@ -276,7 +276,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {
-            coors = Matrix::t(colMaps(ace)[[coordinate_slot]])
+            coors = colMaps(ace)[[coordinate_slot]]
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -292,7 +292,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 
     if (is.null(labels)) {
         if (class(ace) == "ACTIONetExperiment") {
-            vCol = rgb(Matrix::t(colMaps(ace)$denovo_color))
+            vCol = rgb(colMaps(ace)$denovo_color)
         } else {
             vCol = rep("tomato", nrow(coors))
         }
@@ -390,30 +390,30 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5,
     CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F) {
-    M = Matrix::t(as(colMaps(ace)[["H_unified"]], "sparseMatrix"))
+    M = as(colMaps(ace)[["H_unified"]], "sparseMatrix")
     cs = Matrix::colSums(M)
     M = scale(M, center = FALSE, scale = cs)
 
-    if (ncol(feature.enrichment.table) != nrow(colMaps(ace)[["H_unified"]])) {
+    if (ncol(feature.enrichment.table) != ncol(colMaps(ace)[["H_unified"]])) {
         feature.enrichment.table = Matrix::t(feature.enrichment.table)
     }
 
     if (max(feature.enrichment.table) > 50)
         feature.enrichment.table = log1p(feature.enrichment.table)
 
-    X = t(select.top.k.features(feature.enrichment.table, 3, normalize = renormalize,
+    X = t(select.top.k.features(feature.enrichment.table, top.features = top.features, normalize = renormalize,
         reorder.columns = F))
     selected.features = colnames(X)
 
-    core.coors = t(colMaps(ace)[["ACTIONet2D"]] %*% M)
+    core.coors = Matrix::t(colMaps(ace)[["ACTIONet2D"]]) %*% M
     cs = colSums(X)
     cs[cs == 0] = 1
     X = scale(X, center = F, scale = cs)
-    feature.coors = scale(t(X) %*% core.coors)
+    feature.coors = Matrix::t(core.coors %*% X)
 
     if (is.null(CPal)) {
         # Pal = ace$unification.out$Pal
-        cells.Lab = grDevices::convertColor(color = Matrix::t(colMaps(ace)$denovo_color),
+        cells.Lab = grDevices::convertColor(color = colMaps(ace)$denovo_color,
             from = "sRGB", to = "Lab")
         arch.Lab = Matrix::t(M) %*% cells.Lab
         arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
@@ -480,13 +480,12 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
     require(wordcloud)
 
     feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-    feature.enrichment.table = Matrix::t(feature.enrichment.table)
     filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
     if (length(filtered.rows) > 0)
         feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
 
     plot.ACTIONet.feature.view(ace, feature.enrichment.table, title = "Gene view",
-        renormalize = renormalize)
+        renormalize = renormalize, top.features = top.genes)
 }
 
 
@@ -526,7 +525,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {
-            coors = Matrix::t(colMaps(ace)[[coordinate_slot]])
+            coors = colMaps(ace)[[coordinate_slot]]
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -542,7 +541,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 
     if (is.null(labels)) {
         if (class(ace) == "ACTIONetExperiment") {
-            vCol = rgb(Matrix::t(colMaps(ace)$denovo_color))
+            vCol = rgb(colMaps(ace)$denovo_color)
         } else {
             vCol = rep("tomato", nrow(coors))
         }
@@ -602,7 +601,6 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
         }
     } else {
         temp.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-        temp.enrichment.table = Matrix::t(temp.enrichment.table)
         if (!is.null(row.names(temp.enrichment.table))) {
             filtered.rows = grep(blacklist.pattern, rownames(temp.enrichment.table))
             if (length(filtered.rows) > 0)
@@ -612,7 +610,11 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
                 decreasing = T)[1:min(100, nrow(enrichment.table))]])
             selected.features = sort(unique(as.character(GT)))
 
-            cell.scores = Matrix::t(enrichment.table[selected.features, ] %*% colMaps(ace)[["H_unified"]])
+			W = exp(scale(Matrix::t(colMaps(ace)[["H_unified"]])))
+			cs = Matrix::colSums(W)
+			W = t(scale(W, center = F, scale = cs))
+			
+            cell.scores = W %*% Matrix::t(enrichment.table[selected.features, ])
         } else {
             cell.scores = NULL
         }
@@ -807,7 +809,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 
     if (class(ace) == "ACTIONetExperiment") {
         if (is.character(coordinate_slot)) {
-            coors = Matrix::t(colMaps(ace)[[coordinate_slot]])
+            coors = colMaps(ace)[[coordinate_slot]]
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -889,7 +891,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0, export_path = NA) {
+visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
 
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
         names(marker.genes) = marker.genes
@@ -940,7 +942,6 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
 select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
     top.features = 3, normalize = F, reorder.columns = F, specificity.slot.name = "unified_feature_specificity") {
     feature.enrichment.table = as.matrix(rowMaps(ace)[[specificity.slot.name]])
-    feature.enrichment.table = Matrix::t(feature.enrichment.table)
     filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
     if (length(filtered.rows) > 0)
         feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
@@ -958,7 +959,6 @@ plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern 
     require(ComplexHeatmap)
 
     feature.enrichment.table = as.matrix(rowMaps(ace)[[specificity.slot.name]])
-    feature.enrichment.table = Matrix::t(feature.enrichment.table)
     filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
     if (length(filtered.rows) > 0)
         feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
@@ -976,7 +976,6 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
     top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes",
     column.title = "Genes", rowPal = "black", specificity.slot.name = "unified_feature_specificity") {
     feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-    feature.enrichment.table = Matrix::t(feature.enrichment.table)
     filtered.rows = match(intersect(rownames(ace), genes), rownames(ace))
     if (length(filtered.rows) > 0)
         feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
@@ -990,14 +989,14 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
 }
 plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma",
     title = "", arch.labels = NULL, coordinate_slot = "ACTIONet2D", alpha_val = 0.9) {
-    Ht = Matrix::t(colMaps(ace)[["H_unified"]])
+    Ht = colMaps(ace)[["H_unified"]]
     cs = Matrix::colSums(Ht)
     cs[cs == 0] = 1
     U = as(scale(Ht, center = F, scale = cs), "dgTMatrix")
     U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
 
     node.size = node.size * 0.3
-    coors = Matrix::t(colMaps(ace)[[coordinate_slot]])
+    coors = colMaps(ace)[[coordinate_slot]]
 
     if (CPal %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
         require(viridis)
