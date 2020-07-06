@@ -1,7 +1,7 @@
 # Installation
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users** 
-For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure to `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
+For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
 **Install library dependencies**
 Additionally, `ACTIONet` package depends on the HDF5 library to import/export results to standard formats compatible with other packages. To install the related package on debian-based linux machines, run:
@@ -38,13 +38,15 @@ BiocManager::install(c("SingleCellExperiment", "ComplexHeatmap"))
 ```
 
 * **Clone `ACTIONet` repository**:
-If you don't already have git, install it first. On debian-based linux machines, run:
+If you don't already have git, install it first. 
+
+On (Debian) **Linux-based  machines**, run:
 
 ```bash
 sudo apt-get install git
 ```
 
-For Mac-based systems:
+For **Mac-based machines**, run:
 
 ```bash
 brew install git
@@ -57,7 +59,7 @@ git clone https://github.com/shmohammadi86/ACTIONet.git
 ```
 
 
-* ** Install `ACTIONet`**:
+* **Install `ACTIONet`**:
 ACTIONet contains many different branchs. For installing the stable version, switch to the `R-release` branch:
 
 ```bash
@@ -129,7 +131,7 @@ ACTIONet interfaces to scran normalization via `normalize.Linnorm()` function.
 
 
 # Running ACTIONet
-**Note** If you are using `MKL`, make sure to properly set the number of threads used by setting the environment variable `OMP_NUM_THREADS`.
+**Note** If you are using `MKL`, make sure to properly [set the number of threads](https://software.intel.com/content/www/us/en/develop/documentation/mkl-macos-developer-guide/top/managing-performance-and-memory/improving-performance-with-threading/techniques-to-set-the-number-of-threads.html) used prior to running `ACTIONet`.
 
 ## Example Run
 Here is a simple example to get you started:
@@ -142,8 +144,7 @@ require(ACTIONet)
 # Run ACTIONet
 ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 0.01, min_feats_per_cell = 1000)
 ace = reduce.ace(ace)
-ACTIONet_results = run.ACTIONet(ace)
-ace = ACTIONet_results$ace
+ace = run.ACTIONet(ace)
 
 # Annotate cell-types
 data("curatedMarkers_human")
@@ -198,8 +199,8 @@ $ docker run -v /your/data/file/path/:/data -w /data -p 8787:8787 shmohammadi86/
 
 # Additional tutorials
 You can access ACTIONet tutorials from:
-1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/tutorials/min_intro.html)
-2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/tutorials/ACTIONet/intro.html)
+1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/tutorials/mini_intro.html)
+2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/tutorials/intro.html)
 3. [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorials/clustering.html)
 4. [To batch correct or not to batch correct, that is the question!](http://compbio.mit.edu/ACTIONet/tutorials/batch.html)
 5. [PortingData: Import/export options in the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorials/porting_data.html)
