@@ -222,19 +222,19 @@ setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
 })
 
 #' @importFrom BiocGenerics rownames<-
-setReplaceMethod("rownames", "ACTIONetExperiment", function(object, value) {
-  (object)
-  object = callNextMethod()
-  object = .change_slot_dim_name(object, 1)
-  object
+setReplaceMethod("rownames", "ACTIONetExperiment", function(x, value) {
+  (x)
+  x = callNextMethod()
+  x = .change_slot_dim_name(x, 1)
+  x
 })
 
 #' @importFrom BiocGenerics colnames<-
-setReplaceMethod("colnames", "ACTIONetExperiment", function(object, value) {
-    (object)
-    object = callNextMethod()
-    object = .change_slot_dim_name(object, 2)
-    object
+setReplaceMethod("colnames", "ACTIONetExperiment", function(x, value) {
+    (x)
+    x = callNextMethod()
+    x = .change_slot_dim_name(x, 2)
+    x
 })
 
 #' Set column-associated size factors
