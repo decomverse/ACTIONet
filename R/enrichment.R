@@ -41,7 +41,7 @@ assess.TF.activities.from.scores <- function(scores) {
 #' @examples
 #' TF.scores = assess.TF.activities.from.archetypes(ace)
 assess.TF.activities.from.archetypes <- function(ace) {
-    scores = Matrix::t(rowMaps(ace)$unified_feature_specificity)
+    scores = rowMaps(ace)$unified_feature_specificity
 
     TF.scores = assess.TF.activities.from.scores(scores)
 
@@ -96,7 +96,7 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
 assess.geneset.enrichment <- function(ace, associations, L = 1000, specificity.slot = "unified_feature_specificity") {
-    scores = Matrix::t(as.matrix(rowMaps(ace)[[specificity.slot]]))
+    scores = as.matrix(rowMaps(ace)[[specificity.slot]])
 
     Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations,
         L)
