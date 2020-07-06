@@ -20,15 +20,26 @@ normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam())
     } else if (norm.method == "linnorm") {
         ace.norm = normalize.Linnorm(ace)
     } else {
-        ace.norm = ace
-        A = as(SummarizedExperiment::assays(ace.norm)[["counts"]], "dgTMatrix")
-        cs = Matrix::colSums(A)
-        cs[cs == 0] = 1
-        B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = log1p(median(cs) * 
-            (A@x/cs[A@j + 1])), dims = dim(A))
-        rownames(B) = rownames(ace.norm)
-        colnames(B) = colnames(ace.norm)
-        SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
+		S = SummarizedExperiment::assays(ace.norm)[["counts"]]
+		if(is.matrix(S)) {
+			cs = Matrix::colSums(S)
+			cs[cs == 0] = 1
+			B = scale(S, center = F, scale = cs)
+			rownames(B) = rownames(ace.norm)
+			colnames(B) = colnames(ace.norm)
+			SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
+		} else {
+			ace.norm = ace
+			A = as(S, "dgTMatrix")
+			cs = Matrix::colSums(A)
+			cs[cs == 0] = 1
+			B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = log1p(median(cs) * 
+				(A@x/cs[A@j + 1])), dims = dim(A))
+			rownames(B) = rownames(ace.norm)
+			colnames(B) = colnames(ace.norm)
+			SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
+		}
+		
     }
     
     metadata(ace.norm)$normalization.method = norm.method
