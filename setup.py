@@ -79,13 +79,15 @@ if ("extra_link_args" in blas_opt): ACTIONet_extra_link_args+=blas_opt['extra_li
 
 
 os.environ['CC'] = "gcc"
-os.environ['CFLAGS'] = " -w"
+os.environ['CFLAGS']=" -w"
+os.environ['CPPFLAGS']=" -w"
+os.environ['CXXFLAGS']=" -w"
 
 ACTIONet_module = Extension(
     '_ACTIONet',
     ACTIONet_source_files,
     define_macros=ACTIONet_macros,
-    include_dirs=[pybind11.get_include(False), pybind11.get_include(True)]+ACTIONet_header_dirs,    
+    include_dirs=ACTIONet_header_dirs,    
     library_dirs=ACTIONet_lib_dirs,
     libraries=ACTIONet_libs,
     extra_compile_args=ACTIONet_extra_args,
@@ -105,7 +107,7 @@ setup(
     packages=setuptools.find_packages("lib"),
     package_dir={"": "lib"},
     ext_modules=[ACTIONet_module],
-    install_requires=['pybind11>=2.4', 'numpy'],
-    setup_requires=['pybind11>=2.4', 'numpy'],
+    install_requires=['numpy'],
+    setup_requires=['numpy'],
     zip_safe=False
 )
