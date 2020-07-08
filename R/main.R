@@ -27,7 +27,7 @@
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500,
     layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification.resolution = 1, footprint.alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
+    unification.resolution = 1, footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
         stop(err)
@@ -113,11 +113,10 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
 
 	# Smooth archetype footprints
+	Ht_unified = colMaps(ace)[["H_unified"]]
 	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
 	colMaps(ace)$archetype_footprint = archetype_footprint
 	
-	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
-
 	H = Matrix::t(archetype_footprint)
         
     # Compute gene specificity for each archetype
@@ -137,6 +136,8 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
+
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     if (full.trace == T) {
         # Prepare output
@@ -290,12 +291,19 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
     # each cell
     ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
 
+	Ht_unified = colMaps(ace)[["H_unified"]]
+	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
+	colMaps(ace)$archetype_footprint = archetype_footprint
+	
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
+	H = Matrix::t(archetype_footprint)
+        
     # Compute gene specificity for each archetype
     if (is.matrix(S)) {
-        specificity.out = compute_archetype_feature_specificity_full(S, unification.out$H_unified)
+        specificity.out = compute_archetype_feature_specificity_full(S, H)
     } else {
-        specificity.out = compute_archetype_feature_specificity(S, unification.out$H_unified)
+        specificity.out = compute_archetype_feature_specificity(S, H)
     }
 
     specificity.out = lapply(specificity.out, function(specificity.scores) {
@@ -339,12 +347,21 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "log
     ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
 
 
+	Ht_unified = colMaps(ace)[["H_unified"]]
+	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
+	colMaps(ace)$archetype_footprint = archetype_footprint
+	
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+
+	H = Matrix::t(archetype_footprint)
+        
     # Compute gene specificity for each archetype
     if (is.matrix(S)) {
-        specificity.out = compute_archetype_feature_specificity_full(S, unification.out$H_unified)
+        specificity.out = compute_archetype_feature_specificity_full(S, H)
     } else {
-        specificity.out = compute_archetype_feature_specificity(S, unification.out$H_unified)
+        specificity.out = compute_archetype_feature_specificity(S, H)
     }
+
 
     specificity.out = lapply(specificity.out, function(specificity.scores) {
         rownames(specificity.scores) = rownames(ace)
