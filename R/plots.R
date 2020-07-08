@@ -107,7 +107,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
     trans.fact = 1.5, node.size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
-    legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, coordinate_slot = "ACTIONet2D") {
+    legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, add.backbone = FALSE, arch.size.factor = 3, coordinate_slot = "ACTIONet2D") {
 
     text.halo.width = 0.1
     label.text.size = 0.8
@@ -117,7 +117,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {
-            coors = colMaps(ace)[[coordinate_slot]]
+            coors = scale(colMaps(ace)[[coordinate_slot]])
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -276,7 +276,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {
-            coors = colMaps(ace)[[coordinate_slot]]
+            coors = scale(colMaps(ace)[[coordinate_slot]])
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -389,7 +389,7 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 #' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5,
-    CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F) {
+    CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F, coordinate_slot = "ACTIONet2D") {
     M = as(colMaps(ace)[["H_unified"]], "sparseMatrix")
     cs = Matrix::colSums(M)
     M = scale(M, center = FALSE, scale = cs)
@@ -405,7 +405,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
         reorder.columns = F))
     selected.features = colnames(X)
 
-    core.coors = Matrix::t(colMaps(ace)[["ACTIONet2D"]]) %*% M
+    core.coors = Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M
     cs = colSums(X)
     cs[cs == 0] = 1
     X = scale(X, center = F, scale = cs)
@@ -525,7 +525,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {
-            coors = colMaps(ace)[[coordinate_slot]]
+            coors = scale(colMaps(ace)[[coordinate_slot]])
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -809,7 +809,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 
     if (class(ace) == "ACTIONetExperiment") {
         if (is.character(coordinate_slot)) {
-            coors = colMaps(ace)[[coordinate_slot]]
+            coors = scale(colMaps(ace)[[coordinate_slot]])
         } else {
             coors = as.matrix(coordinate_slot)
         }
@@ -996,7 +996,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma"
     U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
 
     node.size = node.size * 0.3
-    coors = colMaps(ace)[[coordinate_slot]]
+    coors = scale(colMaps(ace)[[coordinate_slot]])
 
     if (CPal %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
         require(viridis)
@@ -1090,6 +1090,265 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
     return(W)
 }
 
+plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
+    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, coordinate_slot = "ACTIONet2D") {
+		
+	if(! ("backbone" %in% names(metadata(ace))) ) {
+		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+		return()
+	}	
+	backbone = metadata(ace)$backbone
+
+    node.size = node.size * 0.25
+
+    if (class(ace) == "ACTIONetExperiment") {
+        labels = preprocess.labels(labels, ace)
+        if (is.character(coordinate_slot)) {
+            coors = scale(colMaps(ace)[[coordinate_slot]])
+        } else {
+            coors = as.matrix(coordinate_slot)
+        }
+    } else {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+            coors = as.matrix(ace)
+            labels = preprocess.labels(labels)
+        } else {
+            print("Unknown type for ace")
+            return()
+        }
+    }
+    
+    if (is.null(labels)) {
+        if (class(ace) == "ACTIONetExperiment") {
+            vCol = rgb(colMaps(ace)$denovo_color)
+        } else {
+            vCol = rep("tomato", nrow(coors))
+        }
+        Annot = NULL
+    } else {
+        Annot = names(labels)[match(sort(unique(labels)), labels)]
+        if (length(CPal) > 1) {
+            if (length(CPal) < length(Annot)) {
+                if (length(Annot) <= 20) {
+                  CPal = CPal20
+                  message("Not enough colors. Switching to CPal20")
+                } else {
+                  CPal = CPal88
+                  message("Not enough colors. Switching to CPal88")
+                }
+            }
+            if (is.null(names(CPal))) {
+                Pal = CPal[1:length(Annot)]
+            } else {
+                Pal = CPal[Annot]
+            }
+        } else {
+            Pal = ggpubr::get_palette(CPal, length(Annot))
+        }
+
+        names(Pal) = Annot
+        vCol = Pal[names(labels)]
+        
+        if(is.null(arch.labels)) {
+        	arch.annot = annotate.archetypes.using.labels(ace, labels)
+        	arch.labels = arch.annot$Labels
+        }        
+    }
+	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+
+	
+
+    if (!is.null(transparency.attr)) {
+        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
+        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
+        beta[z > trans.z.threshold] = 1
+        beta = beta^trans.fact
+
+        vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor),
+            beta)
+        vCol = scales::alpha(vCol, beta)
+    } else {
+        vCol.border = colorspace::darken(vCol, border.contrast.factor)
+    }
+
+    x = coors[, 1]
+    y = coors[, 2]
+    x.min = min(x)
+    x.max = max(x)
+    y.min = min(y)
+    y.max = max(y)
+    x.min = x.min - (x.max - x.min)/20
+    x.max = x.max + (x.max - x.min)/20
+    y.min = y.min - (y.max - y.min)/20
+    y.max = y.max + (y.max - y.min)/20
+    XL = c(x.min, x.max)
+    YL = c(y.min, y.max)
+
+
+    rand.perm = sample(nrow(coors))
+    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol[rand.perm],
+        col = vCol.border[rand.perm], axes = F, xlab = "", ylab = "", main = title,
+        xlim = XL, ylim = YL)
+
+
+    ## Add backbone anchors    
+	cell.RGB = Matrix::t(col2rgb(vCol))/255
+    cells.Lab = grDevices::convertColor(color = cell.RGB,from = "sRGB", to = "Lab")
+    arch.Lab = Matrix::t(ace$archetype_footprint) %*% cells.Lab
+    arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+	aCol = rgb(arch.RGB)
+	
+	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
+	arch.sizes = (0.25 + arch.size.factor*w)
+
+	cell.coors =colMaps(ace)[[coordinate_slot]]
+	arch.coors = backbone$coordinates[, c(1, 2)]
+	arch.coors = sapply(1:2, function(i) (arch.coors[, i] - mean(cell.coors[, i])) / sd(cell.coors[, i]))
+
+    text.halo.width = 0.1
+    label.text.size = label.text.size*0.6
+
+
+    x = arch.coors[, 1]
+    y = arch.coors[, 2]-strheight("A")
+    theta = seq(0, 2 * pi, length.out = 50)
+    xy <- xy.coords(x, y)
+    xo <- text.halo.width * strwidth("A")
+    yo <- text.halo.width * strheight("A")
+    for (i in theta) {
+        text(xy$x + cos(i) * xo, xy$y + sin(i) * yo, arch.labels,
+            col = "#dddddd", cex = label.text.size)
+    }
+    text(xy$x, xy$y, arch.labels, col = colorspace::darken(aCol, 0.5), cex = label.text.size)
+    
+    
+	par(new=TRUE)
+	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title, xlim = XL, ylim = YL)
+
+    
+}
+plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
+    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, realign = TRUE, coordinate_slot = "ACTIONet2D") {
+		
+	if(! ("backbone" %in% names(metadata(ace))) ) {
+		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+		return()
+	}	
+	backbone = metadata(ace)$backbone
+
+    node.size = node.size * 0.25
+
+    if (class(ace) == "ACTIONetExperiment") {
+        labels = preprocess.labels(labels, ace)
+        if (is.character(coordinate_slot)) {
+            coors = scale(colMaps(ace)[[coordinate_slot]])
+        } else {
+            coors = as.matrix(coordinate_slot)
+        }
+    } else {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+            coors = as.matrix(ace)
+            labels = preprocess.labels(labels)
+        } else {
+            print("Unknown type for ace")
+            return()
+        }
+    }
+    
+    if (is.null(labels)) {
+        if (class(ace) == "ACTIONetExperiment") {
+            vCol = rgb(colMaps(ace)$denovo_color)
+        } else {
+            vCol = rep("tomato", nrow(coors))
+        }
+        Annot = NULL
+    } else {
+        Annot = names(labels)[match(sort(unique(labels)), labels)]
+        if (length(CPal) > 1) {
+            if (length(CPal) < length(Annot)) {
+                if (length(Annot) <= 20) {
+                  CPal = CPal20
+                  message("Not enough colors. Switching to CPal20")
+                } else {
+                  CPal = CPal88
+                  message("Not enough colors. Switching to CPal88")
+                }
+            }
+            if (is.null(names(CPal))) {
+                Pal = CPal[1:length(Annot)]
+            } else {
+                Pal = CPal[Annot]
+            }
+        } else {
+            Pal = ggpubr::get_palette(CPal, length(Annot))
+        }
+
+        names(Pal) = Annot
+        vCol = Pal[names(labels)]
+        
+        if(is.null(arch.labels)) {
+        	arch.annot = annotate.archetypes.using.labels(ace, labels)
+        	arch.labels = arch.annot$Labels
+        }        
+    }
+	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+
+	
+
+    if (!is.null(transparency.attr)) {
+        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
+        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
+        beta[z > trans.z.threshold] = 1
+        beta = beta^trans.fact
+
+        vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor),
+            beta)
+        vCol = scales::alpha(vCol, beta)
+    } else {
+        vCol.border = colorspace::darken(vCol, border.contrast.factor)
+    }
+
+
+
+    ## Add backbone anchors    
+	cell.RGB = Matrix::t(col2rgb(vCol))/255
+    cells.Lab = grDevices::convertColor(color = cell.RGB,from = "sRGB", to = "Lab")
+    arch.Lab = Matrix::t(ace$archetype_footprint) %*% cells.Lab
+    arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+	aCol = rgb(arch.RGB)
+	
+	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
+	arch.sizes = (0.25 + arch.size.factor*w)
+
+	cell.coors =colMaps(ace)[[coordinate_slot]]
+	if(realign == TRUE) {
+		arch.coors = ACTIONet::sgd2_layout_weighted_convergent(backbone$G, S_r = Matrix::t(backbone$coordinates), t_max = 200, t_maxmax = 1000)
+	} else {
+		arch.coors = backbone$coordinates
+	}
+
+	
+	graphics::plot(arch.coors, pch = 25, cex = 0, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
+	
+	kappa = 0.1 + 0.9 / (1 + exp(-2*scale(Adj@x)))
+	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
+	
+
+
+    text.halo.width = 0.1
+    label.text.size = label.text.size*0.6
+
+    
+     layout.labels(x = arch.coors[, 1], y = arch.coors[, 2]-strheight("A"), labels = arch.labels, col = colorspace::darken(aCol,
+            0.5), bg = "#eeeeee", r = text.halo.width, cex = label.text.size)
+     
+
+	par(new=TRUE)
+	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
+
+}
 
 gate.archetypes <- function(ace, i, j, H.slot = "H_unified") {
     require(plotly)

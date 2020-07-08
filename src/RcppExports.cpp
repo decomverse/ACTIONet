@@ -509,15 +509,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // assess_enrichment
-mat assess_enrichment(mat& scores, mat& associations, int L);
-RcppExport SEXP _ACTIONet_assess_enrichment(SEXP scoresSEXP, SEXP associationsSEXP, SEXP LSEXP) {
+List assess_enrichment(mat& scores, sp_mat& associations, int thread_no);
+RcppExport SEXP _ACTIONet_assess_enrichment(SEXP scoresSEXP, SEXP associationsSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type scores(scoresSEXP);
-    Rcpp::traits::input_parameter< mat& >::type associations(associationsSEXP);
-    Rcpp::traits::input_parameter< int >::type L(LSEXP);
-    rcpp_result_gen = Rcpp::wrap(assess_enrichment(scores, associations, L));
+    Rcpp::traits::input_parameter< sp_mat& >::type associations(associationsSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(assess_enrichment(scores, associations, thread_no));
     return rcpp_result_gen;
 END_RCPP
 }
