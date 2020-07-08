@@ -20,7 +20,7 @@ normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam())
     } else if (norm.method == "linnorm") {
         ace.norm = normalize.Linnorm(ace)
     } else {
-		S = SummarizedExperiment::assays(ace.norm)[["counts"]]
+		S = SummarizedExperiment::assays(ace)[["counts"]]
 		if(is.matrix(S)) {
 			cs = Matrix::colSums(S)
 			cs[cs == 0] = 1
