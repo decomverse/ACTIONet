@@ -386,10 +386,9 @@ construct.backbone <- function(ace, network_density = 1, mutual_edges_only = TRU
 
 	
 	W = ace$archetype_footprint
-	W = apply(W, 2, function(w) {x = exp(w/mean(w)); x = x / sum(x); return(x)})
 	W = as(W, 'sparseMatrix')	
 	arch.vis.out = transform_layout(W, coor2D = Matrix::t(ace$ACTIONet2D), coor3D = Matrix::t(ace$ACTIONet3D), colRGB = Matrix::t(ace$denovo_color), n_epochs = layout_epochs, compactness_level = layout_compactness, thread_no = thread_no)    
-    arch.G = build_ACTIONet(H_stacked = Matrix::t(colMaps(ace)$archetype_footprint), density = network_density, thread_no = thread_no, mutual_edges_only = mutual_edges_only)	
+    arch.G = build_ACTIONet(H_stacked = colMaps(ace)$archetype_footprint, density = network_density, thread_no = thread_no, mutual_edges_only = mutual_edges_only)	
     
     backbone = list(G = arch.G, coordinates = Matrix::t(arch.vis.out$coordinates), coordinates_3D = Matrix::t(arch.vis.out$coordinates_3D), colors = Matrix::t(arch.vis.out$colors))
     
