@@ -1229,7 +1229,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
     
 }
 plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, realign = TRUE, coordinate_slot = "ACTIONet2D") {
+    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, realign = FALSE, coordinate_slot = "ACTIONet2D") {
 		
 	if(! ("backbone" %in% names(metadata(ace))) ) {
 		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
@@ -1332,6 +1332,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 	
 	graphics::plot(arch.coors, pch = 25, cex = 0, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
 	
+	Adj = as(backbone$G, "dgTMatrix")
 	kappa = 0.1 + 0.9 / (1 + exp(-2*scale(Adj@x)))
 	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
 	

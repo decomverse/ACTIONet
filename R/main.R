@@ -24,10 +24,10 @@
 #' ACTIONet.out = run.ACTIONet(ace)
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
-run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -1,
+run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500,
     layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification.resolution = 1, footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
+    unification.resolution = 5, footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
         stop(err)
@@ -137,7 +137,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
-	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     if (full.trace == T) {
         # Prepare output
@@ -265,7 +265,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 
 
 rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcounts",
-    reduction_slot = "ACTION", unified_suffix = "unified") {
+    reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 0.2, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0) {
     S = assays(ace)[[data_slot]]
     S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
     C_stacked = as.matrix(colMaps(ace)[["C_stacked"]])
@@ -275,7 +275,7 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
     unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0,
         resolution = resolution)
 
-    R.utils::printf("resolution = %d -> %d states\n", resolution, length(unique(unification.out$assigned_archetype)))
+    R.utils::printf("resolution = %f -> %d states\n", resolution, length(unique(unification.out$assigned_archetype)))
 
     colMaps(ace)[[sprintf("H_%s", unified_suffix)]] = as(Matrix::t(unification.out$H_unified),
         "sparseMatrix")
@@ -295,7 +295,6 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
 	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
 	colMaps(ace)$archetype_footprint = archetype_footprint
 	
-	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
 	H = Matrix::t(archetype_footprint)
         
@@ -318,11 +317,13 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
     rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
 
+	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+
     return(ace)
 }
 
 regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "logcounts",
-    reduction_slot = "ACTION") {
+    reduction_slot = "ACTION", network_density = 0.2, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, footprint_alpha = 0.85, thread_no = 0) {
     S = assays(ace)[[data_slot]]
     S_r = Matrix::t(colMaps(ace)[[reduction_slot]])
 
@@ -351,8 +352,6 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "log
 	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
 	colMaps(ace)$archetype_footprint = archetype_footprint
 	
-	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
-
 	H = Matrix::t(archetype_footprint)
         
     # Compute gene specificity for each archetype
@@ -374,10 +373,12 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "log
     rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
+	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+
     return(ace)
 }
 
-construct.backbone <- function(ace, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 1) {
+construct.backbone <- function(ace, network_density = 0.2, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 1) {
 	if(! ("archetype_footprint" %in% names(colMaps(ace))) ) {
 	    Ht_unified = colMaps(ace)[["H_unified"]]
 		archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
