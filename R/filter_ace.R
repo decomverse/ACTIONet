@@ -1,7 +1,6 @@
 #' Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.
-
-filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL,
-    min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
+#' @export
+filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
     .check_and_load_package("matrixStats")
     org_dim = dim(ace)
     ace.fil = ace
@@ -57,8 +56,9 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
     }
 }
 
-filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_feat = NULL,
-    min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL) {
+#' Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object by column attribute.
+#' @export
+filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL) {
 
     # if( length(by) == 1) { IDX = split(1:dim(ace)[2],
     # droplevels(colData(ace))[[by]]) } else { IDX = split(1:dim(ace)[2], by) }
