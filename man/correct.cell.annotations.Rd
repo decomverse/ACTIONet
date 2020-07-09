@@ -6,8 +6,7 @@
 \usage{
 correct.cell.annotations(
   ace,
-  annotation.in,
-  annotation.out,
+  initial_labels,
   LFR.threshold = 2,
   double.stochastic = FALSE,
   max_iter = 3,
@@ -19,10 +18,8 @@ correct.cell.annotations(
 \item{ace}{Input results to be clustered
 (alternatively it can be the ACTIONet igraph object)}
 
-\item{annotation.in}{Annotations to correct with missing values (NA) in it.
+\item{initial_labels}{Annotations to correct with missing values (NA) in it.
 It can be either a named annotation (inside ace$annotations) or a label vector.}
-
-\item{annotation.out}{Name of the updated annotations to be stored.}
 
 \item{LFR.threshold}{How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)}
 
