@@ -4,7 +4,7 @@
 \alias{assess_enrichment}
 \title{Computes feature enrichment wrt a given annotation}
 \usage{
-assess_enrichment(scores, associations, L)
+assess_enrichment(scores, associations, thread_no = 0L)
 }
 \arguments{
 \item{scores}{Specificity scores of features}
