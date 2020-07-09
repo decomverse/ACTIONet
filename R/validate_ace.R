@@ -26,12 +26,12 @@ setValidity2("ACTIONetExperiment", function(object) {
     value = object@rowMaps
     for (i in seq_along(value)) {
         .validate_MapType(value[[i]])
-        if ((NCOL(value[[i]]) != NR)) {
-            msg <- c(msg, "'ncol(rowMaps[[..]])' should be equal to the number of rows of ace object..")
+        if ((NROW(value[[i]]) != NR)) {
+            msg <- c(msg, "'nrow(rowMaps[[..]])' should be equal to the number of rows of ace object..")
         }
 
-        if (any(colnames(value[[i]]) != rownames(object))) {
-            msg <- c(msg, "'colnames(rowMaps[[..]])' must match the rownames of ace object.")
+        if (any(rownames(value[[i]]) != rownames(object))) {
+            msg <- c(msg, "'rownames(rowMaps[[..]])' must match the rownames of ace object.")
         }
     }
 
@@ -39,12 +39,12 @@ setValidity2("ACTIONetExperiment", function(object) {
     value = object@colMaps
     for (i in seq_along(value)) {
         .validate_MapType(value[[i]])
-        if ((NCOL(value[[i]]) != NC)) {
+        if ((NROW(value[[i]]) != NC)) {
             msg <- c(msg, "'nrow(colMaps[[..]])' should be equal to the number of columns of ace object..")
         }
 
-        if (any(colnames(value[[i]]) != colnames(object))) {
-            msg <- c(msg, "'colnames(colMaps[[..]])' must match the colnames of ace object.")
+        if (any(rownames(value[[i]]) != colnames(object))) {
+            msg <- c(msg, "'rownames(colMaps[[..]])' must match the colnames of ace object.")
         }
     }
 

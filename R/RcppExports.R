@@ -665,8 +665,8 @@ compute_sparse_network_diffusion <- function(G, X0, alpha = 0.85, rho = 1e-4, ep
 #' logPvals = compute_feature_specificity(specificity_scores[common.genes, ], annotations[common.genes, ])
 #' rownames(logPvals) = colnames(specificity_scores)
 #' colnames(logPvals) = colnames(annotations)
-assess_enrichment <- function(scores, associations, L) {
-    .Call(`_ACTIONet_assess_enrichment`, scores, associations, L)
+assess_enrichment <- function(scores, associations, thread_no = 0L) {
+    .Call(`_ACTIONet_assess_enrichment`, scores, associations, thread_no)
 }
 
 #' Computes disjoint clusters for vertices of G.
