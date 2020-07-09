@@ -202,27 +202,39 @@ setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(object, value
   object
 })
 
-#' @importFrom BiocGenerics counts
-#' @export
+#' @importFrom BiocGenerics counts<-
 setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$counts = value
     object
 })
 
-#' @export
 setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$logcounts = value
     object
 })
 
-
-#' @export
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$normcounts = value
     object
+})
+
+#' @importFrom BiocGenerics rownames<-
+setReplaceMethod("rownames", "ACTIONetExperiment", function(x, value) {
+  (x)
+  x = callNextMethod()
+  x = .change_slot_dim_name(x, 1)
+  x
+})
+
+#' @importFrom BiocGenerics colnames<-
+setReplaceMethod("colnames", "ACTIONetExperiment", function(x, value) {
+    (x)
+    x = callNextMethod()
+    x = .change_slot_dim_name(x, 2)
+    x
 })
 
 #' Set column-associated size factors
@@ -273,13 +285,13 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
     value <- sapply(names(value), function(n){
       v = value[[n]]
-      if(dim(v)[2] != dim(object)[d]){
+      if(dim(v)[1] != dim(object)[d]){
         err = sprintf("ncol(value) must equal %s.\n", dim(object)[d])
         stop(err)
       }
-      colnames(v) <- dimnames(object)[[d]]
+      rownames(v) <- dimnames(object)[[d]]
       if(is.null(rownames(v)))
-        rownames(v) <- 1:NROW(v)
+        colnames(v) <- 1:NCOL(v)
 
       if(is.null(S4Vectors::metadata(v)$type))
           v <- .set_map_type(v, map_types[[n]])
@@ -342,4 +354,24 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
   }
 
   return(value)
+}
+
+.change_slot_dim_name <- function(object, d){
+
+  if(d == 1){
+    X = object@rowMaps
+    X = lapply(X, function(x){
+      rownames(x) = rownames(object)
+      return(x)
+    })
+    object@rowMaps <- as(X, "SimpleList")
+  } else if(d == 2){
+    X = object@colMaps
+    X = lapply(X, function(x){
+      rownames(x) = colnames(object)
+      return(x)
+    })
+    object@colMaps <- as(X, "SimpleList")
+  }
+  return(object)
 }

@@ -32,7 +32,6 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
     }
 
     gene.scores = rowMaps(ace)[["unified_feature_specificity"]]
-    gene.scores = Matrix::t(gene.scores)
 
     common.genes = intersect(rownames(gene.scores), rownames(PCNet))
     if (length(common.genes) == 0) {
