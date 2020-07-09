@@ -41,7 +41,7 @@ assess.TF.activities.from.scores <- function(scores) {
 #' @examples
 #' TF.scores = assess.TF.activities.from.archetypes(ace)
 assess.TF.activities.from.archetypes <- function(ace) {
-    scores = Matrix::t(rowMaps(ace)$unified_feature_specificity)
+    scores = rowMaps(ace)$unified_feature_specificity
 
     TF.scores = assess.TF.activities.from.scores(scores)
 
@@ -95,14 +95,68 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' data('gProfilerDB_human')
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
-assess.geneset.enrichment <- function(ace, associations, L = 1000, specificity.slot = "unified_feature_specificity") {
-    scores = Matrix::t(as.matrix(rowMaps(ace)[[specificity.slot]]))
-
-    Enrichment.mat = assess.geneset.enrichment.from.scores(scores, associations,
-        L)
-
-    return(Enrichment.mat)
+assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
+	scores = rowMaps(ace)[[specificity.slot]]
+	common.genes = intersect(rownames(ace), rownames(associations))
+	
+	scores = as.matrix(scores[common.genes, ])
+	if(max(scores) > 100) {
+		scores = log1p(scores)
+	}
+	associations = as(associations[common.genes, ], 'sparseMatrix')
+	col.mask = (Matrix::colSums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+	associations = associations[, col.mask]
+	associations = associations[, -1]
+	enrichment.out = assess_enrichment(scores, associations)
+	
+	rownames(enrichment.out$logPvals) = colnames(associations)
+	rownames(enrichment.out$thresholds) = colnames(associations)
+	enrichment.out$scores = scores
+	
+	return(enrichment.out)
 }
+
+
+
+#' Performs geneset enrichment analysis on archetypes
+#'
+#' @param ace ACTIONetExperiment (ACE) output object
+#' @param associations Either a genes x pathways membership matrix, or a set of genesets
+#' @param L Maximum length of the top-ranked genes to consider
+#'
+#' @return Matrix pathway x cell type/states
+#'
+#' @examples
+#' data('gProfilerDB_human')
+#' associations = gProfilerDB_human$SYMBOL$WP
+#' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
+assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
+	scores = rowMaps(ace)[[specificity.slot]]
+	common.genes = intersect(rownames(ace), rownames(associations))
+	
+	scores = as.matrix(scores[common.genes, ])
+	if(max(scores) > 100) {
+		scores = log1p(scores)
+	}
+	associations = as(associations[common.genes, ], 'sparseMatrix')
+	col.mask = (Matrix::colSums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+	associations = associations[, col.mask]
+	associations = associations[, -1]
+	enrichment.out = assess_enrichment(scores, associations)
+	
+	rownames(enrichment.out$logPvals) = colnames(associations)
+	rownames(enrichment.out$thresholds) = colnames(associations)
+	enrichment.out$scores = scores
+	
+	return(enrichment.out)
+}
+
+
+
+
+
+
+
 
 
 
@@ -189,4 +243,30 @@ assess.genesets = function(arch.gs, terms.gs, N, min.pval = 1e-100, correct = T)
     # pp.adj = p.adjust(pp, 'BH') logPvals.out[idx] = -log10(pp.adj) }
 
     return(t(logPvals.out))
+}
+
+geneset.enrichment.gProfiler <- function(genes, top.terms = 10, col = "tomato", organism = "hsapiens", category = c("GO:BP", "REAC", "KEGG")) {
+    require(gprofiler2)
+    require(ggpubr)
+    
+    gp.out = gprofiler2::gost(genes, ordered_query = FALSE, exclude_iea = FALSE, correction_method = "fdr", sources = category, 
+        organism = organism)
+    if(is.null(gp.out))
+		return()
+    
+    terms = gp.out$result
+		
+    terms$logPval = -log10(terms$p_value)
+    
+    
+    too.long = which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
+    terms = terms[-too.long, ]
+    
+    terms = terms[order(terms$logPval, decreasing = TRUE), ]
+    sub.terms = terms[1:min(top.terms, sum(terms$logPval > 1)), ]
+    
+    p = ggbarplot(sub.terms, x = "term_name", y = "logPval", sort.val = "asc", orientation = "horiz", 
+        fill = col, xlab = "", ylab = "") + geom_hline(yintercept = -log10(0.05), col = "gray", lty = 2)
+        
+    return(p)
 }

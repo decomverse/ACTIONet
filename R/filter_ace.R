@@ -2,7 +2,7 @@
 
 filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL,
     min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
-    .check_and_load_package("MatrixGenerics")
+    .check_and_load_package("matrixStats")
     org_dim = dim(ace)
     ace.fil = ace
 
@@ -13,17 +13,18 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
         rows_mask = rep(TRUE, NROW(ace.fil))
         cols_mask = rep(TRUE, NCOL(ace.fil))
         if (!is.null(min_umis_per_cell)) {
-            umi_mask = MatrixGenerics::colSums2(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
+            umi_mask = matrixStats::colSums2(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(max_umis_per_cell)) {
-            umi_mask = MatrixGenerics::colSums2(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
+            umi_mask = matrixStats::colSums2(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(min_feats_per_cell)) {
-            feature_mask = MatrixGenerics::colSums2(assays(ace.fil)[[assay.name]] > 0) >= min_feats_per_cell
+            feature_mask = matrixStats::colSums2(assays(ace.fil)[[assay.name]] > 0) >=
+                min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
 

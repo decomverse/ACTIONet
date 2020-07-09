@@ -30,7 +30,7 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
     Xs = colMaps(from)
     Xs = Xs[colMapTypes(from) != "internal"]
 
-    transposed_factors = as(lapply(Xs, function(X) Matrix::t(X)), "SimpleList")
+    transposed_factors = as(lapply(Xs, function(X) X), "SimpleList")
     SingleCellExperiment::reducedDims(sce) = transposed_factors
 
     # rowData(sce) = DataFrame(as.data.frame(rowData(from))) colData(sce) =
@@ -45,7 +45,7 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
 #'
 #' @exportMethod coerce
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
-    SE = as(from, "SummarizedExperiment")
+    SE = as(from, "RangedSummarizedExperiment")
     rownames(SE) = rownames(from)
     rowData(SE) = rowData(from)
 
@@ -53,7 +53,7 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     ace = as(SE, "ACTIONetExperiment")
     # ace = as(from, 'ACTIONetExperiment')
 
-    transposed_factors = as(lapply(SingleCellExperiment::reducedDims(from), function(x) SummarizedExperiment(assays = list(X = Matrix::t(x)))), "SimpleList")
+    transposed_factors = as(lapply(SingleCellExperiment::reducedDims(from), function(x) SummarizedExperiment(assays = list(X = x))), "SimpleList")
     colMaps(ace) = transposed_factors
 
     rowData(ace) = DataFrame(as.data.frame(rowData(ace)))

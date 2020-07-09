@@ -268,7 +268,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
         obsm.subset = obsm.mats[obsm.public.idx]
         for (i in 1:length(obsm.subset)) {
             nn = names(obsm.subset)[[i]]
-            Y = obsm.subset[[i]]
+            Y = Matrix::t(obsm.subset[[i]])
             if (nrow(Y) <= 3) {
                 AD_nn = paste("X", nn, sep = "_")
             } else {
@@ -297,7 +297,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
         varm.subset = varm.mats[varm.public.idx]
         for (i in 1:length(varm.subset)) {
             nn = names(varm.subset)[[i]]
-            Y = varm.subset[[i]]
+            Y = Matrix::t(varm.subset[[i]])
             
             if (is.matrix(Y)) {
                 varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
@@ -324,7 +324,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
                 obsm.subset = obsm.mats[obsm.private.idx]
                 for (i in 1:length(obsm.subset)) {
                   nn = names(obsm.subset)[[i]]
-                  Y = obsm.subset[[i]]
+                  Y = Matrix::t(obsm.subset[[i]])
                   if (is.matrix(Y)) {
                     obsm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
                   } else {
@@ -347,7 +347,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
                 varm.subset = varm.mats[varm.private.idx]
                 for (i in 1:length(varm.subset)) {
                   nn = names(varm.subset)[[i]]
-                  Y = varm.subset[[i]]
+                  Y = Matrix::t(varm.subset[[i]])
                   
                   if (is.matrix(Y)) {
                     varm$create_dataset(nn, Y, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
@@ -477,7 +477,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
             } else {
                 nn = mn
             }
-            colMaps(ace)[[nn]] = Xr
+            colMaps(ace)[[nn]] = Matrix::t(Xr)
         }
     }
     
@@ -500,7 +500,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
             
             
             
-            rowMaps(ace)[[nn]] = Xr
+            rowMaps(ace)[[nn]] = Matrix::t(Xr)
         }
     }
     

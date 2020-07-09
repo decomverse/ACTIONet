@@ -2,9 +2,8 @@
 #'
 #' @param ace Input results to be clustered
 #' (alternatively it can be the ACTIONet igraph object)
-#' @param annotation.in Annotations to correct with missing values (NA) in it.
+#' @param initial_labels Annotations to correct with missing values (NA) in it.
 #' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param annotation.out Name of the updated annotations to be stored.
 #' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
 #' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
 #' @param adjust.levels Whether or not re-adjust labels at the end
@@ -13,7 +12,7 @@
 #'
 #' @examples
 #' ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, 'updated_archetype_annotations')
-infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, double.stochastic = FALSE, 
+infer.missing.cell.annotations <- function(ace, initial_labels, double.stochastic = FALSE, 
     max_iter = 3, adjust.levels = T) {
     Adj = colNets(ace)$ACTIONet
     A = as(Adj, "dgTMatrix")
@@ -28,7 +27,7 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
     }
     
     
-    Labels = preprocess.labels(annotation.in, ace)
+    Labels = preprocess.labels(initial_labels, ace)
     if (is.null(Labels)) {
         return(ace)
     }
@@ -66,18 +65,15 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
         Labels = updated.Labels
     }
     
-    colData(ace)[[annotation.out]] = Labels
-    
-    return(ace)
+    return(Labels)
 }
 
 #' Uses a variant of the label propagation algorithm to correct likely noisy labels
 #'
 #' @param ace Input results to be clustered
 #' (alternatively it can be the ACTIONet igraph object)
-#' @param annotation.in Annotations to correct with missing values (NA) in it.
+#' @param initial_labels Annotations to correct with missing values (NA) in it.
 #' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param annotation.out Name of the updated annotations to be stored.
 #' @param LFR.threshold How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)
 #' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
 #' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
@@ -88,7 +84,7 @@ infer.missing.cell.annotations <- function(ace, annotation.in, annotation.out, d
 #' @examples
 #' ace = add.cell.annotations(ace, cell.labels, 'input_annotations')
 #' ace = correct.cell.annotations(ace, 'input_annotations', 'updated_annotations')
-correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.threshold = 2, 
+correct.cell.annotations <- function(ace, initial_labels, LFR.threshold = 2, 
     double.stochastic = FALSE, max_iter = 3, adjust.levels = T, min.cell.fraction = 0.001) {
     Adj = colNets(ace)$ACTIONet
     A = as(Adj, "dgTMatrix")
@@ -103,7 +99,7 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
     }
     
     
-    Labels = preprocess.labels(annotation.in, ace)
+    Labels = preprocess.labels(initial_labels, ace)
     if (is.null(Labels)) {
         return(ace)
     }
@@ -116,9 +112,7 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
     mask = is.na(Labels)
     if (sum(mask) > 0) {
         Labels[mask] = NA
-        ace = infer.missing.cell.annotations(ace, annotation.in = Labels, annotation.out = annotation.out)
-        
-        Labels = colData(ace)[[annotation.out]]
+        Labels = infer.missing.cell.annotations(ace, initial_labels = Labels)
     }
     
     Annot = sort(unique(Labels))
@@ -148,10 +142,8 @@ correct.cell.annotations <- function(ace, annotation.in, annotation.out, LFR.thr
     } else {
         Labels = updated.Labels
     }
-    
-    colData(ace)[[annotation.out]] = Labels
-    
-    return(ace)
+        
+    return(Labels)
 }
 
 EnhAdj <- function(Adj) {

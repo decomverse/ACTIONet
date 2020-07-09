@@ -228,7 +228,7 @@ namespace ACTIONet {
 
 	
 	// Methods for feature enrichment analysis
-		mat assess_enrichment(mat &scores, mat &associations, int L);
+		field<mat> assess_enrichment(mat &scores, sp_mat &associations, int thread_no);
 
 
 	// Network tools

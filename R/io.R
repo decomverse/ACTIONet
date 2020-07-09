@@ -98,7 +98,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
         row.annotations = rowAnnot[IDX[[feature.name]], ]
         rownames(feature.counts.mat) = rowAnnot[IDX[[feature.name]], 1]
         colnames(feature.counts.mat) = colAnnot[, 1]
-        colMaps(ace)[[feature.name]] = feature.counts.mat
+        colMaps(ace)[[feature.name]] = Matrix::t(feature.counts.mat)
     }
 
     if (prefilter) {
@@ -225,7 +225,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
 
     # Load additional barcoded features
     for (feature.name in names(mats)[-1]) {
-        colMaps(ace)[[feature.name]] = mats[[feature.name]]
+        colMaps(ace)[[feature.name]] = Matrix::t(mats[[feature.name]])
     }
 
     if (prefilter) {
@@ -401,16 +401,12 @@ convert.ace.rownames <- function(ace, from = "ENSEMBL", to = "SYMBOL", species =
             column = to, multiVals = "first"))
         ids[is.na(ids)] = ""
 
-        ace$original_rownames = rownames(ace)
-
         rownames(ace) = ids
     } else if (species == "mouse") {
         library(org.Mm.eg.db)
         suppressWarnings(ids <- mapIds(org.Mm.eg.db, keys = row.names(ace), keytype = from,
             column = to, multiVals = "first"))
         ids[is.na(ids)] = ""
-
-        ace$original_rownames = rownames(ace)
 
         rownames(ace) = ids
     }
@@ -458,22 +454,22 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.al
     colNets(ace)$ACTIONet = G
     vis.out = ACTIONet.out$vis.out
 
-    colMaps(ace)$ACTIONet2D = Matrix::t(vis.out$coordinates)
-    colMaps(ace)$ACTIONet3D = Matrix::t(vis.out$coordinates_3D)
-    colMaps(ace)$denovo_color = Matrix::t(vis.out$colors)
+    colMaps(ace)$ACTIONet2D = vis.out$coordinates
+    colMaps(ace)$ACTIONet3D = vis.out$coordinates_3D
+    colMaps(ace)$denovo_color = vis.out$colors
 
 
 
     if (full.import == T) {
-        colMaps(ace)[["H_stacked"]] = as(ACTIONet.out$reconstruct.out$H_stacked,
+        colMaps(ace)[["H_stacked"]] = as(Matrix::t(ACTIONet.out$reconstruct.out$H_stacked),
             "sparseMatrix")
-        colMaps(ace)[["C_stacked"]] = as(t(ACTIONet.out$reconstruct.out$C_stacked),
+        colMaps(ace)[["C_stacked"]] = as(ACTIONet.out$reconstruct.out$C_stacked,
             "sparseMatrix")
     }
 
     unification.out = ACTIONet.out$unification.out
-    colMaps(ace)[["H_unified"]] = as(ACTIONet.out$unification.out$H.core, "sparseMatrix")
-    colMaps(ace)[["C_unified"]] = as(t(ACTIONet.out$unification.out$C.core), "sparseMatrix")
+    colMaps(ace)[["H_unified"]] = as(Matrix::t(ACTIONet.out$unification.out$H.core), "sparseMatrix")
+    colMaps(ace)[["C_unified"]] = as(ACTIONet.out$unification.out$C.core, "sparseMatrix")
 
     ace$assigned_archetype = ACTIONet.out$unification.out$assignments.core
     ace$node_centrality = compute_archetype_core_centrality(colNets(ace)$ACTIONet,
@@ -483,12 +479,18 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.al
     # ace$assigned_archetype)
 
     specificity.out = ACTIONet.out$unification.out$DE.core
-    rowMaps(ace)[["unified_feature_profile"]] = Matrix::t(specificity.out[["archetypes"]])
-    rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
+    if(is.list(specificity.out)) {
+		rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
+		rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
 
-    rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-    rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
-
+		rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
+		rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
+	} else {
+		rowMaps(ace)[["unified_feature_profile"]] = assays(specificity.out)[["profile"]]
+		rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
+		rowMaps(ace)[["unified_feature_specificity"]] = assays(specificity.out)[["significance"]]
+		rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"		
+	}
 
     # Prepare output
     if (return.all) {
