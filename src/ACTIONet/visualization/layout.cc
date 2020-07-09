@@ -230,7 +230,7 @@ namespace ACTIONet {
 		*/
 		
 		// Initial coordinates of vertices (0-simplices)
-		mat initial_coor2D = init_coors.rows(0, 1);		
+		mat initial_coor2D = init_coors.rows(0, 1);
 		vector<double> head_vec(initial_coor2D.memptr(), initial_coor2D.memptr()+initial_coor2D.n_elem);		
 		vector<double> tail_vec(head_vec);
 		
@@ -243,7 +243,8 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
 		mat coordinates(result.data(), 2, nV);
-		coordinates = robust_zscore(trans(coordinates));
+		//coordinates = robust_zscore(trans(coordinates));
+		coordinates = trans(coordinates);
 		
 		printf("Done\n"); fflush(stdout);
 
@@ -264,7 +265,8 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);	
 		
 		mat coordinates_3D(result.data(), 3, nV);	
-		coordinates_3D = robust_zscore(trans(coordinates_3D));
+		//coordinates_3D = robust_zscore(trans(coordinates_3D));
+		coordinates_3D = trans(coordinates_3D);
 		
 		printf("Done\n"); fflush(stdout);
 			
@@ -346,9 +348,10 @@ namespace ACTIONet {
 		
 		// 1) Smooth similarity scores
 		sp_mat G = W;
-		G.for_each( [](sp_mat::elem_type& val) { val = -log(val); } );		
+		G.for_each( [](sp_mat::elem_type& val) { val = 1 / val; } );		
 		W = smoothKNN(G, thread_no);
-
+		
+		
 		// 2) Use prior embedding to initialize new points (after smoothing -- might need further thresholding prior to averaging)
 		sp_mat Wn = normalise(W, 1, 0); // soft-max
 		mat arch_coor2D = mat(coor2D * Wn);

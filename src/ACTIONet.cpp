@@ -1113,13 +1113,16 @@ sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha = 0.
 //' rownames(logPvals) = colnames(specificity_scores)
 //' colnames(logPvals) = colnames(annotations)
 // [[Rcpp::export]]
-mat assess_enrichment(mat &scores, mat &associations, int L) {
+List assess_enrichment(mat &scores, sp_mat &associations, int thread_no = 0) {
 	
-	mat logPvals = ACTIONet::assess_enrichment(scores, associations, L);
+	field<mat> res = ACTIONet::assess_enrichment(scores, associations, thread_no);
 
-	return(logPvals);
+    List out_list;
+	out_list["logPvals"] = res(0);
+	out_list["thresholds"] = res(1);
+
+	return(out_list);
 }
-
 
 
 	

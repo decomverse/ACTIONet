@@ -211,10 +211,20 @@ setGeneric("normcounts", function(object, ...) standardGeneric("normcounts"))
 #' @export
 setGeneric("normcounts<-", function(object, ..., value) standardGeneric("normcounts<-"))
 
+#' @export
 setGeneric("reducedDimNames", function(object) standardGeneric("reducedDimNames"))
 
+#' @export
 setGeneric("reducedDimNames<-", function(object, value) standardGeneric("reducedDimNames<-"))
 
+#' @export
 setGeneric("reducedDims", function(object, ...) standardGeneric("reducedDims"))
 
+#' @export
 setGeneric("reducedDims<-", function(object, value) standardGeneric("reducedDims<-"))
+
+# #' @export
+# setGeneric("rownames<-", function(object, ..., value) standardGeneric("rownames<-"))
+#
+# #' @export
+# setGeneric("colnames<-", function(object, ..., value) standardGeneric("colnames<-"))
