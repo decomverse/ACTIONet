@@ -231,7 +231,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' plot.ACTIONet(ace)
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1,
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1, network_density = 1,
     reduction_slot = "ACTIONet3D", net_slot = "ACTIONet") {
     G = colNets(ace)[[net_slot]]
 
