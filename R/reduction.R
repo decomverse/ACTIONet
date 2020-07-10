@@ -13,8 +13,7 @@
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
 reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
-    norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0,
-    return_V = FALSE) {
+    norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
     ace <- as(ace, "ACTIONetExperiment")
     if (!(data_slot %in% names(assays(ace)))) {
         if (norm_method != "none") {
@@ -63,10 +62,10 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
     S = assays(ace.norm)[[data_slot]]
     if (is.matrix(S)) {
         reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max_iter,
-            seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
+            seed = seed, SVD_algorithm = SVD_algorithm)
     } else {
         reduction.out = reduce_kernel(S, reduced_dim = reduced_dim, iter = max_iter,
-            seed = seed, reduction_algorithm = 1, SVD_algorithm = SVD_algorithm)
+            seed = seed, SVD_algorithm = SVD_algorithm)
     }
 
     S_r = reduction.out$S_r
@@ -76,12 +75,25 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
     colMapTypes(ace.norm)[[reduction_slot]] = "reduction"
 
 
-    if (return_V) {
-        V = reduction.out[["V"]]
-        colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
-        rowMaps(ace.norm)[["rotation"]] = V
-        rowMapTypes(ace.norm)[["rotation"]] = "reduction"
-    }
+	V = reduction.out$V
+	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))	
+	rowMaps(ace.norm)[[sprintf("%s_V", reduction_slot)]] = V
+	rowMapTypes(ace.norm)[[sprintf("%s_V", reduction_slot)]] = "internal"
+
+
+	A = reduction.out$A
+	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))	
+	rowMaps(ace.norm)[[sprintf("%s_A", reduction_slot)]] = A
+	rowMapTypes(ace.norm)[[sprintf("%s_A", reduction_slot)]] = "internal"
+
+
+	B = reduction.out$B
+	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))	
+	colMaps(ace.norm)[[sprintf("%s_B", reduction_slot)]] = B
+	colMapTypes(ace.norm)[[sprintf("%s_B", reduction_slot)]] = "internal"
+	
+	
+	metadata(ace.norm)[[sprintf("%s_sigma", reduction_slot)]] = reduction.out$sigma
 
     # metadata(ace.norm)$reduction.time = Sys.time()
     return(ace.norm)
