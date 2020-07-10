@@ -20,7 +20,7 @@ A named list with U, sigma, and V components
 }
 \description{
 This is direct implementation of the randomized SVD algorithm:
-XFrom: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
+From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
 }
 \examples{
 A = randn(100, 20)
