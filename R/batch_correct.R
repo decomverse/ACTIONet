@@ -107,3 +107,64 @@ batch.correct.ace.Harmony <- function(ace, batch_attr, reduction_slot = "ACTION"
         meta_data = batch_attr, do_pca = FALSE)
     return(ace)
 }
+
+
+#' @export
+orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION") {
+	S = logcounts(ace)
+	S_r = colMaps(ace)[[sprintf("%s", reduction_slot)]]
+	V = rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
+	A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
+	B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
+	sigma = metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
+	
+	reduction.out = orthogonalize_batch_effect(S = S, old_S_r = S_r, old_V = V, old_A = A, old_B = B, old_sigma = sigma, design = design.mat)
+
+    S_r = reduction.out$S_r
+    colnames(S_r) = colnames(ace)
+    rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
+    colMaps(ace)[[sprintf("%s_ortho", reduction_slot)]] <- Matrix::t(S_r)
+    colMapTypes(ace)[[sprintf("%s_ortho", reduction_slot)]] = "reduction"
+
+
+	V = reduction.out$V
+	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))	
+	rowMaps(ace)[[sprintf("%s_ortho_V", reduction_slot)]] = V
+	rowMapTypes(ace)[[sprintf("%s_ortho_V", reduction_slot)]] = "internal"
+
+
+	A = reduction.out$A
+	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))	
+	rowMaps(ace)[[sprintf("%s_ortho_A", reduction_slot)]] = A
+	rowMapTypes(ace)[[sprintf("%s_ortho_A", reduction_slot)]] = "internal"
+
+
+	B = reduction.out$B
+	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))	
+	colMaps(ace)[[sprintf("%s_ortho_B", reduction_slot)]] = B
+	colMapTypes(ace)[[sprintf("%s_ortho_B", reduction_slot)]] = "internal"
+	
+	
+	metadata(ace)[[sprintf("%s_ortho_sigma", reduction_slot)]] = reduction.out$sigma
+	
+	return(ace)
+}
+
+#' @export
+orthogonalize.ace.batch.simple <- function(ace, batch.vec, reduction_slot = "ACTION") {
+	batch.vec = as.factor(batch.vec)
+	design.mat = model.matrix(~ batch.vec)
+	
+	ace.corrected = orthogonalize.ace.batch(ace, design.mat, reduction_slot = "ACTION")
+	return(ace.corrected)
+	
+}
+
+#' @export
+reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat, reduction_slot = "ACTION", ...) {
+	ace = reduce.ace(ace, reduction_slot = reduction_slot, ...)
+	
+	ace.corrected = orthogonalize.ace.batch(ace, design.mat, reduction_slot = reduction_slot)
+	return(ace.corrected)
+}
+
