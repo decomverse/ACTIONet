@@ -10,13 +10,15 @@
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
   trans.fact = 1.5,
-  node.size = 1,
+  node.size = 0.1,
   CPal = CPal20,
   add.text = TRUE,
   suppress.legend = TRUE,
   legend.pos = "bottomright",
   title = "",
   border.contrast.factor = 0.1,
+  add.backbone = FALSE,
+  arch.size.factor = 3,
   coordinate_slot = "ACTIONet2D"
 )
 }
