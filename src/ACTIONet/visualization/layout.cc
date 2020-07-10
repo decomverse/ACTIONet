@@ -166,7 +166,7 @@ namespace ACTIONet {
 			
 		field<mat> res(3);
 
-		mat init_coors = trans(robust_zscore(trans(S_r.rows(0, 2))));
+		mat init_coors = trans(zscore(trans(S_r.rows(0, 2))));
 		
 		printf("Running layout with: compactness=%d, # epochs = %d\n", compactness_level, n_epochs);
 		
