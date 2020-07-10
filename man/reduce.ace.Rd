@@ -12,8 +12,7 @@ reduce.ace(
   norm_method = "default",
   reduction_slot = "ACTION",
   seed = 0,
-  SVD_algorithm = 0,
-  return_V = FALSE
+  SVD_algorithm = 0
 )
 }
 \arguments{
