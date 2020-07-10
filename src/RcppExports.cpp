@@ -102,8 +102,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // reduce_kernel
-List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
-RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
+List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -111,16 +111,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type reduced_dim(reduced_dimSEXP);
     Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    Rcpp::traits::input_parameter< int >::type reduction_algorithm(reduction_algorithmSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
     Rcpp::traits::input_parameter< bool >::type prenormalize(prenormalizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize));
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize));
     return rcpp_result_gen;
 END_RCPP
 }
 // reduce_kernel_full
-List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
-RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP reduction_algorithmSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
+List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -128,10 +127,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type reduced_dim(reduced_dimSEXP);
     Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    Rcpp::traits::input_parameter< int >::type reduction_algorithm(reduction_algorithmSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
     Rcpp::traits::input_parameter< bool >::type prenormalize(prenormalizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize));
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -788,6 +786,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// perturbedSVD
+List perturbedSVD(mat u, vec d, mat v, mat A, mat B);
+RcppExport SEXP _ACTIONet_perturbedSVD(SEXP uSEXP, SEXP dSEXP, SEXP vSEXP, SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat >::type u(uSEXP);
+    Rcpp::traits::input_parameter< vec >::type d(dSEXP);
+    Rcpp::traits::input_parameter< mat >::type v(vSEXP);
+    Rcpp::traits::input_parameter< mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< mat >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(perturbedSVD(u, d, v, A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
 // computeFullSim
 mat computeFullSim(mat& H, int thread_no);
 RcppExport SEXP _ACTIONet_computeFullSim(SEXP HSEXP, SEXP thread_noSEXP) {
@@ -824,6 +837,57 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// deflate_reduction
+List deflate_reduction(mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& A, mat& B);
+RcppExport SEXP _ACTIONet_deflate_reduction(SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type old_S_r(old_S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_V(old_VSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_A(old_ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_B(old_BSEXP);
+    Rcpp::traits::input_parameter< vec& >::type old_sigma(old_sigmaSEXP);
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(deflate_reduction(old_S_r, old_V, old_A, old_B, old_sigma, A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// orthogonalize_batch_effect
+List orthogonalize_batch_effect(sp_mat& S, mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& design);
+RcppExport SEXP _ACTIONet_orthogonalize_batch_effect(SEXP SSEXP, SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP designSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_S_r(old_S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_V(old_VSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_A(old_ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_B(old_BSEXP);
+    Rcpp::traits::input_parameter< vec& >::type old_sigma(old_sigmaSEXP);
+    Rcpp::traits::input_parameter< mat& >::type design(designSEXP);
+    rcpp_result_gen = Rcpp::wrap(orthogonalize_batch_effect(S, old_S_r, old_V, old_A, old_B, old_sigma, design));
+    return rcpp_result_gen;
+END_RCPP
+}
+// orthogonalize_batch_effect_full
+List orthogonalize_batch_effect_full(mat& S, mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& design);
+RcppExport SEXP _ACTIONet_orthogonalize_batch_effect_full(SEXP SSEXP, SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP designSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_S_r(old_S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_V(old_VSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_A(old_ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_B(old_BSEXP);
+    Rcpp::traits::input_parameter< vec& >::type old_sigma(old_sigmaSEXP);
+    Rcpp::traits::input_parameter< mat& >::type design(designSEXP);
+    rcpp_result_gen = Rcpp::wrap(orthogonalize_batch_effect_full(S, old_S_r, old_V, old_A, old_B, old_sigma, design));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -833,8 +897,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_FengSVD_full", (DL_FUNC) &_ACTIONet_FengSVD_full, 4},
     {"_ACTIONet_HalkoSVD", (DL_FUNC) &_ACTIONet_HalkoSVD, 4},
     {"_ACTIONet_HalkoSVD_full", (DL_FUNC) &_ACTIONet_HalkoSVD_full, 4},
-    {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 7},
-    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 7},
+    {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 6},
+    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 6},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 3},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
@@ -883,9 +947,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_PCA2SVD_full", (DL_FUNC) &_ACTIONet_PCA2SVD_full, 4},
     {"_ACTIONet_SVD2PCA", (DL_FUNC) &_ACTIONet_SVD2PCA, 4},
     {"_ACTIONet_SVD2PCA_full", (DL_FUNC) &_ACTIONet_SVD2PCA_full, 4},
+    {"_ACTIONet_perturbedSVD", (DL_FUNC) &_ACTIONet_perturbedSVD, 5},
     {"_ACTIONet_computeFullSim", (DL_FUNC) &_ACTIONet_computeFullSim, 2},
     {"_ACTIONet_csr_sort_indices_inplace", (DL_FUNC) &_ACTIONet_csr_sort_indices_inplace, 3},
     {"_ACTIONet_csc_sort_indices_inplace", (DL_FUNC) &_ACTIONet_csc_sort_indices_inplace, 3},
+    {"_ACTIONet_deflate_reduction", (DL_FUNC) &_ACTIONet_deflate_reduction, 7},
+    {"_ACTIONet_orthogonalize_batch_effect", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect, 7},
+    {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},
     {NULL, NULL, 0}
 };
 
