@@ -210,6 +210,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
     colMaps(ace)$denovo_color = X
     colMapTypes(ace)[["denovo_color"]] = "embedding"
 
+	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     return(ace)
 }
@@ -259,6 +260,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
     colMaps(ace)$denovo_color = X
     colMapTypes(ace)[["denovo_color"]] = "embedding"
 
+	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     return(ace)
 }

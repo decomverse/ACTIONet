@@ -9,7 +9,7 @@ ifeq ($(UNAME),Linux)
     NPROC=$(shell nproc)
     ifeq ($(MKLROOT),) 
         $(warning Can not find MKL)    
-        PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS)
+        PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
     else
         $(info Found MKL)    
         PKG_CPPFLAGS+=-I${MKLROOT}/include
@@ -41,4 +41,5 @@ else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
 else
     $(error Unsupported OS ${UNAME})    
 endif
+PKG_LIBS+=-lcholmod
 MAKEFLAGS+="-j $(NPROC)

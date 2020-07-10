@@ -62,15 +62,6 @@ void mds_direct(int n, int kd, double* X, double* d, double* w, int t_max, doubl
     
 namespace ACTIONet {
 	// Main structures	
-		// To store the output of reduce_kernel()
-		struct ReducedKernel {
-			mat S_r;
-			mat V;
-			vec lambda;
-			vec exp_var;
-		};
-		
-		
 		// To store the output of compute_AA_coreset()
 		struct Coreset {
 			mat S_coreset;
@@ -126,19 +117,15 @@ namespace ACTIONet {
 		field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed);	
 
 		field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed);
-		field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
-
-		// ACTION-based kernel reduction algorithms
-		ReducedKernel ACTION_reduction(sp_mat &A, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
-		ReducedKernel ACTION_reduction(mat &A, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+		//field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
+		field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed);
 		
 		// Successive Projection Algorithm (SPA) to solve separable NMF
 		SPA_results run_SPA(mat M, int k);
 		
 		// min_{X} (|| AX - B ||) s.t. simplex constraint using ACTIVE Set Method
 		//mat run_simplex_regression(mat &A, mat &B);
-		mat run_simplex_regression(mat &A, mat &B, bool computeXtX);
-		
+		mat run_simplex_regression(mat &A, mat &B, bool computeXtX);		
 		mat run_simplex_regression_proxdist(mat &X, mat &Y, int pmaxiter, int pincmaxiter);
 
 
@@ -156,20 +143,31 @@ namespace ACTIONet {
 		
 		
 	// Entry-points to compute a reduced kernel matrix	
-		ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
-		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
+		field<mat> perturbedSVD(field<mat> SVD_results, mat &A, mat &B);
 		
-		ReducedKernel SVD2ACTIONred(sp_mat &S, field<mat> SVD_results);
-		ReducedKernel SVD2ACTIONred(mat &S, field<mat> SVD_results);
+		field<mat> SVD2ACTIONred(sp_mat &S, field<mat> SVD_results);
+		field<mat> SVD2ACTIONred(mat &S, field<mat> SVD_results);
 
-		ReducedKernel PCA2ACTIONred(sp_mat &S, field<mat> PCA_results);
-		ReducedKernel PCA2ACTIONred(mat &S, field<mat> PCA_results);
+		field<mat> PCA2ACTIONred(sp_mat &S, field<mat> PCA_results);
+		field<mat> PCA2ACTIONred(mat &S, field<mat> PCA_results);
+
 		
 		field<mat> SVD2PCA(sp_mat &S, field<mat> SVD_results);
 		field<mat> SVD2PCA(mat &S, field<mat> SVD_results);
 		field<mat> PCA2SVD(sp_mat &S, field<mat> PCA_results);
 		field<mat> PCA2SVD(mat &S, field<mat> PCA_results);
+		
+		field<mat> reduce_kernel(sp_mat &S, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+		field<mat> reduce_kernel(mat &S, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+
+		field<mat> ACTIONred2SVD(field<mat> SVD_results);
 	
+		field<mat> deflate_reduction(field<mat> SVD_results, mat &A, mat &B);
+
+		field<mat> orthogonalize_batch_effect(sp_mat &S, field<mat> SVD_results, mat &design);
+		field<mat> orthogonalize_batch_effect(mat &S, field<mat> SVD_results, mat &design);	
+	
+
 
 	// ACTION decomposition
 		ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);

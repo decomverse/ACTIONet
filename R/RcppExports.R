@@ -88,7 +88,7 @@ FengSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' Computes SVD decomposition
 #'
 #' This is direct implementation of the randomized SVD algorithm:
-#' XFrom: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
+#' From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
 #' 
 #' @param A Input matrix ("sparseMatrix")
 #' @param dim Dimension of SVD decomposition
@@ -108,7 +108,7 @@ HalkoSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #' Computes SVD decomposition
 #'
 #' This is direct implementation of the randomized SVD algorithm:
-#' XFrom: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
+#' From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
 #' 
 #' @param A Input matrix ("matrix")
 #' @param dim Dimension of SVD decomposition
@@ -144,8 +144,8 @@ HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
-reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, reduction_algorithm = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
-    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize)
+reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
+    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize)
 }
 
 #' Computes reduced kernel matrix for a given (single-cell) profile
@@ -167,8 +167,8 @@ reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, reduction_
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
-reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, reduction_algorithm = 1L, SVD_algorithm = 1L, prenormalize = FALSE) {
-    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize)
+reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
+    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize)
 }
 
 #' Solves min_{X} (|| AX - B ||) s.t. simplex constraint
@@ -886,6 +886,10 @@ SVD2PCA_full <- function(S, u, d, v) {
     .Call(`_ACTIONet_SVD2PCA_full`, S, u, d, v)
 }
 
+perturbedSVD <- function(u, d, v, A, B) {
+    .Call(`_ACTIONet_perturbedSVD`, u, d, v, A, B)
+}
+
 computeFullSim <- function(H, thread_no = 0L) {
     .Call(`_ACTIONet_computeFullSim`, H, thread_no)
 }
@@ -896,5 +900,17 @@ csr_sort_indices_inplace <- function(Ap, Aj, Ax) {
 
 csc_sort_indices_inplace <- function(Ap, Ai, Ax) {
     invisible(.Call(`_ACTIONet_csc_sort_indices_inplace`, Ap, Ai, Ax))
+}
+
+deflate_reduction <- function(old_S_r, old_V, old_A, old_B, old_sigma, A, B) {
+    .Call(`_ACTIONet_deflate_reduction`, old_S_r, old_V, old_A, old_B, old_sigma, A, B)
+}
+
+orthogonalize_batch_effect <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, design) {
+    .Call(`_ACTIONet_orthogonalize_batch_effect`, S, old_S_r, old_V, old_A, old_B, old_sigma, design)
+}
+
+orthogonalize_batch_effect_full <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, design) {
+    .Call(`_ACTIONet_orthogonalize_batch_effect_full`, S, old_S_r, old_V, old_A, old_B, old_sigma, design)
 }
 

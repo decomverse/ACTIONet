@@ -5,7 +5,7 @@
 //#undef FC_LEN_T
 
 
-#include <cblas.h>
+#include <my_cblas.h>
 
 //#undef ARMA_USE_MKL_TYPES
 //#define ARMA_64BIT_WORD
