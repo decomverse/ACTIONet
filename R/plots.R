@@ -105,9 +105,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
-plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
-    legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, add.backbone = FALSE, arch.size.factor = 3, coordinate_slot = "ACTIONet2D") {
+plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1.5, node.size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, add.backbone = FALSE, arch.size.factor = 3, coordinate_slot = "ACTIONet2D") {
 
     text.halo.width = 0.1
     label.text.size = 0.8
@@ -613,7 +611,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 			W = exp(scale(Matrix::t(colMaps(ace)[["H_unified"]])))
 			cs = Matrix::colSums(W)
 			W = t(scale(W, center = F, scale = cs))
-			
+
             cell.scores = W %*% Matrix::t(enrichment.table[selected.features, ])
         } else {
             cell.scores = NULL
@@ -1092,11 +1090,11 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
 
 plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
     trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, coordinate_slot = "ACTIONet2D") {
-		
+
 	if(! ("backbone" %in% names(metadata(ace))) ) {
 		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
 		return()
-	}	
+	}
 	backbone = metadata(ace)$backbone
 
     node.size = node.size * 0.25
@@ -1117,7 +1115,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
             return()
         }
     }
-    
+
     if (is.null(labels)) {
         if (class(ace) == "ACTIONetExperiment") {
             vCol = rgb(colMaps(ace)$denovo_color)
@@ -1148,15 +1146,15 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
         names(Pal) = Annot
         vCol = Pal[names(labels)]
-        
+
         if(is.null(arch.labels)) {
         	arch.annot = annotate.archetypes.using.labels(ace, labels)
         	arch.labels = arch.annot$Labels
-        }        
+        }
     }
 	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
 
-	
+
 
     if (!is.null(transparency.attr)) {
         z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
@@ -1191,13 +1189,13 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
         xlim = XL, ylim = YL)
 
 
-    ## Add backbone anchors    
+    ## Add backbone anchors
 	cell.RGB = Matrix::t(col2rgb(vCol))/255
     cells.Lab = grDevices::convertColor(color = cell.RGB,from = "sRGB", to = "Lab")
     arch.Lab = Matrix::t(ace$archetype_footprint) %*% cells.Lab
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 	aCol = rgb(arch.RGB)
-	
+
 	w = Matrix::colSums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
@@ -1221,20 +1219,20 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
             col = "#dddddd", cex = label.text.size)
     }
     text(xy$x, xy$y, arch.labels, col = colorspace::darken(aCol, 0.5), cex = label.text.size)
-    
-    
+
+
 	par(new=TRUE)
 	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title, xlim = XL, ylim = YL)
 
-    
+
 }
 plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
     trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, realign = FALSE, coordinate_slot = "ACTIONet2D") {
-		
+
 	if(! ("backbone" %in% names(metadata(ace))) ) {
 		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
 		return()
-	}	
+	}
 	backbone = metadata(ace)$backbone
 
     node.size = node.size * 0.25
@@ -1255,7 +1253,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
             return()
         }
     }
-    
+
     if (is.null(labels)) {
         if (class(ace) == "ACTIONetExperiment") {
             vCol = rgb(colMaps(ace)$denovo_color)
@@ -1286,15 +1284,15 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
         names(Pal) = Annot
         vCol = Pal[names(labels)]
-        
+
         if(is.null(arch.labels)) {
         	arch.annot = annotate.archetypes.using.labels(ace, labels)
         	arch.labels = arch.annot$Labels
-        }        
+        }
     }
 	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
 
-	
+
 
     if (!is.null(transparency.attr)) {
         z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
@@ -1311,13 +1309,13 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
 
 
-    ## Add backbone anchors    
+    ## Add backbone anchors
 	cell.RGB = Matrix::t(col2rgb(vCol))/255
     cells.Lab = grDevices::convertColor(color = cell.RGB,from = "sRGB", to = "Lab")
     arch.Lab = Matrix::t(ace$archetype_footprint) %*% cells.Lab
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 	aCol = rgb(arch.RGB)
-	
+
 	w = Matrix::colSums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
@@ -1329,22 +1327,22 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 		arch.coors = backbone$coordinates
 	}
 
-	
+
 	graphics::plot(arch.coors, pch = 25, cex = 0, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
-	
+
 	Adj = as(backbone$G, "dgTMatrix")
 	kappa = 0.1 + 0.9 / (1 + exp(-2*scale(Adj@x)))
 	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
-	
+
 
 
     text.halo.width = 0.1
     label.text.size = label.text.size*0.6
 
-    
+
      layout.labels(x = arch.coors[, 1], y = arch.coors[, 2]-strheight("A"), labels = arch.labels, col = colorspace::darken(aCol,
             0.5), bg = "#eeeeee", r = text.halo.width, cex = label.text.size)
-     
+
 
 	par(new=TRUE)
 	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
