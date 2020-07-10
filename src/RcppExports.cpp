@@ -837,6 +837,25 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// run_subACTION
+List run_subACTION(mat& S_r, mat& W_parent, mat& H_parent, int kk, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+RcppExport SEXP _ACTIONet_run_subACTION(SEXP S_rSEXP, SEXP W_parentSEXP, SEXP H_parentSEXP, SEXP kkSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type W_parent(W_parentSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H_parent(H_parentSEXP);
+    Rcpp::traits::input_parameter< int >::type kk(kkSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_subACTION(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // deflate_reduction
 List deflate_reduction(mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& A, mat& B);
 RcppExport SEXP _ACTIONet_deflate_reduction(SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP ASEXP, SEXP BSEXP) {
@@ -951,6 +970,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_computeFullSim", (DL_FUNC) &_ACTIONet_computeFullSim, 2},
     {"_ACTIONet_csr_sort_indices_inplace", (DL_FUNC) &_ACTIONet_csr_sort_indices_inplace, 3},
     {"_ACTIONet_csc_sort_indices_inplace", (DL_FUNC) &_ACTIONet_csc_sort_indices_inplace, 3},
+    {"_ACTIONet_run_subACTION", (DL_FUNC) &_ACTIONet_run_subACTION, 9},
     {"_ACTIONet_deflate_reduction", (DL_FUNC) &_ACTIONet_deflate_reduction, 7},
     {"_ACTIONet_orthogonalize_batch_effect", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect, 7},
     {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},

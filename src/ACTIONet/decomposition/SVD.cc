@@ -191,8 +191,7 @@ namespace ACTIONet {
 		
 		/* Main iteration */
 		while (iter < iters) {	
-			printf("Iter %d\n", iter);
-					
+				
 			j = 0;
 			
 			/*  Normalize starting vector */
