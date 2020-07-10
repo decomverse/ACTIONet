@@ -4,16 +4,16 @@
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
 **Install library dependencies**
-Additionally, `ACTIONet` package depends on the HDF5 library to import/export results to standard formats compatible with other packages. To install the related package on debian-based linux machines, run:
+To install the `ACTIONet` dependencie on debian-based linux machines, run:
 
 ```bash
-sudo apt-get install libhdf5-dev
+sudo apt-get install libhdf5-dev libsuitesparse-dev
 ```
 
-For Mac-based systems, you can use [brew](https://brew.sh/) to install HDF5 library:
+For Mac-based systems, you can use [brew](https://brew.sh/) instead:
 
 ```bash
-brew install hdf5
+brew install hdf5 suite-sparse
 ```
 
 ### Installing ACTIONet R Package

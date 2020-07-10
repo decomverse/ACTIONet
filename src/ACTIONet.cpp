@@ -1852,6 +1852,28 @@ void csc_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Ai, NumericVecto
 	}
 }
 
+// [[Rcpp::export]]
+List run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
+
+	ACTIONet::ACTION_results trace = ACTIONet::run_subACTION(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta);
+
+	List res;
+	
+	List C(k_max);
+	for (int i = k_min; i <= k_max; i++) {
+		C[i-1] = trace.C[i];
+	}
+	res["C"] = C;	
+
+	List H(k_max);
+	for (int i = k_min; i <= k_max; i++) {
+		H[i-1] = trace.H[i];
+	}
+	res["H"] = H;
+	
+		
+	return res;
+}
 
 // [[Rcpp::export]]
 List deflate_reduction(mat &old_S_r, mat &old_V, mat &old_A, mat &old_B, vec &old_sigma, mat &A, mat &B) {
@@ -1923,7 +1945,7 @@ List orthogonalize_batch_effect(sp_mat &S, mat &old_S_r, mat &old_V, mat &old_A,
 
 
 
-// [[Rcpp::export]]
+//[[Rcpp::export]]
 List orthogonalize_batch_effect_full(mat &S, mat &old_S_r, mat &old_V, mat &old_A, mat &old_B, vec &old_sigma, mat &design) {
 	field<mat> SVD_results(5);
 	
@@ -1955,3 +1977,5 @@ List orthogonalize_batch_effect_full(mat &S, mat &old_S_r, mat &old_V, mat &old_
 		
 	return res;
 }
+
+
