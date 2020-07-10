@@ -7,8 +7,8 @@
 run.ACTIONet(
   ace,
   k_max = 30,
-  min.cells.per.arch = 10,
-  min_specificity_z_threshold = -1,
+  min.cells.per.arch = 2,
+  min_specificity_z_threshold = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
@@ -17,7 +17,8 @@ run.ACTIONet(
   thread_no = 0,
   data_slot = "logcounts",
   reduction_slot = "ACTION",
-  unification.resolution = 0.1,
+  unification.resolution = 5,
+  footprint_alpha = 0.85,
   max_iter_ACTION = 50,
   full.trace = FALSE
 )

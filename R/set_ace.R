@@ -174,32 +174,32 @@ setReplaceMethod("rowEmbeddings", "ACTIONetExperiment", function(object, value) 
     object
 })
 
-setReplaceMethod("reducedDims", "ACTIONetExperiment", function(object, value) {
+setReplaceMethod("reducedDims", "ACTIONetExperiment", function(x, value) {
   if (length(value) == 0) {
     err = sprintf("value passed to 'reducedDims' cannot be empty. To clear column-associated reductions use 'colReductions'.\n")
     stop(err)
   }
 
-  value = as(lapply(value, function(object) Matrix::t(object)), "SimpleList")
+  # value = as(lapply(value, function(x) Matrix::t(x)), "SimpleList")
   value = .coerce_input_to_SE(value)
   for(i in seq_along(value)){
     value[[i]] = .set_map_type(value[[i]], "reduction", force_embed = TRUE)
   }
 
-  object <- .insert_mapping(object, value, 2)
+  x <- .insert_mapping(x, value, 2)
 
-  validObject(object)
-  object
+  validObject(x)
+  x
 })
 
-setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(object, value) {
+setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(x, value) {
   .validate_names(value)
 
-  mask = colMapTypes(object) %in% c("embedding", "reduction")
-  names(object@colMaps)[mask] <- value
+  mask = colMapTypes(x) %in% c("embedding", "reduction")
+  names(x@colMaps)[mask] <- value
 
-  validObject(object)
-  object
+  validObject(x)
+  x
 })
 
 #' @importFrom BiocGenerics counts<-
@@ -290,7 +290,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
         stop(err)
       }
       rownames(v) <- dimnames(object)[[d]]
-      if(is.null(rownames(v)))
+      if(is.null(colnames(v)))
         colnames(v) <- 1:NCOL(v)
 
       if(is.null(S4Vectors::metadata(v)$type))

@@ -106,17 +106,18 @@ setMethod("colMapMeta", "ACTIONetExperiment", function(object, all = T) {
     out
 })
 
-setMethod("reducedDims", "ACTIONetExperiment", function(object) {
-    Xs = colMaps(object)
-    Xs = Xs[colMapTypes(object) %in% c("embedding", "reduction")]
+setMethod("reducedDims", "ACTIONetExperiment", function(x) {
+    Xs = colMaps(x)
+    Xs = Xs[colMapTypes(x) %in% c("embedding", "reduction")]
 
-    transposed_factors = as(lapply(Xs, function(object) Matrix::t(object)), "SimpleList")
-    return(transposed_factors)
+    # transposed_factors = as(lapply(Xs, function(xs) Matrix::t(xs)), "SimpleList")
+    # return(transposed_factors)
+    return(Xs)
 })
 
-setMethod("reducedDimNames", "ACTIONetExperiment", function(object) {
-    Xs = colMaps(object)
-    Xs = Xs[colMapTypes(object) %in% c("embedding", "reduction")]
+setMethod("reducedDimNames", "ACTIONetExperiment", function(x) {
+    Xs = colMaps(x)
+    Xs = Xs[colMapTypes(x) %in% c("embedding", "reduction")]
 
     return(names(Xs))
 })
