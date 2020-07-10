@@ -136,8 +136,7 @@ namespace ACTIONet {
 		field<mat> Online_update_AA(mat& Xt, mat& D, mat& A, mat& B);
 		field<mat> run_online_AA (mat &X, mat &D0, field<uvec> samples);
 		Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples, int k_min, int k_max, int thread_no);
-
-
+		
 		
 	// *********************************
 		
@@ -171,6 +170,8 @@ namespace ACTIONet {
 
 	// ACTION decomposition
 		ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+		ACTION_results run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+
 
 		ACTION_results run_ACTION_dev(mat &S_r, int k_min, int k_max, int thread_no, bool auto_stop, int max_it, double min_delta);
 

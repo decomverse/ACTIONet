@@ -902,6 +902,10 @@ csc_sort_indices_inplace <- function(Ap, Ai, Ax) {
     invisible(.Call(`_ACTIONet_csc_sort_indices_inplace`, Ap, Ai, Ax))
 }
 
+run_subACTION <- function(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it = 50L, min_delta = 1e-16) {
+    .Call(`_ACTIONet_run_subACTION`, S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta)
+}
+
 deflate_reduction <- function(old_S_r, old_V, old_A, old_B, old_sigma, A, B) {
     .Call(`_ACTIONet_deflate_reduction`, old_S_r, old_V, old_A, old_B, old_sigma, A, B)
 }
