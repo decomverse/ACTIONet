@@ -13,7 +13,7 @@ reduce.and.batch.correct.ace.Harmony(
   norm_method = c("default", "scran", "Linnorm"),
   reduction_slot = "ACTION",
   seed = 0,
-  SVD_algorithm = 1
+  SVD_algorithm = 0
 )
 }
 \arguments{

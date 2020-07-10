@@ -35,14 +35,14 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 
         auto.merge = FALSE, merge.order = merge_order, cos.norm = FALSE, assay.type = "logcounts",
         BPPARAM = BPPARAM)))
 
-    S_r = Matrix::t(SingleCellExperiment::reducedDims(mnn.out)[["corrected"]])
-    if (!all(colnames(ace) == colnames(S_r)))
-        S_r = S_r[, match(colnames(ace), colnames(S_r))]
+    S_r = SingleCellExperiment::reducedDims(mnn.out)[["corrected"]]
+    if (!all(colnames(ace) == rownames(S_r)))
+        S_r = S_r[match(colnames(ace), rownames(S_r)), ]
 
     # rownames(S_r) = colnames(ace)
-    rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("PC%d", i))
+    colnames(S_r) = sapply(1:dim(S_r)[2], function(i) sprintf("PC%d", i))
 
-    ACTIONet::colMaps(ace)[[reduction_slot]] <- Matrix::t(S_r)
+    ACTIONet::colMaps(ace)[[reduction_slot]] <- S_r
     colMapTypes(ace)[[reduction_slot]] = "reduction"
 
 
@@ -77,6 +77,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 
 #' ace = import.ace.from.10X(input_path)
 #' batch_attr = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
 #' ace = reduce.and.batch.correct.ace.Harmony(ace)
+#' @export
 reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 50,
     max_iter = 5, data_slot = "logcounts", norm_method = c("default", "scran", "Linnorm"),
     reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
@@ -86,7 +87,7 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
     }
 
     ace = .check_and_convert_se_like(ace, "ACE")
-
+    norm_method = match.arg(norm_method)
     ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, norm_method = norm_method,
         data_slot = data_slot, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
     ace = batch.correct.ace.Harmony(ace, batch_attr, reduction_slot = sprintf("%s_harmony", reduction_slot))

@@ -6,8 +6,7 @@
 \usage{
 infer.missing.cell.annotations(
   ace,
-  annotation.in,
-  annotation.out,
+  initial_labels,
   double.stochastic = FALSE,
   max_iter = 3,
   adjust.levels = T
@@ -17,10 +16,8 @@ infer.missing.cell.annotations(
 \item{ace}{Input results to be clustered
 (alternatively it can be the ACTIONet igraph object)}
 
-\item{annotation.in}{Annotations to correct with missing values (NA) in it.
+\item{initial_labels}{Annotations to correct with missing values (NA) in it.
 It can be either a named annotation (inside ace$annotations) or a label vector.}
-
-\item{annotation.out}{Name of the updated annotations to be stored.}
 
 \item{double.stochastic}{Whether to densify adjacency matrix before running label propagation (default=FALSE).}
 

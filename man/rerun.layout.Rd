@@ -9,7 +9,8 @@ rerun.layout(
   layout_compactness = 50,
   layout_epochs = 500,
   thread_no = 1,
-  reduction_slot = "ACTION2D"
+  reduction_slot = "ACTIONet3D",
+  net_slot = "ACTIONet"
 )
 }
 \arguments{

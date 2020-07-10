@@ -11,7 +11,8 @@
   CPal = NULL,
   title = "Feature view",
   label.text.size = 1,
-  renormalize = F
+  renormalize = F,
+  coordinate_slot = "ACTIONet2D"
 )
 }
 \arguments{
