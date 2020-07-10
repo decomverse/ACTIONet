@@ -1,6 +1,7 @@
 #include <RcppArmadillo.h>
 #include <ACTIONet.h>
 
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -45,8 +46,7 @@ bool kv_pair_less(const std::pair<T1,T2>& x, const std::pair<T1,T2>& y){
 //' SVD.out = IRLBA_SVD(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List IRLB_SVD(sp_mat& A, int dim, int iters = 1000, int seed = 0) {	
-
+List IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {	
 	field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed);            
 	
 	List res;
@@ -155,7 +155,7 @@ List FengSVD_full(mat& A, int dim, int iters = 5, int seed = 0) {
 //' Computes SVD decomposition
 //'
 //' This is direct implementation of the randomized SVD algorithm:
-//' XFrom: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
+//' From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
 //' 
 //' @param A Input matrix ("sparseMatrix")
 //' @param dim Dimension of SVD decomposition
@@ -186,7 +186,7 @@ List HalkoSVD(sp_mat& A, int dim, int iters = 5, int seed = 0) {
 //' Computes SVD decomposition
 //'
 //' This is direct implementation of the randomized SVD algorithm:
-//' XFrom: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
+//' From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
 //' 
 //' @param A Input matrix ("matrix")
 //' @param dim Dimension of SVD decomposition
@@ -236,16 +236,26 @@ List HalkoSVD_full(mat& A, int dim, int iters = 5, int seed = 0) {
 //' reduction.out = reduce(S, reduced_dim = 50)
 //' S_r = reduction.out$S_r
 // [[Rcpp::export]]
-List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int reduction_algorithm = 0, int SVD_algorithm = 0, bool prenormalize = false) {
+List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int SVD_algorithm = 0, bool prenormalize = false) {
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize);				
+	field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize);				
 			
-	List res;	
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
-		
+	List res;		
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+					
 	return res;
 }
 
@@ -271,16 +281,26 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, 
 //' reduction.out = reduce(S, reduced_dim = 50)
 //' S_r = reduction.out$S_r
 // [[Rcpp::export]]
-List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int reduction_algorithm = 1, int SVD_algorithm = 1, bool prenormalize = false) {
-	
-	ACTIONet::ReducedKernel reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, reduction_algorithm, SVD_algorithm, prenormalize);				
+List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5, int seed = 0, int SVD_algorithm = 0, bool prenormalize = false) {
 			
-	List res;	
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
+	field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize);				
+			
+	List res;		
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
 		
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+					
 	return res;
 }
 
@@ -1443,14 +1463,24 @@ List SVD2ACTIONred(sp_mat &S, mat u, vec d, mat v) {
 	SVD_results(2) = v;
 	
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::SVD2ACTIONred(S, SVD_results);			
+	field<mat> reduction = ACTIONet::SVD2ACTIONred(S, SVD_results);			
 			
-	List res;	
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
+	List res;		
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
 		
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+					
 	return res;
 }
 
@@ -1484,14 +1514,23 @@ List SVD2ACTIONred_full(mat &S, mat u, vec d, mat v) {
 	SVD_results(2) = v;
 	
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::SVD2ACTIONred(S, SVD_results);			
+	field<mat> reduction = ACTIONet::SVD2ACTIONred(S, SVD_results);			
 			
-	List res;	
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
-		
+	List res;		
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+			
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+					
 	return res;
 }
 
@@ -1531,14 +1570,24 @@ List PCA2ACTIONred(sp_mat &S, mat x, vec sdev, mat rotation) {
 	SVD_results(2) = rotation;
 	
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::PCA2ACTIONred(S, SVD_results);			
+	field<mat> reduction = ACTIONet::PCA2ACTIONred(S, SVD_results);			
 			
-	List res;	
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
+	List res;		
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
 		
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+					
 	return res;
 }
 
@@ -1578,13 +1627,24 @@ List PCA2ACTIONred_full(mat &S, mat x, vec sdev, mat rotation) {
 
 	
 	
-	ACTIONet::ReducedKernel reduction = ACTIONet::PCA2ACTIONred(S, SVD_results);			
+	field<mat> reduction = ACTIONet::PCA2ACTIONred(S, SVD_results);			
 			
-	List res;	
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
+	List res;		
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+	
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+					
 		
 	return res;
 }
@@ -1701,6 +1761,28 @@ List SVD2PCA_full(mat &S, mat u, vec d, mat v) {
 	return res;
 }
 
+
+// [[Rcpp::export]]
+List perturbedSVD(mat u, vec d, mat v, mat A, mat B) {
+	if(1 < d.n_cols)
+		d = d.diag();
+			
+	field<mat> SVD_results(3);
+	SVD_results(0) = u;
+	SVD_results(1) = d;
+	SVD_results(2) = v;
+	
+	field<mat> perturbed_SVD = ACTIONet::perturbedSVD(SVD_results, A, B);
+
+		
+	List res;	
+	res["u"] = perturbed_SVD(0);
+	res["d"] = perturbed_SVD(1).col(0);
+	res["v"] = perturbed_SVD(2);
+
+	return res;
+}
+
 // [[Rcpp::export]]
 mat computeFullSim(mat &H, int thread_no = 0) {
 
@@ -1740,7 +1822,7 @@ void csr_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Aj, NumericVecto
 	}
 }
 
-	// [[Rcpp::export]]
+// [[Rcpp::export]]
 void csc_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Ai, NumericVector &Ax) {
 	int n_col = Ap.size()-1;
 
@@ -1768,4 +1850,108 @@ void csc_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Ai, NumericVecto
 			Ax(jj) = temp[n].second;
 		}
 	}
+}
+
+
+// [[Rcpp::export]]
+List deflate_reduction(mat &old_S_r, mat &old_V, mat &old_A, mat &old_B, vec &old_sigma, mat &A, mat &B) {
+	field<mat> SVD_results(5);
+	
+	SVD_results(0) = old_V;
+	SVD_results(1) = old_sigma;	
+	SVD_results(2) = old_S_r;	
+	for(int i = 0; i < old_sigma.n_elem; i++) {
+		SVD_results(2).col(i) /= old_sigma(i);
+	}	
+	SVD_results(3) = old_A;	
+	SVD_results(4) = old_B;	
+		
+	field<mat> deflated_reduction = ACTIONet::deflate_reduction(SVD_results, A, B);
+
+	List res;		
+	res["V"] = deflated_reduction(0);
+	
+	vec sigma = deflated_reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = deflated_reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+		
+
+	res["A"] = deflated_reduction(3);
+	res["B"] = deflated_reduction(4);
+			
+	return res;
+}
+
+// [[Rcpp::export]]
+List orthogonalize_batch_effect(sp_mat &S, mat &old_S_r, mat &old_V, mat &old_A, mat &old_B, vec &old_sigma, mat &design) {
+	field<mat> SVD_results(5);
+	
+	SVD_results(0) = old_V;
+	SVD_results(1) = old_sigma;	
+	SVD_results(2) = old_S_r;	
+	for(int i = 0; i < old_sigma.n_elem; i++) {
+		SVD_results(2).col(i) /= old_sigma(i);
+	}	
+	SVD_results(3) = old_A;	
+	SVD_results(4) = old_B;	
+	
+		
+	field<mat> orthogonalized_reduction = ACTIONet::orthogonalize_batch_effect(S, SVD_results, design);
+
+	List res;		
+	res["V"] = orthogonalized_reduction(0);
+	
+	vec sigma = orthogonalized_reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = orthogonalized_reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+
+	res["A"] = orthogonalized_reduction(3);
+	res["B"] = orthogonalized_reduction(4);
+			
+	return res;
+}
+
+
+
+// [[Rcpp::export]]
+List orthogonalize_batch_effect_full(mat &S, mat &old_S_r, mat &old_V, mat &old_A, mat &old_B, vec &old_sigma, mat &design) {
+	field<mat> SVD_results(5);
+	
+	SVD_results(0) = old_V;
+	SVD_results(1) = old_sigma;	
+	SVD_results(2) = old_S_r;	
+	for(int i = 0; i < old_sigma.n_elem; i++) {
+		SVD_results(2).col(i) /= old_sigma(i);
+	}	
+	SVD_results(3) = old_A;	
+	SVD_results(4) = old_B;	
+	
+	field<mat> orthogonalized_reduction = ACTIONet::orthogonalize_batch_effect(S, SVD_results, design);
+
+	List res;		
+	res["V"] = orthogonalized_reduction(0);
+	
+	vec sigma = orthogonalized_reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = orthogonalized_reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+
+	res["A"] = orthogonalized_reduction(3);
+	res["B"] = orthogonalized_reduction(4);
+		
+	return res;
 }
