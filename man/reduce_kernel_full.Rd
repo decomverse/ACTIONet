@@ -9,8 +9,7 @@ reduce_kernel_full(
   reduced_dim = 50L,
   iter = 5L,
   seed = 0L,
-  reduction_algorithm = 1L,
-  SVD_algorithm = 1L,
+  SVD_algorithm = 0L,
   prenormalize = FALSE
 )
 }
@@ -21,11 +20,11 @@ reduce_kernel_full(
 
 \item{seed}{Random seed (default=0)}
 
-\item{reduction_algorithm}{Kernel reduction algorithm. Currently only ACTION method (1) is implemented (default=1)}
-
 \item{SVD_algorithm}{SVD algorithm to use. Currently supported methods are Halko (1) and Feng (2) (default=1)}
 
 \item{iters}{Number of SVD iterations (default=5)}
+
+\item{reduction_algorithm}{Kernel reduction algorithm. Currently only ACTION method (1) is implemented (default=1)}
 }
 \value{
 A named list with S_r, V, lambda, and exp_var. \itemize{
