@@ -96,11 +96,15 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
 }
 
 #' @export
-batch.correct.ace.Harmony <- function(ace, batch_attr, reduction_slot = "ACTION") {
+batch.correct.ace.Harmony <- function(ace, batch_attr = NULL, reduction_slot = "ACTION") {
     if (!require(harmony)) {
         err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
         stop(err)
     }
+    if(is.null(batch_attr)) {
+        stop("No batch attribute is provided\n")
+	}
+	
     ace = .check_and_convert_se_like(ace, "ACE")
     batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
     ACTIONet::colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(ACTIONet::colMaps(ace)[[reduction_slot]],
