@@ -199,6 +199,18 @@ run_SPA <- function(A, k) {
     .Call(`_ACTIONet_run_SPA`, A, k)
 }
 
+#' Runs Successive Projection Algorithm (SPA) to solve separable NMF
+#'
+#' @param A Input matrix
+#' @param k Number of columns to select
+#' 
+#' @return A named list with entries 'selected_columns' and 'norms'
+#' @examples
+#' H = run_SPA(S_r, 10)
+run_SPA_rows_sparse <- function(A, k) {
+    .Call(`_ACTIONet_run_SPA_rows_sparse`, A, k)
+}
+
 #' Runs multi-level ACTION decomposition method
 #'
 #' @param S_r Reduced kernel matrix

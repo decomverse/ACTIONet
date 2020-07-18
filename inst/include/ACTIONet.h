@@ -121,7 +121,9 @@ namespace ACTIONet {
 		field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed);
 		
 		// Successive Projection Algorithm (SPA) to solve separable NMF
-		SPA_results run_SPA(mat M, int k);
+		SPA_results run_SPA(mat &M, int k);
+		SPA_results run_SPA_rows_sparse(sp_mat &A, int k);
+
 		
 		// min_{X} (|| AX - B ||) s.t. simplex constraint using ACTIVE Set Method
 		//mat run_simplex_regression(mat &A, mat &B);
