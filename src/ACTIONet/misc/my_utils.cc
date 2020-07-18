@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 
+
 #define  A1  (-3.969683028665376e+01)
 #define  A2   2.209460984245205e+02
 #define  A3  (-2.759285104469687e+02)
@@ -289,4 +290,82 @@ namespace ACTIONet {
 		b = 1.0;
 		cblas_dgemv(CblasColMajor, CblasNoTrans, xm, xn, a, X, xm, T, inc, b, Y, inc);
 	}		
+	
+	
+	cholmod_sparse_struct  * as_cholmod_sparse(cholmod_sparse_struct  * ans, sp_mat& A) {
+		ans->itype = CHOLMOD_INT;	/* characteristics of the system */
+		ans->dtype = CHOLMOD_DOUBLE;
+		ans->packed = true;
+		
+		A.sync();		
+		
+		/*	
+		std::vector<double> x(A.values, A.values + A.n_nonzero ) ;
+		std::vector<int> i(A.row_indices, A.row_indices + A.n_nonzero);
+		std::vector<int> p(A.col_ptrs, A.col_ptrs + A.n_cols+1 ) ;		
+
+		ans->x = x.data();
+		ans->i = i.data();
+		ans->p = p.data();
+		*/
+
+		ans->i = new int[A.n_nonzero];
+		ans->x = new double[A.n_nonzero];
+		double *x_ptr = (double *)ans->x;
+		int *i_ptr = (int *)ans->i;
+		for(int k = 0; k < A.n_nonzero; k++) {
+			x_ptr[k] = A.values[k];
+			i_ptr[k] = A.row_indices[k];
+		}
+		
+		ans->p = new int[(A.n_cols+1)];
+		int *ptr = (int *)ans->p;
+		for(int k = 0; k < A.n_cols+1; k++) {
+			ptr[k] = A.col_ptrs[k];
+		}
+		
+		ans->nrow = A.n_rows;
+		ans->ncol = A.n_cols;		
+		ans->nzmax = A.n_nonzero;
+	
+		ans->xtype = CHOLMOD_REAL;
+		ans->stype = 0;
+		ans->dtype = 0;
+
+		ans->sorted = 1;
+
+		return ans;
+	}
+
+
+	void dsdmult (char transpose, int m, int n, void * a, double *b, double *c, cholmod_common* chol_cp) {
+		int t = transpose == 't' ? 1 : 0;
+		cholmod_sparse_struct  * cha = (cholmod_sparse_struct  *) a;
+
+		cholmod_dense chb;
+		chb.nrow = transpose == 't' ? m : n;
+		chb.d = chb.nrow;
+		chb.ncol = 1;
+		chb.nzmax = chb.nrow;
+		chb.xtype = cha->xtype;
+		chb.dtype = 0;
+		chb.x = (void *) b;
+		chb.z = (void *) NULL;
+
+		cholmod_dense chc;
+		chc.nrow = transpose == 't' ? n : m;
+		chc.d = chc.nrow;
+		chc.ncol = 1;
+		chc.nzmax = chc.nrow;
+		chc.xtype = cha->xtype;
+		chc.dtype = 0;
+		chc.x = (void *) c;
+		chc.z = (void *) NULL;
+
+		double one[] = { 1, 0 }, zero[] = { 0, 0};
+		cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);		
+	}
+	
+	
+	
 }

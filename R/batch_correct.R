@@ -114,8 +114,8 @@ batch.correct.ace.Harmony <- function(ace, batch_attr = NULL, reduction_slot = "
 
 
 #' @export
-orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION") {
-	S = logcounts(ace)
+orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION", data_slot = "logcounts") {
+	S = assays(ace)[[data_slot]]
 	S_r = colMaps(ace)[[sprintf("%s", reduction_slot)]]
 	V = rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
 	A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
@@ -127,29 +127,29 @@ orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION") 
     S_r = reduction.out$S_r
     colnames(S_r) = colnames(ace)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
-    colMaps(ace)[[sprintf("%s_ortho", reduction_slot)]] <- Matrix::t(S_r)
-    colMapTypes(ace)[[sprintf("%s_ortho", reduction_slot)]] = "reduction"
+    colMaps(ace)[[sprintf("%s", reduction_slot)]] <- Matrix::t(S_r)
+    colMapTypes(ace)[[sprintf("%s", reduction_slot)]] = "reduction"
 
 
 	V = reduction.out$V
 	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))	
-	rowMaps(ace)[[sprintf("%s_ortho_V", reduction_slot)]] = V
-	rowMapTypes(ace)[[sprintf("%s_ortho_V", reduction_slot)]] = "internal"
+	rowMaps(ace)[[sprintf("%s_V", reduction_slot)]] = V
+	rowMapTypes(ace)[[sprintf("%s_V", reduction_slot)]] = "internal"
 
 
 	A = reduction.out$A
 	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))	
-	rowMaps(ace)[[sprintf("%s_ortho_A", reduction_slot)]] = A
-	rowMapTypes(ace)[[sprintf("%s_ortho_A", reduction_slot)]] = "internal"
+	rowMaps(ace)[[sprintf("%s_A", reduction_slot)]] = A
+	rowMapTypes(ace)[[sprintf("%s_A", reduction_slot)]] = "internal"
 
 
 	B = reduction.out$B
 	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))	
-	colMaps(ace)[[sprintf("%s_ortho_B", reduction_slot)]] = B
-	colMapTypes(ace)[[sprintf("%s_ortho_B", reduction_slot)]] = "internal"
+	colMaps(ace)[[sprintf("%s_B", reduction_slot)]] = B
+	colMapTypes(ace)[[sprintf("%s_B", reduction_slot)]] = "internal"
 	
 	
-	metadata(ace)[[sprintf("%s_ortho_sigma", reduction_slot)]] = reduction.out$sigma
+	metadata(ace)[[sprintf("%s_sigma", reduction_slot)]] = reduction.out$sigma
 	
 	return(ace)
 }
@@ -165,10 +165,12 @@ orthogonalize.ace.batch.simple <- function(ace, batch.vec, reduction_slot = "ACT
 }
 
 #' @export
-reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat, reduction_slot = "ACTION", ...) {
-	ace = reduce.ace(ace, reduction_slot = reduction_slot, ...)
+reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
+    norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+	ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, data_slot = data_slot,
+    norm_method = norm_method, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
 	
-	ace.corrected = orthogonalize.ace.batch(ace, design.mat, reduction_slot = reduction_slot)
+	ace.corrected = orthogonalize.ace.batch(ace, design.mat, reduction_slot = reduction_slot, data_slot = data_slot)
 	return(ace.corrected)
 }
 

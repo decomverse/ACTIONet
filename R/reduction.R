@@ -57,7 +57,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
     message(msg)
     # reduction_algorithm=ACTION (1), SVD_algorithm=IRLB (0)
     if (SVD_algorithm == 0)
-        max_iter = max_iter * 100
+        max_iter = 100
 
     S = assays(ace.norm)[[data_slot]]
     if (is.matrix(S)) {
