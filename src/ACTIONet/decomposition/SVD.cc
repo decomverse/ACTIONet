@@ -1,6 +1,6 @@
 #include "ACTIONet.h"
 
-#include "suitesparse/cholmod.h"
+#include "cholmod.h"
 #include <Rcpp.h>
 
 
