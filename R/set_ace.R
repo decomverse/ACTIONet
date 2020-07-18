@@ -248,23 +248,32 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 })
 
 .insert_MapMeta <- function(object, value, d){
+
+  value = lapply(value, function(v){
+    if(is(v, "DFrame")){
+      return(v)
+    } else {
+      v = as(v, "DataFrame")
+      return(v)
+    }
+  })
+
   valid_names = switch(d, names(object@rowMaps), names(object@colMaps))
   .validate_names(value, valid_names)
-  value = lapply(value, function(v){
-    if(is.data.frame(v))
-      v = DataFrame(v)
-    return(v)
-  })
 
   for (n in names(value)) {
       DF = value[[n]]
       if(d == 1){
-        if (nrow(DF) == nrow(object)) {
+        if (nrow(DF) == ncol(object@rowMaps[[n]])) {
             colData(object@rowMaps[[n]]) = DF
+        } else{
+          stop(sprintf("nrow of rowMapMeta does not equal ncol of rowMap.\n"))
         }
       } else if(d == 2){
-        if (nrow(DF) == ncol(object)) {
+        if (nrow(DF) == ncol(object@colMaps[[n]])) {
             colData(object@colMaps[[n]]) = DF
+        } else{
+          stop(sprintf("nrow of colMapMeta does not equal ncol of colMap.\n"))
         }
       }
     }
