@@ -147,14 +147,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_SPA
-List run_SPA(mat A, int k);
+List run_SPA(mat& A, int k);
 RcppExport SEXP _ACTIONet_run_SPA(SEXP ASEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(run_SPA(A, k));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_SPA_rows_sparse
+List run_SPA_rows_sparse(sp_mat& A, int k);
+RcppExport SEXP _ACTIONet_run_SPA_rows_sparse(SEXP ASEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_SPA_rows_sparse(A, k));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -920,6 +932,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 6},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 3},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
+    {"_ACTIONet_run_SPA_rows_sparse", (DL_FUNC) &_ACTIONet_run_SPA_rows_sparse, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
     {"_ACTIONet_run_ACTION_plus", (DL_FUNC) &_ACTIONet_run_ACTION_plus, 6},
     {"_ACTIONet_run_AA", (DL_FUNC) &_ACTIONet_run_AA, 4},

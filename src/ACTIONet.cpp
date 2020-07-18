@@ -335,7 +335,7 @@ mat run_simplex_regression(mat &A, mat &B, bool computeXtX = false) {
 //' @examples
 //' H = run_SPA(S_r, 10)
 // [[Rcpp::export]]
-List run_SPA(mat A, int k) {	
+List run_SPA(mat &A, int k) {	
 
 	ACTIONet::SPA_results res = ACTIONet::run_SPA(A, k);
 	uvec selected_columns = res.selected_columns;
@@ -348,6 +348,33 @@ List run_SPA(mat A, int k) {
 
 	List out;	
 	out["selected_columns"] = cols;		
+	out["norms"] = res.column_norms;
+		
+	return out;
+}
+
+//' Runs Successive Projection Algorithm (SPA) to solve separable NMF
+//'
+//' @param A Input matrix
+//' @param k Number of columns to select
+//' 
+//' @return A named list with entries 'selected_columns' and 'norms'
+//' @examples
+//' H = run_SPA(S_r, 10)
+// [[Rcpp::export]]
+List run_SPA_rows_sparse(sp_mat &A, int k) {	
+
+	ACTIONet::SPA_results res = ACTIONet::run_SPA_rows_sparse(A, k);
+	uvec selected_columns = res.selected_columns;
+	
+	vec cols(k);
+	for(int i = 0; i < k; i++) {
+		cols[i] = selected_columns[i] + 1;
+	}
+	
+
+	List out;	
+	out["selected_rows"] = cols;		
 	out["norms"] = res.column_norms;
 		
 	return out;
