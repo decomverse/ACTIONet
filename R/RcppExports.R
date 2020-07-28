@@ -930,3 +930,7 @@ orthogonalize_batch_effect_full <- function(S, old_S_r, old_V, old_A, old_B, old
     .Call(`_ACTIONet_orthogonalize_batch_effect_full`, S, old_S_r, old_V, old_A, old_B, old_sigma, design)
 }
 
+MWM_rank1 <- function(u, v, u_threshold = 0, v_threshold = 0) {
+    .Call(`_ACTIONet_MWM_rank1`, u, v, u_threshold, v_threshold)
+}
+
