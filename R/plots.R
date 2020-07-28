@@ -114,20 +114,30 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = scale(colMaps(ace)[[coordinate_slot]])
-        } else {
-            coors = as.matrix(coordinate_slot)
+        if (is.character(coordinate_slot)) {            
+        	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	            
+        } else {       	
+        	coors = as.matrix(coordinate_slot)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
             coors = as.matrix(ace)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)            
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
             return()
         }
     }
+
     if (is.null(labels)) {
         if (class(ace) == "ACTIONetExperiment") {
             vCol = rgb(colMaps(ace)$denovo_color)
@@ -273,14 +283,23 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = scale(colMaps(ace)[[coordinate_slot]])
-        } else {
-            coors = as.matrix(coordinate_slot)
+        if (is.character(coordinate_slot)) {            
+        	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	            
+        } else {       	
+        	coors = as.matrix(coordinate_slot)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
             coors = as.matrix(ace)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)            
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -387,10 +406,8 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 #' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
 plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5,
-    CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F, coordinate_slot = "ACTIONet2D") {
-    M = as(colMaps(ace)[["H_unified"]], "sparseMatrix")
-    cs = Matrix::colSums(M)
-    M = scale(M, center = FALSE, scale = cs)
+    CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F, footprint_slot = "H_unified") {
+    M = as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
 
     if (ncol(feature.enrichment.table) != ncol(colMaps(ace)[["H_unified"]])) {
         feature.enrichment.table = Matrix::t(feature.enrichment.table)
@@ -399,23 +416,28 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
     if (max(feature.enrichment.table) > 50)
         feature.enrichment.table = log1p(feature.enrichment.table)
 
+
     X = t(select.top.k.features(feature.enrichment.table, top.features = top.features, normalize = renormalize,
         reorder.columns = F))
     selected.features = colnames(X)
 
-    core.coors = Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M
+	X = exp(scale(X))
+	
+    core.coors = Matrix::t(metadata(ace)$backbone$coordinates) #Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M    
     cs = colSums(X)
     cs[cs == 0] = 1
     X = scale(X, center = F, scale = cs)
+    
     feature.coors = Matrix::t(core.coors %*% X)
 
     if (is.null(CPal)) {
         # Pal = ace$unification.out$Pal
-        cells.Lab = grDevices::convertColor(color = colMaps(ace)$denovo_color,
-            from = "sRGB", to = "Lab")
-        arch.Lab = Matrix::t(M) %*% cells.Lab
-        arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
-        core.Pal = rgb(arch.RGB)
+        # cells.Lab = grDevices::convertColor(color = colMaps(ace)$denovo_color,
+        #     from = "sRGB", to = "Lab")
+        # arch.Lab = Matrix::t(M) %*% cells.Lab
+        # arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+        # core.Pal = rgb(arch.RGB)
+    	core.Pal = rgb(metadata(ace)$backbone$colors)
     } else {
         if (length(CPal) == 1) {
             core.Pal = ggpubr::get_palette(CPal, length(unique(ace$archetype.assignment)))
@@ -434,9 +456,22 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 
     x = feature.coors[, 1]
     y = feature.coors[, 2]
+    x.min = min(x)
+    x.max = max(x)
+    y.min = min(y)
+    y.max = max(y)
+    x.min = x.min - (x.max - x.min)/4
+    x.max = x.max + (x.max - x.min)/4
+    y.min = y.min - (y.max - y.min)/4
+    y.max = y.max + (y.max - y.min)/4
+    XL = c(x.min, x.max)
+    YL = c(y.min, y.max)
+    
     plot(x, y, type = "n", col = feature.colors, axes = FALSE, xlab = "", ylab = "",
-        main = title)
+        main = title, xlim = XL, ylim = YL)
+    
 
+    
     words = selected.features
     lay <- wordlayout(x, y, words, label.text.size)
     for (i in 1:length(x)) {
@@ -459,6 +494,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
     text(loc.x, loc.y, words, col = feature.colors, cex = label.text.size)
 
 }
+
 
 #' Plots projection of genes onto the ACTIONet plot
 #'
@@ -522,14 +558,23 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = scale(colMaps(ace)[[coordinate_slot]])
-        } else {
-            coors = as.matrix(coordinate_slot)
+        if (is.character(coordinate_slot)) {            
+        	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	            
+        } else {       	
+        	coors = as.matrix(coordinate_slot)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
             coors = as.matrix(ace)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)            
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -806,15 +851,25 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
     node.size = node.size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
-        if (is.character(coordinate_slot)) {
-            coors = scale(colMaps(ace)[[coordinate_slot]])
-        } else {
-            coors = as.matrix(coordinate_slot)
+        labels = preprocess.labels(labels, ace)
+        if (is.character(coordinate_slot)) {            
+        	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	            
+        } else {       	
+        	coors = as.matrix(coordinate_slot)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	
         }
     } else {
-        alpha_val = 0
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
             coors = as.matrix(ace)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)            
+            labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
             return()
@@ -843,7 +898,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
         x = log1p(x)
 
     if (alpha_val > 0) {
-        x = as.numeric(compute_network_diffusion(colNets(ace)$ACTIONet, as(x, "sparseMatrix")))
+        x = as.numeric(compute_network_diffusion(colNets(ace)$ACTIONet, as(as.matrix(x), "sparseMatrix")))
     }
 
     if (nonparameteric == TRUE) {
@@ -1099,16 +1154,25 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
     node.size = node.size * 0.25
 
-    if (class(ace) == "ACTIONetExperiment") {
+	if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = scale(colMaps(ace)[[coordinate_slot]])
-        } else {
-            coors = as.matrix(coordinate_slot)
+        if (is.character(coordinate_slot)) {            
+        	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	            
+        } else {       	
+        	coors = as.matrix(coordinate_slot)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
             coors = as.matrix(ace)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)            
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -1152,8 +1216,11 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
         	arch.labels = arch.annot$Labels
         }
     }
-	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
-
+	if(is.null(arch.labels)) {
+    	arch.labels = paste("A", 1:nrow(backbone$G), sep = "")
+	} else {
+    	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+	}
 
 
     if (!is.null(transparency.attr)) {
@@ -1226,8 +1293,9 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
 
 }
+
 plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, realign = FALSE, coordinate_slot = "ACTIONet2D") {
+    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, cell_lightening = 0.5, coordinate_slot = "ACTIONet2D", stretch.factor = 10) {
 
 	if(! ("backbone" %in% names(metadata(ace))) ) {
 		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
@@ -1239,14 +1307,23 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = scale(colMaps(ace)[[coordinate_slot]])
-        } else {
-            coors = as.matrix(coordinate_slot)
+        if (is.character(coordinate_slot)) {            
+        	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	            
+        } else {       	
+        	coors = as.matrix(coordinate_slot)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)        	
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
             coors = as.matrix(ace)
+        	coor.mu = apply(coors, 2, mean)
+        	coor.sigma = apply(coors, 2, sd)
+        	coors = scale(coors)            
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -1290,7 +1367,11 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
         	arch.labels = arch.annot$Labels
         }
     }
-	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+	if(is.null(arch.labels)) {
+    	arch.labels = paste("A", 1:nrow(backbone$G), sep = "")
+	} else {
+    	arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+	}
 
 
 
@@ -1307,7 +1388,26 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
         vCol.border = colorspace::darken(vCol, border.contrast.factor)
     }
 
+    x = coors[, 1]
+    y = coors[, 2]
+    x.min = min(x)
+    x.max = max(x)
+    y.min = min(y)
+    y.max = max(y)
+    x.min = x.min - (x.max - x.min)/20
+    x.max = x.max + (x.max - x.min)/20
+    y.min = y.min - (y.max - y.min)/20
+    y.max = y.max + (y.max - y.min)/20
+    XL = c(x.min, x.max)
+    YL = c(y.min, y.max)
 
+    rand.perm = sample(nrow(coors))
+    vCol_lightend = colorspace::lighten(vCol, cell_lightening)
+    vCol.border_lightend = colorspace::lighten(vCol.border, cell_lightening)
+    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol_lightend[rand.perm],
+        col = vCol.border_lightend[rand.perm], axes = F, xlab = "", ylab = "", main = title,
+        xlim = XL, ylim = YL)
+        
 
     ## Add backbone anchors
 	cell.RGB = Matrix::t(col2rgb(vCol))/255
@@ -1320,18 +1420,18 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
 
-	cell.coors =colMaps(ace)[[coordinate_slot]]
-	if(realign == TRUE) {
-		arch.coors = ACTIONet::sgd2_layout_weighted_convergent(backbone$G, S_r = Matrix::t(backbone$coordinates), t_max = 200, t_maxmax = 1000)
-	} else {
-		arch.coors = backbone$coordinates
-	}
+	# cell.coors =colMaps(ace)[[coordinate_slot]]
+	arch.coors = backbone$coordinates
+	arch.coors[, 1] = (arch.coors[, 1] - coor.mu[1]) / coor.sigma[1]
+	arch.coors[, 2] = (arch.coors[, 2] - coor.mu[2]) / coor.sigma[2]
 
+	par(new=TRUE)
+	graphics::plot(arch.coors, pch = 25, cex = 0, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title, xlim = XL, ylim = YL)
 
-	graphics::plot(arch.coors, pch = 25, cex = 0, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
-
-	Adj = as(backbone$G, "dgTMatrix")
-	kappa = 0.1 + 0.9 / (1 + exp(-2*scale(Adj@x)))
+	G = construct.tspanner(backbone$G, stretch.factor = stretch.factor)
+	Adj = as(G, "dgTMatrix")
+	
+	kappa = 0.25 + 0.75/ (1 + exp(-2*scale(Adj@x)))
 	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
 
 
@@ -1345,7 +1445,51 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
 
 	par(new=TRUE)
-	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title)
+	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = aCol, col = colorspace::darken(aCol, 0.5), axes = F, xlab = "", ylab = "", main = title, xlim = XL, ylim = YL)
+
+}
+
+plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, node.size = 2, label.text.size = 1, title = "", stretch.factor = 2) {
+
+	if(! ("backbone" %in% names(metadata(ace))) ) {
+		message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+		return()
+	}
+	backbone = metadata(ace)$backbone
+
+	G = construct.tspanner(backbone$G, stretch.factor = stretch.factor)
+	Adj = as(G, "dgTMatrix")
+	arch.coors = ACTIONet::sgd2_layout_weighted_convergent(G, Matrix::t(backbone$coordinates_3D))	
+
+	if(is.null(arch.colors)) {
+		arch.colors = rgb(backbone$colors)
+	}
+
+	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
+	arch.sizes = (0.25 + w) * node.size
+
+	graphics::plot(arch.coors, pch = 25, cex = 0, bg = arch.colors, col = colorspace::darken(arch.colors, 0.5), axes = F, xlab = "", ylab = "", main = title)
+
+	
+	kappa = 0.1 + 0.9 / (1 + exp(-2*scale(Adj@x)))
+	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
+
+
+
+    text.halo.width = 0.1
+    label.text.size = label.text.size*0.6
+
+    if(is.null(arch.labels)) {
+        arch.labels = paste("A", 1:nrow(arch.coors), sep = "")
+    } else {
+        arch.labels = paste("A", 1:nrow(arch.coors), "-", arch.labels, sep = "")
+    }
+     layout.labels(x = arch.coors[, 1], y = arch.coors[, 2]-strheight("A"), labels = arch.labels, col = colorspace::darken(arch.colors, 0.5), bg = "#eeeeee", r = text.halo.width, cex = label.text.size)
+
+
+	par(new=TRUE)
+	graphics::plot(arch.coors, pch = 25, cex = arch.sizes, bg = arch.colors, col = colorspace::darken(arch.colors, 0.5), axes = F, xlab = "", ylab = "")
 
 }
 

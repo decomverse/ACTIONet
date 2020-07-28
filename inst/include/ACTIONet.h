@@ -242,6 +242,8 @@ namespace ACTIONet {
 		field<vec> run_HDBSCAN(mat &X, int minPoints, int minClusterSize);
 
 		mat MWM_hungarian(mat &G);
+		umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
+		
 		mat Prune_PageRank(mat &U, double density);
 		field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no);	
 		

@@ -90,7 +90,7 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
     norm_method = match.arg(norm_method)
     ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, norm_method = norm_method,
         data_slot = data_slot, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
-    ace = batch.correct.ace.Harmony(ace, batch_attr, reduction_slot = sprintf("%s_harmony", reduction_slot))
+    ace = batch.correct.ace.Harmony(ace, batch_attr, reduction_slot = reduction_slot)
 
     return(ace)
 }
