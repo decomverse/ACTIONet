@@ -2006,3 +2006,14 @@ List orthogonalize_batch_effect_full(mat &S, mat &old_S_r, mat &old_V, mat &old_
 }
 
 
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+umat MWM_rank1(vec u, vec v, double u_threshold = 0, double v_threshold = 0) {
+	
+	umat pairs = ACTIONet::MWM_rank1(u, v, u_threshold, v_threshold);
+	
+	pairs = pairs + 1;
+	
+	return(pairs);
+}
