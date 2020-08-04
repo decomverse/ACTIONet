@@ -1,5 +1,7 @@
 #include "ACTIONet.h"
 
+#include "cholmod.h"
+
 
 namespace ACTIONet {
 
@@ -133,8 +135,105 @@ namespace ACTIONet {
 
 	}
 
+
 	// Solves separable NMF problem
-	SPA_results run_SPA(mat A, int k) {
+	SPA_results run_SPA_rows_sparse(sp_mat &A, int k) {
+		int m = A.n_rows;
+		int n = A.n_cols;
+		
+		printf("Computing square values ... "); fflush(stdout);
+		sp_mat A_sq = square(A);
+		printf("done\n");
+
+		
+		cholmod_common chol_c;
+		cholmod_start (&chol_c);
+		chol_c.final_ll = 1;          /* LL' form of simplicial factorization */
+		
+		cholmod_sparse_struct  * AS = new cholmod_sparse_struct;		
+		as_cholmod_sparse(AS, A);
+
+		cholmod_sparse_struct  *AS_sq = new cholmod_sparse_struct;		
+		as_cholmod_sparse(AS_sq, A_sq);
+
+		SPA_results res;
+
+		uvec K(k); // selected columns from A
+
+		printf("Computing norms ... ");
+		vec o = ones(n);
+		vec normM(m);
+		dsdmult ('n', m, n, AS_sq, o.memptr(), normM.memptr(), &chol_c);
+		vec normM1 = normM;
+		printf("done\n");
+		
+		mat U(n, k);
+
+		vec norm_trace = zeros(k);
+		double eps = 1e-6;
+		for (int i = 0; i < k; i++) {
+			// Find the column with maximum norm. In case of having more than one column with almost very small diff in norm, pick the one that originally had the largest norm
+			double a = max(normM);
+			norm_trace(i) = a;
+
+			uvec b = find((a*ones(m, 1)-normM)/a <= eps);
+
+			if(b.n_elem > 1) {
+				uword idx = index_max(normM1(b));
+				K(i) = b(idx);
+			}
+			else {
+				K(i) = b(0);
+			}
+
+			// Pick row
+			U.col(i) = vec(trans(A.row(K(i))));
+
+			// Orthogonalize with respect to current basis
+			for (int j = 0; j < i-1; j++) {
+				U.col(i) = U.col(i) - dot(U.col(j), U.col(i)) * U.col(j);
+			}
+			U.col(i) = U.col(i)/ norm(U.col(i), 2);
+
+			// Update column norms
+			vec u = U.col(i);
+			for (int j = i-1; 0 <= j; j--) {
+				u = u - dot(U.col(j), u)*U.col(j);
+			}
+			vec r(m);
+			dsdmult ('n', m, n, AS, u.memptr(), r.memptr(), &chol_c);	
+
+			uvec idx = find(U > 0);
+			double perc = 100*idx.n_elem/U.n_elem;			
+			printf("\t%d- res_norm = %f, U_density = %.2f%% (%d nnz)\n", i, a, perc, idx.n_elem);
+							
+			normM = normM - (r % r);
+		}
+
+		res.selected_columns = K;
+		res.column_norms = norm_trace;
+
+
+		delete [] AS->x;
+		delete [] AS->i;
+		delete [] AS->p;
+		delete AS; 
+
+
+		delete [] AS_sq->x;
+		delete [] AS_sq->i;
+		delete [] AS_sq->p;
+		delete AS_sq; 
+		
+		cholmod_finish (&chol_c);
+
+		return res;
+	}
+
+
+
+	// Solves separable NMF problem
+	SPA_results run_SPA(mat &A, int k) {
 
 		SPA_results res;
 
@@ -177,8 +276,8 @@ namespace ACTIONet {
 			vec u = U.col(i);
 			for (int j = i-1; 0 <= j; j--) {
 				u = u - dot(U.col(j), u)*U.col(j);
-			}
-			rowvec r = u.t()*A;
+			}			
+			rowvec r = u.t()*A;			
 			normM = normM - (r % r);
 		}
 
