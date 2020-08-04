@@ -164,3 +164,36 @@ EnhAdj <- function(Adj) {
     
     return(P)
 }
+
+
+construct.tspanner <- function(backbone, stretch.factor = 10) {   
+	require(igraph)
+	
+    backbone[backbone < 0] = 0
+    diag(backbone) = 0
+    
+    backbone.graph = graph_from_adjacency_matrix(backbone, mode = "undirected", weighted = TRUE)
+    
+    # Construct t-spanner
+    t = (2 * stretch.factor - 1)
+    
+    d = 1 - E(backbone.graph)$weight
+    EL = get.edgelist(backbone.graph, names = FALSE)
+    perm = order(d, decreasing = FALSE)
+    
+    backbone.graph.sparse = delete.edges(backbone.graph, E(backbone.graph))
+    for (i in 1:length(d)) {
+        u = EL[perm[i], 1]
+        v = EL[perm[i], 2]
+        sp = distances(backbone.graph.sparse, v = u, to = v)[1, 1]
+        
+        if (sp > t * d[perm[i]]) {
+            backbone.graph.sparse = add.edges(backbone.graph.sparse, EL[perm[i], ], attr = list(weight = 1 - d[perm[i]]))
+        }
+    }
+    
+    G = as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
+    G@x = 1 - G@x
+    
+    return(G)
+}
