@@ -121,7 +121,9 @@ namespace ACTIONet {
 		field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed);
 		
 		// Successive Projection Algorithm (SPA) to solve separable NMF
-		SPA_results run_SPA(mat M, int k);
+		SPA_results run_SPA(mat &M, int k);
+		SPA_results run_SPA_rows_sparse(sp_mat &A, int k);
+
 		
 		// min_{X} (|| AX - B ||) s.t. simplex constraint using ACTIVE Set Method
 		//mat run_simplex_regression(mat &A, mat &B);
@@ -240,6 +242,8 @@ namespace ACTIONet {
 		field<vec> run_HDBSCAN(mat &X, int minPoints, int minClusterSize);
 
 		mat MWM_hungarian(mat &G);
+		umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
+		
 		mat Prune_PageRank(mat &U, double density);
 		field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no);	
 		

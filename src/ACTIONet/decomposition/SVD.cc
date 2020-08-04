@@ -1,118 +1,9 @@
 #include "ACTIONet.h"
 
-#include "cholmod.h"
-#include <Rcpp.h>
 
-
-typedef struct cholmod_sparse_struct  *CHM_SP ;
-cholmod_common chol_c;
-/* Need our own CHOLMOD error handler */
-void attribute_hidden
-irlba_R_cholmod_error (int status, const char *file, int line,
-					   const char *message)
-{
-  if (status < 0)
-	Rcpp::stop ("Cholmod error '%s' at file:%s, line %d", message, file, line);
-  else
-	Rcpp::warning ("Cholmod warning '%s' at file:%s, line %d", message, file, line);
-}
 
 namespace ACTIONet {
-	// Adopted from the irlba R package
-	bool check_sorted_chm(CHM_SP A) {
-		int *Ai = (int*)(A->i), *Ap = (int*)(A->p);
-		int j, p;
 
-		for (j = 0; j < A->ncol; j++) {
-		int p1 = Ap[j], p2 = Ap[j + 1] - 1;
-		for (p = p1; p < p2; p++)
-			if (Ai[p] >= Ai[p + 1])
-			return false;
-		}
-		return true;
-	}
-	
-	CHM_SP as_cholmod_sparse(CHM_SP ans, sp_mat& A) {
-		ans->itype = CHOLMOD_INT;	/* characteristics of the system */
-		ans->dtype = CHOLMOD_DOUBLE;
-		ans->packed = true;
-		
-		A.sync();		
-		
-		/*	
-		std::vector<double> x(A.values, A.values + A.n_nonzero ) ;
-		std::vector<int> i(A.row_indices, A.row_indices + A.n_nonzero);
-		std::vector<int> p(A.col_ptrs, A.col_ptrs + A.n_cols+1 ) ;		
-
-		ans->x = x.data();
-		ans->i = i.data();
-		ans->p = p.data();
-		*/
-
-		ans->i = new int[A.n_nonzero];
-		ans->x = new double[A.n_nonzero];
-		double *x_ptr = (double *)ans->x;
-		int *i_ptr = (int *)ans->i;
-		for(int k = 0; k < A.n_nonzero; k++) {
-			x_ptr[k] = A.values[k];
-			i_ptr[k] = A.row_indices[k];
-		}
-		
-		ans->p = new int[(A.n_cols+1)];
-		int *ptr = (int *)ans->p;
-		for(int k = 0; k < A.n_cols+1; k++) {
-			ptr[k] = A.col_ptrs[k];
-		}
-		
-		ans->nrow = A.n_rows;
-		ans->ncol = A.n_cols;		
-		ans->nzmax = A.n_nonzero;
-	
-		ans->xtype = CHOLMOD_REAL;
-		ans->stype = 0;
-		ans->dtype = 0;
-		
-		if(!check_sorted_chm(ans)) {
-			cholmod_common c; 			
-			if (!cholmod_sort(ans, &c))
-				printf("Couldn't sort sparse matrix indices!\n");
-		}
-		ans->sorted = 1;
-
-		return ans;
-	}
-
-
-	void dsdmult (char transpose, int m, int n, void * a, double *b, double *c) {
-		int t = transpose == 't' ? 1 : 0;
-		CHM_SP cha = (CHM_SP) a;
-
-		cholmod_dense chb;
-		chb.nrow = transpose == 't' ? m : n;
-		chb.d = chb.nrow;
-		chb.ncol = 1;
-		chb.nzmax = chb.nrow;
-		chb.xtype = cha->xtype;
-		chb.dtype = 0;
-		chb.x = (void *) b;
-		chb.z = (void *) NULL;
-
-		cholmod_dense chc;
-		chc.nrow = transpose == 't' ? n : m;
-		chc.d = chc.nrow;
-		chc.ncol = 1;
-		chc.nzmax = chc.nrow;
-		chc.xtype = cha->xtype;
-		chc.dtype = 0;
-		chc.x = (void *) c;
-		chc.z = (void *) NULL;
-
-		double one[] = { 1, 0 }, zero[] = { 0, 0};
-		cholmod_sdmult(cha, t, one, zero, &chb, &chc, &chol_c);		
-	}
-	
-	
-	
 	field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
 		
 		int m = A.n_rows;
@@ -120,12 +11,12 @@ namespace ACTIONet {
 		printf("\t\t* IRLB (sparse) -- A: %d x %d\n", m, n); fflush(stdout);
 		
 		
-		
+		cholmod_common chol_c;
 		cholmod_start (&chol_c);
 		chol_c.final_ll = 1;          /* LL' form of simplicial factorization */
-		chol_c.error_handler = irlba_R_cholmod_error;
+		//chol_c.error_handler = irlba_R_cholmod_error;
 		
-		CHM_SP AS = new cholmod_sparse_struct;		
+		cholmod_sparse_struct  * AS = new cholmod_sparse_struct;		
 		as_cholmod_sparse(AS, A);
 	
 		
@@ -209,7 +100,7 @@ namespace ACTIONet {
 			y = A * v;			
 			memcpy(W + j * m, y.memptr(), y.n_elem*sizeof(double));		
 			*/
-			dsdmult ('n', m, n, AS, x, W + j * m);
+			dsdmult ('n', m, n, AS, x, W + j * m, &chol_c);
 
 									  
 			if (iter > 0)
@@ -226,7 +117,7 @@ namespace ACTIONet {
 				y = At*v;				
 				memcpy(F, y.memptr(), y.n_elem*sizeof(double));
 				*/
-				dsdmult ('t', m, n, AS, W + j * m, F);
+				dsdmult ('t', m, n, AS, W + j * m, F, &chol_c);
 				//v = vec(F, A.n_cols, true);				
 				//v(span(0, 5)).print("F");
 
@@ -262,7 +153,7 @@ namespace ACTIONet {
 					y = A*v;
 					memcpy(W + (j + 1) * m, y.memptr(), y.n_elem*sizeof(double));
 					*/
-				    dsdmult ('n', m, n, AS, x, W + (j + 1) * m);
+				    dsdmult ('n', m, n, AS, x, W + (j + 1) * m, &chol_c);
 
 					/* One step of classical Gram-Schmidt */
 					R = -R_F;

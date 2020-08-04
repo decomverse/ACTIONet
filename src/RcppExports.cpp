@@ -147,14 +147,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_SPA
-List run_SPA(mat A, int k);
+List run_SPA(mat& A, int k);
 RcppExport SEXP _ACTIONet_run_SPA(SEXP ASEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(run_SPA(A, k));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_SPA_rows_sparse
+List run_SPA_rows_sparse(sp_mat& A, int k);
+RcppExport SEXP _ACTIONet_run_SPA_rows_sparse(SEXP ASEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_SPA_rows_sparse(A, k));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -907,6 +919,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// MWM_rank1
+umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
+RcppExport SEXP _ACTIONet_MWM_rank1(SEXP uSEXP, SEXP vSEXP, SEXP u_thresholdSEXP, SEXP v_thresholdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< vec >::type u(uSEXP);
+    Rcpp::traits::input_parameter< vec >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type u_threshold(u_thresholdSEXP);
+    Rcpp::traits::input_parameter< double >::type v_threshold(v_thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(MWM_rank1(u, v, u_threshold, v_threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -920,6 +946,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 6},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 3},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
+    {"_ACTIONet_run_SPA_rows_sparse", (DL_FUNC) &_ACTIONet_run_SPA_rows_sparse, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},
     {"_ACTIONet_run_ACTION_plus", (DL_FUNC) &_ACTIONet_run_ACTION_plus, 6},
     {"_ACTIONet_run_AA", (DL_FUNC) &_ACTIONet_run_AA, 4},
@@ -974,6 +1001,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_deflate_reduction", (DL_FUNC) &_ACTIONet_deflate_reduction, 7},
     {"_ACTIONet_orthogonalize_batch_effect", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect, 7},
     {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},
+    {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {NULL, NULL, 0}
 };
 
