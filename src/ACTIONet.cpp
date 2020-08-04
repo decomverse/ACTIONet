@@ -335,7 +335,7 @@ mat run_simplex_regression(mat &A, mat &B, bool computeXtX = false) {
 //' @examples
 //' H = run_SPA(S_r, 10)
 // [[Rcpp::export]]
-List run_SPA(mat A, int k) {	
+List run_SPA(mat &A, int k) {	
 
 	ACTIONet::SPA_results res = ACTIONet::run_SPA(A, k);
 	uvec selected_columns = res.selected_columns;
@@ -348,6 +348,33 @@ List run_SPA(mat A, int k) {
 
 	List out;	
 	out["selected_columns"] = cols;		
+	out["norms"] = res.column_norms;
+		
+	return out;
+}
+
+//' Runs Successive Projection Algorithm (SPA) to solve separable NMF
+//'
+//' @param A Input matrix
+//' @param k Number of columns to select
+//' 
+//' @return A named list with entries 'selected_columns' and 'norms'
+//' @examples
+//' H = run_SPA(S_r, 10)
+// [[Rcpp::export]]
+List run_SPA_rows_sparse(sp_mat &A, int k) {	
+
+	ACTIONet::SPA_results res = ACTIONet::run_SPA_rows_sparse(A, k);
+	uvec selected_columns = res.selected_columns;
+	
+	vec cols(k);
+	for(int i = 0; i < k; i++) {
+		cols[i] = selected_columns[i] + 1;
+	}
+	
+
+	List out;	
+	out["selected_rows"] = cols;		
 	out["norms"] = res.column_norms;
 		
 	return out;
@@ -1979,3 +2006,14 @@ List orthogonalize_batch_effect_full(mat &S, mat &old_S_r, mat &old_V, mat &old_
 }
 
 
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+umat MWM_rank1(vec u, vec v, double u_threshold = 0, double v_threshold = 0) {
+	
+	umat pairs = ACTIONet::MWM_rank1(u, v, u_threshold, v_threshold);
+	
+	pairs = pairs + 1;
+	
+	return(pairs);
+}

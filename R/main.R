@@ -137,7 +137,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
-	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     if (full.trace == T) {
         # Prepare output
@@ -210,7 +210,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
     colMaps(ace)$denovo_color = X
     colMapTypes(ace)[["denovo_color"]] = "embedding"
 
-	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     return(ace)
 }
@@ -260,7 +260,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
     colMaps(ace)$denovo_color = X
     colMapTypes(ace)[["denovo_color"]] = "embedding"
 
-	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     return(ace)
 }
@@ -319,7 +319,7 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
     rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
 
-	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     return(ace)
 }
@@ -375,13 +375,14 @@ regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "log
     rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
-	ace = construct.backbone(ace, network_density = 0.2*network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
+	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
     return(ace)
 }
 
-construct.backbone <- function(ace, network_density = 0.2, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 1) {
+construct.backbone <- function(ace, network_density = 1.0, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 1, footprint_alpha = 0.85, ACTIONet_slot = "ACTIONet") {
 	if(! ("archetype_footprint" %in% names(colMaps(ace))) ) {
+		G = colNets(ace)[[ACTIONet_slot]]
 	    Ht_unified = colMaps(ace)[["H_unified"]]
 		archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
 		colMaps(ace)$archetype_footprint = archetype_footprint
