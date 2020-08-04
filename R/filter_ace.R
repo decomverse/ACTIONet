@@ -1,28 +1,29 @@
 #' Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.
 #' @export
 filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
-    .check_and_load_package("matrixStats")
+    .check_and_load_package("sparseMatrixStats")
+    assays(ace)[[assay.name]] = as(assays(ace)[[assay.name]], "dgCMatrix")
     org_dim = dim(ace)
     ace.fil = ace
 
     i = 0
     repeat {
         prev_dim = dim(ace.fil)
-
         rows_mask = rep(TRUE, NROW(ace.fil))
         cols_mask = rep(TRUE, NCOL(ace.fil))
         if (!is.null(min_umis_per_cell)) {
-            umi_mask = matrixStats::colSums2(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
+            umi_mask = sparseMatrixStats::colSums2(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(max_umis_per_cell)) {
-            umi_mask = matrixStats::colSums2(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
+            umi_mask = sparseMatrixStats::colSums2(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(min_feats_per_cell)) {
-            feature_mask = matrixStats::colSums2(assays(ace.fil)[[assay.name]] > 0) >=
+            cts = as(assays(ace.fil)[[assay.name]] > 0, "dgCMatrix")
+            feature_mask = sparseMatrixStats::colSums2(cts) >=
                 min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
@@ -31,12 +32,12 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
             if ((min_cells_per_feat < 1) & (min_cells_per_feat > 0)) {
                 min_cells_per_feat = min_cells_per_feat * org_dim[2]
             }
-
-            cell_count_mask = Matrix::rowSums(assays(ace.fil)[[assay.name]] > 0) >= min_cells_per_feat
+            rcts = as(assays(ace.fil)[[assay.name]] > 0, "dgCMatrix")
+            cell_count_mask = sparseMatrixStats::rowSums2(rcts) >= min_cells_per_feat
             rows_mask = rows_mask & cell_count_mask
         }
         ace.fil <- ace.fil[rows_mask, cols_mask]
-
+        invisible(gc())
         i = i + 1
         if (all(dim(ace.fil) == prev_dim)) {
             break
@@ -84,7 +85,7 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
 
     fil_col = lapply(fil_names, function(i) i[["cols_filtered"]]$name) %>% Reduce(union,
         .)
-    fil_row = lapply(fil_names, function(i) i[["rows_filtered"]]$name) %>% Reduce(intersect,
+    fil_row = lapply(fil_names, function(i) i[["rows_filtered"]]$name) %>% Reduce(union,
         .)
     keep_row = which(!(rownames(ace) %in% fil_row))
     keep_col = which(!(colnames(ace) %in% fil_col))
