@@ -27,7 +27,8 @@
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500,
     layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification.resolution = 5, footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
+    unification_min_edge_weight = 0.5, unification_min_coreness = 2, unification_resolution = 1, unification_min_repeat = 0, unification_alpha = 0.05, unification_beta = 0.5,
+    footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
         stop(err)
@@ -96,8 +97,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 
     # Identiy equivalent classes of archetypes and group them together
-    unification.out = unify_archetypes(S_r, pruning.out$C_stacked, pruning.out$H_stacked,
-        min_overlap = 0, resolution = unification.resolution)
+	unification.out = unify_archetypes(S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, min_edge_weight = unification_min_edge_weight, min_coreness = unification_min_coreness, resolution = unification_resolution, min_repeat = unification_min_repeat, thread_no = thread_no, alpha = unification_alpha, beta = unification_beta)    
 
 	Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
     colMaps(ace)[["H_unified"]] = Ht_unified
@@ -266,18 +266,20 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 }
 
 
-rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcounts",
-    reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 0.2, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0) {
+rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
+    unification_min_edge_weight = 0.5, unification_min_coreness = 2, unification_resolution = 1, unification_min_repeat = 0, unification_alpha = 0.05, unification_beta = 0.5,
+    reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0) {
+		
     S = assays(ace)[[data_slot]]
     S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
     C_stacked = as.matrix(colMaps(ace)[["C_stacked"]])
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
     G = colNets(ace)[["ACTIONet"]]
 
-    unification.out = unify_archetypes(S_r, C_stacked, H_stacked, min_overlap = 0,
-        resolution = resolution)
+    unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, min_edge_weight = unification_min_edge_weight, min_coreness = unification_min_coreness, resolution = unification_resolution, min_repeat = unification_min_repeat, thread_no = thread_no, alpha = unification_alpha, beta = unification_beta)
 
-    R.utils::printf("resolution = %f -> %d states\n", resolution, length(unique(unification.out$assigned_archetype)))
+
+    R.utils::printf("%d states\n", length(unique(unification.out$assigned_archetype)))
 
     colMaps(ace)[[sprintf("H_%s", unified_suffix)]] = as(Matrix::t(unification.out$H_unified),
         "sparseMatrix")
@@ -287,13 +289,13 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
         "sparseMatrix")
     colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] = "internal"
 
-    colData(ace)[[sprintf("assigned_archetypes_%s", unified_suffix)]] = unification.out$assigned_archetype
+    colData(ace)[["assigned_archetype"]] = unification.out$assigned_archetype
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
     ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
 
-	Ht_unified = colMaps(ace)[["H_unified"]]
+	Ht_unified = colMaps(ace)[[sprintf("H_%s", unified_suffix)]]
 	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
 	colMaps(ace)$archetype_footprint = archetype_footprint
 	
@@ -324,62 +326,6 @@ rerun.archetype.aggregation <- function(ace, resolution = 1, data_slot = "logcou
     return(ace)
 }
 
-regroup.archetypes <- function(ace, unification.resolution = 1, data_slot = "logcounts",
-    reduction_slot = "ACTION", network_density = 0.2, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, footprint_alpha = 0.85, thread_no = 0) {
-    S = assays(ace)[[data_slot]]
-    S_r = Matrix::t(colMaps(ace)[[reduction_slot]])
-
-    H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
-    C_stacked = as.matrix(colMaps(ace)[["C_stacked"]])
-    G = colNets(ace)$ACTIONet
-
-    # Identiy equivalent classes of archetypes and group them together
-    unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked,
-        min_overlap = 0, resolution = unification.resolution)
-
-
-    colMaps(ace)[["H_unified"]] = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
-    colMapTypes(ace)[["H_unified"]] = "internal"
-
-    colMaps(ace)[["C_unified"]] = as(unification.out$C_unified, "sparseMatrix")
-    colMapTypes(ace)[["C_unified"]] = "internal"
-
-
-    # Use graph core of global and induced subgraphs to infer centrality/quality of
-    # each cell
-    ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
-
-
-	Ht_unified = colMaps(ace)[["H_unified"]]
-	archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha, thread_no = thread_no)	
-	colMaps(ace)$archetype_footprint = archetype_footprint
-	
-	H = Matrix::t(archetype_footprint)
-        
-    # Compute gene specificity for each archetype
-    if (is.matrix(S)) {
-        specificity.out = compute_archetype_feature_specificity_full(S, H)
-    } else {
-        specificity.out = compute_archetype_feature_specificity(S, H)
-    }
-
-
-    specificity.out = lapply(specificity.out, function(specificity.scores) {
-        rownames(specificity.scores) = rownames(ace)
-        colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores), sep = "")
-        return(specificity.scores)
-    })
-    rowMaps(ace)[["unified_feature_profile"]] = specificity.out[["archetypes"]]
-    rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
-
-    rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
-    rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
-
-	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
-
-    return(ace)
-}
-
 construct.backbone <- function(ace, network_density = 1.0, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 1, footprint_alpha = 0.85, ACTIONet_slot = "ACTIONet") {
 	if(! ("archetype_footprint" %in% names(colMaps(ace))) ) {
 		G = colNets(ace)[[ACTIONet_slot]]
@@ -389,10 +335,12 @@ construct.backbone <- function(ace, network_density = 1.0, mutual_edges_only = T
 	}
 
 	
-	W = ace$archetype_footprint
+	W = exp(scale(ace$archetype_footprint))
 	W = as(W, 'sparseMatrix')	
 	arch.vis.out = transform_layout(W, coor2D = Matrix::t(ace$ACTIONet2D), coor3D = Matrix::t(ace$ACTIONet3D), colRGB = Matrix::t(ace$denovo_color), n_epochs = layout_epochs, compactness_level = layout_compactness, thread_no = thread_no)    
-    arch.G = build_ACTIONet(H_stacked = colMaps(ace)$archetype_footprint, density = network_density, thread_no = thread_no, mutual_edges_only = mutual_edges_only)	
+    #arch.G = build_ACTIONet(H_stacked = colMaps(ace)$archetype_footprint, density = network_density, thread_no = thread_no, mutual_edges_only = mutual_edges_only)	
+    arch.G = ACTIONet::computeFullSim(colMaps(ace)$archetype_footprint)
+    diag(arch.G) = 0
     
     backbone = list(G = arch.G, coordinates = Matrix::t(arch.vis.out$coordinates), coordinates_3D = Matrix::t(arch.vis.out$coordinates_3D), colors = Matrix::t(arch.vis.out$colors))
     

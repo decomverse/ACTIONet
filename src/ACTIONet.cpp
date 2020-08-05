@@ -632,13 +632,17 @@ List prune_archetypes(const List& C_trace, const List& H_trace, double min_speci
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 //' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overlap = 10.0, double resolution = 1.0) {
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, min_overlap, resolution);
+List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_weight = 0.5, int min_coreness = 2, double resolution = 1.0, int min_repeat = 2, int thread_no = 0, double alpha = 0.05, double beta = 0.5) {
+
+	
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta);
 	
 		
 	List out_list;		
 	
-	out_list["archetype_groups"] = results.archetype_groups;
+	out_list["dag_adj"] = results.dag_adj;
+	out_list["dag_node_annotations"] = results.dag_node_annotations;
+	
 
 	for(int i = 0; i < results.selected_archetypes.n_elem; i++) results.selected_archetypes[i]++;
 	out_list["selected_archetypes"] = results.selected_archetypes;
@@ -2016,4 +2020,16 @@ umat MWM_rank1(vec u, vec v, double u_threshold = 0, double v_threshold = 0) {
 	pairs = pairs + 1;
 	
 	return(pairs);
+}
+
+
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat NetEnh(mat A) {
+	
+	mat A_enh = ACTIONet::NetEnh(A);
+	
+	return(A_enh);
 }
