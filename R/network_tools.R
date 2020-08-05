@@ -193,7 +193,7 @@ construct.tspanner <- function(backbone, stretch.factor = 10) {
     }
     
     G = as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
-    G@x = 1 - G@x
+    #G@x = 1 - G@x
     
     return(G)
 }
