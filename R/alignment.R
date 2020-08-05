@@ -145,7 +145,7 @@ plot_pairwise_alignment <- function(alignment, reference_labels = NULL, query_la
 	if(normalize == TRUE)
 		X = doubleNorm(X)
 		
-	ht = Heatmap(X, cluster_columns = F, cluster_rows = F, rect_gp = gpar(col = border.color), name = "Alignment score", col = gradPal, row_names_side = "left", row_title = "Reference", column_title = "Query", column_names_gp = gpar(fontsize = 14, fontface="bold"), row_names_gp = gpar(fontsize = 14, fontface="bold"), column_title_gp = gpar(fontsize = 18, fontface="bold"), row_title_gp = gpar(fontsize = 18, fontface="bold"))
+	ht = Heatmap(X, cluster_columns = F, cluster_rows = F, rect_gp = gpar(col = border.color), name = "Alignment score", col = gradPal, row_names_side = "left", row_title = "Reference", column_title = "Query", column_names_gp = gpar(fontsize = 14, fontface="bold"), row_names_gp = gpar(fontsize = 14, fontface="bold"), column_title_gp = gpar(fontsize = 18, fontface="bold"), row_title_gp = gpar(fontsize = 18, fontface="bold"), row_names_max_width = unit(100, "cm"), column_names_max_height = unit(100, "cm"))
 	
 	ht
 }

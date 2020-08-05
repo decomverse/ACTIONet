@@ -851,7 +851,6 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
     node.size = node.size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
-        labels = preprocess.labels(labels, ace)
         if (is.character(coordinate_slot)) {            
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
@@ -869,7 +868,6 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
         	coors = scale(coors)            
-            labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
             return()
