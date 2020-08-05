@@ -334,8 +334,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 #' cell.clusters = unification.out$sample_assignments
-unify_archetypes <- function(S_r, C_stacked, H_stacked, min_overlap = 10.0, resolution = 1.0) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, min_overlap, resolution)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, min_edge_weight = 0.5, min_coreness = 2L, resolution = 1.0, min_repeat = 2L, thread_no = 0L, alpha = 0.05, beta = 0.5) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta)
 }
 
 #' Builds an interaction network from the multi-level archetypal decompositions
@@ -932,5 +932,9 @@ orthogonalize_batch_effect_full <- function(S, old_S_r, old_V, old_A, old_B, old
 
 MWM_rank1 <- function(u, v, u_threshold = 0, v_threshold = 0) {
     .Call(`_ACTIONet_MWM_rank1`, u, v, u_threshold, v_threshold)
+}
+
+NetEnh <- function(A) {
+    .Call(`_ACTIONet_NetEnh`, A)
 }
 
