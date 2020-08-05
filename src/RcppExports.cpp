@@ -263,17 +263,22 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double min_overlap, double resolution);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP min_overlapSEXP, SEXP resolutionSEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double min_edge_weight, int min_coreness, double resolution, int min_repeat, int thread_no, double alpha, double beta);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP min_edge_weightSEXP, SEXP min_corenessSEXP, SEXP resolutionSEXP, SEXP min_repeatSEXP, SEXP thread_noSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
-    Rcpp::traits::input_parameter< double >::type min_overlap(min_overlapSEXP);
+    Rcpp::traits::input_parameter< double >::type min_edge_weight(min_edge_weightSEXP);
+    Rcpp::traits::input_parameter< int >::type min_coreness(min_corenessSEXP);
     Rcpp::traits::input_parameter< double >::type resolution(resolutionSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, min_overlap, resolution));
+    Rcpp::traits::input_parameter< int >::type min_repeat(min_repeatSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -933,6 +938,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NetEnh
+mat NetEnh(mat A);
+RcppExport SEXP _ACTIONet_NetEnh(SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(NetEnh(A));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -953,7 +969,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 5},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 10},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
@@ -1002,6 +1018,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_orthogonalize_batch_effect", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect, 7},
     {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
+    {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
     {NULL, NULL, 0}
 };
 
