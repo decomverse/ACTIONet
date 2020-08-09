@@ -30,10 +30,12 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
 
         if (!is.null(min_cells_per_feat)) {
             if ((min_cells_per_feat < 1) & (min_cells_per_feat > 0)) {
-                min_cells_per_feat = min_cells_per_feat * org_dim[2]
+                min_fc = min_cells_per_feat * org_dim[2]
+            } else{
+              min_fc = min_cells_per_feat
             }
             rcts = as(assays(ace.fil)[[assay.name]] > 0, "dgCMatrix")
-            cell_count_mask = sparseMatrixStats::rowSums2(rcts) >= min_cells_per_feat
+            cell_count_mask = sparseMatrixStats::rowSums2(rcts) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
         ace.fil <- ace.fil[rows_mask, cols_mask]
