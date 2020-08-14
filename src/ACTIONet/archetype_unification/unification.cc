@@ -232,10 +232,13 @@ namespace ACTIONet {
 					
 			C_unified = C_norm.cols(selected_columns(span(0, state_no-1)));				
 		} else if(method_type == 3) {
-			vec clusters = unsigned_cluster(sp_mat(G_red), resolution);
 			
-			clusters = clusters(selected_archs);
+			uvec initial_clusters(G_red.n_rows);
+			for (int i = 0; i < G_red.n_rows; i++) initial_clusters(i) = i;					
+			vec clusters = unsigned_cluster(sp_mat(G_red), resolution, initial_clusters, 0);
+			
 			uvec selected_archs = find(clusters >= 0);
+			clusters = clusters(selected_archs);
 			
 			
 			vec uc = sort(unique(clusters));				
