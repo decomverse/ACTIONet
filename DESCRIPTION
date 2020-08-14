@@ -21,4 +21,4 @@ LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1

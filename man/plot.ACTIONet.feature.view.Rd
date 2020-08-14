@@ -12,7 +12,7 @@
   title = "Feature view",
   label.text.size = 1,
   renormalize = F,
-  coordinate_slot = "ACTIONet2D"
+  footprint_slot = "H_unified"
 )
 }
 \arguments{
