@@ -494,7 +494,7 @@ namespace ACTIONet {
 	ACTION_results run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
 		int feature_no = S_r.n_rows;
 
-		printf("Running subACTION (%d threads) for parent archetype %d\n", thread_no, kk);
+		printf("Running subACTION (%d threads) for parent archetype %d\n", thread_no, kk+1);
 
 		if(k_max == -1)
 			k_max = (int)S_r.n_cols;
@@ -510,7 +510,7 @@ namespace ACTIONet {
 		
 		mat X_r_scaled = X_r; // To deflate or not deflate!
 		
-		for(int i = 0; i < S_r.n_cols; i++) {
+		for(int i = 0; i < X_r_scaled.n_cols; i++) {
 			X_r_scaled.col(i) *= h[i];
 		}		
 		
@@ -526,28 +526,23 @@ namespace ACTIONet {
 		int current_k = 0;
 		int total = k_min-1;
 		printf("Iterating from k=%d ... %d\n", k_min, k_max);
-		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {
+		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kkk, size_t threadId) {			
 			total++;
 			printf("\tk = %d\n", total);
-			SPA_results SPA_res = run_SPA(X_r_scaled, kk);
-			trace.selected_cols[kk] = SPA_res.selected_columns;
+			
+			SPA_results SPA_res = run_SPA(X_r_scaled, kkk);
+			trace.selected_cols[kkk] = SPA_res.selected_columns;
 
-			mat W = X_r.cols(trace.selected_cols[kk]);
+			
+			mat W = X_r.cols(trace.selected_cols[kkk]);
 
 			field<mat> AA_res;
 			
 			AA_res = run_AA_with_prior(X_r_scaled, W, W_prior, max_it, min_delta);
 						
-			//AA_res = run_AA_old(X_r, W);
-			trace.C[kk] = AA_res(0);
+			trace.C[kkk] = AA_res(0);			
+			trace.H[kkk] = AA_res(1);
 			
-			/*
-			mat W_combined_org = join_rows(X_r * AA_res(0), W_parent);
-			mat H_combined_org =run_simplex_regression(W_combined_org, X_r, true);
-			trace.H[kk] = H_combined_org.rows(span(0, kk-1));			
-			*/
-			
-			trace.H[kk] = AA_res(1);
 
 		});
 
