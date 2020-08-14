@@ -334,8 +334,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 #' cell.clusters = unification.out$sample_assignments
-unify_archetypes <- function(S_r, C_stacked, H_stacked, min_edge_weight = 0.5, min_coreness = 2L, resolution = 1.0, min_repeat = 2L, thread_no = 0L, alpha = 0.05, beta = 0.5) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, min_edge_weight = 0.5, min_coreness = 2L, resolution = 1.0, min_repeat = 2L, thread_no = 0L, alpha = 0.05, beta = 0.5, outlier_threshold = 0.5, minPoints = 5L, minClusterSize = 5L, cond_threshold = 10, normalization_type = 0L, preprocess_adj = TRUE, reduce_G = FALSE, method_type = 3L) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta, outlier_threshold, minPoints, minClusterSize, cond_threshold, normalization_type, preprocess_adj, reduce_G, method_type)
 }
 
 #' Builds an interaction network from the multi-level archetypal decompositions
@@ -742,6 +742,10 @@ MWM_hungarian <- function(G) {
 #' clusters = signed_cluster(G_signed)
 signed_cluster <- function(A, resolution_parameter = 1.0, initial_clusters_ = NULL, seed = 0L) {
     .Call(`_ACTIONet_signed_cluster`, A, resolution_parameter, initial_clusters_, seed)
+}
+
+unsigned_cluster_batch <- function(A, resolutions, initial_clusters_ = NULL, seed = 0L) {
+    .Call(`_ACTIONet_unsigned_cluster_batch`, A, resolutions, initial_clusters_, seed)
 }
 
 #' Computes graph clustering using Leiden algorith over unsigned graphs

@@ -263,8 +263,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double min_edge_weight, int min_coreness, double resolution, int min_repeat, int thread_no, double alpha, double beta);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP min_edge_weightSEXP, SEXP min_corenessSEXP, SEXP resolutionSEXP, SEXP min_repeatSEXP, SEXP thread_noSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double min_edge_weight, int min_coreness, double resolution, int min_repeat, int thread_no, double alpha, double beta, double outlier_threshold, int minPoints, int minClusterSize, double cond_threshold, int normalization_type, bool preprocess_adj, bool reduce_G, int method_type);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP min_edge_weightSEXP, SEXP min_corenessSEXP, SEXP resolutionSEXP, SEXP min_repeatSEXP, SEXP thread_noSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP outlier_thresholdSEXP, SEXP minPointsSEXP, SEXP minClusterSizeSEXP, SEXP cond_thresholdSEXP, SEXP normalization_typeSEXP, SEXP preprocess_adjSEXP, SEXP reduce_GSEXP, SEXP method_typeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -278,7 +278,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta));
+    Rcpp::traits::input_parameter< double >::type outlier_threshold(outlier_thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type minPoints(minPointsSEXP);
+    Rcpp::traits::input_parameter< int >::type minClusterSize(minClusterSizeSEXP);
+    Rcpp::traits::input_parameter< double >::type cond_threshold(cond_thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type normalization_type(normalization_typeSEXP);
+    Rcpp::traits::input_parameter< bool >::type preprocess_adj(preprocess_adjSEXP);
+    Rcpp::traits::input_parameter< bool >::type reduce_G(reduce_GSEXP);
+    Rcpp::traits::input_parameter< int >::type method_type(method_typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta, outlier_threshold, minPoints, minClusterSize, cond_threshold, normalization_type, preprocess_adj, reduce_G, method_type));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -585,6 +593,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type initial_clusters_(initial_clusters_SEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     rcpp_result_gen = Rcpp::wrap(signed_cluster(A, resolution_parameter, initial_clusters_, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// unsigned_cluster_batch
+mat unsigned_cluster_batch(sp_mat A, vec resolutions, Nullable<IntegerVector> initial_clusters_, int seed);
+RcppExport SEXP _ACTIONet_unsigned_cluster_batch(SEXP ASEXP, SEXP resolutionsSEXP, SEXP initial_clusters_SEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< vec >::type resolutions(resolutionsSEXP);
+    Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type initial_clusters_(initial_clusters_SEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(unsigned_cluster_batch(A, resolutions, initial_clusters_, seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -969,7 +991,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 10},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 18},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
@@ -994,6 +1016,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_HDBSCAN", (DL_FUNC) &_ACTIONet_run_HDBSCAN, 3},
     {"_ACTIONet_MWM_hungarian", (DL_FUNC) &_ACTIONet_MWM_hungarian, 1},
     {"_ACTIONet_signed_cluster", (DL_FUNC) &_ACTIONet_signed_cluster, 4},
+    {"_ACTIONet_unsigned_cluster_batch", (DL_FUNC) &_ACTIONet_unsigned_cluster_batch, 4},
     {"_ACTIONet_unsigned_cluster", (DL_FUNC) &_ACTIONet_unsigned_cluster, 4},
     {"_ACTIONet_Prune_PageRank", (DL_FUNC) &_ACTIONet_Prune_PageRank, 2},
     {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 7},

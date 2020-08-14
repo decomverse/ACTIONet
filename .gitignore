@@ -12,3 +12,4 @@ tests/tmp
 build
 dist
 lib
+*.back

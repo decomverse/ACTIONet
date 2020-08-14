@@ -372,7 +372,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 plot.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = T,
     reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
 
-    W = select.top.k.features(feature.enrichment.table, top.features = 3, normalize = T)
+    W = select.top.k.features(feature.enrichment.table, top.features = top.features, normalize = normalize)
 
     gradPal = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
 

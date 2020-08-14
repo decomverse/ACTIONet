@@ -632,10 +632,10 @@ List prune_archetypes(const List& C_trace, const List& H_trace, double min_speci
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 //' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_weight = 0.5, int min_coreness = 2, double resolution = 1.0, int min_repeat = 2, int thread_no = 0, double alpha = 0.05, double beta = 0.5) {
+List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_weight = 0.5, int min_coreness = 2, double resolution = 1.0, int min_repeat = 2, int thread_no = 0, double alpha = 0.05, double beta = 0.5, double outlier_threshold = 0.5, int minPoints = 5, int minClusterSize = 5, double cond_threshold = 10, int normalization_type = 0, bool preprocess_adj = true, bool reduce_G = false, int method_type = 3) {
 
 	
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta);
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta, outlier_threshold, minPoints, minClusterSize, cond_threshold, normalization_type, preprocess_adj, reduce_G, method_type);
 	
 		
 	List out_list;		
@@ -1281,6 +1281,27 @@ vec signed_cluster(sp_mat A, double resolution_parameter = 1.0, Nullable<Integer
     return clusters;	
 }
 
+
+// [[Rcpp::export]]
+mat unsigned_cluster_batch(sp_mat A, vec resolutions, Nullable<IntegerVector> initial_clusters_ = R_NilValue, int seed = 0) {
+    set_seed(seed);
+
+	uvec initial_clusters_uvec(A.n_rows);
+	if ( initial_clusters_.isNotNull() ) {
+        NumericVector initial_clusters(initial_clusters_);
+		
+		for (int i = 0; i < A.n_rows; i++) initial_clusters_uvec(i) = initial_clusters(i);
+	} else {
+		for (int i = 0; i < A.n_rows; i++) initial_clusters_uvec(i) = i;
+	}
+
+	
+	mat clusters = ACTIONet::unsigned_cluster_batch(A, resolutions, initial_clusters_uvec, seed);
+
+    return clusters;	
+}
+
+
 //' Computes graph clustering using Leiden algorith over unsigned graphs
 //'
 //' @param G Adjacency matrix of the input graph
@@ -1886,7 +1907,7 @@ void csc_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Ai, NumericVecto
 // [[Rcpp::export]]
 List run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
 
-	ACTIONet::ACTION_results trace = ACTIONet::run_subACTION(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta);
+	ACTIONet::ACTION_results trace = ACTIONet::run_subACTION(S_r, W_parent, H_parent, kk-1, k_min, k_max, thread_no, max_it, min_delta);
 
 	List res;
 	
