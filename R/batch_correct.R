@@ -12,7 +12,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 
 
     sce.list = lapply(IDX, function(idx) {
         sce = as(ace[, idx], "SingleCellExperiment")
-        sce = computeSumFactors(sce, BPPARAM = BPPARAM)
+        # sce = computeSumFactors(sce, BPPARAM = BPPARAM)
     })
     sce.list.norm = do.call(batchelor::multiBatchNorm, list(sce.list, BPPARAM = BPPARAM))
     # Sort based on 'complexity'
@@ -104,7 +104,7 @@ batch.correct.ace.Harmony <- function(ace, batch_attr = NULL, reduction_slot = "
     if(is.null(batch_attr)) {
         stop("No batch attribute is provided\n")
 	}
-	
+
     ace = .check_and_convert_se_like(ace, "ACE")
     batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
     ACTIONet::colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(ACTIONet::colMaps(ace)[[reduction_slot]],
@@ -121,7 +121,7 @@ orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION", 
 	A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
 	B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
 	sigma = metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
-	
+
 	reduction.out = orthogonalize_batch_effect(S = S, old_S_r = S_r, old_V = V, old_A = A, old_B = B, old_sigma = sigma, design = design.mat)
 
     S_r = reduction.out$S_r
@@ -132,25 +132,25 @@ orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION", 
 
 
 	V = reduction.out$V
-	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))	
+	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))
 	rowMaps(ace)[[sprintf("%s_V", reduction_slot)]] = V
 	rowMapTypes(ace)[[sprintf("%s_V", reduction_slot)]] = "internal"
 
 
 	A = reduction.out$A
-	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))	
+	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))
 	rowMaps(ace)[[sprintf("%s_A", reduction_slot)]] = A
 	rowMapTypes(ace)[[sprintf("%s_A", reduction_slot)]] = "internal"
 
 
 	B = reduction.out$B
-	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))	
+	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))
 	colMaps(ace)[[sprintf("%s_B", reduction_slot)]] = B
 	colMapTypes(ace)[[sprintf("%s_B", reduction_slot)]] = "internal"
-	
-	
+
+
 	metadata(ace)[[sprintf("%s_sigma", reduction_slot)]] = reduction.out$sigma
-	
+
 	return(ace)
 }
 
@@ -158,10 +158,10 @@ orthogonalize.ace.batch <- function(ace, design.mat, reduction_slot = "ACTION", 
 orthogonalize.ace.batch.simple <- function(ace, batch.vec, reduction_slot = "ACTION") {
 	batch.vec = as.factor(batch.vec)
 	design.mat = model.matrix(~ batch.vec)
-	
+
 	ace.corrected = orthogonalize.ace.batch(ace, design.mat, reduction_slot = "ACTION")
 	return(ace.corrected)
-	
+
 }
 
 #' @export
@@ -169,8 +169,7 @@ reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat, reduced_dim = 5
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 	ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, data_slot = data_slot,
     norm_method = norm_method, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
-	
+
 	ace.corrected = orthogonalize.ace.batch(ace, design.mat, reduction_slot = reduction_slot, data_slot = data_slot)
 	return(ace.corrected)
 }
-
