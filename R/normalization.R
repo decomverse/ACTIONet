@@ -22,9 +22,10 @@ normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam())
     } else {
 		S = SummarizedExperiment::assays(ace)[["counts"]]
 		if(is.matrix(S)) {
+			ace.norm = ace
 			cs = Matrix::colSums(S)
 			cs[cs == 0] = 1
-			B = scale(S, center = F, scale = cs)
+			B = log1p(median(cs)*scale(S, center = F, scale = cs))
 			rownames(B) = rownames(ace.norm)
 			colnames(B) = colnames(ace.norm)
 			SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
