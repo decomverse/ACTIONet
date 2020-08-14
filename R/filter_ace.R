@@ -70,12 +70,12 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
     if (any(duplicated(rownames(ace)))) {
         msg = sprintf("Adding suffix to duplicate rownames.\n")
         warning(msg)
-        rownames(ace) = make.names(rownames(ace), unique = T)
+        rownames(ace) = make.unique(rownames(ace))
     }
     if (any(duplicated(colnames(ace)))) {
         msg = sprintf("Adding suffix to duplicate colnames.\n")
         warning(msg)
-        colnames(ace) = make.names(colnames(ace), unique = T)
+        colnames(ace) = make.unique(colnames(ace))
     }
 
     fil_names <- lapply(IDX, function(idx) {
