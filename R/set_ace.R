@@ -209,12 +209,14 @@ setReplaceMethod("counts", "ACTIONetExperiment", function(object, value) {
     object
 })
 
+#' @export
 setReplaceMethod("logcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$logcounts = value
     object
 })
 
+#' @export
 setReplaceMethod("normcounts", "ACTIONetExperiment", function(object, value) {
     (object)
     SummarizedExperiment::assays(object)$normcounts = value
