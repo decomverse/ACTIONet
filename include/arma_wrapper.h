@@ -7,11 +7,10 @@
 #include <algorithm>
 #include <type_traits>
 #include <iterator>
-
+#include <armadillo>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <npy_common.h>
-#include <armadillo>
+#include <numpy/npy_common.h>
 
 namespace std {
 
@@ -854,8 +853,8 @@ Mat<ValueType> reshape_square(const std::vector<ValueType>& vec) {
 
 
 
-NAMESPACE_BEGIN(pybind11)
-NAMESPACE_BEGIN(detail)
+namespace pybind11 {
+namespace detail {
 
 using std::enable_if_t;
 
@@ -865,10 +864,8 @@ using std::enable_if_t;
 template<typename Type> 
 struct type_caster<Type, enable_if_t<(aw::is_Col<Type>::value || aw::is_Row<Type>::value) ||
                                      (aw::is_Mat<Type>::value || aw::is_Cube<Type>::value)>> {
-										 
-    //using Scalar = typename Type::elem_type;
+
     using Scalar = typename std::decay_t<typename Type::elem_type>;
-	//using Scalar = typename Type::Scalar;
     
     /* 
      * This function loads python arrays and coverts them to Armadillo columns. 
@@ -901,7 +898,9 @@ struct type_caster<Type, enable_if_t<(aw::is_Col<Type>::value || aw::is_Row<Type
     }
 
 
-    PYBIND11_TYPE_CASTER(Type, _("Numpy.ndarray[") + npy_format_descriptor<Scalar>::name() + _("]"));
+        PYBIND11_TYPE_CASTER(Type, _("Numpy.ndarray[") + npy_format_descriptor<Scalar>::name() + _("]"));
+
+
 };
 
 
@@ -909,10 +908,7 @@ template<typename Type>
 struct type_caster<Type, enable_if_t<aw::is_SpMat<Type>::value>> {
 
 
-	//using Scalar = typename Type::Scalar;
-    //using Scalar = typename Type::elem_type;
     using Scalar = typename std::decay_t<typename Type::elem_type>;
-
     using StorageIndexType = typename std::decay_t<decltype(*std::declval<Type>().row_indices)>;
     using IndexType = typename std::decay_t<decltype(std::declval<Type>().n_nonzero)>;
 
@@ -990,7 +986,8 @@ struct type_caster<Type, enable_if_t<aw::is_SpMat<Type>::value>> {
  
     }
 
-   PYBIND11_TYPE_CASTER(Type, _("scipy.sparse.csc_matrix[") + npy_format_descriptor<Scalar>::name() + _("]")); 
+   PYBIND11_TYPE_CASTER(Type, _("scipy.sparse.csc_matrix[") + npy_format_descriptor<std::decay_t<Scalar>>::name() + _("]")); 
+    
 
 };
 

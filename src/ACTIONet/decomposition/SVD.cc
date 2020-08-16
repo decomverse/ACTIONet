@@ -1,23 +1,33 @@
 #include "ACTIONet.h"
-#include <my_cblas.h>
+
+
 
 namespace ACTIONet {
-	// Adopted from the irlba R package
+
 	field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
-		printf("\t\t* IRLB (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		
+		int m = A.n_rows;
+		int n = A.n_cols;
+		printf("\t\t* IRLB (sparse) -- A: %d x %d\n", m, n); fflush(stdout);
 		
 		
+		cholmod_common chol_c;
+		cholmod_start (&chol_c);
+		chol_c.final_ll = 1;          /* LL' form of simplicial factorization */
+		//chol_c.error_handler = irlba_R_cholmod_error;
+		
+		cholmod_sparse_struct  * AS = new cholmod_sparse_struct;		
+		as_cholmod_sparse(AS, A);
+	
 		
 		double eps = 3e-13;
 		//double eps = 2.22e-16;
 		double tol = 1e-05, svtol = 1e-5;
 
-		//srand(seed);
+		srand(seed);
 		std::default_random_engine gen (seed);	
 		std::normal_distribution<double> normDist(0.0, 1.0);		
 		
-		int m = A.n_rows;
-		int n = A.n_cols;
 		int work = dim + 7;
 		int lwork = 7 * work * (1 + work);
 		
@@ -62,30 +72,36 @@ namespace ACTIONet {
 
 	
 		// Initialize first column of V
-		//randN_BM(V, n);
+		randN_BM(V, n);
+		/*
         for ( int i = 0; i < n; i ++ ) {
             V[i]   = normDist(gen);;
         }   		
-
+		*/
+		
+		
 		/* Main iteration */
-		while (iter < iters) {			
+		while (iter < iters) {	
+				
 			j = 0;
 			
 			/*  Normalize starting vector */
 			if (iter == 0) {
 				d = cblas_dnrm2(n, V, inc);
 				d = 1 / d;
-				cblas_dscal(n, d, V, inc);
+				cblas_dscal(n, d, V, inc);			
 			}
 			else
 				j = k;
 			
 			// Compute Ax
 			x = V + j * n;
-			v = vec(x, n, true);
+			/*v = vec(x, n, true);
 			y = A * v;			
 			memcpy(W + j * m, y.memptr(), y.n_elem*sizeof(double));		
-			
+			*/
+			dsdmult ('n', m, n, AS, x, W + j * m, &chol_c);
+
 									  
 			if (iter > 0)
 				orthog (W, W + j * m, T, m, j, 1);
@@ -96,10 +112,15 @@ namespace ACTIONet {
 
 			/* The Lanczos process */
 			while (j < work) {			
+				/*
 				v = vec(W + j * m, m, true);				
-				y = trans(trans(v)*A);				
+				y = At*v;				
 				memcpy(F, y.memptr(), y.n_elem*sizeof(double));
-				
+				*/
+				dsdmult ('t', m, n, AS, W + j * m, F, &chol_c);
+				//v = vec(F, A.n_cols, true);				
+				//v(span(0, 5)).print("F");
+
 				
 				SS = -S;
 				cblas_daxpy(n, SS, V + j * n, inc, F, inc);
@@ -127,10 +148,13 @@ namespace ACTIONet {
 					B[(j + 1) * work + j] = R_F;
 					
 					x = V + (j + 1) * n;
+					/*
 					v = vec(x, n, true);
 					y = A*v;
 					memcpy(W + (j + 1) * m, y.memptr(), y.n_elem*sizeof(double));
-				  
+					*/
+				    dsdmult ('n', m, n, AS, x, W + (j + 1) * m, &chol_c);
+
 					/* One step of classical Gram-Schmidt */
 					R = -R_F;
 					cblas_daxpy(m, R, W + j * m, inc, W + (j + 1) * m, inc);				
@@ -273,6 +297,13 @@ namespace ACTIONet {
 		delete [] res;
 		delete [] T;
 		delete [] svratio;	
+		
+		delete [] AS->x;
+		delete [] AS->i;
+		delete [] AS->p;
+		delete AS; 
+
+		cholmod_finish (&chol_c);
 		
 		if (converged != 1) {
 			fprintf(stderr, "IRLB_SVD did NOT converge! Try in creasing the number of iterations\n");

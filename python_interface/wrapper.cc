@@ -30,33 +30,53 @@ using namespace py::literals;
 // \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 // \item lambda, exp_var: Summary statistics of the sigular-values.
 // }
-py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50, int iters = 5, int seed = 0, int reduction_algorithm = 1, int SVD_algorithm = 1, bool prenormalize = false) {
+py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50, int iters = 5, int seed = 0, int SVD_algorithm = 0, bool prenormalize = false) {
 	
-	ACTIONet::ReducedKernel reduction;	
-	reduction = ACTIONet::reduce_kernel(S, reduced_dim, iters, seed, reduction_algorithm, SVD_algorithm, prenormalize);				
-	
+	field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iters, seed, SVD_algorithm, prenormalize);				
+
 
     py::dict res;
-    
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
+
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+		
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+	
 		
 	return res;
 }
-py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50, int iters = 5, int seed = 0, int reduction_algorithm = 1, int SVD_algorithm = 1, bool prenormalize = false) {
+py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50, int iters = 5, int seed = 0, int SVD_algorithm = 0, bool prenormalize = false) {
 	
-	ACTIONet::ReducedKernel reduction;	
-	reduction = ACTIONet::reduce_kernel(S, reduced_dim, iters, seed, reduction_algorithm, SVD_algorithm, prenormalize);				
-	
+	field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iters, seed, SVD_algorithm, prenormalize);				
+
 
     py::dict res;
-    
-	res["S_r"] = reduction.S_r;		
-	res["V"] = reduction.V;
-	res["lambda"] = reduction.lambda;
-	res["explained_var"] = reduction.exp_var;	
+
+	res["V"] = reduction(0);
+	
+	vec sigma = reduction(1).col(0);
+	res["sigma"] = sigma;
+	
+	mat V = reduction(2);
+	for(int i = 0; i < V.n_cols; i++) {
+		V.col(i) *= sigma(i);
+	}	
+	res["S_r"] = trans(V);
+		
+
+	res["A"] = reduction(3);
+	res["B"] = reduction(4);
+	
 		
 	return res;
 }
@@ -84,19 +104,22 @@ arma::Mat<npdouble> run_simplex_regression(arma::Mat<npdouble>& A, arma::Mat<npd
 // 
 // @return A named list with entries 'selected_columns' and 'norms'
 py::dict run_SPA(arma::Mat<npdouble>& A, int k) {	
-
+	
 	ACTIONet::SPA_results res = ACTIONet::run_SPA(A, k);
 	uvec selected_columns = res.selected_columns;
-
+	
+	vec cols(k);
+	for(int i = 0; i < k; i++) {
+		cols[i] = selected_columns[i] + 1;
+	}
+	
 
 	py::dict out;	
-
-	// It is 0-indexed, and that makes sense for column-indices
-	out["selected_columns"] = selected_columns;		
-	
+	out["selected_columns"] = cols;		
 	out["norms"] = res.column_norms;
 		
-	return out;
+	return out;	
+	
 }
 
 
@@ -109,7 +132,7 @@ py::dict run_SPA(arma::Mat<npdouble>& A, int k) {
 // @return A named list with entries 'selected_columns' and 'norms'
 py::dict run_AA(arma::Mat<npdouble>&A, arma::Mat<npdouble> W0, int max_it = 50, double min_delta = 0.01) {	
 
-	arma::field<arma::Mat<npdouble>> AA_res = ACTIONet::run_AA(A, W0, max_it, min_delta);
+	field<mat> AA_res = ACTIONet::run_AA(A, W0, max_it, min_delta);
 	
 	py::dict out;	
 	out["C"] = AA_res(0);
@@ -200,21 +223,21 @@ py::dict prune_archetypes(vector<arma::Mat<npdouble>> &C_trace_list, vector<arma
 // \item C_unified,H_unified: C and H matrices of unified archetypes
 // \item sample_assignments: Assignment of samples/cells to unified archetypes
 // }
-py::dict unify_archetypes(arma::Mat<npdouble>& S_r, arma::Mat<npdouble> &C_stacked, arma::Mat<npdouble>&H_stacked, double min_overlap = 10.0, double resolution = 1.0) {
-
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, min_overlap, resolution);	
+py::dict unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_weight = 0.5, int min_coreness = 2, double resolution = 1.0, int min_repeat = 2, int thread_no = 0, double alpha = 0.05, double beta = 0.5, double outlier_threshold = 0.5, int minPoints = 5, int minClusterSize = 5, double cond_threshold = 10, int normalization_type = 0, bool preprocess_adj = true, bool reduce_G = false, int method_type = 3) {
+	
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta, outlier_threshold, minPoints, minClusterSize, cond_threshold, normalization_type, preprocess_adj, reduce_G, method_type);
+	
 		
 	py::dict out_list;		
-	
-	// It is 0-indexed, but 1-index makes more sense for assignments
-	for(int i = 0; i < (int)results.archetype_groups.n_elem; i++) results.archetype_groups[i]++;
-	out_list["archetype_groups"] = results.archetype_groups;
-	
+
+	for(int i = 0; i < results.selected_archetypes.n_elem; i++) results.selected_archetypes[i]++;
+	out_list["selected_archetypes"] = results.selected_archetypes;
+
+
 	out_list["C_unified"] = results.C_unified;
 	out_list["H_unified"] = results.H_unified;
-
-	// It is 0-indexed, but 1-index makes more sense for assignments
-	for(int i = 0; i < (int)results.assigned_archetypes.n_elem; i++) results.assigned_archetypes[i]++;
+	
+	for(int i = 0; i < results.assigned_archetypes.n_elem; i++) results.assigned_archetypes[i]++;
 	out_list["assigned_archetypes"] = results.assigned_archetypes;
 
     return out_list;
@@ -481,11 +504,16 @@ arma::SpMat<npdouble> compute_sparse_network_diffusion(arma::SpMat<npdouble> &G,
 //' @param L Length of the top-ranked scores to scan
 //' 
 //' @return Matrix of log-pvalues
-arma::Mat<npdouble> assess_enrichment(arma::Mat<npdouble> &scores, arma::Mat<npdouble> &associations, int L) {
+py::dict assess_enrichment(arma::Mat<npdouble> &scores, arma::SpMat<npdouble> &associations, int thread_no = 0) {
 	
-	mat logPvals = ACTIONet::assess_enrichment(scores, associations, L);
+	field<mat> res = ACTIONet::assess_enrichment(scores, associations, thread_no);
 
-	return(logPvals);
+	py::dict out_list;	
+		
+	out_list["logPvals"] = res(0);
+	out_list["thresholds"] = res(1);
+
+	return(out_list);
 }
 
 
@@ -554,17 +582,22 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
     )pbdoc";
     	
-		m.def("reduce_kernel_full", py::overload_cast<arma::Mat<npdouble> &, int, int, int, int, int, bool>(&reduce_kernel_full), "Computes reduced kernel matrix for a given (single-cell) profile", py::arg("S"), py::arg("reduced_dim")=50, py::arg("iters")=5, py::arg("seed")=0, py::arg("reduction_algorithm")=1, py::arg("SVD_algorithm")=1, py::arg("prenormalize") = false);		
+		m.def("reduce_kernel", py::overload_cast<arma::SpMat<npdouble> &, int, int, int, int, bool>(&reduce_kernel), "Computes reduced kernel matrix for a given (single-cell) profile", py::arg("S"), py::arg("reduced_dim")=50, py::arg("iters")=5, py::arg("seed")=0, py::arg("SVD_algorithm")=1, py::arg("prenormalize") = false);		
+		m.def("reduce_kernel_full", py::overload_cast<arma::Mat<npdouble> &, int, int, int, int, bool>(&reduce_kernel_full), "Computes reduced kernel matrix for a given (single-cell) profile", py::arg("S"), py::arg("reduced_dim")=50, py::arg("iters")=5, py::arg("seed")=0, py::arg("SVD_algorithm")=1, py::arg("prenormalize") = false);		
+
+
 
 		m.def("run_simplex_regression", py::overload_cast<arma::Mat<npdouble>&, arma::Mat<npdouble>&, bool>(&run_simplex_regression), "Solves min_{X} (|| AX - B ||) s.t. simplex constraint", py::arg("A"), py::arg("B"), py::arg("computeXtX")=false);
+		
+		
+		
 		m.def("run_SPA", py::overload_cast<arma::Mat<npdouble>&, int>(&run_SPA), "Runs Successive Projection Algorithm (SPA) to solve separable NMF", py::arg("A"), py::arg("k"));
 		m.def("run_AA", py::overload_cast<arma::Mat<npdouble>&, arma::Mat<npdouble>, int, double>(&run_AA), "Runs Archetypal Analysis (AA) Algorithm", py::arg("A"), py::arg("W0"), py::arg("max_it") = 50, py::arg("min_delta") = 0.01);
 		m.def("run_ACTION", py::overload_cast<arma::Mat<npdouble>&, int, int, int, int, double>(&run_ACTION), "Runs multi-level ACTION decomposition method", py::arg("S_r"), py::arg("k_min")=2, py::arg("k_max")=30, py::arg("thread_no")=4, py::arg("max_it")=50, py::arg("min_delta")=0.01);
 
 
 		m.def("prune_archetypes", py::overload_cast<vector<arma::Mat<npdouble>>&, vector<arma::Mat<npdouble>> &, double, int>(&prune_archetypes), "Filters multi-level archetypes and concatenate filtered archetypes", py::arg("C_trace"), py::arg("H_trace"), py::arg("min_specificity_z_threshold")=-1, py::arg("int min_cells") = 3);		
-		m.def("unify_archetypes", py::overload_cast<arma::Mat<npdouble>&, arma::Mat<npdouble>&, arma::Mat<npdouble>&, double, double>(&unify_archetypes), "Identifies and aggregates redundant archetypes into equivalent classes", py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"), py::arg("min_overlap") = 10.0, py::arg("resolution") = 1.0);
-
+		m.def("unify_archetypes", py::overload_cast<arma::Mat<npdouble>&, arma::Mat<npdouble>&, arma::Mat<npdouble>&, double, int, double, int, int, double, double, double, int, int, double, int, bool, bool, int>(&unify_archetypes), "Identifies and aggregates redundant archetypes into equivalent classes", py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"), py::arg("min_edge_weight") = 0.5, py::arg("min_coreness") = 2, py::arg("resolution") = 1.0, py::arg("min_repeat") = 2, py::arg("thread_no") = 0, py::arg("alpha") = 0.05, py::arg("beta") = 0.5, py::arg("outlier_threshold") = 0.5, py::arg("minPoints") = 5, py::arg("minClusterSize") = 5, py::arg("cond_threshold") = 10, py::arg("normalization_type") = 0, py::arg("preprocess_adj") = true, py::arg("reduce_G") = false, py::arg("method_type") = 3);
 	
 		m.def("build_ACTIONet", py::overload_cast<arma::Mat<npdouble>&, double, int, bool>(&build_ACTIONet), "Builds an interaction network from the multi-level archetypal decompositions", py::arg("H_stacked"), py::arg("density") = 1.0, py::arg("thread_no")=8, py::arg("mutual_edges_only")=true);		
 		m.def("layout_ACTIONet", py::overload_cast<arma::SpMat<npdouble>&, arma::Mat<npdouble>&, int, unsigned int, int>(&layout_ACTIONet), "Performs stochastic force-directed layout on the input graph (ACTIONet)", py::arg("G"), py::arg("S_r"), py::arg("compactness_level")= 50, py::arg("n_epochs")=100, py::arg("thread_no")= 4);
@@ -583,12 +616,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
 		m.def("compute_network_diffusion", py::overload_cast<arma::SpMat<npdouble> &, arma::SpMat<npdouble> &, int, double, int>(&compute_network_diffusion), "Computes PageRank for a selected set of nodes", py::arg("G"), py::arg("X0"), py::arg("thread_no") = 4, py::arg("alpha") = 0.85, py::arg("max_it") = 3);					
 		m.def("compute_sparse_network_diffusion", py::overload_cast<arma::SpMat<npdouble> &, arma::SpMat<npdouble> &, double, double, double, int>(&compute_sparse_network_diffusion), "Computes L1-regularized PageRank for a selected set of nodes", py::arg("G"), py::arg("X0"), py::arg("alpha") = 0.85, py::arg("rho") = 1e-4, py::arg("epsilon") = 0.001, py::arg("max_iter") = 20);		
 		
-		m.def("assess_enrichment", py::overload_cast<arma::Mat<npdouble> &, arma::Mat<npdouble> &, int>(&assess_enrichment), "Performs enrichment analysis", py::arg("scores"), py::arg("associations"), py::arg("L") = 1000);		
+		m.def("assess_enrichment", py::overload_cast<arma::Mat<npdouble> &, arma::SpMat<npdouble> &, int>(&assess_enrichment), "Performs enrichment analysis", py::arg("scores"), py::arg("associations"), py::arg("thread_no") = 0);		
 
 
 
 		// Sparse overloads
-		m.def("reduce_kernel", py::overload_cast<arma::SpMat<npdouble> &, int, int, int, int, int, bool>(&reduce_kernel), "Computes reduced kernel matrix for a given (single-cell) profile", py::arg("S"), py::arg("reduced_dim")=50, py::arg("iters")=5, py::arg("seed")=0, py::arg("reduction_algorithm")=1, py::arg("SVD_algorithm")=1, py::arg("prenormalize") = false);		
 		m.def("compute_pseudo_bulk", py::overload_cast<arma::SpMat<npdouble>&, uvec>(&compute_pseudo_bulk), "Computes pseudobulk profiles", py::arg("S"), py::arg("sample_assignments"));
 		m.def("compute_pseudo_bulk_per_ind", py::overload_cast<arma::SpMat<npdouble>&, uvec, uvec>(&compute_pseudo_bulk_per_ind), "Computes pseudobulk profiles (groups[k1] x individuals[k2])", py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 		m.def("renormalize_input_matrix", py::overload_cast<arma::SpMat<npdouble>&, uvec>(&renormalize_input_matrix), "Renormalized input matrix to minimize differences in means", py::arg("S"), py::arg("sample_assignments"));

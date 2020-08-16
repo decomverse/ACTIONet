@@ -4,7 +4,6 @@ import sys
 import setuptools
 import os
 from pathlib import Path
-import distutils.ccompiler
 import sysconfig
 from numpy.distutils.system_info import get_info
 import pybind11
@@ -13,22 +12,6 @@ import multiprocessing
 __version__ = '1.0'
 
 N=multiprocessing.cpu_count()
-
-def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
-    # those lines are copied from distutils.ccompiler.CCompiler directly
-    macros, objects, extra_postargs, pp_opts, build = self._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
-    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
-    # parallel code
-    import multiprocessing.pool
-    def _single_compile(obj):
-        try: src, ext = build[obj]
-        except KeyError: return
-        self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
-    # convert to list, imap is evaluated on-demand
-    list(multiprocessing.pool.ThreadPool(N).imap(_single_compile,objects))
-    return objects
-distutils.ccompiler.CCompiler.compile=parallelCCompile
-
 
 def has_flag(compiler, flagname):
     import tempfile
@@ -62,13 +45,14 @@ ACTIONet_header_dirs=['include']
 for (dirpath, dirnames, filenames) in os.walk('include'):
     for dirname in dirnames: ACTIONet_header_dirs += [os.path.join(dirpath, dirname)]
 
+
 ACTIONet_macros=list()
 if ("define_macros" in blas_opt): ACTIONet_macros+=blas_opt['define_macros']
 
 ACTIONet_lib_dirs=list()
 if ("library_dirs" in blas_opt): ACTIONet_lib_dirs+=blas_opt['library_dirs']
 
-ACTIONet_libs=list()
+ACTIONet_libs=['cholmod', 'dl', 'pthread']
 if ("libraries" in blas_opt): ACTIONet_libs+=blas_opt['libraries']
 
 ACTIONet_extra_args=list()
@@ -82,6 +66,12 @@ os.environ['CC'] = "gcc"
 os.environ['CFLAGS']=" -w"
 os.environ['CPPFLAGS']=" -w"
 os.environ['CXXFLAGS']=" -w"
+
+print(ACTIONet_macros)
+print(ACTIONet_header_dirs)
+print(ACTIONet_lib_dirs)
+print(ACTIONet_libs)
+
 
 ACTIONet_module = Extension(
     '_ACTIONet',
@@ -107,7 +97,7 @@ setup(
     packages=setuptools.find_packages("lib"),
     package_dir={"": "lib"},
     ext_modules=[ACTIONet_module],
-    install_requires=['numpy'],
-    setup_requires=['numpy'],
+    install_requires=['pybind11>=2.4', 'numpy'],
+    setup_requires=['pybind11>=2.4', 'numpy'],
     zip_safe=False
 )
