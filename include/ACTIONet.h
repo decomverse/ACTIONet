@@ -62,15 +62,6 @@ void mds_direct(int n, int kd, double* X, double* d, double* w, int t_max, doubl
     
 namespace ACTIONet {
 	// Main structures	
-		// To store the output of reduce_kernel()
-		struct ReducedKernel {
-			mat S_r;
-			mat V;
-			vec lambda;
-			vec exp_var;
-		};
-		
-		
 		// To store the output of compute_AA_coreset()
 		struct Coreset {
 			mat S_coreset;
@@ -109,7 +100,8 @@ namespace ACTIONet {
 
 		// To store the output of unify_archetypes()
 		struct unification_results {
-			vec archetype_groups; 
+			mat dag_adj; 
+			vec dag_node_annotations;
 			uvec selected_archetypes;
 			mat C_unified;
 			mat H_unified;
@@ -126,19 +118,17 @@ namespace ACTIONet {
 		field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed);	
 
 		field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed);
-		field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
-
-		// ACTION-based kernel reduction algorithms
-		ReducedKernel ACTION_reduction(sp_mat &A, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
-		ReducedKernel ACTION_reduction(mat &A, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+		//field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
+		field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed);
 		
 		// Successive Projection Algorithm (SPA) to solve separable NMF
-		SPA_results run_SPA(mat M, int k);
+		SPA_results run_SPA(mat &M, int k);
+		SPA_results run_SPA_rows_sparse(sp_mat &A, int k);
+
 		
 		// min_{X} (|| AX - B ||) s.t. simplex constraint using ACTIVE Set Method
 		//mat run_simplex_regression(mat &A, mat &B);
-		mat run_simplex_regression(mat &A, mat &B, bool computeXtX);
-		
+		mat run_simplex_regression(mat &A, mat &B, bool computeXtX);		
 		mat run_simplex_regression_proxdist(mat &X, mat &Y, int pmaxiter, int pincmaxiter);
 
 
@@ -149,30 +139,42 @@ namespace ACTIONet {
 		field<mat> Online_update_AA(mat& Xt, mat& D, mat& A, mat& B);
 		field<mat> run_online_AA (mat &X, mat &D0, field<uvec> samples);
 		Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples, int k_min, int k_max, int thread_no);
-
-
+		
 		
 	// *********************************
 		
 		
 	// Entry-points to compute a reduced kernel matrix	
-		ReducedKernel reduce_kernel(sp_mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
-		ReducedKernel reduce_kernel(mat &S, int dim, int iter, int seed, int reduction_algorithm, int SVD_algorithm, bool prenormalize);
+		field<mat> perturbedSVD(field<mat> SVD_results, mat &A, mat &B);
 		
-		ReducedKernel SVD2ACTIONred(sp_mat &S, field<mat> SVD_results);
-		ReducedKernel SVD2ACTIONred(mat &S, field<mat> SVD_results);
+		field<mat> SVD2ACTIONred(sp_mat &S, field<mat> SVD_results);
+		field<mat> SVD2ACTIONred(mat &S, field<mat> SVD_results);
 
-		ReducedKernel PCA2ACTIONred(sp_mat &S, field<mat> PCA_results);
-		ReducedKernel PCA2ACTIONred(mat &S, field<mat> PCA_results);
+		field<mat> PCA2ACTIONred(sp_mat &S, field<mat> PCA_results);
+		field<mat> PCA2ACTIONred(mat &S, field<mat> PCA_results);
+
 		
 		field<mat> SVD2PCA(sp_mat &S, field<mat> SVD_results);
 		field<mat> SVD2PCA(mat &S, field<mat> SVD_results);
 		field<mat> PCA2SVD(sp_mat &S, field<mat> PCA_results);
 		field<mat> PCA2SVD(mat &S, field<mat> PCA_results);
+		
+		field<mat> reduce_kernel(sp_mat &S, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+		field<mat> reduce_kernel(mat &S, int dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
+
+		field<mat> ACTIONred2SVD(field<mat> SVD_results);
 	
+		field<mat> deflate_reduction(field<mat> SVD_results, mat &A, mat &B);
+
+		field<mat> orthogonalize_batch_effect(sp_mat &S, field<mat> SVD_results, mat &design);
+		field<mat> orthogonalize_batch_effect(mat &S, field<mat> SVD_results, mat &design);	
+	
+
 
 	// ACTION decomposition
 		ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+		ACTION_results run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk, int k_min, int k_max, int thread_no, int max_it, double min_delta);
+
 
 		ACTION_results run_ACTION_dev(mat &S_r, int k_min, int k_max, int thread_no, bool auto_stop, int max_it, double min_delta);
 
@@ -188,8 +190,8 @@ namespace ACTIONet {
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
 		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
-		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overlap, double resolution);
-	
+		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_weight, int min_coreness, double resolution, int min_repeat, int thread_no, double alpha, double beta, double outlier_threshold, int minPoints, int minClusterSize, double cond_threshold, int normalization_type, bool preprocess_adj, bool reduce_G, int method_type);
+		
 	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
 		sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
@@ -228,7 +230,7 @@ namespace ACTIONet {
 
 	
 	// Methods for feature enrichment analysis
-		mat assess_enrichment(mat &scores, mat &associations, int L);
+		field<mat> assess_enrichment(mat &scores, sp_mat &associations, int thread_no);
 
 
 	// Network tools
@@ -241,6 +243,8 @@ namespace ACTIONet {
 		field<vec> run_HDBSCAN(mat &X, int minPoints, int minClusterSize);
 
 		mat MWM_hungarian(mat &G);
+		umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
+		
 		mat Prune_PageRank(mat &U, double density);
 		field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no);	
 		
@@ -250,6 +254,10 @@ namespace ACTIONet {
 		
 		
 		Coreset compute_AA_coreset(sp_mat &S, int m); 
+
+		mat NetEnh(mat Adj);
+
+		mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters, int seed);
 		
 }
 
