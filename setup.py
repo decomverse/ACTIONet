@@ -8,6 +8,7 @@ import sysconfig
 from numpy.distutils.system_info import get_info
 import pybind11
 import multiprocessing
+import numpy as np
 
 __version__ = '1.0'
 
@@ -23,25 +24,22 @@ def has_flag(compiler, flagname):
             return False
     return True
 
-def cpp_flag(compiler):
-    flags = ['-std=c++17', '-std=c++14', '-std=c++11']
-
-    for flag in flags:
-        if has_flag(compiler, flag): return flag
-
-    raise RuntimeError('Unsupported compiler -- at least C++11 support '
-                       'is needed!')
-
                        
 blas_opt = get_info('lapack_opt')
 
-ACTIONet_source_files=["python_interface/wrapper.cc"]
+ACTIONet_cc_files=["python_interface/wrapper.cc"]
 for (dirpath, dirnames, filenames) in os.walk('src'):
     for file in filenames:
-        if file.endswith(".cc") or file.endswith(".c"):
-            ACTIONet_source_files+=[os.path.join(dirpath, file)]
+        if file.endswith(".cc") or file.endswith(".cpp"):
+            ACTIONet_cc_files+=[os.path.join(dirpath, file)]
 
-ACTIONet_header_dirs=['include']
+ACTIONet_c_files=["python_interface/wrapper.cc"]
+for (dirpath, dirnames, filenames) in os.walk('src'):
+    for file in filenames:
+        if file.endswith(".c"):
+            ACTIONet_c_files+=[os.path.join(dirpath, file)]
+
+ACTIONet_header_dirs=[np.get_include(), 'include']
 for (dirpath, dirnames, filenames) in os.walk('include'):
     for dirname in dirnames: ACTIONet_header_dirs += [os.path.join(dirpath, dirname)]
 
@@ -55,7 +53,7 @@ if ("library_dirs" in blas_opt): ACTIONet_lib_dirs+=blas_opt['library_dirs']
 ACTIONet_libs=['cholmod', 'dl', 'pthread']
 if ("libraries" in blas_opt): ACTIONet_libs+=blas_opt['libraries']
 
-ACTIONet_extra_args=list()
+ACTIONet_extra_args=['-w']
 if ("extra_compile_args" in blas_opt): ACTIONet_extra_args+=blas_opt['extra_compile_args']
 
 ACTIONet_extra_link_args=list()
@@ -67,23 +65,31 @@ os.environ['CFLAGS']=" -w"
 os.environ['CPPFLAGS']=" -w"
 os.environ['CXXFLAGS']=" -w"
 
-print(ACTIONet_macros)
-print(ACTIONet_header_dirs)
-print(ACTIONet_lib_dirs)
-print(ACTIONet_libs)
+ACTIONet_c_module = Extension(
 
-
-ACTIONet_module = Extension(
     '_ACTIONet',
-    ACTIONet_source_files,
+    ACTIONet_c_files,
     define_macros=ACTIONet_macros,
     include_dirs=ACTIONet_header_dirs,    
     library_dirs=ACTIONet_lib_dirs,
     libraries=ACTIONet_libs,
     extra_compile_args=ACTIONet_extra_args,
     extra_link_args=ACTIONet_extra_link_args,
+    language='c'
+)
+
+ACTIONet_cc_module = Extension(
+    '_ACTIONet',
+    ACTIONet_cc_files,
+    define_macros=ACTIONet_macros,
+    include_dirs=ACTIONet_header_dirs,    
+    library_dirs=ACTIONet_lib_dirs,
+    libraries=ACTIONet_libs,
+    extra_compile_args=ACTIONet_extra_args+['-std=c++11'],
+    extra_link_args=ACTIONet_extra_link_args,
     language='c++'
 )
+
 
 
 setup(
@@ -99,5 +105,6 @@ setup(
     ext_modules=[ACTIONet_module],
     install_requires=['pybind11>=2.4', 'numpy'],
     setup_requires=['pybind11>=2.4', 'numpy'],
+
     zip_safe=False
 )
