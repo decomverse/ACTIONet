@@ -639,10 +639,6 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_
 	
 		
 	List out_list;		
-	
-	out_list["dag_adj"] = results.dag_adj;
-	out_list["dag_node_annotations"] = results.dag_node_annotations;
-	
 
 	for(int i = 0; i < results.selected_archetypes.n_elem; i++) results.selected_archetypes[i]++;
 	out_list["selected_archetypes"] = results.selected_archetypes;
