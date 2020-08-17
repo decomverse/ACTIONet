@@ -518,11 +518,6 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     } else {
         obs.DF = DataFrame(row.names = paste("Cell", 1:ncol(X), sep = ""))
     }
-	if(class(rowRanges(ace)) == "GRanges") {
-		GR = rowRanges(ace)
-		BED = data.frame(chr = as.character(seqnames(GR)), start = start(GR), end = end(GR))
-		obs.DF = cbind(BED, obs.DF)
-	}
 
     if ("var" %in% objs) {
         var.DF = read.HD5DF(h5file = h5file, gname = "var")
@@ -537,6 +532,16 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     })
 
     ace = ACTIONetExperiment(assays = input_assays, rowData = var.DF, colData = obs.DF)
+
+    idx = match(c("chr", "start", "end") %in% colnames(obs.DF))
+    if(sum(is.na(idx)) == 0) {
+		colData(ace) = colData(ace)[, idx]
+		
+		BED = obs.DF[, idx]
+		GR = makeGRangesFromDataFrame(BED)
+		rowRanges(ace) = GR
+	}
+
 
     var.DF = rowData(ace)
     if(sum(colnames(var.DF) %in% c("chr", "start", "end")) == 3) {

@@ -231,15 +231,12 @@ namespace ACTIONet {
 							
 					
 			C_unified = C_norm.cols(selected_columns(span(0, state_no-1)));				
-		} else if(method_type == 3) {
+		} else if(method_type == 3) {			
+			field<vec> hd_out = run_HDBSCAN(G_red, minPoints, minClusterSize);
 			
-			uvec initial_clusters(G_red.n_rows);
-			for (int i = 0; i < G_red.n_rows; i++) initial_clusters(i) = i;					
-			vec clusters = unsigned_cluster(sp_mat(G_red), resolution, initial_clusters, 0);
-			
-			uvec selected_archs = find(clusters >= 0);
+			uvec selected_archs = find(hd_out(2) <= outlier_threshold); 
+			vec clusters = hd_out(0);
 			clusters = clusters(selected_archs);
-			
 			
 			vec uc = sort(unique(clusters));				
 			mat subC;
@@ -266,11 +263,15 @@ namespace ACTIONet {
 					
 			C_unified = normalise(C_unified, 1, 0);					
 		} else if(method_type == 4) {
-			field<vec> hd_out = run_HDBSCAN(G_red, minPoints, minClusterSize);
+			G.diag().zeros();
 			
-			uvec selected_archs = find(hd_out(2) <= outlier_threshold); 
-			vec clusters = hd_out(0);
+			uvec initial_clusters(G.n_rows);
+			for (int i = 0; i < G_red.n_rows; i++) initial_clusters(i) = i;					
+			vec clusters = unsigned_cluster(sp_mat(G), resolution, initial_clusters, 0);
+			
+			uvec selected_archs = find(clusters >= 0);
 			clusters = clusters(selected_archs);
+			
 			
 			vec uc = sort(unique(clusters));				
 			mat subC;
