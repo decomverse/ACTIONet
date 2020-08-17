@@ -173,13 +173,11 @@ setMethod("counts", "ACTIONetExperiment", function(object) {
     assays(object)$counts
 })
 
-#' @export
 setMethod("logcounts", "ACTIONetExperiment", function(object) {
     (object)
     assays(object)$logcounts
 })
 
-#' @export
 setMethod("normcounts", "ACTIONetExperiment", function(object) {
     (object)
     assays(object)$normcounts
