@@ -10,6 +10,7 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
     ace = ACTIONet::ACTIONetExperiment(
       assays = SummarizedExperiment::assays(from),
       rowData = from@elementMetadata,
+      rowRanges = from@rowRanges,
       colData = from@colData,
       metadata = from@metadata)
     # rowData(ace) = DataFrame(as.data.frame(rowData(ace))) colData(ace) =
