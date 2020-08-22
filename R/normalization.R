@@ -1,10 +1,17 @@
-normalize.scran <- function(ace, BPPARAM = SerialParam()) {
+normalize.scran <- function(ace, batch_attr = NULL, BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "scater"))
-    ace = scran::computeSumFactors(ace, BPPARAM = BPPARAM)
+    batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
+    ace = scran::computeSumFactors(ace, clusters = batch_attr, BPPARAM = BPPARAM)
     ace = scater::logNormCounts(ace)
     return(ace)
 }
 
+normalize.multiBatchNorm <- function(ace, batch_attr, BPPARAM = SerialParam()) {
+    .check_and_load_package(c("scran", "batchelor"))
+    batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
+    ace = batchelor::multiBatchNorm(ace, batch = batch_attr, assay.type = "counts", BPPARAM = BPPARAM)
+    return(ace)
+}
 
 normalize.Linnorm <- function(ace) {
     .check_and_load_package("Linnorm")
@@ -42,10 +49,12 @@ rescale.matrix <- function(S, log_scale = FALSE){
   return(B)
 }
 
-normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam()) {
+normalize.ace <- function(ace, norm.method = "default", batch_attr = NULL, BPPARAM = SerialParam()) {
 
     if (norm.method == "scran") {
-        ace = normalize.scran(ace, BPPARAM = BPPARAM)
+        ace = normalize.scran(ace, batch_attr, BPPARAM = BPPARAM)
+    } else if (norm.method == "multiBatchNorm"){
+      ace = normalize.multiBatchNorm(ace, batch_attr, BPPARAM = BPPARAM)
     } else if (norm.method == "linnorm") {
         ace = normalize.Linnorm(ace)
     } else {
