@@ -12,41 +12,45 @@ normalize.Linnorm <- function(ace) {
     return(ace)
 }
 
+normalize.default <- function(ace, log_scale = TRUE){
+  S = SummarizedExperiment::assays(ace)[["counts"]]
+  B = rescale.matrix(S, log_scale)
+  rownames(B) = rownames(ace)
+  colnames(B) = colnames(ace)
+  SummarizedExperiment::assays(ace)[["logcounts"]] = B
+  return(ace)
+}
+
+rescale.matrix <- function(S, log_scale = FALSE){
+  if(is.matrix(S)) {
+    cs = Matrix::colSums(S)
+    cs[cs == 0] = 1
+    B = median(cs)*scale(S, center = F, scale = cs)
+    if(log_scale == TRUE){
+      B = log1p(B)
+    }
+  } else {
+    A = as(S, "dgTMatrix")
+    cs = Matrix::colSums(A)
+    cs[cs == 0] = 1
+    x = median(cs) * (A@x/cs[A@j + 1])
+    if(log_scale == TRUE){
+      x = log1p(x)
+    }
+    B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = x, dims = dim(A))
+  }
+  return(B)
+}
 
 normalize.ace <- function(ace, norm.method = "default", BPPARAM = SerialParam()) {
-    
+
     if (norm.method == "scran") {
-        ace.norm = normalize.scran(ace, BPPARAM = BPPARAM)
+        ace = normalize.scran(ace, BPPARAM = BPPARAM)
     } else if (norm.method == "linnorm") {
-        ace.norm = normalize.Linnorm(ace)
+        ace = normalize.Linnorm(ace)
     } else {
-		S = SummarizedExperiment::assays(ace)[["counts"]]
-		if(is.matrix(S)) {
-			ace.norm = ace
-			cs = Matrix::colSums(S)
-			cs[cs == 0] = 1
-			B = log1p(median(cs)*scale(S, center = F, scale = cs))
-			rownames(B) = rownames(ace.norm)
-			colnames(B) = colnames(ace.norm)
-			SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
-		} else {
-			ace.norm = ace
-			A = as(S, "dgTMatrix")
-			cs = Matrix::colSums(A)
-			cs[cs == 0] = 1
-			B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = log1p(median(cs) * 
-				(A@x/cs[A@j + 1])), dims = dim(A))
-			rownames(B) = rownames(ace.norm)
-			colnames(B) = colnames(ace.norm)
-			SummarizedExperiment::assays(ace.norm)[["logcounts"]] = B
-		}
-		
+        ace = normalize.default(ace, log_scale = TRUE)
     }
-    
-    metadata(ace.norm)$normalization.method = norm.method
-    # metadata(ace.norm)$normalization.time = Sys.time()
-    
-    # ace.norm = add.count.metadata(ace.norm)
-    
-    return(ace.norm)
+    metadata(ace)$normalization.method = norm.method
+    return(ace)
 }
