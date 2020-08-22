@@ -1,3 +1,4 @@
+#' @export
 normalize.scran <- function(ace, batch_attr = NULL, BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "scater"))
     batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
@@ -6,6 +7,7 @@ normalize.scran <- function(ace, batch_attr = NULL, BPPARAM = SerialParam()) {
     return(ace)
 }
 
+#' @export
 normalize.multiBatchNorm <- function(ace, batch_attr, BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "batchelor"))
     batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
@@ -13,12 +15,14 @@ normalize.multiBatchNorm <- function(ace, batch_attr, BPPARAM = SerialParam()) {
     return(ace)
 }
 
+#' @export
 normalize.Linnorm <- function(ace) {
     .check_and_load_package("Linnorm")
     SummarizedExperiment::assays(ace)[["logcounts"]] = Linnorm(counts(ace))
     return(ace)
 }
 
+#' @export
 normalize.default <- function(ace, log_scale = TRUE){
   S = SummarizedExperiment::assays(ace)[["counts"]]
   B = rescale.matrix(S, log_scale)
@@ -49,6 +53,7 @@ rescale.matrix <- function(S, log_scale = FALSE){
   return(B)
 }
 
+#' @export
 normalize.ace <- function(ace, norm.method = "default", batch_attr = NULL, BPPARAM = SerialParam()) {
 
     if (norm.method == "scran") {

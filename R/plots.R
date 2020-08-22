@@ -105,6 +105,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+#' @export
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1.5, node.size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE, legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, add.backbone = FALSE, arch.size.factor = 3, coordinate_slot = "ACTIONet2D") {
 
     text.halo.width = 0.1
@@ -114,23 +115,23 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {            
+        if (is.character(coordinate_slot)) {
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	            
-        } else {       	
+        	coors = scale(coors)
+        } else {
         	coors = as.matrix(coordinate_slot)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	
+        	coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)            
+        	coors = scale(coors)
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -269,6 +270,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+#' @export
 plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1,
     trans.fact = 1, node.size = 1, CPal = CPal20, coordinate_slot = "ACTIONet3D") {
     require(ggplot2)
@@ -283,23 +285,23 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {            
+        if (is.character(coordinate_slot)) {
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	            
-        } else {       	
+        	coors = scale(coors)
+        } else {
         	coors = as.matrix(coordinate_slot)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	
+        	coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)            
+        	coors = scale(coors)
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -369,6 +371,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 #' @examples
 #' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 #' plot.top.k.features(feature.enrichment.table, 3)
+#' @export
 plot.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = T,
     reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
 
@@ -405,6 +408,7 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' @examples
 #' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 #' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
+#' @export
 plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5,
     CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F, footprint_slot = "H_unified") {
     M = as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
@@ -422,12 +426,12 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
     selected.features = colnames(X)
 
 	X = exp(scale(X))
-	
-    core.coors = Matrix::t(metadata(ace)$backbone$coordinates) #Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M    
+
+    core.coors = Matrix::t(metadata(ace)$backbone$coordinates) #Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M
     cs = colSums(X)
     cs[cs == 0] = 1
     X = scale(X, center = F, scale = cs)
-    
+
     feature.coors = Matrix::t(core.coors %*% X)
 
     if (is.null(CPal)) {
@@ -466,12 +470,12 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
     y.max = y.max + (y.max - y.min)/4
     XL = c(x.min, x.max)
     YL = c(y.min, y.max)
-    
+
     plot(x, y, type = "n", col = feature.colors, axes = FALSE, xlab = "", ylab = "",
         main = title, xlim = XL, ylim = YL)
-    
 
-    
+
+
     words = selected.features
     lay <- wordlayout(x, y, words, label.text.size)
     for (i in 1:length(x)) {
@@ -509,6 +513,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 #'
 #' @examples
 #' plot.ACTIONet.gene.view(ace, 5)
+#' @export
 plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
     title = "", label.text.size = 0.8, renormalize = F) {
     require(wordcloud)
@@ -542,6 +547,7 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
+#' @export
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL,
     trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, enrichment.table = NULL,
     top.features = 7, Alt_Text = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
@@ -558,23 +564,23 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {            
+        if (is.character(coordinate_slot)) {
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	            
-        } else {       	
+        	coors = scale(coors)
+        } else {
         	coors = as.matrix(coordinate_slot)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	
+        	coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)            
+        	coors = scale(coors)
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -772,6 +778,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 #'
 #' @examples
 #' plot.individual.gene(ace, ace$assigned_archetype, 'CD14')
+#' @export
 plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
     require(igraph)
     require(ACTIONet)
@@ -844,6 +851,7 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
+#' @export
 plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5,
     trans.fact = 3, node.size = 1, CPal = "magma", title = "", alpha_val = 0.85,
     nonparameteric = FALSE, coordinate_slot = "ACTIONet2D") {
@@ -851,23 +859,23 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
     node.size = node.size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
-        if (is.character(coordinate_slot)) {            
+        if (is.character(coordinate_slot)) {
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	            
-        } else {       	
+        	coors = scale(coors)
+        } else {
         	coors = as.matrix(coordinate_slot)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	
+        	coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)            
+        	coors = scale(coors)
         } else {
             print("Unknown type for ace")
             return()
@@ -942,6 +950,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
+#' @export
 visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
 
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
@@ -1038,6 +1047,8 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
     return(ht)
 
 }
+
+#' @export
 plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma",
     title = "", arch.labels = NULL, coordinate_slot = "ACTIONet2D", alpha_val = 0.9) {
     Ht = colMaps(ace)[["H_unified"]]
@@ -1107,6 +1118,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma"
 #' @examples
 #' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
 #' enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
+#' @export
 select.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = F,
     reorder.columns = T) {
 
@@ -1141,6 +1153,7 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
     return(W)
 }
 
+#' @export
 plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
     trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, coordinate_slot = "ACTIONet2D") {
 
@@ -1154,23 +1167,23 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
 	if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {            
+        if (is.character(coordinate_slot)) {
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	            
-        } else {       	
+        	coors = scale(coors)
+        } else {
         	coors = as.matrix(coordinate_slot)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	
+        	coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)            
+        	coors = scale(coors)
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -1292,6 +1305,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
 }
 
+#' @export
 plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
     trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, cell_lightening = 0.5, coordinate_slot = "ACTIONet2D", stretch.factor = 10) {
 
@@ -1305,23 +1319,23 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
-        if (is.character(coordinate_slot)) {            
+        if (is.character(coordinate_slot)) {
         	coors = as.matrix(colMaps(ace)[[coordinate_slot]])
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	            
-        } else {       	
+        	coors = scale(coors)
+        } else {
         	coors = as.matrix(coordinate_slot)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)        	
+        	coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {			
+        if (is.matrix(ace) | is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
         	coor.mu = apply(coors, 2, mean)
         	coor.sigma = apply(coors, 2, sd)
-        	coors = scale(coors)            
+        	coors = scale(coors)
             labels = preprocess.labels(labels)
         } else {
             print("Unknown type for ace")
@@ -1405,7 +1419,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
     graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol_lightend[rand.perm],
         col = vCol.border_lightend[rand.perm], axes = F, xlab = "", ylab = "", main = title,
         xlim = XL, ylim = YL)
-        
+
 
     ## Add backbone anchors
 	cell.RGB = Matrix::t(col2rgb(vCol))/255
@@ -1428,7 +1442,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
 	G = construct.tspanner(backbone$G, stretch.factor = stretch.factor)
 	Adj = as(G, "dgTMatrix")
-	
+
 	kappa = 0.25 + 0.75/ (1 + exp(-2*scale(Adj@x)))
 	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
 
@@ -1447,6 +1461,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
 }
 
+#' @export
 plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, node.size = 2, label.text.size = 1, title = "", stretch.factor = 2) {
 
 	if(! ("backbone" %in% names(metadata(ace))) ) {
@@ -1457,7 +1472,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
 
 	G = construct.tspanner(backbone$G, stretch.factor = stretch.factor)
 	Adj = as(G, "dgTMatrix")
-	arch.coors = ACTIONet::sgd2_layout_weighted_convergent(G, Matrix::t(backbone$coordinates_3D))	
+	arch.coors = ACTIONet::sgd2_layout_weighted_convergent(G, Matrix::t(backbone$coordinates_3D))
 
 	if(is.null(arch.colors)) {
 		arch.colors = rgb(backbone$colors)
@@ -1469,7 +1484,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
 
 	graphics::plot(arch.coors, pch = 25, cex = 0, bg = arch.colors, col = colorspace::darken(arch.colors, 0.5), axes = F, xlab = "", ylab = "", main = title)
 
-	
+
 	kappa = 0.1 + 0.9 / (1 + exp(-2*scale(Adj@x)))
 	segments(arch.coors[Adj@i+1, 1], arch.coors[Adj@i+1, 2], arch.coors[Adj@j+1, 1], arch.coors[Adj@j+1, 2], col = rgb(0, 0, 0, 0.8*kappa), lwd = kappa*3)
 
