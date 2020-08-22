@@ -11,6 +11,7 @@
 #'
 #' @examples
 #' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE, min_feats_per_cell = 500)
+#' @export
 import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz",
     sample_annotations = "barcodes.tsv.gz", sep = "\t", use.names = T, prefilter = FALSE,
     ...) {
@@ -121,6 +122,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
 #'
 #' @examples
 #' ace = import.ace.from.10X(input_path, prefilter=TRUE, min_feats_per_cell = 500)
+#' @export
 import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...) {
     if (file.exists(paste(input_path, "genes.tsv", sep = "/"))) {
         version = 2
@@ -159,6 +161,7 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...)
 #'
 #' @examples
 #' ace = import.ace.from.10X.h5(fname = fname, prefilter=TRUE)
+#' @export
 import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names = TRUE,
     prefilter = FALSE, ...) {
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
@@ -250,6 +253,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
 #'
 #' @examples
 #' ace = import.ace.from.count.matrix(counts.mat.mat, gene_names, prefilter=TRUE)
+#' @export
 import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotations = NULL,
     prefilter = FALSE, ...) {
     if (!is.sparseMatrix(counts.mat)) {
@@ -282,6 +286,7 @@ import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotati
 #'
 #' @examples
 #' ace = import.ace.from.table(file_name, prefilter=TRUE)
+#' @export
 import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, ...) {
     require(Matrix)
     require(ACTIONetExperiment)
@@ -315,6 +320,7 @@ import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, ...) {
 #'
 #' @examples
 #' ace = import.ace.from.Seurat(file_name)
+#' @export
 import.ace.from.Seurat <- function(Seurat.obj) {
     if (!requireNamespace("Seurat", quietly = TRUE)) {
         stop("Please install Seurat to read Seurat objects")
@@ -338,6 +344,7 @@ import.ace.from.Seurat <- function(Seurat.obj) {
 #'
 #' @examples
 #' ace = import.ace.from.loom(file_name)
+#' @export
 import.ace.from.loom <- function(fname, ...) {
     if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
         stop("Please install sceasy to read loom files")
@@ -363,6 +370,7 @@ import.ace.from.loom <- function(fname, ...) {
 #'
 #' @examples
 #' ace = import.ace.from.CDS(monocle_cds)
+#' @export
 import.ace.from.CDS <- function(monocle_cds) {
     if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
         stop("Please install sceasy to read loom files")
@@ -394,6 +402,7 @@ import.ace.from.CDS <- function(monocle_cds) {
 #'
 #' @examples
 #' ace = import.ace.from.CDS(monocle_cds)
+#' @export
 convert.ace.rownames <- function(ace, from = "ENSEMBL", to = "SYMBOL", species = "human") {
     if (species == "human") {
         library(org.Hs.eg.db)
@@ -489,7 +498,7 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.al
 		rowMaps(ace)[["unified_feature_profile"]] = assays(specificity.out)[["profile"]]
 		rowMapTypes(ace)[["unified_feature_profile"]] = "internal"
 		rowMaps(ace)[["unified_feature_specificity"]] = assays(specificity.out)[["significance"]]
-		rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"		
+		rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 	}
 
     # Prepare output

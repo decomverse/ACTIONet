@@ -7,6 +7,7 @@
 #'
 #' @examples
 #' imputed.gene.expression = impute.genes.using.archetype(ace, genes)
+#' @export
 impute.genes.using.archetypes <- function(ace, genes) {
     require(igraph)
 
@@ -32,6 +33,7 @@ impute.genes.using.archetypes <- function(ace, genes) {
 #'
 #' @examples
 #' imputed.gene.expression = impute.genes.using.archetype(ace, genes)
+#' @export
 impute.specific.genes.using.archetypes <- function(ace, genes) {
     require(igraph)
 
@@ -63,6 +65,7 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
 #' @examples
 #' imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
 #' plot.ACTIONet.gradient(ace, imputed.genes[, 1])
+#' @export
 impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no = 8,
     diffusion_iters = 5, data_slot = "logcounts") {
     genes = unique(genes)

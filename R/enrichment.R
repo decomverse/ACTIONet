@@ -8,6 +8,7 @@
 #' @examples
 #' scores = rowMaps(ace)$unified_feature_specificity
 #' TF.scores = assess.TF.activities.from.scores(scores)
+#' @export
 assess.TF.activities.from.scores <- function(scores) {
     if (!exists("ChEA3plusDB")) {
         data("ChEA3plusDB")
@@ -40,6 +41,7 @@ assess.TF.activities.from.scores <- function(scores) {
 #'
 #' @examples
 #' TF.scores = assess.TF.activities.from.archetypes(ace)
+#' @export
 assess.TF.activities.from.archetypes <- function(ace) {
     scores = rowMaps(ace)$unified_feature_specificity
 
@@ -63,6 +65,7 @@ assess.TF.activities.from.archetypes <- function(ace) {
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' scores = rowMaps(ace)$unified_feature_specificity
 #' Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
+#' @export
 assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000) {
     if (is.list(associations)) {
         associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
@@ -95,10 +98,11 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' data('gProfilerDB_human')
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
+#' @export
 assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
 	scores = rowMaps(ace)[[specificity.slot]]
 	common.genes = intersect(rownames(ace), rownames(associations))
-	
+
 	scores = as.matrix(scores[common.genes, ])
 	if(max(scores) > 100) {
 		scores = log1p(scores)
@@ -108,11 +112,11 @@ assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.cou
 	associations = associations[, col.mask]
 	associations = associations[, -1]
 	enrichment.out = assess_enrichment(scores, associations)
-	
+
 	rownames(enrichment.out$logPvals) = colnames(associations)
 	rownames(enrichment.out$thresholds) = colnames(associations)
 	enrichment.out$scores = scores
-	
+
 	return(enrichment.out)
 }
 
@@ -130,10 +134,11 @@ assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.cou
 #' data('gProfilerDB_human')
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
+#' @export
 assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
 	scores = rowMaps(ace)[[specificity.slot]]
 	common.genes = intersect(rownames(ace), rownames(associations))
-	
+
 	scores = as.matrix(scores[common.genes, ])
 	if(max(scores) > 100) {
 		scores = log1p(scores)
@@ -143,21 +148,13 @@ assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.cou
 	associations = associations[, col.mask]
 	associations = associations[, -1]
 	enrichment.out = assess_enrichment(scores, associations)
-	
+
 	rownames(enrichment.out$logPvals) = colnames(associations)
 	rownames(enrichment.out$thresholds) = colnames(associations)
 	enrichment.out$scores = scores
-	
+
 	return(enrichment.out)
 }
-
-
-
-
-
-
-
-
 
 
 #' Performs geneset enrichment analysis on a given set of genes
@@ -173,6 +170,7 @@ assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.cou
 #'
 #' @examples
 #' geneset.enrichment.gProfiler(my_genes)
+#' @export
 assess.geneset.enrichment.gProfiler <- function(genes, category = c("GO:BP", "REAC",
     "KEGG"), organism = "hsapiens", top.terms = 10, col = "tomato") {
     require(gprofiler2)
@@ -202,7 +200,7 @@ assess.geneset.enrichment.gProfiler <- function(genes, category = c("GO:BP", "RE
     return(p)
 }
 
-
+#' @export
 assess.genesets = function(arch.gs, terms.gs, N, min.pval = 1e-100, correct = T) {
 
     shared = t(sapply(terms.gs, function(gs1) {
@@ -245,28 +243,29 @@ assess.genesets = function(arch.gs, terms.gs, N, min.pval = 1e-100, correct = T)
     return(t(logPvals.out))
 }
 
+#' @export
 geneset.enrichment.gProfiler <- function(genes, top.terms = 10, col = "tomato", organism = "hsapiens", category = c("GO:BP", "REAC", "KEGG")) {
     require(gprofiler2)
     require(ggpubr)
-    
-    gp.out = gprofiler2::gost(genes, ordered_query = FALSE, exclude_iea = FALSE, correction_method = "fdr", sources = category, 
+
+    gp.out = gprofiler2::gost(genes, ordered_query = FALSE, exclude_iea = FALSE, correction_method = "fdr", sources = category,
         organism = organism)
     if(is.null(gp.out))
 		return()
-    
+
     terms = gp.out$result
-		
+
     terms$logPval = -log10(terms$p_value)
-    
-    
+
+
     too.long = which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
     terms = terms[-too.long, ]
-    
+
     terms = terms[order(terms$logPval, decreasing = TRUE), ]
     sub.terms = terms[1:min(top.terms, sum(terms$logPval > 1)), ]
-    
-    p = ggbarplot(sub.terms, x = "term_name", y = "logPval", sort.val = "asc", orientation = "horiz", 
+
+    p = ggbarplot(sub.terms, x = "term_name", y = "logPval", sort.val = "asc", orientation = "horiz",
         fill = col, xlab = "", ylab = "") + geom_hline(yintercept = -log10(0.05), col = "gray", lty = 2)
-        
+
     return(p)
 }
