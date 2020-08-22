@@ -10,6 +10,7 @@
 #'
 #' @examples
 #' ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+#' @export
 compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
     data_slot = "logcounts") {
     S = assays(ace)[[data_slot]]
@@ -58,6 +59,7 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
 #'
 #' @examples
 #' arch.annot = annotate.clusters.using.labels(ace, ace$clusters, sce$celltypes)
+#' @export
 annotate.clusters.using.labels <- function(ace, clusters, labels) {
 
     clusters = preprocess.labels(clusters, ace)
@@ -118,16 +120,17 @@ annotate.clusters.using.labels <- function(ace, clusters, labels) {
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
 #' arch.annot = annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = 'cluster_specificity_scores')
+#' @export
 annotate.clusters.using.markers <- function(ace, marker.genes, specificity.slot.name,
     rand.sample.no = 1000) {
-		
+
 	if(!grepl("_feature_specificity", specificity.slot.name)) {
 		specificity.slot.name = paste(specificity.slot.name, "feature_specificity", sep = "_")
 	}
     if (!(specificity.slot.name %in% names(rowMaps(ace)))) {
         message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
     }
-	
+
     if (is.matrix(marker.genes) | is.sparseMatrix(marker.genes)) {
         marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x >
             0])
@@ -235,6 +238,7 @@ annotate.clusters.using.markers <- function(ace, marker.genes, specificity.slot.
 #' data('curatedMarkers_human') # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.profile.using.markers(my.gene.scores.profile, marker.genes = marker.genes)
+#' @export
 annotate.profile.using.markers <- function(feature.scores, marker.genes, rand.sample.no = 1000) {
     require(ACTIONet)
     require(igraph)
@@ -341,6 +345,7 @@ annotate.profile.using.markers <- function(feature.scores, marker.genes, rand.sa
 #'
 #' @examples
 #' clusters = cluster.graph(G, 1.0)
+#' @export
 cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NULL,
     seed = 0) {
     if (is.matrix(G)) {
@@ -391,6 +396,7 @@ cluster.graph <- function(G, resolution_parameter = 0.5, initial.clustering = NU
 #' @examples
 #' clusters = Leiden.clustering(ace)
 #' plot.ACTIONet(ace, clusters)
+#' @export
 Leiden.clustering <- function(ace, resolution_parameter = 1, net.slot = "ACTIONet",
     init.slot = "assigned_archetype", seed = 0) {
     initial.clusters = NULL
@@ -418,6 +424,7 @@ Leiden.clustering <- function(ace, resolution_parameter = 1, net.slot = "ACTIONe
 #' @examples
 #' clusters = HDBSCAN.clustering(ace)
 #' plot.ACTIONet(ace, clusters)
+#' @export
 HDBSCAN.clustering <- function(ace, minPoints = 30, minClusterSize = 30, archetype.slot = "H_unified") {
     X = as.matrix(colMaps(ace)[[archetype.slot]])
     out_list = run_HDBSCAN(X, minPoints, minClusterSize)

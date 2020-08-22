@@ -12,6 +12,7 @@
 #' @examples
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
+#' @export
 reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
     ace <- as(ace, "ACTIONetExperiment")
