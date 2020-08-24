@@ -284,6 +284,7 @@ read.HD5List <- function(h5file, gname, depth = 1, max.depth = 5, compression.le
     return(L.out)
 }
 
+#' @export
 ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", full.export = T,
     compression.level = 0) {
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
@@ -475,6 +476,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 }
 
+#' @export
 AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
         stop("Please install hdf5r to read HDF5 files")
@@ -536,7 +538,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     idx = match(c("chr", "start", "end"), colnames(obs.DF))
     if(sum(is.na(idx)) == 0) {
 		colData(ace) = colData(ace)[, idx]
-		
+
 		BED = obs.DF[, idx]
 		GR = makeGRangesFromDataFrame(BED)
 		rowRanges(ace) = GR
