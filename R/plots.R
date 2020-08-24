@@ -942,7 +942,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
+visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 0.01, CPal = "magma", alpha_val = 0.85, export_path = NA) {
 
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
         names(marker.genes) = marker.genes
@@ -1038,7 +1038,7 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
     return(ht)
 
 }
-plot.ACTIONet.archetype.footprint <- function(ace, node.size = 1, CPal = "magma",
+plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.01, CPal = "magma",
     title = "", arch.labels = NULL, coordinate_slot = "ACTIONet2D", alpha_val = 0.9) {
     Ht = colMaps(ace)[["H_unified"]]
     cs = Matrix::colSums(Ht)
