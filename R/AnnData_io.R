@@ -533,7 +533,7 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
 
     ace = ACTIONetExperiment(assays = input_assays, rowData = var.DF, colData = obs.DF)
 
-    idx = match(c("chr", "start", "end") %in% colnames(obs.DF))
+    idx = match(c("chr", "start", "end"), colnames(obs.DF))
     if(sum(is.na(idx)) == 0) {
 		colData(ace) = colData(ace)[, idx]
 		
