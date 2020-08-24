@@ -942,3 +942,7 @@ NetEnh <- function(A) {
     .Call(`_ACTIONet_NetEnh`, A)
 }
 
+roll_var <- function(X) {
+    .Call(`_ACTIONet_roll_var`, X)
+}
+

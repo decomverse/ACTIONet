@@ -2,7 +2,7 @@
 % Please edit documentation in R/batch_correct.R
 \name{reduce.and.batch.correct.ace.Harmony}
 \alias{reduce.and.batch.correct.ace.Harmony}
-\title{(It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)}
+\title{(It uses Harmony for batch-correction: https://github.com/immunogenomics/harmony)}
 \usage{
 reduce.and.batch.correct.ace.Harmony(
   ace,
@@ -34,7 +34,7 @@ reduce.and.batch.correct.ace.Harmony(
 Reduced ace object with added colMaps(ace)
 }
 \description{
-(It used Harmony for batch-correction: https://github.com/immunogenomics/harmony)
+(It uses Harmony for batch-correction: https://github.com/immunogenomics/harmony)
 }
 \examples{
 ace = import.ace.from.10X(input_path)
