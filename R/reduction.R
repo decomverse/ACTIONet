@@ -12,6 +12,7 @@
 #' @examples
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
+#' @export
 reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
     ace <- as(ace, "ACTIONetExperiment")
@@ -76,23 +77,23 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
 
 
 	V = reduction.out$V
-	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))	
+	colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))
 	rowMaps(ace.norm)[[sprintf("%s_V", reduction_slot)]] = V
 	rowMapTypes(ace.norm)[[sprintf("%s_V", reduction_slot)]] = "internal"
 
 
 	A = reduction.out$A
-	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))	
+	colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))
 	rowMaps(ace.norm)[[sprintf("%s_A", reduction_slot)]] = A
 	rowMapTypes(ace.norm)[[sprintf("%s_A", reduction_slot)]] = "internal"
 
 
 	B = reduction.out$B
-	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))	
+	colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))
 	colMaps(ace.norm)[[sprintf("%s_B", reduction_slot)]] = B
 	colMapTypes(ace.norm)[[sprintf("%s_B", reduction_slot)]] = "internal"
-	
-	
+
+
 	metadata(ace.norm)[[sprintf("%s_sigma", reduction_slot)]] = reduction.out$sigma
 
     # metadata(ace.norm)$reduction.time = Sys.time()
