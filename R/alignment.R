@@ -54,33 +54,6 @@ compute_pairwise_alignment <- function(reference_profile, query_profile, reduced
 }
 
 
-
-annotate_cells_from_alignment <- function(ace, alignment, reference_annotations, slot_name = "unified") {
-	# mm = as(MWM_hungarian(alignment), "dgTMatrix")
-	# ii = mm@i+1
-	# jj = mm@j+1
-	# subalignment = alignment[ii, jj]
-	# reference_annotations = reference_annotations[ii]
-	
-    H.slot = sprintf("H_%s", slot_name)
-    cell.scores.mat = colMaps(ace)[[H.slot]]
-	cell.enrichment.mat = cell.scores.mat %*% Matrix::t(alignment)
-	
-	# A = as.matrix(cell.enrichment.mat)
-	# rownames(A) = ace$Labels
-
-	
-    Labels = reference_annotations[apply(cell.enrichment.mat, 
-        1, which.max)]
-    Labels.confidence = apply(cell.enrichment.mat, 1, max)
-    res = list(Labels = Labels, Labels.confidence = Labels.confidence, 
-        Enrichment = cell.enrichment.mat)
-        
-	return(res)
-}
-
-
-
 compute_merged_ace_from_cell_alignment <-function(reference_ace, query_ace, cell_to_cell_alignment, reference_cell_labels = NULL, query_cell_labels = NULL, n_epochs = 500) {
 
 	if(is.null(colnames(reference_ace)))	
@@ -145,7 +118,7 @@ plot_pairwise_alignment <- function(alignment, reference_labels = NULL, query_la
 	if(normalize == TRUE)
 		X = doubleNorm(X)
 		
-	ht = Heatmap(X, cluster_columns = F, cluster_rows = F, rect_gp = gpar(col = border.color), name = "Alignment score", col = gradPal, row_names_side = "left", row_title = "Reference", column_title = "Query", column_names_gp = gpar(fontsize = 14, fontface="bold"), row_names_gp = gpar(fontsize = 14, fontface="bold"), column_title_gp = gpar(fontsize = 18, fontface="bold"), row_title_gp = gpar(fontsize = 18, fontface="bold"))
+	ht = Heatmap(X, cluster_columns = F, cluster_rows = F, rect_gp = gpar(col = border.color), name = "Alignment score", col = gradPal, row_names_side = "left", row_title = "Reference", column_title = "Query", column_names_gp = gpar(fontsize = 14, fontface="bold"), row_names_gp = gpar(fontsize = 14, fontface="bold"), column_title_gp = gpar(fontsize = 18, fontface="bold"), row_title_gp = gpar(fontsize = 18, fontface="bold"), row_names_max_width = unit(100, "cm"), column_names_max_height = unit(100, "cm"))
 	
 	ht
 }
@@ -191,4 +164,29 @@ compute_cell_alignments_from_archetype_alignments <- function(reference_ace, que
 }
 
 
+annotate_cells_from_alignment <- function(ace, alignment, unification.slot = "H_unified") {
 
+    cell.scores.mat = colMaps(ace)[[unification.slot]]
+    cell.enrichment.mat = cell.scores.mat %*% Matrix::t(alignment)
+    
+	newLabels = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
+    newLabels.confidence = apply(cell.enrichment.mat, 1, max)
+
+	newLabels.corrected = correct.cell.annotations(ace, newLabels, LFR.threshold = 1)
+	
+	newLabels.annot = annotate.archetypes.using.labels(ace, newLabels.corrected)
+
+	M = as(MWM_hungarian(newLabels.annot$Enrichment), 'dgTMatrix')
+	
+	newLabels.CPal = colorspace::lighten(rgb(metadata(ace)$backbone$colors[M@i+1, ]), 0.25)
+	names(newLabels.CPal) = colnames(newLabels.annot$Enrichment)[M@j+1]
+
+
+
+    
+    out = list(Labels = newLabels.corrected, Labels.confidence = newLabels.confidence, 
+        Enrichment = cell.enrichment.mat, Pal = newLabels.CPal)
+
+
+	return(out)
+}

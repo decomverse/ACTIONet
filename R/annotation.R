@@ -12,6 +12,7 @@
 #'
 #' @examples
 #' arch.annot = annotate.archetypes.using.labels(ace, sce$celltypes)
+#' @export
 annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_unified") {
     Labels = preprocess.labels(labels, ace)
 
@@ -79,6 +80,7 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
 #' data('curatedMarkers_human') # pre-packaged in ACTIONet
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
+#' @export
 annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000,
     significance.slot = "unified_feature_specificity") {
     require(ACTIONet)
@@ -194,6 +196,7 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' arch.annot = annotate.cells.using.markers(ace, marker.genes = marker.genes)
 #' cell.labels = arch.annot$Labels
+#' @export
 annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100,
     alpha_val = 0.9, thread_no = 8, imputation = "PageRank", data_slot = "logcounts") {
     require(ACTIONet)
@@ -307,6 +310,7 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
 #' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 #' cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
 #' labels = cell.annotations$Labels
+#' @export
 annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no = 1000,
     unified_suffix = "unified") {
 
@@ -346,6 +350,7 @@ annotate.cells.from.archetypes.using.markers <- function(ace, marker.genes, rand
 #' enrichment.mat = arch.annot$enrichment
 #' cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat)
 #' cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
+#' @export
 map.cell.scores.from.archetype.enrichment <- function(ace, enrichment.matrix, normalize = F,
     H.slot = "H_unified") {
     cell.scores.mat = colMaps(ace)[[H.slot]]

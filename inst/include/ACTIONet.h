@@ -100,11 +100,13 @@ namespace ACTIONet {
 
 		// To store the output of unify_archetypes()
 		struct unification_results {
-			vec archetype_groups; 
+			mat dag_adj; 
+			vec dag_node_annotations;
 			uvec selected_archetypes;
 			mat C_unified;
 			mat H_unified;
 			uvec assigned_archetypes;
+			vec archetype_group;
 		};	
 		
 	// Low-level functions
@@ -189,8 +191,8 @@ namespace ACTIONet {
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
 		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
-		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_overlap, double resolution);
-	
+		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double min_edge_weight, int min_coreness, double resolution, int min_repeat, int thread_no, double alpha, double beta, double outlier_threshold, int minPoints, int minClusterSize, double cond_threshold, int normalization_type, bool preprocess_adj, bool reduce_G, int method_type, double sensitivity);
+		
 	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
 		sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
@@ -253,6 +255,10 @@ namespace ACTIONet {
 		
 		
 		Coreset compute_AA_coreset(sp_mat &S, int m); 
+
+		mat NetEnh(mat Adj);
+
+		mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters, int seed);
 		
 }
 
