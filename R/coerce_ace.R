@@ -13,8 +13,10 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
       rowData = from@elementMetadata,
       colData = from@colData,
       metadata = from@metadata)
-     
-	rowRanges(ace) = from@rowRanges
+    
+    if(class(from) == "RangedSummarizedExperiment") {
+		rowRanges(ace) = rowRanges(from)
+	}
   
     # rowData(ace) = DataFrame(as.data.frame(rowData(ace))) colData(ace) =
     # DataFrame(as.data.frame(colData(ace)))
