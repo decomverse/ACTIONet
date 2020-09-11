@@ -7,12 +7,17 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
     # ace = ACTIONetExperiment(from, rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(),
     #     rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList())
 
+
     ace = ACTIONet::ACTIONetExperiment(
       assays = SummarizedExperiment::assays(from),
       rowData = from@elementMetadata,
-      rowRanges = from@rowRanges,
       colData = from@colData,
       metadata = from@metadata)
+    
+    if(class(from) == "RangedSummarizedExperiment") {
+		rowRanges(ace) = rowRanges(from)
+	}
+  
     # rowData(ace) = DataFrame(as.data.frame(rowData(ace))) colData(ace) =
     # DataFrame(as.data.frame(colData(ace)))
 
