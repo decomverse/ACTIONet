@@ -6,6 +6,7 @@ import sys
 import subprocess
 
 from setuptools import find_packages, setup, Extension
+from setuptools.command.build_ext import build_ext
 
 __version__ = '1.0'
 
