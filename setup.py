@@ -5,10 +5,7 @@ import re
 import sys
 import subprocess
 
-import pybind11
-from numpy.distutils.system_info import get_info
 from setuptools import find_packages, setup, Extension
-from setuptools.command.build_ext import build_ext
 
 __version__ = '1.0'
 
