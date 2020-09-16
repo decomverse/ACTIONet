@@ -898,7 +898,7 @@ struct type_caster<Type, enable_if_t<(aw::is_Col<Type>::value || aw::is_Row<Type
     }
 
 
-        PYBIND11_TYPE_CASTER(Type, _("Numpy.ndarray[") + npy_format_descriptor<Scalar>::name() + _("]"));
+        PYBIND11_TYPE_CASTER(Type, _("Numpy.ndarray[") + npy_format_descriptor<Scalar>::name + _("]"));
 
 
 };
@@ -986,7 +986,7 @@ struct type_caster<Type, enable_if_t<aw::is_SpMat<Type>::value>> {
  
     }
 
-   PYBIND11_TYPE_CASTER(Type, _("scipy.sparse.csc_matrix[") + npy_format_descriptor<std::decay_t<Scalar>>::name() + _("]")); 
+   PYBIND11_TYPE_CASTER(Type, _("scipy.sparse.csc_matrix[") + npy_format_descriptor<std::decay_t<Scalar>>::name + _("]")); 
     
 
 };

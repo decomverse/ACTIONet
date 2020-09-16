@@ -1,89 +1,80 @@
-from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext
-import sys
-import setuptools
-import os
-from pathlib import Path
-import sysconfig
-from numpy.distutils.system_info import get_info
-import pybind11
 import multiprocessing
+import os
+import platform
+import re
+import sys
+import subprocess
+
+import pybind11
+from numpy.distutils.system_info import get_info
+from setuptools import find_packages, setup, Extension
+from setuptools.command.build_ext import build_ext
 
 __version__ = '1.0'
 
-N=multiprocessing.cpu_count()
+def read(path):
+    with open(path, 'r') as f:
+        return f.read()
 
-def has_flag(compiler, flagname):
-    import tempfile
-    with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
-        f.write('int main (int argc, char **argv) { return 0; }')
+def get_numpy_include():
+    import numpy
+    return numpy.get_include()
+
+
+# Classes below were taken from https://github.com/pybind/cmake_example
+class CMakeExtension(Extension):
+    def __init__(self, name, sourcedir=''):
+        Extension.__init__(self, name, sources=[])
+        self.sourcedir = os.path.abspath(sourcedir)
+
+
+class CMakeBuild(build_ext):
+    def run(self):
         try:
-            compiler.compile([f.name], extra_postargs=[flagname])
-        except setuptools.distutils.errors.CompileError:
-            return False
-    return True
+            out = subprocess.check_output(['cmake', '--version'])
+        except OSError:
+            raise RuntimeError("CMake must be installed to build the following extensions: " +
+                               ", ".join(e.name for e in self.extensions))
 
-def cpp_flag(compiler):
-    flags = ['-std=c++17', '-std=c++14', '-std=c++11']
+        if platform.system() == "Windows":
+            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
+            if cmake_version < '3.1.0':
+                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
-    for flag in flags:
-        if has_flag(compiler, flag): return flag
+        for ext in self.extensions:
+            self.build_extension(ext)
 
-    raise RuntimeError('Unsupported compiler -- at least C++11 support '
-                       'is needed!')
+    def build_extension(self, ext):
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        # required for auto-detection of auxiliary "native" libs
+        if not extdir.endswith(os.path.sep):
+            extdir += os.path.sep
 
-                       
-blas_opt = get_info('lapack_opt')
+        cmake_args = [
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
+            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            '-DNUMPY_INCLUDE_DIRS=' + get_numpy_include(),
+        ]
 
-ACTIONet_source_files=["python_interface/wrapper.cc"]
-for (dirpath, dirnames, filenames) in os.walk('src'):
-    for file in filenames:
-        if file.endswith(".cc") or file.endswith(".c"):
-            ACTIONet_source_files+=[os.path.join(dirpath, file)]
+        cfg = 'Debug' if self.debug else 'Release'
+        build_args = ['--config', cfg]
 
-ACTIONet_header_dirs=['include']
-for (dirpath, dirnames, filenames) in os.walk('include'):
-    for dirname in dirnames: ACTIONet_header_dirs += [os.path.join(dirpath, dirname)]
+        if platform.system() == "Windows":
+            cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
+            if sys.maxsize > 2**32:
+                cmake_args += ['-A', 'x64']
+            build_args += ['--', '/m']
+        else:
+            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+            build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
 
-
-ACTIONet_macros=list()
-if ("define_macros" in blas_opt): ACTIONet_macros+=blas_opt['define_macros']
-
-ACTIONet_lib_dirs=list()
-if ("library_dirs" in blas_opt): ACTIONet_lib_dirs+=blas_opt['library_dirs']
-
-ACTIONet_libs=['cholmod', 'dl', 'pthread']
-if ("libraries" in blas_opt): ACTIONet_libs+=blas_opt['libraries']
-
-ACTIONet_extra_args=list()
-if ("extra_compile_args" in blas_opt): ACTIONet_extra_args+=blas_opt['extra_compile_args']
-
-ACTIONet_extra_link_args=list()
-if ("extra_link_args" in blas_opt): ACTIONet_extra_link_args+=blas_opt['extra_link_args']
-
-
-os.environ['CC'] = "gcc"
-os.environ['CFLAGS']=" -w"
-os.environ['CPPFLAGS']=" -w"
-os.environ['CXXFLAGS']=" -w"
-
-print(ACTIONet_macros)
-print(ACTIONet_header_dirs)
-print(ACTIONet_lib_dirs)
-print(ACTIONet_libs)
-
-
-ACTIONet_module = Extension(
-    '_ACTIONet',
-    ACTIONet_source_files,
-    define_macros=ACTIONet_macros,
-    include_dirs=ACTIONet_header_dirs,    
-    library_dirs=ACTIONet_lib_dirs,
-    libraries=ACTIONet_libs,
-    extra_compile_args=ACTIONet_extra_args,
-    extra_link_args=ACTIONet_extra_link_args,
-    language='c++'
-)
+        env = os.environ.copy()
+        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
+                                                              self.distribution.get_version())
+        if not os.path.exists(self.build_temp):
+            os.makedirs(self.build_temp)
+        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 
 setup(
@@ -93,11 +84,17 @@ setup(
     author_email='shahin.mohammadi@gmail.com',
     url='https://github.com/shmohammadi86/ACTIONet',
     description='ACTIONet single-cell analysis framework',
-    long_description='',
-    packages=setuptools.find_packages("lib"),
-    package_dir={"": "lib"},
-    ext_modules=[ACTIONet_module],
-    install_requires=['pybind11>=2.4', 'numpy'],
-    setup_requires=['pybind11>=2.4', 'numpy'],
-    zip_safe=False
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
+    keywords='',
+    python_requires='>=3.5',
+    packages=find_packages('lib'),
+    package_dir={'': 'lib'},
+    ext_modules=[CMakeExtension('ACTIONet')],
+    cmdclass=dict(build_ext=CMakeBuild),
+    install_requires=read('requirements.txt').strip().split('\n'),
+    setup_requires=['numpy'],
+    zip_safe=False,
+    include_package_data=True,
+    classifiers=[],
 )
