@@ -12,3 +12,4 @@ dist/
 ACTIONet.egg-info/
 build/
 data/
+.vscode
