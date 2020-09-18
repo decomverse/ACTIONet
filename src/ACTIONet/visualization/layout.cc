@@ -1,5 +1,6 @@
 #include <ACTIONet.h>
 
+#include <cfloat>
 #include <thread>
 #include <atomic>
 
