@@ -112,8 +112,8 @@ def reduce_kernel(
         else:
             adata.varm['ACTION_V'] = reduction_out['V']
             
-        adata.uns['ACTIONet_reduction']['lambda'] = reduction_out['lambda']
-        adata.uns['ACTIONet_reduction']['explained_var'] = reduction_out['explained_var']
+        # adata.uns['ACTIONet_reduction']['lambda'] = reduction_out['lambda']
+        # adata.uns['ACTIONet_reduction']['explained_var'] = reduction_out['explained_var']
 
         return adata if copy else None
     else:
@@ -121,8 +121,8 @@ def reduce_kernel(
             return (
                 ACTION_S_r,
                 reduction_out['V'].T,
-                reduction_out['lambda'],
-                reduction_out['explained_var']
+                # reduction_out['lambda'],
+                # reduction_out['explained_var']
             )
         else:
             return ACTION_S_r
