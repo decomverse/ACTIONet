@@ -1,9 +1,8 @@
 #include <ACTIONet.h>
 
+#include <cfloat>
 #include <thread>
 #include <atomic>
-#include <cfloat>
-#include <limits>
 
 // Visualization associated parameter settings
 #define TUMAP_LAYOUT 0
