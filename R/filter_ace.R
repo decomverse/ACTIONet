@@ -12,7 +12,6 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
         rows_mask = rep(TRUE, NROW(ace.fil))
         cols_mask = rep(TRUE, NCOL(ace.fil))
         if (!is.null(min_umis_per_cell)) {
-          if(require())
             # umi_mask = sparseMatrixStats::colSums2(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
             umi_mask = Matrix::colSums(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
             cols_mask = cols_mask & umi_mask
