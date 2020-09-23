@@ -1,8 +1,13 @@
 #' Perform batch correction on `ACTIONetExperiment` and `SingleCellExperiment` objects.
 #' @export
-reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr, reduced_dim = 50, MNN_k = 20, return_V = FALSE, reduction_slot = "MNN", V_slot = NULL, BPPARAM = SerialParam()) {
+reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, reduced_dim = 50, MNN_k = 20, return_V = FALSE, reduction_slot = "MNN", V_slot = NULL, BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "SingleCellExperiment", "batchelor", "BiocParallel"))
 
+	if(is.null(batch_attr)) {
+		warning("batch_attr must be provided")
+		return(ace)
+	}
+	
     ace = .check_and_convert_se_like(ace, "ACE")
     m_data = metadata(ace)
     ace = normalize.ace(ace, norm.method = "multiBatchNorm", batch_attr = batch_attr, BPPARAM = BPPARAM)
@@ -77,8 +82,9 @@ batch.correct.ace.Harmony <- function(ace, batch_attr = NULL, reduction_slot = "
         err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
         stop(err)
     }
-    if(is.null(batch_attr)) {
-        stop("No batch attribute is provided\n")
+	if(is.null(batch_attr)) {
+		warning("batch_attr must be provided")
+		return(ace)
 	}
 
     ace = .check_and_convert_se_like(ace, "ACE")
@@ -141,7 +147,13 @@ orthogonalize.ace.batch.simple <- function(ace, batch.vec, reduction_slot = "ACT
 }
 
 #' @export
-reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
+reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat = NULL, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
+	if(!is.matrix(design.mat)) {
+		warning("design.mat must be a matrix")
+		return(ace)
+	}
+	
+
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 	ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, data_slot = data_slot,
     norm_method = norm_method, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)

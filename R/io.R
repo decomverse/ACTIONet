@@ -514,3 +514,13 @@ import.ace.from.legacy <- function(ACTIONet.out, sce, full.import = T, return.al
         return(ace)
     }
 }
+
+export.sparse.format <- function(ace, path) {
+	counts.mat = counts(ace)
+	cell_metadata = colData(ace)
+	features = rownames(ace)
+
+	write.table(features, file.path(path, "features.txt"), row.names = F, col.names = F, quote = F)
+	write.table(cell_metadata, file.path(path, "metadata.tsv"), row.names = F, col.names = T, quote = F, sep = "\t")
+	Matrix::writeMM(counts.mat, file.path(path, "counts.mtx"))	
+}
