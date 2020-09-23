@@ -147,14 +147,15 @@ orthogonalize.ace.batch.simple <- function(ace, batch.vec, reduction_slot = "ACT
 }
 
 #' @export
-reduce.and.batch.orthogonalize.ace  <- function(ace, design.mat = NULL, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
+reduce.and.batch.orthogonalize.ace <- function (ace, design.mat, reduced_dim = 50, max_iter = 5, data_slot = "logcounts", 
+    norm_method = "default", reduction_slot = "ACTION", seed = 0, 
+    SVD_algorithm = 0) {
 	if(!is.matrix(design.mat)) {
 		warning("design.mat must be a matrix")
 		return(ace)
 	}
 	
 
-    norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 	ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, data_slot = data_slot,
     norm_method = norm_method, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
 
