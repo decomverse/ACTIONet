@@ -351,7 +351,7 @@ import.ace.from.loom <- function(fname, ...) {
     }
 
 
-	SE = SummarizedExperiment::makeSummarizedExperimentFromLoom(file, ...)
+	SE = SummarizedExperiment::makeSummarizedExperimentFromLoom(fname, ...)
     ace = as(SE, "ACTIONetExperiment")
 
     #ace <- as(sceasy:::readExchangeableLoom(fname), "ACTIONetExperiment")
