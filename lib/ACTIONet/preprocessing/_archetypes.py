@@ -42,7 +42,7 @@ def prune_archetypes(
 
         `.obsm['ACTION_C_stacked']`
         `.obsm['ACTION_H_stacked']`
-        `.uns['ACTION']['prune']`
+        `.uns['ACTION']['pruned']`
     """
     if 'ACTION' not in adata.uns.keys():
         raise ValueError(
@@ -95,8 +95,12 @@ def unify_archetypes(
         Determines whether a copy of `adata` is returned. 
     Returns
     -------
-        None, if copy is False, and ACE: AnnData, otherwise. 
-        In either case, "C_pruned" and "H_pruned" are added to the ACE.obsm.
+        adata : anndata.AnnData
+        if `copy=True` returns None or else adds fields to `adata`:
+
+        `.obsm['ACTION_C_unified']`
+        `.obsm['ACTION_H_unified']`
+        `.uns['ACTION']['unified']`
     """
     # Check for ACTION_S_r and ACTION_H_stacked
     if 'ACTION_S_r' not in adata.obsm.keys():
