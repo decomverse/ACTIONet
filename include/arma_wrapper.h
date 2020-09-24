@@ -100,7 +100,12 @@ std::vector<npulong> extract_shape(const InfoType& info) {
     std::string format_err_msg = "The format descriptor strings are not the same. Are you using the right " 
                                  " template specialization?";
 
-    if (info.format != py::format_descriptor<Scalar>::value) {throw std::runtime_error(format_err_msg);}
+    if (info.format != py::format_descriptor<Scalar>::format()) {
+        // Temporary fix for sparse matrix
+        if (info.format != "L" && py::format_descriptor<Scalar>::format() != "Q") {
+            throw std::runtime_error(format_err_msg);
+        }
+    }
 
     if(sizeof(Scalar) != info.itemsize) {
         std::string size_err_msg = "The type you are storing the data in does not contain the same number of " 
@@ -125,7 +130,7 @@ py::buffer_info def_buffer(arma::Row<Scalar>&& m) {
 
         return_buf = py::buffer_info(reinterpret_cast<void*>(m.memptr()), /* data */
                         static_cast<ssize_t>(sizeof(Scalar)),
-                        py::format_descriptor<Scalar>::value,
+                        py::format_descriptor<Scalar>::format(),
                         static_cast<ssize_t>(1),
                         std::vector<ssize_t>{static_cast<ssize_t>(m.n_cols)},
                         std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar)) *
@@ -135,7 +140,7 @@ py::buffer_info def_buffer(arma::Row<Scalar>&& m) {
 
         return_buf = py::buffer_info(nullptr, /* data */
                         static_cast<ssize_t>(sizeof(Scalar)),
-                        py::format_descriptor<Scalar>::value,
+                        py::format_descriptor<Scalar>::format(),
                         static_cast<ssize_t>(1),
                         std::vector<ssize_t>{static_cast<ssize_t>(m.n_cols)},
                         std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar)) *
@@ -154,7 +159,7 @@ py::buffer_info def_buffer(Col<Scalar>&& m) {
 
         return py::buffer_info(reinterpret_cast<void*>(m.memptr()), /* data */
                 static_cast<ssize_t>(sizeof(Scalar)),
-                py::format_descriptor<Scalar>::value,
+                py::format_descriptor<Scalar>::format(),
                 static_cast<ssize_t>(1),
                 std::vector<ssize_t>{static_cast<ssize_t>(m.n_rows)},
                 std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar))}); 
@@ -163,7 +168,7 @@ py::buffer_info def_buffer(Col<Scalar>&& m) {
         return py::buffer_info(
                         nullptr, 
                         static_cast<ssize_t>(sizeof(Scalar)), 
-                        py::format_descriptor<Scalar>::value,
+                        py::format_descriptor<Scalar>::format(),
                         static_cast<ssize_t>(1), 
                         std::vector<ssize_t>{static_cast<ssize_t>(m.n_rows)}, 
                         std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar))}); 
@@ -182,7 +187,7 @@ py::buffer_info def_buffer(Mat<Scalar>&& m) {
         
         return_buf = py::buffer_info(reinterpret_cast<void*>(m.memptr()), /* data */
                     static_cast<ssize_t>(sizeof(Scalar)), /* Size of one scalar. */
-                    py::format_descriptor<Scalar>::value, /*Python struct-style format descriptor */
+                    py::format_descriptor<Scalar>::format(), /*Python struct-style format descriptor */
                     static_cast<ssize_t>(2),   /*Number of dimensions */
                     std::vector<ssize_t>{static_cast<ssize_t>(m.n_rows), static_cast<ssize_t>(m.n_cols)}, 
                     std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar)),
@@ -193,7 +198,7 @@ py::buffer_info def_buffer(Mat<Scalar>&& m) {
         return_buf = py::buffer_info(
                     nullptr, /* Pointer to memory buffer. */
                     static_cast<ssize_t>(sizeof(Scalar)), /* Size of one scalar. */
-                    py::format_descriptor<Scalar>::value, /*Python struct-style format descriptor */
+                    py::format_descriptor<Scalar>::format(), /*Python struct-style format descriptor */
                     static_cast<ssize_t>(2),   /*Number of dimensions */
                     std::vector<ssize_t>{static_cast<ssize_t>(m.n_rows), static_cast<ssize_t>(m.n_cols)}, 
                     std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar)),
@@ -215,7 +220,7 @@ py::buffer_info def_buffer(Cube<Scalar>&& m) {
    
         return_buf = py::buffer_info(reinterpret_cast<void*>(m.memptr()), /* data */
                     static_cast<ssize_t>(sizeof(Scalar)), /* Size of one scalar. */
-                    py::format_descriptor<Scalar>::value, /*Python struct-style format descriptor */
+                    py::format_descriptor<Scalar>::format(), /*Python struct-style format descriptor */
                     static_cast<ssize_t>(3),
                     {m.n_slices, m.n_rows, m.n_cols},
                     std::vector<ssize_t>{static_cast<ssize_t>(sizeof(Scalar)) * static_cast<ssize_t>(m.n_rows) *
@@ -226,7 +231,7 @@ py::buffer_info def_buffer(Cube<Scalar>&& m) {
         return_buf = py::buffer_info( 
                     nullptr,
                     static_cast<ssize_t>(sizeof(Scalar)), /* Size of one scalar. */
-                    py::format_descriptor<Scalar>::value, /*Python struct-style format descriptor */
+                    py::format_descriptor<Scalar>::format(), /*Python struct-style format descriptor */
                     static_cast<ssize_t>(3),
                     std::vector<ssize_t>{static_cast<ssize_t>(m.n_slices), static_cast<ssize_t>(m.n_rows),
                         static_cast<ssize_t>(m.n_cols)},
