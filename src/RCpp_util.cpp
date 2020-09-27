@@ -18,13 +18,13 @@ using namespace arma;
 
 
 // [[Rcpp::export]]
-arma::vec roll_var(arma::vec &X){
-    const arma::uword n_max = X.n_elem;
+vec roll_var(vec &X){
+    const uword n_max = X.n_elem;
     double xbar = 0, M = 0;
-    arma::vec out(n_max);
+    vec out(n_max);
     double *x = X.begin(), *o = out.begin();
 
-    for(arma::uword n = 1; n <= n_max; ++n, ++x, ++o){
+    for(uword n = 1; n <= n_max; ++n, ++x, ++o){
       double tmp = (*x - xbar);
       xbar += (*x - xbar) / n;
       M += tmp * (*x - xbar);
@@ -37,3 +37,29 @@ arma::vec roll_var(arma::vec &X){
 
     return out;
   }
+
+
+// [[Rcpp::export]]
+vec fast_row_sums(sp_mat &X) {
+
+	vec sum_vec = zeros(X.n_rows);
+	sp_mat::const_iterator it     = X.begin();
+	sp_mat::const_iterator it_end = X.end();
+	for(; it != it_end; ++it) {
+		sum_vec[it.row()] += (*it);
+	}
+	
+	return(sum_vec);
+}
+
+// [[Rcpp::export]]
+vec fast_column_sums(sp_mat &X) {
+	vec sum_vec = zeros(X.n_cols);
+	sp_mat::const_iterator it     = X.begin();
+	sp_mat::const_iterator it_end = X.end();
+	for(; it != it_end; ++it) {
+		sum_vec[it.col()] += (*it);
+	}
+	
+	return(sum_vec);
+}
