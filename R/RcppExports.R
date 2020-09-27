@@ -946,3 +946,11 @@ roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
 
+fast_row_sums <- function(X) {
+    .Call(`_ACTIONet_fast_row_sums`, X)
+}
+
+fast_column_sums <- function(X) {
+    .Call(`_ACTIONet_fast_column_sums`, X)
+}
+
