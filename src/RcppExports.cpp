@@ -973,13 +973,35 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_var
-arma::vec roll_var(arma::vec& X);
+vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< vec& >::type X(XSEXP);
     rcpp_result_gen = Rcpp::wrap(roll_var(X));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fast_row_sums
+vec fast_row_sums(sp_mat& X);
+RcppExport SEXP _ACTIONet_fast_row_sums(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_row_sums(X));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fast_column_sums
+vec fast_column_sums(sp_mat& X);
+RcppExport SEXP _ACTIONet_fast_column_sums(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_column_sums(X));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1055,6 +1077,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
+    {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
+    {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
     {NULL, NULL, 0}
 };
 
