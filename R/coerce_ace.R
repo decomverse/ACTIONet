@@ -1,11 +1,9 @@
-#' Converts a SummarizedExperiment (SE) object to an ACTIONetExperiment (ACE) object
+#' Converts a SummarizedExperiment object to an ACTIONetExperiment object.
 #'
 #' @param from SummarizedExperiment object
 #'
 #' @exportMethod coerce
 setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
-    # ace = ACTIONetExperiment(from, rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(),
-    #     rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList())
 
     ace = ACTIONet::ACTIONetExperiment(
       assays = SummarizedExperiment::assays(from),
@@ -22,43 +20,8 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
     return(ace)
 })
 
-#' Converts an ACTIONetExperiment (ACE) method to a SummarizedExperiment (SE) object
-#'
-#' @param from ACTIONetExperiment object
-#'
-#' @exportMethod coerce
-setAs("ACTIONetExperiment", "SummarizedExperiment", function(from) {
 
-    SE = SummarizedExperiment::SummarizedExperiment(
-      assays = SummarizedExperiment::assays(from),
-      rowData = from@elementMetadata,
-      colData = from@colData,
-      metadata = from@metadata)
-
-    rownames(SE) = rownames(from)
-
-    return(SE)
-})
-
-#' Converts an ACTIONetExperiment (ACE) object to a RangedSummarizedExperiment (RSE) object
-#'
-#' @param from ACTIONetExperiment object
-#'
-#' @exportMethod coerce
-setAs( "ACTIONetExperiment", "RangedSummarizedExperiment", function(from) {
-
-    SE = SummarizedExperiment::SummarizedExperiment(
-      assays = SummarizedExperiment::assays(from),
-      rowRanges = from@rowRanges,
-      colData = from@colData,
-      metadata = from@metadata)
-
-    rownames(SE) = rownames(from)
-
-    return(SE)
-})
-
-#' Converts an ACTIONetExperiment (ACE) object to a SingleCellExperiment (SCE) object
+#' Converts an ACTIONetExperiment object to a SingleCellExperiment object.
 #'
 #' @param from ACTIONetExperiment object
 #'
@@ -79,7 +42,8 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
     return(sce)
 })
 
-#' Converts a SingleCellExperiment (SCE) object to an ACTIONetExperiment (ACE) object
+
+#' Converts a SingleCellExperiment object to an ACTIONetExperiment object.
 #'
 #' @param from SingleCellExperiment object
 #'
@@ -100,3 +64,49 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
 
     return(ace)
 })
+
+#' Converts a SummarizedExperiment, RangedSummarizedExperiment, or SingleCellExperiment object to an ACTIONetExperiment object.
+#'
+#' @param object SummarizedExperiment, RangedSummarizedExperiment, or SingleCellExperiment object
+#'
+#' @export'
+as.ACTIONetExperiment <- function(object){
+
+  if(class(object) %in% c("SummarizedExperiment", "RangedSummarizedExperiment", "SingleCellExperiment")){
+    ace = as(object, "ACTIONetExperiment")
+  } else {
+    err = sprintf("'object' must be class 'SummarizedExperiment', 'RangedSummarizedExperiment', or 'SingleCellExperiment'.\n")
+    stop(err)
+  }
+  return(ace)
+}
+
+
+#' Converts an ACTIONetExperiment method to a SummarizedExperiment object.
+#'
+#' @param ace ACTIONetExperiment object
+#'
+#' @export'
+as.SummarizedExperiment <- function(ace) {
+
+    SE = SummarizedExperiment::SummarizedExperiment(
+      assays = SummarizedExperiment::assays(ace),
+      # rowData = ace@elementMetadata,
+      rowRanges = ace@rowRanges,
+      colData = ace@colData,
+      metadata = ace@metadata)
+
+    rownames(SE) = rownames(ace)
+
+    return(SE)
+}
+
+#' Converts an ACTIONetExperiment object to a SingleCellExperiment object.
+#'
+#' @param ace ACTIONetExperiment object
+#'
+#' @export
+as.SingleCellExperiment <- function(ace){
+  ace = as(ace, "SingleCellExperiment")
+  return(ace)
+}
