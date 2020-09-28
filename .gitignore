@@ -13,3 +13,5 @@ ACTIONet.egg-info/
 build/
 data/
 .vscode
+__pycache__
+.ipynb_checkpoints
