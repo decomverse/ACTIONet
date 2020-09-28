@@ -13,8 +13,8 @@ def prune_archetypes(
     C_trace: list,
     H_trace: list,
     min_specificity_z_threshold: Optional[float] = -3,
-    min_cells_per_archetype: Optional[int] = 2,    
-    copy: Optional[bool] = False    
+    min_cells_per_archetype: Optional[int] = 2,
+    copy: Optional[bool] = False
 ) -> Optional[AnnData]:
     """\
     Archetype pruning
@@ -24,7 +24,7 @@ def prune_archetypes(
     Parameters
     ----------
     adata:
-        Current AnnData object storing the ACTIONet results    
+        Current AnnData object storing the ACTIONet results
     C_trace, H_trace:
         Output of pp.ACTION()
     min_specificity_z_threshold:
@@ -34,7 +34,7 @@ def prune_archetypes(
         Minimum number of influential cells for each archetype
         to be considered nontrivial
     copy
-        Determines whether a copy of `adata` is returned. 
+        Determines whether a copy of `adata` is returned.
     Returns
     -------
     adata : anndata.AnnData
@@ -42,7 +42,7 @@ def prune_archetypes(
 
         `.obsm['ACTION_C_stacked']`
         `.obsm['ACTION_H_stacked']`
-        `.uns['ACTION']['pruned']`
+        `.uns['ACTION']['archetypes']['pruned']`
     """
     if 'ACTION' not in adata.uns.keys():
         raise ValueError(
@@ -51,14 +51,14 @@ def prune_archetypes(
         )
 
     pruned = _an.prune_archetypes(C_trace, H_trace, min_specificity_z_threshold)
-    
+
     adata = adata.copy() if copy else adata
     adata.obsm['ACTION_C_stacked'] = pruned['C_stacked']
     adata.obsm['ACTION_H_stacked'] = pruned['H_stacked'].T
     adata.uns['ACTION'].setdefault('archetypes', {}).update({
-        'pruned': pruned['selected_archs']
+        'pruned': {'selected_archetypes': pruned['selected_archs']}
     })
-    
+
     return adata if copy else None
 
 def unify_archetypes(
@@ -92,7 +92,7 @@ def unify_archetypes(
         Current AnnData object storing the ACTIONet results
 
     copy
-        Determines whether a copy of `adata` is returned. 
+        Determines whether a copy of `adata` is returned.
     Returns
     -------
         adata : anndata.AnnData
@@ -100,7 +100,7 @@ def unify_archetypes(
 
         `.obsm['ACTION_C_unified']`
         `.obsm['ACTION_H_unified']`
-        `.uns['ACTION']['unified']`
+        `.uns['ACTION']['archetypes']['unified']`
     """
     # Check for ACTION_S_r and ACTION_H_stacked
     if 'ACTION_S_r' not in adata.obsm.keys():
@@ -113,7 +113,7 @@ def unify_archetypes(
             'Did not find adata.obsm[\'ACTION_C_stacked\'] or adata.obsm[\'ACTION_H_stacked\']. '
             'Please run pp.prune_archetypes() first.'
         )
-    
+
     adata = adata.copy() if copy else adata
     unified = _an.unify_archetypes(
         adata.obsm['ACTION_S_r'].T,
@@ -136,11 +136,11 @@ def unify_archetypes(
         method_type,
         sensitivity,
     )
-    
+
     adata.obsm['ACTION_C_unified'] = unified['C_unified']
     adata.obsm['ACTION_H_unified'] = unified['H_unified'].T
     adata.uns['ACTION'].setdefault('archetypes', {}).update({
-        'unified': unified['selected_archetypes']
+        'unified': {'selected_archetypes': unified['selected_archetypes']}
     })
 
     groups = unified['assigned_archetypes']
