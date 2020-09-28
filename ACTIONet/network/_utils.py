@@ -6,14 +6,14 @@ import _ACTIONet as _an
 
 def compute_archetype_core_centrality(
     adata: AnnData,
-    key: Optional[str] = 'ACTIONet',    
-    copy: Optional[bool] = False    
+    key: Optional[str] = 'ACTIONet',
+    copy: Optional[bool] = False
 ) -> AnnData:
-    """\
+    """
     Computes node centrality scores
-    
+
     Uses graph core-ness to compute node centralities
-    
+
     Parameters
     ----------
     adata
@@ -25,9 +25,9 @@ def compute_archetype_core_centrality(
 
     Returns
     -------
-        None, if copy is False, ACE: AnnData, if copy is True.        
-        "node_centrality" is to ACE.obs.        
-    """    
+        None, if copy is False, ACE: AnnData, if copy is True.
+        "node_centrality" is to ACE.obs.
+    """
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
             'Did not find adata.obsp[\'ACTIONet\']. '
@@ -45,5 +45,5 @@ def compute_archetype_core_centrality(
 
     scores = _an.compute_archetype_core_centrality(G, assignments)
     adata.obs['ACTIONet_centrality'] = scores
-    
+
     return adata if copy else None
