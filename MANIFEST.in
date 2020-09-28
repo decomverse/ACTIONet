@@ -1,4 +1,4 @@
-include README.md system_info.py
+include README.md
 global-include CMakeLists.txt *.cmake
 recursive-include src *
 recursive-include python_interface *
