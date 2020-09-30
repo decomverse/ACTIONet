@@ -18,7 +18,7 @@ assess.TF.activities.from.scores <- function(scores) {
         associations = ChEA3plusDB[[i]]
         associations.mat = sapply(associations, function(gs) as.numeric(rownames(ace) %in%
             gs))
-        Enrichment.mat = t(assess_enrichment(scores, associations.mat, L))
+        Enrichment.mat = t(assess_enrichment(scores, associations.mat))[[1]]
     })
 
     TF.scores = sapply(1:ncol(Enrichments[[1]]), function(j) {
