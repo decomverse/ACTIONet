@@ -14,12 +14,14 @@ assess.TF.activities.from.scores <- function(scores) {
         data("ChEA3plusDB")
     }
 
-    Enrichments = lapply(1:length(ChEA3plusDB), function(i) {
-        associations = ChEA3plusDB[[i]]
-        associations.mat = sapply(associations, function(gs) as.numeric(rownames(ace) %in%
-            gs))
-        Enrichment.mat = t(assess_enrichment(scores, associations.mat))[[1]]
-    })
+  Enrichments = lapply(1:length(ChEA3plusDB), function(i) {
+    associations = ChEA3plusDB[[i]]
+    associations.mat = as(sapply(associations, function(gs) as.numeric(rownames(ace) %in% 
+      gs)), "dgCMatrix")
+    Enrichment = assess_enrichment(scores, associations.mat)
+    Enrichment.mat = t(Enrichment[[1]])
+  })
+
 
     TF.scores = sapply(1:ncol(Enrichments[[1]]), function(j) {
         X = t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[, j])))
