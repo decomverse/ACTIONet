@@ -23,15 +23,15 @@ assess.TF.activities.from.scores <- function(scores) {
   })
 
 
-    TF.scores = sapply(1:ncol(Enrichments[[1]]), function(j) {
-        X = t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[, j])))
-        meta.logPval = combine.logPvals(X)
-        return(meta.logPval)
+  TF.scores = Matrix::t(sapply(1:ncol(Enrichments[[1]]), function(j) {
+    X = t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[, 
+      j])))
+    meta.logPval = combine.logPvals(X)
+    return(meta.logPval)
+  }))
+  rownames(TF.scores) = names(ChEA3plusDB$Enrichr)
 
-    })
-    rownames(TF.scores) = names(ChEA3plusDB$Enrichr)
-
-    return(TF.scores)
+  return(TF.scores)
 }
 
 #' Compute the activity score of each TF based on the observed activity of its targets.
