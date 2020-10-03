@@ -18,19 +18,20 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
       
     ace <- as(ace, "ACTIONetExperiment")
     if (!(data_slot %in% names(assays(ace)))) {
-      err = sprintf("Slot %s not found.\n", data_slot)
-      stop(err)
+		if (norm_method != "none") {
+			msg = sprintf("Normalizing ace object ...\n")
+			message(msg)
+			ace = normalize.ace(ace, norm_method)
+		} else {		
+			err = sprintf("Slot %s not found.\n", data_slot)
+			stop(err)
+		}
     }
 
-    if (norm_method != "none") {
-        msg = sprintf("Normalizing ace object ...\n")
-        message(msg)
-        ace = normalize.ace(ace, norm_method)
-    }
 
     ace.norm = ace
     if (is.null(rownames(ace.norm))) {
-        rownames(ace.norm) = sapply(1:nrow(ace.norm), function(i) sprintf("Gene%d",
+        rownames(ace.norm) = sapply(1:nrow(ace.norm), function(i) sprintf("Feature%d",
             i))
     } else {
         rn = rownames(ace.norm)
@@ -40,7 +41,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcoun
     }
 
     if (is.null(colnames(ace.norm))) {
-        colnames(ace.norm) = sapply(1:ncol(ace.norm), function(i) sprintf("Cell%d",
+        colnames(ace.norm) = sapply(1:ncol(ace.norm), function(i) sprintf("Sample%d",
             i))
     } else {
         cn = colnames(ace.norm)
