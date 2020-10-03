@@ -756,7 +756,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             network <- plot_ly(node.data, x = ~x, y = ~y, color = ~type, colors = Pal,
                 marker = list(size = ~size, line = list(width = 0.1 * node.size,
                   color = ~vCol.border)), text = node.annotations, mode = "markers",
-                type = "scatter", hoverinfo = "text")
+                type = "scattergl", hoverinfo = "text")
             p <- plotly::layout(network, title = title, shapes = edge_shapes, xaxis = axis,
                 yaxis = axis, showlegend = TRUE, legend = list(marker = list(marker.size = 10)))
         }
