@@ -257,30 +257,32 @@ read.HD5List <- function(h5file, gname, depth = 1, max.depth = 5, compression.le
     L.out = vector("list", length(obj_names))
     names(L.out) = obj_names
 
-    for(nn in obj_names) {
-	    attr = h5attributes(h5group[[nn]])
-    	if(length(attr) > 0 & ("encoding-type" %in% names(attr))) {
-    		if ( (attr[["encoding-type"]] == "csc_matrix") | (attr[["encoding-type"]] == "csr_matrix") ) {
-    			obj = read.HD5SpMat(h5group, nn, compression.level = compression.level)
-    		} else if ((attr[["encoding-type"]] == "dataframe")) {
-    			obj = read.HD5DF(h5group, nn, compression.level = compression.level)
-    		} else {
-    			warning(sprintf("Unknown encoding %s", attr[["encoding-type"]]))
-    			next
-    		}
-    	} else if(h5group[[nn]]$get_obj_type() == 2 & (depth < max.depth)) {
-			obj = read.HD5List(h5group, nn, compression.level = compression.level, depth = depth + 1)
+	if(length(obj_names) > 0) {
+		for(nn in obj_names) {
+			attr = h5attributes(h5group[[nn]])
+			if(length(attr) > 0 & ("encoding-type" %in% names(attr))) {
+				if ( (attr[["encoding-type"]] == "csc_matrix") | (attr[["encoding-type"]] == "csr_matrix") ) {
+					obj = read.HD5SpMat(h5group, nn, compression.level = compression.level)
+				} else if ((attr[["encoding-type"]] == "dataframe")) {
+					obj = read.HD5DF(h5group, nn, compression.level = compression.level)
+				} else {
+					warning(sprintf("Unknown encoding %s", attr[["encoding-type"]]))
+					next
+				}
+			} else if(h5group[[nn]]$get_obj_type() == 2 & (depth < max.depth)) {
+				obj = read.HD5List(h5group, nn, compression.level = compression.level, depth = depth + 1)
+			}
+			else {
+				obj = h5group[[nn]]$read()
+			}
+			L.out[[nn]] = obj
 		}
-    	else {
-		    obj = h5group[[nn]]$read()
-    	}
-	    L.out[[nn]] = obj
-    }
-    filter.mask = sapply(L.out, function(x) is.null(x))
-    if(sum(filter.mask) > 0) {
-    	L.out = L.out[!filter.mask]
-    }
-
+		filter.mask = sapply(L.out, function(x) is.null(x))
+		if(sum(filter.mask) > 0) {
+			L.out = L.out[!filter.mask]
+		}
+	}
+	
     return(L.out)
 }
 
@@ -535,16 +537,6 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
 
     ace = ACTIONetExperiment(assays = input_assays, rowData = var.DF, colData = obs.DF)
 
-    idx = match(c("chr", "start", "end"), colnames(obs.DF))
-    if(sum(is.na(idx)) == 0) {
-		colData(ace) = colData(ace)[, idx]
-
-		BED = obs.DF[, idx]
-		GR = makeGRangesFromDataFrame(BED)
-		rowRanges(ace) = GR
-	}
-
-
     var.DF = rowData(ace)
     if(sum(colnames(var.DF) %in% c("chr", "start", "end")) == 3) {
 		cols = match(c("chr", "start", "end"), colnames(obs.DF))
@@ -648,8 +640,8 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
                 }
             }
         }
-
-		meta = read.HD5List(h5file, "uns")
+    
+		meta = read.HD5List(h5file = h5file, gname = "uns")
 		meta = meta[setdiff(names(meta), c("obsm_annot", "varm_annot"))]
 		metadata(ace) = meta
 
