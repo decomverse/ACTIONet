@@ -15,17 +15,17 @@
 #' @export
 reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+      
     ace <- as(ace, "ACTIONetExperiment")
     if (!(data_slot %in% names(assays(ace)))) {
-        if (norm_method != "none") {
-            msg = sprintf("Normalizing ace object ...\n")
-            message(msg)
-            ace = normalize.ace(ace, norm_method)
-        } else {
-            err = sprintf("Slot %s not found. This can be potentially due to missing normalization step.\n",
-                data_slot)
-            stop(err)
-        }
+      err = sprintf("Slot %s not found.\n", data_slot)
+      stop(err)
+    }
+
+    if (norm_method != "none") {
+        msg = sprintf("Normalizing ace object ...\n")
+        message(msg)
+        ace = normalize.ace(ace, norm_method)
     }
 
     ace.norm = ace

@@ -48,7 +48,7 @@ vec fast_row_sums(sp_mat &X) {
 	for(; it != it_end; ++it) {
 		sum_vec[it.row()] += (*it);
 	}
-	
+
 	return(sum_vec);
 }
 
@@ -60,6 +60,6 @@ vec fast_column_sums(sp_mat &X) {
 	for(; it != it_end; ++it) {
 		sum_vec[it.col()] += (*it);
 	}
-	
+
 	return(sum_vec);
 }
