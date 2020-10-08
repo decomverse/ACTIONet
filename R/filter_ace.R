@@ -17,7 +17,6 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
         }
 
         if (!is.null(max_umis_per_cell)) {
-            # umi_mask = sparseMatrixStats::colSums2(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
             umi_mask = ACTIONet::fast_column_sums(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
