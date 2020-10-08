@@ -954,3 +954,7 @@ fast_column_sums <- function(A) {
     .Call(`_ACTIONet_fast_column_sums`, A)
 }
 
+computeSparseRowVariances <- function(j, val, rm, n) {
+    .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
+}
+

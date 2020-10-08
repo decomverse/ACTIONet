@@ -984,7 +984,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // fast_row_sums
-NumericVector fast_row_sums(SEXP& A);
+Rcpp::NumericVector fast_row_sums(SEXP& A);
 RcppExport SEXP _ACTIONet_fast_row_sums(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -995,13 +995,27 @@ BEGIN_RCPP
 END_RCPP
 }
 // fast_column_sums
-NumericVector fast_column_sums(SEXP& A);
+Rcpp::NumericVector fast_column_sums(SEXP& A);
 RcppExport SEXP _ACTIONet_fast_column_sums(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
     rcpp_result_gen = Rcpp::wrap(fast_column_sums(A));
+    return rcpp_result_gen;
+END_RCPP
+}
+// computeSparseRowVariances
+Rcpp::NumericVector computeSparseRowVariances(IntegerVector j, NumericVector val, NumericVector rm, int n);
+RcppExport SEXP _ACTIONet_computeSparseRowVariances(SEXP jSEXP, SEXP valSEXP, SEXP rmSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type j(jSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type val(valSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rm(rmSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeSparseRowVariances(j, val, rm, n));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1079,6 +1093,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
+    {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {NULL, NULL, 0}
 };
 
