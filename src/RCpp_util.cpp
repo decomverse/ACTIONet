@@ -69,7 +69,7 @@ Rcpp::NumericVector fast_column_sums(SEXP &A) {
 	vec sum_vec;
     if (Rf_isS4(A)) {
 		sp_mat X = as<arma::sp_mat>(A);
-		sum_vec = zeros(X.n_rows);
+		sum_vec = zeros(X.n_cols);
 
 		sp_mat::const_iterator it     = X.begin();
 		sp_mat::const_iterator it_end = X.end();
