@@ -69,7 +69,7 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
 #'
 #' @param object SummarizedExperiment, RangedSummarizedExperiment, or SingleCellExperiment object
 #'
-#' @export'
+#' @export
 as.ACTIONetExperiment <- function(object){
 
   if(class(object) %in% c("SummarizedExperiment", "RangedSummarizedExperiment", "SingleCellExperiment")){
@@ -86,7 +86,7 @@ as.ACTIONetExperiment <- function(object){
 #'
 #' @param ace ACTIONetExperiment object
 #'
-#' @export'
+#' @export
 as.SummarizedExperiment <- function(ace) {
 
     SE = SummarizedExperiment::SummarizedExperiment(

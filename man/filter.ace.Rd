@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_ace.R
 \name{filter.ace}
 \alias{filter.ace}
-\title{Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.}
+\title{Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment`-like object.}
 \usage{
 \method{filter}{ace}(
   ace,
@@ -15,5 +15,5 @@
 )
 }
 \description{
-Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object.
+Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment`-like object.
 }
