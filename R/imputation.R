@@ -84,7 +84,7 @@ impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no 
             ], "dgTMatrix"))
         U = raw.gene.expression
         U[U < 0] = 0
-        cs = Matrix::colSums(U)
+        cs = fast_column_sums(U)
         U = Matrix::sparseMatrix(i = U@i + 1, j = U@j + 1, x = U@x/cs[U@j + 1], dims = dim(U))
         U = U[, cs > 0]
         gg = matched.genes[cs > 0]

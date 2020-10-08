@@ -51,7 +51,7 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = Matrix::colSums(G.Adj) == 0
+        filter.mask = fast_column_sums(G.Adj) == 0
         G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask],
             mode = "undirected", weighted = T)
         V(G)$name = common.genes[!filter.mask]
@@ -135,7 +135,7 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.w
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = Matrix::colSums(G.Adj) == 0
+        filter.mask = fast_column_sums(G.Adj) == 0
         G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask],
             mode = "undirected", weighted = T)
         V(G)$name = common.genes[!filter.mask]
@@ -210,7 +210,7 @@ run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, s
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = Matrix::colSums(G.Adj) == 0
+        filter.mask = fast_column_sums(G.Adj) == 0
         G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask],
             mode = "undirected", weighted = T)
         V(G)$name = common.genes[!filter.mask]
