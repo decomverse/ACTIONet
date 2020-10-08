@@ -984,24 +984,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // fast_row_sums
-vec fast_row_sums(sp_mat& X);
-RcppExport SEXP _ACTIONet_fast_row_sums(SEXP XSEXP) {
+NumericVector fast_row_sums(SEXP& A);
+RcppExport SEXP _ACTIONet_fast_row_sums(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_row_sums(X));
+    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_row_sums(A));
     return rcpp_result_gen;
 END_RCPP
 }
 // fast_column_sums
-vec fast_column_sums(sp_mat& X);
-RcppExport SEXP _ACTIONet_fast_column_sums(SEXP XSEXP) {
+NumericVector fast_column_sums(SEXP& A);
+RcppExport SEXP _ACTIONet_fast_column_sums(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_column_sums(X));
+    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_column_sums(A));
     return rcpp_result_gen;
 END_RCPP
 }
