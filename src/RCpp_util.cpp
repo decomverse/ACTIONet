@@ -45,7 +45,7 @@ vec roll_var(vec &X){
 
 
 // [[Rcpp::export]]
-NumericVector fast_row_sums(SEXP &A) {
+Rcpp::NumericVector fast_row_sums(SEXP &A) {
 	vec sum_vec;
     if (Rf_isS4(A)) {
 		sp_mat X = as<arma::sp_mat>(A);
@@ -65,7 +65,7 @@ NumericVector fast_row_sums(SEXP &A) {
 }
 
 // [[Rcpp::export]]
-NumericVector fast_column_sums(SEXP &A) {
+Rcpp::NumericVector fast_column_sums(SEXP &A) {
 	vec sum_vec;
     if (Rf_isS4(A)) {
 		sp_mat X = as<arma::sp_mat>(A);
