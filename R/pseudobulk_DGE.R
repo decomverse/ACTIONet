@@ -34,7 +34,7 @@ get.pseudobulk.SE <- function(sce, batch_attr, ensemble = FALSE, bins = 20, assa
   }
 
   n_cells = sapply(counts.list, NCOL)
-  nnz_feat_mean = sapply(counts.list, function(X) mean(fast_column_sums(X > 0)))
+  nnz_feat_mean = sapply(counts.list, function(X) mean(ACTIONet::fast_column_sums(X > 0)))
   sample = factor(names(IDX))
   cd = data.frame(n_cells = n_cells, nnz_feat_mean = nnz_feat_mean, sample = sample)
 
@@ -148,7 +148,7 @@ run.ensemble.pseudobulk.DESeq <- function(se, design, bins = NULL, bins_use = NU
     return(out)
   })
 
-  outlier_count = fast_row_sums(sapply(dds_res, function(dds) dds$dispOutlier))
+  outlier_count = ACTIONet::fast_row_sums(sapply(dds_res, function(dds) dds$dispOutlier))
 
   mat.bm = sapply(dds_res, function(dds) dds$baseMean)
   bm_mean = rowMeans(mat.bm, na.rm = T)
@@ -278,11 +278,11 @@ variance.adjusted.DE.Limma <- function(se, design, slot_E = "counts", slot_V = N
   }))
   W.masked[W.masked == 0] = 1e-16
 
-  selected.vars = fast_column_sums(d > 0) >= min.covered.samples
+  selected.vars = ACTIONet::fast_column_sums(d > 0) >= min.covered.samples
 
-  selected.genes = setdiff(1:nrow(W.masked), which(fast_row_sums(apply(design.mat[, selected.vars], 2, function(x) {
+  selected.genes = setdiff(1:nrow(W.masked), which(ACTIONet::fast_row_sums(apply(design.mat[, selected.vars], 2, function(x) {
     mm =  (x > 0)
-    v = as.numeric( (fast_row_sums(W.masked[, mm]) == 0) > 0 )
+    v = as.numeric( (ACTIONet::fast_row_sums(W.masked[, mm]) == 0) > 0 )
     return(v)
   })) > 0 ))
 
