@@ -16,7 +16,7 @@ assess.TF.activities.from.scores <- function(scores) {
 
   Enrichments = lapply(1:length(ChEA3plusDB), function(i) {
     associations = ChEA3plusDB[[i]]
-    associations.mat = as(sapply(associations, function(gs) as.numeric(rownames(ace) %in% 
+    associations.mat = as(sapply(associations, function(gs) as.numeric(rownames(ace) %in%
       gs)), "dgCMatrix")
     Enrichment = assess_enrichment(scores, associations.mat)
     Enrichment.mat = t(Enrichment[[1]])
@@ -24,7 +24,7 @@ assess.TF.activities.from.scores <- function(scores) {
 
 
   TF.scores = Matrix::t(sapply(1:ncol(Enrichments[[1]]), function(j) {
-    X = t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[, 
+    X = t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[,
       j])))
     meta.logPval = combine.logPvals(X)
     return(meta.logPval)
@@ -110,7 +110,7 @@ assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.cou
 		scores = log1p(scores)
 	}
 	associations = as(associations[common.genes, ], 'dgCMatrix')
-	col.mask = (fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+	col.mask = (ACTIONet::fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
 	associations = associations[, col.mask]
 	associations = associations[, -1]
 	enrichment.out = assess_enrichment(scores, associations)
@@ -146,7 +146,7 @@ assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.cou
 		scores = log1p(scores)
 	}
 	associations = as(associations[common.genes, ], 'sparseMatrix')
-	col.mask = (fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+	col.mask = (ACTIONet::fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
 	associations = associations[, col.mask]
 	associations = associations[, -1]
 	enrichment.out = assess_enrichment(scores, associations)
@@ -279,31 +279,31 @@ compute.Geary.C <- function(L, W, x) {
 	denom = as.numeric(2*W*(t(delta) %*% delta))
 
 	C = as.numeric((N-1) * t(x) %*% L %*% x / denom)
-	
+
 	return(1 - C/2)
 }
 
 assess.continuous.autocorrelation <- function(ace, variables, perm.no = 100) {
   set.seed(0)
-  
+
 	A = ace$ACTIONet
-	degs = fast_column_sums(A)
+	degs = ACTIONet::fast_column_sums(A)
 	L = -A
 	diag(L) = degs
 	W = sum(A@x)
 
 	Z = apply(variables, 2, function(x) {
 		C = compute.Geary.C(L, W, x)
-		
+
 		rand.Cs = sapply(1:perm.no, function(j) {
 		  rand.x = sample(x)
   		rand.C = compute.Geary.C(L, W, rand.x)
-		  
+
 		})
-		
+
 		z = (C - mean(rand.Cs)) / sd(rand.Cs)
 	})
-	
+
 	return(Z)
 }
 
@@ -312,15 +312,15 @@ compute.phi <- function(A, labels, s0, s1, s2) {
     n = length(labels)
     counts = table(labels)
     categoties = as.numeric(names(counts))
-    
+
     w = A@x
-    
+
     pvec = as.vector(counts)/n
-    
+
     k = length(pvec)
-   
+
     m1.rawphi = (s0/(n * (n - 1))) * (n^2 * k * (2 - k) - n * sum(1/pvec))
-    
+
     Q1 = sum(1/pvec)
     Q2 = sum(1/pvec^2)
     Q3 = sum(1/pvec^3)
@@ -328,51 +328,51 @@ compute.phi <- function(A, labels, s0, s1, s2) {
     E1 = (n^2 * Q22 - n * Q3)/(n * (n - 1))
     E2 = 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - 2 * (2 * n^2 * Q2 - n^2 * k * Q2) + 2 * n * Q3 - n^2 * Q22
     E2 = E2/(n * (n - 1) * (n - 2))
-    
+
     A1 = 4 * n^4 * k^2 - 4 * n^4 * k^3 + n^4 * k^4 - (2 * n^3 * k * Q1 - n^3 * k^2 * Q1)
     A2 = 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - (2 * n^2 * Q2 - n^2 * k * Q2)
     Apart = A1 - 2 * A2
-    
+
     B1 = 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - (2 * n^2 * Q2 - n^2 * k * Q2)
     B2 = 2 * n^2 * Q2 - n^2 * k * Q2 - n * Q3
     B3 = n^2 * Q22 - n * Q3
     Bpart = B1 - B2 - B3
-    
+
     C1 = 2 * n^3 * k * Q1 - n^3 * k^2 * Q1 - n^2 * Q22
     C2 = 2 * n^2 * Q2 - n^2 * k * Q2 - n * Q3
     Cpart = C1 - 2 * C2
-    
+
     E3 = (Apart - 2 * Bpart - Cpart)/(n * (n - 1) * (n - 2) * (n - 3))
-    
+
     m2.rawphi = s1 * E1 + (s2 - 2 * s1) * E2 + (s0^2 - s2 + s1) * E3
-    
+
     v_i = labels[A@i + 1]
     v_j = labels[A@j + 1]
-    
+
     p_i = pvec[match(v_i, categoties)]
     p_j = pvec[match(v_j, categoties)]
-    
+
     rawphi = sum(w * (2 * (v_i == v_j) - 1)/(p_i * p_j))
-    
+
     mean.rawphi = m1.rawphi
     var.rawphi = m2.rawphi - mean.rawphi^2
     phi.z = (rawphi - mean.rawphi)/sqrt(var.rawphi)
     phi.logPval = -log10(pnorm(phi.z, lower.tail = FALSE))
-    
+
     return(list(z = phi.z, logPval = phi.logPval, phi = rawphi))
 }
 
 assess.categorical.autocorrelation <- function(ace, labels, perm.no = 100) {
    set.seed(0)
-  
+
     A = ace$ACTIONet
     labels = as.numeric(as.factor(labels))
-    
+
     w = A@x
     s0 = sum(w)
     s1 = sum(4 * w^2)/2
-    s2 = sum((fast_column_sums(A) + fast_row_sums(A))^2)
-    
+    s2 = sum((ACTIONet::fast_column_sums(A) + ACTIONet::fast_row_sums(A))^2)
+
     A = as(A, "dgTMatrix")
 
     phi = compute.phi(A, labels, s0, s1, s2)$phi
@@ -383,6 +383,6 @@ assess.categorical.autocorrelation <- function(ace, labels, perm.no = 100) {
 		})
 
 		z = (phi - mean(rand.phis)) / sd(rand.phis)
-		
+
 		return(z)
 }
