@@ -217,16 +217,6 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 
             sub.coors = coors[idx, ]
             anchor.coor = as.numeric(apply(sub.coors, 2, function(x) mean(x, trim = 0.8)))
-            # sub.coors.sq = sub.coors^2 norm.sq = Matrix::rowSums(sub.coors.sq) anchor.idx =
-            # which.min(sapply(1:nrow(sub.coors.sq), function(i) { dd = norm.sq[i] + norm.sq
-            # - 2* sub.coors %*% sub.coors[i, ] mean.dist.sq = median(dd)
-            # return(mean.dist.sq) }))
-
-
-            # D = as.matrix(dist(sub.coors)) stats = Matrix::rowMeans(D) anchor.idx =
-            # which.min(stats)
-
-            # anchor.coor = as.numeric(sub.coors[anchor.idx, ])
 
             return(anchor.coor)
         }))
@@ -428,7 +418,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 	X = exp(scale(X))
 
     core.coors = Matrix::t(metadata(ace)$backbone$coordinates) #Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M
-    cs = colSums(X)
+    cs = fast_column_sums(X)
     cs[cs == 0] = 1
     X = scale(X, center = F, scale = cs)
 
@@ -660,7 +650,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             selected.features = sort(unique(as.character(GT)))
 
 			W = exp(scale(Matrix::t(colMaps(ace)[["H_unified"]])))
-			cs = Matrix::colSums(W)
+			cs = fast_column_sums(W)
 			W = t(scale(W, center = F, scale = cs))
 
             cell.scores = W %*% Matrix::t(enrichment.table[selected.features, ])
@@ -1049,7 +1039,7 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
 plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.1, CPal = "magma",
     title = "", arch.labels = NULL, coordinate_slot = "ACTIONet2D", alpha_val = 0.9) {
     Ht = colMaps(ace)[["H_unified"]]
-    cs = Matrix::colSums(Ht)
+    cs = fast_column_sums(Ht)
     cs[cs == 0] = 1
     U = as(scale(Ht, center = F, scale = cs), "dgTMatrix")
     U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
@@ -1271,7 +1261,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 	aCol = rgb(arch.RGB)
 
-	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = fast_column_sums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
 
@@ -1425,7 +1415,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 	aCol = rgb(arch.RGB)
 
-	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = fast_column_sums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
 
@@ -1475,7 +1465,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
 		arch.colors = rgb(backbone$colors)
 	}
 
-	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = fast_column_sums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + w) * node.size
 

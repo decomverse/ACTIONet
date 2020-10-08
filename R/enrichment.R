@@ -109,8 +109,8 @@ assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.cou
 	if(max(scores) > 100) {
 		scores = log1p(scores)
 	}
-	associations = as(associations[common.genes, ], 'sparseMatrix')
-	col.mask = (Matrix::colSums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+	associations = as(associations[common.genes, ], 'dgCMatrix')
+	col.mask = (fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
 	associations = associations[, col.mask]
 	associations = associations[, -1]
 	enrichment.out = assess_enrichment(scores, associations)
@@ -146,7 +146,7 @@ assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.cou
 		scores = log1p(scores)
 	}
 	associations = as(associations[common.genes, ], 'sparseMatrix')
-	col.mask = (Matrix::colSums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+	col.mask = (fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
 	associations = associations[, col.mask]
 	associations = associations[, -1]
 	enrichment.out = assess_enrichment(scores, associations)
@@ -287,7 +287,7 @@ assess.continuous.autocorrelation <- function(ace, variables, perm.no = 100) {
   set.seed(0)
   
 	A = ace$ACTIONet
-	degs = Matrix::colSums(A)
+	degs = fast_column_sums(A)
 	L = -A
 	diag(L) = degs
 	W = sum(A@x)
@@ -371,7 +371,6 @@ assess.categorical.autocorrelation <- function(ace, labels, perm.no = 100) {
     w = A@x
     s0 = sum(w)
     s1 = sum(4 * w^2)/2
-    # s2 = sum((colSums(A) + rowSums(A))^2)
     s2 = sum((fast_column_sums(A) + fast_row_sums(A))^2)
     
     A = as(A, "dgTMatrix")
