@@ -70,7 +70,7 @@
 }
 
 fastRowMeans <- function(mat){
-  E = ACTIONet::fast_row_sums(mat)/ncol(mat))
+  E = ACTIONet::fast_row_sums(mat)/ncol(mat)
   return(E)
 }
 
