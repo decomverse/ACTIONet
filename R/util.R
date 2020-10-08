@@ -68,3 +68,15 @@
         }
     }
 }
+
+fastRowMeans <- function(mat){
+  E = ACTIONet::fast_row_sums(mat)/ncol(mat))
+  return(E)
+}
+
+fastRowVars <- function (mat){
+    mat <- as(mat, "dgTMatrix")
+    E = fastRowMeans(mat)
+    V <- computeSparseRowVariances(mat@i + 1, mat@x, E, ncol(mat))
+    return(V)
+}
