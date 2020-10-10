@@ -7,7 +7,6 @@ create_formula <- function(vars){
 
 get.pseudobulk.SE <- function(sce, batch_attr, ensemble = FALSE, bins = 20, assay = "counts", colData = NULL, pseudocount = 0, with_S = FALSE, with_E = FALSE, with_V = FALSE, BPPARAM = SerialParam()){
 
-  ACTIONet:::.check_and_load_package("sparseMatrixStats")
   counts.mat = SummarizedExperiment::assays(sce)[[assay]]
   IDX = ACTIONet:::.get_ace_split_IDX(sce, batch_attr)
   counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = F])
