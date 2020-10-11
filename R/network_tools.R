@@ -19,10 +19,10 @@ infer.missing.cell.annotations <- function(ace, initial_labels, double.stochasti
     A = as(Adj, "dgTMatrix")
 
     eps = 1e-16
-    rs = fast_row_sums(A)
+    rs = ACTIONet::fast_row_sums(A)
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
     if (double.stochastic == TRUE) {
-        w = sqrt(fast_column_sums(P) + eps)
+        w = sqrt(ACTIONet::fast_column_sums(P) + eps)
         W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
         P = W %*% Matrix::t(W)
     }
@@ -92,10 +92,10 @@ correct.cell.annotations <- function(ace, initial_labels, LFR.threshold = 2,
     A = as(Adj, "dgTMatrix")
 
     eps = 1e-16
-    rs = fast_row_sums(A)
+    rs = ACTIONet::fast_row_sums(A)
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
     if (double.stochastic == TRUE) {
-        w = sqrt(fast_column_sums(P) + eps)
+        w = sqrt(ACTIONet::fast_column_sums(P) + eps)
         W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
         P = W %*% Matrix::t(W)
     }
@@ -155,10 +155,10 @@ EnhAdj <- function(Adj) {
     A = as(Adj, "dgTMatrix")
     diag(A) = 0
     eps = 1e-16
-    rs = fast_row_sums(A)
+    rs = ACTIONet::fast_row_sums(A)
     rs[rs == 0] = 1
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
-    w = sqrt(fast_column_sums(P) + eps)
+    w = sqrt(ACTIONet::fast_column_sums(P) + eps)
     W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
     P = W %*% Matrix::t(W)
     P = as.matrix(P)
