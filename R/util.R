@@ -69,6 +69,27 @@
     }
 }
 
+fastColSums <- function(mat){
+  if(ACTIONet::is.sparseMatrix(mat) && class(mat) != "dgCMatrix"){
+    mat = as(mat, "dgCMatrix")
+  }
+  out = ACTIONet::fast_column_sums(mat)
+  return(out)
+}
+
+fastRowSums <- function(mat){
+  if(ACTIONet::is.sparseMatrix(mat) && class(mat) != "dgCMatrix"){
+    mat = as(mat, "dgCMatrix")
+  }
+  out = ACTIONet::fast_row_sums(mat)
+  return(out)
+}
+
+fastColMeans <- function(mat){
+  E = ACTIONet::fast_column_sums(mat)/nrow(mat)
+  return(E)
+}
+
 fastRowMeans <- function(mat){
   E = ACTIONet::fast_row_sums(mat)/ncol(mat)
   return(E)
