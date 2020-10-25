@@ -21,11 +21,13 @@ compute.ACTIONet.doublet.score <- function(ace, z.threshold = 1, combination_met
 		x / sum(x)
 	})
 	h = apply(X, 1, ineq::entropy)
+	h[is.na(h)] = 0
 	
-	arch.doublet_score = scale(-h)
+	arch.doublet_score = -(h - median(h)) / mad(h)
 	
 	
-	ACTIONet.dbl.score = -scale(ace$node_centrality)
+	x = ace$node_centrality
+	ACTIONet.dbl.score = -(x - median(x)) / mad(x)
 
 	if(combination_method == "min") {
 		combined = pmin(arch.doublet_score, ACTIONet.dbl.score)
@@ -45,4 +47,4 @@ compute.ACTIONet.doublet.score <- function(ace, z.threshold = 1, combination_met
 
 	
 	return(ace)
-}	
+}

@@ -47,7 +47,7 @@ annotate.archetypes.using.labels <- function(ace, labels, archetype.slot = "H_un
         t.stat = delta.mean/sqrt((sigma_sq.class/N.class) + (sigma_sq.null/N.null))
         return(t.stat)
     })
-
+	Enrichment.Z[is.na(Enrichment.Z)] = 0
 
     archetypeLabels = Annot[apply(Enrichment.Z, 1, which.max)]
     Labels.confidence = apply(Enrichment.Z, 1, max)
