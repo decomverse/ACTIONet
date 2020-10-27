@@ -24,7 +24,6 @@ ACTIONetExperiment(
 }
 \value{
 an ACTIONetExperiment (ACE) object
-slot.
 
 An ACTIONetExperiment (ACE) object, derived from SummarizedExperiment, with additional slots to store ACTIONet results
 }

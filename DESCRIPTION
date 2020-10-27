@@ -15,10 +15,13 @@ Maintainer: Shahin Mohammadi <shahin.mohammadi@gmail.com>
 Description: 
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer
-Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer
+Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ineq, rmdformats
+Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ComplexHeatmap, metap, rmdformats
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
+Remotes: immunogenomics/harmony,shmohammadi86/SCINET
 Encoding: UTF-8
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
+
+

@@ -34,7 +34,7 @@ normalize.default <- function(ace, log_scale = TRUE){
 
 rescale.matrix <- function(S, log_scale = FALSE){
   if(is.matrix(S)) {
-    cs = Matrix::colSums(S)
+    cs = ACTIONet::fast_column_sums(S)
     cs[cs == 0] = 1
     B = median(cs)*scale(S, center = F, scale = cs)
     if(log_scale == TRUE){
@@ -42,7 +42,7 @@ rescale.matrix <- function(S, log_scale = FALSE){
     }
   } else {
     A = as(S, "dgTMatrix")
-    cs = Matrix::colSums(A)
+    cs = ACTIONet::fast_column_sums(S)
     cs[cs == 0] = 1
     x = median(cs) * (A@x/cs[A@j + 1])
     if(log_scale == TRUE){

@@ -11,7 +11,7 @@ visualize.markers(
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
   trans.fact = 3,
-  node.size = 1,
+  node.size = 0.1,
   CPal = "magma",
   alpha_val = 0.85,
   export_path = NA
