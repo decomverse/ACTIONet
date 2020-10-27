@@ -13,3 +13,4 @@ build
 dist
 lib
 *.back
+.DS_store

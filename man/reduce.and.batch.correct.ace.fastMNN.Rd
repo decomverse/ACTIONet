@@ -6,7 +6,7 @@
 \usage{
 reduce.and.batch.correct.ace.fastMNN(
   ace,
-  batch_attr,
+  batch_attr = NULL,
   reduced_dim = 50,
   MNN_k = 20,
   return_V = FALSE,

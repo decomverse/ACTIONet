@@ -139,7 +139,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
         }
     }
 
-    if (is.null(labels)) {
+    if (is.null(labels) || length(unique(labels)) == 1) {
         if (class(ace) == "ACTIONetExperiment") {
             vCol = rgb(colMaps(ace)$denovo_color)
         } else {
@@ -217,16 +217,6 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 
             sub.coors = coors[idx, ]
             anchor.coor = as.numeric(apply(sub.coors, 2, function(x) mean(x, trim = 0.8)))
-            # sub.coors.sq = sub.coors^2 norm.sq = Matrix::rowSums(sub.coors.sq) anchor.idx =
-            # which.min(sapply(1:nrow(sub.coors.sq), function(i) { dd = norm.sq[i] + norm.sq
-            # - 2* sub.coors %*% sub.coors[i, ] mean.dist.sq = median(dd)
-            # return(mean.dist.sq) }))
-
-
-            # D = as.matrix(dist(sub.coors)) stats = Matrix::rowMeans(D) anchor.idx =
-            # which.min(stats)
-
-            # anchor.coor = as.numeric(sub.coors[anchor.idx, ])
 
             return(anchor.coor)
         }))
@@ -428,7 +418,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 	X = exp(scale(X))
 
     core.coors = Matrix::t(metadata(ace)$backbone$coordinates) #Matrix::t(scale(colMaps(ace)[[coordinate_slot]])) %*% M
-    cs = colSums(X)
+    cs = ACTIONet::fast_column_sums(X)
     cs[cs == 0] = 1
     X = scale(X, center = F, scale = cs)
 
@@ -660,7 +650,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             selected.features = sort(unique(as.character(GT)))
 
 			W = exp(scale(Matrix::t(colMaps(ace)[["H_unified"]])))
-			cs = Matrix::colSums(W)
+			cs = ACTIONet::fast_column_sums(W)
 			W = t(scale(W, center = F, scale = cs))
 
             cell.scores = W %*% Matrix::t(enrichment.table[selected.features, ])
@@ -744,7 +734,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             network <- plot_ly(node.data, x = ~x, y = ~y, marker = list(color = ~vCol,
                 size = ~size, opacity = 1, alpha = 1, line = list(width = 0.1 * node.size,
                   alpha = 0.5, color = ~vCol.border)), text = node.annotations, mode = "markers",
-                type = "scatter", hoverinfo = "text", showlegend = FALSE)
+                type = "scattergl", hoverinfo = "text", showlegend = FALSE)
             p <- plotly::layout(network, title = title, shapes = edge_shapes, xaxis = axis,
                 yaxis = axis)
         } else {
@@ -756,7 +746,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             network <- plot_ly(node.data, x = ~x, y = ~y, color = ~type, colors = Pal,
                 marker = list(size = ~size, line = list(width = 0.1 * node.size,
                   color = ~vCol.border)), text = node.annotations, mode = "markers",
-                type = "scatter", hoverinfo = "text")
+                type = "scattergl", hoverinfo = "text")
             p <- plotly::layout(network, title = title, shapes = edge_shapes, xaxis = axis,
                 yaxis = axis, showlegend = TRUE, legend = list(marker = list(marker.size = 10)))
         }
@@ -853,7 +843,7 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
 #' plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
 #' @export
 plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 3, node.size = 1, CPal = "magma", title = "", alpha_val = 0.85,
+    trans.fact = 3, node.size = 0.1, CPal = "magma", title = "", alpha_val = 0.85,
     nonparameteric = FALSE, coordinate_slot = "ACTIONet2D") {
 
     node.size = node.size * 0.3
@@ -950,7 +940,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 0.01, CPal = "magma", alpha_val = 0.85, export_path = NA) {
+visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 0.1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
         names(marker.genes) = marker.genes
     }
@@ -1046,10 +1036,10 @@ plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pat
 
 }
 
-plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.01, CPal = "magma",
+plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.1, CPal = "magma",
     title = "", arch.labels = NULL, coordinate_slot = "ACTIONet2D", alpha_val = 0.9) {
     Ht = colMaps(ace)[["H_unified"]]
-    cs = Matrix::colSums(Ht)
+    cs = ACTIONet::fast_column_sums(Ht)
     cs[cs == 0] = 1
     U = as(scale(Ht, center = F, scale = cs), "dgTMatrix")
     U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
@@ -1160,7 +1150,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 	}
 	backbone = metadata(ace)$backbone
 
-    node.size = node.size * 0.25
+    node.size = node.size * 0.3
 
 	if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
@@ -1271,7 +1261,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 	aCol = rgb(arch.RGB)
 
-	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = ACTIONet::fast_column_sums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
 
@@ -1312,7 +1302,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 	}
 	backbone = metadata(ace)$backbone
 
-    node.size = node.size * 0.25
+    node.size = node.size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = preprocess.labels(labels, ace)
@@ -1425,7 +1415,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
 	aCol = rgb(arch.RGB)
 
-	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = ACTIONet::fast_column_sums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + arch.size.factor*w)
 
@@ -1475,7 +1465,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
 		arch.colors = rgb(backbone$colors)
 	}
 
-	w = Matrix::colSums(colMaps(ace)$H_unified)
+	w = ACTIONet::fast_column_sums(colMaps(ace)$H_unified)
 	w = 0.3 + 0.7*(w - min(w)) / (max(w) - min(w))
 	arch.sizes = (0.25 + w) * node.size
 
