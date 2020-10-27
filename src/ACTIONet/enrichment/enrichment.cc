@@ -66,6 +66,7 @@ namespace ACTIONet {
 			fprintf(stderr, "Number of rows in scores and association matrices should both match the number of features\n");
 		}
 
+		associations = spones(associations);
 		
 		mat sorted_scores = sort(scores, "descend");
 		vec a_max = trans(sorted_scores.row(0));
