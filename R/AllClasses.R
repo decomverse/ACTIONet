@@ -6,9 +6,6 @@
 #'
 #'
 #' @return an ACTIONetExperiment (ACE) object
-#' slot.
-
-#' @export
 #' @rdname ACTIONetExperiment
 #' @import methods
 #' @importFrom stats setNames
@@ -30,10 +27,10 @@ setClass("ACTIONetExperiment",
 #' @param rowMaps,colMaps Factorization results (W and H matrices)
 #'
 #' @return An ACTIONetExperiment (ACE) object, derived from SummarizedExperiment, with additional slots to store ACTIONet results
-#' @export
 #' @importFrom methods new
 #' @importFrom S4Vectors SimpleList
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
+#' @export
 ACTIONetExperiment <- function(...,
   rowNets = .slot_type,
   colNets = .slot_type,
