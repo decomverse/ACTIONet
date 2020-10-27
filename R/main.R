@@ -97,7 +97,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 
     # Identiy equivalent classes of archetypes and group them together
-	unification.out = unify_archetypes(S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, sensitivity = unification_sensitivity, normalization_type = 0)    
+	unification.out = unify_archetypes(S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, sensitivity = unification_sensitivity, normalization_type = 1, edge_threshold = 0.5)    
 
 
 	Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
@@ -279,7 +279,7 @@ rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
     G = colNets(ace)[["ACTIONet"]]
 
-	unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, sensitivity = unification_sensitivity, normalization_type = 0)    
+	unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, sensitivity = unification_sensitivity, normalization_type = 1, edge_threshold = 0.5)    
 
 
     R.utils::printf("%d states\n", length(unique(unification.out$assigned_archetype)))
