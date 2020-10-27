@@ -105,7 +105,7 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0, int normalization_type = 0) {
+	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0, int normalization_type = 1, double edge_threshold = 0.5) {
 		printf("Unify archetypes: sensitivity = %.2f (%d archs)\n", sensitivity, H_stacked.n_rows);
 								
 
@@ -118,10 +118,13 @@ namespace ACTIONet {
 
 		mat G = computeFullSim(arch_H_stacked, 1);
 		G.diag().zeros();		
-		G.transform( [](double val) { return (val < 0.25? 0:val); } );
+		G.transform( [edge_threshold](double val) { return (val < edge_threshold? 0:val); } );
 
 		if(normalization_type == 1) {
-			G = normalise(G, 1, 0);
+			G = normalise(G, 1, 0)*G.n_rows;
+		}
+		else if(normalization_type == 3) {
+			G = NetEnh(G)*G.n_rows;						
 		}
 		
 		
@@ -144,7 +147,6 @@ namespace ACTIONet {
 		vec is_selected = zeros(selected_columns.n_elem);
 		for(int i = 0; i < selected_columns.n_elem; i++) {
 			vec N = subG.col(i);
-			
 			vec neighbors_contrib = vec( trans(N) * is_selected );
 			double w = neighbors_contrib(0);
 			if(w <= sensitivity) {
@@ -161,7 +163,7 @@ namespace ACTIONet {
 
 
 		mat G_ext = G(selected_columns, selected_columns);
-		G_ext.diag() = 5.0 * ones(G_ext.n_rows);
+		G_ext.diag() = 10.0 * ones(G_ext.n_rows);
 		G_ext = normalise(G_ext, 1, 0);
 		
 		mat C_avg = C_norm.cols(selected_columns) * G_ext;
