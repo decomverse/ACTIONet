@@ -9,13 +9,12 @@ import _ACTIONet as _an
 def reduce_kernel(
     data: Union[AnnData, np.ndarray, spmatrix],
     dim: Optional[int] = 50,
-    svd_solver: Literal['irlb', 'feng', 'halko'] = 'halko',
+    svd_solver: Literal[0, 1, 2] = 0,
     n_iters: Optional[int] = 5,
     seed: Optional[int] = 0,
     prenormalize: Optional[bool] = False,
     return_info: bool = False,
     use_highly_variable: Optional[bool] = None,
-    dtype: str = 'float32',
     copy: bool = False
 ) -> [AnnData, np.ndarray, spmatrix]:
     """\
@@ -33,12 +32,12 @@ def reduce_kernel(
         dimension size of selected representation.
     svd_solver
         SVD solver to use:
-        `'irlb'`
+        `0` (the default)
           randomized SVD used in IRLBA R package
-        `'feng'`
-          randomized SVD from Feng et al.
-        `'halko'` (the default)
+        `1`
           randomized SVD from Halko et al.
+        `2`
+          randomized SVD from Feng et al.
     n_iters
         Maximum number of iterations
     seed
@@ -51,9 +50,9 @@ def reduce_kernel(
     use_highly_variable
         Whether to use highly variable genes only, stored in
         `.var['highly_variable']`.
-        By default uses them if they have been determined beforehand.        
+        By default uses them if they have been determined beforehand.
     dtype
-        Numpy data type string to which to convert the result.        
+        Numpy data type string to which to convert the result.
     copy
         If an :class:`~anndata.AnnData` is passed, determines whether a copy
         is returned. Is ignored otherwise.
@@ -100,24 +99,18 @@ def reduce_kernel(
     # irlb  = 0
     # halko = 1
     # feng  = 2
-    solver = 2
-    if svd_solver == 'irlb':
-        solver = 0
-    elif svd_solver == 'halko':
-        solver = 1
-
+    if svd_solver == 0:
+        n_iters = 100 * n_iters
     reduced = _an.reduce_kernel(
-        X, dim, n_iters, seed, solver, prenormalize
+        X, dim, n_iters, seed, svd_solver, prenormalize
     ) if issparse(X) else _an.reduce_kernel_full(
-        X, dim, n_iters, seed, solver, prenormalize
+        X, dim, n_iters, seed, svd_solver, prenormalize
     )
 
     # Note S_r.T
     S_r, V, sigma, A, B = (
         reduced['S_r'].T, reduced['V'], reduced['sigma'], reduced['A'], reduced['B']
     )
-    if S_r.dtype.descr != np.dtype(dtype).descr:
-        S_r = S_r.astype(dtype)
 
     if data_is_AnnData:
         adata.obsm['ACTION_S_r'] = S_r

@@ -1,6 +1,7 @@
 from typing import Optional
 
 from anndata import AnnData
+from scipy import sparse
 
 import _ACTIONet as _an
 
@@ -9,16 +10,16 @@ def build_network(
     density: Optional[float] = 1.0,
     n_threads: Optional[int] = 0,
     mutual_edges_only: Optional[bool] = True,
-    copy: Optional[bool] = False        
+    copy: Optional[bool] = False
 ) -> AnnData:
     """\
-    Build ACTIIONet 
-    
+    Build ACTIIONet
+
     Computes and returns the ACTIONet graph
     Parameters
     ----------
     adata
-        Current AnnData object storing the ACTIONet results    
+        Current AnnData object storing the ACTIONet results
     density
         Controls the overall density of constructed network.
         Larger values results in more retained edges.
@@ -44,9 +45,11 @@ def build_network(
             'Please run pp.prune_archetypes() first.'
         )
     adata = adata.copy() if copy else adata
-    H_stacked = adata.obsm["ACTION_H_stacked"].T
+    H_stacked = adata.obsm['ACTION_H_stacked'].T
+    if sparse.issparse(H_stacked):
+        H_stacked = H_stacked.toarray()
     G = _an.build_ACTIONet(H_stacked, density, n_threads, mutual_edges_only)
-    
+
     adata.uns.setdefault('ACTIONet', {}).update({'params': {
         'density': density,
         'mutual_edges_only': mutual_edges_only,
@@ -54,4 +57,3 @@ def build_network(
     adata.obsp['ACTIONet'] = G
 
     return adata if copy else None
-

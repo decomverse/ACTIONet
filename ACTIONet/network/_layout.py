@@ -1,11 +1,14 @@
 from typing import Optional
 
+import numpy as np
 from anndata import AnnData
 
 import _ACTIONet as _an
+from ..tools import scale_matrix
 
 def layout_network(
     adata: AnnData,
+    scale: Optional[bool] = True,
     compactness_level: Optional[int] = 50,
     n_epochs: Optional[int] = 500,
     n_threads: Optional[int] = 8,
@@ -13,9 +16,9 @@ def layout_network(
 ) -> Optional[AnnData]:
     """\
     Network layout
-    
+
     Embedded the graph into 2D/3D space
-    
+
     Parameters
     ----------
     adata:
@@ -43,15 +46,18 @@ def layout_network(
             'Did not find adata.obsp[\'ACTIONet\']. '
             'Please run nt.build_network() first.'
         )
-    
+
     adata = adata.copy() if copy else adata
-    S_r = adata.obsm['ACTION_S_r'].T
     G = adata.obsp['ACTIONet']
-    
+    if scale:
+        S_r = scale_matrix(adata.obsm['ACTION_S_r']).T
+    else:
+        S_r = adata.obsm['ACTION_S_r'].T
+
     layout = _an.layout_ACTIONet(G, S_r, compactness_level, n_epochs, n_threads)
 
     adata.obsm['X_ACTIONet_2D'] = layout['coordinates']
     adata.obsm['X_ACTIONet_3D'] = layout['coordinates_3D']
     adata.uns['ACTIONet'].update({'colors': layout['colors']})
-    
+
     return ACE if copy else None

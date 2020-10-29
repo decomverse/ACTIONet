@@ -11,7 +11,7 @@ def impute_genes_using_archetypes(
     adata: AnnData,
     genes: list,
     archetypes_key: Optional[str] = 'ACTION_H_unified'
-) -> np.ndarray:
+) -> AnnData:
     """
     Impute expression of genes by interpolating over archetype profile
 
@@ -26,7 +26,7 @@ def impute_genes_using_archetypes(
 
     Returns
     -------
-        imputed : np.ndarray
+        AnnData
             cells x genes
     """
     if archetypes_key not in adata.obsm.keys():
@@ -49,7 +49,7 @@ def impute_specific_genes_using_archetypes(
     genes: list,
     archetypes_key: Optional[str] = 'ACTION_H_unified',
     significance: Optional[Literal['upper', 'lower']] = 'upper'
-) -> np.ndarray:
+) -> AnnData:
     """
     Impute expression of genes by interpolating over archetype profile
 
@@ -66,7 +66,7 @@ def impute_specific_genes_using_archetypes(
 
     Returns
     -------
-        imputed : np.ndarray
+        AnnData
             cells x genes
     """
     if archetypes_key not in adata.obsm.keys():
@@ -89,7 +89,7 @@ def impute_genes_using_network(
     alpha: Optional[float] = 0.85,
     n_threads: Optional[int] = 0,
     n_iters: Optional[int] = 5
-) -> np.ndarray:
+) -> AnnData:
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
             f'Did not find adata.obsp[\'ACTIONet\']. '

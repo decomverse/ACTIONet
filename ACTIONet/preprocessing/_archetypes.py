@@ -1,10 +1,10 @@
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
 from anndata import AnnData
 from natsort import natsorted
-from scipy.sparse import issparse, spmatrix
+from scipy import sparse
 
 import _ACTIONet as _an
 
@@ -13,7 +13,7 @@ def prune_archetypes(
     C_trace: list,
     H_trace: list,
     min_specificity_z_threshold: Optional[float] = -3,
-    min_cells_per_archetype: Optional[int] = 2,
+    min_cells: Optional[int] = 2,
     copy: Optional[bool] = False
 ) -> Optional[AnnData]:
     """\
@@ -50,11 +50,11 @@ def prune_archetypes(
             'Please run pp.ACTION() first.'
         )
 
-    pruned = _an.prune_archetypes(C_trace, H_trace, min_specificity_z_threshold)
+    pruned = _an.prune_archetypes(C_trace, H_trace, min_specificity_z_threshold, min_cells)
 
     adata = adata.copy() if copy else adata
-    adata.obsm['ACTION_C_stacked'] = pruned['C_stacked']
-    adata.obsm['ACTION_H_stacked'] = pruned['H_stacked'].T
+    adata.obsm['ACTION_C_stacked'] = sparse.csc_matrix(pruned['C_stacked'])
+    adata.obsm['ACTION_H_stacked'] = sparse.csc_matrix(pruned['H_stacked'].T)
     adata.uns['ACTION'].setdefault('archetypes', {}).update({
         'pruned': {'selected_archetypes': pruned['selected_archs']}
     })
@@ -63,22 +63,9 @@ def prune_archetypes(
 
 def unify_archetypes(
     adata: AnnData,
-    min_edge_weight: Optional[float] = 0.5,
-    min_coreness: Optional[int] = 0,
-    resolution: Optional[float] = 1.0,
-    min_repeat: Optional[int] = 2,
-    n_threads: Optional[int] = 0,
-    alpha: Optional[float] = 0.05,
-    beta: Optional[float] = 0.5,
-    outlier_threshold: Optional[float] = 0.5,
-    min_points: Optional[int] = 5,
-    min_cluster_size: Optional[int] = 5,
-    cond_threshold: Optional[float] = 10.0,
-    normalization_type: Optional[int] = 3,
-    preprocess_adj: Optional[bool] = False,
-    reduce_G: Optional[bool] = False,
-    method_type: Optional[int] = 0,
-    sensitivity: Optional[float] = 0.95,
+    sensitivity: Optional[float] = 1.0,
+    normalization_type: Literal[1, 3] = 1,
+    edge_threshold: Optional[float] = 0.5,
     copy: Optional[bool] = False
 ) -> AnnData:
     """\
@@ -115,30 +102,24 @@ def unify_archetypes(
         )
 
     adata = adata.copy() if copy else adata
+    S_r = adata.obsm['ACTION_S_r'].T
+    C = adata.obsm['ACTION_C_stacked']
+    if sparse.issparse(C):
+        C = C.toarray()
+    H = adata.obsm['ACTION_H_stacked'].T
+    if sparse.issparse(H):
+        H = H.toarray()
     unified = _an.unify_archetypes(
-        adata.obsm['ACTION_S_r'].T,
-        adata.obsm['ACTION_C_stacked'],
-        adata.obsm['ACTION_H_stacked'].T,
-        min_edge_weight,
-        min_coreness,
-        resolution,
-        min_repeat,
-        n_threads,
-        alpha,
-        beta,
-        outlier_threshold,
-        min_points,
-        min_cluster_size,
-        cond_threshold,
-        normalization_type,
-        preprocess_adj,
-        reduce_G,
-        method_type,
+        S_r,
+        C,
+        H,
         sensitivity,
+        normalization_type,
+        edge_threshold,
     )
 
-    adata.obsm['ACTION_C_unified'] = unified['C_unified']
-    adata.obsm['ACTION_H_unified'] = unified['H_unified'].T
+    adata.obsm['ACTION_C_unified'] = sparse.csc_matrix(unified['C_unified'])
+    adata.obsm['ACTION_H_unified'] = sparse.csc_matrix(unified['H_unified'].T)
     adata.uns['ACTION'].setdefault('archetypes', {}).update({
         'unified': {'selected_archetypes': unified['selected_archetypes']}
     })

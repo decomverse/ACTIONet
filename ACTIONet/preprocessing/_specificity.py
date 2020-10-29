@@ -18,7 +18,7 @@ def _compute_cluster_specificity(S, assignments):
 
 def compute_archetype_feature_specificity(
     adata: AnnData,
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
+    archetypes_key: Optional[str] = 'ACTION_archetype_footprint',
     copy: Optional[bool] = False
 ) -> AnnData:
     """\
@@ -59,7 +59,7 @@ def compute_archetype_feature_specificity(
 
 
 def compute_cluster_feature_specificity(
-    ACE: AnnData,
+    adata: AnnData,
     cluster_key: Optional[str] = 'leiden',
     copy: Optional[bool] = False
 ) -> Optional[AnnData]:
@@ -100,4 +100,4 @@ def compute_cluster_feature_specificity(
     adata.varm[f'{cluster_key}_upper_significance'] = specificity['upper_significance']
     adata.varm[f'{cluster_key}_lower_significance'] = specificity['lower_significance']
 
-    return ACE if copy else None
+    return adata if copy else None

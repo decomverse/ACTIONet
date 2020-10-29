@@ -408,7 +408,7 @@ py::dict unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensi
 arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble>& H_stacked, double density = 1.0, int thread_no = 0, bool mutual_edges_only = true) {
 	double M = 16, ef_construction = 200, ef = 50;
 
-	const arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
+	arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
 
     return G;
 }
@@ -427,7 +427,7 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble>& H_stacked, double dens
 // \item coordinates_3D 3D coordinates of vertices.
 // \item colors De novo color of nodes inferred from their 3D embedding.
 // }
-py::dict layout_ACTIONet(arma::SpMat<npdouble>& G, arma::Mat<npdouble>& S_r, int compactness_level = 50, unsigned int n_epochs = 500, int thread_no = 0) {
+py::dict layout_ACTIONet(arma::SpMat<npdouble>& G, arma::Mat<npdouble> S_r, int compactness_level = 50, unsigned int n_epochs = 500, int thread_no = 0) {
 
 	field<arma::Mat<npdouble>> res = ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no);
 
@@ -832,8 +832,14 @@ py::dict transform_layout(arma::SpMat<npdouble> &W, arma::Mat<npdouble>& coor2D,
 	out_list["coordinates_3D"] = res(1);
 	out_list["colors"] = res(2);
 
-    return out_list;
+  return out_list;
 
+}
+
+arma::Mat<npdouble> compute_full_sim(arma::Mat<npdouble>& H, int thread_no = 0) {
+	arma::Mat<npdouble> G = ACTIONet::computeFullSim(H, thread_no);
+
+	return G;
 }
 
 PYBIND11_MODULE(_ACTIONet, m) {
@@ -975,7 +981,7 @@ PYBIND11_MODULE(_ACTIONet, m) {
 	);
 	m.def(
 		"layout_ACTIONet",
-		py::overload_cast<arma::SpMat<npdouble>&, arma::Mat<npdouble>&, int, unsigned int, int>(&layout_ACTIONet),
+		py::overload_cast<arma::SpMat<npdouble>&, arma::Mat<npdouble>, int, unsigned int, int>(&layout_ACTIONet),
 		"Performs stochastic force-directed layout on the input graph (ACTIONet)",
 		py::arg("G"), py::arg("S_r"), py::arg("compactness_level")=50, py::arg("n_epochs")=500, py::arg("thread_no")=0
 	);
@@ -1151,6 +1157,13 @@ PYBIND11_MODULE(_ACTIONet, m) {
 		"Project a new data into current embedding",
 		py::arg("W"), py::arg("coor2D"), py::arg("coor3D"), py::arg("colRGB"), py::arg("compactness_level") = 50, py::arg("n_epochs") = 500, py::arg("thread_no") = 0
 	);
+	m.def(
+		"compute_full_sim",
+		py::overload_cast<arma::Mat<npdouble>&, int>(&compute_full_sim),
+		"",
+		py::arg("H"), py::arg("thread_no")=0
+	);
+
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;
 #else
