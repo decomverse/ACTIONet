@@ -40,8 +40,7 @@ def compute_archetype_feature_specificity(
         if `copy=True` returns None or else adds fields to `adata`:
 
         `.varm[f'{archetypes_key}_profile']`
-        `.varm[f'{archetypes_key}_upper_significance']`
-        `.varm[f'{archetypes_key}_lower_significance']`
+        `.varm[f'{archetypes_key}_feature_specificity']`
     """
     if archetypes_key not in adata.obsm.keys():
         raise ValueError(f'Did not find adata.obsm[\'{archetypes_key}\'].')
@@ -52,8 +51,7 @@ def compute_archetype_feature_specificity(
 
     specificity = _compute_archetype_specificity(S, H)
     adata.varm[f'{archetypes_key}_profile'] = specificity['archetypes']
-    adata.varm[f'{archetypes_key}_upper_significance'] = specificity['upper_significance']
-    adata.varm[f'{archetypes_key}_lower_significance'] = specificity['lower_significance']
+    adata.varm[f'{archetypes_key}_feature_specificity'] = specificity['upper_significance']
 
     return adata if copy else None
 
@@ -82,8 +80,7 @@ def compute_cluster_feature_specificity(
         if `copy=True` returns None or else adds fields to `adata`:
 
         `.varm[f'{cluster_key}_profile']`
-        `.varm[f'{cluster_key}_upper_significance']`
-        `.varm[f'{cluster_key}_lower_significance']`
+        `.varm[f'{cluster_key}_feature_specificity']`
     """
     if cluster_key not in adata.obs.keys():
         raise ValueError(f'Did not find adata.obs[\'{cluster_key}\'].')
@@ -98,6 +95,5 @@ def compute_cluster_feature_specificity(
 
     adata.varm[f'{cluster_key}_profile'] = specificity['archetypes']
     adata.varm[f'{cluster_key}_upper_significance'] = specificity['upper_significance']
-    adata.varm[f'{cluster_key}_lower_significance'] = specificity['lower_significance']
 
     return adata if copy else None

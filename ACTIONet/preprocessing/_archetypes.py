@@ -123,11 +123,6 @@ def unify_archetypes(
     adata.uns['ACTION'].setdefault('archetypes', {}).update({
         'unified': {'selected_archetypes': unified['selected_archetypes']}
     })
-
-    groups = unified['assigned_archetypes']
-    adata.obs['ACTION'] = pd.Categorical(
-        values=groups.astype('U'),
-        categories=natsorted(map(str, np.unique(groups))),
-    )
+    adata.obs['assigned_archetype'] = unified['assigned_archetypes']
 
     return adata if copy else None
