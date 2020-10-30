@@ -7,6 +7,7 @@ import _ACTIONet as _an
 
 def ACTION(
     data: Union[AnnData, np.ndarray],
+    reduction_key: Optional[str] = 'ACTION',
     k_min: Optional[int] = 2,
     k_max: Optional[int] = 30,
     n_threads: Optional[int] = 0,
@@ -37,15 +38,15 @@ def ACTION(
     """
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
-        if 'ACTION_S_r' not in data.obsm.keys():
+        if reduction_key not in data.obsm.keys():
             raise ValueError(
-                'Did not find adata.obsm[\'ACTION_S_r\']. '
+                f'Did not find adata.obsm[\'{reduction_key}\']. '
                 'Please run pp.reduce_kernel() first.'
             )
-        X = data.obsm['ACTION_S_r'].T
+        X = data.obsm[reduction_key].T
     else:
         X = data.T
 
     result = _an.run_ACTION(X, k_min, k_max, n_threads, max_it, min_delta)
-    
+
     return (result['C'], result['H'])

@@ -14,7 +14,6 @@ def reduce_kernel(
     seed: Optional[int] = 0,
     prenormalize: Optional[bool] = False,
     return_info: bool = False,
-    use_highly_variable: Optional[bool] = None,
     copy: bool = False
 ) -> [AnnData, np.ndarray, spmatrix]:
     """\
@@ -47,10 +46,6 @@ def reduce_kernel(
     return_info
         Only relevant when not passing an :class:`~anndata.AnnData`:
         see “**Returns**”.
-    use_highly_variable
-        Whether to use highly variable genes only, stored in
-        `.var['highly_variable']`.
-        By default uses them if they have been determined beforehand.
     dtype
         Numpy data type string to which to convert the result.
     copy
@@ -65,14 +60,16 @@ def reduce_kernel(
     adata : anndata.AnnData
         …otherwise if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm['ACTION_S_r']`
+        `.obsm['ACTION']`
              Scaled right singular vectors (reduced cell representations)
         `.varm['ACTION_V']`
-             Left singular vectors (signifying gene modules)
-        `.uns['ACTION']['params']`
-        `.uns['ACTION']['sigma']`
         `.varm['ACTION_A']`
         `.obsm['ACTION_B']`
+
+        `.uns['obsm_annot']['ACTION']`
+        `.uns['obsm_annot']['ACTION_B']`
+        `.uns['varm_annot']['ACTION_V']`
+        `.uns['varm_annot']['ACTION_A']`
     """
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
@@ -80,20 +77,8 @@ def reduce_kernel(
     else:
         adata = AnnData(data)
 
-    if use_highly_variable is True and 'highly_variable' not in adata.var.keys():
-        raise ValueError(
-            'Did not find adata.var[\'highly_variable\']. '
-            'Either your data already only consists of highly-variable genes '
-            'or consider running `pp.highly_variable_genes` first.'
-        )
-    if use_highly_variable is None:
-        use_highly_variable = True if 'highly_variable' in adata.var.keys() else False
-    adata_comp = (
-        adata[:, adata.var['highly_variable']] if use_highly_variable else adata
-    )
-
     # ACTIONet C++ library takes cells as columns
-    X = adata_comp.X.T
+    X = adata.X.T
 
     # See ACTIONet.h for definitions
     # irlb  = 0
@@ -113,26 +98,23 @@ def reduce_kernel(
     )
 
     if data_is_AnnData:
-        adata.obsm['ACTION_S_r'] = S_r
-        adata.uns['ACTION'] = {}
-        adata.uns['ACTION']['params'] = {
-            'use_highly_variable': use_highly_variable
-        }
-        adata.uns['ACTION']['sigma'] = sigma
+        adata.obsm['ACTION'] = S_r
+        adata.varm['ACTION_V'] = V
+        adata.varm['ACTION_A'] = A
         adata.obsm['ACTION_B'] = B
 
-        if use_highly_variable:
-            adata.varm['ACTION_V'] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm['ACTION_V'][adata.var['highly_variable']] = V
-            adata.varm['ACTION_A'] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm['ACTION_A'][adata.var['highly_variable']] = A
-        else:
-            adata.varm['ACTION_V'] = V
-            adata.varm['ACTION_A'] = A
+        adata.uns.setdefault('obsm_annot', {}).update({
+            'ACTION': {'type': np.array([b'reduction'], dtype=object)},
+            'ACTION_B': {'type': np.array([b'internal'], dtype=object)},
+        })
+        adata.uns.setdefault('varm_annot', {
+            'ACTION_A': {'type': np.array([b'internal'], dtype=object)},
+            'ACTION_V': {'type': np.array([b'internal'], dtype=object)},
+        })
 
         return adata if copy else None
     else:
         if return_info:
-            return (S_r, V.T, sigma, A, B)
+            return (S_r, V, A, B)
         else:
             return S_r

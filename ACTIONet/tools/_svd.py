@@ -23,7 +23,7 @@ def _halko(X, dim, n_iters=5, random_state=0):
 def svd(
     X: Union[np.ndarray, spmatrix],
     dim: int,
-    solver: Literal['irlb', 'feng', 'halko'] = 'halko',
+    solver: Literal[0, 1, 2] = 0,
     n_iters: Optional[int] = None,
     seed: int = 0
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -38,12 +38,12 @@ def svd(
         Target dimensions
     solver:
         SVD solver to use:
-        `'irlb'`
+        `0` (the default)
           randomized SVD used in IRLBA R package
-        `'feng'`
-          randomized SVD from Feng et al.
-        `'halko'` (the default)
+        `1`
           randomized SVD from Halko et al.
+        `2`
+          randomized SVD from Feng et al.
     n_iters:
         Maximum number of iterations. Defaults to 1000 for `irlb` and 5 otherwise.
     seed:
@@ -58,11 +58,11 @@ def svd(
     V:
         Matrix of right singular vectors
     """
-    if solver == 'irlb':
+    if solver == 0:
         result = _irlb(X, dim, n_iters or 1000, seed)
-    elif solver == 'feng':
+    elif solver == 1:
         result = _feng(X, dim, n_iters or 5, seed)
-    elif solver == 'halko':
+    elif solver == 2:
         result = _halko(X, dim, n_iters or 5, seed)
     else:
         raise Exception(f'Unknown SVD solver: {solver}')

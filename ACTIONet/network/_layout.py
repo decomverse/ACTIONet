@@ -37,9 +37,15 @@ def layout_network(
         adata : anndata.AnnData
         if `copy=True` returns None or else adds fields to `adata`:
 
+        `.obsm['X_ACTIONred']`
         `.obsm['X_ACTIONet_2D']`
         `.obsm['X_ACTIONet_3D']`
-        `.uns['ACTIONet']['colors']`
+        `.obsm['X_denovo_color']`
+
+        `.uns['obsm_annot']['X_ACTIONred']`
+        `.uns['obsm_annot']['X_ACTIONet_2D']`
+        `.uns['obsm_annot']['X_ACTIONet_3D']`
+        `.uns['obsm_annot']['X_denovo_color']`
     """
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
@@ -50,14 +56,21 @@ def layout_network(
     adata = adata.copy() if copy else adata
     G = adata.obsp['ACTIONet']
     if scale:
-        S_r = scale_matrix(adata.obsm['ACTION_S_r']).T
+        initial_coordinates = scale_matrix(adata.obsm['ACTION'])
     else:
-        S_r = adata.obsm['ACTION_S_r'].T
+        initial_coordinates = adata.obsm['ACTION']
 
-    layout = _an.layout_ACTIONet(G, S_r, compactness_level, n_epochs, n_threads)
+    layout = _an.layout_ACTIONet(G, initial_coordinates.T, compactness_level, n_epochs, n_threads)
 
-    adata.obsm['X_ACTIONet_2D'] = layout['coordinates']
-    adata.obsm['X_ACTIONet_3D'] = layout['coordinates_3D']
-    adata.uns['ACTIONet'].update({'colors': layout['colors']})
+    adata.obsm['X_ACTIONred'] = initial_coordinates[:,:3]
+    adata.obsm['X_ACTIONet2D'] = layout['coordinates']
+    adata.obsm['X_ACTIONet3D'] = layout['coordinates_3D']
+    adata.obsm['X_denovo_color'] = layout['colors']
 
+    adata.uns.setdefault('obsm_annot', {}).update({
+        'X_ACTIONred': {'type': np.array([b'embedding'], dtype=object)},
+        'X_ACTIONet2D': {'type': np.array([b'embedding'], dtype=object)},
+        'X_ACTIONet3D': {'type': np.array([b'embedding'], dtype=object)},
+        'X_denovo_color': {'type': np.array([b'embedding'], dtype=object)},
+    })
     return ACE if copy else None

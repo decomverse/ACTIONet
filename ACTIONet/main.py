@@ -20,7 +20,6 @@ def run_ACTIONet(
     unification_sensitivity: Optional[float] = 1.0,
     footprint_alpha: Optional[float] = 0.85,
     max_iter_ACTION: Optional[int] = 50,
-    full_trace: Optional[bool] = False,
     copy: Optional[bool] = False,
 ):
     adata = adata.copy() if copy else adata
@@ -84,14 +83,14 @@ def run_ACTIONet(
     nt.compute_network_diffusion(adata, alpha=footprint_alpha, n_threads=n_threads)
 
     # Compute gene specificity for each archetype
-    pp.compute_archetype_feature_specificity(adata)
+    nt.compute_archetype_feature_specificity(adata)
 
     nt.construct_backbone(
         adata,
         network_density=network_density,
         mutual_edges_only=mutual_edges_only,
         layout_compactness=layout_compactness,
-        layout_epochs=layout_epochs/5,
+        layout_epochs=int(layout_epochs/5),
         n_threads=1,
     )
 

@@ -1,5 +1,6 @@
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy.sparse import issparse
@@ -18,7 +19,6 @@ def _compute_cluster_specificity(S, assignments):
 
 def compute_archetype_feature_specificity(
     adata: AnnData,
-    archetypes_key: Optional[str] = 'ACTION_archetype_footprint',
     copy: Optional[bool] = False
 ) -> AnnData:
     """\
@@ -29,8 +29,6 @@ def compute_archetype_feature_specificity(
     ----------
     adata
         Current AnnData object storing the ACTIONet results
-    archetypes_key
-        Key in `adata.obsm` that holds the archetype footprints
     copy
         Return a copy instead of writing to adata.
 
@@ -39,19 +37,29 @@ def compute_archetype_feature_specificity(
         adata : anndata.AnnData
         if `copy=True` returns None or else adds fields to `adata`:
 
-        `.varm[f'{archetypes_key}_profile']`
-        `.varm[f'{archetypes_key}_feature_specificity']`
+        `.varm['unified_feature_profile']`
+        `.varm['unified_feature_specificity']`
+
+        `.uns['varm_annot']['unified_feature_profile']`
+        `.uns['varm_annot']['unified_feature_specificity']`
     """
-    if archetypes_key not in adata.obsm.keys():
-        raise ValueError(f'Did not find adata.obsm[\'{archetypes_key}\'].')
+    if 'archetype_footprint' not in adata.obsm.keys():
+        raise ValueError(
+            'Did not find adata.obsm[\'archetype_footprint\']. '
+            'Please run nt.compute_network_diffusion() first.'
+        )
 
     adata = adata.copy() if copy else adata
     S = adata.X.T
-    H = adata.obsm[archetypes_key].T
+    H = adata.obsm['archetype_footprint'].T
 
     specificity = _compute_archetype_specificity(S, H)
-    adata.varm[f'{archetypes_key}_profile'] = specificity['archetypes']
-    adata.varm[f'{archetypes_key}_feature_specificity'] = specificity['upper_significance']
+    adata.varm['unified_feature_profile'] = specificity['archetypes']
+    adata.varm['unified_feature_specificity'] = specificity['upper_significance']
+    adata.uns.setdefault('varm_annot', {}).update({
+        'unified_feature_profile': {'type': np.array([b'internal'], dtype=object)},
+        'unified_feature_specificity': {'type': np.array([b'reduction'], dtype=object)},
+    })
 
     return adata if copy else None
 
