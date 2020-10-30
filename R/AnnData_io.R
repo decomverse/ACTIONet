@@ -52,11 +52,11 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 
         cat.vars = setdiff(cat.vars, noncat.num.vars)
         cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
-        catDF = DF[, cat.vars]
+        catDF = DF[, cat.vars, drop = F]
         catDF = apply(catDF, 2, as.character)
         catDF[is.na(catDF)] = "NA"
 
-        numDF = DF[, noncat.num.vars]
+        numDF = DF[, noncat.num.vars, drop = F]
         numDF = apply(numDF, 2, as.numeric)
         numDF[is.na(numDF)] = NA
 
@@ -324,14 +324,27 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
 
     ## Write obs (colData() in ace)
-    obs.DF = as.data.frame(colData(ace))
+	obs.DF = as.data.frame(lapply(colData(ace), function(x) {
+		if(is.numeric(x) & (!is.null(names(x)))) {
+			return(factor(names(x), names(x)[match(unique(x), x)]))
+		} else {
+			return(x)
+		}
+	}))    
     if (is.null(rownames(obs.DF))) {
         rownames(obs.DF) = paste("Cell", 1:ncol(obs.DF), sep = "")
     }
     write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
 
     ## Write var (matching rowData() in ace)
-    var.DF = as.data.frame(rowData(ace))
+	var.DF = as.data.frame(lapply(colData(ace), function(x) {
+		if(is.numeric(x) & (!is.null(names(x)))) {
+			return(factor(names(x), names(x)[match(unique(x), x)]))
+		} else {
+			return(x)
+		}
+	}))
+    
     if (is.null(rownames(var.DF))) {
         rownames(var.DF) = paste("Gene", 1:nrow(var.DF), sep = "")
     }
