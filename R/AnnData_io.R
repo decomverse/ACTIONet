@@ -337,14 +337,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
     write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
 
     ## Write var (matching rowData() in ace)
-	var.DF = as.data.frame(lapply(rowData(ace), function(x) {
-		if(is.numeric(x) & (!is.null(names(x)))) {
-			return(factor(names(x), names(x)[match(unique(x), x)]))
-		} else {
-			return(x)
-		}
-	}))
-    
+	var.DF = as.data.frame(rowData(ace))
     if (is.null(rownames(var.DF))) {
         rownames(var.DF) = paste("Gene", 1:nrow(var.DF), sep = "")
     }
