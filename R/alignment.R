@@ -39,7 +39,7 @@ compute_pairwise_alignment <- function(reference_profile, query_profile, reduced
 	# V.reference = pc.out2$rotation[, 1:reduced_dim]
 
 	query_profile_centered[is.na(query_profile_centered)] = 0
-	reference_profile_centered[is.na(reference_profile_centereds)] = 0
+	reference_profile_centered[is.na(reference_profile_centered)] = 0
 	
 	query_profile.red = ACTIONet::IRLB_SVD_full(t(query_profile_centered), dim = reduced_dim, iters = 100)
 	reference_profile.red = ACTIONet::IRLB_SVD_full(t(reference_profile_centered), dim = reduced_dim, iters = 100)
