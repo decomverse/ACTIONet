@@ -16,10 +16,10 @@ def run_ACTIONet(
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 500,
     layout_in_parallel: Optional[bool] = False,
-    n_threads: Optional[int] = 0,
     unification_sensitivity: Optional[float] = 1.0,
     footprint_alpha: Optional[float] = 0.85,
     max_iter_ACTION: Optional[int] = 50,
+    n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
 ):
     adata = adata.copy() if copy else adata
@@ -85,6 +85,114 @@ def run_ACTIONet(
     # Compute gene specificity for each archetype
     nt.compute_archetype_feature_specificity(adata)
 
+    nt.construct_backbone(
+        adata,
+        network_density=network_density,
+        mutual_edges_only=mutual_edges_only,
+        layout_compactness=layout_compactness,
+        layout_epochs=int(layout_epochs/5),
+        n_threads=1,
+    )
+
+    return adata if copy else None
+
+def reconstruct_ACTIONet(
+    adata: AnnData,
+    network_density: Optional[int] = 1,
+    mutual_edges_only: Optional[bool] = True,
+    layout_compactness: Optional[int] = 50,
+    layout_epochs: Optional[int] = 500,
+    layout_in_parallel: Optional[bool] = False,
+    n_threads: Optional[int] = 0,
+    copy: Optional[bool] = False,
+):
+    adata = adata.copy() if copy else adata
+
+    # re-build ACTIONet
+    nt.build_network(
+        adata,
+        density=network_density,
+        n_threads=n_threads,
+        mutual_edges_only=mutual_edges_only
+    )
+
+    # layout ACTIONet
+    if not layout_in_parallel:
+        nt.layout_network(
+            adata,
+            compactness_level=layout_compactness,
+            n_epochs=layout_epochs,
+            n_threads=1,
+        )
+    else:
+        nt.layout_network(
+            adata,
+            compactness_level=layout_compactness,
+            n_epochs=layout_epochs,
+            n_threads=n_threads,
+        )
+
+    nt.construct_backbone(
+        adata,
+        network_density=network_density,
+        mutual_edges_only=mutual_edges_only,
+        layout_compactness=layout_compactness,
+        layout_epochs=int(layout_epochs/5),
+        n_threads=1,
+    )
+
+    return adata if copy else None
+
+def rerun_layout(
+    adata: AnnData,
+    network_density: Optional[int] = 1,
+    mutual_edges_only: Optional[bool] = True,
+    layout_compactness: Optional[int] = 50,
+    layout_epochs: Optional[int] = 1000,
+    n_threads: Optional[int] = 1,
+    copy: Optional[bool] = False,
+):
+    adata = adata.copy() if copy else adata
+
+    # re-layout ACTIONet
+    nt.layout_network(
+        adata,
+        compactness_level=layout_compactness,
+        n_epochs=layout_epochs,
+        n_threads=n_threads,
+    )
+    nt.construct_backbone(
+        adata,
+        network_density=network_density,
+        mutual_edges_only=mutual_edges_only,
+        layout_compactness=layout_compactness,
+        layout_epochs=int(layout_epochs/5),
+        n_threads=1,
+    )
+
+    return adata if copy else None
+
+def rerun_archetype_aggregation(
+    adata: AnnData,
+    network_density: Optional[int] = 1,
+    mutual_edges_only: Optional[bool] = True,
+    layout_compactness: Optional[int] = 50,
+    layout_epochs: Optional[int] = 500,
+    unification_sensitivity: Optional[float] = 0.3,
+    footprint_alpha: Optional[float] = 0.85,
+    n_threads: Optional[int] = 0,
+    copy: Optional[bool] = False,
+):
+    adata = adata.copy() if copy else adata
+
+    pp.unify_archetypes(
+        sensitivity=unification_sensitivity,
+        normalization_type=1,
+        edge_threshold=0,
+    )
+    nt.compute_archetype_core_centrality(adata)
+    nt.compute_network_diffusion(adata, alpha=footprint_alpha, n_threads=n_threads)
+    nt.compute_archetype_feature_specificity(adata)
     nt.construct_backbone(
         adata,
         network_density=network_density,

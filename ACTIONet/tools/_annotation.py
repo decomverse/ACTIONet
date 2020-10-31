@@ -9,7 +9,7 @@ from . import _normalization as normalization
 def annotate_archetypes_using_labels(
     adata: AnnData,
     label_key: Optional[str] = 'cell_types',
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
+    archetypes_key: Optional[str] = 'H_unified',
 ) -> Tuple[list, np.ndarray, np.ndarray]:
     """
     """
@@ -54,7 +54,7 @@ def annotate_archetypes_using_markers(
     marker_genes: list,
     directions: list,
     names: Optional[list] = None,
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
+    archetypes_key: Optional[str] = 'H_unified',
     significance: Optional[Literal['upper', 'lower']] = 'upper',
     n_iters: Optional[int] = 1000,
 ) -> Tuple[list, np.ndarray, np.ndarray]:
@@ -107,7 +107,7 @@ def annotate_cells_using_markers(
     names: Optional[list] = None,
     method: Optional[Literal['diffusion', 'archetype']] = 'diffusion',
     alpha: Optional[float] = 0.85,
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
+    archetypes_key: Optional[str] = 'H_unified',
     significance: Optional[Literal['upper', 'lower']] = 'upper',
     n_threads: Optional[int] = 0,
     n_iters: Optional[int] = 1000,
@@ -156,7 +156,7 @@ def annotate_cells_using_markers(
 def map_cell_scores_from_archetype_enrichment(
     adata: AnnData,
     enrichment: np.ndarray,
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
+    archetypes_key: Optional[str] = 'H_unified',
     normalize: Optional[bool] = False
 ) -> np.ndarray:
     if archetypes_key not in adata.obsm.keys():
@@ -185,7 +185,7 @@ def annotate_cells_from_archetypes_using_markers(
     marker_genes: list,
     directions: list,
     names: Optional[list] = None,
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
+    archetypes_key: Optional[str] = 'H_unified',
     significance: Optional[Literal['upper', 'lower']] = 'upper',
     n_iters: Optional[int] = 1000,
 ) -> Tuple[list, np.ndarray, np.ndarray]:

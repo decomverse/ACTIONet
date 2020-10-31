@@ -65,6 +65,7 @@ def reduce_kernel(
         `.varm['ACTION_V']`
         `.varm['ACTION_A']`
         `.obsm['ACTION_B']`
+        `.uns['metadata']['ACTION_sigma']`
 
         `.uns['obsm_annot']['ACTION']`
         `.uns['obsm_annot']['ACTION_B']`
@@ -102,6 +103,9 @@ def reduce_kernel(
         adata.varm['ACTION_V'] = V
         adata.varm['ACTION_A'] = A
         adata.obsm['ACTION_B'] = B
+        adata.uns.setdefault('metadata', {}).update({
+            'ACTION_sigma': sigma
+        })
 
         adata.uns.setdefault('obsm_annot', {}).update({
             'ACTION': {'type': np.array([b'reduction'], dtype=object)},
