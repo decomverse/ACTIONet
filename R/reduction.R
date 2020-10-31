@@ -13,16 +13,16 @@
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
 #' @export
-reduce.ace <- function(ace, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
+reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, data_slot = "logcounts",
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
-      
+
     ace <- as(ace, "ACTIONetExperiment")
     if (!(data_slot %in% names(assays(ace)))) {
 		if (norm_method != "none") {
 			msg = sprintf("Normalizing ace object ...\n")
 			message(msg)
 			ace = normalize.ace(ace, norm_method)
-		} else {		
+		} else {
 			err = sprintf("Slot %s not found.\n", data_slot)
 			stop(err)
 		}
