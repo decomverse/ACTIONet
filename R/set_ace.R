@@ -64,12 +64,13 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(object, value) {
 #' @rdname rowMapTypes
 #' @export
 setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
-  # .validate_MapType(value)
+
   common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
       length(x) == 1)], names(object@rowMaps))
 
   for (n in common_names) {
       metadata(object@rowMaps[[n]])$type = value[[n]]
+      object@rowMaps[[n]] = .validate_MapType(object@rowMaps[[n]])
   }
   validObject(object)
   object
@@ -81,12 +82,13 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
 #' @rdname colMapTypes
 #' @export
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(object, value) {
-  # .validate_MapType(value)
+
   common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
       length(x) == 1)], names(object@colMaps))
 
   for (n in common_names) {
       metadata(object@colMaps[[n]])$type = value[[n]]
+      object@colMaps[[n]] = .validate_MapType(object@colMaps[[n]])
   }
   validObject(object)
   object
