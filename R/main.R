@@ -27,8 +27,8 @@
 #' @export
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
-    layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification_sensitivity = 1.0,
+    layout.in.parallel = TRUE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
+    unification_sensitivity = 0.3, 
     footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
@@ -97,7 +97,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 
     # Identiy equivalent classes of archetypes and group them together
-	unification.out = unify_archetypes(S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, sensitivity = unification_sensitivity, normalization_type = 1, edge_threshold = 0.5)
+	unification.out = unify_archetypes(S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, sensitivity = unification_sensitivity, normalization_type = 1, edge_threshold = 0)    
 
 
 	Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
@@ -270,7 +270,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thr
 
 #' @export
 rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
-    unification_sensitivity = 1.0,
+    unification_sensitivity = 0.3,
     reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0) {
 
     S = assays(ace)[[data_slot]]
@@ -279,7 +279,7 @@ rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
     G = colNets(ace)[["ACTIONet"]]
 
-	unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, sensitivity = unification_sensitivity, normalization_type = 1, edge_threshold = 0.5)
+	unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, sensitivity = unification_sensitivity, normalization_type = 1, edge_threshold = 0)    
 
 
     R.utils::printf("%d states\n", length(unique(unification.out$assigned_archetype)))
