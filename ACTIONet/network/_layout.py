@@ -8,6 +8,7 @@ from ..tools import scale_matrix
 
 def layout_network(
     adata: AnnData,
+    reduction_key: Optional[str] = 'ACTION',
     scale: Optional[bool] = True,
     compactness_level: Optional[int] = 50,
     n_epochs: Optional[int] = 500,
@@ -56,9 +57,9 @@ def layout_network(
     adata = adata.copy() if copy else adata
     G = adata.obsp['ACTIONet']
     if scale:
-        initial_coordinates = scale_matrix(adata.obsm['ACTION'])
+        initial_coordinates = scale_matrix(adata.obsm[reduction_key])
     else:
-        initial_coordinates = adata.obsm['ACTION']
+        initial_coordinates = adata.obsm[reduction_key]
 
     layout = _an.layout_ACTIONet(G, initial_coordinates.T, compactness_level, n_epochs, n_threads)
 

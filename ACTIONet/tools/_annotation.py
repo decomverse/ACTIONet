@@ -2,13 +2,14 @@ from typing import Literal, Optional, Tuple
 
 import numpy as np
 from anndata import AnnData
+from scipy import sparse
 
 from . import _imputation as imputation
 from . import _normalization as normalization
 
 def annotate_archetypes_using_labels(
     adata: AnnData,
-    label_key: Optional[str] = 'cell_types',
+    label_key: Optional[str] = 'cell_type',
     archetypes_key: Optional[str] = 'H_unified',
 ) -> Tuple[list, np.ndarray, np.ndarray]:
     """
@@ -17,6 +18,8 @@ def annotate_archetypes_using_labels(
         raise ValueError(f'Did not find adata.obsm[\'{key}\'].')
     labels = adata.obs[label_key]
     profile = adata.obsm[archetypes_key].T
+    if sparse.issparse(profile):
+        profile = profile.toarray()
 
     # Compute enrichment using t-statistics
     unique_labels = labels.unique()
@@ -26,8 +29,8 @@ def annotate_archetypes_using_labels(
         class_profile = profile[:, mask]
         null_profile = profile[:, ~mask]
 
-        n_class = class_profile.shape[1]
-        n_null = null_profile.shape[1]
+        n_class = np.sum(mask)
+        n_null = np.sum(~mask)
 
         if n_class < 3 or n_null < 3:
             # Leave this column as zeros
@@ -54,18 +57,16 @@ def annotate_archetypes_using_markers(
     marker_genes: list,
     directions: list,
     names: Optional[list] = None,
-    archetypes_key: Optional[str] = 'H_unified',
-    significance: Optional[Literal['upper', 'lower']] = 'upper',
+    significance_key: Optional[str] = 'unified_feature_specificity',
     n_iters: Optional[int] = 1000,
+    seed: Optional[int] = 0,
 ) -> Tuple[list, np.ndarray, np.ndarray]:
-    if archetypes_key not in adata.obsm.keys():
-        raise ValueError(f'Did not find adata.obsm[\'{archetypes_key}\'].')
-    if f'{archetypes_key}_{significance}_significance' not in adata.varm.keys():
+    if significance_key not in adata.varm.keys():
         raise ValueError(
-            f'Did not find adata.varm[\'{archetypes_key}_{significance}_significance\']. '
+            f'Did not find adata.varm[\'{significance_key}\']. '
             'Please run pp.compute_archetype_feature_specificity() first.'
         )
-    specificity = np.log1p(adata.varm[f'{archetypes_key}_{significance}_significance']).T
+    specificity = np.log1p(adata.varm[significance_key]).T
     np.nan_to_num(specificity, copy=False, nan=0.0)
 
     unique_genes = set([g for genes in marker_genes for g in genes])
@@ -73,6 +74,7 @@ def annotate_archetypes_using_markers(
     specificity_genes = adata.var.index[mask]
     specificity_panel = specificity[:, mask]
 
+    np.random.seed(seed)
     Z = np.empty((specificity_panel.shape[0], len(marker_genes)))
     names = names or [f'Celltype {i+1}' for i in range(len(marker_genes))]
     for i, (name, genes, ds) in enumerate(zip(names, marker_genes, directions)):
@@ -186,7 +188,7 @@ def annotate_cells_from_archetypes_using_markers(
     directions: list,
     names: Optional[list] = None,
     archetypes_key: Optional[str] = 'H_unified',
-    significance: Optional[Literal['upper', 'lower']] = 'upper',
+    significance_key: Optional[str] = 'unified_feature_specificity',
     n_iters: Optional[int] = 1000,
 ) -> Tuple[list, np.ndarray, np.ndarray]:
     if archetypes_key not in adata.obsm.keys():
@@ -194,7 +196,7 @@ def annotate_cells_from_archetypes_using_markers(
 
     names = names or [f'Celltype {i+1}' for i in range(len(marker_genes))]
     _, _, Z = annotate_archetypes_using_markers(
-        adata, marker_genes, directions, names, archetypes_key, significance, n_iters
+        adata, marker_genes, directions, names, significance_key, n_iters
     )
     cell_enrichment_mat = map_cell_scores_from_archetype_enrichment(
         adata, Z, archetypes_key, normalize=True

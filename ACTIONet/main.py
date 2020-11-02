@@ -8,6 +8,7 @@ from . import tools as tl
 
 def run_ACTIONet(
     adata: AnnData,
+    reduction_key: Optional[str] = 'ACTION',
     k_max: Optional[int] = 30,
     min_cells_per_archetype: Optional[int] = 2,
     min_specificity_z_threshold: Optional[int] = -3,
@@ -21,12 +22,38 @@ def run_ACTIONet(
     max_iter_ACTION: Optional[int] = 50,
     n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
-):
+) -> Optional[AnnData]:
+    """A wrapper function to call all main functions of the ACTIONet
+
+    Parameters
+    ----------
+    adata
+    reduction_key
+    k_max
+    min_cells_per_archetype
+    min_specificity_z_threshold
+    network_density
+    mutual_edges_only
+    layout_compactness
+    layout_epochs
+    layout_in_parallel
+    unification_sensitivity
+    footprint_alpha
+    max_iter_ACTION
+    n_threads
+    copy
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        if `copy=True` returns None or else adds fields to `adata`:
+    """
     adata = adata.copy() if copy else adata
 
     # Run ACTION
     C, H = pp.ACTION(
         adata,
+        reduction_key=reduction_key,
         k_min=2,
         k_max=k_max,
         n_threads=n_threads,
@@ -55,6 +82,7 @@ def run_ACTIONet(
     if not layout_in_parallel:
         nt.layout_network(
             adata,
+            reduction_key=reduction_key,
             compactness_level=layout_compactness,
             n_epochs=layout_epochs,
             n_threads=1,
@@ -62,6 +90,7 @@ def run_ACTIONet(
     else:
         nt.layout_network(
             adata,
+            reduction_key=reduction_key,
             compactness_level=layout_compactness,
             n_epochs=layout_epochs,
             n_threads=n_threads,
@@ -98,6 +127,7 @@ def run_ACTIONet(
 
 def reconstruct_ACTIONet(
     adata: AnnData,
+    reduction_key: Optional[str] = 'ACTION',
     network_density: Optional[int] = 1,
     mutual_edges_only: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
@@ -105,7 +135,26 @@ def reconstruct_ACTIONet(
     layout_in_parallel: Optional[bool] = False,
     n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
-):
+) -> Optional[AnnData]:
+    """Reconstructs the ACTIONet graph with the new parameters (uses prior decomposition)
+
+    Parameters
+    ----------
+    adata
+    reduction_key
+    network_density
+    mutual_edges_only
+    layout_compactness
+    layout_epochs
+    layout_in_parallel
+    n_threads
+    copy
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        if `copy=True` returns None or else adds fields to `adata`:
+    """
     adata = adata.copy() if copy else adata
 
     # re-build ACTIONet
@@ -120,6 +169,7 @@ def reconstruct_ACTIONet(
     if not layout_in_parallel:
         nt.layout_network(
             adata,
+            reduction_key=reduction_key,
             compactness_level=layout_compactness,
             n_epochs=layout_epochs,
             n_threads=1,
@@ -127,6 +177,7 @@ def reconstruct_ACTIONet(
     else:
         nt.layout_network(
             adata,
+            reduction_key=reduction_key,
             compactness_level=layout_compactness,
             n_epochs=layout_epochs,
             n_threads=n_threads,
@@ -145,18 +196,37 @@ def reconstruct_ACTIONet(
 
 def rerun_layout(
     adata: AnnData,
+    reduction_key: Optional[str] = 'ACTION',
     network_density: Optional[int] = 1,
     mutual_edges_only: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 1000,
     n_threads: Optional[int] = 1,
     copy: Optional[bool] = False,
-):
+) -> Optional[AnnData]:
+    """Rerun layout on the ACTIONet graph with new parameters
+
+    Parameters
+    ----------
+    adata
+    network_density
+    mutual_edges_only
+    layout_compactness
+    layout_epochs
+    n_threads
+    copy
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        if `copy=True` returns None or else adds fields to `adata`:
+    """
     adata = adata.copy() if copy else adata
 
     # re-layout ACTIONet
     nt.layout_network(
         adata,
+        reduction_key=reduction_key,
         compactness_level=layout_compactness,
         n_epochs=layout_epochs,
         n_threads=n_threads,
@@ -182,7 +252,7 @@ def rerun_archetype_aggregation(
     footprint_alpha: Optional[float] = 0.85,
     n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
-):
+) -> Optional[AnnData]:
     adata = adata.copy() if copy else adata
 
     pp.unify_archetypes(

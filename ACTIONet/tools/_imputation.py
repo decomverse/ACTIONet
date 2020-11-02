@@ -3,7 +3,7 @@ from typing import Literal, Optional
 import numpy as np
 import pandas as pd
 from anndata import AnnData
-from scipy.sparse import csc_matrix
+from scipy import sparse
 
 import _ACTIONet as _an
 
@@ -101,7 +101,7 @@ def impute_genes_using_network(
     if (np.sum(mask)) > 0:
         U = adata.X[:, mask].copy()
         U[U < 0] = 0
-        cs = np.sum(U, axis=0)
+        cs = np.array(np.sum(U, axis=0)).flatten()
         U = U / cs
         U = U[:, cs > 0]
         gg = genes[cs > 0]
@@ -112,7 +112,7 @@ def impute_genes_using_network(
 
     # Network diffusion
     G = adata.obsp['ACTIONet']
-    imputed = _an.compute_network_diffusion(G, csc_matrix(U), n_threads, alpha, n_iters)
+    imputed = _an.compute_network_diffusion(G, sparse.csc_matrix(U), n_threads, alpha, n_iters)
     np.nan_to_num(imputed, copy=False, nan=0.0)
 
     # Rescale the baseline expression of each gene

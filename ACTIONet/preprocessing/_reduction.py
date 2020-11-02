@@ -8,11 +8,11 @@ import _ACTIONet as _an
 
 def reduce_kernel(
     data: Union[AnnData, np.ndarray, spmatrix],
+    reduction_key: Optional[str] = 'ACTION',
     dim: Optional[int] = 50,
     svd_solver: Literal[0, 1, 2] = 0,
     n_iters: Optional[int] = 5,
     seed: Optional[int] = 0,
-    prenormalize: Optional[bool] = False,
     return_info: bool = False,
     copy: bool = False
 ) -> [AnnData, np.ndarray, spmatrix]:
@@ -41,8 +41,6 @@ def reduce_kernel(
         Maximum number of iterations
     seed
         Random seed
-    prenormalise
-        Row-normalise the input matrix before SVD
     return_info
         Only relevant when not passing an :class:`~anndata.AnnData`:
         see “**Returns**”.
@@ -60,17 +58,17 @@ def reduce_kernel(
     adata : anndata.AnnData
         …otherwise if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm['ACTION']`
+        `.obsm[f'{reduction_key}']`
              Scaled right singular vectors (reduced cell representations)
-        `.varm['ACTION_V']`
-        `.varm['ACTION_A']`
-        `.obsm['ACTION_B']`
-        `.uns['metadata']['ACTION_sigma']`
+        `.varm[f'{reduction_key}_V']`
+        `.varm[f'{reduction_key}_A']`
+        `.obsm[f'{reduction_key}_B']`
+        `.uns['metadata'][f'{reduction_key}_sigma']`
 
-        `.uns['obsm_annot']['ACTION']`
-        `.uns['obsm_annot']['ACTION_B']`
-        `.uns['varm_annot']['ACTION_V']`
-        `.uns['varm_annot']['ACTION_A']`
+        `.uns['obsm_annot'][f'{reduction_key}']`
+        `.uns['obsm_annot'][f'{reduction_key}_B']`
+        `.uns['varm_annot'][f'{reduction_key}_V']`
+        `.uns['varm_annot'][f'{reduction_key}_A']`
     """
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
@@ -88,9 +86,9 @@ def reduce_kernel(
     if svd_solver == 0:
         n_iters = 100 * n_iters
     reduced = _an.reduce_kernel(
-        X, dim, n_iters, seed, svd_solver, prenormalize
+        X, dim, n_iters, seed, svd_solver
     ) if issparse(X) else _an.reduce_kernel_full(
-        X, dim, n_iters, seed, svd_solver, prenormalize
+        X, dim, n_iters, seed, svd_solver
     )
 
     # Note S_r.T
@@ -99,21 +97,21 @@ def reduce_kernel(
     )
 
     if data_is_AnnData:
-        adata.obsm['ACTION'] = S_r
-        adata.varm['ACTION_V'] = V
-        adata.varm['ACTION_A'] = A
-        adata.obsm['ACTION_B'] = B
+        adata.obsm[reduction_key] = S_r
+        adata.varm[f'{reduction_key}_V'] = V
+        adata.varm[f'{reduction_key}_A'] = A
+        adata.obsm[f'{reduction_key}_B'] = B
         adata.uns.setdefault('metadata', {}).update({
-            'ACTION_sigma': sigma
+            f'{reduction_key}_sigma': sigma
         })
 
         adata.uns.setdefault('obsm_annot', {}).update({
-            'ACTION': {'type': np.array([b'reduction'], dtype=object)},
-            'ACTION_B': {'type': np.array([b'internal'], dtype=object)},
+            reduction_key: {'type': np.array([b'reduction'], dtype=object)},
+            f'{reduction_key}_B': {'type': np.array([b'internal'], dtype=object)},
         })
         adata.uns.setdefault('varm_annot', {
-            'ACTION_A': {'type': np.array([b'internal'], dtype=object)},
-            'ACTION_V': {'type': np.array([b'internal'], dtype=object)},
+            f'{reduction_key}_A': {'type': np.array([b'internal'], dtype=object)},
+            f'{reduction_key}_V': {'type': np.array([b'internal'], dtype=object)},
         })
 
         return adata if copy else None
