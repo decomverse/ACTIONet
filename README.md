@@ -29,13 +29,16 @@ pip install git+https://github.com/shmohammadi86/ACTIONet@python-devel
 Here is a simple example to get you started:
 
 ```python
-from urllib.request import urlretrieve
+import urllib.request
 
 import ACTIONet as an
 import scanpy as sc
 
 # Download example dataset from the 10X Genomics website
-urlretrieve('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5', 'pbmc_10k_v3.h5')
+opener = urllib.request.build_opener()
+opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+urllib.request.install_opener(opener)
+urllib.request.urlretrieve('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5', 'pbmc_10k_v3.h5')
 
 # Read and filter the data
 adata = sc.read_10x_h5('pbmc_10k_v3.h5')
