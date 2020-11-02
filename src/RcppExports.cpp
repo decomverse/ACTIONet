@@ -1006,6 +1006,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// merge_sparse_mats
+sp_mat merge_sparse_mats(sp_mat& A, sp_mat& B);
+RcppExport SEXP _ACTIONet_merge_sparse_mats(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sparse_mats(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -1081,6 +1093,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
+    {"_ACTIONet_merge_sparse_mats", (DL_FUNC) &_ACTIONet_merge_sparse_mats, 2},
     {NULL, NULL, 0}
 };
 
