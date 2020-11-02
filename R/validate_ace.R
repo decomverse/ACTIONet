@@ -25,7 +25,7 @@ setValidity2("ACTIONetExperiment", function(object) {
 
     value = object@rowMaps
     for (i in seq_along(value)) {
-        .validate_MapType(value[[i]])
+        value[[i]] = .validate_MapType(value[[i]])
         if ((NROW(value[[i]]) != NR)) {
             msg <- c(msg, "'nrow(rowMaps[[..]])' should be equal to the number of rows of ace object..")
         }
@@ -38,7 +38,7 @@ setValidity2("ACTIONetExperiment", function(object) {
 
     value = object@colMaps
     for (i in seq_along(value)) {
-        .validate_MapType(value[[i]])
+        value[[i]] = .validate_MapType(value[[i]])
         if ((NROW(value[[i]]) != NC)) {
             msg <- c(msg, "'nrow(colMaps[[..]])' should be equal to the number of columns of ace object..")
         }
@@ -57,11 +57,13 @@ setValidity2("ACTIONetExperiment", function(object) {
 .validate_MapType <- function(SE){
   value = S4Vectors::metadata(SE)$type
 
-  if(value == "" | is.null(value)){
-    err = sprintf("MapType cannot be empty or NULL.\n")
-    stop(err)
+  if( !(value %in% c("generic", "reduction", "embedding", "internal")) | is.null(value) ){
+    err = sprintf("MapType must be 'generic', 'reduction', 'embedding', or 'internal'. Setting to 'generic'.\n")
+    warning(err)
+    S4Vectors::metadata(SE)$type = "generic"
+    return(SE)
   }
-  return
+  return(SE)
 }
 
 .validate_names <- function(value, valid_names = NULL){
