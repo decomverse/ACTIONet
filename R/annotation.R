@@ -96,12 +96,10 @@ annotate.archetypes.using.markers <- function(ace, marker.genes, rand.sample.no 
     specificity.panel = Matrix::t(as.matrix(log1p(rowMaps(ace)[[significance.slot]])))
     specificity.panel[is.na(specificity.panel)] = 0
 
-    GS.names = names(marker.genes)
-    if (is.null(GS.names)) {
-        GS.names = sapply(1:length(GS.names), function(i) sprintf("Celltype %s",
-            i))
-    }
-
+    if(is.null(names(marker.genes))) {
+		names(marker.genes) = sapply(1:length(marker.genes), function(i) sprintf("Celltype %s", i))
+	}
+	
     markers.table = do.call(rbind, lapply(names(marker.genes), function(celltype) {
         genes = marker.genes[[celltype]]
         if (length(genes) == 0)
@@ -205,10 +203,9 @@ annotate.cells.using.markers <- function(ace, marker.genes, rand.sample.no = 100
     require(stringr)
 
 
-    GS.names = names(marker.genes)
-    if (is.null(GS.names)) {
-        GS.names = sapply(1:length(marker.genes), function(i) sprintf("Celltype %s", i))
-    }
+    if(is.null(names(marker.genes))) {
+		names(marker.genes) = sapply(1:length(marker.genes), function(i) sprintf("Celltype %s", i))
+	}
 
     markers.table = do.call(rbind, lapply(names(marker.genes), function(celltype) {
         genes = marker.genes[[celltype]]
