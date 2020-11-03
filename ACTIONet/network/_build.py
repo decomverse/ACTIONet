@@ -12,14 +12,14 @@ def build_ACTIONet(
     mutual_edges_only: Optional[bool] = True,
     copy: Optional[bool] = False
 ) -> AnnData:
-    """\
-    Build ACTIIONet
+    """Build ACTIONet
 
     Computes and returns the ACTIONet graph
+
     Parameters
     ----------
     adata
-        Current AnnData object storing the ACTIONet results
+        Annotated data matrix
     density
         Controls the overall density of constructed network.
         Larger values results in more retained edges.

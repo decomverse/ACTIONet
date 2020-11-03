@@ -51,7 +51,7 @@ def run_ACTIONet(
     adata = adata.copy() if copy else adata
 
     # Run ACTION
-    C, H = pp.ACTION(
+    C, H = pp.run_ACTION(
         adata,
         reduction_key=reduction_key,
         k_min=2,

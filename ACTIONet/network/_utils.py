@@ -11,8 +11,7 @@ def compute_archetype_core_centrality(
     adata: AnnData,
     copy: Optional[bool] = False
 ) -> AnnData:
-    """
-    Computes node centrality scores
+    """Computes node centrality scores
 
     Uses graph core-ness to compute node centralities
 
@@ -55,12 +54,16 @@ def compute_network_diffusion(
     n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
 ):
-    """
+    """Performs network diffusion
 
     Parameters
     ----------
     adata
         AnnData object storing the ACTIONet results
+    alpha
+        Random walk depth between (0, 1)
+    n_threads
+        Number of threads. Defaults to number of threads available
     copy
         Return a copy instead of writing to adata.
 

@@ -15,20 +15,23 @@ def layout_ACTIONet(
     n_threads: Optional[int] = 8,
     copy: Optional[bool] = False
 ) -> Optional[AnnData]:
-    """\
-    Network layout
+    """Network layout
 
     Embedded the graph into 2D/3D space
 
     Parameters
     ----------
-    adata:
-        AnnData object storing the ACTIONet results
-    compactness_level:
+    adata
+        Annotated data matrix
+    reduction_key
+        Key in `adata.obsm` that contains ACTION reductions
+    scale
+        If `False`, ACTION reduction will not be scaled
+    compactness_level
         Between 0-100
-    n_epochs:
+    n_epochs
         Number of SGD epochs
-    n_threads:
+    n_threads
         Number of parallel threads
     copy
         Return a copy instead of writing to adata.

@@ -17,14 +17,17 @@ def reduce_adata(
     seed: Optional[int] = 0,
     copy: bool = False
 ) -> Optional[AnnData]:
-    """\
-    Kernel Reduction Method [Mohammadi2020].
+    """
+    Kernel Reduction Method.
 
     Computes SVD-reduced form of the kernel matrix.
 
     Parameters
     ----------
-    data
+    adata
+        Annotated data matrix
+    reduction_key
+        Key in `adata.obsm` to add reduced cell representations
     dim
         Target dimension. Defaults to 50, or 1 - minimum
         dimension size of selected representation.
@@ -41,16 +44,14 @@ def reduce_adata(
     seed
         Random seed
     copy
-        If an :class:`~anndata.AnnData` is passed, determines whether a copy
-        is returned. Is ignored otherwise.
+        Return a copy instead of writing to `adata`.
 
     Returns
     -------
     adata : anndata.AnnData
         if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm[f'{reduction_key}']`
-             Scaled right singular vectors (reduced cell representations)
+        `.obsm[reduction_key]`
         `.varm[f'{reduction_key}_V']`
         `.varm[f'{reduction_key}_A']`
         `.obsm[f'{reduction_key}_B']`

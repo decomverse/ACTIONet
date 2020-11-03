@@ -17,22 +17,20 @@ def aa(
 
     Parameters
     ----------
-    A:
+    A
         Input matrix
-    W0:
-        Initial estimate of archetypes with k (# archetype) columns
+    k
+        Number of archetypes to consider
     max_it, min_delta:
         Define stopping conditions
 
     Returns
     -------
-    C:
-        Convex matrix of archetype coefficients (#observations x # archetypes)
-    W:
-        Matrix of archetypes (# features x # archetypes)
-    H:
-        Convex matrix of observation coefficients (# archetypes x # observations)    
-        
+    C
+        Convex matrix of archetype coefficients (# observations x # archetypes)
+    H
+        Convex matrix of observation coefficients (# archetypes x # observations)
+
     """
     result = _an.run_AA(A, k)
     return (

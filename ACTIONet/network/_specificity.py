@@ -21,8 +21,7 @@ def compute_archetype_feature_specificity(
     adata: AnnData,
     copy: Optional[bool] = False
 ) -> AnnData:
-    """\
-    Computes Feature (i.e., gene) specificity of archetypes
+    """Computes Feature (i.e., gene) specificity of archetypes
 
     Uses Archetype footprints to estimate markers (soft clustering)
     Parameters
@@ -69,10 +68,10 @@ def compute_cluster_feature_specificity(
     cluster_key: Optional[str] = 'leiden',
     copy: Optional[bool] = False
 ) -> Optional[AnnData]:
-    """\
-    Computes Feature (i.e., gene) specificity of clusters
+    """Computes Feature (i.e., gene) specificity of clusters
 
     Uses cluster membership vector to estimate markers (disjoint clustering)
+
     Parameters
     ----------
     adata

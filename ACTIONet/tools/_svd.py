@@ -32,11 +32,11 @@ def svd(
 
     Parameters
     ----------
-    X:
+    X
         Input matrix (dense or sparse)
-    dim:
+    dim
         Target dimensions
-    solver:
+    solver
         SVD solver to use:
         `0` (the default)
           randomized SVD used in IRLBA R package
@@ -44,18 +44,18 @@ def svd(
           randomized SVD from Halko et al.
         `2`
           randomized SVD from Feng et al.
-    n_iters:
+    n_iters
         Maximum number of iterations. Defaults to 1000 for `irlb` and 5 otherwise.
-    seed:
+    seed
         Random seed
 
     Returns
     -------
-    U:
+    U
         Matrix of left singular vectors
-    sigma:
+    sigma
         Matrix of singular values
-    V:
+    V
         Matrix of right singular vectors
     """
     if solver == 0:

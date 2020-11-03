@@ -5,8 +5,8 @@ from anndata import AnnData
 
 import _ACTIONet as _an
 
-def ACTION(
-    data: Union[AnnData, np.ndarray],
+def run_ACTION(
+    adata: AnnData,
     reduction_key: Optional[str] = 'ACTION',
     k_min: Optional[int] = 2,
     k_max: Optional[int] = 30,
@@ -14,8 +14,8 @@ def ACTION(
     max_it: Optional[int] = 50,
     min_delta: Optional[float] = 1e-300
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """\
-    Run ACTION decomposition [Mohammadi2018]_.
+    """
+    Run ACTION decomposition.
 
     Computes reduced ACTION decomposition.
 
@@ -24,6 +24,10 @@ def ACTION(
     data
         The (annotated) data matrix of shape `n_obs` × `n_vars`.
         Rows correspond to cells and columns to genes.
+    reduction_key
+        Key in `adata.obsm` that contains reduced cell representations
+    k_min
+        Min. # of archetypes to consider
     k_max
         Max. # of archetypes to consider
     n_threads
@@ -34,18 +38,14 @@ def ACTION(
     Returns
     -------
     C, H
-        A dictionary with trace of C and H matrices
+        A tuple with trace of C and H matrices
     """
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
-        if reduction_key not in data.obsm.keys():
-            raise ValueError(
-                f'Did not find adata.obsm[\'{reduction_key}\']. '
-                'Please run pp.reduce_kernel() first.'
-            )
-        X = data.obsm[reduction_key].T
-    else:
-        X = data.T
+    if reduction_key not in adata.obsm.keys():
+        raise ValueError(
+            f'Did not find adata.obsm[\'{reduction_key}\']. '
+            'Please run pp.reduce_kernel() first.'
+        )
+    X = adata.obsm[reduction_key].T
 
     result = _an.run_ACTION(X, k_min, k_max, n_threads, max_it, min_delta)
 

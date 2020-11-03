@@ -10,7 +10,8 @@ import _ACTIONet as _an
 def impute_genes_using_archetypes(
     adata: AnnData,
     genes: list,
-    archetypes_key: Optional[str] = 'ACTION_H_unified'
+    archetypes_key: Optional[str] = 'H_unified',
+    profile_key: Optional[str] = 'unified_feature_profile'
 ) -> AnnData:
     """
     Impute expression of genes by interpolating over archetype profile
@@ -23,17 +24,19 @@ def impute_genes_using_archetypes(
         List of genes to impute
     archetypes_key
         Key in `adata.obsm` that holds the archetype footprints
+    profile_key
+        Key in `adata.varm` that holds the archetype feature profile
 
     Returns
     -------
-        AnnData
-            cells x genes
+    AnnData
+        cells x genes
     """
     if archetypes_key not in adata.obsm.keys():
         raise ValueError(f'Did not find adata.obsm[\'{archetypes_key}\'].')
-    if f'{archetypes_key}_profile' not in adata.varm.keys():
+    if profile_key not in adata.varm.keys():
         raise ValueError(
-            f'Did not find adata.varm[\'{archetypes_key}_profile\']. '
+            f'Did not find adata.varm[\'{profile_key}\']. '
             'Please run pp.compute_archetype_feature_specificity() first.'
         )
     genes = adata.obs.index.intersection(genes)
@@ -47,8 +50,8 @@ def impute_genes_using_archetypes(
 def impute_specific_genes_using_archetypes(
     adata: AnnData,
     genes: list,
-    archetypes_key: Optional[str] = 'ACTION_H_unified',
-    significance: Optional[Literal['upper', 'lower']] = 'upper'
+    archetypes_key: Optional[str] = 'H_unified',
+    significance_key: Optional[str] = 'unified_feature_specificity'
 ) -> AnnData:
     """
     Impute expression of genes by interpolating over archetype profile
@@ -59,37 +62,56 @@ def impute_specific_genes_using_archetypes(
         AnnData object storing the ACTIONet results
     genes
         List of genes to impute
-    archetypes_key:
-        Key in `adata.obsm` that holds the archetype footprints
-    significance:
-        Whether to use upper or lower significant genes.
+    archetypes_key
+        Key in `adata.obsm` that contains archetype footprints
+    significance_key
+        Key in `adata.varm` that contains feature specificity
 
     Returns
     -------
-        AnnData
-            cells x genes
+    AnnData
+        cells x genes
     """
     if archetypes_key not in adata.obsm.keys():
         raise ValueError(f'Did not find adata.obsm[\'{archetypes_key}\'].')
-    if f'{archetypes_key}_{significance}_significance' not in adata.varm.keys():
+    if significance_key not in adata.varm.keys():
         raise ValueError(
-            f'Did not find adata.varm[\'{archetypes_key}_{significance}_significance\']. '
+            f'Did not find adata.varm[\'{significance_key}\']. '
             'Please run pp.compute_archetype_feature_specificity() first.'
         )
     genes = adata.obs.index.intersection(genes)
-    Z = np.log1p(adata[:, genes].varm[f'{archetypes_key}_{significance}_significance'])
+    Z = np.log1p(adata[:, genes].varm[significance_key])
     H = adata.obsm[archetypes_key].T
     return AnnData(
         X=(Z @ H).T, obs=pd.DataFrame(index=adata.obs.index), var=pd.DataFrame(index=genes)
     )
 
-def impute_genes_using_network(
+def impute_genes_using_ACTIONet(
     adata: AnnData,
     genes: list,
     alpha: Optional[float] = 0.85,
     n_threads: Optional[int] = 0,
     n_iters: Optional[int] = 5
 ) -> AnnData:
+    """Gene expression imputation using network diffusion.
+
+    Parameters
+    ----------
+    adata
+        Annotated data matrix
+    genes
+        List of genes to impute
+    alpha
+        Depth of diffusion between (0, 1)
+    n_threads
+        Number of threads. Defaults to number of threads available
+    n_iters
+        Number of diffusion iterations
+
+    Returns
+    -------
+    AnnData
+    """
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
             f'Did not find adata.obsp[\'ACTIONet\']. '

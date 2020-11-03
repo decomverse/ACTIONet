@@ -16,7 +16,7 @@ def prune_archetypes(
     min_cells: Optional[int] = 2,
     copy: Optional[bool] = False
 ) -> Optional[AnnData]:
-    """\
+    """
     Archetype pruning
 
     Initial pruning of archetypes
@@ -26,7 +26,7 @@ def prune_archetypes(
     adata:
         Current AnnData object storing the ACTIONet results
     C_trace, H_trace:
-        Output of pp.ACTION()
+        Outputs of pp.run_ACTION()
     min_specificity_z_threshold:
         Controls level of prunning for non-specific archetypes
         (larger values remove more archetypes)
@@ -72,9 +72,11 @@ def unify_archetypes(
 
     Parameters
     ----------
-    adata:
+    adata
         Current AnnData object storing the ACTIONet results
-
+    sensitivity
+    normalization_type
+    edge_threshold
     copy
         Determines whether a copy of `adata` is returned.
     Returns

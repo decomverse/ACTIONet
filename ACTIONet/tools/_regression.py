@@ -14,17 +14,16 @@ def run_simplex_regression(
 
     Parameters
     ----------
-    A:
+    A
         Matrix of independent variables (design matrix)
-    B:
+    B
         Matrix of dependent variables (response variable)
-        
     computeXtX:
         Parameter to simplex regression
 
     Returns
     -------
-    X:
+    X
         Coefficient matrix
     """
     return _an.run_simplex_regresion(A, B, computeXtX)
