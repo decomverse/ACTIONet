@@ -41,13 +41,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 		noncat.vars = setdiff(1:ncol(DF), cat.vars)
 		noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
 			x = as.numeric(DF[, i])
-			if(sum(!is.na(x)) > 0) {
-				x[is.na(x)] = 0
-				return(sum(round(x) != x) == 0)
-			}
-			else
-				return(FALSE)
-
+			return(sum(!is.na(x)) > 0) 
 		})]
 
         cat.vars = setdiff(cat.vars, noncat.num.vars)
