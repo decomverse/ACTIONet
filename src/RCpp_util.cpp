@@ -113,3 +113,13 @@ sp_mat merge_sparse_mats(sp_mat &A, sp_mat& B) {
   
   return(C);
 }
+
+// [[Rcpp::export]]
+sp_mat filter_counts(sp_mat &A, vec mito_rows) {
+	vec gene_counts = zeros(A.n_cols);
+	vec cell_counts = zeros
+  
+  sp_mat C = join_rows(A, B);
+  
+  return(C);
+}
