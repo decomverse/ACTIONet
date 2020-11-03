@@ -88,7 +88,8 @@ def annotate_archetypes_using_markers(
 
         rand_stats = np.empty((specificity_panel.shape[0], n_iters))
         for j in range(n_iters):
-            rand_samples = np.random.choice(specificity_panel.shape[1], np.sum(mask))
+            rand_samples = np.random.choice(specificity_panel.shape[1], sum(gene in specificity_genes for gene in genes))
+            rand_samples = np.array([2, 3])
             rand_A = specificity_panel[:, rand_samples]
             rand_stat = (rand_A @ sgn).flatten()
             rand_stats[:, j] = rand_stat
@@ -141,7 +142,7 @@ def annotate_cells_using_markers(
 
         rand_stats = np.empty((adata_imputed.shape[0], n_iters))
         for j in range(n_iters):
-            rand_samples = np.random.choice(adata_imputed.shape[1], np.sum(mask))
+            rand_samples = np.random.choice(adata_imputed.shape[1], sum(gene in adata_imputed.var.index for gene in genes))
             rand_A = adata_imputed.X[:, rand_samples]
             rand_stat = (rand_A @ sgn).flatten()
             rand_stats[:, j] = rand_stat

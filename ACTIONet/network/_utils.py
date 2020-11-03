@@ -32,7 +32,7 @@ def compute_archetype_core_centrality(
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
             'Did not find adata.obsp[\'ACTIONet\']. '
-            'Please run nt.build_network() first.'
+            'Please run nt.build_ACTIONet() first.'
         )
     if 'assigned_archetype' not in adata.obs.keys():
         raise ValueError(

@@ -16,8 +16,8 @@ def run_ACTIONet(
     mutual_edges_only: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 500,
-    layout_in_parallel: Optional[bool] = False,
-    unification_sensitivity: Optional[float] = 1.0,
+    layout_in_parallel: Optional[bool] = True,
+    unification_sensitivity: Optional[float] = 0.3,
     footprint_alpha: Optional[float] = 0.85,
     max_iter_ACTION: Optional[int] = 50,
     n_threads: Optional[int] = 0,
@@ -71,7 +71,7 @@ def run_ACTIONet(
     )
 
     # Build ACTIONet
-    nt.build_network(
+    nt.build_ACTIONet(
         adata,
         density=network_density,
         n_threads=n_threads,
@@ -80,7 +80,7 @@ def run_ACTIONet(
 
     # Layout ACTIONet
     if not layout_in_parallel:
-        nt.layout_network(
+        nt.layout_ACTIONet(
             adata,
             reduction_key=reduction_key,
             compactness_level=layout_compactness,
@@ -88,7 +88,7 @@ def run_ACTIONet(
             n_threads=1,
         )
     else:
-        nt.layout_network(
+        nt.layout_ACTIONet(
             adata,
             reduction_key=reduction_key,
             compactness_level=layout_compactness,
@@ -158,7 +158,7 @@ def reconstruct_ACTIONet(
     adata = adata.copy() if copy else adata
 
     # re-build ACTIONet
-    nt.build_network(
+    nt.build_ACTIONet(
         adata,
         density=network_density,
         n_threads=n_threads,
@@ -167,7 +167,7 @@ def reconstruct_ACTIONet(
 
     # layout ACTIONet
     if not layout_in_parallel:
-        nt.layout_network(
+        nt.layout_ACTIONet(
             adata,
             reduction_key=reduction_key,
             compactness_level=layout_compactness,
@@ -175,7 +175,7 @@ def reconstruct_ACTIONet(
             n_threads=1,
         )
     else:
-        nt.layout_network(
+        nt.layout_ACTIONet(
             adata,
             reduction_key=reduction_key,
             compactness_level=layout_compactness,
@@ -224,7 +224,7 @@ def rerun_layout(
     adata = adata.copy() if copy else adata
 
     # re-layout ACTIONet
-    nt.layout_network(
+    nt.layout_ACTIONet(
         adata,
         reduction_key=reduction_key,
         compactness_level=layout_compactness,

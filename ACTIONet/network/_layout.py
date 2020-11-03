@@ -6,7 +6,7 @@ from anndata import AnnData
 import _ACTIONet as _an
 from ..tools import scale_matrix
 
-def layout_network(
+def layout_ACTIONet(
     adata: AnnData,
     reduction_key: Optional[str] = 'ACTION',
     scale: Optional[bool] = True,
@@ -51,7 +51,7 @@ def layout_network(
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
             'Did not find adata.obsp[\'ACTIONet\']. '
-            'Please run nt.build_network() first.'
+            'Please run nt.build_ACTIONet() first.'
         )
 
     adata = adata.copy() if copy else adata

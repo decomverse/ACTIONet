@@ -38,3 +38,14 @@ def scale_matrix(
     if scale:
         X /= X.std(axis=0, ddof=1)
     return X
+
+def rescale_matrix(
+    X: np.ndarray,
+    log_scale: Optional[bool] = False,
+) -> np.ndarray:
+    row_sums = np.sum(X, axis=1, keepdims=True)
+    row_sums[row_sums == 0] = 1
+    scaled = np.median(row_sums) * (X / row_sums)
+    if log_scale:
+        scaled = np.log1p(scaled)
+    return scaled

@@ -93,7 +93,7 @@ def impute_genes_using_network(
     if 'ACTIONet' not in adata.obsp.keys():
         raise ValueError(
             f'Did not find adata.obsp[\'ACTIONet\']. '
-            'Please run nt.build_network() first.'
+            'Please run nt.build_ACTIONet() first.'
         )
 
     genes = adata.var.index.intersection(genes)

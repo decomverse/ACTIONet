@@ -42,11 +42,15 @@ urllib.request.urlretrieve('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbm
 
 # Read and filter the data
 adata = sc.read_10x_h5('pbmc_10k_v3.h5')
+adata.var_names_make_unique(join='.')
 an.pp.filter_adata(adata, min_cells_per_feature=0.01, min_features_per_cell=1000)
 
 # Run ACTIONet
-an.pp.reduce_kernel(adata)
+an.pp.reduce_adata(adata)
 an.run_ACTIONet(adata)
+
+# Visualize output
+an.pl.plot_ACTIONet(adata, transparency_key='node_centrality')
 
 # Export results
 adata.write('pbmc_10k_v3.h5ad')

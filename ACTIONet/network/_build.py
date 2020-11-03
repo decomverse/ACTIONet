@@ -5,7 +5,7 @@ from scipy import sparse
 
 import _ACTIONet as _an
 
-def build_network(
+def build_ACTIONet(
     adata: AnnData,
     density: Optional[float] = 1.0,
     n_threads: Optional[int] = 0,

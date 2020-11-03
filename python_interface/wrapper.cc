@@ -265,7 +265,7 @@ py::dict run_AA(arma::Mat<npdouble>&A, arma::Mat<npdouble> W0, int max_it = 50, 
 // @param max_it,min_delta Convergence parameters for archetypal analysis
 //
 // @return A named list with entries 'C' and 'H', each a list for different values of k
-py::dict run_ACTION(arma::Mat<npdouble>& S_r, int k_min = 2, int k_max = 30, int thread_no = 0, int max_it = 50, double min_delta = 0.01) {
+py::dict run_ACTION(arma::Mat<npdouble>& S_r, int k_min = 2, int k_max = 30, int thread_no = 0, int max_it = 50, double min_delta = 1e-16) {
 
 	ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
 
@@ -340,8 +340,8 @@ py::dict prune_archetypes(vector<arma::Mat<npdouble>> &C_trace, vector<arma::Mat
 			continue;
 		}
 
-		C_trace_vec[i] = C_trace[i]; //aw::conv_to<arma::Mat<npdouble>>::from(C_trace_list[i]);
-		H_trace_vec[i] = H_trace[i]; //aw::conv_to<arma::Mat<npdouble>>::from(H_trace_list[i]);
+		C_trace_vec[i+1] = C_trace[i]; //aw::conv_to<arma::Mat<npdouble>>::from(C_trace_list[i]);
+		H_trace_vec[i+1] = H_trace[i]; //aw::conv_to<arma::Mat<npdouble>>::from(H_trace_list[i]);
 	}
 
 	ACTIONet::multilevel_archetypal_decomposition results = ACTIONet::prune_archetypes(C_trace_vec, H_trace_vec, min_specificity_z_threshold, min_cells);
@@ -949,7 +949,7 @@ PYBIND11_MODULE(_ACTIONet, m) {
 		"run_ACTION",
 		py::overload_cast<arma::Mat<npdouble>&, int, int, int, int, double>(&run_ACTION),
 		"Runs multi-level ACTION decomposition method",
-		py::arg("S_r"), py::arg("k_min")=2, py::arg("k_max")=30, py::arg("thread_no")=0, py::arg("max_it")=50, py::arg("min_delta")=0.01
+		py::arg("S_r"), py::arg("k_min")=2, py::arg("k_max")=30, py::arg("thread_no")=0, py::arg("max_it")=50, py::arg("min_delta")=1e-16
 	);
 	m.def(
 		"run_ACTION_plus",

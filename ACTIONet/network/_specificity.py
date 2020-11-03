@@ -9,12 +9,12 @@ import _ACTIONet as _an
 
 def _compute_archetype_specificity(S, H):
     if issparse(S):
-        return _an.compute_archetype_feature_specificity(S, H)
+        return _an.compute_archetype_feature_specificity(S.tocsc(), H)
     return _an.compute_archetype_feature_specificity_full(S, H)
 
 def _compute_cluster_specificity(S, assignments):
     if issparse(S):
-        return _an.compute_cluster_feature_specificity(S, assignments)
+        return _an.compute_cluster_feature_specificity(S.tocsc(), assignments)
     return _an.compute_cluster_feature_specificity_full(S, assignments)
 
 def compute_archetype_feature_specificity(
