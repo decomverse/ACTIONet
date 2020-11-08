@@ -276,6 +276,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// unify_archetypes_with_ACTIONet
+List unify_archetypes_with_ACTIONet(sp_mat& G, mat& S_r, mat& C_stacked, mat& H_stacked, double sensitivity, double alpha, int thread_no);
+RcppExport SEXP _ACTIONet_unify_archetypes_with_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP sensitivitySEXP, SEXP alphaSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
+    Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes_with_ACTIONet(G, S_r, C_stacked, H_stacked, sensitivity, alpha, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
 // build_ACTIONet
 sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, bool mutual_edges_only);
 RcppExport SEXP _ACTIONet_build_ACTIONet(SEXP H_stackedSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP) {
@@ -1037,6 +1054,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 4},
+    {"_ACTIONet_unify_archetypes_with_ACTIONet", (DL_FUNC) &_ACTIONet_unify_archetypes_with_ACTIONet, 7},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},

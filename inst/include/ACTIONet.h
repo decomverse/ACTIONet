@@ -192,6 +192,7 @@ namespace ACTIONet {
 	// To unify redundant archetypes across different levels
 		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
 		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity);
+		unification_results unify_archetypes_with_ACTIONet(sp_mat& G, mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity, double alpha, int thread_no);
 		
 	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
