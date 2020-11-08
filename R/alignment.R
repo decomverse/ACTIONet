@@ -51,7 +51,7 @@ compute_pairwise_alignment <- function(reference_profile, query_profile, reduced
 	S_r.query  = t(V.alignment) %*% query_profile_centered
 	S_r.reference  = t(V.reference) %*% reference_profile_centered
 
-	X = run_simplex_regression(S_r.reference, S_r.query)
+	X = run_simplex_regression(S_r.query, S_r.reference)
 	
 	return( X )
 }
