@@ -263,8 +263,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double sensitivity, int normalization_type, double edge_threshold);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP sensitivitySEXP, SEXP normalization_typeSEXP, SEXP edge_thresholdSEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double sensitivity);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP sensitivitySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -272,9 +272,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
     Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
-    Rcpp::traits::input_parameter< int >::type normalization_type(normalization_typeSEXP);
-    Rcpp::traits::input_parameter< double >::type edge_threshold(edge_thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, sensitivity, normalization_type, edge_threshold));
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, sensitivity));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1038,7 +1036,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 6},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 4},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
