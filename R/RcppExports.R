@@ -338,6 +338,30 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, sensitivity = 1.1) {
     .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, sensitivity)
 }
 
+#' Identifies and aggregates redundant archetypes into equivalent classes
+#' (Post-ACTIONet archetype processing)
+#'
+#' @param G Adjacency matrix of the ACTIONet graph
+#' @param S_r Reduced kernel profile
+#' @param archetypes Archetype profile (S*C)
+#' @param C_stacked,H_stacked Output of reconstruct_archetypes()
+#' @param minPoints, minClusterSize, outlier_threshold HDBSCAN parameters
+#' @param reduced_dim Kernel reduction
+#' 
+#' @return A named list: \itemize{
+#' \item archetype_groups: Equivalent classes of archetypes (non-redundant)
+#' \item C_unified,H_unified: C and H matrices of unified archetypes
+#' \item sample_assignments: Assignment of samples/cells to unified archetypes
+#' }
+#' @examples
+#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
+#'	G = build_ACTIONet(prune.out$H_stacked)
+#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
+#' cell.clusters = unification.out$sample_assignments
+unify_archetypes_with_ACTIONet <- function(G, S_r, C_stacked, H_stacked, sensitivity = 1.0, alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes_with_ACTIONet`, G, S_r, C_stacked, H_stacked, sensitivity, alpha, thread_no)
+}
+
 #' Builds an interaction network from the multi-level archetypal decompositions
 #'
 #' @param H_stacked Output of the prune_archetypes() function.
