@@ -105,7 +105,7 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0, int normalization_type = 1, double edge_threshold = 0.5) {
+	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0) {
 		printf("Unify archetypes: sensitivity = %.2f (%d archs)\n", sensitivity, H_stacked.n_rows);
 								
 
@@ -134,7 +134,6 @@ namespace ACTIONet {
 			C_arch.col(i) = v;
 		}
 		uvec selected_clusters = find(1 < sum(C_arch));
-		selected_clusters.print("selected_clusters");
 		C_arch = C_arch.cols(selected_clusters);
 				
 		mat C_unified = C_norm * C_arch;
