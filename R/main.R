@@ -28,7 +28,7 @@
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
     layout.in.parallel = TRUE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification_sensitivity = 0.3, 
+    unification_sensitivity = 1.1, 
     footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
@@ -234,7 +234,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
 #' @export
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thread_no = 1, network_density = 1, mutual_edges_only = T,
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thread_no = 0, network_density = 1, mutual_edges_only = T,
     reduction_slot = "ACTIONet3D", net_slot = "ACTIONet") {
     G = colNets(ace)[[net_slot]]
 
@@ -270,7 +270,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thr
 
 #' @export
 rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
-    unification_sensitivity = 0.3,
+    unification_sensitivity = 1.1,
     reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0) {
 
     S = assays(ace)[[data_slot]]
