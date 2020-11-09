@@ -192,6 +192,7 @@ namespace ACTIONet {
 			initial_clusters_uvec(i) = i;
 		
 		vec clusters = signed_cluster(G, sensitivity, initial_clusters_uvec, 0);
+		output.archetype_group = clusters;
 		
 		mat C_arch(clusters.n_elem, max(clusters)+1);
 		for(int i = 0; i <= max(clusters); i++) {
@@ -203,7 +204,7 @@ namespace ACTIONet {
 		uvec selected_clusters = find(1 < sum(C_arch));
 		C_arch = C_arch.cols(selected_clusters);
 				
-		mat C_unified = U * C_arch;
+		mat C_unified = C_norm * C_arch;
 
 		C_unified = normalise(C_unified, 1, 0);					
 		
