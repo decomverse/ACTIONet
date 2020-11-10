@@ -334,8 +334,32 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 #' cell.clusters = unification.out$sample_assignments
-unify_archetypes <- function(S_r, C_stacked, H_stacked, min_edge_weight = 0.5, min_coreness = 0L, resolution = 1.0, min_repeat = 2L, thread_no = 0L, alpha = 0.05, beta = 0.5, outlier_threshold = 0.5, minPoints = 5L, minClusterSize = 5L, cond_threshold = 10, normalization_type = 3L, preprocess_adj = FALSE, reduce_G = FALSE, method_type = 0L, sensitivity = 0.95) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, min_edge_weight, min_coreness, resolution, min_repeat, thread_no, alpha, beta, outlier_threshold, minPoints, minClusterSize, cond_threshold, normalization_type, preprocess_adj, reduce_G, method_type, sensitivity)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, sensitivity = 1.1) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, sensitivity)
+}
+
+#' Identifies and aggregates redundant archetypes into equivalent classes
+#' (Post-ACTIONet archetype processing)
+#'
+#' @param G Adjacency matrix of the ACTIONet graph
+#' @param S_r Reduced kernel profile
+#' @param archetypes Archetype profile (S*C)
+#' @param C_stacked,H_stacked Output of reconstruct_archetypes()
+#' @param minPoints, minClusterSize, outlier_threshold HDBSCAN parameters
+#' @param reduced_dim Kernel reduction
+#' 
+#' @return A named list: \itemize{
+#' \item archetype_groups: Equivalent classes of archetypes (non-redundant)
+#' \item C_unified,H_unified: C and H matrices of unified archetypes
+#' \item sample_assignments: Assignment of samples/cells to unified archetypes
+#' }
+#' @examples
+#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
+#'	G = build_ACTIONet(prune.out$H_stacked)
+#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
+#' cell.clusters = unification.out$sample_assignments
+unify_archetypes_with_ACTIONet <- function(G, S_r, C_stacked, H_stacked, sensitivity = 1.0, alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes_with_ACTIONet`, G, S_r, C_stacked, H_stacked, sensitivity, alpha, thread_no)
 }
 
 #' Builds an interaction network from the multi-level archetypal decompositions
@@ -956,5 +980,9 @@ fast_column_sums <- function(A) {
 
 computeSparseRowVariances <- function(j, val, rm, n) {
     .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
+}
+
+merge_sparse_mats <- function(A, B) {
+    .Call(`_ACTIONet_merge_sparse_mats`, A, B)
 }
 

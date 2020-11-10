@@ -18,7 +18,6 @@ setClass("ACTIONetExperiment",
   colMaps = "SimpleList"),
   contains = "RangedSummarizedExperiment")
 
-.slot_type = S4Vectors::SimpleList()
 
 #' Creates an ACTIONetExperiment (ACE) object
 #'
@@ -32,10 +31,10 @@ setClass("ACTIONetExperiment",
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 #' @export
 ACTIONetExperiment <- function(...,
-  rowNets = .slot_type,
-  colNets = .slot_type,
-  rowMaps = .slot_type,
-  colMaps = .slot_type) {
+  rowNets = S4Vectors::SimpleList(),
+  colNets = S4Vectors::SimpleList(),
+  rowMaps = S4Vectors::SimpleList(),
+  colMaps = S4Vectors::SimpleList()) {
 
     SE <- SummarizedExperiment::SummarizedExperiment(...)
     if(!is(SE, "RangedSummarizedExperiment")) {

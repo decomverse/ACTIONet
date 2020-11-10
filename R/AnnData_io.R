@@ -39,24 +39,25 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
             256))
 
 		noncat.vars = setdiff(1:ncol(DF), cat.vars)
-		noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
-			x = as.numeric(DF[, i])
-			if(sum(!is.na(x)) > 0) {
-				x[is.na(x)] = 0
-				return(sum(round(x) != x) == 0)
-			}
-			else
-				return(FALSE)
-
-		})]
-
-        cat.vars = setdiff(cat.vars, noncat.num.vars)
+		if(length(noncat.vars) > 0) {
+			noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
+				x = as.numeric(DF[, i])
+				return(sum(!is.na(x)) > 0) 
+			})]
+		} else {
+			noncat.num.vars = noncat.vars
+		}
+		
+		if(length(cat.vars) > 0) {
+			cat.vars = setdiff(cat.vars, noncat.num.vars)
+		}
+		
         cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
-        catDF = DF[, cat.vars]
+        catDF = DF[, cat.vars, drop = F]
         catDF = apply(catDF, 2, as.character)
         catDF[is.na(catDF)] = "NA"
 
-        numDF = DF[, noncat.num.vars]
+        numDF = DF[, noncat.num.vars, drop = F]
         numDF = apply(numDF, 2, as.numeric)
         numDF[is.na(numDF)] = NA
 
@@ -292,11 +293,37 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
         stop("Please install hdf5r to wrote HDF5 files")
     }
+	
 
     if (file.exists(fname)) {
         file.remove(fname)
     }
 
+	if(is.null(colnames(ace))) {
+		colnames(ace) = paste("Cell", 1:ncol(ace), sep = "")
+	}
+	if(is.null(rownames(ace))) {
+		rownames(ace) = paste("Feature", 1:nrow(ace), sep = "")
+	}
+
+	# Make row/column-names unique
+	ucn = make.unique(colnames(ace))
+	urn = make.unique(rownames(ace))
+
+	rownames(ace) = urn
+	colnames(ace) = ucn
+
+	for(nn in names(assays(ace))) {
+		X = assays(ace)[[nn]]
+		rownames(X) = urn
+		colnames(X) = ucn
+		assays(ace)[[nn]] = X
+	}
+
+	# Ensure it can be case as an ACE object
+	ace = as(ace, "ACTIONetExperiment")
+	
+	
     h5file = H5File$new(fname, mode = "w")
 
     ## Write X (logcounts() in ace, in either sparse or dense format)
@@ -325,16 +352,22 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 
     ## Write obs (colData() in ace)
     obs.DF = as.data.frame(colData(ace))
-    if (is.null(rownames(obs.DF))) {
-        rownames(obs.DF) = paste("Cell", 1:ncol(obs.DF), sep = "")
-    }
+    if(0 < ncol(obs.DF)) {
+		obs.DF = as.data.frame(lapply(colData(ace), function(x) {
+			if(is.numeric(x) & (!is.null(names(x)))) {
+				return(factor(names(x), names(x)[match(unique(x), x)]))
+			} else {
+				return(x)
+			}
+		}))    
+	}
+	rownames(obs.DF) = colnames(ace)
+	
     write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
 
     ## Write var (matching rowData() in ace)
-    var.DF = as.data.frame(rowData(ace))
-    if (is.null(rownames(var.DF))) {
-        rownames(var.DF) = paste("Gene", 1:nrow(var.DF), sep = "")
-    }
+	var.DF = as.data.frame(rowData(ace))
+	rownames(var.DF) = rownames(ace)	
     if(class(rowRanges(ace)) == "GRanges") {
 		GR = rowRanges(ace)
 		BED = data.frame(chr = as.character(seqnames(GR)), start = start(GR), end = end(GR))

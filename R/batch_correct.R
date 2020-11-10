@@ -60,7 +60,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, reduced
 #' ace = reduce.and.batch.correct.ace.Harmony(ace)
 #' @export
 reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 50,
-    max_iter = 5, data_slot = "logcounts", norm_method = c("default", "scran", "Linnorm"),
+    max_iter = 10, data_slot = "logcounts", norm_method = c("default", "scran", "Linnorm"),
     reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
     if (!require(harmony)) {
         err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
@@ -147,7 +147,7 @@ orthogonalize.ace.batch.simple <- function(ace, batch.vec, reduction_slot = "ACT
 }
 
 #' @export
-reduce.and.batch.orthogonalize.ace <- function (ace, design.mat, reduced_dim = 50, max_iter = 5, data_slot = "logcounts",
+reduce.and.batch.orthogonalize.ace <- function (ace, design.mat, reduced_dim = 50, max_iter = 10, data_slot = "logcounts",
     norm_method = "default", reduction_slot = "ACTION", seed = 0,
     SVD_algorithm = 0) {
 	if(!is.matrix(design.mat)) {
