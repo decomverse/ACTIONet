@@ -940,7 +940,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 0.1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
+visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
         names(marker.genes) = marker.genes
     }
@@ -976,6 +976,7 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
 
         if(!is.na(export_path)) {
     			fname = sprintf('%s/%s.pdf', export_path, ifelse(celltype.name == gene, gene, sprintf('%s_%s', celltype.name, gene)));
+          dir.create(dirname(fname), showWarnings = F, recursive = T)
     			pdf(fname)
           par(mar = c(0,0,1,0))
           plot.ACTIONet.gradient(ace, x, transparency.attr, trans.z.threshold, trans.fact,
