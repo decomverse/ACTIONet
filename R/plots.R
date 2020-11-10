@@ -139,7 +139,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
         }
     }
 
-    if (is.null(labels)) {
+    if (is.null(labels) || length(unique(labels)) == 1) {
         if (class(ace) == "ACTIONetExperiment") {
             vCol = rgb(colMaps(ace)$denovo_color)
         } else {
