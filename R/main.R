@@ -7,7 +7,7 @@
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
-#' @param n_epochs Number of epochs for SGD algorithm (default=500).
+#' @param n_epochs Number of epochs for SGD algorithm (default=1000).
 #' @param thread_no Number of parallel threads (default=0)
 #' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r')
 #' @param data_slot Corresponding slot in the `ace` object the normalized counts (default='logcounts')
@@ -26,11 +26,9 @@
 #' trace = ACTIONet.out$trace # for backup
 #' @export
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
-    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 500,
-    layout.in.parallel = FALSE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
-    unification_cond_threshold = 10, unification_min_edge_weight = 0.5, unification_min_coreness = 0, unification_resolution = 1, unification_min_repeat = 0, unification_alpha = 0.05, unification_beta = 0.5,
-    unification_sensitivity = 0.95, unification_minPoints = 5, unification_minClusterSize = 5, unification_outlier_threshold = 0.5,
-    unification_normalization_type = 3, unification_preprocess_adj = FALSE, unification_reduce_G = FALSE, unification_method_type = 0,
+    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
+    layout.in.parallel = TRUE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
+    unification_sensitivity = 1.0, unification_alpha = 0.85, 
     footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
@@ -56,7 +54,6 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     colMaps(ace)[["C_stacked"]] = as(pruning.out$C_stacked, "sparseMatrix")
     colMapTypes(ace)[["C_stacked"]] = "internal"
-
 
 
     # Build ACTIONet
@@ -100,7 +97,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 
     # Identiy equivalent classes of archetypes and group them together
-	unification.out = unify_archetypes(S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, min_edge_weight = unification_min_edge_weight, min_coreness = unification_min_coreness, resolution = unification_resolution, min_repeat = unification_min_repeat, thread_no = thread_no, alpha = unification_alpha, beta = unification_beta, cond_threshold = unification_cond_threshold, minPoints = unification_minPoints, minClusterSize = unification_minClusterSize, normalization_type = unification_normalization_type, preprocess_adj = unification_preprocess_adj, reduce_G = unification_reduce_G, method_type = unification_method_type, outlier_threshold = unification_outlier_threshold, sensitivity = unification_sensitivity)    
+	unification.out = unify_archetypes_with_ACTIONet(G = G, S_r = S_r, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked, sensitivity = unification_sensitivity, alpha = unification_alpha, thread_no = thread_no)    
 
 
 	Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
@@ -174,7 +171,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 #' plot.ACTIONet(ace.updated)
 #' @export
 reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE,
-    layout_compactness = 50, layout_epochs = 500, thread_no = 0, layout.in.parallel = FALSE,
+    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout.in.parallel = FALSE,
     reduction_slot = "ACTION") {
     set.seed(0)
 
@@ -237,7 +234,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
 #' @export
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thread_no = 1, network_density = 1, mutual_edges_only = T,
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thread_no = 0, network_density = 1, mutual_edges_only = T,
     reduction_slot = "ACTIONet3D", net_slot = "ACTIONet") {
     G = colNets(ace)[[net_slot]]
 
@@ -273,9 +270,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 500, thre
 
 #' @export
 rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
-    unification_cond_threshold = 10, unification_min_edge_weight = 0.5, unification_min_coreness = 0, unification_resolution = 1, unification_min_repeat = 0, unification_alpha = 0.05, unification_beta = 0.5,
-    unification_sensitivity = 0.95, unification_minPoints = 5, unification_minClusterSize = 5, unification_outlier_threshold = 0.5,
-    unification_normalization_type = 3, unification_preprocess_adj = FALSE, unification_reduce_G = FALSE, unification_method_type = 0,
+    unification_sensitivity = 1.0, unification_alpha = 0.85,
     reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0) {
 
     S = assays(ace)[[data_slot]]
@@ -284,7 +279,7 @@ rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
     G = colNets(ace)[["ACTIONet"]]
 
-    unification.out = unify_archetypes(S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, min_edge_weight = unification_min_edge_weight, min_coreness = unification_min_coreness, resolution = unification_resolution, min_repeat = unification_min_repeat, thread_no = thread_no, alpha = unification_alpha, beta = unification_beta, cond_threshold = unification_cond_threshold, minPoints = unification_minPoints, minClusterSize = unification_minClusterSize, outlier_threshold = unification_outlier_threshold, normalization_type = unification_normalization_type, preprocess_adj = unification_preprocess_adj, reduce_G = unification_reduce_G, method_type = unification_method_type, sensitivity = unification_sensitivity)
+	unification.out = unify_archetypes_with_ACTIONet(G = G, S_r = S_r, C_stacked = C_stacked, H_stacked = H_stacked, sensitivity = unification_sensitivity, alpha = unification_alpha, thread_no = thread_no)    
 
 
     R.utils::printf("%d states\n", length(unique(unification.out$assigned_archetype)))
