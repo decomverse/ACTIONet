@@ -39,12 +39,19 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
             256))
 
 		noncat.vars = setdiff(1:ncol(DF), cat.vars)
-		noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
-			x = as.numeric(DF[, i])
-			return(sum(!is.na(x)) > 0) 
-		})]
-
-        cat.vars = setdiff(cat.vars, noncat.num.vars)
+		if(length(noncat.vars) > 0) {
+			noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
+				x = as.numeric(DF[, i])
+				return(sum(!is.na(x)) > 0) 
+			})]
+		} else {
+			noncat.num.vars = noncat.vars
+		}
+		
+		if(length(cat.vars) > 0) {
+			cat.vars = setdiff(cat.vars, noncat.num.vars)
+		}
+		
         cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
         catDF = DF[, cat.vars, drop = F]
         catDF = apply(catDF, 2, as.character)
@@ -286,6 +293,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
         stop("Please install hdf5r to wrote HDF5 files")
     }
+	
 
     if (file.exists(fname)) {
         file.remove(fname)
@@ -297,6 +305,24 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 	if(is.null(rownames(ace))) {
 		rownames(ace) = paste("Feature", 1:nrow(ace), sep = "")
 	}
+
+	# Make row/column-names unique
+	ucn = make.unique(colnames(ace))
+	urn = make.unique(rownames(ace))
+
+	rownames(ace) = urn
+	colnames(ace) = ucn
+
+	for(nn in names(assays(ace))) {
+		X = assays(ace)[[nn]]
+		rownames(X) = urn
+		colnames(X) = ucn
+		assays(ace)[[nn]] = X
+	}
+
+	# Ensure it can be case as an ACE object
+	ace = as(ace, "ACTIONetExperiment")
+	
 	
     h5file = H5File$new(fname, mode = "w")
 
