@@ -121,7 +121,7 @@ namespace ACTIONet {
 		mat Wg = cor(arch_S_r);
 		mat Hg = computeFullSim(arch_H_stacked, 1);
 
-		mat G0 = Wg % Hg;				
+		mat G0 = arma::pow(Wg, 9); // % Hg;				
 		sp_mat G = sp_mat(G0);
 		
 		uvec initial_clusters_uvec(G.n_rows);
@@ -137,7 +137,7 @@ namespace ACTIONet {
 			v(idx) = ones(idx.n_elem);
 			C_arch.col(i) = v;
 		}
-		uvec selected_clusters = find(1 < sum(C_arch));
+		uvec selected_clusters = find(2 < sum(C_arch));
 		C_arch = C_arch.cols(selected_clusters);
 				
 		mat C_unified = C_norm * C_arch;
