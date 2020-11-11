@@ -33,7 +33,7 @@ get.pseudobulk.SE <- function(sce, batch_attr, ensemble = FALSE, bins = 20, assa
   }
 
   n_cells = sapply(counts.list, NCOL)
-  nnz_feat_mean = sapply(counts.list, function(X) mean(ACTIONet::fast_column_sums(X > 0)))
+  nnz_feat_mean = sapply(counts.list, function(X) mean(ACTIONet::fast_column_sums(as(X > 0, "dgCMatrix"))))
   sample = factor(names(IDX))
   cd = data.frame(n_cells = n_cells, nnz_feat_mean = nnz_feat_mean, sample = sample)
 
