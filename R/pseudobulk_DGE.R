@@ -5,10 +5,10 @@ create_formula <- function(vars){
   return(fml)
 }
 
-get.pseudobulk.SE <- function(sce, batch_attr, ensemble = FALSE, bins = 20, assay = "counts", colData = NULL, pseudocount = 0, with_S = FALSE, with_E = FALSE, with_V = FALSE, BPPARAM = SerialParam()){
+get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assay = "counts", colData = NULL, pseudocount = 0, with_S = FALSE, with_E = FALSE, with_V = FALSE, BPPARAM = SerialParam()){
 
-  counts.mat = SummarizedExperiment::assays(sce)[[assay]]
-  IDX = ACTIONet:::.get_ace_split_IDX(sce, batch_attr)
+  counts.mat = SummarizedExperiment::assays(ace)[[assay]]
+  IDX = ACTIONet:::.get_ace_split_IDX(ace, batch_attr)
   counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = F])
   counts.list = lapply(counts.list, as, "dgCMatrix")
   se.assays = list()
@@ -44,7 +44,7 @@ get.pseudobulk.SE <- function(sce, batch_attr, ensemble = FALSE, bins = 20, assa
   }
 
   cd = droplevels(cd)
-  se = SummarizedExperiment(assays = se.assays, colData = cd, rowData = rowData(sce))
+  se = SummarizedExperiment(assays = se.assays, colData = cd, rowData = rowData(ace))
 
   if(ensemble == TRUE){
     metadata(se)$bins = bins
