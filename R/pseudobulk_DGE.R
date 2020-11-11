@@ -111,12 +111,6 @@ make.ensemble.assays <- function(counts.list, bins, pseudocount, with_S = FALSE,
 
   mr.out = list(assays = mr.assays)
 
-  if(libSizes == TRUE){
-    LS = Matrix::t(sapply(sorted.list, function(L) L$LS))
-    colnames(LS) = paste0("LS",1:bins)
-    mr.out$libSizes = LS
-  }
-
   invisible(gc())
   return(mr.out)
 }
@@ -217,7 +211,7 @@ run.ensemble.pseudobulk.Limma <- function(se, design, bins = NULL, bins_use = NU
 
   mat.lfc = sapply(out, function(tbl) tbl$logFC)
   lfc_mean = apply(mat.lfc, 1, function(r) mean(r, na.rm = T, trim = 0.25))
-  lfc_max = apply(mat.lfc, 1, function(r) r[which.max(abs(r))])
+  # lfc_max = apply(mat.lfc, 1, function(r) r[which.max(abs(r))])
 
   mat.t = sapply(out, function(tbl) tbl$t)
   t_mean = rowMeans(mat.t, na.rm = T)
@@ -232,7 +226,7 @@ run.ensemble.pseudobulk.Limma <- function(se, design, bins = NULL, bins_use = NU
   corr.pvals = 10^-corr.pvals
 
   rdat = rowData(se)[rownames(se) %in% common, ]
-  res = data.frame(rdat, aveExpr = bm_mean, log2FCMean = lfc_mean, log2FCMax = lfc_max, tStatMean = t_mean, BStatMean = B_mean, pvalue = corr.pvals, padj = p.adjust(corr.pvals, method = p_adj_method))
+  res = data.frame(rdat, aveExpr = bm_mean, log2FCMean = lfc_mean, tStatMean = t_mean, BStatMean = B_mean, pvalue = corr.pvals, padj = p.adjust(corr.pvals, method = p_adj_method))
   invisible(gc())
   return(res)
 }
@@ -277,7 +271,7 @@ variance.adjusted.DE.Limma <- function(se, design, slot_E = "counts", slot_V = N
   }))
   W.masked[W.masked == 0] = 1e-16
 
-  selected.vars = ACTIONet::fast_column_sums(d > 0) >= min.covered.samples
+  selected.vars = ACTIONet::fast_column_sums(design.mat > 0) >= min.covered.samples
 
   selected.genes = setdiff(1:nrow(W.masked), which(ACTIONet::fast_row_sums(apply(design.mat[, selected.vars], 2, function(x) {
     mm =  (x > 0)
