@@ -69,6 +69,7 @@
     }
 }
 
+#' @export
 fastColSums <- function(mat){
   if(ACTIONet::is.sparseMatrix(mat) && class(mat) != "dgCMatrix"){
     mat = as(mat, "dgCMatrix")
@@ -77,6 +78,7 @@ fastColSums <- function(mat){
   return(out)
 }
 
+#' @export
 fastRowSums <- function(mat){
   if(ACTIONet::is.sparseMatrix(mat) && class(mat) != "dgCMatrix"){
     mat = as(mat, "dgCMatrix")
@@ -85,16 +87,19 @@ fastRowSums <- function(mat){
   return(out)
 }
 
+#' @export
 fastColMeans <- function(mat){
   E = ACTIONet::fast_column_sums(mat)/nrow(mat)
   return(E)
 }
 
+#' @export
 fastRowMeans <- function(mat){
   E = ACTIONet::fast_row_sums(mat)/ncol(mat)
   return(E)
 }
 
+#' @export
 fastRowVars <- function (mat){
   mat <- as(mat, "dgTMatrix")
   E = fastRowMeans(mat)

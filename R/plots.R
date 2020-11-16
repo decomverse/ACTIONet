@@ -940,13 +940,19 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.85, export_path = NA) {
+visualize.markers <- function(ace, marker.genes, feat.attr = NULL, assay.name = "logcounts", transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.9, export_path = NA) {
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
         names(marker.genes) = marker.genes
     }
 
-    gg = intersect(unique(unlist(marker.genes)), rownames(ace))
-    all.marker.genes = sort(intersect(gg, rownames(ace)))
+    if(is.null(feat.attr)){
+      feats = rownames(ace)
+    } else{
+      feats = SummarizedExperiment::rowData(ace)[[feat.attr]]
+    }
+
+    gg = intersect(unique(unlist(marker.genes)), feats)
+    all.marker.genes = sort(intersect(gg, feats))
     if (length(all.marker.genes) == 0) {
         return()
     }
@@ -954,7 +960,7 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
     if (alpha_val > 0)
         imputed.marker.expression = impute.genes.using.ACTIONet(ace, all.marker.genes,
             alpha_val = alpha_val) else {
-        imputed.marker.expression = Matrix::t(assays(ace)[["logcounts"]])
+        imputed.marker.expression = Matrix::t(assays(ace)[[assay.name]])
     }
 
     lapply(all.marker.genes, function(gene) {
@@ -983,7 +989,6 @@ visualize.markers <- function(ace, marker.genes, transparency.attr = NULL, trans
           node.size, CPal = CPal, title = gene, alpha_val = 0)
     			dev.off()
     		}
-
     })
 }
 
