@@ -84,6 +84,29 @@ Rcpp::NumericVector fast_column_sums(SEXP &A) {
 	return(arma2vec(sum_vec));
 }
 
+
+
+// [[Rcpp::export]]
+Rcpp::NumericVector fast_row_max(SEXP &A) {
+	vec sum_vec;
+    if (Rf_isS4(A)) {
+		sp_mat X = as<arma::sp_mat>(A);
+		sum_vec = zeros(X.n_rows);
+
+		sp_mat::const_iterator it     = X.begin();
+		sp_mat::const_iterator it_end = X.end();
+		for(; it != it_end; ++it) {
+			sum_vec[it.row()] = std::max(sum_vec[it.row()], (*it));
+		}
+    } else {
+		mat X = as<arma::mat>(A);
+		sum_vec = max(X, 1);
+    }
+
+	return(arma2vec(sum_vec));
+}
+
+
 // Adapted from https://github.com/GreenleafLab/MPAL-Single-Cell-2019/blob/master/scRNA_02_Cluster_Disease_w_Reference_v1.R
 // [[Rcpp::export]]
 Rcpp::NumericVector computeSparseRowVariances(IntegerVector j, NumericVector val, NumericVector rm, int n) {

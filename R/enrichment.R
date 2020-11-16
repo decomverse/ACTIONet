@@ -74,19 +74,20 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
             gs))
         rownames(associations) = rownames(scores)
     }
-    associations = as.matrix(associations)
+    associations = as(associations, "sparseMatrix")
 
     common.features = intersect(rownames(associations), rownames(scores))
     L = min(L, length(common.features))
 
+	enrichment.out = assess_enrichment(scores[common.features, ], associations[common.features, ])
 
-    Enrichment.mat = t(assess_enrichment(scores[common.features, ], associations[common.features,
-        ], L))
-
-    rownames(Enrichment.mat) = colnames(associations)
-
-    return(Enrichment.mat)
-}
+	rownames(enrichment.out$logPvals) = colnames(associations)
+	rownames(enrichment.out$thresholds) = colnames(associations)
+	enrichment.out$scores = scores
+    
+    
+    return(enrichment.out)
+}	
 
 #' Performs geneset enrichment analysis on archetypes
 #'
@@ -101,27 +102,34 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
 #' associations = gProfilerDB_human$SYMBOL$WP
 #' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
 #' @export
-assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
-	scores = rowMaps(ace)[[specificity.slot]]
-	common.genes = intersect(rownames(ace), rownames(associations))
-
-	scores = as.matrix(scores[common.genes, ])
+assess.geneset.enrichment.from.archetypes <- function (ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
+    scores = rowMaps(ace)[[specificity.slot]]
 	if(max(scores) > 100) {
 		scores = log1p(scores)
 	}
-	associations = as(associations[common.genes, ], 'dgCMatrix')
-	col.mask = (ACTIONet::fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
-	associations = associations[, col.mask]
-	associations = associations[, -1]
+    
+    if (is.list(associations)) {
+        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
+            gs))
+        rownames(associations) = rownames(scores)
+    }
+    common.features = intersect(rownames(associations), rownames(scores))
+
+	rows = match(common.features, rownames(associations))
+	associations = as(associations[rows, ], 'dgCMatrix')
+	scores = scores[common.features, ]
+	
+    L = min(L, length(common.features))
+
 	enrichment.out = assess_enrichment(scores, associations)
 
 	rownames(enrichment.out$logPvals) = colnames(associations)
 	rownames(enrichment.out$thresholds) = colnames(associations)
 	enrichment.out$scores = scores
-
-	return(enrichment.out)
-}
-
+    
+    
+    return(enrichment.out)
+}	
 
 
 #' Performs geneset enrichment analysis on archetypes
@@ -139,13 +147,26 @@ assess.geneset.enrichment.from.archetypes <- function(ace, associations, min.cou
 #' @export
 assess.peakset.enrichment.from.archetypes <- function(ace, associations, min.counts = 0, specificity.slot = "unified_feature_specificity") {
 	scores = rowMaps(ace)[[specificity.slot]]
-	common.genes = intersect(rownames(ace), rownames(associations))
-
-	scores = as.matrix(scores[common.genes, ])
 	if(max(scores) > 100) {
 		scores = log1p(scores)
 	}
+	rownames(scores) = rownames(ace)
+
+    if (is.list(associations)) {
+        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
+            gs))
+        rownames(associations) = rownames(scores)
+    }
+    common.features = intersect(rownames(associations), rownames(ace))
+
+	rows = match(common.features, rownames(associations))
+	associations = as(associations[rows, ], 'dgCMatrix')
+	scores = scores[common.features, ]
+	
+		
 	associations = as(associations[common.genes, ], 'sparseMatrix')
+	
+	
 	col.mask = (ACTIONet::fast_column_sums(associations) > min.counts) #& (Matrix::colSums(associations) < nrow(associations)*0.1)
 	associations = associations[, col.mask]
 	associations = associations[, -1]
