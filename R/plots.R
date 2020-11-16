@@ -940,15 +940,15 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' x = logcounts(ace)['CD14', ]
 #' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, feat_attr = NULL, assay.name = "logcounts", transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.9, export_path = NA) {
+visualize.markers <- function(ace, marker.genes, feat.attr = NULL, assay.name = "logcounts", transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", alpha_val = 0.9, export_path = NA) {
     if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
         names(marker.genes) = marker.genes
     }
 
-    if(is.null()){
+    if(is.null(feat.attr)){
       feats = rownames(ace)
     } else{
-      feats = SummarizedExperiment::rowData(ace)[[feat_attr]]
+      feats = SummarizedExperiment::rowData(ace)[[feat.attr]]
     }
 
     gg = intersect(unique(unlist(marker.genes)), feats)
