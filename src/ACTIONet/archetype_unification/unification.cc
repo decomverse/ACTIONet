@@ -106,7 +106,7 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked) {
+	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.95) {
 		printf("Unify archetypes (%d archs)\n", H_stacked.n_rows);
 														
 		unification_results output;
@@ -116,11 +116,11 @@ namespace ACTIONet {
 		mat S_r_arch = S_r * Ht_norm;
 		
 		
-		// Filter noisy archetypes
-		vec x = trans(sum(abs(S_r_arch)));
-		vec z = zscore(x);
-		S_r_arch = S_r_arch.cols(find(z > -1));
-		C_norm = C_norm.cols(find(z > -1));
+		// Filter noisy archetypes		
+		vec x = trans(sqrt(sum(square(S_r_arch))));
+		vec z = robust_zscore(x);
+		S_r_arch = S_r_arch.cols(find(z > z_threshold));
+		C_norm = C_norm.cols(find(z > z_threshold));
 		
 		
 		// Normalize wrt norm-1
@@ -144,7 +144,7 @@ namespace ACTIONet {
 			vec cc_vals = v(find(is_selected == 1));
 			double mm = max(cc_vals);
 			
-			if(0.9 < mm) {
+			if(cor_threshold < mm) {
 				continue;
 			}
 			is_selected(j) = 1;
@@ -152,7 +152,17 @@ namespace ACTIONet {
 		uvec idx = find(is_selected == 1);		
 		
 		mat C_unified = C_norm.cols(idx);
-		mat W_unified = S_r_arch.cols(idx);				
+		mat W_unified = S_r_arch.cols(idx);
+				
+		
+		field<mat> res_AA = run_AA(S_r_arch, W_unified, 50, 1e-16);
+		mat C_AA = res_AA(0);	
+		mat H_AA = res_AA(1);		
+						
+		W_unified = S_r_arch * C_AA;
+		C_unified = C_norm * C_AA;
+		
+		
 		mat H_unified = run_simplex_regression(W_unified, S_r, false);			
 
 
