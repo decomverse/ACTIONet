@@ -6,6 +6,7 @@ vector<double> Corrector::vals;
 
 namespace ACTIONet {
 	mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters = uvec(), int seed = 0);
+	mat signed_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters = uvec(), int seed = 0);
 	
 	double Kappa(double p, double q) {
 		double a = 0.0, b = 0.0;
@@ -105,46 +106,53 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0) {
-		printf("Unify archetypes: sensitivity = %.2f (%d archs)\n", sensitivity, H_stacked.n_rows);
-								
-
+	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked) {
+		printf("Unify archetypes (%d archs)\n", H_stacked.n_rows);
+														
 		unification_results output;
 
 		mat C_norm = normalise(C_stacked, 1, 0);
-		mat Ht_norm = normalise(trans(H_stacked), 1, 0);		
+		mat Ht_norm = normalise(trans(H_stacked), 1, 0);					
+		mat S_r_arch = S_r * Ht_norm;
 		
-		//mat W_stacked = S_r * C_norm;
-		mat arch_H_stacked = H_stacked * Ht_norm;
-		mat arch_S_r = S_r * Ht_norm;
 		
-		mat Wg = cor(arch_S_r);
-		mat Hg = computeFullSim(arch_H_stacked, 1);
-
-		mat G0 = arma::pow(Wg, 9); // % Hg;				
-		sp_mat G = sp_mat(G0);
+		// Filter noisy archetypes
+		vec x = trans(sum(abs(S_r_arch)));
+		vec z = zscore(x);
+		S_r_arch = S_r_arch.cols(find(z > -1));
+		C_norm = C_norm.cols(find(z > -1));
 		
-		uvec initial_clusters_uvec(G.n_rows);
-		for (int i = 0; i < G.n_rows; i++) 
-			initial_clusters_uvec(i) = i;
 		
-		vec clusters = signed_cluster(G, sensitivity, initial_clusters_uvec, 0);
+		// Normalize wrt norm-1
+		S_r_arch = normalise(S_r_arch, 1, 0);
 		
-		mat C_arch(clusters.n_elem, max(clusters)+1);
-		for(int i = 0; i <= max(clusters); i++) {
-			uvec idx = find(clusters == i);
-			vec v = zeros(clusters.n_elem);
-			v(idx) = ones(idx.n_elem);
-			C_arch.col(i) = v;
-		}
-		uvec selected_clusters = find(2 < sum(C_arch));
-		C_arch = C_arch.cols(selected_clusters);
 				
-		mat C_unified = C_norm * C_arch;
-
-		C_unified = normalise(C_unified, 1, 0);					
+		// Run SPA to order columns
+		int dim = min(100, (int)min(S_r_arch.n_cols, S_r_arch.n_rows));		
+		SPA_results res = run_SPA(S_r_arch, dim);
+		uvec selected_columns = res.selected_columns;
 		
-		mat W_unified = S_r * C_unified;
+		
+		
+		// Prune selected columns in order
+		mat CC = cor(S_r_arch);
+		vec is_selected = zeros(S_r_arch.n_cols);
+		is_selected(selected_columns(0)) = 1;		
+		for(int i = 1; i < dim; i++) {			
+			int j = selected_columns[i];
+			vec v = CC.col(j);
+			vec cc_vals = v(find(is_selected == 1));
+			double mm = max(cc_vals);
+			
+			if(0.9 < mm) {
+				continue;
+			}
+			is_selected(j) = 1;
+		}		
+		uvec idx = find(is_selected == 1);		
+		
+		mat C_unified = C_norm.cols(idx);
+		mat W_unified = S_r_arch.cols(idx);				
 		mat H_unified = run_simplex_regression(W_unified, S_r, false);			
 
 
@@ -156,72 +164,8 @@ namespace ACTIONet {
 		
 		//output.dag_adj = dag_adj;
 		//output.dag_node_annotations = dag_node_annotations;
-		
 
 		return(output);
 	}
-
-
-	unification_results unify_archetypes_with_ACTIONet(sp_mat& Adj, mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0, double alpha = 0.85, int thread_no = 0) {
-		printf("Unify archetypes: sensitivity = %.2f (%d archs)\n", sensitivity, H_stacked.n_rows);
-								
-
-		unification_results output;
-
-		mat C_norm = normalise(C_stacked, 1, 0);
-		
-		sp_mat X0 = sp_mat(normalise(trans(H_stacked), 1, 0));
-		mat U;
-		if(alpha == 0) {
-			U = mat(X0);
-		} else {
-			U = compute_network_diffusion(Adj, X0, thread_no, alpha, 3);			
-		}
-		mat Hg = computeFullSim(U, thread_no);
-
-		
-		//mat W_stacked = S_r * C_norm;
-		mat arch_S_r = S_r * U;	
-		mat Wg = cor(arch_S_r);
-
-		mat G0 = Wg % Hg;				
-		sp_mat G = sp_mat(G0);
-		
-		uvec initial_clusters_uvec(G.n_rows);
-		for (int i = 0; i < G.n_rows; i++) 
-			initial_clusters_uvec(i) = i;
-		
-		vec clusters = signed_cluster(G, sensitivity, initial_clusters_uvec, 0);
-		output.archetype_group = clusters;
-		
-		mat C_arch(clusters.n_elem, max(clusters)+1);
-		for(int i = 0; i <= max(clusters); i++) {
-			uvec idx = find(clusters == i);
-			vec v = zeros(clusters.n_elem);
-			v(idx) = ones(idx.n_elem);
-			C_arch.col(i) = v;
-		}
-		uvec selected_clusters = find(1 < sum(C_arch));
-		C_arch = C_arch.cols(selected_clusters);
-				
-		mat C_unified = C_norm * C_arch;
-
-		C_unified = normalise(C_unified, 1, 0);					
-		
-		mat W_unified = S_r * C_unified;
-		mat H_unified = run_simplex_regression(W_unified, S_r, false);			
-
-
-		uvec assigned_archetypes = trans(index_max( H_unified, 0 ));
-		
-		output.C_unified = C_unified;
-		output.H_unified = H_unified;
-		output.assigned_archetypes = assigned_archetypes;
-		
-		//output.dag_adj = dag_adj;
-		//output.dag_node_annotations = dag_node_annotations;
-		
-
-		return(output);
-	}
+	
 }
