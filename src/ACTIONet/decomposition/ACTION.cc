@@ -241,44 +241,53 @@ namespace ACTIONet {
 		uvec K(k); // selected columns from A
 
 
-		rowvec normM = sum(A % A, 0);
+		rowvec normM = sum(square(A), 0);
 		rowvec normM1 = normM;
 
 		mat U(A.n_rows, k);
 
 		vec norm_trace = zeros(k);
 		double eps = 1e-6;
-		for (int i = 0; i < k; i++) {
+		
+		for (int i = 1; i <= k; i++) {
 			// Find the column with maximum norm. In case of having more than one column with almost very small diff in norm, pick the one that originally had the largest norm
 			double a = max(normM);
-			norm_trace(i) = a;
+			norm_trace(i-1) = a;
 
 			uvec b = find((a*ones(1, n)-normM)/a <= eps);
 
 			if(b.n_elem > 1) {
 				uword idx = index_max(normM1(b));
-				K(i) = b(idx);
+				K(i-1) = b(idx);
+				b.print("b");
 			}
 			else {
-				K(i) = b(0);
+				K(i-1) = b(0);
 			}
 
 			// Pick column
-			U.col(i) = A.col(K(i));
+			U.col(i-1) = A.col(K(i-1));
 
 			// Orthogonalize with respect to current basis
-			for (int j = 0; j < i-1; j++) {
-				U.col(i) = U.col(i) - dot(U.col(j), U.col(i)) * U.col(j);
+			if(i > 1) {
+				for (int j = 1; j <= i-1; j++) {
+					U.col(i-1) = U.col(i-1) - sum(U.col(j-1) % U.col(i-1)) * U.col(j-1);
+				}
 			}
-			U.col(i) = U.col(i)/ norm(U.col(i), 2);
+			double nm = norm(U.col(i-1), 2);
+			if(nm > 0)
+				U.col(i-1) /= nm;
 
 			// Update column norms
-			vec u = U.col(i);
-			for (int j = i-1; 0 <= j; j--) {
-				u = u - dot(U.col(j), u)*U.col(j);
-			}			
-			rowvec r = u.t()*A;			
-			normM = normM - (r % r);
+			vec u = U.col(i-1);
+			if(i > 1) {
+				for (int j = i-1; 1 <= j; j--) {
+					u = u - sum(U.col(j-1) % u)*U.col(j-1);
+				}			
+			}
+			normM = normM - square(u.t()*A);
+			normM.transform( [](double val) { return (val < 0?0:val); } );
+			
 		}
 
 		res.selected_columns = K;

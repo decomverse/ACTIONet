@@ -371,14 +371,15 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 
     M = apply(W, 1, max)
 
-    Z = Matrix::t(apply(W, 1, function(w) (w - min(w))/(max(w) - min(w))))
+	Z = W
+    #Z = Matrix::t(apply(W, 1, function(w) (w - min(w))/(max(w) - min(w))))
     # Z = t(scale(t(W))) Z[Z > 3] = 3 Z[Z < -3] = -3
     ht = Heatmap(Z, name = "Expression (scaled)", cluster_rows = F, cluster_columns = F,
         col = gradPal, row_title = row.title, column_title = column.title, column_names_gp = gpar(fontsize = 8,
             fontface = "bold"), row_names_gp = gpar(fontsize = 8, fontface = "bold",
             col = rowPal), column_title_gp = gpar(fontsize = 14, fontface = "bold"),
         row_title_gp = gpar(fontsize = 14, fontface = "bold"), row_names_side = "left",
-        rect_gp = gpar(col = "black"))
+        rect_gp = gpar(col = "black"), row_names_max_width = unit(100, "cm"), column_names_max_height = unit(100, "cm"))
 
     return(ht)
 }
