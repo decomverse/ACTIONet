@@ -106,7 +106,7 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.95) {
+	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.5, unsigned int magnification = 3) {
 		printf("Unify archetypes (%d archs)\n", H_stacked.n_rows);
 														
 		unification_results output;
@@ -124,8 +124,8 @@ namespace ACTIONet {
 		
 		
 		// Normalize wrt norm-1
-		S_r_arch = normalise(S_r_arch, 1, 0);
-		
+		//S_r_arch = normalise(S_r_arch, 1, 0);
+
 				
 		// Run SPA to order columns
 		int dim = min(100, (int)min(S_r_arch.n_cols, S_r_arch.n_rows));		
@@ -136,6 +136,8 @@ namespace ACTIONet {
 		
 		// Prune selected columns in order
 		mat CC = cor(S_r_arch);
+		CC = pow(CC, 2*magnification-1);
+		
 		vec is_selected = zeros(S_r_arch.n_cols);
 		is_selected(selected_columns(0)) = 1;		
 		for(int i = 1; i < dim; i++) {			
