@@ -60,9 +60,9 @@ def prune_archetypes(
 
 def unify_archetypes(
     adata: AnnData,
-    sensitivity: Optional[float] = 1.0,
-    normalization_type: Literal[1, 3] = 1,
-    edge_threshold: Optional[float] = 0.5,
+    z_threshold: Optional[float] = -1.0,
+    cor_threshold: Optional[float] = 0.5,
+    magnification: Optional[int] = 3,
     copy: Optional[bool] = False
 ) -> AnnData:
     """\
@@ -74,9 +74,9 @@ def unify_archetypes(
     ----------
     adata
         Current AnnData object storing the ACTIONet results
-    sensitivity
-    normalization_type
-    edge_threshold
+    z_threshold
+    cor_threshold
+    magnification
     copy
         Determines whether a copy of `adata` is returned.
     Returns
@@ -115,9 +115,9 @@ def unify_archetypes(
         S_r,
         C,
         H,
-        sensitivity,
-        normalization_type,
-        edge_threshold,
+        z_threshold,
+        cor_threshold,
+        magnification,
     )
 
     adata.obs['assigned_archetype'] = unified['assigned_archetypes']

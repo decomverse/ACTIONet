@@ -6,6 +6,7 @@ vector<double> Corrector::vals;
 
 namespace ACTIONet {
 	mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters = uvec(), int seed = 0);
+	mat signed_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters = uvec(), int seed = 0);
 	
 	double Kappa(double p, double q) {
 		double a = 0.0, b = 0.0;
@@ -105,93 +106,67 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0, int normalization_type = 1, double edge_threshold = 0.5) {
-		printf("Unify archetypes: sensitivity = %.2f (%d archs)\n", sensitivity, H_stacked.n_rows);
-								
-
+	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.5, unsigned int magnification = 3) {
+		printf("Unify archetypes (%d archs)\n", H_stacked.n_rows);
+														
 		unification_results output;
 
 		mat C_norm = normalise(C_stacked, 1, 0);
-		//mat W_stacked = S_r * C_norm;
-		mat arch_H_stacked = H_stacked * C_norm;
-
-
-		mat G = computeFullSim(arch_H_stacked, 1);
-		G.diag().zeros();		
-		G.transform( [edge_threshold](double val) { return (val < edge_threshold? 0:val); } );
-
-		if(normalization_type == 1) {
-			G = normalise(G, 1, 0)*G.n_rows;
-		}
-		else if(normalization_type == 3) {
-			G = NetEnh(G)*G.n_rows;						
-		}
+		mat Ht_norm = normalise(trans(H_stacked), 1, 0);					
+		mat S_r_arch = S_r * Ht_norm;
 		
 		
-		int dim = std::min((int)G.n_cols, 100);
-		SPA_results res = run_SPA(G, dim);
+		// Filter noisy archetypes		
+		vec x = trans(sqrt(sum(square(S_r_arch))));
+		vec z = robust_zscore(x);
+		S_r_arch = S_r_arch.cols(find(z > z_threshold));
+		C_norm = C_norm.cols(find(z > z_threshold));
 		
-		uvec selected_columns = res.selected_columns;
-
-/*
-		output.C_unified = G_red;
-		output.H_unified = conv_to<mat>::from(selected_columns);
-		output.assigned_archetypes = selected_archs;
 		
-		return(output);
-*/
-		
-		printf("Computing lead independent vertex set\n"); fflush(stdout);	
-		mat subG = G(selected_columns, selected_columns);
-			
-		vec is_selected = zeros(selected_columns.n_elem);
-		for(int i = 0; i < selected_columns.n_elem; i++) {
-			vec N = subG.col(i);
-			vec neighbors_contrib = vec( trans(N) * is_selected );
-			double w = neighbors_contrib(0);
-			if(w <= sensitivity) {
-				//printf("pick %d (N. contrib = %f)\n", i, w);
-				is_selected(i) = 1;
-			} else {
-				//printf("drop %d (N. contri = %f)\n", i, w);
-			}
-		}
-		printf("Selected %d states\n", (int)sum(is_selected));
+		// Normalize wrt norm-1
+		//S_r_arch = normalise(S_r_arch, 1, 0);
 
-		uvec idx = find(is_selected == 1);
-		uvec selected_archs = selected_columns(idx);
-
-
-		mat G_ext = G(selected_columns, selected_columns);
-		G_ext.diag() = 10.0 * ones(G_ext.n_rows);
-		G_ext = normalise(G_ext, 1, 0);
-		
-		mat C_avg = C_norm.cols(selected_columns) * G_ext;
-		mat C_unified = C_avg.cols(idx);
 				
-		/*
-		mat G_ext = G;
-		G_ext.diag() = 5.0 * ones(G_ext.n_rows);
-		G_ext = normalise(G_ext, 1, 0);
-		
-		mat C_avg = C_norm * G_ext;
-		mat C_unified = C_avg.cols(selected_archs);
-		*/
-		
-		//mat C_unified = C_norm.cols(selected_arch);
+		// Run SPA to order columns
+		int dim = min(100, (int)min(S_r_arch.n_cols, S_r_arch.n_rows));		
+		SPA_results res = run_SPA(S_r_arch, dim);
+		uvec selected_columns = res.selected_columns;
 		
 		
-		C_unified = normalise(C_unified, 1, 0);					
+		
+		// Prune selected columns in order
+		mat CC = cor(S_r_arch);
+		CC = pow(CC, 2*magnification-1);
+		
+		vec is_selected = zeros(S_r_arch.n_cols);
+		is_selected(selected_columns(0)) = 1;		
+		for(int i = 1; i < dim; i++) {			
+			int j = selected_columns[i];
+			vec v = CC.col(j);
+			vec cc_vals = v(find(is_selected == 1));
+			double mm = max(cc_vals);
+			
+			if(cor_threshold < mm) {
+				continue;
+			}
+			is_selected(j) = 1;
+		}		
+		uvec idx = find(is_selected == 1);		
+		
+		mat C_unified = C_norm.cols(idx);
+		mat W_unified = S_r_arch.cols(idx);
+				
+		
+		field<mat> res_AA = run_AA(S_r_arch, W_unified, 50, 1e-16);
+		mat C_AA = res_AA(0);	
+		mat H_AA = res_AA(1);		
+						
+		W_unified = S_r_arch * C_AA;
+		C_unified = C_norm * C_AA;
 		
 		
-		mat W_unified = S_r * C_unified;
 		mat H_unified = run_simplex_regression(W_unified, S_r, false);			
-		
 
-		/*
-		mat A = H_stacked * C_unified;
-		mat H_unified = run_simplex_regression(A, H_stacked, false);			
-		*/
 
 		uvec assigned_archetypes = trans(index_max( H_unified, 0 ));
 		
@@ -201,8 +176,8 @@ namespace ACTIONet {
 		
 		//output.dag_adj = dag_adj;
 		//output.dag_node_annotations = dag_node_annotations;
-		
 
 		return(output);
 	}
+	
 }

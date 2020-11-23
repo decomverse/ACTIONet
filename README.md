@@ -49,8 +49,13 @@ an.pp.filter_adata(adata, min_cells_per_feature=0.01, min_features_per_cell=1000
 an.pp.reduce_adata(adata)
 an.run_ACTIONet(adata)
 
+# Annotate cell-types
+marker_genes, directions, names = an.tl.load_markers('PBMC_Monaco2019_12celltypes')
+cell_labels, confidences, Z = an.tl.annotate_cells_using_markers(adata, marker_genes, directions, names)
+adata.obs['celltypes'] = cell_labels
+
 # Visualize output
-an.pl.plot_ACTIONet(adata, transparency_key='node_centrality')
+an.pl.plot_ACTIONet(adata, 'celltypes', transparency_key='node_centrality')
 
 # Export results
 adata.write('pbmc_10k_v3.h5ad')

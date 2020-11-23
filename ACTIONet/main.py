@@ -17,7 +17,9 @@ def run_ACTIONet(
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 500,
     layout_in_parallel: Optional[bool] = True,
-    unification_sensitivity: Optional[float] = 0.3,
+    unification_threshold: Optional[float] = 0.5,
+    unification_magnitude: Optional[int] = 3,
+    unification_z_threshold: Optional[float] = -3.0,
     footprint_alpha: Optional[float] = 0.85,
     max_iter_ACTION: Optional[int] = 50,
     n_threads: Optional[int] = 0,
@@ -99,9 +101,9 @@ def run_ACTIONet(
     # Identiy equivalent classes of archetypes and group them together
     pp.unify_archetypes(
         adata,
-        sensitivity=unification_sensitivity,
-        normalization_type=1,
-        edge_threshold=0.5,
+        z_threshold=unification_z_threshold,
+        cor_threshold=unification_threshold,
+        magnification=unification_magnitude,
     )
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
@@ -248,7 +250,9 @@ def rerun_archetype_aggregation(
     mutual_edges_only: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 500,
-    unification_sensitivity: Optional[float] = 0.3,
+    unification_threshold: Optional[float] = 0.5,
+    unification_magnitude: Optional[int] = 3,
+    unification_z_threshold: Optional[float] = -3.0,
     footprint_alpha: Optional[float] = 0.85,
     n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
@@ -256,9 +260,10 @@ def rerun_archetype_aggregation(
     adata = adata.copy() if copy else adata
 
     pp.unify_archetypes(
-        sensitivity=unification_sensitivity,
-        normalization_type=1,
-        edge_threshold=0,
+        adata,
+        z_threshold=unification_z_threshold,
+        cor_threshold=unification_threshold,
+        magnification=unification_magnitude,
     )
     nt.compute_archetype_core_centrality(adata)
     nt.compute_network_diffusion(adata, alpha=footprint_alpha, n_threads=n_threads)

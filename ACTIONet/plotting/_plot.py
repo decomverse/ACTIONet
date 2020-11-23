@@ -35,8 +35,8 @@ def layout_labels(
 
 def plot_ACTIONet(
     adata: AnnData,
-    coordinate_key: Optional[str] = 'X_ACTIONet2D',
     label_key: Optional[str] = None,
+    coordinate_key: Optional[str] = 'X_ACTIONet2D',
     transparency_key: Optional[str] = None,
     transparency_z_threshold: Optional[float] = -0.5,
     transparency_factor: Optional[float] = 1.5,

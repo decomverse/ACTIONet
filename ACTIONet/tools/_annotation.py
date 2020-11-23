@@ -1,11 +1,63 @@
 from typing import Literal, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 from anndata import AnnData
 from scipy import sparse
 
 from . import _imputation as imputation
 from . import _normalization as normalization
+from .. import config
+
+def load_markers(key: Optional[str] = None) -> Tuple[list, list, list]:
+    """Load marker genes from a dataset.
+
+    Parameters
+    ----------
+    key
+        Dataset key. Available keys are:
+            `Brain_PFC_MohammadisDavila2020`
+            `Brain_PFC_Velmeshev2019`
+            `Brain_PFC_Schirmer2019`
+            `Brain_PFC_MathysDavila2019`
+            `Brain_PFC_Wang2018`
+            `PFC_Layers_Yao2020`
+            `PFC_Layers_Yao2020_shortlist`
+            `Brain_Layers_He2017`
+            `PBMC_Monaco2019_20celltypes`
+            `PBMC_Monaco2019_12celltypes`
+            `Retina_MenonMohammadi2019`
+        If not provided, all datasets are aggregated.
+
+    Returns
+    -------
+    (marker_genes, directions, names)
+        marker_genes
+            List of list of marker genes
+        directions
+            List of list of gene directions
+        names
+            List of labels (i.e. cell types)
+    """
+    df = pd.read_csv(config.MARKERS_PATH, sep='\t')
+
+    # Filter specific dataset if provided
+    if key is not None:
+        datasets = df['Dataset'].unique()
+        if key in datasets:
+            df = df[df['Dataset'] == key]
+        else:
+            raise ValueError(
+                f'Dataset `{key}` not found. Available datasets: {", ".join(datasets)}'
+            )
+
+    # Transform to (marker_genes, directions, names)
+    df_agg = df.groupby('Celltype').agg(list)
+    marker_genes = list(df_agg['Gene'])
+    directions = [['+'] * len(genes) for genes in marker_genes]
+    names = list(df_agg.index)
+
+    return marker_genes, directions, names
 
 def annotate_archetypes_using_labels(
     adata: AnnData,
