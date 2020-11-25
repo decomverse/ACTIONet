@@ -259,7 +259,6 @@ namespace ACTIONet {
 			if(b.n_elem > 1) {
 				uword idx = index_max(normM1(b));
 				K(i-1) = b(idx);
-				b.print("b");
 			}
 			else {
 				K(i-1) = b(0);
