@@ -8,7 +8,7 @@ reduce.and.batch.correct.ace.Harmony(
   ace,
   batch_attr,
   reduced_dim = 50,
-  max_iter = 5,
+  max_iter = 10,
   data_slot = "logcounts",
   norm_method = c("default", "scran", "Linnorm"),
   reduction_slot = "ACTION",

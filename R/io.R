@@ -2,8 +2,8 @@
 #'
 #' @param input_path Folder containing input files.
 #' @param mtx_file Count file in Matrix Market format (default='matrix.mtx.gz').
-#' @param feature_annotations Table of the same size as number of rows in the count matrix (default='features.tsv.gz').
-#' @param sample_annotations Table of the same size as number of columns in the count matrix (default='barcodes.tsv.gz').
+#' @param feature_metadata Table of the same size as number of rows in the count matrix (default='features.tsv.gz').
+#' @param sample_metadata Table of the same size as number of columns in the count matrix (default='barcodes.tsv.gz').
 #' @param sep Column-separator used in the row/column annotations files (default='\\t').
 #' @param prefilter Whether to prefilter rows/columns of input counts matrix. Must specify filtering parameters to pass to filter.ace().
 #'
@@ -12,8 +12,8 @@
 #' @examples
 #' ace = import.ace.from.10X.generic(input_path, prefilter=TRUE, min_feats_per_cell = 500)
 #' @export
-import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_annotations = "features.tsv.gz",
-    sample_annotations = "barcodes.tsv.gz", sep = "\t", use.names = T, prefilter = FALSE,
+import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", feature_metadata = "features.tsv.gz",
+    sample_metadata = "barcodes.tsv.gz", sep = "\t", use.names = T, prefilter = FALSE,
     ...) {
     require(ACTIONet)
     require(S4Vectors)
@@ -25,14 +25,14 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
         stop(err)
     }
 
-    feature.file = paste(input_path, feature_annotations, sep = "/")
+    feature.file = paste(input_path, feature_metadata, sep = "/")
     if (!file.exists(feature.file)) {
         err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.",
             feature.file)
         stop(err)
     }
 
-    barcode.file = paste(input_path, sample_annotations, sep = "/")
+    barcode.file = paste(input_path, sample_metadata, sep = "/")
     if (!file.exists(barcode.file)) {
         err = sprintf("File %s not found. Consider changing `mtx_file` or `input_path` options.",
             barcode.file)
@@ -57,12 +57,12 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
         colnames(rowAnnot) = c("ENSEMBL", "Gene", "Feature")
     }
 
-    sample_annotations = read.table(barcode.file, header = F, sep = sep, as.is = TRUE)
-    if (ncol(sample_annotations) == (ncol(counts.mat) + 1)) {
-        colAnnot = S4Vectors::DataFrame(sample_annotations[-1, ])
-        colnames(colAnnot) = sample_annotations[1, ]
+    sample_metadata = read.table(barcode.file, header = F, sep = sep, as.is = TRUE)
+    if (ncol(sample_metadata) == (ncol(counts.mat) + 1)) {
+        colAnnot = S4Vectors::DataFrame(sample_metadata[-1, ])
+        colnames(colAnnot) = sample_metadata[1, ]
     } else {
-        colAnnot = S4Vectors::DataFrame(sample_annotations)
+        colAnnot = S4Vectors::DataFrame(sample_metadata)
     }
 
     # Feature-barcoding
@@ -86,7 +86,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
     colnames(expression.counts.mat) = colAnnot[, 1]
 
 
-    if (ncol(sample_annotations) > 1) {
+    if (ncol(sample_metadata) > 1) {
         ace <- ACTIONetExperiment(assays = list(counts = expression.counts.mat),
             colData = colAnnot, rowData = rowAnnot)
     } else {
@@ -130,18 +130,18 @@ import.ace.from.10X <- function(input_path, version = 3, prefilter = FALSE, ...)
 
     if ((2 <= version) & (version < 3)) {
         mtx_file = "matrix.mtx"
-        feature_annotations = "genes.tsv"
-        sample_annotations = "barcodes.tsv"
+        feature_metadata = "genes.tsv"
+        sample_metadata = "barcodes.tsv"
     } else if ((3 <= version) & (version < 4)) {
         mtx_file = "matrix.mtx.gz"
-        feature_annotations = "features.tsv.gz"
-        sample_annotations = "barcodes.tsv.gz"
+        feature_metadata = "features.tsv.gz"
+        sample_metadata = "barcodes.tsv.gz"
     } else {
         message("Unknown version")
     }
 
     ace = import.ace.from.10X.generic(input_path = input_path, mtx_file = mtx_file,
-        feature_annotations = feature_annotations, sample_annotations = sample_annotations,
+        feature_metadata = feature_metadata, sample_metadata = sample_metadata,
         prefilter = prefilter, ...)
 
     return(ace)
@@ -238,13 +238,11 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
     return(ace)
 }
 
-
-
-#' Constructs an `SingleCellExeriment` object from count matrix, gene names, and sample_annotations
+#' Constructs an `SingleCellExeriment` object from count matrix, gene names, and sample_metadata
 #'
-#' @param counts.mat Matrix of counts.mat
-#' @param gene.names A list of gene names to annotate columns of the count matrix
-#' @param sample_annotations Optional table of annotations for samples (columns of the count matrix)
+#' @param counts_mat Matrix of counts.mat
+#' @param feature_metadata Vector or data frame  of annotations for features (rows of the count matrix)
+#' @param sample_metadata Vector or data frame of annotations for samples (columns of the count matrix)
 #' @param prefilter Whether to prefilter genes/cells based on the counts.mat
 #' @param min.cell.frac.per.gene Minimum fraction of cells capturing a gene for it to be retained, if prefilter=TRUE (default=0.005)
 #' @param min.genes.per.cell Minimum number of required captured genes per cell, if prefilter=TRUE (default=500)
@@ -254,18 +252,24 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
 #' @examples
 #' ace = import.ace.from.count.matrix(counts.mat.mat, gene_names, prefilter=TRUE)
 #' @export
-import.ace.from.count.matrix <- function(counts.mat, gene.names, sample_annotations = NULL,
+import.ace.from.counts <- function(counts_mat, feature_metadata = NULL, sample_metadata = NULL,
     prefilter = FALSE, ...) {
-    if (!is.sparseMatrix(counts.mat)) {
-        counts.mat = as(counts.mat, "sparseMatrix")
-    }
-    rownames(counts.mat) = gene.names
+    # if (!is.sparseMatrix(counts.mat)) {
+    #     counts.mat = as(counts.mat, "sparseMatrix")
+    # }
+    # rownames(counts.mat) = gene.names
 
-    if (is.null(sample_annotations)) {
-        ace <- ACTIONetExperiment(assays = list(counts = counts.mat))
-    } else {
-        ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_annotations)
+    if (is.null(feature_metadata)){
+      feature_metadata = .default_rowData(NROW(counts_mat))
     }
+
+    if (is.null(sample_metadata)){
+      sample_metadata = .default_colData(NCOL(counts_mat))
+    }
+
+    ace <- ACTIONetExperiment(assays = list(counts = counts_mat),
+      rowData = feature_metadata,
+      colData = sample_metadata)
 
     if (prefilter) {
         ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
@@ -346,10 +350,7 @@ import.ace.from.Seurat <- function(Seurat.obj) {
 #' ace = import.ace.from.loom(file_name)
 #' @export
 import.ace.from.loom <- function(fname, ...) {
-    if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-        stop("Please install sceasy to read loom files")
-    }
-
+  .check_and_load_package("sceasy")
 
 	SE = SummarizedExperiment::makeSummarizedExperimentFromLoom(fname, ...)
     ace = as(SE, "ACTIONetExperiment")
@@ -372,15 +373,13 @@ import.ace.from.loom <- function(fname, ...) {
 #' ace = import.ace.from.CDS(monocle_cds)
 #' @export
 import.ace.from.CDS <- function(monocle_cds) {
-    if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-        stop("Please install sceasy to read loom files")
-    }
+  .check_and_load_package("monocle3")
 
     counts.mat = exprs(monocle_cds)
     gene_annotations = fData(monocle_cds)
-    sample_annotations = pData(monocle_cds)
+    sample_metadata = pData(monocle_cds)
 
-    ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_annotations,
+    ace <- ACTIONetExperiment(assays = list(counts = counts.mat), colData = sample_metadata,
         rowData = gene_annotations)
 
     # This one is NOT stable. SORRY!
@@ -522,5 +521,5 @@ export.sparse.format <- function(ace, path) {
 
 	write.table(features, file.path(path, "features.txt"), row.names = F, col.names = F, quote = F)
 	write.table(cell_metadata, file.path(path, "metadata.tsv"), row.names = F, col.names = T, quote = F, sep = "\t")
-	Matrix::writeMM(counts.mat, file.path(path, "counts.mtx"))	
+	Matrix::writeMM(counts.mat, file.path(path, "counts.mtx"))
 }

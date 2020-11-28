@@ -1,4 +1,14 @@
 
+.default_rowData <- function(d){
+  DF = DataFrame("feature_name" = paste0("feat_", 1:d))
+  return(DF)
+}
+
+.default_colData <- function(d){
+  DF = DataFrame("sample_name" = paste0("sam_", 1:d))
+  return(DF)
+}
+
 .get_ace_split_IDX <- function(ace, attr, groups_use = NULL, return_split_vec = FALSE) {
     if (length(attr) == 1) {
         split_vec = colData(ace)[[attr]]
