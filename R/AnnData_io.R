@@ -306,6 +306,11 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 		rownames(ace) = paste("Feature", 1:nrow(ace), sep = "")
 	}
 
+	# Fallback to counts if main assay doesn't exist
+	if( !(main.assay %in% names(assays(ace))) ) {
+		main.assay = "counts"
+	}
+	
 	# Make row/column-names unique
 	ucn = make.unique(colnames(ace))
 	urn = make.unique(rownames(ace))

@@ -263,33 +263,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double sensitivity);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP sensitivitySEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double z_threshold, double cor_threshold, unsigned int magnification);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP z_thresholdSEXP, SEXP cor_thresholdSEXP, SEXP magnificationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
-    Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, sensitivity));
-    return rcpp_result_gen;
-END_RCPP
-}
-// unify_archetypes_with_ACTIONet
-List unify_archetypes_with_ACTIONet(sp_mat& G, mat& S_r, mat& C_stacked, mat& H_stacked, double sensitivity, double alpha, int thread_no);
-RcppExport SEXP _ACTIONet_unify_archetypes_with_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP sensitivitySEXP, SEXP alphaSEXP, SEXP thread_noSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
-    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
-    Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
-    Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
-    Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes_with_ACTIONet(G, S_r, C_stacked, H_stacked, sensitivity, alpha, thread_no));
+    Rcpp::traits::input_parameter< double >::type z_threshold(z_thresholdSEXP);
+    Rcpp::traits::input_parameter< double >::type cor_threshold(cor_thresholdSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type magnification(magnificationSEXP);
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, z_threshold, cor_threshold, magnification));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1007,6 +992,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// fast_row_max
+Rcpp::NumericVector fast_row_max(SEXP& A);
+RcppExport SEXP _ACTIONet_fast_row_max(SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_row_max(A));
+    return rcpp_result_gen;
+END_RCPP
+}
 // computeSparseRowVariances
 Rcpp::NumericVector computeSparseRowVariances(IntegerVector j, NumericVector val, NumericVector rm, int n);
 RcppExport SEXP _ACTIONet_computeSparseRowVariances(SEXP jSEXP, SEXP valSEXP, SEXP rmSEXP, SEXP nSEXP) {
@@ -1053,8 +1049,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 4},
-    {"_ACTIONet_unify_archetypes_with_ACTIONet", (DL_FUNC) &_ACTIONet_unify_archetypes_with_ACTIONet, 7},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 6},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
@@ -1108,6 +1103,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
+    {"_ACTIONet_fast_row_max", (DL_FUNC) &_ACTIONet_fast_row_max, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_merge_sparse_mats", (DL_FUNC) &_ACTIONet_merge_sparse_mats, 2},
     {NULL, NULL, 0}
