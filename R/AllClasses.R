@@ -45,13 +45,15 @@ ACTIONetExperiment <- function(...,
   if(SummarizedExperiment::rowData(out) %>% NCOL != 0){
     rownames(out) = SummarizedExperiment::rowData(out)[,1]
   } else if(NROW(out) > 0){
-    rownames(out) = paste0("feat_", 1:NROW(out))
+    SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
+    rownames(out) = SummarizedExperiment::rowData(out)[,1]
   }
 
   if(SummarizedExperiment::colData(out) %>% NCOL != 0){
     colnames(out) = SummarizedExperiment::colData(out)[,1]
   } else if(NCOL(out) > 0){
-    colnames(out) = paste0("obs_", 1:NCOL(out))
+    SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
+    colnames(out) = SummarizedExperiment::colData(out)[,1]
   }
 
   return(out)

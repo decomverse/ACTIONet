@@ -13,19 +13,19 @@
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
 #' @export
-reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, data_slot = "logcounts",
+reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logcounts",
     norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 
     ace <- as(ace, "ACTIONetExperiment")
-    if (!(data_slot %in% names(assays(ace)))) {
-		if (norm_method != "none") {
-			msg = sprintf("Normalizing ace object ...\n")
-			message(msg)
-			ace = normalize.ace(ace, norm_method)
-		} else {
-			err = sprintf("Slot %s not found.\n", data_slot)
-			stop(err)
-		}
+    if (!(assay_name %in% names(assays(ace)))) {
+  		if (norm_method != "none") {
+  			msg = sprintf("Normalizing ace object ...\n")
+  			message(msg)
+  			ace = normalize.ace(ace, norm_method)
+  		} else {
+  			err = sprintf("Slot %s not found.\n", assay_name)
+  			stop(err)
+  		}
     }
 
 
@@ -61,7 +61,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, data_slot = "logcou
     if (SVD_algorithm == 0)
         max_iter = 100*max_iter
 
-    S = assays(ace.norm)[[data_slot]]
+    S = assays(ace.norm)[[assay_name]]
     if (is.matrix(S)) {
         reduction.out = reduce_kernel_full(S, reduced_dim = reduced_dim, iter = max_iter,
             seed = seed, SVD_algorithm = SVD_algorithm)

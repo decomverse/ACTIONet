@@ -9,10 +9,10 @@ the results of ACTIONet method}
 \usage{
 ACTIONetExperiment(
   ...,
-  rowNets = .slot_type,
-  colNets = .slot_type,
-  rowMaps = .slot_type,
-  colMaps = .slot_type
+  rowNets = S4Vectors::SimpleList(),
+  colNets = S4Vectors::SimpleList(),
+  rowMaps = S4Vectors::SimpleList(),
+  colMaps = S4Vectors::SimpleList()
 )
 }
 \arguments{
