@@ -632,9 +632,9 @@ List prune_archetypes(const List& C_trace, const List& H_trace, double min_speci
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 //' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.1) {
+List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.5, unsigned int magnification = 3) {
 	
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, sensitivity);
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, z_threshold, cor_threshold, magnification);
 
 		
 	List out_list;		
@@ -653,51 +653,6 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivi
 
     return out_list;
 }
-
-
-//' Identifies and aggregates redundant archetypes into equivalent classes
-//' (Post-ACTIONet archetype processing)
-//'
-//' @param G Adjacency matrix of the ACTIONet graph
-//' @param S_r Reduced kernel profile
-//' @param archetypes Archetype profile (S*C)
-//' @param C_stacked,H_stacked Output of reconstruct_archetypes()
-//' @param minPoints, minClusterSize, outlier_threshold HDBSCAN parameters
-//' @param reduced_dim Kernel reduction
-//' 
-//' @return A named list: \itemize{
-//' \item archetype_groups: Equivalent classes of archetypes (non-redundant)
-//' \item C_unified,H_unified: C and H matrices of unified archetypes
-//' \item sample_assignments: Assignment of samples/cells to unified archetypes
-//' }
-//' @examples
-//' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-//'	G = build_ACTIONet(prune.out$H_stacked)
-//' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
-//' cell.clusters = unification.out$sample_assignments
-// [[Rcpp::export]]
-List unify_archetypes_with_ACTIONet(sp_mat& G, mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity = 1.0, double alpha = 0.85, int thread_no = 0) {
-
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes_with_ACTIONet(G, S_r, C_stacked, H_stacked, sensitivity, alpha, thread_no);
-		
-	List out_list;		
-
-	for(int i = 0; i < results.selected_archetypes.n_elem; i++) results.selected_archetypes[i]++;
-	out_list["selected_archetypes"] = results.selected_archetypes;
-
-	out_list["archetype_group"] = results.archetype_group;
-
-
-	out_list["C_unified"] = results.C_unified;
-	out_list["H_unified"] = results.H_unified;
-	
-	for(int i = 0; i < results.assigned_archetypes.n_elem; i++) results.assigned_archetypes[i]++;
-	out_list["assigned_archetypes"] = results.assigned_archetypes;
-
-    return out_list;
-}
-
-
 
 
 
@@ -2097,3 +2052,4 @@ mat NetEnh(mat A) {
 	
 	return(A_enh);
 }
+
