@@ -36,24 +36,28 @@ ACTIONetExperiment <- function(...,
   rowMaps = S4Vectors::SimpleList(),
   colMaps = S4Vectors::SimpleList()) {
 
-    SE <- SummarizedExperiment::SummarizedExperiment(...)
-    if(!is(SE, "RangedSummarizedExperiment")) {
-      SE <- as(SE, "RangedSummarizedExperiment")
-    }
+  SE <- SummarizedExperiment::SummarizedExperiment(...)
+  if(!is(SE, "RangedSummarizedExperiment")) {
+    SE <- as(SE, "RangedSummarizedExperiment")
+  }
   out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
 
-  if(SummarizedExperiment::rowData(out) %>% NCOL != 0){
-    rownames(out) = SummarizedExperiment::rowData(out)[,1]
-  } else if(NROW(out) > 0){
-    SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
-    rownames(out) = SummarizedExperiment::rowData(out)[,1]
+  if(NROW(out) > 0){
+    if(NCOL(SummarizedExperiment::rowData(out)) == 0){
+      SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
+      rownames(out) = SummarizedExperiment::rowData(out)[,1]
+    } else {
+      rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% make.unique(., sep = "_")
+    }
   }
 
-  if(SummarizedExperiment::colData(out) %>% NCOL != 0){
-    colnames(out) = SummarizedExperiment::colData(out)[,1]
-  } else if(NCOL(out) > 0){
-    SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
-    colnames(out) = SummarizedExperiment::colData(out)[,1]
+  if(NCOL(out) > 0){
+    if(NCOL(SummarizedExperiment::colData(out)) == 0){
+      SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
+      colnames(out) = SummarizedExperiment::colData(out)[,1]
+    } else {
+      colnames(out) = SummarizedExperiment::colData(out)[,1] %>% make.unique(., sep = "_")
+    }
   }
 
   return(out)

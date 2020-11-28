@@ -1,8 +1,8 @@
 #' Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment`-like object.
 #' @export
-filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
+filter.ace <- function(ace, assay_name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
 
-    assays(ace)[[assay.name]] = as(assays(ace)[[assay.name]], "dgCMatrix")
+    # assays(ace)[[assay_name]] = as(assays(ace)[[assay_name]], "dgCMatrix")
     org_dim = dim(ace)
     ace.fil = ace
 
@@ -12,29 +12,29 @@ filter.ace <- function(ace, assay.name = "counts", min_cells_per_feat = NULL, mi
         rows_mask = rep(TRUE, NROW(ace.fil))
         cols_mask = rep(TRUE, NCOL(ace.fil))
         if (!is.null(min_umis_per_cell)) {
-            umi_mask = ACTIONet::fast_column_sums(assays(ace.fil)[[assay.name]]) >= min_umis_per_cell
+            umi_mask = ACTIONet::fastColSums(assays(ace.fil)[[assay_name]]) >= min_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(max_umis_per_cell)) {
-            umi_mask = ACTIONet::fast_column_sums(assays(ace.fil)[[assay.name]]) <= max_umis_per_cell
+            umi_mask = ACTIONet::fastColSums(assays(ace.fil)[[assay_name]]) <= max_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(min_feats_per_cell)) {
-            cts = as(assays(ace.fil)[[assay.name]] > 0, "dgCMatrix")
-            feature_mask = ACTIONet::fast_column_sums(cts) >= min_feats_per_cell
+            # cts = as(assays(ace.fil)[[assay_name]] > 0, "dgCMatrix")
+            feature_mask = ACTIONet::fastColSums(assays(ace.fil)[[assay_name]] > 0) >= min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
 
         if (!is.null(min_cells_per_feat)) {
             if ((min_cells_per_feat < 1) & (min_cells_per_feat > 0)) {
-                min_fc = min_cells_per_feat * org_dim[2]
-            } else{
+              min_fc = min_cells_per_feat * org_dim[2]
+            } else {
               min_fc = min_cells_per_feat
             }
-            rcts = as(assays(ace.fil)[[assay.name]] > 0, "dgCMatrix")
-            cell_count_mask = ACTIONet::fast_row_sums(rcts) >= min_fc
+            # rcts = as(assays(ace.fil)[[assay_name]] > 0, "dgCMatrix")
+            cell_count_mask = ACTIONet::fastRowSums(assays(ace.fil)[[assay_name]] > 0) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
         ace.fil <- ace.fil[rows_mask, cols_mask]
@@ -78,7 +78,7 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
     }
 
     fil_names <- lapply(IDX, function(idx) {
-        fil_list <- filter.ace(ace[, idx], assay.name = assay_name, min_cells_per_feat = min_cells_per_feat,
+        fil_list <- filter.ace(ace[, idx], assay_name = assay_name, min_cells_per_feat = min_cells_per_feat,
             min_umis_per_cell = min_umis_per_cell, max_umis_per_cell = max_umis_per_cell,
             min_feats_per_cell = min_feats_per_cell, return_fil_ace = F)
         return(fil_list)

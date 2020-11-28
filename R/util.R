@@ -9,6 +9,16 @@
   return(DF)
 }
 
+.default_rownames <- function(d){
+  n = paste0("feat_", 1:d)
+  return(n)
+}
+
+.default_colnames <- function(d){
+  n = paste0("sam_", 1:d)
+  return(n)
+}
+
 .get_ace_split_IDX <- function(ace, attr, groups_use = NULL, return_split_vec = FALSE) {
     if (length(attr) == 1) {
         split_vec = colData(ace)[[attr]]
@@ -39,8 +49,10 @@
     if (class(object) %in% c("ACTIONetExperiment", "SummarizedExperiment", "SingleCellExperiment")) {
         convert_type = match.arg(convert_to)
         if (convert_type != "none") {
-            convert_type = switch(convert_type, ACE = "ACTIONetExperiment", SCE = "SingleCellExperiment",
-                SE = "SummarizedExperiment")
+            convert_type = switch(convert_type,
+              ACE = "ACTIONetExperiment",
+              SCE = "SingleCellExperiment",
+              SE = "SummarizedExperiment")
             msg = sprintf("Converting to %s class.\n", convert_type)
             message(msg)
             object = as(object, convert_type)
