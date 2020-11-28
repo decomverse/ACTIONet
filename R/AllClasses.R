@@ -41,9 +41,15 @@ ACTIONetExperiment <- function(...,
       SE <- as(SE, "RangedSummarizedExperiment")
     }
   out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
-  rownames(out) = SummarizedExperiment::rowData(out)[,1]
-  colnames(out) = SummarizedExperiment::colData(out)[,1]
 
+  if(SummarizedExperiment::rowData(out) %>% NROW != 0){
+    rownames(out) = SummarizedExperiment::rowData(out)[,1]
+  }
+
+  if(SummarizedExperiment::colData(out) %>% NROW != 0){
+    colnames(out) = SummarizedExperiment::colData(out)[,1]
+  }
+  
   return(out)
 }
 
