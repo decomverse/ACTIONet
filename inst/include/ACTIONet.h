@@ -191,8 +191,7 @@ namespace ACTIONet {
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
 		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
-		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity);
-		unification_results unify_archetypes_with_ACTIONet(sp_mat& G, mat &S_r, mat &C_stacked, mat &H_stacked, double sensitivity, double alpha, int thread_no);
+		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold, double cor_threshold, unsigned int magnification);
 		
 	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
@@ -260,7 +259,8 @@ namespace ACTIONet {
 		mat NetEnh(mat Adj);
 
 		mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters, int seed);
-		
+
+		vec sweepcut(sp_mat A, vec s);		
 }
 
 #endif

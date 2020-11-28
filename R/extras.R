@@ -495,7 +495,7 @@ assess.label.local.enrichment <- function(P, Labels) {
     w2 = ACTIONet::fast_row_sums(P^2)
     Nu = w2 %*% t(p)
 
-    a = as.numeric(qlcMatrix::rowMax(P)) %*% t(array(1, length(p)))
+    a = as.numeric(fast_row_max(P)) %*% t(array(1, length(p)))
 
 
     logPval = (Lambda^2)/(2 * (Nu + (a * Lambda)/3))
