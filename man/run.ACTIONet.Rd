@@ -12,26 +12,14 @@ run.ACTIONet(
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
-  layout_epochs = 500,
-  layout.in.parallel = FALSE,
+  layout_epochs = 1000,
+  unification_threshold = 0.5,
+  unification_magnitude = 3,
+  unification_z_threshold = -3,
+  layout.in.parallel = TRUE,
   thread_no = 0,
   data_slot = "logcounts",
   reduction_slot = "ACTION",
-  unification_cond_threshold = 10,
-  unification_min_edge_weight = 0.5,
-  unification_min_coreness = 0,
-  unification_resolution = 1,
-  unification_min_repeat = 0,
-  unification_alpha = 0.05,
-  unification_beta = 0.5,
-  unification_sensitivity = 0.95,
-  unification_minPoints = 5,
-  unification_minClusterSize = 5,
-  unification_outlier_threshold = 0.5,
-  unification_normalization_type = 3,
-  unification_preprocess_adj = FALSE,
-  unification_reduce_G = FALSE,
-  unification_method_type = 0,
   footprint_alpha = 0.85,
   max_iter_ACTION = 50,
   full.trace = FALSE
@@ -57,7 +45,7 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
 
-\item{n_epochs}{Number of epochs for SGD algorithm (default=500).}
+\item{n_epochs}{Number of epochs for SGD algorithm (default=1000).}
 
 \item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
 If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores}

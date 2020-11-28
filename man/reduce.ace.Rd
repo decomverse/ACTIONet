@@ -7,7 +7,7 @@
 reduce.ace(
   ace,
   reduced_dim = 50,
-  max_iter = 5,
+  max_iter = 10,
   data_slot = "logcounts",
   norm_method = "default",
   reduction_slot = "ACTION",
