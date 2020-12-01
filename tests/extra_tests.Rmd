@@ -1,6 +1,6 @@
 ---
 title: "Testing core functionalities of the ACTIONet package"
-author: 
+author:
 - Shahin Mohammadi
 - Jose Davila-Velderrain
 date: "`r Sys.Date()`"
@@ -43,13 +43,13 @@ HDBSCAN.outlier_threshold = 0.0
     S_r = t(SingleCellExperiment::reducedDims(ace)[[reduction.slot]])
 
 	# ACTION.out = run_ACTION(S_r, k_min = 2, k_max = 40, thread_no = thread_no, max_it = 50, min_delta = AA_delta)
-    
-    
+
+
 #     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold)
-# 
+#
 # 	C_stacked = pruning.out$C_stacked
 # 	H_stacked = pruning.out$H_stacked
-	
+
 	min.cells = 3
     C_stacked = do.call(cbind, ACTION.out$C[-1])
 	H_stacked = do.call(rbind, ACTION.out$H[-1])
@@ -57,37 +57,37 @@ HDBSCAN.outlier_threshold = 0.0
 	mask =  min.cells < ic.couts
 	C_stacked = C_stacked[, mask]
 	H_stacked = H_stacked[mask, ]
-	
+
     #colFactors(ace)[["C_stacked"]] = Matrix::t(C_stacked)
     #colFactors(ace)[["H_stacked"]] = H_stacked
-    
+
     # Build ACTIONet
     set.seed(0)
     G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no=thread_no, mutual_edges_only = TRUE)
     colNets(ace)$ACTIONet = G
-    
-    
+
+
     # Layout ACTIONet
     initial.coordinates = t(scale(t(S_r)))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
-    
+
     reducedDims(ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(ace)$ACTIONet3D = vis.out$coordinates_3D
     ace$denovo_color = rgb(vis.out$colors)
-    
-    
+
+
     # Identiy equivalent classes of archetypes and group them together
     unification.out = unify_archetypes(G, S_r, C_stacked, H_stacked, HDBSCAN.minPoints, HDBSCAN.minClusterSize, HDBSCAN.outlier_threshold)
-    
+
     colFactors(ace)[["H_unified"]] = unification.out$H_unified
     colFactors(ace)[["C_unified"]] = t(unification.out$C_unified)
     ace$archetype_assignment = unification.out$sample_assignments
-    
+
     # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
     ace$node_centrality = compute_archetype_core_centrality(G, ace$archetype_assignment)
-    
-    
-    
+
+
+
     # Re-normalize input (~gene expression) matrix and compute feature (~gene) specificity scores
     S = assays(ace)[[data.slot]]
     if(is.null(renormalize.logcounts.slot)) {
@@ -100,15 +100,15 @@ HDBSCAN.outlier_threshold = 0.0
         }
         assays(ace)[[renormalize.logcounts.slot]] = S.norm
     }
-    
-    # Compute gene specificity for each archetype	
+
+    # Compute gene specificity for each archetype
     ## Core/unified archetypes only
     if(is.matrix(S.norm)) {
         specificity.out = compute_archetype_feature_specificity_full(S.norm, unification.out$H_unified)
     } else {
         specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
     }
-    
+
     specificity.out = lapply(specificity.out, function(specificity.scores) {
         rownames(specificity.scores) = rownames(ace)
         colnames(specificity.scores) = paste("A", 1:ncol(specificity.scores))
@@ -118,8 +118,8 @@ HDBSCAN.outlier_threshold = 0.0
     rowFactors(ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
     rowFactors(ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
 
-    
-    
+
+
 	S = assays(ace)[["logcounts"]]
 	S_r = Matrix::t(reducedDims(ace)[["S_r"]])
 	H = H_stacked
@@ -128,23 +128,23 @@ HDBSCAN.outlier_threshold = 0.0
 
     W = S %*% C[, selected.states]
 	W_r = S_r %*% C[, selected.states]
-	
+
 
 
 	U.red.out = reduce_kernel_full(as.matrix(W), reduced_dim = 50)
 	U.S_r = U.red.out$S_r
-	# 
-	# 
+	#
+	#
 	HDBSCAN.out = run_HDBSCAN(Matrix::t(U.S_r), minPoints = 10, minClusterSize = 10)
 	modules = HDBSCAN.out$labels
-	# 
+	#
 
 # 	U = Matrix::t(H[selected.states, ])
 # 	cs = Matrix::colSums(U)
 # 	U = as(scale(U, center = F, scale = cs), 'sparseMatrix')
 # 	G = colNets(ace)$ACTIONet
 # 	U.smooth = ACTIONet::compute_network_diffusion(G, U)
-# 	# 
+# 	#
 # 	G.backbone = build_ACTIONet(U.smooth, density = 1, thread_no = 8)
 #     A = as(G.backbone, "dgTMatrix")
 #     eps = 1e-16
@@ -158,18 +158,18 @@ HDBSCAN.outlier_threshold = 0.0
 	# W = as(cor(U.S_r), 'dgTMatrix')
 	# W[W < 0.8] = 0
 	# modules = unsigned_cluster(W, resolution_parameter = 1.5)
-	# 
+	#
 	# perm = order(modules)
 	# Heatmap(as.matrix(W[perm, perm]), cluster_rows = F, cluster_columns = F)
-	
+
 
 	# modules = unsigned_cluster(W, resolution_parameter = 2)
 
-	
+
     IDX = split(1:length(modules), modules)
     C.core = sapply(IDX, function(idx) {
         if (length(idx) == 1) {
-            c = as.numeric(C[, selected.states[idx]]) 
+            c = as.numeric(C[, selected.states[idx]])
         }
         else {
             c = as.numeric(Matrix::rowMeans(C[, selected.states[idx]]))
@@ -178,18 +178,18 @@ HDBSCAN.outlier_threshold = 0.0
     })
     W.core = S_r %*% C.core
     Matrix::rcond(W.core)
-    
+
     H.core = run_simplex_regression(W.core, S_r)
-    
+
     l = apply(H.core, 2, which.max)
-    
+
     plot.ACTIONet(ace, l)
 
 
-    
+
     plot.ACTIONet(ace, sce$Celltypes)
     plot.ACTIONet(ace, ace$archetype_assignment)
-    # 
+    #
     # marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.20celltypes$marker.genes
     # annot.out = annotate.cells.using.markers(ace, marker.genes)
     plot.ACTIONet(ace, annot.out$Labels)
@@ -201,41 +201,41 @@ HDBSCAN.outlier_threshold = 0.0
 
 ```
 ```{r}
-reduce.sce <- function(sce, norm.method = "default", reduced_dim = 50, max.iter = 5, passphrase = NULL) {        
+reduce.sce <- function(sce, norm_method = "default", reduced_dim = 50, max.iter = 5, passphrase = NULL) {
     sce.norm = sce
-    
+
     if (is.null(rownames(sce.norm))) {
         rownames(sce.norm) = sapply(1:nrow(sce.norm), function(i) sprintf("Gene%d", i))
     }
     if (is.null(colnames(sce.norm))) {
         colnames(sce.norm) = sapply(1:ncol(sce.norm), function(i) sprintf("Cell%d", i))
     }
-    
-    
+
+
     if (!("logcounts" %in% names(SummarizedExperiment::assays(sce.norm)))) {
         print("Normalizing sce object")
-        
-        sce.norm = normalize.sce(sce.norm, norm.method)
+
+        sce.norm = normalize.sce(sce.norm, norm_method)
     }
     SummarizedExperiment::assays(sce.norm) = lapply(SummarizedExperiment::assays(sce.norm), function(A) {
 		rownames(A) = rownames(sce.norm)
 		colnames(A) = colnames(sce.norm)
 		return(A)
 	})
-        
-    
+
+
     print("Running main reduction")
     # reduction_algorithm=ACTION, SVD_algorithm=Halko
     suppressWarnings({
-        reduction.out = reduce_kernel(as(SummarizedExperiment::assays(sce.norm)$logcounts, "sparseMatrix"), reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1) 
+        reduction.out = reduce_kernel(as(SummarizedExperiment::assays(sce.norm)$logcounts, "sparseMatrix"), reduced_dim = reduced_dim, iter = max.iter, seed = 0, reduction_algorithm = 1, SVD_algorithm = 1)
     })
-    
+
     S_r = t(reduction.out$S_r)
     rownames(S_r) = colnames(sce.norm)
-    colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("Dim%d", i))    
+    colnames(S_r) = sapply(1:ncol(S_r), function(i) sprintf("Dim%d", i))
     reducedDim(sce.norm, "ACTION") <- S_r
-    
-    
+
+
     metadata(sce.norm)$reduction.time = Sys.time()
     return(sce.norm)
 }
@@ -260,14 +260,14 @@ PR2 = compute_network_diffusion(G, U, alpha = 0.95)
 sapply(1:ncol(PR), function(i) {
 	x = U[, i]
 	plot.ACTIONet.gradient(ace, x, title = sprintf("%s (org)", genes[i]))
-	
+
 	x = PR2[, i]
 	plot.ACTIONet.gradient(ace, x, title = sprintf("%s (PR)", genes[i]))
 
 	x = PR[, i]
 	plot.ACTIONet.gradient(ace, x, title = sprintf("%s (sparse PR)", genes[i]))
-	
-		
+
+
 })
 
 ```
@@ -285,16 +285,16 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
     coors = reducedDims(ace)[[reduction.slot]]
 
     NA.col = "#eeeeee"
-        
+
     ## Create color gradient generator
     if (CPal %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
 		require(viridis)
-        Pal_grad = switch(CPal, greys = gray.colors(100), inferno = viridis::inferno(500, alpha = 0.8), magma = viridis::magma(500, alpha = 0.8), viridis = viridis::viridis(500, alpha = 0.8), 
-            BlGrRd = colorRampPalette(c("blue", "grey", "red"))(500), Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, 
+        Pal_grad = switch(CPal, greys = gray.colors(100), inferno = viridis::inferno(500, alpha = 0.8), magma = viridis::magma(500, alpha = 0.8), viridis = viridis::viridis(500, alpha = 0.8),
+            BlGrRd = colorRampPalette(c("blue", "grey", "red"))(500), Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7,
                 name = "Spectral"))))(100), RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100))
     } else {
         Pal_grad = colorRampPalette(c(NA.col, CPal))(500)
-    }	
+    }
 
     ## Scale/prune scorees, if needed
     x[x < 0] = 0
@@ -304,37 +304,37 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 	if(alpha_val > 0) {
 		x = as.numeric(compute_network_diffusion(colNets(ace)$ACTIONet, as(x, 'sparseMatrix')))
 	}
-	
+
     if (nonparameteric == TRUE) {
         vCol = scales::col_numeric(Pal_grad, domain = NULL, na.color = NA.col)(rank(x))
     } else {
         vCol = scales::col_numeric(Pal_grad, domain = NULL, na.color = NA.col)(x)
-    }	
+    }
 
     if (!is.null(transparency.attr)) {
         z = scale(transparency.attr) # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
         beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
         beta[z > trans.z.threshold] = 1
         beta = beta^trans.fact
-        
+
         vCol = scales::alpha(vCol, beta)
         vCol.border = scales::alpha(colorspace::darken(vCol, 0.1), beta)
     } else {
         vCol.border = colorspace::darken(vCol, 0.1)
     }
-	
+
     idx = order(x, decreasing = F)
     plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol.border[idx], cex = node.size, pch = 21, axes = FALSE, xlab = "", ylab = "", main = title)
-	
+
 }
 
 sapply(1:ncol(PR), function(i) {
 	x = U[, i]
 	plot.ACTIONet.gradient(ace, x, title = sprintf("%s (org)", genes[i]), node.size = 0.5)
-	
+
 	x = PR[, i]
 	plot.ACTIONet.gradient(ace, x, title = genes[i], node.size = 0.5)
-	
+
 })
 
 ```
@@ -388,19 +388,19 @@ S_r = t(reducedDims(sce)[[reduction.slot]])
 	nnz = round(sum(s)^2/sum(s^2))
 	threshold = sort(s, decreasing = T)[nnz]
 	mask = s >= threshold
-	
+
 	sub.ace = as(sce[, mask], 'ACTIONetExperiment')
-	
+
     # Build ACTIONet
     set.seed(0)
     G = build_ACTIONet(H_stacked = H_stacked[, mask], density = network_density, thread_no=thread_no, mutual_edges_only = mutual_edges_only)
 	colNets(sub.ace)$ACTIONet = G
-	
-	
+
+
     # Layout ACTIONet
 	initial.coordinates = t(scale(t(S_r[, mask])))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness, n_epochs = layout_epochs)
-    
+
     reducedDims(sub.ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(sub.ace)$ACTIONet3D = vis.out$coordinates_3D
     sub.ace$denovo_color = rgb(vis.out$colors)
@@ -415,8 +415,8 @@ S_r = t(reducedDims(sce)[[reduction.slot]])
 	# Use graph core of global and induced subgraphs to infer centrality/quality of each cell
 	sub.ace$node_centrality = compute_archetype_core_centrality(G, sub.ace$archetype_assignment)
 
-	
-    
+
+
     # Re-normalize input (~gene expression) matrix and compute feature (~gene) specificity scores
     if(is.null(renormalize.logcounts.slot)) {
 		renormalize.logcounts.slot = data.slot
@@ -425,8 +425,8 @@ S_r = t(reducedDims(sce)[[reduction.slot]])
 		norm.out = ACTIONet::renormalize_input_matrix(S, unification.out$sample_assignments)
 		assays(ace)[[renormalize.logcounts.slot]] = norm.out$S_norm
 	}
-	
-	# Compute gene specificity for each archetype	
+
+	# Compute gene specificity for each archetype
 	S.norm = assays(sub.ace)[["logcounts"]]
 	## Core/unified archetypes only
 	specificity.out = compute_archetype_feature_specificity(S.norm, unification.out$H_unified)
@@ -438,7 +438,7 @@ S_r = t(reducedDims(sce)[[reduction.slot]])
 	rowFactors(sub.ace)[["H_unified_profile"]] = specificity.out[["archetypes"]]
 	rowFactors(sub.ace)[["H_unified_upper_significance"]] = specificity.out[["upper_significance"]]
 	rowFactors(sub.ace)[["H_unified_lower_significance"]] = specificity.out[["lower_significance"]]
-	
+
 	# ## All pruned archetypes
 	# specificity.out = compute_archetype_feature_specificity(S.norm, pruning.out$H_stacked)
 	# specificity.out = lapply(specificity.out, function(specificity.scores) {
@@ -449,11 +449,11 @@ S_r = t(reducedDims(sce)[[reduction.slot]])
 	# rowFactors(ace)[["H_stacked_profile"]] = specificity.out[["archetypes"]]
 	# rowFactors(ace)[["H_stacked_upper_significance"]] = specificity.out[["upper_significance"]]
 	# rowFactors(ace)[["H_stacked_lower_significance"]] = specificity.out[["lower_significance"]]
-	# 
+	#
 
 	data("curatedMarkers_human")
 	annot.out = annotate.cells.using.markers(sub.ace, curatedMarkers_human$Blood$PBMC$Monaco2019.20celltypes$marker.genes)
-	
+
 	plot.ACTIONet(sub.ace, annot.out$Labels)
 
 ```
@@ -545,7 +545,7 @@ getNextBatch <- function(sce, l) {
 	cs = Matrix::colSums(counts(sub.sce))
 	cs[cs == 0] = 1
 	logcounts(sub.sce) = log1p(median(cs)*scale(counts(sub.sce), center = F, scale = cs))
-	
+
 	return(sub.sce)
 }
 
@@ -560,11 +560,11 @@ names(ACTIONet.results) = UL
 for( l in UL ) {
 	# Split
 	Batch = getNextBatch(sce, l)
-	
+
 	# Reduce
 	Batch.reduced = reduce.sce(Batch)
 
-	
+
     # Run ACTION
 	ACTIONet.results[[l]] = run.ACTIONet(Batch.reduced, k_max = 30, HDBSCAN.minPoints = 5, HDBSCAN.minClusterSize = 5, thread_no = 8)
 
@@ -591,22 +591,22 @@ plot.ACTIONet(ace, ace$CellType)
 
 # diff.parts = lapply(ACTIONet.results, function(res) {
 #     unification.out = unify_archetypes(colNets(res$ace)$ACTIONet, Matrix::t(reducedDims(res$ace)[["ACTION"]]), res$trace$pruning.out$C_stacked, res$trace$pruning.out$H_stacked, 5, 5, 0.5)
-# 
+#
 #     H = unification.out$H_unified
-#     
+#
 #     S = assays(res$ace)[["logcounts"]]
 #     specificity.out = compute_archetype_feature_specificity_full(S, H)
-# 	
+#
 #     out = list(H = H, Upper = specificity.out$upper_significance, Lower = specificity.out$lower_significance)
 #     rownames(out$Upper) = rownames(out$Lower) = rownames(res$ace)
-#     
+#
 #     return(out)
 # })
 
 
 min.cells = 1
 diff.parts = lapply(ACTIONet.results, function(res) {
-	
+
 	S = assays(res$ace)[["logcounts"]]
 	S_r = Matrix::t(reducedDims(res$ace)[["ACTION"]])
 	H = res$trace$pruning.out$H_stacked
@@ -615,23 +615,23 @@ diff.parts = lapply(ACTIONet.results, function(res) {
 
     W = S %*% C[, selected.states]
 	W_r = S_r %*% C[, selected.states]
-	
+
 
 
 	U.red.out = reduce_kernel_full(as.matrix(W), reduced_dim = 50)
 	U.S_r = U.red.out$S_r
-	# 
-	# 
+	#
+	#
 	HDBSCAN.out = run_HDBSCAN(Matrix::t(W_r), minPoints = 5, minClusterSize = 5)
 	modules = HDBSCAN.out$labels
-	# 
+	#
 
 	# U = Matrix::t(H[selected.states, ])
 	# cs = Matrix::colSums(U)
 	# U = as(scale(U, center = F, scale = cs), 'sparseMatrix')
 	# G = colNets(res$ace)$ACTIONet
 	# U.smooth = ACTIONet::compute_network_diffusion(G, U)
-	# 
+	#
 	# G.backbone = build_ACTIONet(U.smooth, density = 1, thread_no = 8)
     # A = as(G.backbone, "dgTMatrix")
     # eps = 1e-16
@@ -645,15 +645,15 @@ diff.parts = lapply(ACTIONet.results, function(res) {
 	# W = as(cor(U.S_r), 'dgTMatrix')
 	# W[W < 0.9] = 0
 	# modules = unsigned_cluster(W, resolution_parameter = 1)
-	# 
+	#
 	# perm = order(modules)
 	# Heatmap(as.matrix(W[perm, perm]), cluster_rows = F, cluster_columns = F)
-	
-		
+
+
     IDX = split(1:length(modules), modules)
     C.core = sapply(IDX, function(idx) {
         if (length(idx) == 1) {
-            c = as.numeric(C[, selected.states[idx]]) 
+            c = as.numeric(C[, selected.states[idx]])
         }
         else {
             c = as.numeric(Matrix::rowMeans(C[, selected.states[idx]]))
@@ -662,21 +662,21 @@ diff.parts = lapply(ACTIONet.results, function(res) {
     })
     W.core = S_r %*% C.core
     Matrix::rcond(W.core)
-    
+
     H.core = run_simplex_regression(W.core, S_r)
-    
+
     # unification.out = unify_archetypes(colNets(res$ace)$ACTIONet, Matrix::t(reducedDims(res$ace)[["ACTION"]]), res$trace$pruning.out$C_stacked, res$trace$pruning.out$H_stacked, 5, 5, 0.5)
-    # 
+    #
     # H = unification.out$H_unified
     labels = apply(H.core, 2, which.max)
-    
+
     S = assays(res$ace)[["logcounts"]]
     #S = ACTIONet::renormalize_input_matrix_full(S, labels)
     specificity.out = compute_archetype_feature_specificity_full(S, H.core)
 
     out = list(H = H.core, Profile = specificity.out$archetypes, Upper = specificity.out$upper_significance, Lower = specificity.out$lower_significance)
     rownames(out$Upper) = rownames(out$Lower) = rownames(res$ace)
-    
+
     return(out)
 })
 
@@ -720,20 +720,20 @@ What.list = lapply(diff.parts, function(res) {
 	# 	}
 	# 	return(u)
 	# })
-	
+
 	# dd = max(abs(P))
 	# print(dd)
 	# P = P / dd
-	
+
 	idx = which(U == 0)
 	U[idx] = rnorm(length(idx))*1e-6
 	Z = scale(U)
-	
+
 	# cs = Matrix::colSums(U)
 	# cs[cs == 0] = 1
 	# Z = log1p(1e6*scale(U, scale = cs, center = F))
-	
-	
+
+
 	# Z[Z > 10] = 10
 	# Z.orth = orthoProject(Z, Matrix::rowMeans(Z))
 
@@ -779,7 +779,7 @@ meta.ACTIONet.results = run.ACTIONet(meta.ace, data.slot = "logPvals", k_max = 3
 		cs = Matrix::colSums(U)
 		U = as(scale(U, center = F, scale = cs), 'sparseMatrix')
 		U.smooth = ACTIONet::compute_network_diffusion(G, U, alpha = alpha_val)
-		
+
 		G.backbone = build_ACTIONet(U.smooth, density = 1, thread_no = 8)
 		# A = as(G.backbone, "dgTMatrix")
 		# eps = 1e-16
@@ -789,12 +789,12 @@ meta.ACTIONet.results = run.ACTIONet(meta.ace, data.slot = "logPvals", k_max = 3
 		# W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
 		# P = W %*% Matrix::t(W)
 		# W = as(P, 'dgTMatrix')
-		
+
 		arch.coors.2D = H %*% reducedDims(ace)$ACTIONet2D
 		arch.coors.3D = H %*% reducedDims(ace)$ACTIONet3D
-		
+
 		out = list(backbone = G.backbone, ACTIONet2D = arch.coors.2D, ACTIONet3D = arch.coors.3D)
-		
+
 		return(out)
 	}
 
@@ -805,8 +805,8 @@ meta.backbone = construct.backbone(meta.ACTIONet.results$ace)
 
 ll.out = annotate.cells.using.markers(meta.ACTIONet.results$ace, marker, data.slot = "logPvals")
 plot.ACTIONet(meta.ACTIONet.results$ace, ll.out$Labels)
-# 
-# 
+#
+#
 
 # plot.ACTIONet(meta.ACTIONet.results$ace, annot.out$Labels)
 
@@ -826,7 +826,7 @@ plot.ACTIONet(meta.ACTIONet.results$ace, ll.out$Labels)
 
 ```{r}
 split.idx = c(1, cumsum(sapply(split(1:ncol(meta.ACTIONet.results$ace), meta.ACTIONet.results$ace$Batch), length))+1)
-		
+
 depth = 30#length(meta.ACTION.out$H)
 
   reconstructed.H = lapply(meta.ACTIONet.results$trace$ACTION.out$H[2:depth], function(metaH) {
@@ -846,66 +846,66 @@ depth = 30#length(meta.ACTION.out$H)
 	# merged.H_stacked = do.call(cbind, lapply(1:length(H.list), function(i) {
 	# 	idx = split.idx[i]:(split.idx[i+1]-1)
 	# 	meta.subH = metaH[, idx]
-	# 	
+	#
 	# 	sub.ACTIONet.H = H.list [[names(split.idx)[[i+1]]]]
-	# 	
-	# 	
+	#
+	#
 	# 	subH.projected = meta.subH %*% sub.ACTIONet.H
 	# }))
 
-  
+
 	metaH = colFactors(meta.ACTIONet.results$ace)$H_unified
 	merged.H_unified = do.call(cbind, lapply(1:length(H.list), function(i) {
 		idx = split.idx[i]:(split.idx[i+1]-1)
 		meta.subH = metaH[, idx]
-		
+
 		sub.ACTIONet.H = H.list [[names(split.idx)[[i+1]]]]
-		
-		
+
+
 		subH.projected = meta.subH %*% sub.ACTIONet.H
 	}))
 
 
-	
+
 	fakeAdj = sparseMatrix(i = 1, j = 1, x = 1, dims = c(length(common.genes), ncol(merged.H_stacked)))
     merged.ace = ACTIONetExperiment(assays = list(logcounts = fakeAdj))
     colFactors(merged.ace)$H_stacked = merged.H_stacked
     colFactors(merged.ace)$H_unified = merged.H_unified
-    
+
     merged.ace$archetype_assignment = apply(merged.H_unified, 2, which.max)
-    
+
     # marker.genes12 = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
 	# merged.ace$Labels = names(marker.genes12)[unlist(Labels[names(H.list)])]
 
     Labels = unlist(sapply(ACTIONet.results, function(res) res$ace$CellType))
-    
+
 	merged.ace$Labels = Labels
-	
+
 	ClusterR::external_validation(as.numeric(factor(merged.ace$Labels)), merged.ace$archetype_assignment, "nmi")
-	
-	# Construct merged ACTIONet    
+
+	# Construct merged ACTIONet
 	system.time( {G = ACTIONet::build_ACTIONet(H_stacked = merged.H_stacked, density =  1, mutual_edges_only = F, thread_no = 8)} )
 
 	colNets(merged.ace)$ACTIONet = G
-	
-	
+
+
 	# cs = Matrix::colSums(merged.H_unified)
 	# cs[cs == 0] = 1
 	# merged.H_unified.norm = scale(merged.H_unified, center = F, scale = cs)
 	imputed.coordinates = Matrix::t(merged.H_unified) %*% meta.backbone$ACTIONet3D
-	
+
     initial.coordinates = t(scale(imputed.coordinates))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = 50, n_epochs = 500)
-    
+
     reducedDims(merged.ace)$ACTIONet2D = vis.out$coordinates
     reducedDims(merged.ace)$ACTIONet3D = vis.out$coordinates_3D
     merged.ace$denovo_color = rgb(vis.out$colors)
- 
+
     merged.ace$node_centrality = compute_archetype_core_centrality(G, merged.ace$archetype_assignment)
-    
+
 	plot.ACTIONet(merged.ace, merged.ace$Labels, transparency.attr = merged.ace$node_centrality)
 	plot.ACTIONet(merged.ace, merged.ace$archetype_assignment, transparency.attr = merged.ace$node_centrality, trans.z.threshold = 0)
-	
+
 
 
 ```
@@ -929,4 +929,3 @@ corrected.archs = as.matrix(Diagonal(length(cs), cs) %*% t(solve((I - alpha*P), 
 corrected.archs.specificity = assess.feature.specificity(corrected.archs, metaACTIONet.out$unification.out$H.core)
 
 ```
-

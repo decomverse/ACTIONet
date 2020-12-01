@@ -7,8 +7,8 @@
 rerun.layout(
   ace,
   layout_compactness = 50,
-  layout_epochs = 500,
-  thread_no = 1,
+  layout_epochs = 1000,
+  thread_no = 0,
   network_density = 1,
   mutual_edges_only = T,
   reduction_slot = "ACTIONet3D",
