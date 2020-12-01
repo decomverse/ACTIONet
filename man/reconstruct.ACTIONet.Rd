@@ -9,7 +9,7 @@ reconstruct.ACTIONet(
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
-  layout_epochs = 500,
+  layout_epochs = 1000,
   thread_no = 0,
   layout.in.parallel = FALSE,
   reduction_slot = "ACTION"
