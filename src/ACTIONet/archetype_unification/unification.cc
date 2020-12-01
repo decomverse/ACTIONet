@@ -106,65 +106,81 @@ namespace ACTIONet {
 		return(P2);
 	}
 
-	unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.5, unsigned int magnification = 3) {
-		printf("Unify archetypes (%d archs)\n", H_stacked.n_rows);
+	unification_results unify_archetypes(sp_mat& G,
+										mat &S_r,
+										mat &C_stacked,
+										double alpha = 0.85,
+										int core_threshold = 1,
+										double sim_threshold = 0.5,
+										int thread_no = 0) {
+		printf("Unify archetypes (%d archs, alpha = %f, core_threshold = %d, sim_threshold = %f)\n", C_stacked.n_cols, alpha, core_threshold, sim_threshold);
 														
 		unification_results output;
+		
+		// Smooth archetypes using ACTIONet
+		sp_mat X0 = sp_mat(normalise(C_stacked, 1, 0));
+		mat C_filtered = compute_network_diffusion(G, X0, thread_no, alpha, 5);
+		
+		
+		
+		// Build archetype-archetype network from smoothed archetype footprints
+		double M = 16, ef_construction = 200, ef = 50, density = 1.0;
+		sp_mat arch_G = build_ACTIONet(C_filtered, density, thread_no, M, ef_construction, ef, true);
 
-		mat C_norm = normalise(C_stacked, 1, 0);
-		mat Ht_norm = normalise(trans(H_stacked), 1, 0);					
-		mat S_r_arch = S_r * Ht_norm;
-		
-		
-		// Filter noisy archetypes		
-		vec x = trans(sqrt(sum(square(S_r_arch))));
-		vec z = robust_zscore(x);
-		S_r_arch = S_r_arch.cols(find(z > z_threshold));
-		C_norm = C_norm.cols(find(z > z_threshold));
-		
-		
-		// Normalize wrt norm-1
-		//S_r_arch = normalise(S_r_arch, 1, 0);
 
-				
-		// Run SPA to order columns
-		int dim = min(100, (int)min(S_r_arch.n_cols, S_r_arch.n_rows));		
-		SPA_results res = run_SPA(S_r_arch, dim);
-		uvec selected_columns = res.selected_columns;
+		// Prune unreliable archetypes
+		uvec core_num = compute_core_number(arch_G);
+		uvec selected_archetypes = find(core_threshold < core_num);
+		
+		arch_G = sp_mat(mat(arch_G)(selected_archetypes, selected_archetypes));
+
+
+		// Transform similarity matrix
+		vec resolutions = regspace(0.1, 0.1, 5);
+		mat X = trans(unsigned_cluster_batch(arch_G, resolutions));			
+		mat Sim = trans(X) * X;
+		Sim = Sim / max(max(Sim));
+
+/*		
+		output.C_unified = mat(Sim);
+		output.H_unified = mat(arch_G);
+		output.selected_archetypes = selected_archetypes;
+		return(output);
+*/		
+		// Reduced profile of each archetype
+		C_filtered = C_filtered.cols(selected_archetypes);
+		mat S_r_arch = S_r * C_filtered;
 		
 		
+		// Prioritize archetypes
+		int dim = min(100, (int)min(X.n_cols, X.n_rows));		
+		SPA_results res = run_SPA(X, dim);		
+		uvec selected_columns = res.selected_columns;		
+		uvec row_idx = find(1e-10 < res.column_norms);		
+		selected_columns = selected_columns(row_idx);
 		
-		// Prune selected columns in order
-		mat CC = cor(S_r_arch);
-		CC = pow(CC, 2*magnification-1);
-		
+		dim = selected_columns.n_elem;	
+
+						
 		vec is_selected = zeros(S_r_arch.n_cols);
 		is_selected(selected_columns(0)) = 1;		
 		for(int i = 1; i < dim; i++) {			
 			int j = selected_columns[i];
-			vec v = CC.col(j);
+			vec v = Sim.col(j);
 			vec cc_vals = v(find(is_selected == 1));
 			double mm = max(cc_vals);
 			
-			if(cor_threshold < mm) {
+			if(sim_threshold < mm) {
 				continue;
 			}
 			is_selected(j) = 1;
 		}		
 		uvec idx = find(is_selected == 1);		
 		
-		mat C_unified = C_norm.cols(idx);
+		mat C_unified = C_filtered.cols(idx);
 		mat W_unified = S_r_arch.cols(idx);
 				
-		
-		field<mat> res_AA = run_AA(S_r_arch, W_unified, 50, 1e-16);
-		mat C_AA = res_AA(0);	
-		mat H_AA = res_AA(1);		
-						
-		W_unified = S_r_arch * C_AA;
-		C_unified = C_norm * C_AA;
-		
-		
+				
 		mat H_unified = run_simplex_regression(W_unified, S_r, false);			
 
 
@@ -173,10 +189,8 @@ namespace ACTIONet {
 		output.C_unified = C_unified;
 		output.H_unified = H_unified;
 		output.assigned_archetypes = assigned_archetypes;
+		output.selected_archetypes = selected_archetypes(idx);		
 		
-		//output.dag_adj = dag_adj;
-		//output.dag_node_annotations = dag_node_annotations;
-
 		return(output);
 	}
 	

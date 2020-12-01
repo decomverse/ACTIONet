@@ -632,17 +632,20 @@ List prune_archetypes(const List& C_trace, const List& H_trace, double min_speci
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 //' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold = -1.0, double cor_threshold = 0.5, unsigned int magnification = 3) {
-	
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, z_threshold, cor_threshold, magnification);
+List unify_archetypes(sp_mat& G,
+						mat &S_r,
+						mat &C_stacked,
+						double alpha = 0.85,
+						int core_threshold = 1,
+						double sim_threshold = 0.5,
+						int thread_no = 0) {
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, alpha, core_threshold, sim_threshold, thread_no);
 
 		
 	List out_list;		
 
 	for(int i = 0; i < results.selected_archetypes.n_elem; i++) results.selected_archetypes[i]++;
 	out_list["selected_archetypes"] = results.selected_archetypes;
-
-	out_list["archetype_group"] = results.archetype_group;
 
 
 	out_list["C_unified"] = results.C_unified;
