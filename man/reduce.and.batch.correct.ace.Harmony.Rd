@@ -8,27 +8,25 @@ reduce.and.batch.correct.ace.Harmony(
   ace,
   batch_attr,
   reduced_dim = 50,
-  max_iter = 5,
-  data_slot = "logcounts",
-  norm_method = c("default", "scran", "Linnorm"),
+  max_iter = 10,
+  assay_name = "logcounts",
+  norm_method = c("default", "scran", "multiBatchNorm", "Linnorm"),
   reduction_slot = "ACTION",
   seed = 0,
   SVD_algorithm = 0
 )
 }
 \arguments{
-\item{ace}{Input ace object}
+\item{ace}{ACTIONetExperiment object}
 
-\item{batch_attr}{Vector of batches per sample}
+\item{batch_attr}{Vector of length ncol(ace) or column name of colData(ace) containing batch labels.}
 
 \item{reduced_dim}{Dimension of SVD used for reducing kernel matrix}
 
 \item{max_iter}{Number of SVD iterations}
 
-\item{norm.method}{Normalization method to use. See normalize.ace() function (default:'default')
+\item{norm_method}{Normalization method to use. See normalize.ace() function (default:'default')
 (used only if the ace object is not already normalized)}
-
-\item{passphrase}{Passphrase for encrypting column names of the ace object for anonymization}
 }
 \value{
 Reduced ace object with added colMaps(ace)

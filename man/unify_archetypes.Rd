@@ -9,22 +9,9 @@ unify_archetypes(
   S_r,
   C_stacked,
   H_stacked,
-  min_edge_weight = 0.5,
-  min_coreness = 0L,
-  resolution = 1,
-  min_repeat = 2L,
-  thread_no = 0L,
-  alpha = 0.05,
-  beta = 0.5,
-  outlier_threshold = 0.5,
-  minPoints = 5L,
-  minClusterSize = 5L,
-  cond_threshold = 10,
-  normalization_type = 3L,
-  preprocess_adj = FALSE,
-  reduce_G = FALSE,
-  method_type = 0L,
-  sensitivity = 0.95
+  z_threshold = -1,
+  cor_threshold = 0.5,
+  magnification = 3L
 )
 }
 \arguments{
@@ -32,11 +19,11 @@ unify_archetypes(
 
 \item{C_stacked, H_stacked}{Output of reconstruct_archetypes()}
 
-\item{minPoints, }{minClusterSize, outlier_threshold HDBSCAN parameters}
-
 \item{G}{Adjacency matrix of the ACTIONet graph}
 
 \item{archetypes}{Archetype profile (S*C)}
+
+\item{minPoints, }{minClusterSize, outlier_threshold HDBSCAN parameters}
 
 \item{reduced_dim}{Kernel reduction}
 }
