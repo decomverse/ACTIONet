@@ -191,9 +191,8 @@ namespace ACTIONet {
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
 		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
-		unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked, double z_threshold, double cor_threshold, unsigned int magnification);
+		unification_results unify_archetypes(sp_mat& G, mat &S_r, mat &C_stacked, double alpha, int core_threshold, double sim_threshold, int thread_no);	
 		
-	
 	// Main functions to build an interaction network from multi-level archetypal decompositions
 		sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
 		sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);

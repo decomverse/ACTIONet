@@ -353,7 +353,10 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
     uns = h5file$create_group("uns")
     obsm_annot = uns$create_group("obsm_annot")
     varm_annot = uns$create_group("varm_annot")
-
+	
+	obj_list = metadata(ace)
+	write.HD5List(uns, "metadata", obj_list, depth = 1, max.depth = 10, compression.level = compression.level)
+	
 
     ## Write obs (colData() in ace)
     obs.DF = as.data.frame(colData(ace))
@@ -677,10 +680,24 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
                   rowMapMeta(ace)[[nn]] = DF
                 }
             }
-        }
+        } 
+        if("metadata" %in% names(uns)) {
+			meta_data_objs = read.HD5List(uns, "metadata", depth = 1, max.depth = 10, compression.level = compression.level)
+		} else {
+			meta_data_objs = NULL
+		}
+        
+        
     
 		meta = read.HD5List(h5file = h5file, gname = "uns")
-		meta = meta[setdiff(names(meta), c("obsm_annot", "varm_annot"))]
+		meta = meta[setdiff(names(meta), c("obsm_annot", "varm_annot", "metadata"))]
+		if(!is.null(meta_data_objs)) {
+			if(length(meta) == 0) {
+				meta = meta_data_objs
+			} else {
+				meta = c(meta_data_objs, meta)
+			}
+		}
 		metadata(ace) = meta
 
     }

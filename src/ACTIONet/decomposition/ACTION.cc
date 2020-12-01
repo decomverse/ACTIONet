@@ -239,7 +239,7 @@ namespace ACTIONet {
 
 		int n = A.n_cols;
 		uvec K(k); // selected columns from A
-
+		K.zeros();
 
 		rowvec normM = sum(square(A), 0);
 		rowvec normM1 = normM;
@@ -247,7 +247,7 @@ namespace ACTIONet {
 		mat U(A.n_rows, k);
 
 		vec norm_trace = zeros(k);
-		double eps = 1e-6;
+		double eps = 1e-9;
 		
 		for (int i = 1; i <= k; i++) {
 			// Find the column with maximum norm. In case of having more than one column with almost very small diff in norm, pick the one that originally had the largest norm
@@ -255,8 +255,10 @@ namespace ACTIONet {
 			norm_trace(i-1) = a;
 
 			uvec b = find((a*ones(1, n)-normM)/a <= eps);
-
-			if(b.n_elem > 1) {
+			if(b.n_elem == 0) {
+				break;
+			}
+			else if(b.n_elem > 1) {
 				uword idx = index_max(normM1(b));
 				K(i-1) = b(idx);
 			}
