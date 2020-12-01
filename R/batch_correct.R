@@ -57,7 +57,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
 #' batch_attr = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
 #' ace = reduce.and.batch.correct.ace.Harmony(ace)
 #' @export
-reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", norm_method = c("default", "scran", "multiBatchNorm", "Linnorm"), reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", norm_method = "none", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
   if (!require(harmony)) {
       err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
       stop(err)
@@ -69,7 +69,7 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
 	}
 
   ace = .check_and_convert_se_like(ace, "ACE")
-  norm_method = match.arg(norm_method)
+  # norm_method = match.arg(norm_method)
   batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
 
   ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, norm_method = norm_method,
@@ -111,11 +111,11 @@ orthogonalize.ace.batch <- function(ace, design_mat, reduction_slot = "ACTION", 
 
 	reduction.out = orthogonalize_batch_effect(S = S, old_S_r = S_r, old_V = V, old_A = A, old_B = B, old_sigma = sigma, design = design_mat)
 
-    S_r = reduction.out$S_r
-    colnames(S_r) = colnames(ace)
-    rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
-    colMaps(ace)[[sprintf("%s", reduction_slot)]] <- Matrix::t(S_r)
-    colMapTypes(ace)[[sprintf("%s", reduction_slot)]] = "reduction"
+  S_r = reduction.out$S_r
+  colnames(S_r) = colnames(ace)
+  rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
+  colMaps(ace)[[sprintf("%s", reduction_slot)]] <- Matrix::t(S_r)
+  colMapTypes(ace)[[sprintf("%s", reduction_slot)]] = "reduction"
 
 
 	V = reduction.out$V
