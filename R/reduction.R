@@ -24,7 +24,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logco
 			message(msg)
 			ace = normalize.ace(ace, norm_method)
 		} else {
-			err = sprintf("Slot %s not found.\n", assay_name)
+			err = sprintf("Assay '%s' not found.\n", assay_name)
 			stop(err)
 		}
   }
@@ -77,7 +77,7 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logco
 
 	A = reduction.out$A
 	# colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))
-  colnames(A = paste0("A", 1:NCOL(A))
+  colnames(A) = paste0("A", 1:NCOL(A))
 	rowMaps(ace)[[sprintf("%s_A", reduction_slot)]] = A
 	rowMapTypes(ace)[[sprintf("%s_A", reduction_slot)]] = "internal"
 
