@@ -334,8 +334,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 #' cell.clusters = unification.out$sample_assignments
-unify_archetypes <- function(S_r, C_stacked, H_stacked, z_threshold = -1.0, cor_threshold = 0.5, magnification = 3L) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, z_threshold, cor_threshold, magnification)
+unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.85, core_threshold = 1L, sim_threshold = 0.5, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, core_threshold, sim_threshold, thread_no)
 }
 
 #' Builds an interaction network from the multi-level archetypal decompositions
