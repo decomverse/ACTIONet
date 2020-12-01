@@ -7,6 +7,7 @@
 reduce.and.batch.correct.ace.fastMNN(
   ace,
   batch_attr = NULL,
+  assay_name = "logcounts",
   reduced_dim = 50,
   MNN_k = 20,
   return_V = FALSE,
