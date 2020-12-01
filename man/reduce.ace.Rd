@@ -8,7 +8,7 @@ reduce.ace(
   ace,
   reduced_dim = 50,
   max_iter = 10,
-  data_slot = "logcounts",
+  assay_name = "logcounts",
   norm_method = "default",
   reduction_slot = "ACTION",
   seed = 0,
@@ -16,19 +16,21 @@ reduce.ace(
 )
 }
 \arguments{
-\item{ace}{Input ace object}
+\item{ace}{ACTIONetExperiment object.}
 
 \item{reduced_dim}{Dimension of SVD used for reducing kernel matrix}
 
 \item{max_iter}{Number of SVD iterations}
 
-\item{norm.method}{Normalization method to use. See normalize.ace() function (default:'default')
+\item{assay_name}{Name of assay to reduce.}
+
+\item{norm_method}{Normalization method to use. See normalize.ace() function (default:'default')
 (used only if the ace object is not already normalized)}
 
-\item{passphrase}{Passphrase for encrypting column names of the ace object for anonymization}
+\item{reduction_slot}{Name of slot to store reduction.}
 }
 \value{
-ACTIONetExperiment object (ACE), derived from SummarizedExperiment (ace), with added colMaps(ace)[['S_r']]
+ACTIONetExperiment object with reduction in colMaps(ace).
 }
 \description{
 Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix
