@@ -10,7 +10,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
 
     ace = .check_and_convert_se_like(ace, "ACE")
     m_data = metadata(ace)
-    ace = normalize.ace(ace, norm.method = "multiBatchNorm", assay_name = assay_name, batch_attr = batch_attr, BPPARAM = BPPARAM)
+    ace = normalize.ace(ace, norm_method = "multiBatchNorm", assay_name = assay_name, batch_attr = batch_attr, BPPARAM = BPPARAM)
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
     mnn_batch = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
