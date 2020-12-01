@@ -35,7 +35,6 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
         }
         rowMaps(ace)[[V_slot]] = V
     }
-    rm("sce.list.norm", "mnn.out")
     invisible(gc())
 
     metadata(ace) = m_data
