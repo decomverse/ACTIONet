@@ -109,9 +109,9 @@ namespace ACTIONet {
 	unification_results unify_archetypes(sp_mat& G,
 										mat &S_r,
 										mat &C_stacked,
-										double alpha = 0.85,
+										double alpha = 0.99,
 										int core_threshold = 1,
-										double sim_threshold = 0.5,
+										double sim_threshold = 0,
 										int thread_no = 0) {
 		printf("Unify archetypes (%d archs, alpha = %f, core_threshold = %d, sim_threshold = %f)\n", C_stacked.n_cols, alpha, core_threshold, sim_threshold);
 														
@@ -119,42 +119,44 @@ namespace ACTIONet {
 		
 		// Smooth archetypes using ACTIONet
 		sp_mat X0 = sp_mat(normalise(C_stacked, 1, 0));
-		mat C_filtered = compute_network_diffusion(G, X0, thread_no, alpha, 5);
+		mat C_imputed = compute_network_diffusion(G, X0, thread_no, alpha, 5);
 		
+		// Compute similarity matrix
+		vec d = vec(trans(sum(G)));		
+		sp_mat L(G.n_rows, G.n_cols);
+		L.diag() = d;
+		L -= G;
 		
-		
-		// Build archetype-archetype network from smoothed archetype footprints
-		double M = 16, ef_construction = 200, ef = 50, density = 1.0;
-		sp_mat arch_G = build_ACTIONet(C_filtered, density, thread_no, M, ef_construction, ef, true);
+		mat Sim = mat(trans(C_imputed) * L * C_imputed);
+		vec x = Sim.diag();
+		for(int i = 0; i < Sim.n_rows; i++) {
+			for(int j = 0; j < Sim.n_rows; j++) {
+				if(x(i) == 0 || x(j) == 0) {
+					Sim(i, j) = 0;
+				} else {
+					Sim(i, j) /= sqrt(x(i) * x(j));
+				}
+			}
+		}		
+		Sim.transform( [sim_threshold](double val) { return (val < sim_threshold?0:val); } );
 
 
-		// Prune unreliable archetypes
-		uvec core_num = compute_core_number(arch_G);
+		// Prune unreliable archetypes		
+		sp_mat Sim_sp = sp_mat(Sim);
+		uvec core_num = compute_core_number(Sim_sp);
 		uvec selected_archetypes = find(core_threshold < core_num);
+			
+		// Subset archetypes and compute reduced profile of each archetype
+		C_imputed = C_imputed.cols(selected_archetypes);
+		mat S_r_arch = S_r * C_imputed;
 		
-		arch_G = sp_mat(mat(arch_G)(selected_archetypes, selected_archetypes));
-
-
-		// Transform similarity matrix
-		vec resolutions = regspace(0.1, 0.1, 5);
-		mat X = trans(unsigned_cluster_batch(arch_G, resolutions));			
-		mat Sim = trans(X) * X;
-		Sim = Sim / max(max(Sim));
-
-/*		
-		output.C_unified = mat(Sim);
-		output.H_unified = mat(arch_G);
-		output.selected_archetypes = selected_archetypes;
-		return(output);
-*/		
-		// Reduced profile of each archetype
-		C_filtered = C_filtered.cols(selected_archetypes);
-		mat S_r_arch = S_r * C_filtered;
+		Sim = Sim(selected_archetypes, selected_archetypes);
 		
 		
 		// Prioritize archetypes
-		int dim = min(100, (int)min(X.n_cols, X.n_rows));		
-		SPA_results res = run_SPA(X, dim);		
+		int dim = min(100, (int)min(C_imputed.n_cols, C_imputed.n_rows));		
+		SPA_results res = run_SPA(C_imputed, dim);		
+		
 		uvec selected_columns = res.selected_columns;		
 		uvec row_idx = find(1e-10 < res.column_norms);		
 		selected_columns = selected_columns(row_idx);
@@ -164,27 +166,103 @@ namespace ACTIONet {
 						
 		vec is_selected = zeros(S_r_arch.n_cols);
 		is_selected(selected_columns(0)) = 1;		
-		for(int i = 1; i < dim; i++) {			
+		for(int i = 1; i < dim; i++) {	
 			int j = selected_columns[i];
 			vec v = Sim.col(j);
 			vec cc_vals = v(find(is_selected == 1));
 			double mm = max(cc_vals);
 			
+			printf("%d- %d %f\n", i, j, mm);
+			 
 			if(sim_threshold < mm) {
 				continue;
 			}
 			is_selected(j) = 1;
 		}		
 		uvec idx = find(is_selected == 1);		
+
 		
-		mat C_unified = C_filtered.cols(idx);
+		mat C_unified = C_imputed.cols(idx);
 		mat W_unified = S_r_arch.cols(idx);
 				
 				
 		mat H_unified = run_simplex_regression(W_unified, S_r, false);			
-
-
 		uvec assigned_archetypes = trans(index_max( H_unified, 0 ));
+
+
+		// Construct Ontology!		
+		graph_undirected inputNetwork(Sim);
+		DAGraph ontology;
+		ontology.setTerminalName("archetype");
+		nodeDistanceObject nodeDistances;
+		
+		double threshold =  0.05;
+		double density = 0.5;
+  
+		dagConstruct::constructDAG(inputNetwork, ontology, nodeDistances, threshold, density);
+		
+		vector<vector<int>> dag_nodes;
+		vector<int> dag_nodes_type;
+		
+		for(int k = 0; k < Sim.n_rows; k++) {
+			vector<int> v;
+			v.push_back(k);
+			dag_nodes.push_back(v);
+			dag_nodes_type.push_back(0);
+		}
+				
+		for(map< pair<unsigned,unsigned>, string >::iterator edgesIt = ontology.edgesBegin(); edgesIt != ontology.edgesEnd(); ++edgesIt) {
+			unsigned ii = edgesIt->first.first;
+			unsigned jj = edgesIt->first.second;
+
+			vector<int> v;			
+			int tt;
+			if(edgesIt->second == "archetype") {
+				v.push_back(jj);
+				tt = 0;
+			} else { // Internal node
+				for(int kk = 0; kk < dag_nodes[jj].size(); kk++) {
+					v.push_back(dag_nodes[jj][kk]);
+				}
+				tt = 1;
+			}
+			
+			if(ii >= dag_nodes.size()) {
+				dag_nodes.push_back(v);
+				dag_nodes_type.push_back(tt);
+			} else { // merge
+				for(int kk = 0; kk < v.size(); kk++) {
+					dag_nodes[ii].push_back(v[kk]);
+				}	
+				
+				if(edgesIt->second != "archetype")
+					dag_nodes_type[ii] = 1;
+			}
+			
+			//cout << ontology.getName(edgesIt->first.first) << "\t" << ontology.getName(edgesIt->first.second) << "\t" << edgesIt->second << "\t" << ontology.getWeight(edgesIt->first.first) << endl;
+		}
+		
+		// Get internal adjacency matrix of DAGs
+		int dag_node_counts = dag_nodes.size();
+		mat dag_adj = zeros(dag_node_counts, dag_node_counts);	
+		vec dag_node_annotations = zeros(dag_node_counts);		
+		for(map< pair<unsigned,unsigned>, string >::iterator edgesIt = ontology.edgesBegin(); edgesIt != ontology.edgesEnd(); ++edgesIt) {
+			unsigned ii = edgesIt->first.first;
+			unsigned jj = edgesIt->first.second;
+			double w = ontology.getWeight(edgesIt->first.first);
+
+			if(edgesIt->second == "archetype") {
+				dag_node_annotations(ii) = 1;
+			} else {
+				dag_node_annotations(ii) = 2;
+			}
+			
+			dag_adj(ii, jj) = 1;
+			
+		}
+		
+		output.dag_adj = dag_adj;
+		output.dag_node_annotations = dag_node_annotations;
 		
 		output.C_unified = C_unified;
 		output.H_unified = H_unified;

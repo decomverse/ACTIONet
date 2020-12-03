@@ -635,9 +635,9 @@ List prune_archetypes(const List& C_trace, const List& H_trace, double min_speci
 List unify_archetypes(sp_mat& G,
 						mat &S_r,
 						mat &C_stacked,
-						double alpha = 0.85,
+						double alpha = 0.99,
 						int core_threshold = 1,
-						double sim_threshold = 0.5,
+						double sim_threshold = 0.0,
 						int thread_no = 0) {
 	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, alpha, core_threshold, sim_threshold, thread_no);
 
@@ -651,8 +651,14 @@ List unify_archetypes(sp_mat& G,
 	out_list["C_unified"] = results.C_unified;
 	out_list["H_unified"] = results.H_unified;
 	
+	
 	for(int i = 0; i < results.assigned_archetypes.n_elem; i++) results.assigned_archetypes[i]++;
 	out_list["assigned_archetypes"] = results.assigned_archetypes;
+
+
+	out_list["ontology"] = results.dag_adj;
+	out_list["ontology_node_attributes"] = results.dag_node_annotations;
+
 
     return out_list;
 }
