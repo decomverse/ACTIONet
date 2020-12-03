@@ -27,7 +27,7 @@
 #' @export
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
-	unification_alpha = 0.85, unification_core_threshold = 1, unification_sim_threshold = 0.5,
+	unification_alpha = 0.99, unification_core_threshold = 1, unification_sim_threshold = 0.0,
     layout.in.parallel = TRUE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
     footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
     if (!(data_slot %in% names(assays(ace)))) {
@@ -99,6 +99,8 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     # Identiy equivalent classes of archetypes and group them together
 	unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.outC_stacked, alpha = unification_alpha, core_threshold = unification_core_threshold, sim_threshold = unification_sim_threshold, thread_no)    
 	metadata(ace)$selected_archetypes = unification.out$selected_archetypes
+	metadata(ace)$selected_archetypes_ontology = unification.out$ontology
+	metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
 
 	Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
     colMaps(ace)[["H_unified"]] = Ht_unified
@@ -271,7 +273,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thr
 #' @export
 rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
     reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0,
-	unification_alpha = 0.85, unification_core_threshold = 1, unification_sim_threshold = 0.5) {
+	unification_alpha = 0.99, unification_core_threshold = 1, unification_sim_threshold = 0.0) {
 
     S = assays(ace)[[data_slot]]
     S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
@@ -281,9 +283,9 @@ rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
 
 	unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = C_stacked, alpha = unification_alpha, core_threshold = unification_core_threshold, sim_threshold = unification_sim_threshold, thread_no)    
 	metadata(ace)$selected_archetypes = unification.out$selected_archetypes
+	metadata(ace)$selected_archetypes_ontology = unification.out$ontology
+	metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
 
-
-    R.utils::printf("%d states\n", length(unique(unification.out$assigned_archetype)))
 
     colMaps(ace)[[sprintf("H_%s", unified_suffix)]] = as(Matrix::t(unification.out$H_unified),
         "sparseMatrix")
