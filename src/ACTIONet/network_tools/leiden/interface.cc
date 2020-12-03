@@ -168,7 +168,9 @@ namespace ACTIONet {
 
 
 		Optimiser *opt = new Optimiser(seed);
-		mat clusters;
+		
+		int min_size = nV, max_size = 0;
+		field<vec> cluster_bank(resolutions.n_elem);
 		for(int j = 0; j < resolutions.n_elem; j++) {
 			partition->resolution_parameter = resolutions(j);
 			opt->optimise_partition(partition);
@@ -178,24 +180,38 @@ namespace ACTIONet {
 			for(int i = 0; i < nV; i++) {
 				cur_clusters(i) = partition->membership(i);
 			}						
+			cluster_bank(j) = cur_clusters;
 			
+			int kk = (int)arma::max(cur_clusters)+1;	
+			min_size = min(min_size, kk);
+			max_size = max(max_size, kk);	
 			
-			int kk = (int)arma::max(cur_clusters);
-			mat M = zeros(nV, kk+1);			
-			for(int i = 0; i < M.n_cols; i++) {
-				uvec idx = find(cur_clusters == i);				
-
-				vec v = M.col(i);
-				v(idx).ones();
-				M.col(i) = v;
-			}
-			if(j == 0) {
-				clusters = M;
-			} else {
-				clusters = join_horiz(clusters, M);
-			}			
 		}
 		
+		// One-hot encoding
+		mat clusters;
+		for(int j = 0; j < resolutions.n_elem; j++) {
+			vec cur_clusters = cluster_bank(j)+1;
+			
+			int kk = (int)arma::max(cur_clusters);
+			if( (kk > min_size) && (kk < max_size) ) {
+				mat M = zeros(nV, kk);			
+				for(int i = 0; i < M.n_cols; i++) {
+					uvec idx = find(cur_clusters == i);				
+
+					vec v = M.col(i);
+					v(idx).ones();
+					M.col(i) = v;
+				}
+				if(clusters.n_cols == 0) {
+					clusters = M;
+				} else {
+					clusters = join_horiz(clusters, M);
+				}			
+			}
+		}
+		
+
 
 		
 	    partition->destructor_delete_graph = true;
@@ -250,7 +266,10 @@ namespace ACTIONet {
 
 
 		Optimiser *opt = new Optimiser(seed);
-		mat clusters;
+
+
+		int min_size = nV, max_size = 0;
+		field<vec> cluster_bank(resolutions.n_elem);
 		for(int j = 0; j < resolutions.n_elem; j++) {
 			partition->resolution_parameter = resolutions(j);
 			opt->optimise_partition(partition);
@@ -260,25 +279,36 @@ namespace ACTIONet {
 			for(int i = 0; i < nV; i++) {
 				cur_clusters(i) = partition->membership(i);
 			}						
+			cluster_bank(j) = cur_clusters;
 			
+			int kk = (int)arma::max(cur_clusters)+1;	
+			min_size = min(min_size, kk);
+			max_size = max(max_size, kk);	
 			
-			int kk = (int)arma::max(cur_clusters);
-			mat M = zeros(nV, kk+1);			
-			for(int i = 0; i < M.n_cols; i++) {
-				uvec idx = find(cur_clusters == i);				
-
-				vec v = M.col(i);
-				v(idx).ones();
-				M.col(i) = v;
-			}
-			if(j == 0) {
-				clusters = M;
-			} else {
-				clusters = join_horiz(clusters, M);
-			}			
 		}
 		
+		// One-hot encoding
+		mat clusters;
+		for(int j = 0; j < resolutions.n_elem; j++) {
+			vec cur_clusters = cluster_bank(j)+1;
+			
+			int kk = (int)arma::max(cur_clusters);
+			if( (kk > min_size) && (kk < max_size) ) {
+				mat M = zeros(nV, kk);			
+				for(int i = 0; i < M.n_cols; i++) {
+					uvec idx = find(cur_clusters == i);				
 
+					vec v = M.col(i);
+					v(idx).ones();
+					M.col(i) = v;
+				}
+				if(clusters.n_cols == 0) {
+					clusters = M;
+				} else {
+					clusters = join_horiz(clusters, M);
+				}			
+			}
+		}
 		
 	    partition->destructor_delete_graph = true;
 		delete(G);
