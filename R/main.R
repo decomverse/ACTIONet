@@ -97,7 +97,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 
     # Identiy equivalent classes of archetypes and group them together
-	unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.outC_stacked, alpha = unification_alpha, core_threshold = unification_core_threshold, sim_threshold = unification_sim_threshold, thread_no)    
+	unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.out$C_stacked, alpha = unification_alpha, core_threshold = unification_core_threshold, sim_threshold = unification_sim_threshold, thread_no)
 	metadata(ace)$selected_archetypes = unification.out$selected_archetypes
 	metadata(ace)$selected_archetypes_ontology = unification.out$ontology
 	metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
@@ -281,7 +281,7 @@ rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
     G = colNets(ace)[["ACTIONet"]]
 
-	unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = C_stacked, alpha = unification_alpha, core_threshold = unification_core_threshold, sim_threshold = unification_sim_threshold, thread_no)    
+	unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = C_stacked, alpha = unification_alpha, core_threshold = unification_core_threshold, sim_threshold = unification_sim_threshold, thread_no)
 	metadata(ace)$selected_archetypes = unification.out$selected_archetypes
 	metadata(ace)$selected_archetypes_ontology = unification.out$ontology
 	metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
