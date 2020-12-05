@@ -23,9 +23,10 @@
 #include <thread>
 #include <atomic>
 
-
 #include <arma_base.h>
+#include <Rinterface.h>
 #include <my_utils.h>
+#include <Rinterface.h>
 #include <gradient.h>
 #include <sampler.h>
 #include <tauprng.h>
