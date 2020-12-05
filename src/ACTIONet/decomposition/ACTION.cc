@@ -325,10 +325,14 @@ namespace ACTIONet {
 
 		int current_k = 0;
 		int total = k_min-1;
-		REprintf("Iterating from k=%d ... %d\n", k_min, k_max);
+		char stat_buff[50];
+
+		// Rprintf("Iterating from k=%d ... %d: ", k_min, k_max);
+		sprintf(stat_buff, "Iterating from k=%d ... %d:", k_min, k_max);
+		REprintf(stat_buff);
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {
-			total++;
-			printf("\tk = %d\n", total);
+
+
 			SPA_results SPA_res = run_SPA(X_r, kk);
 			trace.selected_cols[kk] = SPA_res.selected_columns;
 
@@ -340,9 +344,13 @@ namespace ACTIONet {
 			//AA_res = run_AA_old(X_r, W);
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);
-
-
+			total++;
+			// REprintf("\r");
+			Rprintf("\r%s %d/$d", stat_buff, total, k_max);
+			// REprintf("\r");
+			R_FlushConsole();
 		});
+		Rprintf("\n");
 
 		return trace;
 	}
