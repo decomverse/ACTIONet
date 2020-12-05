@@ -232,7 +232,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
     }
 
     if (prefilter) {
-        ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
+        ace = filter.ace(ace, assay_name = "counts", return_fil_ace = TRUE, ...)
     }
 
     return(ace)
