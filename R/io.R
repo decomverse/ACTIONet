@@ -103,7 +103,7 @@ import.ace.from.10X.generic <- function(input_path, mtx_file = "matrix.mtx.gz", 
     }
 
     if (prefilter) {
-        ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
+        ace = filter.ace(ace, assay_name = "counts", return_fil_ace = TRUE, ...)
     }
 
     return(ace)
@@ -232,7 +232,7 @@ import.ace.from.10X.h5 <- function(fname, version = 3, genome = NULL, use.names 
     }
 
     if (prefilter) {
-        ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
+        ace = filter.ace(ace, assay_name = "counts", return_fil_ace = TRUE, ...)
     }
 
     return(ace)
@@ -272,7 +272,7 @@ import.ace.from.counts <- function(counts_mat, feature_metadata = NULL, sample_m
       colData = sample_metadata)
 
     if (prefilter) {
-        ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
+        ace = filter.ace(ace, assay_name = "counts", return_fil_ace = TRUE, ...)
     }
 
     return(ace)
@@ -308,7 +308,7 @@ import.ace.from.table <- function(fname, sep = "\t", prefilter = FALSE, ...) {
     ace <- ACTIONetExperiment(assays = list(counts = counts.mat))
 
     if (prefilter) {
-        ace = filter.ace(ace, assay.name = "counts", return_fil_ace = TRUE, ...)
+        ace = filter.ace(ace, assay_name = "counts", return_fil_ace = TRUE, ...)
     }
 
     return(ace)
