@@ -171,9 +171,7 @@ namespace ACTIONet {
 			vec v = Sim.col(j);
 			vec cc_vals = v(find(is_selected == 1));
 			double mm = max(cc_vals);
-			
-			printf("%d- %d %f\n", i, j, mm);
-			 
+						 
 			if(sim_threshold < mm) {
 				continue;
 			}
