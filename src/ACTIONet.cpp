@@ -636,10 +636,10 @@ List unify_archetypes(sp_mat& G,
 						mat &S_r,
 						mat &C_stacked,
 						double alpha = 0.99,
-						int core_threshold = 1,
+						int outlier_z_threshold = -1.65,
 						double sim_threshold = 0.0,
 						int thread_no = 0) {
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, alpha, core_threshold, sim_threshold, thread_no);
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, alpha, outlier_z_threshold, sim_threshold, thread_no);
 
 		
 	List out_list;		
@@ -1115,6 +1115,29 @@ mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no = 0, double a
 }
 
 
+
+
+//' Computes network diffusion over a given network, starting with an arbitrarty set of initial scores (direct approach)
+//'
+//' @param G Input graph
+//' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
+//' @param thread_no Number of parallel threads (default=0)
+//' @param alpha Random-walk depth ( between [0, 1] )
+//' @param max_it PageRank iterations
+//' 
+//' @return Matrix of diffusion scores
+//' 
+//' @examples
+//' G = colNets(ace)$ACTIONet
+//' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+//' smoothed.expression = compute_network_diffusion_direct(G, gene.expression)
+// [[Rcpp::export]]
+mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no = 0, double alpha = 0.85) {
+
+	mat Diff = ACTIONet::compute_network_diffusion_direct(G, X0, thread_no, alpha);
+
+	return(Diff);
+}
 
 
 //' Computes sparse network diffusion over a given network, starting with an arbitrarty set of initial scores

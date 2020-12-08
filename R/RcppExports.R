@@ -334,8 +334,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked, prune.out$H_stacked)
 #' cell.clusters = unification.out$sample_assignments
-unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.85, core_threshold = 1L, sim_threshold = 0.5, thread_no = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, core_threshold, sim_threshold, thread_no)
+unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.99, outlier_z_threshold = -1.65, sim_threshold = 0.0, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, outlier_z_threshold, sim_threshold, thread_no)
 }
 
 #' Builds an interaction network from the multi-level archetypal decompositions
@@ -640,6 +640,24 @@ compute_archetype_core_centrality <- function(G, sample_assignments) {
 #' smoothed.expression = compute_network_diffusion(G, gene.expression)
 compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 3L) {
     .Call(`_ACTIONet_compute_network_diffusion`, G, X0, thread_no, alpha, max_it)
+}
+
+#' Computes network diffusion over a given network, starting with an arbitrarty set of initial scores (direct approach)
+#'
+#' @param G Input graph
+#' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
+#' @param thread_no Number of parallel threads (default=0)
+#' @param alpha Random-walk depth ( between [0, 1] )
+#' @param max_it PageRank iterations
+#' 
+#' @return Matrix of diffusion scores
+#' 
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+#' smoothed.expression = compute_network_diffusion_direct(G, gene.expression)
+compute_network_diffusion_direct <- function(G, X0, thread_no = 0L, alpha = 0.85) {
+    .Call(`_ACTIONet_compute_network_diffusion_direct`, G, X0, thread_no, alpha)
 }
 
 #' Computes sparse network diffusion over a given network, starting with an arbitrarty set of initial scores
