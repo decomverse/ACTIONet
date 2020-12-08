@@ -3,6 +3,62 @@
 
 vector<double> Corrector::vals;
 
+	template<class Function>
+	inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
+		if (thread_no <= 0) {
+			thread_no = std::thread::hardware_concurrency();
+		}
+
+		if (thread_no == 1) {
+			for (size_t id = start; id < end; id++) {
+				fn(id, 0);
+			}
+		} else {
+			std::vector<std::thread> threads;
+			std::atomic<size_t> current(start);
+
+			// keep track of exceptions in threads
+			// https://stackoverflow.com/a/32428427/1713196
+			std::exception_ptr lastException = nullptr;
+			std::mutex lastExceptMutex;
+
+			for (size_t threadId = 0; threadId < thread_no; ++threadId) {
+				threads.push_back(std::thread([&, threadId] {
+					while (true) {
+						size_t id = current.fetch_add(1);
+
+						if ((id >= end)) {
+							break;
+						}
+
+						try {
+							fn(id, threadId);
+						} catch (...) {
+							std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
+							lastException = std::current_exception();
+							/*
+							 * This will work even when current is the largest value that
+							 * size_t can fit, because fetch_add returns the previous value
+							 * before the increment (what will result in overflow
+							 * and produce 0 instead of current + 1).
+							 */
+							current = end;
+							break;
+						}
+					}
+				}));
+			}
+			for (auto &thread : threads) {
+				thread.join();
+			}
+			if (lastException) {
+				std::rethrow_exception(lastException);
+			}
+		}
+
+	}
+
+
 
 namespace ACTIONet {
 	mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters = uvec(), int seed = 0);
@@ -106,52 +162,75 @@ namespace ACTIONet {
 		return(P2);
 	}
 
+
 	unification_results unify_archetypes(sp_mat& G,
 										mat &S_r,
 										mat &C_stacked,
 										double alpha = 0.99,
-										int core_threshold = 1,
-										double sim_threshold = 0,
+										int outlier_z_threshold = -1.65,
+										double sim_threshold = 3.0,
 										int thread_no = 0) {
-		printf("Unify archetypes (%d archs, alpha = %f, core_threshold = %d, sim_threshold = %f)\n", C_stacked.n_cols, alpha, core_threshold, sim_threshold);
+		printf("Unify archetypes (%d archs, alpha = %f, outlier_z_threshold = %d, sim_threshold = %f)\n", C_stacked.n_cols, alpha, outlier_z_threshold, sim_threshold);
 														
 		unification_results output;
 		
 		// Smooth archetypes using ACTIONet
-		sp_mat X0 = sp_mat(normalise(C_stacked, 1, 0));
+		C_stacked = normalise(C_stacked, 1, 0);
+		sp_mat X0 = sp_mat(C_stacked);		
 		mat C_imputed = compute_network_diffusion(G, X0, thread_no, alpha, 5);
-		
-		// Compute similarity matrix
-		vec d = vec(trans(sum(G)));		
-		sp_mat L(G.n_rows, G.n_cols);
-		L.diag() = d;
-		L -= G;
-		
-		mat Sim = mat(trans(C_imputed) * L * C_imputed);
-		vec x = Sim.diag();
-		for(int i = 0; i < Sim.n_rows; i++) {
-			for(int j = 0; j < Sim.n_rows; j++) {
-				if(x(i) == 0 || x(j) == 0) {
-					Sim(i, j) = 0;
-				} else {
-					Sim(i, j) /= sqrt(x(i) * x(j));
-				}
-			}
-		}		
-		Sim.transform( [sim_threshold](double val) { return (val < sim_threshold?0:val); } );
 
+		// Compute similarity matrix		
+		mat Yc = zscore(C_imputed);
+		/*
+		vec ys = trans(mean(Yc, 0));
+		for(int i = 0; i < ys.n_elem; i++) {
+			Yc.col(i) -= ys(i); 
+		}
+		*/
+		
+		vec v = trans(sum(square(Yc)));
+		
+		
+		/*
+		mat denom(v.n_elem, v.n_elem);
+		for(int i = 0; i < v.n_elem; i++) {
+			for(int j = i; j < v.n_elem; j++) {
+//				denom(i, j) = denom(j, i) = (v(i) + v(j)) / 2.0;
+				denom(i, j) = denom(j, i) = max	(v(i) + v(j));
+			}
+		}
+		*/
+		mat denom = sqrt(v * trans(v));
+		denom = sum(sum(G)) * denom / (double)G.n_rows;
+
+		
+		mat Sim = (trans(Yc) * G * Yc) / sum(sum(G)); //denom;
+		
+		Sim(find(denom == 0)).zeros();
+
+		output.C_unified = Sim;
+		return(output);
+		
 
 		// Prune unreliable archetypes		
+/*
+		vec zz = zscore(Sim.diag());
+		uvec selected_archetypes = find( (zz > outlier_z_threshold) && (Sim.diag() != 0) );
+*/
+		Sim.transform( [sim_threshold](double val) { return (val < sim_threshold?0:val); } );
 		sp_mat Sim_sp = sp_mat(Sim);
 		uvec core_num = compute_core_number(Sim_sp);
-		uvec selected_archetypes = find(core_threshold < core_num);
-			
+		uvec selected_archetypes = find(1 < core_num);
+
+		printf("%d selected archs\n", selected_archetypes.n_elem);
+		
+
+
 		// Subset archetypes and compute reduced profile of each archetype
 		C_imputed = C_imputed.cols(selected_archetypes);
 		mat S_r_arch = S_r * C_imputed;
 		
 		Sim = Sim(selected_archetypes, selected_archetypes);
-		
 		
 		// Prioritize archetypes
 		int dim = min(100, (int)min(C_imputed.n_cols, C_imputed.n_rows));		
@@ -166,21 +245,22 @@ namespace ACTIONet {
 						
 		vec is_selected = zeros(S_r_arch.n_cols);
 		is_selected(selected_columns(0)) = 1;		
-		for(int i = 1; i < dim; i++) {	
+		for(int i = 1; i < dim; i++) {							
 			int j = selected_columns[i];
 			vec v = Sim.col(j);
 			vec cc_vals = v(find(is_selected == 1));
 			double mm = max(cc_vals);
-			
-			printf("%d- %d %f\n", i, j, mm);
-			 
+						
+			printf("%d- %d %f\n", i+1, j+1, mm);
 			if(sim_threshold < mm) {
 				continue;
 			}
 			is_selected(j) = 1;
+
 		}		
 		uvec idx = find(is_selected == 1);		
-
+		
+		printf("%d unfied archetypes\n", idx.n_elem);
 		
 		mat C_unified = C_imputed.cols(idx);
 		mat W_unified = S_r_arch.cols(idx);

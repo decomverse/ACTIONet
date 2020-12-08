@@ -191,7 +191,7 @@ namespace ACTIONet {
 	// Post-ACTIONet archetype filtering/aggregation
 	// To unify redundant archetypes across different levels
 		//unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes, mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double outlier_threshold, int reduced_dim);
-		unification_results unify_archetypes(sp_mat& G, mat &S_r, mat &C_stacked, double alpha, int core_threshold, double sim_threshold, int thread_no);	
+		unification_results unify_archetypes(sp_mat& G, mat &S_r, mat &C_stacked, double alpha, int outlier_z_threshold, double sim_threshold, int thread_no);	
 		
 	// Main functions to build an interaction network from multi-level archetypal decompositions
 		sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no, double M, double ef_construction, double ef, bool mutual_edges_only);
@@ -237,6 +237,7 @@ namespace ACTIONet {
 		uvec compute_core_number(sp_mat &G);
 		vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments);		
 		mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no, double alpha, int max_it);
+		mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no, double alpha);
 		sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha, double rho, double epsilon, int max_iter);
 		vec NetDBSCAN(sp_mat& G, int minPts, double eps, double alpha_val);
 	

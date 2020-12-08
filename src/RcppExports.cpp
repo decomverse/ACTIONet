@@ -263,8 +263,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, int core_threshold, double sim_threshold, int thread_no);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP core_thresholdSEXP, SEXP sim_thresholdSEXP, SEXP thread_noSEXP) {
+List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, int outlier_z_threshold, double sim_threshold, int thread_no);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP outlier_z_thresholdSEXP, SEXP sim_thresholdSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -272,10 +272,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< int >::type core_threshold(core_thresholdSEXP);
+    Rcpp::traits::input_parameter< int >::type outlier_z_threshold(outlier_z_thresholdSEXP);
     Rcpp::traits::input_parameter< double >::type sim_threshold(sim_thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, core_threshold, sim_threshold, thread_no));
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, outlier_z_threshold, sim_threshold, thread_no));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -501,6 +501,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_network_diffusion(G, X0, thread_no, alpha, max_it));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_network_diffusion_direct
+mat compute_network_diffusion_direct(sp_mat& G, sp_mat& X0, int thread_no, double alpha);
+RcppExport SEXP _ACTIONet_compute_network_diffusion_direct(SEXP GSEXP, SEXP X0SEXP, SEXP thread_noSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type X0(X0SEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_network_diffusion_direct(G, X0, thread_no, alpha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1069,6 +1083,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_core_number", (DL_FUNC) &_ACTIONet_compute_core_number, 1},
     {"_ACTIONet_compute_archetype_core_centrality", (DL_FUNC) &_ACTIONet_compute_archetype_core_centrality, 2},
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 5},
+    {"_ACTIONet_compute_network_diffusion_direct", (DL_FUNC) &_ACTIONet_compute_network_diffusion_direct, 4},
     {"_ACTIONet_compute_sparse_network_diffusion", (DL_FUNC) &_ACTIONet_compute_sparse_network_diffusion, 6},
     {"_ACTIONet_assess_enrichment", (DL_FUNC) &_ACTIONet_assess_enrichment, 3},
     {"_ACTIONet_NetDBSCAN", (DL_FUNC) &_ACTIONet_NetDBSCAN, 4},
