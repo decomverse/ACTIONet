@@ -636,10 +636,10 @@ List unify_archetypes(sp_mat& G,
 						mat &S_r,
 						mat &C_stacked,
 						double alpha = 0.99,
-						int outlier_z_threshold = -1.65,
+						double outlier_threshold = 0,
 						double sim_threshold = 0.0,
 						int thread_no = 0) {
-	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, alpha, outlier_z_threshold, sim_threshold, thread_no);
+	ACTIONet::unification_results results = ACTIONet::unify_archetypes(G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no);
 
 		
 	List out_list;		

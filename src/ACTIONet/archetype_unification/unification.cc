@@ -167,10 +167,10 @@ namespace ACTIONet {
 										mat &S_r,
 										mat &C_stacked,
 										double alpha = 0.99,
-										int outlier_z_threshold = -1.65,
+										double outlier_threshold = -1.65,
 										double sim_threshold = 3.0,
 										int thread_no = 0) {
-		printf("Unify archetypes (%d archs, alpha = %f, outlier_z_threshold = %d, sim_threshold = %f)\n", C_stacked.n_cols, alpha, outlier_z_threshold, sim_threshold);
+		printf("Unify archetypes (%d archs, alpha = %f, outlier_threshold = %f, sim_threshold = %f)\n", C_stacked.n_cols, alpha, outlier_threshold, sim_threshold);
 														
 		unification_results output;
 		
@@ -180,34 +180,55 @@ namespace ACTIONet {
 		mat C_imputed = compute_network_diffusion(G, X0, thread_no, alpha, 5);
 
 		// Compute similarity matrix		
-		mat Yc = zscore(C_imputed);
 		/*
-		vec ys = trans(mean(Yc, 0));
-		for(int i = 0; i < ys.n_elem; i++) {
-			Yc.col(i) -= ys(i); 
+		mat logC = log(C_imputed);
+		mat Z = zeros(size(logC));
+		for(int j = 0; j < logC.n_cols; j++) {
+			vec v = logC.col(j);
+			uvec idx = find( (v != datum::nan) && (v != -datum::inf) && (v != +datum::inf));
+			double mu = mean(v(idx));
+			double sigma = stddev(v(idx));
+			vec z = (v-mu)/sigma;
+			uvec mask_idx = find( (v == datum::nan) || (v == -datum::inf) || (v == +datum::inf));
+			z(mask_idx).zeros();
+			Z.col(j) = z;
 		}
+		
+		vec mu = mean(Z, 1);		
+		mat R = Z - ( (mu * (trans(mu) * Z)) / sum(square(mu)));
 		*/
+	/*	
+		mat Z = zscore(C_imputed);
 		
-		vec v = trans(sum(square(Yc)));
-		
-		
-		/*
-		mat denom(v.n_elem, v.n_elem);
-		for(int i = 0; i < v.n_elem; i++) {
-			for(int j = i; j < v.n_elem; j++) {
-//				denom(i, j) = denom(j, i) = (v(i) + v(j)) / 2.0;
-				denom(i, j) = denom(j, i) = max	(v(i) + v(j));
-			}
-		}
-		*/
-		mat denom = sqrt(v * trans(v));
-		denom = sum(sum(G)) * denom / (double)G.n_rows;
+		//mat Sim = trans(Z) * Z / (double)Z.n_rows;
 
 		
-		mat Sim = (trans(Yc) * G * Yc) / sum(sum(G)); //denom;
+		vec v = trans(sum(square(Z)));			
+		mat denom = sqrt(v * trans(v));
+		denom = sum(sum(G)) * denom / (double)G.n_rows;
 		
+		mat Sim = (trans(Z) * G * Z) / denom;
+
 		Sim(find(denom == 0)).zeros();
+*/
+
+
+		mat Sim = cor(C_imputed);
+	
+/*		
+		vec resolutions = regspace(0.1, 0.05, 5);
+		mat M_total = signed_cluster_batch(sp_mat(Sim), resolutions);
+		Sim = (M_total * trans(M_total));
 		
+		Sim /= max(max(abs(Sim)));
+*/		
+		
+/*		
+		output.C_unified = Sim;
+		output.H_unified = Z;		
+		
+		return(output);
+*/
 
 		// Prune unreliable archetypes		
 /*
@@ -217,13 +238,14 @@ namespace ACTIONet {
 		Sim.transform( [sim_threshold](double val) { return (val < sim_threshold?0:val); } );
 		sp_mat Sim_sp = sp_mat(Sim);
 		uvec core_num = compute_core_number(Sim_sp);
-		uvec selected_archetypes = find(1 < core_num);
-
-		printf("%d selected archs\n", selected_archetypes.n_elem);
 		
+		uvec selected_archetypes = find(outlier_threshold <= core_num);				
+		printf("%d selected archs\n", selected_archetypes.n_elem);		
 
 
 		// Subset archetypes and compute reduced profile of each archetype
+		//M_total = M_total.cols(selected_archetypes);
+		
 		C_imputed = C_imputed.cols(selected_archetypes);
 		mat S_r_arch = S_r * C_imputed;
 		
