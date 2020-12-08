@@ -207,9 +207,6 @@ namespace ACTIONet {
 		mat Sim = (trans(Yc) * G * Yc) / sum(sum(G)); //denom;
 		
 		Sim(find(denom == 0)).zeros();
-
-		output.C_unified = Sim;
-		return(output);
 		
 
 		// Prune unreliable archetypes		
