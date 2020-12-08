@@ -1,4 +1,5 @@
-FROM shmohammadi86/r-bioc
+ARG base_image=nuest/mro:4.0.2-rstudio
+FROM "$base_image"
 
 LABEL name="shmohammadi86/actionet:latest" \
       version=1.0.0 \
@@ -6,14 +7,7 @@ LABEL name="shmohammadi86/actionet:latest" \
       maintainer="shahin.mohammadi@gmail.com" \
       description="ACTIONet single-cell framework." \
       license="GPLv2"
-      
-ENV DEBIAN_FRONTEND noninteractive
 
-# Install ACTIONet
-RUN Rscript -e 'update.packages(ask = FALSE) \
-				devtools::install_github("shmohammadi86/SCINET", ref = "master") \
-				devtools::install_github("shmohammadi86/NetLibR", ref = "master") \
-				devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")'
-
+RUN Rscript -e 'devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")'
 
 CMD ["/init"]
