@@ -270,7 +270,7 @@ namespace ACTIONet {
 			vec cc_vals = v(find(is_selected == 1));
 			double mm = max(cc_vals);
 						
-			printf("%d- %d %f\n", i+1, j+1, mm);
+			//printf("%d- %d %f\n", i+1, j+1, mm);
 			if(sim_threshold < mm) {
 				continue;
 			}
