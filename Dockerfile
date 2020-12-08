@@ -1,4 +1,4 @@
-ARG base_image=shmohammadi86/r4mkl_bioc:latest
+ARG base_image=/home/shahin/Dropbox/Projects/SingleCell/repositories/ACTION/Final_repo
 FROM "$base_image"
 
 LABEL name="shmohammadi86/actionet:latest" \
@@ -7,10 +7,6 @@ LABEL name="shmohammadi86/actionet:latest" \
       maintainer="shahin.mohammadi@gmail.com" \
       description="ACTIONet single-cell framework." \
       license="GPLv2"
-      
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE 1
 
 RUN Rscript -e 'devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")'
 
