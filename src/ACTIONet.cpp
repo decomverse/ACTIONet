@@ -674,7 +674,7 @@ List unify_archetypes(sp_mat& G,
 //' @param density Overall density of constructed graph. The higher the density, the more edges are retained (default = 1.0).
 //' @param thread_no Number of parallel threads (default = 0).
 //' @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges.
-//' If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
+//' If it is true, only mutual nearest-neighbors are returned (default=TRUE).
 //'
 //' @return G Adjacency matrix of the ACTIONet graph.
 //'

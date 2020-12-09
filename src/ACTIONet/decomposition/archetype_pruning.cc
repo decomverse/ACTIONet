@@ -9,7 +9,7 @@ namespace ACTIONet {
 		multilevel_archetypal_decomposition results;
 
 		// Vector contains an element for k==0, this have to -1
-		Rprintf("Joining the trace of C& H matrices (depth = %d) ... ", depth-1); //fflush(stdout);
+		Rprintf("Joining trace of C & H matrices (depth = %d) ... ", depth-1); //fflush(stdout);
 		// Group H and C matrices for different values of k (#archs) into joint matrix
 		for(int k = 0; k < depth; k++) {
 			if(H_trace[k].n_rows == 0)
@@ -26,11 +26,11 @@ namespace ACTIONet {
 			}
 		}
 		int total_archs = H_stacked.n_rows;
-		Rprintf("done\n");
+		Rprintf("done\n"); R_FlushConsole();
 
+		Rprintf("Pruning archetypes:\n");
 
-
-		Rprintf("Pruning non-specific archetypes (based on transitivity) ... ");
+		// Rprintf("Pruning non-specific archetypes (based on transitivity) ... ");
 		// Construct backbone
 		mat backbone = cor(trans(H_stacked));
 		backbone.diag().zeros();
@@ -62,11 +62,11 @@ namespace ACTIONet {
 		vec transitivity_z = zscore(transitivity);
 		uvec nonspecific_idx = find(transitivity_z < min_specificity_z_threshold);
 		pruned(nonspecific_idx).ones();
-		Rprintf("done (%d archs pruned)\n", nonspecific_idx.n_elem);
-
+		// Rprintf("done (%d archs pruned)\n", nonspecific_idx.n_elem);
+		Rprintf("\tNon-specific archetypes: %d\n", nonspecific_idx.n_elem);
 
 		// Find landmark cells, i.e., closest cells to each multi-level archetype (its projection on to the cell space, ish)
-		Rprintf("Removing unreliable archetypes (based on the landmark cells) ... ");
+		// Rprintf("Removing unreliable archetypes (based on the landmark cells) ... ");
 		double epsilon = 1e-6;
 		int bad_archs = 0;
 		vec landmark_cells = -ones(total_archs);
@@ -86,8 +86,9 @@ namespace ACTIONet {
 				bad_archs++;
 			}
 		}
-		Rprintf("done (further %d archs removed)\n", bad_archs); fflush(stdout);
 
+		// Rprintf("done (%d archs removed)\n", bad_archs); //fflush(stdout);
+		Rprintf("\tUnreliable archetypes: %d\n", bad_archs);
 
 		uvec idx = find(C_stacked > 0);
 		mat C_bin = C_stacked;
@@ -95,8 +96,11 @@ namespace ACTIONet {
 		uvec trivial_idx = find(sum(C_bin) < min_cells);
 		pruned(trivial_idx).ones();
 
-		Rprintf("Found (and removed) %d trivial archetypes\n", trivial_idx.n_elem); fflush(stdout);
-
+		// Rprintf("Found (and removed) %d trivial archetypes\n", trivial_idx.n_elem); //fflush(stdout);
+		// string temp_str = (trivial_idx.n_elem == 1) ? "archetype" : "archetypes";
+		// Rprintf("Removed %d trivial %s.\n", trivial_idx.n_elem, temp_str.c_str()); //fflush(stdout);
+		Rprintf("\tTrivial archetypes: %d\n", trivial_idx.n_elem);
+		R_FlushConsole();
 
 		uvec selected_archs = find(pruned == 0);
 		results.selected_archs = selected_archs;

@@ -33,7 +33,6 @@ template<class Function>
 inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
     if (thread_no <= 0) {
         thread_no = SYS_THREADS_DEF;
-        printf("# Threads = %d\n", thread_no);
     }
 
 
@@ -164,12 +163,15 @@ namespace ACTIONet {
 		unsigned int n_epochs = 500,
 		int thread_no = 0) {
 
+    if (thread_no <= 0) { thread_no = SYS_THREADS_DEF; }
+    Rprintf("Computing layout (%d threads):\n", thread_no);
 
 		field<mat> res(3);
 
 		mat init_coors = trans(zscore(trans(S_r.rows(0, 2))));
 
-		printf("Running layout with: compactness=%d, # epochs = %d\n", compactness_level, n_epochs);
+		Rprintf("\tParameters: compactness = %d, layout_epochs = %d\n", compactness_level, n_epochs);
+    R_FlushConsole();
 
 		G.for_each( [](sp_mat::elem_type& val) { val = 1.0 - val; } );
 		G = smoothKNN(G, thread_no);
@@ -216,10 +218,6 @@ namespace ACTIONet {
 
 		});
 
-
-
-
-
 		/*
 		int i = 0;
 		double w_max = max(max(G));
@@ -236,7 +234,7 @@ namespace ACTIONet {
 		vector<double> tail_vec(head_vec);
 
 
-		printf("Computing 2D layout ... "); fflush(stdout);
+		Rprintf("\tComputing 2D layout ... "); //fflush(stdout);
 		// Stores linearized coordinates [x1, y1, x2, y2, ...]
 		vector<double> result;
 
@@ -247,7 +245,7 @@ namespace ACTIONet {
 		//coordinates = robust_zscore(trans(coordinates));
 		coordinates = trans(coordinates);
 
-		printf("done\n"); fflush(stdout);
+		Rprintf("done\n"); R_FlushConsole(); //fflush(stdout);
 
 
 		/****************************
@@ -261,7 +259,7 @@ namespace ACTIONet {
 		tail_vec = head_vec;
 
 
-		printf("Compute 3D layout ... "); fflush(stdout);
+		Rprintf("\tComputing 3D layout ... "); //fflush(stdout);
 		result.clear();
 		result = optimize_layout_umap(head_vec, tail_vec, positive_head, positive_tail, n_epochs,
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);
@@ -270,14 +268,14 @@ namespace ACTIONet {
 		//coordinates_3D = robust_zscore(trans(coordinates_3D));
 		coordinates_3D = trans(coordinates_3D);
 
-		printf("done\n"); fflush(stdout);
+		Rprintf("done\n"); R_FlushConsole(); //fflush(stdout);
 
 
 
 		/****************************
 		 *  Now compute node colors *
 		 ***************************/
-		printf("Estimating node colors ... \n"); fflush(stdout);
+		Rprintf("\tComputing node colors ... "); //fflush(stdout);
 
 		/*
 		mat coeff;
@@ -319,12 +317,11 @@ namespace ACTIONet {
 			RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
 		}
 
-		printf("done\n");
+		Rprintf("done\n"); R_FlushConsole();
 
 		res(0) = coordinates;
 		res(1) = coordinates_3D;
 		res(2) = RGB_colors;
-
 		return res;
 	}
 
@@ -395,7 +392,7 @@ namespace ACTIONet {
 
 
 		mat coordinates(result.data(), 2, nV);
-		printf("done\n"); fflush(stdout);
+		// Rprintf("done\n"); R_FlushConsole();//fflush(stdout);
 
 
 
@@ -403,7 +400,7 @@ namespace ACTIONet {
 		vector<double> head_vec3D(coor3D.memptr(), coor3D.memptr()+coor3D.n_elem);
 		vector<double> tail_vec3D(arch_coor3D.memptr(), arch_coor3D.memptr()+arch_coor3D.n_elem);
 
-		printf("Compute 3D layout ... "); fflush(stdout);
+		// Rprintf("Computing 3D layout ... "); //fflush(stdout);
 		result.clear();
 
 
@@ -411,7 +408,7 @@ namespace ACTIONet {
 			nV, epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0, NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);
 
 		mat coordinates_3D(result.data(), 3, nV);
-		printf("done\n"); fflush(stdout);
+		// Rprintf("done\n"); R_FlushConsole(); //fflush(stdout);
 
 
 
