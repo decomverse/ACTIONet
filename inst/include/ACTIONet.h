@@ -48,6 +48,7 @@
 #define ACTIONet_AND_SYM 1
 #define ACTIONet_OR_SYM 2
 
+extern int SYS_THREADS_DEF;
 
 // s_gd2 visualization
 void layout_unweighted(int n, double* X, int m, int* I, int* J, int t_max, double eps, int seed);

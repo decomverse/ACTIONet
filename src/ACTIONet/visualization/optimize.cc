@@ -1,5 +1,5 @@
 // Adopted from the UWOT R package
-
+#include <ACTIONet.h>
 #include <vector>
 
 #include "perpendicular.h"
@@ -27,12 +27,12 @@ auto optimize_layout(const T &gradient, std::vector<double> &head_embedding,
   double alpha = initial_alpha;
 
 	if (thread_no <= 0) {
-		thread_no = std::thread::hardware_concurrency();
+		thread_no = SYS_THREADS_DEF; //std::thread::hardware_concurrency();
 	}
 
-		
 
-  for (auto n = 0U; n < n_epochs; n++) {	  
+
+  for (auto n = 0U; n < n_epochs; n++) {
     worker.set_alpha(alpha);
     worker.set_n(n);
     if (thread_no > 1) {
@@ -43,7 +43,7 @@ auto optimize_layout(const T &gradient, std::vector<double> &head_embedding,
     }
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
   }
-  
+
   return head_embedding;
 }
 
@@ -83,7 +83,7 @@ std::vector<double>  optimize_layout_umap(
         result = optimize_layout<uwot::umap_gradient, false>(
             gradient, head_vec, tail_vec, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, thread_no, grain_size);      
+            negative_sample_rate, thread_no, grain_size);
     }
   }
 
@@ -99,7 +99,7 @@ std::vector<double> optimize_layout_tumap(
     double initial_alpha, double negative_sample_rate,
     std::size_t thread_no = 0, std::size_t grain_size = 1,
     bool move_other = true) {
-		
+
   std::vector<double> result;
   const uwot::tumap_gradient gradient;
 
