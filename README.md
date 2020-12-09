@@ -1,20 +1,23 @@
+# This is the development version of ACTIONet and may be unstable.
+
 # Installation
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users** 
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
 **Install library dependencies**
-To install the `ACTIONet` dependencie on debian-based linux machines, run:
+To install the `ACTIONet` dependencies on debian-based linux machines, run:
 
 ```bash
-sudo apt-get install libhdf5-dev libsuitesparse-dev
+sudo apt install libhdf5-dev libsuitesparse-dev
 ```
 
-For Mac-based systems, you can use [brew](https://brew.sh/) instead:
+For Mac-based systems use [brew](https://brew.sh/):
 
 ```bash
 brew install hdf5 suite-sparse
 ```
+Some of the dependent R packages also require [XQuartz](https://www.xquartz.org) to be installed.
 
 ### Installing ACTIONet R Package
 
@@ -23,7 +26,7 @@ This is the easiest way to install the package, and it automatically installs al
 
 ```r
 install.packages("devtools")
-devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")
+devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
 
 ```
 
