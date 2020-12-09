@@ -15,7 +15,7 @@ prune_archetypes(
 \arguments{
 \item{C_trace, H_trace}{Output of ACTION}
 
-\item{min_specificity_z_threshold}{Defines the stringency of pruning nonspecific archetypes. 
+\item{min_specificity_z_threshold}{Defines the stringency of pruning nonspecific archetypes.
 The larger the value, the more archetypes will be filtered out (default=-1)}
 }
 \value{
