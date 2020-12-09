@@ -102,7 +102,7 @@ namespace ACTIONet {
 
 		int sample_no = H.n_cols;
 		int dim = H.n_rows;
-		Rprintf("sample # = %d, dim = %d\n", sample_no, dim);
+		// Rprintf("sample # = %d, dim = %d\n", sample_no, dim);
 
 		mat G = zeros(sample_no, sample_no);
 		ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
@@ -239,7 +239,7 @@ namespace ACTIONet {
 			G_sym = (G + Gt);
 			G_sym.for_each( [](sp_mat::elem_type& val) { val /= 2.0; } );
 		} else { // Default to MNN
-			Rprintf("\n\tKeeping mutual-nearest-neighbors only ... ");
+			Rprintf("\n\t\tKeeping mutual nearest-neighbors only ... ");
 			G_sym = sqrt(G % Gt);
 		}
 		Rprintf("done\n");
@@ -256,7 +256,9 @@ namespace ACTIONet {
 			thread_no = SYS_THREADS_DEF; //std::thread::hardware_concurrency();
 		}
 
-		Rprintf("Building adaptive network (density = %.2f) -- Updated\n", density);
+		Rprintf("Building adaptive network (%d threads):\n", thread_no);
+    Rprintf("\tParameters: density = %0.2f, mutual_edges_only = %s\n", density, mutual_edges_only ? "TRUE" : "FALSE");
+    R_FlushConsole();
 
 		H_stacked = clamp(H_stacked, 0, 1);
 		H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1
@@ -342,7 +344,7 @@ namespace ACTIONet {
 			G_sym = (G + Gt);
 			G_sym.for_each( [](sp_mat::elem_type& val) { val /= 2.0; } );
 		} else { // Default to MNN
-			Rprintf("\n\tKeeping mutual-nearest-neighbors only ... ");
+			// Rprintf("\n\t\tKeeping mutual nearest-neighbors only ... ");
 			G_sym = sqrt(G % Gt);
 		}
 		Rprintf("done\n");
@@ -418,7 +420,7 @@ namespace ACTIONet {
 			G_sym = (G + Gt);
 			G_sym.for_each( [](sp_mat::elem_type& val) { val /= 2.0; } );
 		} else { // Default to MNN
-			Rprintf("\n\tKeeping mutual-nearest-neighbors only ... ");
+			Rprintf("\n\t\tKeeping mutual nearest-neighbors only ... ");
 			G_sym = sqrt(G % Gt);
 		}
 		Rprintf("done\n");

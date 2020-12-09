@@ -1,5 +1,4 @@
 #include "ACTIONet.h"
-
 #include "cholmod.h"
 
 
@@ -303,7 +302,7 @@ namespace ACTIONet {
 
 		int feature_no = S_r.n_rows;
 
-		Rprintf("Running ACTION (%d threads)\n", thread_no);
+		Rprintf("Running ACTION (%d threads):\n", thread_no); R_FlushConsole();
 
 		if(k_max == -1)
 			k_max = (int)S_r.n_cols;
@@ -326,10 +325,10 @@ namespace ACTIONet {
 
 		int current_k = 0;
 		// int total = k_min-1;
-		char stat_buff[50];
+		char status_msg[50];
 
-		sprintf(stat_buff, "Iterating from k = %d ... %d:", k_min, k_max);
-		REprintf("%s %d/%d finished", stat_buff, current_k, (k_max - k_min + 1));
+		sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+		REprintf("\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1)); R_FlushConsole();
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {
 
 			SPA_results SPA_res = run_SPA(X_r, kk);
@@ -345,11 +344,10 @@ namespace ACTIONet {
 			trace.H[kk] = AA_res(1);
 			current_k++;
 
-			REprintf("\r%s %d/%d finished", stat_buff, current_k, (k_max - k_min + 1));
+			REprintf("\r\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1));
 			R_FlushConsole();
 		});
-		Rprintf("\r"); R_FlushConsole();
-		Rprintf("%s %d/%d finished\n", stat_buff, current_k, (k_max - k_min + 1));
+		Rprintf("\r\t%s %d/%d finished\n", status_msg, current_k, (k_max - k_min + 1));
 
 		return trace;
 	}
