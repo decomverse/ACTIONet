@@ -28,7 +28,7 @@ inline auto split_input_range(const IndexRange &range, std::size_t thread_no,
 
   // determine max number of threads
   if (thread_no <= 0) {
-	thread_no = std::thread::hardware_concurrency();
+	thread_no = std::thread::hardware_concurrency() - 2;
   }
 
 
