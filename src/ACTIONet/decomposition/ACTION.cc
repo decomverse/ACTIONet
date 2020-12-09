@@ -83,7 +83,7 @@ namespace ACTIONet {
 	template<class Function>
 	inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
 		if (thread_no <= 0) {
-			thread_no = std::thread::hardware_concurrency();
+			thread_no = SYS_THREADS_DEF;
 		}
 
 		if (thread_no == 1) {
@@ -298,9 +298,12 @@ namespace ACTIONet {
 	}
 
 	ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
+
+		if (thread_no <= 0) { thread_no = SYS_THREADS_DEF; }
+
 		int feature_no = S_r.n_rows;
 
-		printf("Running ACTION (%d threads)\n", thread_no);
+		Rprintf("Running ACTION (%d threads)\n", thread_no);
 
 		if(k_max == -1)
 			k_max = (int)S_r.n_cols;
@@ -319,19 +322,15 @@ namespace ACTIONet {
 		trace.C = field<mat>(k_max + 1);
 		trace.selected_cols = field<uvec>(k_max + 1);
 
-
-
 		mat X_r = normalise(S_r, 1); // ATTENTION!
 
 		int current_k = 0;
-		int total = k_min-1;
+		// int total = k_min-1;
 		char stat_buff[50];
 
-		// Rprintf("Iterating from k=%d ... %d: ", k_min, k_max);
-		sprintf(stat_buff, "Iterating from k=%d ... %d:", k_min, k_max);
-		REprintf(stat_buff);
+		sprintf(stat_buff, "Iterating from k = %d ... %d:", k_min, k_max);
+		REprintf("%s %d/%d finished", stat_buff, current_k, (k_max - k_min + 1));
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {
-
 
 			SPA_results SPA_res = run_SPA(X_r, kk);
 			trace.selected_cols[kk] = SPA_res.selected_columns;
@@ -344,17 +343,16 @@ namespace ACTIONet {
 			//AA_res = run_AA_old(X_r, W);
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);
-			total++;
-			// REprintf("\r");
-			Rprintf("\r%s %d/$d", stat_buff, total, k_max);
-			// REprintf("\r");
+			current_k++;
+
+			REprintf("\r%s %d/%d finished", stat_buff, current_k, (k_max - k_min + 1));
 			R_FlushConsole();
 		});
-		Rprintf("\n");
+		Rprintf("\r"); R_FlushConsole();
+		Rprintf("%s %d/%d finished\n", stat_buff, current_k, (k_max - k_min + 1));
 
 		return trace;
 	}
-
 
 
 	ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 50, double min_delta = 1e-16, int max_trial = 3) {
