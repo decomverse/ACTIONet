@@ -15,7 +15,7 @@ For Mac-based systems use [brew](https://brew.sh/):
 ```bash
 brew install hdf5 suite-sparse
 ```
-Some of the dependent R packages also require [XQuartz](https://www.xquartz.org) to be installed:
+Some of the dependent R packages also require [XQuartz](https://www.xquartz.org) to be installed.
 
 ### Installing ACTIONet R Package
 
