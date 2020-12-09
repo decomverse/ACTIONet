@@ -125,7 +125,7 @@ namespace ACTIONet {
 		// Construct transition matrix
 		vec d = vec(trans(sum(G, 0)));
 		uvec zero_idx = find(d == 0);
-		d(zero_idx).ones();		
+		d(zero_idx).ones();
 		sp_mat P = G;
 
 		for(sp_mat::iterator it = P.begin(); it != P.end(); ++it) {
@@ -214,13 +214,5 @@ namespace ACTIONet {
 
 		return (PR) ;
 	}
-
-}
-
-
-
-		return(X);
-	}
-
 
 }
