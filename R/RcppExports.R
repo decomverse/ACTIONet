@@ -9,14 +9,14 @@ set_seed <- function(seed) {
 #'
 #' This is direct implementation of the randomized SVD algorithm:
 #' From: IRLBA R Package
-#' 
+#'
 #' @param A Input matrix ("sparseMatrix")
 #' @param dim Dimension of SVD decomposition
 #' @param iters Number of iterations (default=5)
 #' @param seed Random seed (default=0)
-#' 
+#'
 #' @return A named list with U, sigma, and V components
-#' 
+#'
 #' @examples
 #' A = randn(100, 20)
 #' SVD.out = IRLBA_SVD(A, dim = 2)
@@ -29,14 +29,14 @@ IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L) {
 #'
 #' This is direct implementation of the randomized SVD algorithm:
 #' From: IRLBA R Package
-#' 
+#'
 #' @param A Input matrix ("sparseMatrix")
 #' @param dim Dimension of SVD decomposition
 #' @param iters Number of iterations (default=5)
 #' @param seed Random seed (default=0)
-#' 
+#'
 #' @return A named list with U, sigma, and V components
-#' 
+#'
 #' @examples
 #' A = randn(100, 20)
 #' SVD.out = IRLBA_SVD_full(A, dim = 2)
@@ -49,14 +49,14 @@ IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L) {
 #'
 #' This is direct implementation of the randomized SVD algorithm for sparse matrices:
 #' Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
-#' 
+#'
 #' @param A Input matrix ("sparseMatrix")
 #' @param dim Dimension of SVD decomposition
 #' @param iters Number of iterations (default=5)
 #' @param seed Random seed (default=0)
-#' 
+#'
 #' @return A named list with U, sigma, and V components
-#' 
+#'
 #' @examples
 #' A = randn(100, 20)
 #' SVD.out = FengSVD(A, dim = 2)
@@ -69,14 +69,14 @@ FengSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #'
 #' This is direct implementation of the randomized SVD algorithm for sparse matrices:
 #' Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzied SVD for Sparse Data," in Proc. the 10th Asian Conference on Machine Learning (ACML), Beijing, China, Nov. 2018.
-#' 
+#'
 #' @param A Input matrix ("matrix")
 #' @param dim Dimension of SVD decomposition
 #' @param iters Number of iterations (default=5)
 #' @param seed Random seed (default=0)
-#' 
+#'
 #' @return A named list with U, sigma, and V components
-#' 
+#'
 #' @examples
 #' A = randn(100, 20)
 #' SVD.out = FengSVD(A, dim = 2)
@@ -89,14 +89,14 @@ FengSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #'
 #' This is direct implementation of the randomized SVD algorithm:
 #' From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
-#' 
+#'
 #' @param A Input matrix ("sparseMatrix")
 #' @param dim Dimension of SVD decomposition
 #' @param iters Number of iterations (default=5)
 #' @param seed Random seed (default=0)
-#' 
+#'
 #' @return A named list with U, sigma, and V components
-#' 
+#'
 #' @examples
 #' A = randn(100, 20)
 #' SVD.out = HalkoSVD(A, dim = 2)
@@ -109,14 +109,14 @@ HalkoSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #'
 #' This is direct implementation of the randomized SVD algorithm:
 #' From: N Halko, P. G Martinsson, and J. A Tropp. Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions. Siam Review, 53(2):217-288, 2011.
-#' 
+#'
 #' @param A Input matrix ("matrix")
 #' @param dim Dimension of SVD decomposition
 #' @param iters Number of iterations (default=5)
 #' @param seed Random seed (default=0)
-#' 
+#'
 #' @return A named list with U, sigma, and V components
-#' 
+#'
 #' @examples
 #' A = randn(100, 20)
 #' SVD.out = HalkoSVD(A, dim = 2)
@@ -133,13 +133,13 @@ HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' @param seed Random seed (default=0)
 #' @param reduction_algorithm Kernel reduction algorithm. Currently only ACTION method (1) is implemented (default=1)
 #' @param SVD_algorithm SVD algorithm to use. Currently supported methods are Halko (1) and Feng (2) (default=1)
-#' 
+#'
 #' @return A named list with S_r, V, lambda, and exp_var. \itemize{
 #' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
 #' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 #' \item lambda, exp_var: Summary statistics of the sigular-values.
 #' }
-#' 
+#'
 #' @examples
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
@@ -156,13 +156,13 @@ reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algori
 #' @param seed Random seed (default=0)
 #' @param reduction_algorithm Kernel reduction algorithm. Currently only ACTION method (1) is implemented (default=1)
 #' @param SVD_algorithm SVD algorithm to use. Currently supported methods are Halko (1) and Feng (2) (default=1)
-#' 
+#'
 #' @return A named list with S_r, V, lambda, and exp_var. \itemize{
 #' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
 #' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 #' \item lambda, exp_var: Summary statistics of the sigular-values.
 #' }
-#' 
+#'
 #' @examples
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
@@ -175,9 +175,9 @@ reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_a
 #'
 #' @param A Input matrix
 #' @param B Input matrix
-#' 
+#'
 #' @return X Solution
-#' 
+#'
 #' @examples
 #' C = ACTION.out$C[[10]]
 #' A = S_r %*% C
@@ -191,7 +191,7 @@ run_simplex_regression <- function(A, B, computeXtX = FALSE) {
 #'
 #' @param A Input matrix
 #' @param k Number of columns to select
-#' 
+#'
 #' @return A named list with entries 'selected_columns' and 'norms'
 #' @examples
 #' H = run_SPA(S_r, 10)
@@ -203,7 +203,7 @@ run_SPA <- function(A, k) {
 #'
 #' @param A Input matrix
 #' @param k Number of columns to select
-#' 
+#'
 #' @return A named list with entries 'selected_columns' and 'norms'
 #' @examples
 #' H = run_SPA(S_r, 10)
@@ -218,7 +218,7 @@ run_SPA_rows_sparse <- function(A, k) {
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
 #' @param thread_no Number of parallel threads (default = 0)
 #' @param max_it,min_delta Convergence parameters for archetypal analysis
-#' 
+#'
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
 #' ACTION.out = run_ACTION(S_r, k_max = 10)
@@ -235,7 +235,7 @@ run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 50
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
 #' @param max_it,min_delta Convergence parameters for archetypal analysis
 #' @param max_trial Maximum number of trials before termination
-#' 
+#'
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
 #' ACTION.out = run_ACTION_plus(S_r, k_max = 10)
@@ -250,7 +250,7 @@ run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 50L, min_delt
 #' @param A Inpu matrix
 #' @param W0 Starting archetypes
 #' @param max_it,min_delta Convergence parameters for archetypal analysis
-#' 
+#'
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
 #' S_r = t(reducedDims(ace)$ACTION)
@@ -270,7 +270,7 @@ run_AA <- function(A, W0, max_it = 50L, min_delta = 1e-16) {
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
 #' @param samples List of sampled cells to use for updating archetype decomposition
 #' @param thread_no Number of parallel threads (default = 0)
-#' 
+#'
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
 #' ACTION.out = run_online_ACTION(S_r, k_max = 10)
@@ -285,7 +285,7 @@ run_online_ACTION <- function(S_r, samples, k_min = 2L, k_max = 30L, thread_no =
 #' @param k_min Minimum number of archetypes to consider (default=2)
 #' @param k_max Maximum number of archetypes to consider, or "depth" of decomposition (default=30)
 #' @param thread_no Number of parallel threads (default=0)
-#' 
+#'
 #' @return A named list with entries 'C' and 'H', each a list for different values of k
 #' @examples
 #' ACTION.out = run_weighted_ACTION(S_r, w, k_max = 20)
@@ -297,9 +297,9 @@ run_weighted_ACTION <- function(S_r, w, k_min = 2L, k_max = 30L, thread_no = 0L,
 #' (Pre-ACTIONet archetype processing)
 #'
 #' @param C_trace,H_trace Output of ACTION
-#' @param min_specificity_z_threshold Defines the stringency of pruning nonspecific archetypes. 
+#' @param min_specificity_z_threshold Defines the stringency of pruning nonspecific archetypes.
 #' The larger the value, the more archetypes will be filtered out (default=-1)
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item selected_archs: List of final archetypes that passed the filtering/pruning step.
 #' \item C_stacked,H_stacked: Horizontal/Vertical concatenation of filtered C and H matrices, respectively.
@@ -323,7 +323,7 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
 #' @param C_stacked,H_stacked Output of reconstruct_archetypes()
 #' @param minPoints, minClusterSize, outlier_threshold HDBSCAN parameters
 #' @param reduced_dim Kernel reduction
-#' 
+#'
 #' @return A named list: \itemize{
 #' \item archetype_groups: Equivalent classes of archetypes (non-redundant)
 #' \item C_unified,H_unified: C and H matrices of unified archetypes
@@ -343,11 +343,11 @@ unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.99, outlier_threshold 
 #' @param H_stacked Output of the prune_archetypes() function.
 #' @param density Overall density of constructed graph. The higher the density, the more edges are retained (default = 1.0).
 #' @param thread_no Number of parallel threads (default = 0).
-#' @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges. 
-#' If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
-#' 
+#' @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges.
+#' If it is true, only mutual nearest-neighbors are returned (default=TRUE).
+#'
 #' @return G Adjacency matrix of the ACTIONet graph.
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -362,13 +362,13 @@ build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edge
 #' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
 #' @param n_epochs Number of epochs for SGD algorithm (default=100).
 #' @param thread_no Number of threads (default = 0).
-#' 
+#'
 #' @return A named list \itemize{
 #' \item coordinates 2D coordinates of vertices.
 #' \item coordinates_3D 3D coordinates of vertices.
 #' \item colors De novo color of nodes inferred from their 3D embedding.
 #' }
-#' 
+#'
 #' @examples
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #'	vis.out = layout_ACTIONet(G, S_r)
@@ -380,9 +380,9 @@ layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, th
 #'
 #' @param ids List of input string ids
 #' @param pass Pass phrase to use for encryption
-#' 
+#'
 #' @return A string array of encoded ids
-#' 
+#'
 #' @examples
 #'	encoded.ids = encode_ids(colnames(sce))
 encode_ids <- function(ids, pass) {
@@ -393,9 +393,9 @@ encode_ids <- function(ids, pass) {
 #'
 #' @param encoded_ids List of encrypted string ids
 #' @param pass Pass phrase to use for decryption
-#' 
+#'
 #' @return A string array of decrypted ids
-#' 
+#'
 #' @examples
 #'	ids = decode_ids(encoded.ids)
 decode_ids <- function(encoded_ids, pass) {
@@ -406,9 +406,9 @@ decode_ids <- function(encoded_ids, pass) {
 #'
 #' @param S Input matrix ("sparseMatrix")
 #' @param sample_assignments Any sample clustering/annotation (it has to be in {1, ..., max_class_num})
-#' 
+#'
 #' @return S matrix aggregated within each class of sample_assignments
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -423,9 +423,9 @@ compute_pseudo_bulk <- function(S, sample_assignments) {
 #'
 #' @param S Input matrix ("matrix")
 #' @param sample_assignments Any sample clustering/annotation (it has to be in {1, ..., max_class_num})
-#' 
+#'
 #' @return S matrix aggregated within each class of sample_assignments
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -441,9 +441,9 @@ compute_pseudo_bulk_full <- function(S, sample_assignments) {
 #' @param S Input matrix ("sparseMatrix")
 #' @param sample_assignments Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})
 #' @param individuals Any Secondary grouping - typically corresponds to individuals (it has to be in {1, ..., k2})
-#' 
+#'
 #' @return A list of pseudobulk profile, where each entry is matrix corresponding to one cell type/state
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -459,9 +459,9 @@ compute_pseudo_bulk_per_ind <- function(S, sample_assignments, individuals) {
 #' @param S Input matrix ("matrix")
 #' @param sample_assignments Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})
 #' @param individuals Any Secondary grouping - typically corresponds to individuals (it has to be in {1, ..., k2})
-#' 
+#'
 #' @return A list of pseudobulk profile, where each entry is matrix corresponding to one cell type/state
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -476,9 +476,9 @@ compute_pseudo_bulk_per_ind_full <- function(S, sample_assignments, individuals)
 #'
 #' @param S Input matrix
 #' @param sample_assignments Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})
-#' 
+#'
 #' @return A list with the first entry being the renormalized input matrix
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -493,9 +493,9 @@ renormalize_input_matrix <- function(S, sample_assignments) {
 #'
 #' @param S Input matrix ("matrix" type)
 #' @param sample_assignments Any primary grouping - typically based on cell type/state (it has to be in {1, ..., k1})
-#' 
+#'
 #' @return A list with the first entry being the renormalized input matrix
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -510,9 +510,9 @@ renormalize_input_matrix_full <- function(S, sample_assignments) {
 #'
 #' @param S Input matrix (sparseMatrix - binary)
 #' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
-#' 
+#'
 #' @return A list with the over/under-logPvals
-#' 
+#'
 #' @examples
 #'	logPvals.list = compute_archetype_feature_specificity_bin(S.bin, unification.out$H_unified)
 #' specificity.scores = logPvals.list$upper_significance
@@ -524,9 +524,9 @@ compute_archetype_feature_specificity_bin <- function(S, H) {
 #'
 #' @param S Input matrix (sparseMatrix)
 #' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
-#' 
+#'
 #' @return A list with the over/under-logPvals
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -543,9 +543,9 @@ compute_archetype_feature_specificity <- function(S, H) {
 #'
 #' @param S Input matrix ("matrix" type)
 #' @param H A soft membership matrix - Typically H_unified from the unify_archetypes() function.
-#' 
+#'
 #' @return A list with the over/under-logPvals
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -562,9 +562,9 @@ compute_archetype_feature_specificity_full <- function(S, H) {
 #'
 #' @param S Input matrix ("sparseMatrix")
 #' @param sample_assignments Vector of cluster assignments
-#' 
+#'
 #' @return A list with the over/under-logPvals
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -581,9 +581,9 @@ compute_cluster_feature_specificity <- function(S, sample_assignments) {
 #'
 #' @param S Input matrix ("matrix")
 #' @param sample_assignments Vector of cluster assignments
-#' 
+#'
 #' @return A list with the over/under-logPvals
-#' 
+#'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
@@ -599,9 +599,9 @@ compute_cluster_feature_specificity_full <- function(S, sample_assignments) {
 #' Compute coreness of graph vertices
 #'
 #' @param G Input graph
-#' 
+#'
 #' @return cn core-number of each graph node
-#' 
+#'
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' cn = compute_core_number(G)
@@ -613,9 +613,9 @@ compute_core_number <- function(G) {
 #'
 #' @param G Input graph
 #' @param sample_assignments Archetype discretization (output of unify_archetypes())
-#' 
+#'
 #' @return cn core-number of each graph node
-#' 
+#'
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' assignments = ace$archetype.assignment
@@ -631,9 +631,9 @@ compute_archetype_core_centrality <- function(G, sample_assignments) {
 #' @param thread_no Number of parallel threads (default=0)
 #' @param alpha Random-walk depth ( between [0, 1] )
 #' @param max_it PageRank iterations
-#' 
+#'
 #' @return Matrix of diffusion scores
-#' 
+#'
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
@@ -649,9 +649,9 @@ compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_i
 #' @param thread_no Number of parallel threads (default=0)
 #' @param alpha Random-walk depth ( between [0, 1] )
 #' @param max_it PageRank iterations
-#' 
+#'
 #' @return Matrix of diffusion scores
-#' 
+#'
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
@@ -666,10 +666,10 @@ compute_network_diffusion_direct <- function(G, X0, thread_no = 0L, alpha = 0.85
 #' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) == ncol(X0))
 #' @param alpha Random-walk depth ( between [0, 1] )
 #' @param rho Sparsity controling parameter
-#' @param epsilon,max_it Conditions on the length of diffusion 
-#' 
+#' @param epsilon,max_it Conditions on the length of diffusion
+#'
 #' @return Matrix of sparse diffusion scores
-#' 
+#'
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
@@ -683,9 +683,9 @@ compute_sparse_network_diffusion <- function(G, X0, alpha = 0.85, rho = 1e-4, ep
 #' @param scores Specificity scores of features
 #' @param associations Binary matrix of annotations
 #' @param L Length of the top-ranked scores to scan
-#' 
+#'
 #' @return Matrix of log-pvalues
-#' 
+#'
 #' @examples
 #' data("gProfilerDB_human")
 #' G = colNets(ace)$ACTIONet
@@ -705,9 +705,9 @@ assess_enrichment <- function(scores, associations, thread_no = 0L) {
 #' @param G Adjacency matrix of the input graph
 #' @param minPts, eps DBSCAN parameters
 #' @param alpha Diffusion parameter for initial node ordering
-#' 
+#'
 #' @return Matrix of log-pvalues
-#' 
+#'
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' clusters = NetDBSCAN(G)
@@ -718,13 +718,13 @@ NetDBSCAN <- function(G, minPts = 10L, eps = 0.5, alpha = 0.85) {
 #' Clusters data points using the hierarchical DBSCAN algorithm.
 #'
 #' @param X Input data matrix with each row being a data point
-#' 
+#'
 #' @return A list with \itemize{
 #' \item labels
 #' \item membershipProbabilities
 #' \item outlierScores
 #'}
-#' 
+#'
 #' @examples
 #' S_r = t(reducedDims(ace)[["S_r"]])
 #' W_r = S_r %*% trace$pruning.out$C_stacked
@@ -738,9 +738,9 @@ run_HDBSCAN <- function(X, minPoints = 5L, minClusterSize = 5L) {
 #' Computes the maximum-weight bipartite graph matching
 #'
 #' @param G Adjacency matrix of the input graph
-#' 
+#'
 #' @return G_matched An adjacency matrix with a maximum of one nonzero entry on rows/columns
-#' 
+#'
 #' @examples
 #' G_matched = MWM_hungarian(G)
 MWM_hungarian <- function(G) {
@@ -753,9 +753,9 @@ MWM_hungarian <- function(G) {
 #' @param resolution_parameter Granularity of clustering. Larger values result in more clusters (default = 1.0)
 #' @param initial_clusters_ Initialization vector for clusters (if available)
 #' @param seed Random seed
-#' 
+#'
 #' @return clusters Assignment vector of samples to clusters
-#' 
+#'
 #' @examples
 #' clusters = signed_cluster(G_signed)
 signed_cluster <- function(A, resolution_parameter = 1.0, initial_clusters_ = NULL, seed = 0L) {
@@ -772,9 +772,9 @@ unsigned_cluster_batch <- function(A, resolutions, initial_clusters_ = NULL, see
 #' @param resolution_parameter Granularity of clustering. Larger values result in more clusters (default = 1.0)
 #' @param initial_clusters_ Initialization vector for clusters (if available)
 #' @param seed Random seed
-#' 
+#'
 #' @return clusters Assignment vector of samples to clusters
-#' 
+#'
 #' @examples
 #' clusters = unsigned_cluster(G)
 unsigned_cluster <- function(A, resolution_parameter = 1.0, initial_clusters_ = NULL, seed = 0L) {
@@ -807,9 +807,9 @@ sgd2_layout_sparse_weighted <- function(G, S_r, p = 200L, t_max = 30L, eps = 0.0
 #' @param S Input matrix (e.g., gene x cell)
 #' @param m Number of samples (or 0, to be automatically identified)
 #' @param seed Random seed
-#' 
+#'
 #' @return clusters Assignment vector of samples to clusters
-#' 
+#'
 #' @examples
 #' coreset = compute_AA_coreset(S, 1000)
 compute_AA_coreset <- function(S, m = 0L) {
@@ -822,13 +822,13 @@ compute_AA_coreset <- function(S, m = 0L) {
 #' @param U Left singular vectors
 #' @param s signular values
 #' @param V Right singular vectors
-#' 
+#'
 #' @return A named list with S_r, V, lambda, and exp_var. \itemize{
 #' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
 #' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 #' \item lambda, exp_var: Summary statistics of the sigular-values.
 #' }
-#' 
+#'
 #' @examples
 #' S = logcounts(sce)
 #' irlba.out = irlba::irlba(S, nv = 50)
@@ -844,13 +844,13 @@ SVD2ACTIONred <- function(S, u, d, v) {
 #' @param U Left singular vectors
 #' @param s signular values
 #' @param V Right singular vectors
-#' 
+#'
 #' @return A named list with S_r, V, lambda, and exp_var. \itemize{
 #' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
 #' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 #' \item lambda, exp_var: Summary statistics of the sigular-values.
 #' }
-#' 
+#'
 #' @examples
 #' S = logcounts(sce)
 #' irlba.out = irlba::irlba(S, nv = 50)
@@ -866,13 +866,13 @@ SVD2ACTIONred_full <- function(S, u, d, v) {
 #' @param U Left singular vectors
 #' @param s signular values
 #' @param V Right singular vectors
-#' 
+#'
 #' @return A named list with S_r, V, lambda, and exp_var. \itemize{
 #' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
 #' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 #' \item lambda, exp_var: Summary statistics of the sigular-values.
 #' }
-#' 
+#'
 #' @examples
 #' S = logcounts(sce)
 #' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
@@ -888,13 +888,13 @@ PCA2ACTIONred <- function(S, x, sdev, rotation) {
 #' @param U Left singular vectors
 #' @param s signular values
 #' @param V Right singular vectors
-#' 
+#'
 #' @return A named list with S_r, V, lambda, and exp_var. \itemize{
 #' \item S_r: reduced kernel matrix of size reduced_dim x #samples.
 #' \item V: Associated left singular-vectors (useful for reconstructing discriminative scores for features, such as genes).
 #' \item lambda, exp_var: Summary statistics of the sigular-values.
 #' }
-#' 
+#'
 #' @examples
 #' S = logcounts(sce)
 #' irlba.out = irlba::prcomp_irlba(S, n = 50, retx = TRUE, center = T)
@@ -983,4 +983,3 @@ computeSparseRowVariances <- function(j, val, rm, n) {
 merge_sparse_mats <- function(A, B) {
     .Call(`_ACTIONet_merge_sparse_mats`, A, B)
 }
-
