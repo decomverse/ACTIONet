@@ -10,7 +10,7 @@ reduce.and.batch.correct.ace.Harmony(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  norm_method = c("default", "scran", "multiBatchNorm", "Linnorm"),
+  norm_method = "none",
   reduction_slot = "ACTION",
   seed = 0,
   SVD_algorithm = 0
