@@ -173,7 +173,7 @@ namespace ACTIONet {
 
 		if (thread_no <= 0) { thread_no = SYS_THREADS_DEF; }
 		Rprintf("Unifying %d archetypes (%d threads):\n", C_stacked.n_cols, thread_no);
-		Rprintf("\tParameters: alpha = %0.2f, outlier_threshold = %d, sim_threshold = %0.2f\n", alpha, outlier_threshold, sim_threshold);
+		Rprintf("\tParameters: alpha = %0.2f, outlier_threshold = %0.2f, sim_threshold = %0.2f\n", alpha, outlier_threshold, sim_threshold);
 		R_FlushConsole();
 
 		unification_results output;
