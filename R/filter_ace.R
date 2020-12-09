@@ -2,7 +2,6 @@
 #' @export
 filter.ace <- function(ace, assay_name = "counts", min_cells_per_feat = NULL, min_feats_per_cell = NULL, min_umis_per_cell = NULL, max_umis_per_cell = NULL, return_fil_ace = TRUE) {
 
-    # assays(ace)[[assay_name]] = as(assays(ace)[[assay_name]], "dgCMatrix")
     org_dim = dim(ace)
     ace.fil = ace
 
@@ -22,7 +21,6 @@ filter.ace <- function(ace, assay_name = "counts", min_cells_per_feat = NULL, mi
         }
 
         if (!is.null(min_feats_per_cell)) {
-            # cts = as(assays(ace.fil)[[assay_name]] > 0, "dgCMatrix")
             feature_mask = ACTIONet::fastColSums(assays(ace.fil)[[assay_name]] > 0) >= min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
@@ -33,7 +31,6 @@ filter.ace <- function(ace, assay_name = "counts", min_cells_per_feat = NULL, mi
             } else {
               min_fc = min_cells_per_feat
             }
-            # rcts = as(assays(ace.fil)[[assay_name]] > 0, "dgCMatrix")
             cell_count_mask = ACTIONet::fastRowSums(assays(ace.fil)[[assay_name]] > 0) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
@@ -84,10 +81,8 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
         return(fil_list)
     })
 
-    fil_col = lapply(fil_names, function(i) i[["cols_filtered"]]$name) %>% Reduce(union,
-        .)
-    fil_row = lapply(fil_names, function(i) i[["rows_filtered"]]$name) %>% Reduce(union,
-        .)
+    fil_col = lapply(fil_names, function(i) i[["cols_filtered"]]$name) %>% Reduce(union, .)
+    fil_row = lapply(fil_names, function(i) i[["rows_filtered"]]$name) %>% Reduce(union, .)
     keep_row = which(!(rownames(ace) %in% fil_row))
     keep_col = which(!(colnames(ace) %in% fil_col))
 

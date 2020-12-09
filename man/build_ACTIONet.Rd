@@ -18,8 +18,8 @@ build_ACTIONet(
 
 \item{thread_no}{Number of parallel threads (default = 0).}
 
-\item{mutual_edges_only}{Symmetrization strategy for nearest-neighbor edges. 
-If it is true, only mutual-nearest-neighbors are returned (default=TRUE).}
+\item{mutual_edges_only}{Symmetrization strategy for nearest-neighbor edges.
+If it is true, only mutual nearest-neighbors are returned (default=TRUE).}
 }
 \value{
 G Adjacency matrix of the ACTIONet graph.

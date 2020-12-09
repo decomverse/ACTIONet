@@ -1,5 +1,4 @@
 #include "ACTIONet.h"
-
 #include "cholmod.h"
 
 
@@ -83,7 +82,7 @@ namespace ACTIONet {
 	template<class Function>
 	inline void ParallelFor(size_t start, size_t end, size_t thread_no, Function fn) {
 		if (thread_no <= 0) {
-			thread_no = std::thread::hardware_concurrency();
+			thread_no = SYS_THREADS_DEF;
 		}
 
 		if (thread_no == 1) {
@@ -140,20 +139,20 @@ namespace ACTIONet {
 	SPA_results run_SPA_rows_sparse(sp_mat &A, int k) {
 		int m = A.n_rows;
 		int n = A.n_cols;
-		
+
 		printf("Computing square values ... "); fflush(stdout);
 		sp_mat A_sq = square(A);
 		printf("done\n");
 
-		
+
 		cholmod_common chol_c;
 		cholmod_start (&chol_c);
 		chol_c.final_ll = 1;          /* LL' form of simplicial factorization */
-		
-		cholmod_sparse_struct  * AS = new cholmod_sparse_struct;		
+
+		cholmod_sparse_struct  * AS = new cholmod_sparse_struct;
 		as_cholmod_sparse(AS, A);
 
-		cholmod_sparse_struct  *AS_sq = new cholmod_sparse_struct;		
+		cholmod_sparse_struct  *AS_sq = new cholmod_sparse_struct;
 		as_cholmod_sparse(AS_sq, A_sq);
 
 		SPA_results res;
@@ -166,7 +165,7 @@ namespace ACTIONet {
 		dsdmult ('n', m, n, AS_sq, o.memptr(), normM.memptr(), &chol_c);
 		vec normM1 = normM;
 		printf("done\n");
-		
+
 		mat U(n, k);
 
 		vec norm_trace = zeros(k);
@@ -201,12 +200,12 @@ namespace ACTIONet {
 				u = u - dot(U.col(j), u)*U.col(j);
 			}
 			vec r(m);
-			dsdmult ('n', m, n, AS, u.memptr(), r.memptr(), &chol_c);	
+			dsdmult ('n', m, n, AS, u.memptr(), r.memptr(), &chol_c);
 
 			uvec idx = find(U > 0);
-			double perc = 100*idx.n_elem/U.n_elem;			
+			double perc = 100*idx.n_elem/U.n_elem;
 			printf("\t%d- res_norm = %f, U_density = %.2f%% (%d nnz)\n", i, a, perc, idx.n_elem);
-							
+
 			normM = normM - (r % r);
 		}
 
@@ -217,14 +216,14 @@ namespace ACTIONet {
 		delete [] AS->x;
 		delete [] AS->i;
 		delete [] AS->p;
-		delete AS; 
+		delete AS;
 
 
 		delete [] AS_sq->x;
 		delete [] AS_sq->i;
 		delete [] AS_sq->p;
-		delete AS_sq; 
-		
+		delete AS_sq;
+
 		cholmod_finish (&chol_c);
 
 		return res;
@@ -248,7 +247,7 @@ namespace ACTIONet {
 
 		vec norm_trace = zeros(k);
 		double eps = 1e-9;
-		
+
 		for (int i = 1; i <= k; i++) {
 			// Find the column with maximum norm. In case of having more than one column with almost very small diff in norm, pick the one that originally had the largest norm
 			double a = max(normM);
@@ -284,11 +283,11 @@ namespace ACTIONet {
 			if(i > 1) {
 				for (int j = i-1; 1 <= j; j--) {
 					u = u - sum(U.col(j-1) % u)*U.col(j-1);
-				}			
+				}
 			}
 			normM = normM - square(u.t()*A);
 			normM.transform( [](double val) { return (val < 0?0:val); } );
-			
+
 		}
 
 		res.selected_columns = K;
@@ -298,9 +297,12 @@ namespace ACTIONet {
 	}
 
 	ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
+
+		if (thread_no <= 0) { thread_no = SYS_THREADS_DEF; }
+
 		int feature_no = S_r.n_rows;
 
-		printf("Running ACTION (%d threads)\n", thread_no);
+		Rprintf("Running ACTION (%d threads):\n", thread_no); R_FlushConsole();
 
 		if(k_max == -1)
 			k_max = (int)S_r.n_cols;
@@ -319,34 +321,36 @@ namespace ACTIONet {
 		trace.C = field<mat>(k_max + 1);
 		trace.selected_cols = field<uvec>(k_max + 1);
 
-
-
 		mat X_r = normalise(S_r, 1); // ATTENTION!
 
 		int current_k = 0;
-		int total = k_min-1;
-		printf("Iterating from k=%d ... %d\n", k_min, k_max);
+		// int total = k_min-1;
+		char status_msg[50];
+
+		sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+		REprintf("\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1)); R_FlushConsole();
 		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kk, size_t threadId) {
-			total++;
-			printf("\tk = %d\n", total);
+
 			SPA_results SPA_res = run_SPA(X_r, kk);
 			trace.selected_cols[kk] = SPA_res.selected_columns;
 
 			mat W = X_r.cols(trace.selected_cols[kk]);
 
 			field<mat> AA_res;
-			
+
 			AA_res = run_AA(X_r, W, max_it, min_delta);
 			//AA_res = run_AA_old(X_r, W);
 			trace.C[kk] = AA_res(0);
 			trace.H[kk] = AA_res(1);
+			current_k++;
 
-
+			REprintf("\r\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1));
+			R_FlushConsole();
 		});
+		Rprintf("\r\t%s %d/%d finished\n", status_msg, current_k, (k_max - k_min + 1));
 
 		return trace;
 	}
-
 
 
 	ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 50, double min_delta = 1e-16, int max_trial = 3) {
@@ -440,9 +444,9 @@ namespace ACTIONet {
 		for (int it = 0; it < max_it; it++) {
 			mat combined_W = join_rows(W, W_prior);
 			mat combined_H = run_simplex_regression(combined_W, A, true);
-						
+
 			H = combined_H.rows(span(0, k-1));
-			
+
 
 			//mat C_old = C;
 			mat R = A - W*H;
@@ -516,14 +520,14 @@ namespace ACTIONet {
 
 		vec h = vec(trans(H_parent.row(kk)));
 		mat W_prior = W_parent;
-		W_prior.shed_col(kk);		
-		
+		W_prior.shed_col(kk);
+
 		mat X_r_scaled = X_r; // To deflate or not deflate!
-		
+
 		for(int i = 0; i < X_r_scaled.n_cols; i++) {
 			X_r_scaled.col(i) *= h[i];
-		}		
-		
+		}
+
 
 		ACTION_results trace;
 		trace.H = field<mat>(k_max + 1);
@@ -536,23 +540,23 @@ namespace ACTIONet {
 		int current_k = 0;
 		int total = k_min-1;
 		printf("Iterating from k=%d ... %d\n", k_min, k_max);
-		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kkk, size_t threadId) {			
+		ParallelFor(k_min, k_max+1, thread_no, [&](size_t kkk, size_t threadId) {
 			total++;
 			printf("\tk = %d\n", total);
-			
+
 			SPA_results SPA_res = run_SPA(X_r_scaled, kkk);
 			trace.selected_cols[kkk] = SPA_res.selected_columns;
 
-			
+
 			mat W = X_r.cols(trace.selected_cols[kkk]);
 
 			field<mat> AA_res;
-			
+
 			AA_res = run_AA_with_prior(X_r_scaled, W, W_prior, max_it, min_delta);
-						
-			trace.C[kkk] = AA_res(0);			
+
+			trace.C[kkk] = AA_res(0);
 			trace.H[kkk] = AA_res(1);
-			
+
 
 		});
 
