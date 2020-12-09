@@ -1,4 +1,4 @@
-# This is the development version of ACTIONet and may be unstable.
+# This is the development version of ACTIONet and may be unstable
 
 # Installation
 ### Setting Up the Environment (Preinstallation)
