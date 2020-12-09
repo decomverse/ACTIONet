@@ -71,7 +71,7 @@ struct SgdWorker {
   std::size_t head_nvert;
   std::size_t tail_nvert;
   std::mt19937 rng;
-  std::uniform_int_distribution<long> gen;  
+  std::uniform_int_distribution<long> gen;
   double dist_eps;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
@@ -89,7 +89,7 @@ struct SgdWorker {
         head_embedding(head_embedding), tail_embedding(tail_embedding),
         ndim(ndim), head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-		rng(seed), gen(-2147483647, 2147483646),        
+		rng(seed), gen(-2147483647, 2147483646),
         dist_eps(std::numeric_limits<double>::epsilon()) {}
 
   void operator()(std::size_t begin, std::size_t end) {
@@ -101,9 +101,9 @@ struct SgdWorker {
       s3 = gen(rng); // should be > 15
     }
     //printf("States: s1 = %ld, s2 = %ld, s3 = %ld\n", s1, s2, s3);
-    
+
     tau_prng prng(s1, s2, s3);
-    
+
     std::vector<double> dys(ndim);
     for (auto i = begin; i < end; i++) {
 		//printf("=> <%d, %d>:: %d\n", begin, end, i);
@@ -111,7 +111,7 @@ struct SgdWorker {
 		  //printf("\tFail\n");
         continue;
       }
-      
+
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
@@ -135,12 +135,12 @@ struct SgdWorker {
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
-      //printf("Done\n"); fflush(stdout);
-      
+      //printf("done\n"); fflush(stdout);
+
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
 		//  printf("\tNeg %d (/%d) ... ", p, n_neg_samples);
-		  
+
         std::size_t dkn = (prng() % tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
@@ -155,14 +155,14 @@ struct SgdWorker {
         dist_squared = (std::max)(dist_eps, dist_squared);
         double grad_coeff = gradient.grad_rep(dist_squared);
 		//printf("%f\n", grad_coeff);
-		
+
         for (std::size_t d = 0; d < ndim; d++) {
           double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
           head_embedding[dj + d] += grad_d;
         }
         //printf("done\n"); fflush(stdout);
-        
+
       }
       sampler.next_sample(i, n_neg_samples);
     }
