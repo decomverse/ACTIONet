@@ -6,20 +6,21 @@
 (Post-ACTIONet archetype processing)}
 \usage{
 unify_archetypes(
+  G,
   S_r,
   C_stacked,
-  H_stacked,
-  z_threshold = -1,
-  cor_threshold = 0.5,
-  magnification = 3L
+  alpha = 0.99,
+  outlier_threshold = 0,
+  sim_threshold = 0,
+  thread_no = 0L
 )
 }
 \arguments{
+\item{G}{Adjacency matrix of the ACTIONet graph}
+
 \item{S_r}{Reduced kernel profile}
 
 \item{C_stacked, H_stacked}{Output of reconstruct_archetypes()}
-
-\item{G}{Adjacency matrix of the ACTIONet graph}
 
 \item{archetypes}{Archetype profile (S*C)}
 

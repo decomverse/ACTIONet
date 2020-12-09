@@ -649,9 +649,9 @@ compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_i
 #' @param thread_no Number of parallel threads (default=0)
 #' @param alpha Random-walk depth ( between [0, 1] )
 #' @param max_it PageRank iterations
-#'
+#' 
 #' @return Matrix of diffusion scores
-#'
+#' 
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
@@ -983,3 +983,4 @@ computeSparseRowVariances <- function(j, val, rm, n) {
 merge_sparse_mats <- function(A, B) {
     .Call(`_ACTIONet_merge_sparse_mats`, A, B)
 }
+
