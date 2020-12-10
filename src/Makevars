@@ -44,4 +44,4 @@ else
     $(error Unsupported OS ${UNAME})
 endif
 PKG_LIBS+=-lcholmod
-MAKEFLAGS+="-j $(NPROC)
+MAKEFLAGS+="-j $(NPROC)"
