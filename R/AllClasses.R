@@ -43,20 +43,20 @@ ACTIONetExperiment <- function(...,
   out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
 
   if(NROW(out) > 0){
-    if(NCOL(SummarizedExperiment::rowData(out)) == 0){
+    if(length(rownames(SummarizedExperiment::rowData(out)))== 0){
       SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
       rownames(out) = SummarizedExperiment::rowData(out)[,1]
     } else {
-      rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% make.unique(., sep = "_")
+      rownames(out) = rownames(SummarizedExperiment::rowData(out))
     }
   }
 
   if(NCOL(out) > 0){
-    if(NCOL(SummarizedExperiment::colData(out)) == 0){
+    if(length(rownames(SummarizedExperiment::colData(out))) == 0){
       SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
       colnames(out) = SummarizedExperiment::colData(out)[,1]
     } else {
-      colnames(out) = SummarizedExperiment::colData(out)[,1] %>% make.unique(., sep = "_")
+      colnames(out) = rownames(SummarizedExperiment::colData(out))
     }
   }
 
