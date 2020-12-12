@@ -19,6 +19,11 @@
   return(n)
 }
 
+.make_chars_unique <- function(x){
+  x = as.character(x) %>% make.unique(., sep = "_")
+  return(x)
+}
+
 .get_ace_split_IDX <- function(ace, attr, groups_use = NULL, return_split_vec = FALSE) {
     if (length(attr) == 1) {
         split_vec = colData(ace)[[attr]]
