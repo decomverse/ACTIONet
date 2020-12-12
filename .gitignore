@@ -14,3 +14,4 @@ dist
 lib
 *.back
 .DS_store
+README.md
