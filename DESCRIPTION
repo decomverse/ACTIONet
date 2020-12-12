@@ -1,8 +1,8 @@
 Package: ACTIONet
 Type: Package
 Title: Robust multi-resolution analysis of single-cell datasets
-Version: 2.0
-Date: 2020-11-26
+Version: 2.0.8
+Date: 2020-12-11
 Authors@R: c(
     person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com",
         role = c("cre", "aut"), comment = c(ORCID = "0000-0001-8734-2326")),
@@ -15,7 +15,7 @@ Maintainer: Shahin Mohammadi <shahin.mohammadi@gmail.com>
 Description:
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: R (>= 3.5.0), Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ineq, rmdformats, pals, seriation, networkD3, BiocParallel
+Depends: R (>= 3.6.0), Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ineq, rmdformats, pals, seriation, networkD3, BiocParallel
 Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ComplexHeatmap, metap, rmdformats, pals, seriation, BiocParallel
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
