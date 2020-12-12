@@ -1,3 +1,5 @@
+# This is the development version of ACTIONet and may be unstable
+
 # Installation
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users** 
@@ -24,7 +26,7 @@ This is the easiest way to install the package, and it automatically installs al
 
 ```r
 install.packages("devtools")
-devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")
+devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
 
 ```
 
