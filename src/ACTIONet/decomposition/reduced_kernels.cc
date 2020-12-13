@@ -66,7 +66,7 @@ namespace ACTIONet {
 	field<mat> PCA2SVD(sp_mat &S, field<mat> PCA_results) {
 		int n = S.n_rows;
 
-		Rprintf("\tPCA => SVD (sparse)\n");// fflush(stdout);
+		Rprintf("PCA => SVD (sparse)\n");// fflush(stdout);
 		mat U = PCA_results(0);
 		vec s = PCA_results(1);
 		mat V = PCA_results(2);
@@ -86,7 +86,7 @@ namespace ACTIONet {
 	field<mat> PCA2SVD(mat &S, field<mat> PCA_results) {
 		int n = S.n_rows;
 
-		Rprintf("\tPCA => SVD (dense)\n"); //fflush(stdout);
+		Rprintf("PCA => SVD (dense)\n"); //fflush(stdout);
 		mat U = PCA_results(0);
 		vec s = PCA_results(1);
 		mat V = PCA_results(2);
@@ -108,7 +108,7 @@ namespace ACTIONet {
 	field<mat> SVD2PCA(sp_mat &S, field<mat> SVD_results) {
 		int n = S.n_rows;
 
-		Rprintf("\tSVD => PCA (sparse)\n"); //fflush(stdout);
+		Rprintf("SVD => PCA (sparse)\n"); //fflush(stdout);
 		mat U = SVD_results(0);
 		vec s = SVD_results(1);
 		mat V = SVD_results(2);
@@ -129,7 +129,7 @@ namespace ACTIONet {
 	field<mat> SVD2PCA(mat &S, field<mat> SVD_results) {
 		int n = S.n_rows;
 
-		Rprintf("\tSVD => PCA (dense)\n"); //fflush(stdout);
+		Rprintf("SVD => PCA (dense)\n"); //fflush(stdout);
 		mat U = SVD_results(0);
 		vec s = SVD_results(1);
 		mat V = SVD_results(2);
@@ -148,7 +148,7 @@ namespace ACTIONet {
 
 
 	field<mat> SVD2ACTIONred(sp_mat &S, field<mat> SVD_results) {
-		Rprintf("\tSVD => ACTIONred (sparse)\n"); //fflush(stdout);
+		Rprintf("SVD => ACTIONred (sparse)\n"); //fflush(stdout);
 		int n = S.n_rows;
 		int dim = SVD_results(0).n_cols;
 
@@ -173,7 +173,7 @@ namespace ACTIONet {
 	}
 
 	field<mat> SVD2ACTIONred(mat &S, field<mat> SVD_results) {
-		Rprintf("\tSVD => ACTIONred (dense)\n"); //fflush(stdout);
+		Rprintf("SVD => ACTIONred (dense)\n"); //fflush(stdout);
 		int n = S.n_rows;
 		int dim = SVD_results(0).n_cols;
 
@@ -200,7 +200,7 @@ namespace ACTIONet {
 
 	field<mat> PCA2ACTIONred(sp_mat &S, field<mat> PCA_results) {
 
-		Rprintf("\tReverting column-centering ... "); //fflush(stdout);
+		Rprintf("Reverting column-centering ... "); //fflush(stdout);
 		field<mat> SVD_results = PCA2SVD(S, PCA_results);
 		Rprintf("done\n");
 
@@ -211,7 +211,7 @@ namespace ACTIONet {
 
 	field<mat> PCA2ACTIONred(mat &S, field<mat> PCA_results) {
 
-		Rprintf("\tReverting column-centering ... "); //fflush(stdout);
+		Rprintf("Reverting column-centering ... "); //fflush(stdout);
 		field<mat> SVD_results = PCA2SVD(S, PCA_results);
 		Rprintf("done\n");
 
@@ -225,9 +225,9 @@ namespace ACTIONet {
 		if(prenormalize)
 			S = normalise(S, 2);
 
-		Rprintf("\tComputing reduced ACTION kernel (sparse)\n"); //fflush(stdout);
+		Rprintf("Computing reduced ACTION kernel (sparse):\n"); //fflush(stdout);
 
-		Rprintf("\tPerform SVD on the original matrix.\n"); //fflush(stdout);
+		Rprintf("\tPerforming SVD on original matrix: "); //fflush(stdout);
 		vec s;
 		mat U, V;
 		field<mat> SVD_results;
@@ -279,9 +279,9 @@ namespace ACTIONet {
 		if(prenormalize)
 			S = normalise(S, 2);
 
-		Rprintf("\tComputing reduced ACTION kernel (dense)\n"); //fflush(stdout);
+		Rprintf("Computing reduced ACTION kernel (dense):\n"); //fflush(stdout);
 
-		Rprintf("\tPerform SVD on the original matrix\n"); //fflush(stdout);
+		Rprintf("\tPerforming SVD on original matrix: "); //fflush(stdout);
 		vec s;
 		mat U, V;
 		field<mat> SVD_results;
@@ -329,7 +329,7 @@ namespace ACTIONet {
 	}
 
 	field<mat> ACTIONred2SVD(field<mat> SVD_results) {
-		Rprintf("\tACTION kernel => SVD\n");// fflush(stdout);
+		Rprintf("ACTION kernel => SVD\n");// fflush(stdout);
 
 		mat A = -1 * SVD_results(3); // Reverting
 		mat B = SVD_results(4);
@@ -341,20 +341,21 @@ namespace ACTIONet {
 
 
 	field<mat> deflate_reduction(field<mat> SVD_results, mat &A, mat &B) {
-		Rprintf("Deflate reduction ... \n"); //fflush(stdout);
+		Rprintf("\tDeflating reduction ... "); //fflush(stdout);
 
 		vec mu_A = vec(trans(mean(A, 0)));
 		vec mu = B * mu_A;
 
 		A = join_rows(ones(A.n_rows), A);
 		B = join_rows(-mu, B);
+		Rprintf("done\n"); R_FlushConsole();
 
 		field<mat> perturbed_SVD = perturbedSVD(SVD_results, A, B);
 		return(perturbed_SVD);
 	}
 
 	field<mat> orthogonalize_batch_effect(sp_mat &S, field<mat> SVD_results, mat &design) {
-		Rprintf("Orthogonalize batch effect (sparse) ... \n"); //fflush(stdout);
+		Rprintf("Orthogonalizing batch effect (sparse):\n"); //fflush(stdout);
 
 		mat Z = mat(S * design);
 		gram_schmidt(Z);
@@ -363,12 +364,12 @@ namespace ACTIONet {
 		mat B = -mat(trans(trans(Z) * S));
 
 		field<mat> perturbed_SVD = deflate_reduction(SVD_results, A, B);
-
+		R_FlushConsole();
 		return(perturbed_SVD);
 	}
 
 	field<mat> orthogonalize_batch_effect(mat &S, field<mat> SVD_results, mat &design) {
-		Rprintf("Orthogonalize batch effect (dense) ... \n"); //fflush(stdout);
+		Rprintf("Orthogonalizing batch effect: (dense):\n"); //fflush(stdout);
 
 		mat Z = mat(S * design);
 		gram_schmidt(Z);
@@ -377,7 +378,7 @@ namespace ACTIONet {
 		mat B = -mat(trans(trans(Z) * S));
 
 		field<mat> perturbed_SVD = deflate_reduction(SVD_results, A, B);
-
+		R_FlushConsole();
 		return(perturbed_SVD);
 	}
 }
