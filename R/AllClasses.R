@@ -43,28 +43,32 @@ ACTIONetExperiment <- function(...,
   out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
 
   if(NROW(out) > 0){
-    if(NCOL(SummarizedExperiment::rowData(out)) == 0){
-      SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
-      rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique
-    } else {
-      if(is.null(rownames(SummarizedExperiment::rowData(out)))){
-        rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique
-      } else {
-        rownames(out) = rownames(SummarizedExperiment::rowData(out)) %>% .make_chars_unique
-      }
+    # if(NCOL(SummarizedExperiment::rowData(out)) == 0){
+    #   SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
+    #   rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique
+    # }
+    # if(is.null(rownames(SummarizedExperiment::rowData(out)))){
+    #   rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique
+    # } else {
+    #   rownames(out) = rownames(SummarizedExperiment::rowData(out)) %>% .make_chars_unique
+    # }
+    if(is.null(rownames(out))){
+      rownames(out) = .default_rownames(NROW(out))
     }
   }
 
   if(NCOL(out) > 0){
-    if(NCOL(SummarizedExperiment::colData(out)) == 0){
-      SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
-      colnames(out) = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique
-    } else {
-      if(is.null(rownames(SummarizedExperiment::colData(out)))){
-        colnames(out) = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique
-      } else {
-        colnames(out) = rownames(SummarizedExperiment::colData(out)) %>% .make_chars_unique
-      }
+    # if(NCOL(SummarizedExperiment::colData(out)) == 0){
+    #   SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
+    #   colnames(out) = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique
+    # }
+    # if(is.null(rownames(SummarizedExperiment::colData(out)))){
+    #   colnames(out) = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique
+    # } else {
+    #   colnames(out) = rownames(SummarizedExperiment::colData(out)) %>% .make_chars_unique
+    # }
+    if(is.null(colnames(out))){
+      colnames(out) = .default_colnames(NCOL(out))
     }
   }
 
