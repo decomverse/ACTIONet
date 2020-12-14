@@ -8,7 +8,7 @@ namespace ACTIONet {
 
 		int m = A.n_rows;
 		int n = A.n_cols;
-		Rprintf("\t\t* IRLB (sparse) -- A: %d x %d\n", m, n); //fflush(stdout);
+		Rprintf("IRLB (sparse) -- A: %d x %d\n", m, n); //fflush(stdout);
 
 
 		cholmod_common chol_c;
@@ -314,7 +314,7 @@ namespace ACTIONet {
 
 
 	field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
-		Rprintf("\t\t* IRLB (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); //fflush(stdout);
+		Rprintf("IRLB (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); //fflush(stdout);
 
 		double eps = 3e-13;
 		//double eps = 2.22e-16;
@@ -584,14 +584,14 @@ namespace ACTIONet {
 		int m = A.n_rows;
 		int n = A.n_cols;
 
-		printf("\t\t* Feng (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		printf("Feng (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 
 		vec S;
 		mat Q, L, U, V;
 		field<mat> SVD_out;
 
 		if(m < n) {
-			printf("\t\t\tInitializing SVD (mode 1) ... ");
+			printf("\t\tInitializing SVD (mode 1) ... ");
 			//arma_rng::set_seed(seed);
 			//Q = randn( n, dim+s );
 			//Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
@@ -608,7 +608,7 @@ namespace ACTIONet {
 			printf("done\n");
 
 			for (int i = 1; i <= iters; i++) {
-				printf("\t\t\t\tIter %d/%d ... ", i, iters);
+				printf("\t\t\tIter %d/%d ... ", i, iters);
 
 				if (i == iters) {
 					SVD_out = eigSVD(A*(trans(A)*Q));
@@ -631,7 +631,7 @@ namespace ACTIONet {
 			S = flipud(S(span(s, dim+s-1)));
 		}
 		else {
-			printf("\t\t\tInitializing SVD (mode 2) ... ");
+			printf("\t\tInitializing SVD (mode 2) ... ");
 			// arma_rng::set_seed(seed);
 			// Q = randn( m, dim+s );
 			// Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
@@ -648,7 +648,7 @@ namespace ACTIONet {
 			printf("done\n");
 
 			for (int i = 1; i <= iters; i++) {
-				printf("\t\t\t\tIter %d/%d ... ", i, iters);
+				printf("\t\t\tIter %d/%d ... ", i, iters);
 
 				if (i == iters) {
 					SVD_out = eigSVD(trans(A)*(A*Q));
@@ -679,7 +679,7 @@ namespace ACTIONet {
 		out(1) = S;
 		out(2) = V;
 
-		printf("\t\t\tdone\n");	fflush(stdout);
+		printf("\t\tdone\n");	fflush(stdout);
 
 		return(out);
 	}
@@ -692,14 +692,14 @@ namespace ACTIONet {
 		int m = A.n_rows;
 		int n = A.n_cols;
 
-		printf("\t\t* Feng (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		printf("Feng (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 
 		vec S;
 		mat Q, L, U, V;
 		field<mat> SVD_out;
 
 		if(m < n) {
-			printf("\t\t\tInitializing SVD (mode 1) ... ");
+			printf("\t\tInitializing SVD (mode 1) ... ");
 			//arma_rng::set_seed(seed);
 			//Q = randn( n, dim+s );
 			//Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
@@ -717,7 +717,7 @@ namespace ACTIONet {
 			printf("done\n");
 
 			for (int i = 1; i <= iters; i++) {
-				printf("\t\t\t\tIter %d/%d ... ", i, iters);
+				printf("\t\t\tIter %d/%d ... ", i, iters);
 
 				if (i == iters) {
 					SVD_out = eigSVD(A*(trans(A)*Q));
@@ -740,7 +740,7 @@ namespace ACTIONet {
 			S = flipud(S(span(s, dim+s-1)));
 		}
 		else {
-			printf("\t\t\tInitializing SVD (mode 2) ... ");
+			printf("\t\tInitializing SVD (mode 2) ... ");
 			// arma_rng::set_seed(seed);
 			// Q = randn( m, dim+s );
 			//Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
@@ -757,7 +757,7 @@ namespace ACTIONet {
 			printf("done\n");
 
 			for (int i = 1; i <= iters; i++) {
-				printf("\t\t\t\tIter %d/%d ... ", i, iters);
+				printf("\t\t\tIter %d/%d ... ", i, iters);
 
 				if (i == iters) {
 					SVD_out = eigSVD(trans(A)*(A*Q));
@@ -788,7 +788,7 @@ namespace ACTIONet {
 		out(1) = S;
 		out(2) = V;
 
-		printf("\t\t\tdone\n");	fflush(stdout);
+		printf("\t\tdone\n");	fflush(stdout);
 
 		return(out);
 	}
@@ -807,7 +807,7 @@ namespace ACTIONet {
 		mat R, Q;
 		mat U, V, X;
 
-		printf("\t\t* Halko (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		printf("Halko (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 
 		if (m < n) {
 			//R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
@@ -833,7 +833,7 @@ namespace ACTIONet {
 		if (m < n) {
 			// Conduct normalized power iterations.
 			for(int it = 1; it <= iters; it++) {
-				printf("\t\tIteration %d\n", it);
+				printf("\tIteration %d\n", it);
 
 
 				Q = A*Q;
@@ -846,7 +846,7 @@ namespace ACTIONet {
 			}
 
 			X = mat(A*Q);
-			printf("\t\tReduced SVD ... ");
+			printf("\tReduced SVD ... ");
 			svd_econ( U, s, V,  X);
 			printf("done\n");
 			V = Q*V;
@@ -854,7 +854,7 @@ namespace ACTIONet {
 		else {
 			// Conduct normalized power iterations.
 			for(int it = 1; it <= iters; it++) {
-				printf("\t\tIteration %d\n", it);
+				printf("\tIteration %d\n", it);
 
 				Q = A.t()*Q;
 				gram_schmidt(Q);
@@ -896,7 +896,7 @@ namespace ACTIONet {
 		mat R, Q;
 		mat U, V, X;
 
-		printf("\t\t* Halko (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
+		printf("Halko (dense) -- A: %d x %d\n", A.n_rows, A.n_cols); fflush(stdout);
 
 		if (m < n) {
 			//R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
@@ -922,7 +922,7 @@ namespace ACTIONet {
 		if (m < n) {
 			// Conduct normalized power iterations.
 			for(int it = 1; it <= iters; it++) {
-				printf("\t\tIteration %d\n", it);
+				printf("\tIteration %d\n", it);
 
 
 				Q = A*Q;
@@ -935,7 +935,7 @@ namespace ACTIONet {
 			}
 
 			X = mat(A*Q);
-			printf("\t\tReduced SVD ... ");
+			printf("\tReduced SVD ... ");
 			svd_econ( U, s, V,  X);
 			printf("done\n");
 			V = Q*V;
@@ -943,7 +943,7 @@ namespace ACTIONet {
 		else {
 			// Conduct normalized power iterations.
 			for(int it = 1; it <= iters; it++) {
-				printf("\t\tIteration %d\n", it);
+				printf("\tIteration %d\n", it);
 
 				Q = A.t()*Q;
 				gram_schmidt(Q);
