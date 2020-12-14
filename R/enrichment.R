@@ -118,8 +118,6 @@ assess.geneset.enrichment.from.archetypes <- function (ace, associations, min.co
 	associations = as(associations[rows, ], 'dgCMatrix')
 	scores = scores[common.features, ]
 	
-    L = min(L, length(common.features))
-
 	enrichment.out = assess_enrichment(scores, associations)
 
 	rownames(enrichment.out$logPvals) = colnames(associations)
