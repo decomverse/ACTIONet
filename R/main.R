@@ -6,12 +6,12 @@
 #' The larger the value, the more archetypes will be filtered out (default=-1).
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
-#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
+#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param n_epochs Number of epochs for SGD algorithm (default=1000).
-#' @param thread_no Number of parallel threads (default=0)
-#' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r')
-#' @param data_slot Corresponding slot in the `ace` object the normalized counts (default='logcounts')
-#' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
+#' @param thread_no Number of parallel threads (default=0).
+#' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r').
+#' @param assay_name Name of assay to be used (default='logcounts').
+#' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes.
 #' If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores
 #'
 #' @return A named list: \itemize{
@@ -28,17 +28,17 @@
 run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
 	unification_alpha = 0.99, unification_outlier_threshold = 2.0, unification_sim_threshold = 0.0,
-    layout.in.parallel = TRUE, thread_no = 0, data_slot = "logcounts", reduction_slot = "ACTION",
+    layout.in.parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
     footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
-    if (!(data_slot %in% names(assays(ace)))) {
-        err = sprintf("Attribute %s is not an assay of the input ace\n", data_slot)
+    if (!(assay_name %in% names(assays(ace)))) {
+        err = sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
         stop(err)
     }
 
     ace = as(ace, "ACTIONetExperiment")
 
 
-    S = assays(ace)[[data_slot]]
+    S = assays(ace)[[assay_name]]
     S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
 
     # Run ACTION
@@ -271,11 +271,11 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thr
 }
 
 #' @export
-rerun.archetype.aggregation <- function(ace, data_slot = "logcounts",
+rerun.archetype.aggregation <- function(ace, assay_name = "logcounts",
     reduction_slot = "ACTION", unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 100, thread_no = 0,
 	unification_alpha = 0.99, unification_outlier_threshold = 2.0, unification_sim_threshold = 0.0) {
 
-    S = assays(ace)[[data_slot]]
+    S = assays(ace)[[assay_name]]
     S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
     C_stacked = as.matrix(colMaps(ace)[["C_stacked"]])
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
