@@ -28,12 +28,13 @@ setReplaceMethod("colNets", "ACTIONetExperiment", function(object, value) {
 #' @rdname rowMaps
 #' @export
 setReplaceMethod("rowMaps", "ACTIONetExperiment", function(object, value) {
-
-     if (length(value) == 0) {
-         object@rowMaps = SimpleList()
-         validObject(object)
-         return(object)
-     }
+    (object)
+    value <- as(value, "SimpleList")
+   # if (length(value) == 0) {
+   #     object@rowMaps = SimpleList()
+   #     validObject(object)
+   #     return(object)
+   # }
 
     object <- .insert_mapping(object, value, 1)
     validObject(object)
@@ -46,12 +47,13 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(object, value) {
 #' @rdname colMaps
 #' @export
 setReplaceMethod("colMaps", "ACTIONetExperiment", function(object, value) {
-
-     if (length(value) == 0) {
-         object@colMaps = SimpleList()
-         validObject(object)
-         return(object)
-     }
+  (object)
+  value <- as(value, "SimpleList")
+   # if (length(value) == 0) {
+   #     object@colMaps = SimpleList()
+   #     validObject(object)
+   #     return(object)
+   # }
 
     object <- .insert_mapping(object, value, 2)
     validObject(object)
@@ -283,16 +285,15 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 }
 
 .insert_mapping <- function(object, value, d){
-  value = .check_if_mapping_list(value)
 
-  map_types <- switch(d, rowMapTypes(object), colMapTypes(object))
-  .validate_names(value)
-
-  value = .coerce_input_to_SE(value)
 
   if (length(value) == 0) {
-      value = SimpleList()
-  } else{
+      value = S4Vectors::SimpleList()
+  } else {
+    value = .check_if_mapping_list(value)
+    map_types <- switch(d, rowMapTypes(object), colMapTypes(object))
+    .validate_names(value)
+    value = .coerce_input_to_SE(value)
 
     value <- sapply(names(value), function(n){
       v = value[[n]]
