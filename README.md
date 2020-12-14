@@ -24,7 +24,7 @@ This is the easiest way to install the package, and it automatically installs al
 
 ```r
 install.packages("devtools")
-devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")
+devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
 
 ```
 
