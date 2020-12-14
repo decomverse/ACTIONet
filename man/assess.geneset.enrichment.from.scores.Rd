@@ -4,7 +4,7 @@
 \alias{assess.geneset.enrichment.from.scores}
 \title{PErforms geneset enrichment analysis on arbitrary gene scores}
 \usage{
-assess.geneset.enrichment.from.scores(scores, associations, L = 1000)
+assess.geneset.enrichment.from.scores(scores, associations)
 }
 \arguments{
 \item{scores}{Gene scores}
