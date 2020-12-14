@@ -68,7 +68,7 @@ assess.TF.activities.from.archetypes <- function(ace) {
 #' scores = rowMaps(ace)$unified_feature_specificity
 #' Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
 #' @export
-assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000) {
+assess.geneset.enrichment.from.scores <- function(scores, associations) {
     if (is.list(associations)) {
         associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
             gs))
@@ -77,7 +77,6 @@ assess.geneset.enrichment.from.scores <- function(scores, associations, L = 1000
     associations = as(associations, "sparseMatrix")
 
     common.features = intersect(rownames(associations), rownames(scores))
-    L = min(L, length(common.features))
 
 	enrichment.out = assess_enrichment(scores[common.features, ], associations[common.features, ])
 
@@ -119,8 +118,6 @@ assess.geneset.enrichment.from.archetypes <- function (ace, associations, min.co
 	associations = as(associations[rows, ], 'dgCMatrix')
 	scores = scores[common.features, ]
 	
-    L = min(L, length(common.features))
-
 	enrichment.out = assess_enrichment(scores, associations)
 
 	rownames(enrichment.out$logPvals) = colnames(associations)

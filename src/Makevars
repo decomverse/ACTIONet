@@ -15,7 +15,7 @@ ifeq ($(UNAME),Linux)
     else
         $(info Found MKL)
         PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/include/suitesparse
-        PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+        PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_lp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl
     endif
 else ifeq ($(UNAME),Darwin)
     $(info Using Mac OS configurations)
