@@ -40,7 +40,10 @@ ACTIONetExperiment <- function(...,
   if(!is(SE, "RangedSummarizedExperiment")) {
     SE <- as(SE, "RangedSummarizedExperiment")
   }
-  out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets, rowMaps = rowMaps, colMaps = colMaps)
+  out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets)
+  out = .insert_mapping(out, rowMaps, 1)
+  out = .insert_mapping(out, colMaps, 2)
+
 
   if(NROW(out) > 0){
     # if(NCOL(SummarizedExperiment::rowData(out)) == 0){
@@ -72,6 +75,7 @@ ACTIONetExperiment <- function(...,
     }
   }
 
+  validObject(out)
   return(out)
 }
 
