@@ -19,17 +19,10 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logco
 
   ace <- as(ace, "ACTIONetExperiment")
   if (!(assay_name %in% names(assays(ace)))) {
-		if (norm_method != "none") {
-			msg = sprintf("Normalizing ace object ...\n")
-			message(msg)
-			ace = normalize.ace(ace, norm_method)
-		} else {
-			err = sprintf("Assay '%s' not found.\n", assay_name)
-			stop(err)
-		}
+		err = sprintf("Assay '%s' not found.\n", assay_name)
+		stop(err)
   }
 
-  ace = ace
   if (is.null(rownames(ace))) {
     rownames(ace) = .default_rownames(NROW(ace))
   } else {
@@ -47,8 +40,8 @@ reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logco
   #   colnames(assays(ace)[[n]]) = colnames(ace)
   # }
 
-  msg = sprintf("Running main reduction.\n")
-  message(msg)
+  # msg = sprintf("Running main reduction.\n")
+  # message(msg)
   # reduction_algorithm=ACTION (1), SVD_algorithm=IRLB (0)
   if (SVD_algorithm == 0)
       max_iter = 100*max_iter
