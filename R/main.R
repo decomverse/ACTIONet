@@ -6,13 +6,11 @@
 #' The larger the value, the more archetypes will be filtered out (default=-1).
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
-#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
-#' @param n_epochs Number of epochs for SGD algorithm (default=1000).
+#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
+#' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
 #' @param thread_no Number of parallel threads (default=0).
 #' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r').
 #' @param assay_name Name of assay to be used (default='logcounts').
-#' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes.
-#' If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores
 #'
 #' @return A named list: \itemize{
 #' \item ace: ACTIONetExperiment object (derived from SummarizedExperiment)
@@ -25,11 +23,11 @@
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
 #' @export
-run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificity_z_threshold = -3,
+run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
 	unification_alpha = 0.99, unification_outlier_threshold = 2.0, unification_sim_threshold = 0.0,
-    layout.in.parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
-    footprint_alpha = 0.85, max_iter_ACTION = 50, full.trace = FALSE) {
+    layout_in_parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
+    footprint_alpha = 0.85, max_iter_ACTION = 50, full_trace = FALSE) {
     if (!(assay_name %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
         stop(err)
@@ -47,7 +45,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
     # Prune nonspecific and/or unreliable archetypes
     pruning.out = prune_archetypes(ACTION.out$C, ACTION.out$H, min_specificity_z_threshold = min_specificity_z_threshold,
-        min_cells = min.cells.per.arch)
+        min_cells = min_cells_per_arch)
 
     colMaps(ace)[["H_stacked"]] = Matrix::t(as(pruning.out$H_stacked, "sparseMatrix"))
     colMapTypes(ace)[["H_stacked"]] = "internal"
@@ -68,7 +66,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
     colMaps(ace)[["ACTIONred"]] = Matrix::t(initial.coordinates[1:3, ])
     colMapTypes(ace)[["ACTIONred"]] = "embedding"
 
-    if (layout.in.parallel == FALSE) {
+    if (layout_in_parallel == FALSE) {
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
             n_epochs = layout_epochs, thread_no = 1)
     } else {
@@ -142,7 +140,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 
 	ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only, layout_compactness = layout_compactness, layout_epochs = layout_epochs/5, thread_no = 1)
 
-    if (full.trace == T) {
+    if (full_trace == T) {
         # Prepare output
         trace = list(ACTION.out = ACTION.out, pruning.out = pruning.out, vis.out = vis.out,
             unification.out = unification.out)
@@ -173,7 +171,7 @@ run.ACTIONet <- function(ace, k_max = 30, min.cells.per.arch = 2, min_specificit
 #' plot.ACTIONet(ace.updated)
 #' @export
 reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE,
-    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout.in.parallel = FALSE,
+    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout_in_parallel = FALSE,
     reduction_slot = "ACTION") {
     set.seed(0)
 
@@ -187,7 +185,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 
     # Layout ACTIONet
     initial.coordinates = Matrix::t(scale(ACTIONet::colMaps(ace)[[reduction_slot]]))
-    if (layout.in.parallel == FALSE) {
+    if (layout_in_parallel == FALSE) {
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
             n_epochs = layout_epochs, thread_no = 1)
     } else {
@@ -224,8 +222,8 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' Rerun layout on the ACTIONet graph with new parameters
 #'
 #' @param ace ACTIONetExperiment object containing the results
-#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
-#' @param n_epochs Number of epochs for SGD algorithm (default=500).
+#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
+#' @param layout_epochs Number of epochs for SGD algorithm (default=500).
 #' @param thread_no Number of parallel threads (default=8)
 #' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r')
 #'
