@@ -8,12 +8,14 @@ create_formula <- function(vars){
 get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assay = "counts", colData = NULL, pseudocount = 0, with_S = FALSE, with_E = FALSE, with_V = FALSE, BPPARAM = SerialParam()){
 
   counts.mat = SummarizedExperiment::assays(ace)[[assay]]
-  IDX = ACTIONet:::.get_ace_split_IDX(ace, batch_attr)
+  IDX = .get_ace_split_IDX(ace, batch_attr)
+  sample_names = names(IDX)
   counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = F])
-  counts.list = lapply(counts.list, as, "dgCMatrix")
+
+  # counts.list = lapply(counts.list, as, "dgCMatrix")
   se.assays = list()
 
-  S0 = sapply(counts.list, ACTIONet::fast_row_sums) + pseudocount
+  S0 = sapply(counts.list, fastRowSums) + pseudocount
   se.assays$counts = S0
 
   E0 = sapply(counts.list, fastRowMeans)
@@ -33,16 +35,15 @@ get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assa
   }
 
   n_cells = sapply(counts.list, NCOL)
-  nnz_feat_mean = sapply(counts.list, function(X) mean(ACTIONet::fast_column_sums(as(X > 0, "dgCMatrix"))))
-  sample = factor(names(IDX))
-  cd = data.frame(n_cells = n_cells, nnz_feat_mean = nnz_feat_mean, sample = sample)
+  nnz_feat_mean = sapply(counts.list, function(X) mean(fastColSums(X > 0)) )
+  cd = data.frame(n_cells = n_cells, nnz_feat_mean = nnz_feat_mean, sample = factor(sample_names))
 
   if(!is.null(colData)){
-    md = colData[colData[[batch_attr]] %in% names(counts.list), ]
-    md = md[match(names(counts.list), md[[batch_attr]]),]
+    md = colData[colData[[batch_attr]] %in% sample_names, ]
+    md = md[match(sample_names, md[[batch_attr]]),]
     cd = data.frame(md, cd)
   }
-
+  rownames(cd) = sample_names
   cd = droplevels(cd)
   se = SummarizedExperiment(assays = se.assays, colData = cd, rowData = rowData(ace))
 
