@@ -209,7 +209,8 @@ namespace ACTIONet {
 				cols[k+l] = j;
 			}
 		});
-
+		
+		
 		double w_max = arma::max(vec(values, G.n_nonzero));
 		ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
 			epochs_per_sample[i] = w_max / values[i]; // Higher the weight of the edge, the more likely it is to be sampled (inversely proportional to epochs_per_sample)
