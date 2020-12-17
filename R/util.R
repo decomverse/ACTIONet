@@ -116,13 +116,13 @@ fastRowSums <- function(mat){
 
 #' @export
 fastColMeans <- function(mat){
-  E = ACTIONet::fast_column_sums(mat)/nrow(mat)
+  E = ACTIONet::fastColSums(mat)/nrow(mat)
   return(E)
 }
 
 #' @export
 fastRowMeans <- function(mat){
-  E = ACTIONet::fast_row_sums(mat)/ncol(mat)
+  E = ACTIONet::fastRowSums(mat)/ncol(mat)
   return(E)
 }
 
