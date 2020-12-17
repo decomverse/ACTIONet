@@ -207,6 +207,9 @@ read.HD5DF <- function(h5file, gname, compression.level = 0) {
             for (nn in names(cat)) {
                 l = cat[[nn]]$read()
                 l = setdiff(l, "NA")
+                if(length(l) < 2)
+					next
+					
                 vars[[nn]] = factor(l[vars[[nn]] + 1], l)
             }
         }
