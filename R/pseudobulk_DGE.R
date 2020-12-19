@@ -10,7 +10,7 @@ get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assa
   counts.mat = SummarizedExperiment::assays(ace)[[assay]]
   IDX = .get_ace_split_IDX(ace, batch_attr)
   sample_names = names(IDX)
-  counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = F])
+  counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = FALSE])
 
   # counts.list = lapply(counts.list, as, "dgCMatrix")
   se.assays = list()
@@ -39,8 +39,8 @@ get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assa
   cd = data.frame(n_cells = n_cells, nnz_feat_mean = nnz_feat_mean, sample = factor(sample_names))
 
   if(!is.null(colData)){
-    md = colData[colData[[batch_attr]] %in% sample_names, ]
-    md = md[match(sample_names, md[[batch_attr]]),]
+    md = colData[colData[[batch_attr]] %in% sample_names, , drop = FALSE]
+    md = md[match(sample_names, md[[batch_attr]]), ,  drop = FALSE]
     cd = data.frame(md, cd)
   }
   rownames(cd) = sample_names
