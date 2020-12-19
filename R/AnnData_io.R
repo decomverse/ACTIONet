@@ -164,9 +164,9 @@ write.HD5List <- function(h5file, gname, obj_list, depth = 1, max.depth = 5, com
 
     for(nn in names(obj_list)) {
     	obj = obj_list[[nn]]
-    	if( (class(obj) %in% c("list", "SimpleList")) & (depth < max.depth) ) {
+    	if( (sum(sapply(c("list", "SimpleList"), function(x) return(length(which(is(obj) == x)) != 0))) != 0) & (depth < max.depth) ) {
 			write.HD5List(h5group, nn, obj, depth = depth+1, max.depth = max.depth, compression.level = compression.level)
-    	} else if(class(obj) %in% c("data.frame", "DataFrame", "DFrame")) {
+    	} else if(sum(sapply(c("data.frame", "DataFrame", "DFrame"), function(x) return(length(which(is(obj) == x)) != 0))) != 0) {
 			write.HD5DF(h5group, nn, obj, compression.level = compression.level)
     	} else if(is.sparseMatrix(obj)) {
     		write.HD5SpMat(h5group, nn, obj, compression.level = compression.level)
@@ -207,6 +207,9 @@ read.HD5DF <- function(h5file, gname, compression.level = 0) {
             for (nn in names(cat)) {
                 l = cat[[nn]]$read()
                 l = setdiff(l, "NA")
+                if(length(l) < 2)
+					next
+					
                 vars[[nn]] = factor(l[vars[[nn]] + 1], l)
             }
         }
