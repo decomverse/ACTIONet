@@ -133,3 +133,12 @@ fastRowVars <- function (mat){
   V <- computeSparseRowVariances(mat@i + 1, mat@x, E, ncol(mat))
   return(V)
 }
+
+
+#' @export
+revert_ace_as_sce <- function (ace){
+	sce = SingleCellExperiment(assays = assays(ace), colData = colData(ace), rowData = rowData(ace))
+	
+	return(sce)
+}
+
