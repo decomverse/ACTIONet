@@ -24,22 +24,23 @@
 #ifndef IGRAPH_MIXING_H
 #define IGRAPH_MIXING_H
 
-#include "igraph_datatype.h"
 #include "igraph_decls.h"
 #include "igraph_types.h"
+#include "igraph_datatype.h"
 #include "igraph_vector.h"
 
 __BEGIN_DECLS
 
 DECLDIR int igraph_assortativity_nominal(const igraph_t *graph,
-                                         const igraph_vector_t *types,
-                                         igraph_real_t *res,
-                                         igraph_bool_t directed);
+        const igraph_vector_t *types,
+        igraph_real_t *res,
+        igraph_bool_t directed);
 
 DECLDIR int igraph_assortativity(const igraph_t *graph,
                                  const igraph_vector_t *types1,
                                  const igraph_vector_t *types2,
-                                 igraph_real_t *res, igraph_bool_t directed);
+                                 igraph_real_t *res,
+                                 igraph_bool_t directed);
 
 DECLDIR int igraph_assortativity_degree(const igraph_t *graph,
                                         igraph_real_t *res,

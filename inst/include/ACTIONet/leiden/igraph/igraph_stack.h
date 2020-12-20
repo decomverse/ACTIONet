@@ -35,45 +35,44 @@ __BEGIN_DECLS
 
 #define BASE_IGRAPH_REAL
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
 #include "igraph_stack_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_IGRAPH_REAL
 
 #define BASE_LONG
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
 #include "igraph_stack_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_LONG
 
 #define BASE_INT
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
 #include "igraph_stack_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_INT
 
 #define BASE_CHAR
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
 #include "igraph_stack_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_CHAR
 
 #define BASE_BOOL
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
 #include "igraph_stack_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_BOOL
 
 #define BASE_PTR
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
 #include "igraph_stack_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_PTR
 
-#define IGRAPH_STACK_NULL                                                      \
-  { 0, 0, 0 }
+#define IGRAPH_STACK_NULL { 0,0,0 }
 
-void igraph_stack_ptr_free_all(igraph_stack_ptr_t *s);
-void igraph_stack_ptr_destroy_all(igraph_stack_ptr_t *s);
+void igraph_stack_ptr_free_all(igraph_stack_ptr_t* s);
+void igraph_stack_ptr_destroy_all(igraph_stack_ptr_t* s);
 
 __END_DECLS
 

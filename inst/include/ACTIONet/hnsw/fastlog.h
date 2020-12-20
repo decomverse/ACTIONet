@@ -41,8 +41,8 @@
 #ifndef __FAST_LOG_H_
 #define __FAST_LOG_H_
 
-#include "sse.h"
 #include <cstdint>
+#include "sse.h"
 
 static inline float fastlog2(float x) {
   union {
@@ -144,6 +144,6 @@ static inline v4sf vfasterlog(v4sf x) {
   return y - c_87_989971088;
 }
 
-#endif // __SSE2__
+#endif  // __SSE2__
 
-#endif // __FAST_LOG_H_
+#endif  // __FAST_LOG_H_

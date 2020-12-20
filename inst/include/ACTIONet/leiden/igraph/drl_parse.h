@@ -34,7 +34,7 @@
 // the command line, print help, and do error checking
 
 #ifdef MUSE_MPI
-#include <mpi.h>
+    #include <mpi.h>
 #endif
 
 #include <string>
@@ -44,26 +44,29 @@ namespace drl {
 class parse {
 
 public:
-  // Methods
 
-  parse(int argc, char **argv);
-  ~parse() {}
+    // Methods
 
-  // user parameters
-  std::string sim_file;   // .sim file
-  std::string coord_file; // .coord file
-  std::string parms_file; // .parms file
-  std::string real_file;  // .real file
+    parse ( int argc, char **argv );
+    ~parse () {}
 
-  int rand_seed;  // random seed int >= 0
-  float edge_cut; // edge cutting real [0,1]
-  int int_out;    // intermediate output, int >= 1
-  int edges_out;  // true if .edges file is requested
-  int parms_in;   // true if .parms file is to be read
-  float real_in;  // true if .real file is to be read
+    // user parameters
+    std::string sim_file;        // .sim file
+    std::string coord_file;      // .coord file
+    std::string parms_file;      // .parms file
+    std::string real_file;       // .real file
+
+    int rand_seed;      // random seed int >= 0
+    float edge_cut;         // edge cutting real [0,1]
+    int int_out;            // intermediate output, int >= 1
+    int edges_out;                  // true if .edges file is requested
+    int parms_in;           // true if .parms file is to be read
+    float real_in;          // true if .real file is to be read
 
 private:
-  void print_syntax(const char *error_string);
+
+    void print_syntax ( const char *error_string );
+
 };
 
 } // namespace drl

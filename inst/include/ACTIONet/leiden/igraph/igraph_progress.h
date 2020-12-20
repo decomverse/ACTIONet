@@ -73,8 +73,7 @@ __BEGIN_DECLS
  */
 
 /**
- * \section igraph_functions_with_progress Writing igraph functions with
- * progress reporting
+ * \section igraph_functions_with_progress Writing igraph functions with progress reporting
  *
  * <para>
  * If you want to write a function that uses igraph and supports
@@ -143,19 +142,17 @@ __BEGIN_DECLS
  *     error code \c IGRAPH_INTERRUPTED in this case.
  */
 
-typedef int igraph_progress_handler_t(const char *message,
-                                      igraph_real_t percent, void *data);
+typedef int igraph_progress_handler_t(const char *message, igraph_real_t percent,
+                                      void *data);
 
 extern igraph_progress_handler_t igraph_progress_handler_stderr;
 
-DECLDIR igraph_progress_handler_t *
-igraph_set_progress_handler(igraph_progress_handler_t new_handler);
+DECLDIR igraph_progress_handler_t * igraph_set_progress_handler(igraph_progress_handler_t new_handler);
 
-DECLDIR int igraph_progress(const char *message, igraph_real_t percent,
-                            void *data);
+DECLDIR int igraph_progress(const char *message, igraph_real_t percent, void *data);
 
-DECLDIR int igraph_progressf(const char *message, igraph_real_t percent,
-                             void *data, ...);
+DECLDIR int igraph_progressf(const char *message, igraph_real_t percent, void *data,
+                             ...);
 
 /**
  * \define IGRAPH_PROGRESS
@@ -173,13 +170,13 @@ DECLDIR int igraph_progressf(const char *message, igraph_real_t percent,
  *    IGRAPH_INTERRUPTED.
  */
 
-#define IGRAPH_PROGRESS(message, percent, data)                                \
-  do {                                                                         \
-    if (igraph_progress((message), (percent), (data)) != IGRAPH_SUCCESS) {     \
-      IGRAPH_FINALLY_FREE();                                                   \
-      return IGRAPH_INTERRUPTED;                                               \
-    }                                                                          \
-  } while (0)
+#define IGRAPH_PROGRESS(message, percent, data) \
+    do { \
+        if (igraph_progress((message), (percent), (data)) != IGRAPH_SUCCESS) { \
+            IGRAPH_FINALLY_FREE(); \
+            return IGRAPH_INTERRUPTED; \
+        } \
+    } while (0)
 
 __END_DECLS
 

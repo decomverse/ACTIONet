@@ -24,15 +24,14 @@
 #ifndef IGRAPH_MEMORY_H
 #define IGRAPH_MEMORY_H
 
-#include "igraph_decls.h"
 #include <stdlib.h>
+#include "igraph_decls.h"
 
 __BEGIN_DECLS
 
-#define igraph_Calloc(n, t) (t *)calloc((size_t)(n), sizeof(t))
-#define igraph_Realloc(p, n, t)                                                \
-  (t *)realloc((void *)(p), (size_t)((n) * sizeof(t)))
-#define igraph_Free(p) (free((void *)(p)), (p) = NULL)
+#define igraph_Calloc(n,t)    (t*) calloc( (size_t)(n), sizeof(t) )
+#define igraph_Realloc(p,n,t) (t*) realloc((void*)(p), (size_t)((n)*sizeof(t)))
+#define igraph_Free(p)        (free( (void *)(p) ), (p) = NULL)
 
 /* #ifndef IGRAPH_NO_CALLOC */
 /* #  define Calloc igraph_Calloc */

@@ -45,15 +45,17 @@
 #define NETROUTINES_H
 
 #include "NetDataTypes.h"
-#include "igraph_datatype.h"
 #include "igraph_types.h"
+#include "igraph_datatype.h"
 
-int igraph_i_read_network(const igraph_t *graph, const igraph_vector_t *weights,
+int igraph_i_read_network(const igraph_t *graph,
+                          const igraph_vector_t *weights,
                           network *net, igraph_bool_t use_weights,
                           unsigned int states);
 
-void reduce_cliques(DLList<ClusterList<NNode *> *> *, FILE *file);
-void reduce_cliques2(network *, bool, long);
+void reduce_cliques(DLList<ClusterList<NNode*>*>*, FILE *file);
+void reduce_cliques2(network*, bool,  long );
 void clear_all_markers(network *net);
 
 #endif
+

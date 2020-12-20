@@ -35,10 +35,15 @@
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
-#define YYTOKENTYPE
-/* Put the tokens into the symbol table, so that GDB and other debuggers
-   know about them.  */
-enum yytokentype { ALNUM = 258, NEWLINE = 259, HASH = 260, ERROR = 261 };
+# define YYTOKENTYPE
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     ALNUM = 258,
+     NEWLINE = 259,
+     HASH = 260,
+     ERROR = 261
+   };
 #endif
 /* Tokens.  */
 #define ALNUM 258
@@ -46,7 +51,10 @@ enum yytokentype { ALNUM = 258, NEWLINE = 259, HASH = 260, ERROR = 261 };
 #define HASH 260
 #define ERROR 261
 
-#if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED
+
+
+
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 #line 81 "../../src/foreign-lgl-parser.y"
 {
@@ -55,20 +63,25 @@ typedef union YYSTYPE
 }
 /* Line 1529 of yacc.c.  */
 #line 66 "foreign-lgl-parser.h"
-YYSTYPE;
-#define yystype YYSTYPE /* obsolescent; will be withdrawn */
-#define YYSTYPE_IS_DECLARED 1
-#define YYSTYPE_IS_TRIVIAL 1
+	YYSTYPE;
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
+# define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
-#if !defined YYLTYPE && !defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE {
+
+
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE
+{
   int first_line;
   int first_column;
   int last_line;
   int last_column;
 } YYLTYPE;
-#define yyltype YYLTYPE /* obsolescent; will be withdrawn */
-#define YYLTYPE_IS_DECLARED 1
-#define YYLTYPE_IS_TRIVIAL 1
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
 #endif
+
+
