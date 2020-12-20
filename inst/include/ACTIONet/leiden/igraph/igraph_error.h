@@ -146,12 +146,13 @@ __BEGIN_DECLS
  * the error handler should deallocate all temporary memory. This is
  * done by storing the address and the destroy function of all temporary
  * objects in a stack. The \ref IGRAPH_FINALLY function declares an object as
- * temporary by placing its address in the stack. If an \a igraph function
- * returns with success it calls \ref IGRAPH_FINALLY_CLEAN() with the number of
- * objects to remove from the stack. If an error happens however, the error
- * handler should call \ref IGRAPH_FINALLY_FREE() to deallocate each object
- * added to the stack. This means that the temporary objects allocated in the
- * calling function (and etc.) will be freed as well.
+ * temporary by placing its address in the stack. If an \a igraph function returns
+ * with success it calls \ref IGRAPH_FINALLY_CLEAN() with the
+ * number of objects to remove from the stack. If an error happens
+ * however, the error handler should call \ref IGRAPH_FINALLY_FREE() to
+ * deallocate each object added to the stack. This means that the
+ * temporary objects allocated in the calling function (and etc.) will
+ * be freed as well.
  * </para>
  */
 
@@ -164,9 +165,8 @@ __BEGIN_DECLS
  * behaving well in erroneous situations. First, check the arguments
  * of the functions and call \ref IGRAPH_ERROR if they are invalid. Second,
  * call \ref IGRAPH_FINALLY on each dynamically allocated object and call
- * \ref IGRAPH_FINALLY_CLEAN() with the proper argument before returning. Third,
- * use \ref IGRAPH_CHECK on all \a igraph function calls which can generate
- * errors.
+ * \ref IGRAPH_FINALLY_CLEAN() with the proper argument before returning. Third, use
+ * \ref IGRAPH_CHECK on all \a igraph function calls which can generate errors.
  * </para>
  * <para>
  * The size of the stack used for this bookkeeping is fixed, and
@@ -206,8 +206,8 @@ __BEGIN_DECLS
  * \param igraph_errno The \a igraph error code.
  */
 
-typedef void igraph_error_handler_t(const char *reason, const char *file,
-                                    int line, int igraph_errno);
+typedef void igraph_error_handler_t (const char * reason, const char * file,
+                                     int line, int igraph_errno);
 
 /**
  * \var igraph_error_handler_abort
@@ -252,8 +252,7 @@ extern igraph_error_handler_t igraph_error_handler_printignore;
  *   more.
  */
 
-DECLDIR igraph_error_handler_t *
-igraph_set_error_handler(igraph_error_handler_t *new_handler);
+DECLDIR igraph_error_handler_t* igraph_set_error_handler(igraph_error_handler_t* new_handler);
 
 /**
  * \typedef igraph_error_type_t
@@ -288,24 +287,25 @@ igraph_set_error_handler(igraph_error_handler_t *new_handler);
  * \enumval IGRAPH_ARPACK_NPOS N must be positive.
  * \enumval IGRAPH_ARPACK_NEVNPOS NEV must be positive.
  * \enumval IGRAPH_ARPACK_NCVSMALL NCV must be bigger.
- * \enumval IGRAPH_ARPACK_NONPOSI Maximum number of iterations should be
- * positive. \enumval IGRAPH_ARPACK_WHICHINV Invalid WHICH parameter. \enumval
- * IGRAPH_ARPACK_BMATINV Invalid BMAT parameter. \enumval
- * IGRAPH_ARPACK_WORKLSMALL WORKL is too small. \enumval IGRAPH_ARPACK_TRIDERR
- * LAPACK error in tridiagonal eigenvalue calculation. \enumval
- * IGRAPH_ARPACK_ZEROSTART Starting vector is zero. \enumval
- * IGRAPH_ARPACK_MODEINV MODE is invalid. \enumval IGRAPH_ARPACK_MODEBMAT MODE
- * and BMAT are not compatible. \enumval IGRAPH_ARPACK_ISHIFT ISHIFT must be 0
- * or 1. \enumval IGRAPH_ARPACK_NEVBE NEV and WHICH='BE' are incompatible.
+ * \enumval IGRAPH_ARPACK_NONPOSI Maximum number of iterations should be positive.
+ * \enumval IGRAPH_ARPACK_WHICHINV Invalid WHICH parameter.
+ * \enumval IGRAPH_ARPACK_BMATINV Invalid BMAT parameter.
+ * \enumval IGRAPH_ARPACK_WORKLSMALL WORKL is too small.
+ * \enumval IGRAPH_ARPACK_TRIDERR LAPACK error in tridiagonal eigenvalue calculation.
+ * \enumval IGRAPH_ARPACK_ZEROSTART Starting vector is zero.
+ * \enumval IGRAPH_ARPACK_MODEINV MODE is invalid.
+ * \enumval IGRAPH_ARPACK_MODEBMAT MODE and BMAT are not compatible.
+ * \enumval IGRAPH_ARPACK_ISHIFT ISHIFT must be 0 or 1.
+ * \enumval IGRAPH_ARPACK_NEVBE NEV and WHICH='BE' are incompatible.
  * \enumval IGRAPH_ARPACK_NOFACT Could not build an Arnoldi factorization.
  * \enumval IGRAPH_ARPACK_FAILED No eigenvalues to sufficient accuracy.
  * \enumval IGRAPH_ARPACK_HOWMNY HOWMNY is invalid.
  * \enumval IGRAPH_ARPACK_HOWMNYS HOWMNY='S' is not implemented.
  * \enumval IGRAPH_ARPACK_EVDIFF Different number of converged Ritz values.
  * \enumval IGRAPH_ARPACK_SHUR Error from calculation of a real Schur form.
- * \enumval IGRAPH_ARPACK_LAPACK LAPACK (dtrevc) error for calculating
- * eigenvectors. \enumval IGRAPH_ARPACK_UNKNOWN Unknown ARPACK error. \enumval
- * IGRAPH_ENEGLOOP Negative loop detected while calculating shortest paths.
+ * \enumval IGRAPH_ARPACK_LAPACK LAPACK (dtrevc) error for calculating eigenvectors.
+ * \enumval IGRAPH_ARPACK_UNKNOWN Unknown ARPACK error.
+ * \enumval IGRAPH_ENEGLOOP Negative loop detected while calculating shortest paths.
  * \enumval IGRAPH_EINTERNAL Internal error, likely a bug in igraph.
  * \enumval IGRAPH_EDIVZERO Big integer division by zero.
  * \enumval IGARPH_GLP_EBOUND GLPK error (GLP_EBOUND).
@@ -330,68 +330,67 @@ igraph_set_error_handler(igraph_error_handler_t *new_handler);
  * \enumval IGRAPH_ERWSTUCK Random walk got stuck.
  */
 
-typedef enum {
-  IGRAPH_SUCCESS = 0,
-  IGRAPH_FAILURE = 1,
-  IGRAPH_ENOMEM = 2,
-  IGRAPH_PARSEERROR = 3,
-  IGRAPH_EINVAL = 4,
-  IGRAPH_EXISTS = 5,
-  IGRAPH_EINVEVECTOR = 6,
-  IGRAPH_EINVVID = 7,
-  IGRAPH_NONSQUARE = 8,
-  IGRAPH_EINVMODE = 9,
-  IGRAPH_EFILE = 10,
-  IGRAPH_UNIMPLEMENTED = 12,
-  IGRAPH_INTERRUPTED = 13,
-  IGRAPH_DIVERGED = 14,
-  IGRAPH_ARPACK_PROD = 15,
-  IGRAPH_ARPACK_NPOS = 16,
-  IGRAPH_ARPACK_NEVNPOS = 17,
-  IGRAPH_ARPACK_NCVSMALL = 18,
-  IGRAPH_ARPACK_NONPOSI = 19,
-  IGRAPH_ARPACK_WHICHINV = 20,
-  IGRAPH_ARPACK_BMATINV = 21,
-  IGRAPH_ARPACK_WORKLSMALL = 22,
-  IGRAPH_ARPACK_TRIDERR = 23,
-  IGRAPH_ARPACK_ZEROSTART = 24,
-  IGRAPH_ARPACK_MODEINV = 25,
-  IGRAPH_ARPACK_MODEBMAT = 26,
-  IGRAPH_ARPACK_ISHIFT = 27,
-  IGRAPH_ARPACK_NEVBE = 28,
-  IGRAPH_ARPACK_NOFACT = 29,
-  IGRAPH_ARPACK_FAILED = 30,
-  IGRAPH_ARPACK_HOWMNY = 31,
-  IGRAPH_ARPACK_HOWMNYS = 32,
-  IGRAPH_ARPACK_EVDIFF = 33,
-  IGRAPH_ARPACK_SHUR = 34,
-  IGRAPH_ARPACK_LAPACK = 35,
-  IGRAPH_ARPACK_UNKNOWN = 36,
-  IGRAPH_ENEGLOOP = 37,
-  IGRAPH_EINTERNAL = 38,
-  IGRAPH_ARPACK_MAXIT = 39,
-  IGRAPH_ARPACK_NOSHIFT = 40,
-  IGRAPH_ARPACK_REORDER = 41,
-  IGRAPH_EDIVZERO = 42,
-  IGRAPH_GLP_EBOUND = 43,
-  IGRAPH_GLP_EROOT = 44,
-  IGRAPH_GLP_ENOPFS = 45,
-  IGRAPH_GLP_ENODFS = 46,
-  IGRAPH_GLP_EFAIL = 47,
-  IGRAPH_GLP_EMIPGAP = 48,
-  IGRAPH_GLP_ETMLIM = 49,
-  IGRAPH_GLP_ESTOP = 50,
-  IGRAPH_EATTRIBUTES = 51,
-  IGRAPH_EATTRCOMBINE = 52,
-  IGRAPH_ELAPACK = 53,
-  IGRAPH_EDRL = 54,
-  IGRAPH_EOVERFLOW = 55,
-  IGRAPH_EGLP = 56,
-  IGRAPH_CPUTIME = 57,
-  IGRAPH_EUNDERFLOW = 58,
-  IGRAPH_ERWSTUCK = 59,
-  IGRAPH_STOP = 60, /* undocumented, used internally; signals a request to stop
-                       in functions like igraph_i_maximal_cliques_bk */
+typedef enum {    
+    IGRAPH_SUCCESS           = 0,
+    IGRAPH_FAILURE           = 1,
+    IGRAPH_ENOMEM            = 2,
+    IGRAPH_PARSEERROR        = 3,
+    IGRAPH_EINVAL            = 4,
+    IGRAPH_EXISTS            = 5,
+    IGRAPH_EINVEVECTOR       = 6,
+    IGRAPH_EINVVID           = 7,
+    IGRAPH_NONSQUARE         = 8,
+    IGRAPH_EINVMODE          = 9,
+    IGRAPH_EFILE             = 10,
+    IGRAPH_UNIMPLEMENTED     = 12,
+    IGRAPH_INTERRUPTED       = 13,
+    IGRAPH_DIVERGED          = 14,
+    IGRAPH_ARPACK_PROD       = 15,
+    IGRAPH_ARPACK_NPOS       = 16,
+    IGRAPH_ARPACK_NEVNPOS    = 17,
+    IGRAPH_ARPACK_NCVSMALL   = 18,
+    IGRAPH_ARPACK_NONPOSI    = 19,
+    IGRAPH_ARPACK_WHICHINV   = 20,
+    IGRAPH_ARPACK_BMATINV    = 21,
+    IGRAPH_ARPACK_WORKLSMALL = 22,
+    IGRAPH_ARPACK_TRIDERR    = 23,
+    IGRAPH_ARPACK_ZEROSTART  = 24,
+    IGRAPH_ARPACK_MODEINV    = 25,
+    IGRAPH_ARPACK_MODEBMAT   = 26,
+    IGRAPH_ARPACK_ISHIFT     = 27,
+    IGRAPH_ARPACK_NEVBE      = 28,
+    IGRAPH_ARPACK_NOFACT     = 29,
+    IGRAPH_ARPACK_FAILED     = 30,
+    IGRAPH_ARPACK_HOWMNY     = 31,
+    IGRAPH_ARPACK_HOWMNYS    = 32,
+    IGRAPH_ARPACK_EVDIFF     = 33,
+    IGRAPH_ARPACK_SHUR       = 34,
+    IGRAPH_ARPACK_LAPACK     = 35,
+    IGRAPH_ARPACK_UNKNOWN    = 36,
+    IGRAPH_ENEGLOOP          = 37,
+    IGRAPH_EINTERNAL         = 38,
+    IGRAPH_ARPACK_MAXIT      = 39,
+    IGRAPH_ARPACK_NOSHIFT    = 40,
+    IGRAPH_ARPACK_REORDER    = 41,
+    IGRAPH_EDIVZERO          = 42,
+    IGRAPH_GLP_EBOUND        = 43,
+    IGRAPH_GLP_EROOT         = 44,
+    IGRAPH_GLP_ENOPFS        = 45,
+    IGRAPH_GLP_ENODFS        = 46,
+    IGRAPH_GLP_EFAIL         = 47,
+    IGRAPH_GLP_EMIPGAP       = 48,
+    IGRAPH_GLP_ETMLIM        = 49,
+    IGRAPH_GLP_ESTOP         = 50,
+    IGRAPH_EATTRIBUTES       = 51,
+    IGRAPH_EATTRCOMBINE      = 52,
+    IGRAPH_ELAPACK           = 53,
+    IGRAPH_EDRL              = 54,
+    IGRAPH_EOVERFLOW         = 55,
+    IGRAPH_EGLP              = 56,
+    IGRAPH_CPUTIME           = 57,
+    IGRAPH_EUNDERFLOW        = 58,
+    IGRAPH_ERWSTUCK          = 59,
+    IGRAPH_STOP              = 60, /* undocumented, used internally; signals a request to stop in functions like igraph_i_maximal_cliques_bk */
 } igraph_error_type_t;
 /* Each enum value above must have a corresponding error string in
  * igraph_i_error_strings[] in igraph_error.c */
@@ -416,11 +415,11 @@ typedef enum {
  * \param igraph_errno The \a igraph error code.
  */
 
-#define IGRAPH_ERROR(reason, igraph_errno)                                     \
-  do {                                                                         \
-    igraph_error(reason, __FILE__, __LINE__, igraph_errno);                    \
-    return igraph_errno;                                                       \
-  } while (0)
+#define IGRAPH_ERROR(reason,igraph_errno) \
+    do { \
+        igraph_error (reason, __FILE__, __LINE__, igraph_errno) ; \
+        return igraph_errno ; \
+    } while (0)
 
 /**
  * \function igraph_error
@@ -476,16 +475,12 @@ DECLDIR int igraph_errorvf(const char *reason, const char *file, int line,
  * \return pointer to the textual description of the error code.
  */
 
-DECLDIR const char *igraph_strerror(const int igraph_errno);
+DECLDIR const char* igraph_strerror(const int igraph_errno);
 
-#define IGRAPH_ERROR_SELECT_2(a, b)                                            \
-  ((a) != IGRAPH_SUCCESS ? (a) : ((b) != IGRAPH_SUCCESS ? (b) : IGRAPH_SUCCESS))
-#define IGRAPH_ERROR_SELECT_3(a, b, c)                                         \
-  ((a) != IGRAPH_SUCCESS ? (a) : IGRAPH_ERROR_SELECT_2(b, c))
-#define IGRAPH_ERROR_SELECT_4(a, b, c, d)                                      \
-  ((a) != IGRAPH_SUCCESS ? (a) : IGRAPH_ERROR_SELECT_3(b, c, d))
-#define IGRAPH_ERROR_SELECT_5(a, b, c, d, e)                                   \
-  ((a) != IGRAPH_SUCCESS ? (a) : IGRAPH_ERROR_SELECT_4(b, c, d, e))
+#define IGRAPH_ERROR_SELECT_2(a,b)       ((a) != IGRAPH_SUCCESS ? (a) : ((b) != IGRAPH_SUCCESS ? (b) : IGRAPH_SUCCESS))
+#define IGRAPH_ERROR_SELECT_3(a,b,c)     ((a) != IGRAPH_SUCCESS ? (a) : IGRAPH_ERROR_SELECT_2(b,c))
+#define IGRAPH_ERROR_SELECT_4(a,b,c,d)   ((a) != IGRAPH_SUCCESS ? (a) : IGRAPH_ERROR_SELECT_3(b,c,d))
+#define IGRAPH_ERROR_SELECT_5(a,b,c,d,e) ((a) != IGRAPH_SUCCESS ? (a) : IGRAPH_ERROR_SELECT_4(b,c,d,e))
 
 /* Now comes the more convenient error handling macro arsenal.
  * Ideas taken from exception.{h,c} by Laurent Deniau see
@@ -493,14 +488,14 @@ DECLDIR const char *igraph_strerror(const int igraph_errno);
  * information. We don't use the exception handling code though.  */
 
 struct igraph_i_protectedPtr {
-  int all;
-  void *ptr;
-  void (*func)(void *);
+    int all;
+    void *ptr;
+    void (*func)(void*);
 };
 
-typedef void igraph_finally_func_t(void *);
+typedef void igraph_finally_func_t (void*);
 
-DECLDIR void IGRAPH_FINALLY_REAL(void (*func)(void *), void *ptr);
+DECLDIR void IGRAPH_FINALLY_REAL(void (*func)(void*), void* ptr);
 
 /**
  * \function IGRAPH_FINALLY_CLEAN
@@ -568,19 +563,19 @@ DECLDIR int IGRAPH_FINALLY_STACK_SIZE(void);
  * prevent memory leaks.
  */
 
-#define IGRAPH_FINALLY(func, ptr)                                              \
-  IGRAPH_FINALLY_REAL((igraph_finally_func_t *)(func), (ptr))
+#define IGRAPH_FINALLY(func,ptr) \
+    IGRAPH_FINALLY_REAL((igraph_finally_func_t*)(func), (ptr))
 
 #if !defined(GCC_VERSION_MAJOR) && defined(__GNUC__)
-#define GCC_VERSION_MAJOR __GNUC__
+    #define GCC_VERSION_MAJOR  __GNUC__
 #endif
 
 #if defined(GCC_VERSION_MAJOR) && (GCC_VERSION_MAJOR >= 3)
-#define IGRAPH_UNLIKELY(a) __builtin_expect((a), 0)
-#define IGRAPH_LIKELY(a) __builtin_expect((a), 1)
+    #define IGRAPH_UNLIKELY(a) __builtin_expect((a), 0)
+    #define IGRAPH_LIKELY(a)   __builtin_expect((a), 1)
 #else
-#define IGRAPH_UNLIKELY(a) a
-#define IGRAPH_LIKELY(a) a
+    #define IGRAPH_UNLIKELY(a) a
+    #define IGRAPH_LIKELY(a)   a
 #endif
 
 /**
@@ -606,13 +601,12 @@ DECLDIR int IGRAPH_FINALLY_STACK_SIZE(void);
  * call which can return an error code.
  */
 
-#define IGRAPH_CHECK(a)                                                        \
-  do {                                                                         \
-    int igraph_i_ret = (a);                                                    \
-    if (IGRAPH_UNLIKELY(igraph_i_ret != 0)) {                                  \
-      IGRAPH_ERROR("", igraph_i_ret);                                          \
-    }                                                                          \
-  } while (0)
+#define IGRAPH_CHECK(a) do { \
+        int igraph_i_ret=(a); \
+        if (IGRAPH_UNLIKELY(igraph_i_ret != 0)) {\
+            IGRAPH_ERROR("", igraph_i_ret); \
+        } } while (0)
+
 
 /**
  * \section about_igraph_warnings Warning messages
@@ -662,8 +656,7 @@ typedef igraph_error_handler_t igraph_warning_handler_t;
  * \return The current warning handler function.
  */
 
-DECLDIR igraph_warning_handler_t *
-igraph_set_warning_handler(igraph_warning_handler_t *new_handler);
+DECLDIR igraph_warning_handler_t* igraph_set_warning_handler(igraph_warning_handler_t* new_handler);
 
 extern igraph_warning_handler_t igraph_warning_handler_ignore;
 extern igraph_warning_handler_t igraph_warning_handler_print;
@@ -717,10 +710,10 @@ DECLDIR int igraph_warningf(const char *reason, const char *file, int line,
  * \param reason The warning message.
  */
 
-#define IGRAPH_WARNING(reason)                                                 \
-  do {                                                                         \
-    igraph_warning(reason, __FILE__, __LINE__, -1);                            \
-  } while (0)
+#define IGRAPH_WARNING(reason) \
+    do { \
+        igraph_warning(reason, __FILE__, __LINE__, -1); \
+    } while (0)
 
 __END_DECLS
 

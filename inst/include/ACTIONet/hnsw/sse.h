@@ -47,7 +47,7 @@
 
 #ifdef __cplusplus
 namespace {
-#endif // __cplusplus
+#endif  // __cplusplus
 
 typedef __m128 v4sf;
 typedef __m128i v4si;
@@ -63,37 +63,37 @@ typedef union {
   v4sf f;
   float array[4];
 } v4sfindexer;
-#define v4sf_index(_findx, _findi)                                             \
-  ({                                                                           \
-    v4sfindexer _findvx = {_findx};                                            \
-    _findvx.array[_findi];                                                     \
+#define v4sf_index(_findx, _findi)  \
+  ({                                \
+    v4sfindexer _findvx = {_findx}; \
+    _findvx.array[_findi];          \
   })
 typedef union {
   v4si i;
   int array[4];
 } v4siindexer;
-#define v4si_index(_iindx, _iindi)                                             \
-  ({                                                                           \
-    v4siindexer _iindvx = {_iindx};                                            \
-    _iindvx.array[_iindi];                                                     \
+#define v4si_index(_iindx, _iindi)  \
+  ({                                \
+    v4siindexer _iindvx = {_iindx}; \
+    _iindvx.array[_iindi];          \
   })
 
 typedef union {
   v4sf f;
   v4si i;
 } v4sfv4sipun;
-#define v4sf_fabs(x)                                                           \
-  ({                                                                           \
-    v4sfv4sipun vx;                                                            \
-    vx.f = x;                                                                  \
-    vx.i &= v4sil(0x7FFFFFFF);                                                 \
-    vx.f;                                                                      \
+#define v4sf_fabs(x)           \
+  ({                           \
+    v4sfv4sipun vx;            \
+    vx.f = x;                  \
+    vx.i &= v4sil(0x7FFFFFFF); \
+    vx.f;                      \
   })
 
 #ifdef __cplusplus
-} // end namespace
-#endif // __cplusplus
+}  // end namespace
+#endif  // __cplusplus
 
-#endif // __SSE2__
+#endif  // __SSE2__
 
-#endif // __SSE_H_
+#endif  // __SSE_H_

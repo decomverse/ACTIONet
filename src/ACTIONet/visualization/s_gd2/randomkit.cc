@@ -27,8 +27,8 @@
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ *   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  *   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
  *   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
  *   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
@@ -64,12 +64,12 @@
 
 /* static char const rcsid[] =
   "@(#) $Jeannot: randomkit.c,v 1.28 2005/07/21 22:14:09 js Exp $"; */
-#include <errno.h>
-#include <limits.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
 
 #ifdef _WIN32
 /*
@@ -84,8 +84,8 @@
  * something higher than 0x601 to enable _ftime64 and co
  */
 #define __MSVCRT_VERSION__ 0x0700
-#include <sys/timeb.h>
 #include <time.h>
+#include <sys/timeb.h>
 
 /*
  * mingw msvcr lib import wrongly export _ftime, which does not exist in the
@@ -94,8 +94,8 @@
  */
 #define _FTIME(x) _ftime64((x))
 #else
-#include <sys/timeb.h>
 #include <time.h>
+#include <sys/timeb.h>
 #define _FTIME(x) _ftime((x))
 #endif
 
@@ -104,14 +104,14 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0400
 #endif
-#include <wincrypt.h>
 #include <windows.h>
+#include <wincrypt.h>
 #endif
 
 #else
 /* Unix */
-#include <sys/time.h>
 #include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #endif
 
@@ -125,24 +125,30 @@
 #define RK_DEV_RANDOM "/dev/random"
 #endif
 
-char *rk_strerror[RK_ERR_MAX] = {"no error", "random device unvavailable"};
+char *rk_strerror[RK_ERR_MAX] =
+{
+    "no error",
+    "random device unvavailable"
+};
 
 /* static functions */
 // static unsigned long rk_hash(unsigned long key);
 
-void rk_seed(unsigned long seed, rk_state *state) {
-  int pos;
-  seed &= 0xffffffffUL;
+void
+rk_seed(unsigned long seed, rk_state *state)
+{
+    int pos;
+    seed &= 0xffffffffUL;
 
-  /* Knuth's PRNG as used in the Mersenne Twister reference implementation */
-  for (pos = 0; pos < RK_STATE_LEN; pos++) {
-    state->key[pos] = seed;
-    seed = (1812433253UL * (seed ^ (seed >> 30)) + pos + 1) & 0xffffffffUL;
-  }
-  state->pos = RK_STATE_LEN;
-  state->gauss = 0;
-  state->has_gauss = 0;
-  state->has_binomial = 0;
+    /* Knuth's PRNG as used in the Mersenne Twister reference implementation */
+    for (pos = 0; pos < RK_STATE_LEN; pos++) {
+        state->key[pos] = seed;
+        seed = (1812433253UL * (seed ^ (seed >> 30)) + pos + 1) & 0xffffffffUL;
+    }
+    state->pos = RK_STATE_LEN;
+    state->gauss = 0;
+    state->has_gauss = 0;
+    state->has_binomial = 0;
 }
 
 /* Thomas Wang 32 bits integer hash function */
@@ -188,8 +194,7 @@ void rk_seed(unsigned long seed, rk_state *state) {
 //             ^ rk_hash(clock()), state);
 // #else
 //     _FTIME(&tv);
-//     rk_seed(rk_hash(tv.time) ^ rk_hash(tv.millitm) ^ rk_hash(clock()),
-//     state);
+//     rk_seed(rk_hash(tv.time) ^ rk_hash(tv.millitm) ^ rk_hash(clock()), state);
 // #endif
 
 //     return RK_ENODEV;
@@ -203,83 +208,92 @@ void rk_seed(unsigned long seed, rk_state *state) {
 #define LOWER_MASK 0x7fffffffUL
 
 /* Slightly optimised reference implementation of the Mersenne Twister */
-unsigned long rk_random(rk_state *state) {
-  unsigned long y;
+unsigned long
+rk_random(rk_state *state)
+{
+    unsigned long y;
 
-  if (state->pos == RK_STATE_LEN) {
-    int i;
+    if (state->pos == RK_STATE_LEN) {
+        int i;
 
-    for (i = 0; i < N - M; i++) {
-      y = (state->key[i] & UPPER_MASK) | (state->key[i + 1] & LOWER_MASK);
-      state->key[i] = state->key[i + M] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
+        for (i = 0; i < N - M; i++) {
+            y = (state->key[i] & UPPER_MASK) | (state->key[i+1] & LOWER_MASK);
+            state->key[i] = state->key[i+M] ^ (y>>1) ^ (-(y & 1) & MATRIX_A);
+        }
+        for (; i < N - 1; i++) {
+            y = (state->key[i] & UPPER_MASK) | (state->key[i+1] & LOWER_MASK);
+            state->key[i] = state->key[i+(M-N)] ^ (y>>1) ^ (-(y & 1) & MATRIX_A);
+        }
+        y = (state->key[N - 1] & UPPER_MASK) | (state->key[0] & LOWER_MASK);
+        state->key[N - 1] = state->key[M - 1] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
+
+        state->pos = 0;
     }
-    for (; i < N - 1; i++) {
-      y = (state->key[i] & UPPER_MASK) | (state->key[i + 1] & LOWER_MASK);
-      state->key[i] =
-          state->key[i + (M - N)] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
-    }
-    y = (state->key[N - 1] & UPPER_MASK) | (state->key[0] & LOWER_MASK);
-    state->key[N - 1] = state->key[M - 1] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
+    y = state->key[state->pos++];
 
-    state->pos = 0;
-  }
-  y = state->key[state->pos++];
+    /* Tempering */
+    y ^= (y >> 11);
+    y ^= (y << 7) & 0x9d2c5680UL;
+    y ^= (y << 15) & 0xefc60000UL;
+    y ^= (y >> 18);
 
-  /* Tempering */
-  y ^= (y >> 11);
-  y ^= (y << 7) & 0x9d2c5680UL;
-  y ^= (y << 15) & 0xefc60000UL;
-  y ^= (y >> 18);
-
-  return y;
+    return y;
 }
 
-long rk_long(rk_state *state) { return rk_ulong(state) >> 1; }
+long
+rk_long(rk_state *state)
+{
+    return rk_ulong(state) >> 1;
+}
 
-unsigned long rk_ulong(rk_state *state) {
+unsigned long
+rk_ulong(rk_state *state)
+{
 #if ULONG_MAX <= 0xffffffffUL
-  return rk_random(state);
+    return rk_random(state);
 #else
-  return (rk_random(state) << 32) | (rk_random(state));
+    return (rk_random(state) << 32) | (rk_random(state));
 #endif
 }
 
-unsigned long rk_interval(unsigned long max, rk_state *state) {
-  unsigned long mask = max, value;
+unsigned long
+rk_interval(unsigned long max, rk_state *state)
+{
+    unsigned long mask = max, value;
 
-  if (max == 0) {
-    return 0;
-  }
-  /* Smallest bit mask >= max */
-  mask |= mask >> 1;
-  mask |= mask >> 2;
-  mask |= mask >> 4;
-  mask |= mask >> 8;
-  mask |= mask >> 16;
+    if (max == 0) {
+        return 0;
+    }
+    /* Smallest bit mask >= max */
+    mask |= mask >> 1;
+    mask |= mask >> 2;
+    mask |= mask >> 4;
+    mask |= mask >> 8;
+    mask |= mask >> 16;
 #if ULONG_MAX > 0xffffffffUL
-  mask |= mask >> 32;
+    mask |= mask >> 32;
 #endif
 
-  /* Search a random value in [0..mask] <= max */
+    /* Search a random value in [0..mask] <= max */
 #if ULONG_MAX > 0xffffffffUL
-  if (max <= 0xffffffffUL) {
-    while ((value = (rk_random(state) & mask)) > max)
-      ;
-  } else {
-    while ((value = (rk_ulong(state) & mask)) > max)
-      ;
-  }
+    if (max <= 0xffffffffUL) {
+        while ((value = (rk_random(state) & mask)) > max);
+    }
+    else {
+        while ((value = (rk_ulong(state) & mask)) > max);
+    }
 #else
-  while ((value = (rk_ulong(state) & mask)) > max)
-    ;
+    while ((value = (rk_ulong(state) & mask)) > max);
 #endif
-  return value;
+    return value;
 }
 
-double rk_double(rk_state *state) {
-  /* shifts : 67108864 = 0x4000000, 9007199254740992 = 0x20000000000000 */
-  long a = rk_random(state) >> 5, b = rk_random(state) >> 6;
-  return (a * 67108864.0 + b) / 9007199254740992.0;
+double
+rk_double(rk_state *state)
+{
+    /* shifts : 67108864 = 0x4000000, 9007199254740992 = 0x20000000000000 */
+    long a = rk_random(state) >> 5, b = rk_random(state) >> 6;
+    return (a * 67108864.0 + b) / 9007199254740992.0;
 }
 
 // void

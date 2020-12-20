@@ -23,8 +23,8 @@
 #include "igraph_gml_tree.h"
 
 typedef struct {
-  void *scanner;
-  int eof;
-  char errmsg[300];
-  igraph_gml_tree_t *tree;
+    void *scanner;
+    int eof;
+    char errmsg[300];
+    igraph_gml_tree_t *tree;
 } igraph_i_gml_parsedata_t;

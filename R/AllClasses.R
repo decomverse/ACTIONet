@@ -11,8 +11,12 @@
 #' @importFrom stats setNames
 #' @importClassesFrom S4Vectors SimpleList
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
-setClass("ACTIONetExperiment", slots = c(rowNets = "SimpleList", colNets = "SimpleList", 
-    rowMaps = "SimpleList", colMaps = "SimpleList"), contains = "RangedSummarizedExperiment")
+setClass("ACTIONetExperiment",
+  slots = c(rowNets = "SimpleList",
+  colNets = "SimpleList",
+  rowMaps = "SimpleList",
+  colMaps = "SimpleList"),
+  contains = "RangedSummarizedExperiment")
 
 
 #' Creates an ACTIONetExperiment (ACE) object
@@ -26,46 +30,53 @@ setClass("ACTIONetExperiment", slots = c(rowNets = "SimpleList", colNets = "Simp
 #' @importFrom S4Vectors SimpleList
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 #' @export
-ACTIONetExperiment <- function(..., rowNets = S4Vectors::SimpleList(), colNets = S4Vectors::SimpleList(), 
-    rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList()) {
-    
-    SE <- SummarizedExperiment::SummarizedExperiment(...)
-    if (!is(SE, "RangedSummarizedExperiment")) {
-        SE <- as(SE, "RangedSummarizedExperiment")
+ACTIONetExperiment <- function(...,
+  rowNets = S4Vectors::SimpleList(),
+  colNets = S4Vectors::SimpleList(),
+  rowMaps = S4Vectors::SimpleList(),
+  colMaps = S4Vectors::SimpleList()) {
+
+  SE <- SummarizedExperiment::SummarizedExperiment(...)
+  if(!is(SE, "RangedSummarizedExperiment")) {
+    SE <- as(SE, "RangedSummarizedExperiment")
+  }
+  out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets)
+  out = .insert_mapping(out, rowMaps, 1)
+  out = .insert_mapping(out, colMaps, 2)
+
+
+  if(NROW(out) > 0){
+    # if(NCOL(SummarizedExperiment::rowData(out)) == 0){
+    #   SummarizedExperiment::rowData(out) = .default_rowData(NROW(out))
+    #   rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique
+    # }
+    # if(is.null(rownames(SummarizedExperiment::rowData(out)))){
+    #   rownames(out) = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique
+    # } else {
+    #   rownames(out) = rownames(SummarizedExperiment::rowData(out)) %>% .make_chars_unique
+    # }
+    if(is.null(rownames(out))){
+      rownames(out) = .default_rownames(NROW(out))
     }
-    out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets)
-    out = .insert_mapping(out, rowMaps, 1)
-    out = .insert_mapping(out, colMaps, 2)
-    
-    
-    if (NROW(out) > 0) {
-        # if(NCOL(SummarizedExperiment::rowData(out)) == 0){
-        # SummarizedExperiment::rowData(out) = .default_rowData(NROW(out)) rownames(out)
-        # = SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique }
-        # if(is.null(rownames(SummarizedExperiment::rowData(out)))){ rownames(out) =
-        # SummarizedExperiment::rowData(out)[,1] %>% .make_chars_unique } else {
-        # rownames(out) = rownames(SummarizedExperiment::rowData(out)) %>%
-        # .make_chars_unique }
-        if (is.null(rownames(out))) {
-            rownames(out) = .default_rownames(NROW(out))
-        }
+  }
+
+  if(NCOL(out) > 0){
+    # if(NCOL(SummarizedExperiment::colData(out)) == 0){
+    #   SummarizedExperiment::colData(out) = .default_colData(NCOL(out))
+    #   colnames(out) = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique
+    # }
+    # if(is.null(rownames(SummarizedExperiment::colData(out)))){
+    #   colnames(out) = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique
+    # } else {
+    #   colnames(out) = rownames(SummarizedExperiment::colData(out)) %>% .make_chars_unique
+    # }
+    if(is.null(colnames(out))){
+      colnames(out) = .default_colnames(NCOL(out))
     }
-    
-    if (NCOL(out) > 0) {
-        # if(NCOL(SummarizedExperiment::colData(out)) == 0){
-        # SummarizedExperiment::colData(out) = .default_colData(NCOL(out)) colnames(out)
-        # = SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique }
-        # if(is.null(rownames(SummarizedExperiment::colData(out)))){ colnames(out) =
-        # SummarizedExperiment::colData(out)[,1] %>% .make_chars_unique } else {
-        # colnames(out) = rownames(SummarizedExperiment::colData(out)) %>%
-        # .make_chars_unique }
-        if (is.null(colnames(out))) {
-            colnames(out) = .default_colnames(NCOL(out))
-        }
-    }
-    
-    validObject(out)
-    return(out)
+  }
+
+  validObject(out)
+  return(out)
 }
 
 
@@ -73,7 +84,7 @@ ACTIONetExperiment <- function(..., rowNets = S4Vectors::SimpleList(), colNets =
 #' @method .DollarNames ACTIONetExperiment
 #' @export
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
-    ll = c(names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)), 
+    ll = c(names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)),
         names(colNets(x)), names(rowNets(x)))
     grep(pattern, ll, value = TRUE)
 }
@@ -98,7 +109,7 @@ setMethod("$", "ACTIONetExperiment", function(x, name) {
     } else {
         message(sprintf("Attribute %s not found", name))
     }
-    
+
 })
 
 #' @export
@@ -116,6 +127,6 @@ setReplaceMethod("$", "ACTIONetExperiment", function(x, name, value) {
     } else {
         colData(x)[[name]] <- value
     }
-    
+
     x
 })

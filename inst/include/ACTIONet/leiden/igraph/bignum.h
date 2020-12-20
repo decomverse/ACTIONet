@@ -24,28 +24,28 @@
 
 #include "config.h"
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
+    #include <stdint.h>
 #else
-#ifdef HAVE_SYS_INT_TYPES_H
-#include <sys/int_types.h>
-#else
-#include "pstdint.h"
+    #ifdef HAVE_SYS_INT_TYPES_H
+        #include <sys/int_types.h>
+    #else
+        #include "pstdint.h"
+    #endif
 #endif
-#endif
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #ifndef NULL
-#define NULL 0
+    #define NULL 0
 #endif
 
 #ifndef O_BINARY
-#define O_BINARY 0
+    #define O_BINARY 0
 #endif
 
 #ifndef HAVE_U64
-#define HAVE_U64 1
+    #define HAVE_U64 1
 #endif
 
 /* up to 512 limbs (512 * 32 = 16384 bits) numbers */
@@ -65,15 +65,15 @@ typedef uint32_t count_t;
 typedef uint16_t half_t;
 typedef uint32_t limb_t;
 #if HAVE_U64
-typedef uint64_t dlimb_t;
+    typedef uint64_t dlimb_t;
 #endif
 
 /* less significant half limb */
-#define LSH(d) ((half_t)(d))
+#define LSH(d)  ((half_t)(d))
 /* more significant half limb */
-#define MSH(d) ((limb_t)(d) >> 16)
+#define MSH(d)  ((limb_t)(d)>>16)
 /* shift left half limb */
-#define SHL(d) ((limb_t)(d) << 16)
+#define SHL(d)  ((limb_t)(d)<<16)
 
 /* single limb functions */
 limb_t sl_div(limb_t *q, limb_t *r, limb_t u[2], limb_t v);
@@ -114,8 +114,7 @@ limb_t bn_sub(limb_t w[], limb_t u[], limb_t v[], count_t nlimb);
 limb_t bn_shl(limb_t a[], limb_t b[], count_t x, count_t nlimb);
 limb_t bn_shr(limb_t a[], limb_t b[], count_t x, count_t nlimb);
 int bn_mul(limb_t w[], limb_t u[], limb_t v[], count_t nlimb);
-int bn_div(limb_t q[], limb_t r[], limb_t u[], limb_t v[], count_t ulimb,
-           count_t vlimb);
+int bn_div(limb_t q[], limb_t r[], limb_t u[], limb_t v[], count_t ulimb, count_t vlimb);
 limb_t bn_mod(limb_t r[], limb_t u[], count_t ulimb, limb_t v[], count_t vlimb);
 int bn_gcd(limb_t g[], limb_t x[], limb_t y[], count_t nlimb);
 int bn_sqrt(limb_t g[], limb_t x[], limb_t y[], count_t rlimb, count_t nlimb);
@@ -123,4 +122,4 @@ int bn_modexp(limb_t y[], limb_t x[], limb_t e[], limb_t m[], count_t nlimb);
 int bn_modinv(limb_t inv[], limb_t u[], limb_t v[], count_t nlimb);
 limb_t bn_modmul(limb_t a[], limb_t x[], limb_t y[], limb_t m[], count_t nlimb);
 
-#endif /* !defined(_bignum_h_) */
+#endif  /* !defined(_bignum_h_) */

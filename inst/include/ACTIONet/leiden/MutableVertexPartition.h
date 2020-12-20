@@ -1,20 +1,20 @@
 #ifndef MUTABLEVERTEXPARTITION_H
 #define MUTABLEVERTEXPARTITION_H
 
+#include <string>
 #include "GraphHelper.h"
-#include <algorithm>
 #include <map>
 #include <set>
-#include <string>
 #include <utility>
+#include <algorithm>
 
-using std::make_pair;
-using std::map;
-using std::pair;
-using std::reverse;
-using std::set;
-using std::sort;
 using std::string;
+using std::map;
+using std::set;
+using std::make_pair;
+using std::pair;
+using std::sort;
+using std::reverse;
 
 /****************************************************************************
 Contains a partition of graph.
@@ -42,131 +42,111 @@ Leiden method in the optimisation class can call these general functions in
 order to optimise the quality function.
 *****************************************************************************/
 
-class MutableVertexPartition {
-public:
-  MutableVertexPartition(Graph *graph, vector<size_t> const &membership);
-  MutableVertexPartition(Graph *graph);
-  virtual MutableVertexPartition *create(Graph *graph);
-  virtual MutableVertexPartition *create(Graph *graph,
-                                         vector<size_t> const &membership);
+class MutableVertexPartition
+{
+  public:
+    MutableVertexPartition(Graph* graph,
+        vector<size_t> const& membership);
+    MutableVertexPartition(Graph* graph);
+    virtual MutableVertexPartition* create(Graph* graph);
+    virtual MutableVertexPartition* create(Graph* graph, vector<size_t> const& membership);
 
-  virtual ~MutableVertexPartition();
+    virtual ~MutableVertexPartition();
 
-  inline size_t membership(size_t v) { return this->_membership[v]; };
-  inline vector<size_t> const &membership() const { return this->_membership; };
+    inline size_t membership(size_t v) { return this->_membership[v]; };
+    inline vector<size_t> const& membership() const { return this->_membership; };
 
-  size_t csize(size_t comm);
-  size_t cnodes(size_t comm);
-  vector<size_t> get_community(size_t comm);
-  vector<vector<size_t>> get_communities();
-  size_t n_communities();
+    size_t csize(size_t comm);
+    size_t cnodes(size_t comm);
+    vector<size_t> get_community(size_t comm);
+    vector< vector<size_t> > get_communities();
+    size_t n_communities();
 
-  void move_node(size_t v, size_t new_comm);
-  virtual double diff_move(size_t v, size_t new_comm) {
-    throw Exception(
-        "Function not implemented. This should be implented in a derived "
-        "class, since the base class does not implement a specific method.");
-  };
-  virtual double quality() {
-    throw Exception(
-        "Function not implemented. This should be implented in a derived "
-        "class, since the base class does not implement a specific method.");
-  };
+    void move_node(size_t v,size_t new_comm);
+    virtual double diff_move(size_t v, size_t new_comm)
+    {
+      throw Exception("Function not implemented. This should be implented in a derived class, since the base class does not implement a specific method.");
+    };
+    virtual double quality()
+    {
+      throw Exception("Function not implemented. This should be implented in a derived class, since the base class does not implement a specific method.");
+    };
 
-  inline Graph *get_graph() { return this->graph; };
+    inline Graph* get_graph() { return this->graph; };
 
-  void renumber_communities();
-  void renumber_communities(vector<size_t> const &new_membership);
-  void set_membership(vector<size_t> const &new_membership);
-  vector<size_t> static renumber_communities(
-      vector<MutableVertexPartition *> partitions);
-  size_t get_empty_community();
-  size_t add_empty_community();
-  void from_coarse_partition(vector<size_t> const &coarse_partition_membership);
-  void from_coarse_partition(MutableVertexPartition *partition);
-  void from_coarse_partition(MutableVertexPartition *partition,
-                             vector<size_t> const &coarser_membership);
-  void from_coarse_partition(vector<size_t> const &coarse_partition_membership,
-                             vector<size_t> const &coarse_node);
+    void renumber_communities();
+    void renumber_communities(vector<size_t> const& new_membership);
+    void set_membership(vector<size_t> const& new_membership);
+    vector<size_t> static renumber_communities(vector<MutableVertexPartition*> partitions);
+    size_t get_empty_community();
+    size_t add_empty_community();
+    void from_coarse_partition(vector<size_t> const& coarse_partition_membership);
+    void from_coarse_partition(MutableVertexPartition* partition);
+    void from_coarse_partition(MutableVertexPartition* partition, vector<size_t> const& coarser_membership);
+    void from_coarse_partition(vector<size_t> const& coarse_partition_membership, vector<size_t> const& coarse_node);
 
-  void from_partition(MutableVertexPartition *partition);
+    void from_partition(MutableVertexPartition* partition);
 
-  inline double total_weight_in_comm(size_t comm) {
-    return this->_total_weight_in_comm[comm];
-  };
-  inline double total_weight_from_comm(size_t comm) {
-    return this->_total_weight_from_comm[comm];
-  };
-  inline double total_weight_to_comm(size_t comm) {
-    return this->_total_weight_to_comm[comm];
-  };
-  inline double total_weight_in_all_comms() {
-    return this->_total_weight_in_all_comms;
-  };
-  inline size_t total_possible_edges_in_all_comms() {
-    return this->_total_possible_edges_in_all_comms;
-  };
+    inline double total_weight_in_comm(size_t comm) { return this->_total_weight_in_comm[comm]; };
+    inline double total_weight_from_comm(size_t comm) { return this->_total_weight_from_comm[comm]; };
+    inline double total_weight_to_comm(size_t comm) { return this->_total_weight_to_comm[comm]; };
+    inline double total_weight_in_all_comms() { return this->_total_weight_in_all_comms; };
+    inline size_t total_possible_edges_in_all_comms() { return this->_total_possible_edges_in_all_comms; };
 
-  double weight_to_comm(size_t v, size_t comm);
-  double weight_from_comm(size_t v, size_t comm);
+    double weight_to_comm(size_t v, size_t comm);
+    double weight_from_comm(size_t v, size_t comm);
 
-  vector<size_t> const &get_neigh_comms(size_t v, igraph_neimode_t);
-  set<size_t> get_neigh_comms(size_t v, igraph_neimode_t mode,
-                              vector<size_t> const &constrained_membership);
+    vector<size_t> const& get_neigh_comms(size_t v, igraph_neimode_t);
+    set<size_t> get_neigh_comms(size_t v, igraph_neimode_t mode, vector<size_t> const& constrained_membership);
 
-  // By delegating the responsibility for deleting the graph to the partition,
-  // we no longer have to worry about deleting this graph.
-  int destructor_delete_graph;
+    // By delegating the responsibility for deleting the graph to the partition,
+    // we no longer have to worry about deleting this graph.
+    int destructor_delete_graph;
 
-protected:
-  void init_admin();
+  protected:
 
-  vector<size_t> _membership; // Membership vector, i.e. \sigma_i = c means that
-                              // node i is in community c
+    void init_admin();
 
-  Graph *graph;
+    vector<size_t> _membership; // Membership vector, i.e. \sigma_i = c means that node i is in community c
 
-  // Community size
-  vector<size_t> _csize;
+    Graph* graph;
 
-  // Number of nodes in community
-  vector<size_t> _cnodes;
+    // Community size
+    vector< size_t > _csize;
 
-  double weight_vertex_tofrom_comm(size_t v, size_t comm,
-                                   igraph_neimode_t mode);
+    // Number of nodes in community
+    vector< size_t > _cnodes;
 
-  void set_default_attrs();
+    double weight_vertex_tofrom_comm(size_t v, size_t comm, igraph_neimode_t mode);
 
-private:
-  // Keep track of the internal weight of each community
-  vector<double> _total_weight_in_comm;
-  // Keep track of the total weight to a community
-  vector<double> _total_weight_to_comm;
-  // Keep track of the total weight from a community
-  vector<double> _total_weight_from_comm;
-  // Keep track of the total internal weight
-  double _total_weight_in_all_comms;
-  size_t _total_possible_edges_in_all_comms;
-  size_t _n_communities;
+    void set_default_attrs();
 
-  vector<size_t> _empty_communities;
+  private:
 
-  void cache_neigh_communities(size_t v, igraph_neimode_t mode);
+    // Keep track of the internal weight of each community
+    vector<double> _total_weight_in_comm;
+    // Keep track of the total weight to a community
+    vector<double> _total_weight_to_comm;
+    // Keep track of the total weight from a community
+    vector<double> _total_weight_from_comm;
+    // Keep track of the total internal weight
+    double _total_weight_in_all_comms;
+    size_t _total_possible_edges_in_all_comms;
+    size_t _n_communities;
 
-  size_t _current_node_cache_community_from;
-  vector<double> _cached_weight_from_community;
-  vector<size_t> _cached_neigh_comms_from;
-  size_t _current_node_cache_community_to;
-  vector<double> _cached_weight_to_community;
-  vector<size_t> _cached_neigh_comms_to;
-  size_t _current_node_cache_community_all;
-  vector<double> _cached_weight_all_community;
-  vector<size_t> _cached_neigh_comms_all;
+    vector<size_t> _empty_communities;
 
-  void clean_mem();
-  void init_graph_admin();
+    void cache_neigh_communities(size_t v, igraph_neimode_t mode);
 
-  void update_n_communities();
+    size_t _current_node_cache_community_from; vector<double> _cached_weight_from_community; vector<size_t> _cached_neigh_comms_from;
+    size_t _current_node_cache_community_to;   vector<double> _cached_weight_to_community;   vector<size_t> _cached_neigh_comms_to;
+    size_t _current_node_cache_community_all;  vector<double> _cached_weight_all_community;  vector<size_t> _cached_neigh_comms_all;
+
+    void clean_mem();
+    void init_graph_admin();
+
+    void update_n_communities();
+
 };
 
 #endif // MUTABLEVERTEXPARTITION_H

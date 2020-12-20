@@ -66,8 +66,7 @@ typedef int igraph_status_handler_t(const char *message, void *data);
 
 extern igraph_status_handler_t igraph_status_handler_stderr;
 
-DECLDIR igraph_status_handler_t *
-igraph_set_status_handler(igraph_status_handler_t new_handler);
+DECLDIR igraph_status_handler_t * igraph_set_status_handler(igraph_status_handler_t new_handler);
 
 DECLDIR int igraph_status(const char *message, void *data);
 
@@ -88,13 +87,13 @@ DECLDIR int igraph_status(const char *message, void *data);
  *        \c IGRAPH_INTERRUPTED.
  */
 
-#define IGRAPH_STATUS(message, data)                                           \
-  do {                                                                         \
-    if (igraph_status((message), (data)) != IGRAPH_SUCCESS) {                  \
-      IGRAPH_FINALLY_FREE();                                                   \
-      return IGRAPH_INTERRUPTED;                                               \
-    }                                                                          \
-  } while (0)
+#define IGRAPH_STATUS(message, data) \
+    do { \
+        if (igraph_status((message), (data)) != IGRAPH_SUCCESS) { \
+            IGRAPH_FINALLY_FREE(); \
+            return IGRAPH_INTERRUPTED; \
+        } \
+    } while (0)
 
 DECLDIR int igraph_statusf(const char *message, void *data, ...);
 
@@ -114,13 +113,13 @@ DECLDIR int igraph_statusf(const char *message, void *data, ...);
  *        \c IGRAPH_INTERRUPTED.
  */
 
-#define IGRAPH_STATUSF(args)                                                   \
-  do {                                                                         \
-    if (igraph_statusf args != IGRAPH_SUCCESS) {                               \
-      IGRAPH_FINALLY_FREE();                                                   \
-      return IGRAPH_INTERRUPTED;                                               \
-    }                                                                          \
-  } while (0)
+#define IGRAPH_STATUSF(args) \
+    do { \
+        if (igraph_statusf args != IGRAPH_SUCCESS) { \
+            IGRAPH_FINALLY_FREE(); \
+            return IGRAPH_INTERRUPTED; \
+        } \
+    } while (0)
 
 __END_DECLS
 

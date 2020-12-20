@@ -25,8 +25,8 @@
 #ifndef FLOWGRAPH_H
 #define FLOWGRAPH_H
 
-#include <set>
 #include <vector>
+#include <set>
 
 #include "igraph_interface.h"
 
@@ -34,43 +34,43 @@
 
 class FlowGraph {
 private:
-  void init(int n, const igraph_vector_t *nodeWeights);
+    void init(int n, const igraph_vector_t *nodeWeights);
 
 public:
-  FlowGraph(int n);
-  FlowGraph(int n, const igraph_vector_t *nodeWeights);
-  FlowGraph(FlowGraph *fgraph);
-  FlowGraph(FlowGraph *fgraph, int sub_Nnode, int *sub_members);
+    FlowGraph(int n);
+    FlowGraph(int n, const igraph_vector_t *nodeWeights);
+    FlowGraph(FlowGraph * fgraph);
+    FlowGraph(FlowGraph * fgraph, int sub_Nnode, int * sub_members);
 
-  FlowGraph(const igraph_t *graph, const igraph_vector_t *e_weights,
-            const igraph_vector_t *v_weights);
+    FlowGraph(const igraph_t * graph, const igraph_vector_t *e_weights,
+              const igraph_vector_t *v_weights);
 
-  ~FlowGraph();
+    ~FlowGraph();
 
-  void swap(FlowGraph *fgraph);
+    void swap(FlowGraph * fgraph);
 
-  void initiate();
-  void eigenvector();
-  void calibrate();
+    void initiate();
+    void eigenvector();
+    void calibrate();
 
-  void back_to(FlowGraph *fgraph);
+    void back_to(FlowGraph * fgraph);
 
-  /*************************************************************************/
-  Node **node;
-  int Nnode;
+    /*************************************************************************/
+    Node **node;
+    int  Nnode;
 
-  double alpha, beta;
+    double alpha, beta;
 
-  int Ndanglings;
-  std::vector<int> danglings; // id of dangling nodes
+    int Ndanglings;
+    std::vector<int> danglings; // id of dangling nodes
 
-  double exit;                  //
-  double exitFlow;              //
-  double exit_log_exit;         //
-  double size_log_size;         //
-  double nodeSize_log_nodeSize; // \sum_{v in V} p log(p)
+    double exit;                  //
+    double exitFlow;              //
+    double exit_log_exit;         //
+    double size_log_size;         //
+    double nodeSize_log_nodeSize; // \sum_{v in V} p log(p)
 
-  double codeLength;
+    double codeLength;
 };
 
 void delete_FlowGraph(FlowGraph *fgraph);

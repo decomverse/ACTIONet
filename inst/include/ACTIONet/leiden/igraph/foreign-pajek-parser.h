@@ -35,60 +35,60 @@
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
-#define YYTOKENTYPE
-/* Put the tokens into the symbol table, so that GDB and other debuggers
-   know about them.  */
-enum yytokentype {
-  NEWLINE = 258,
-  NUM = 259,
-  ALNUM = 260,
-  QSTR = 261,
-  PSTR = 262,
-  NETWORKLINE = 263,
-  VERTICESLINE = 264,
-  ARCSLINE = 265,
-  EDGESLINE = 266,
-  ARCSLISTLINE = 267,
-  EDGESLISTLINE = 268,
-  MATRIXLINE = 269,
-  ERROR = 270,
-  VP_X_FACT = 271,
-  VP_Y_FACT = 272,
-  VP_IC = 273,
-  VP_BC = 274,
-  VP_LC = 275,
-  VP_LR = 276,
-  VP_LPHI = 277,
-  VP_BW = 278,
-  VP_FOS = 279,
-  VP_PHI = 280,
-  VP_R = 281,
-  VP_Q = 282,
-  VP_LA = 283,
-  VP_FONT = 284,
-  VP_URL = 285,
-  VP_SIZE = 286,
-  EP_C = 287,
-  EP_S = 288,
-  EP_A = 289,
-  EP_W = 290,
-  EP_H1 = 291,
-  EP_H2 = 292,
-  EP_A1 = 293,
-  EP_A2 = 294,
-  EP_K1 = 295,
-  EP_K2 = 296,
-  EP_AP = 297,
-  EP_P = 298,
-  EP_L = 299,
-  EP_LP = 300,
-  EP_LR = 301,
-  EP_LPHI = 302,
-  EP_LC = 303,
-  EP_LA = 304,
-  EP_SIZE = 305,
-  EP_FOS = 306
-};
+# define YYTOKENTYPE
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     NEWLINE = 258,
+     NUM = 259,
+     ALNUM = 260,
+     QSTR = 261,
+     PSTR = 262,
+     NETWORKLINE = 263,
+     VERTICESLINE = 264,
+     ARCSLINE = 265,
+     EDGESLINE = 266,
+     ARCSLISTLINE = 267,
+     EDGESLISTLINE = 268,
+     MATRIXLINE = 269,
+     ERROR = 270,
+     VP_X_FACT = 271,
+     VP_Y_FACT = 272,
+     VP_IC = 273,
+     VP_BC = 274,
+     VP_LC = 275,
+     VP_LR = 276,
+     VP_LPHI = 277,
+     VP_BW = 278,
+     VP_FOS = 279,
+     VP_PHI = 280,
+     VP_R = 281,
+     VP_Q = 282,
+     VP_LA = 283,
+     VP_FONT = 284,
+     VP_URL = 285,
+     VP_SIZE = 286,
+     EP_C = 287,
+     EP_S = 288,
+     EP_A = 289,
+     EP_W = 290,
+     EP_H1 = 291,
+     EP_H2 = 292,
+     EP_A1 = 293,
+     EP_A2 = 294,
+     EP_K1 = 295,
+     EP_K2 = 296,
+     EP_AP = 297,
+     EP_P = 298,
+     EP_L = 299,
+     EP_LP = 300,
+     EP_LR = 301,
+     EP_LPHI = 302,
+     EP_LC = 303,
+     EP_LA = 304,
+     EP_SIZE = 305,
+     EP_FOS = 306
+   };
 #endif
 /* Tokens.  */
 #define NEWLINE 258
@@ -141,33 +141,41 @@ enum yytokentype {
 #define EP_SIZE 305
 #define EP_FOS 306
 
-#if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED
+
+
+
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 #line 118 "../../src/foreign-pajek-parser.y"
 {
   long int intnum;
-  double realnum;
+  double   realnum;  
   struct {
     char *str;
     int len;
-  } string;
+  } string;  
 }
 /* Line 1529 of yacc.c.  */
 #line 160 "foreign-pajek-parser.h"
-YYSTYPE;
-#define yystype YYSTYPE /* obsolescent; will be withdrawn */
-#define YYSTYPE_IS_DECLARED 1
-#define YYSTYPE_IS_TRIVIAL 1
+	YYSTYPE;
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
+# define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
-#if !defined YYLTYPE && !defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE {
+
+
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE
+{
   int first_line;
   int first_column;
   int last_line;
   int last_column;
 } YYLTYPE;
-#define yyltype YYLTYPE /* obsolescent; will be withdrawn */
-#define YYLTYPE_IS_DECLARED 1
-#define YYLTYPE_IS_TRIVIAL 1
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
 #endif
+
+

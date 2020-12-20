@@ -23,22 +23,20 @@
 #include "igraph_types.h"
 #include "igraph_types_internal.h"
 
-typedef enum {
-  IGRAPH_DL_MATRIX,
-  IGRAPH_DL_EDGELIST1,
-  IGRAPH_DL_NODELIST1
-} igraph_i_dl_type_t;
+typedef enum { IGRAPH_DL_MATRIX,
+               IGRAPH_DL_EDGELIST1, IGRAPH_DL_NODELIST1
+             } igraph_i_dl_type_t;
 
 typedef struct {
-  void *scanner;
-  int eof;
-  int mode;
-  long int n;
-  long int from, to;
-  igraph_vector_t edges;
-  igraph_vector_t weights;
-  igraph_strvector_t labels;
-  igraph_trie_t trie;
-  igraph_i_dl_type_t type;
-  char errmsg[300];
+    void *scanner;
+    int eof;
+    int mode;
+    long int n;
+    long int from, to;
+    igraph_vector_t edges;
+    igraph_vector_t weights;
+    igraph_strvector_t labels;
+    igraph_trie_t trie;
+    igraph_i_dl_type_t type;
+    char errmsg[300];
 } igraph_i_dl_parsedata_t;

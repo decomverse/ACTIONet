@@ -24,30 +24,35 @@
 #ifndef IGRAPH_TRANSITIVITY_H
 #define IGRAPH_TRANSITIVITY_H
 
-#include "igraph_constants.h"
-#include "igraph_datatype.h"
 #include "igraph_decls.h"
+#include "igraph_datatype.h"
+#include "igraph_constants.h"
 #include "igraph_iterators.h"
 
 __BEGIN_DECLS
 
 DECLDIR int igraph_transitivity_undirected(const igraph_t *graph,
-                                           igraph_real_t *res,
-                                           igraph_transitivity_mode_t mode);
-DECLDIR int igraph_transitivity_local_undirected(
-    const igraph_t *graph, igraph_vector_t *res, const igraph_vs_t vids,
-    igraph_transitivity_mode_t mode);
-DECLDIR int igraph_transitivity_local_undirected1(
-    const igraph_t *graph, igraph_vector_t *res, const igraph_vs_t vids,
-    igraph_transitivity_mode_t mode);
-DECLDIR int igraph_transitivity_local_undirected2(
-    const igraph_t *graph, igraph_vector_t *res, const igraph_vs_t vids,
-    igraph_transitivity_mode_t mode);
-DECLDIR int igraph_transitivity_local_undirected4(
-    const igraph_t *graph, igraph_vector_t *res, const igraph_vs_t vids,
-    igraph_transitivity_mode_t mode);
-DECLDIR int igraph_transitivity_avglocal_undirected(
-    const igraph_t *graph, igraph_real_t *res, igraph_transitivity_mode_t mode);
+        igraph_real_t *res,
+        igraph_transitivity_mode_t mode);
+DECLDIR int igraph_transitivity_local_undirected(const igraph_t *graph,
+        igraph_vector_t *res,
+        const igraph_vs_t vids,
+        igraph_transitivity_mode_t mode);
+DECLDIR int igraph_transitivity_local_undirected1(const igraph_t *graph,
+        igraph_vector_t *res,
+        const igraph_vs_t vids,
+        igraph_transitivity_mode_t mode);
+DECLDIR int igraph_transitivity_local_undirected2(const igraph_t *graph,
+        igraph_vector_t *res,
+        const igraph_vs_t vids,
+        igraph_transitivity_mode_t mode);
+DECLDIR int igraph_transitivity_local_undirected4(const igraph_t *graph,
+        igraph_vector_t *res,
+        const igraph_vs_t vids,
+        igraph_transitivity_mode_t mode);
+DECLDIR int igraph_transitivity_avglocal_undirected(const igraph_t *graph,
+        igraph_real_t *res,
+        igraph_transitivity_mode_t mode);
 DECLDIR int igraph_transitivity_barrat(const igraph_t *graph,
                                        igraph_vector_t *res,
                                        const igraph_vs_t vids,

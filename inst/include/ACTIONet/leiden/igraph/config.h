@@ -127,7 +127,7 @@
 #define IGRAPH_F77_SAVE static IGRAPH_THREAD_LOCAL
 
 /* Keyword for thread local storage, or empty if not available */
-#define IGRAPH_THREAD_LOCAL
+#define IGRAPH_THREAD_LOCAL 
 
 /* Define to 1 if you use the internal ARPACK library */
 #define INTERNAL_ARPACK 1

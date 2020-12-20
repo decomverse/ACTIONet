@@ -10,16 +10,16 @@
 #' @export
 impute.genes.using.archetypes <- function(ace, genes) {
     require(igraph)
-    
+
     genes = intersect(unique(genes), rownames(ace))
-    
-    
+
+
     Z = rowMaps(ace)[["archetype_gene_profile"]][genes, ]
     H = Matrix::t(colMaps(ace)[["H_unified"]])
-    
+
     imputed.gene.expression = t(Z %*% H)
     colnames(imputed.gene.expression) = genes
-    
+
     return(imputed.gene.expression)
 }
 
@@ -36,16 +36,16 @@ impute.genes.using.archetypes <- function(ace, genes) {
 #' @export
 impute.specific.genes.using.archetypes <- function(ace, genes) {
     require(igraph)
-    
+
     genes = intersect(unique(genes), rownames(ace))
-    
-    
+
+
     Z = log1p(rowMaps(ace)[["unified_feature_specificity"]][genes, ])
     H = Matrix::t(colMaps(ace)[["H_unified"]])
-    
+
     imputed.gene.expression = t(Z %*% H)
     colnames(imputed.gene.expression) = genes
-    
+
     return(imputed.gene.expression)
 }
 
@@ -66,21 +66,21 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
 #' imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
 #' plot.ACTIONet.gradient(ace, imputed.genes[, 1])
 #' @export
-impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no = 8, 
+impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no = 8,
     diffusion_iters = 5, data_slot = "logcounts") {
     genes = unique(genes)
-    
-    
+
+
     matched.genes = intersect(genes, rownames(ace))
     matched.idx = match(matched.genes, rownames(ace))
-    
+
     # Smooth/impute gene expressions
     if (!(data_slot %in% names(SummarizedExperiment::assays(ace)))) {
         R.utils::printf("%s is not in assays of ace\n", data_slot)
     }
-    
+
     if (length(matched.idx) > 1) {
-        raw.gene.expression = Matrix::t(as(SummarizedExperiment::assays(ace)[[data_slot]][matched.idx, 
+        raw.gene.expression = Matrix::t(as(SummarizedExperiment::assays(ace)[[data_slot]][matched.idx,
             ], "dgTMatrix"))
         U = raw.gene.expression
         U[U < 0] = 0
@@ -89,40 +89,40 @@ impute.genes.using.ACTIONet <- function(ace, genes, alpha_val = 0.85, thread_no 
         U = U[, cs > 0]
         gg = matched.genes[cs > 0]
     } else {
-        raw.gene.expression = SummarizedExperiment::assays(ace)[[data_slot]][matched.idx, 
+        raw.gene.expression = SummarizedExperiment::assays(ace)[[data_slot]][matched.idx,
             ]
         U = raw.gene.expression/sum(raw.gene.expression)
         gg = matched.genes
     }
-    
+
     # Perform network-diffusion
     G = colNets(ace)$ACTIONet
-    imputed.gene.expression = compute_network_diffusion(G, as(U, "sparseMatrix"), 
+    imputed.gene.expression = compute_network_diffusion(G, as(U, "sparseMatrix"),
         alpha = alpha_val, max_it = diffusion_iters)
-    
+
     imputed.gene.expression[is.na(imputed.gene.expression)] = 0
-    
-    
+
+
     # Rescale the baseline expression of each gene
     imputed.gene.expression = sapply(1:dim(imputed.gene.expression)[2], function(col) {
         x = raw.gene.expression[, col]
         y = imputed.gene.expression[, col]
-        
+
         x.Q = quantile(x, 1)
         y.Q = quantile(y, 1)
-        
+
         if (y.Q == 0) {
             return(array(0, length(x)))
         }
-        
+
         y = y * x.Q/y.Q
-        
+
         y[y > max(x)] = max(x)
-        
+
         return(y)
     })
-    
+
     colnames(imputed.gene.expression) = gg
-    
+
     return(imputed.gene.expression)
 }

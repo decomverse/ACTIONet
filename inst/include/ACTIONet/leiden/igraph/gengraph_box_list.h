@@ -29,9 +29,9 @@
 #define _BOX_LIST_H
 
 #ifndef _MSC_VER
-#ifndef register
-#define register
-#endif
+    #ifndef register
+        #define register
+    #endif
 #endif
 
 namespace gengraph {
@@ -39,42 +39,49 @@ namespace gengraph {
 class box_list {
 
 private:
-  int n;    // INITIAL number of vertices
-  int dmax; // CURRENT Maximum degree
-  int *deg; // CURRENT Degrees (points directly to the deg[] of the graph
+    int n;     // INITIAL number of vertices
+    int dmax;  // CURRENT Maximum degree
+    int *deg;  // CURRENT Degrees (points directly to the deg[] of the graph
 
-  // Vertices are grouped by degree: one double-chained lists for each degree
-  int *list;        // list[d-1] is the head of list of vertices of degree d
-  int *next;        // next[v]/prev[v] are the vertices next/previous to v
-  int *prev;        //   in the list where v belongs
-  void pop(int);    // pop(v) just removes v from its list
-  void insert(int); // insert(v) insert v at the head of its list
+    // Vertices are grouped by degree: one double-chained lists for each degree
+    int *list;        // list[d-1] is the head of list of vertices of degree d
+    int *next;        // next[v]/prev[v] are the vertices next/previous to v
+    int *prev;        //   in the list where v belongs
+    void pop(int);    // pop(v) just removes v from its list
+    void insert(int); // insert(v) insert v at the head of its list
 
 public:
-  // Ctor. Takes O(n) time.
-  box_list(int n0, int *deg0);
 
-  // Dtor
-  ~box_list();
+    // Ctor. Takes O(n) time.
+    box_list(int n0, int *deg0);
 
-  // Self-explaining inline routines
-  inline bool is_empty() { return dmax < 1; };
-  inline int get_max() { return list[dmax - 1]; };
-  inline int get_one() { return list[0]; };
-  inline int get_min() {
-    int i = 0;
-    while (list[i] < 0) {
-      i++;
-    }
-    return list[i];
-  };
+    // Dtor
+    ~box_list();
 
-  // Remove v from box_list
-  // Also, semi-remove vertex v from graph: all neighbours of v will swap
-  // their last neighbour wit hv, and then decrease their degree, so
-  // that any arc w->v virtually disappear
-  // Actually, adjacency lists are just permuted, and deg[] is changed
-  void pop_vertex(int v, int **neigh);
+    // Self-explaining inline routines
+    inline bool is_empty() {
+        return dmax < 1;
+    };
+    inline int get_max()   {
+        return list[dmax - 1];
+    };
+    inline int get_one()   {
+        return list[0];
+    };
+    inline int get_min()   {
+        int i = 0;
+        while (list[i] < 0) {
+            i++;
+        }
+        return list[i];
+    };
+
+    // Remove v from box_list
+    // Also, semi-remove vertex v from graph: all neighbours of v will swap
+    // their last neighbour wit hv, and then decrease their degree, so
+    // that any arc w->v virtually disappear
+    // Actually, adjacency lists are just permuted, and deg[] is changed
+    void pop_vertex(int v, int **neigh);
 };
 
 } // namespace gengraph

@@ -3,20 +3,19 @@
 
 #include <ResolutionParameterVertexPartition.h>
 
-class LinearResolutionParameterVertexPartition
-    : public ResolutionParameterVertexPartition {
-public:
-  LinearResolutionParameterVertexPartition(Graph *graph,
-                                           vector<size_t> membership,
-                                           double resolution_parameter);
-  LinearResolutionParameterVertexPartition(Graph *graph,
-                                           vector<size_t> membership);
-  LinearResolutionParameterVertexPartition(Graph *graph,
-                                           double resolution_parameter);
-  LinearResolutionParameterVertexPartition(Graph *graph);
-  virtual ~LinearResolutionParameterVertexPartition();
+class LinearResolutionParameterVertexPartition : public ResolutionParameterVertexPartition
+{
+  public:
+    LinearResolutionParameterVertexPartition(Graph* graph,
+          vector<size_t> membership, double resolution_parameter);
+    LinearResolutionParameterVertexPartition(Graph* graph,
+          vector<size_t> membership);
+    LinearResolutionParameterVertexPartition(Graph* graph, double resolution_parameter);
+    LinearResolutionParameterVertexPartition(Graph* graph);
+    virtual ~LinearResolutionParameterVertexPartition();
 
-private:
+  private:
+
 };
 
 #endif // RESOLUTIONPARAMETERVERTEXPARTITION_H

@@ -21,30 +21,30 @@
 
 */
 
-#include "igraph_array.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
+#include "igraph_array.h"
 
 #define BASE_IGRAPH_REAL
-#include "array.pmt"
 #include "igraph_pmt.h"
+#include "array.pmt"
 #include "igraph_pmt_off.h"
 #undef BASE_IGRAPH_REAL
 
 #define BASE_LONG
-#include "array.pmt"
 #include "igraph_pmt.h"
+#include "array.pmt"
 #include "igraph_pmt_off.h"
 #undef BASE_LONG
 
 #define BASE_CHAR
-#include "array.pmt"
 #include "igraph_pmt.h"
+#include "array.pmt"
 #include "igraph_pmt_off.h"
 #undef BASE_CHAR
 
 #define BASE_BOOL
-#include "array.pmt"
 #include "igraph_pmt.h"
+#include "array.pmt"
 #include "igraph_pmt_off.h"
 #undef BASE_BOOL

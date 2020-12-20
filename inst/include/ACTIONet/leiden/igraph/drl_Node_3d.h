@@ -44,21 +44,23 @@ namespace drl3d {
 class Node {
 
 public:
-  bool fixed; // if true do not change the
-  // position of this node
-  int id;
 
-  float x, y, z;
-  float sub_x, sub_y, sub_z;
-  float energy;
+    bool fixed;   // if true do not change the
+    // position of this node
+    int id;
+
+    float x, y, z;
+    float sub_x, sub_y, sub_z;
+    float energy;
 
 public:
-  Node(int node_id) {
-    x = y = z = 0.0;
-    fixed = false;
-    id = node_id;
-  }
-  ~Node() {}
+
+    Node( int node_id ) {
+        x = y = z = 0.0; fixed = false;
+        id = node_id;
+    }
+    ~Node() { }
+
 };
 
 } // namespace drl3d

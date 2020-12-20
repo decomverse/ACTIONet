@@ -21,8 +21,8 @@
 
 */
 
-#include "config.h"
 #include "igraph_memory.h"
+#include "config.h"
 
 /**
  * \function igraph_free
@@ -72,9 +72,10 @@
  */
 
 int igraph_free(void *p) {
-  igraph_Free(p);
-  return 0;
+    igraph_Free(p);
+    return 0;
 }
+
 
 /**
  * \function igraph_malloc
@@ -93,4 +94,6 @@ int igraph_free(void *p) {
  * \sa \ref igraph_free()
  */
 
-void *igraph_malloc(size_t n) { return malloc(n); }
+void *igraph_malloc(size_t n) {
+    return malloc(n);
+}

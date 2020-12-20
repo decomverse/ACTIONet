@@ -22,17 +22,17 @@
 
 */
 
-#include "config.h"
-#include "igraph_error.h"
-#include "igraph_spmatrix.h"
 #include "igraph_types.h"
+#include "igraph_spmatrix.h"
+#include "igraph_error.h"
+#include "config.h"
 
 #include <assert.h>
-#include <string.h> /* memcpy & co. */
+#include <string.h>     /* memcpy & co. */
 
 /**
- * \section igraph_spmatrix_constructor_and_destructor Sparse matrix
- * constructors and destructors.
+ * \section igraph_spmatrix_constructor_and_destructor Sparse matrix constructors
+ * and destructors.
  */
 
 /**
@@ -54,14 +54,14 @@
  */
 
 int igraph_spmatrix_init(igraph_spmatrix_t *m, long int nrow, long int ncol) {
-  assert(m != NULL);
-  IGRAPH_VECTOR_INIT_FINALLY(&m->ridx, 0);
-  IGRAPH_VECTOR_INIT_FINALLY(&m->cidx, ncol + 1);
-  IGRAPH_VECTOR_INIT_FINALLY(&m->data, 0);
-  IGRAPH_FINALLY_CLEAN(3);
-  m->nrow = nrow;
-  m->ncol = ncol;
-  return 0;
+    assert(m != NULL);
+    IGRAPH_VECTOR_INIT_FINALLY(&m->ridx, 0);
+    IGRAPH_VECTOR_INIT_FINALLY(&m->cidx, ncol + 1);
+    IGRAPH_VECTOR_INIT_FINALLY(&m->data, 0);
+    IGRAPH_FINALLY_CLEAN(3);
+    m->nrow = nrow;
+    m->ncol = ncol;
+    return 0;
 }
 
 /**
@@ -79,10 +79,10 @@ int igraph_spmatrix_init(igraph_spmatrix_t *m, long int nrow, long int ncol) {
  */
 
 void igraph_spmatrix_destroy(igraph_spmatrix_t *m) {
-  assert(m != NULL);
-  igraph_vector_destroy(&m->ridx);
-  igraph_vector_destroy(&m->cidx);
-  igraph_vector_destroy(&m->data);
+    assert(m != NULL);
+    igraph_vector_destroy(&m->ridx);
+    igraph_vector_destroy(&m->cidx);
+    igraph_vector_destroy(&m->data);
 }
 
 /**
@@ -102,19 +102,18 @@ void igraph_spmatrix_destroy(igraph_spmatrix_t *m) {
  */
 
 int igraph_spmatrix_copy(igraph_spmatrix_t *to, const igraph_spmatrix_t *from) {
-  assert(from != NULL);
-  assert(to != NULL);
-  to->nrow = from->nrow;
-  to->ncol = from->ncol;
-  IGRAPH_CHECK(igraph_vector_copy(&to->ridx, &from->ridx));
-  IGRAPH_CHECK(igraph_vector_copy(&to->cidx, &from->cidx));
-  IGRAPH_CHECK(igraph_vector_copy(&to->data, &from->data));
-  return 0;
+    assert(from != NULL);
+    assert(to != NULL);
+    to->nrow = from->nrow;
+    to->ncol = from->ncol;
+    IGRAPH_CHECK(igraph_vector_copy(&to->ridx, &from->ridx));
+    IGRAPH_CHECK(igraph_vector_copy(&to->cidx, &from->cidx));
+    IGRAPH_CHECK(igraph_vector_copy(&to->data, &from->data));
+    return 0;
 }
 
 /**
- * \section igraph_spmatrix_accessing_elements Accessing elements of a sparse
- * matrix
+ * \section igraph_spmatrix_accessing_elements Accessing elements of a sparse matrix
  */
 
 /**
@@ -130,39 +129,40 @@ int igraph_spmatrix_copy(igraph_spmatrix_t *to, const igraph_spmatrix_t *from) {
  * Time complexity: O(log n), where n is the number of nonzero elements in
  * the requested column.
  */
-igraph_real_t igraph_spmatrix_e(const igraph_spmatrix_t *m, long int row,
-                                long int col) {
-  long int start, end;
+igraph_real_t igraph_spmatrix_e(const igraph_spmatrix_t *m,
+                                long int row, long int col) {
+    long int start, end;
 
-  assert(m != NULL);
-  start = (long)VECTOR(m->cidx)[col];
-  end = (long)VECTOR(m->cidx)[col + 1] - 1;
+    assert(m != NULL);
+    start = (long) VECTOR(m->cidx)[col];
+    end = (long) VECTOR(m->cidx)[col + 1] - 1;
 
-  if (end < start) {
-    return 0;
-  }
-  /* Elements residing in column col are between m->data[start] and
-   * m->data[end], inclusive, ordered by row index */
-  while (start < end - 1) {
-    long int mid = (start + end) / 2;
-    if (VECTOR(m->ridx)[mid] > row) {
-      end = mid;
-    } else if (VECTOR(m->ridx)[mid] < row) {
-      start = mid;
-    } else {
-      start = mid;
-      break;
+    if (end < start) {
+        return 0;
     }
-  }
+    /* Elements residing in column col are between m->data[start] and
+     * m->data[end], inclusive, ordered by row index */
+    while (start < end - 1) {
+        long int mid = (start + end) / 2;
+        if (VECTOR(m->ridx)[mid] > row) {
+            end = mid;
+        } else if (VECTOR(m->ridx)[mid] < row) {
+            start = mid;
+        } else {
+            start = mid;
+            break;
+        }
+    }
 
-  if (VECTOR(m->ridx)[start] == row) {
-    return VECTOR(m->data)[start];
-  }
-  if (VECTOR(m->ridx)[start] != row && VECTOR(m->ridx)[end] == row) {
-    return VECTOR(m->data)[end];
-  }
-  return 0;
+    if (VECTOR(m->ridx)[start] == row) {
+        return VECTOR(m->data)[start];
+    }
+    if (VECTOR(m->ridx)[start] != row && VECTOR(m->ridx)[end] == row) {
+        return VECTOR(m->data)[end];
+    }
+    return 0;
 }
+
 
 /**
  * \ingroup matrix
@@ -180,86 +180,85 @@ igraph_real_t igraph_spmatrix_e(const igraph_spmatrix_t *m, long int row,
  */
 int igraph_spmatrix_set(igraph_spmatrix_t *m, long int row, long int col,
                         igraph_real_t value) {
-  long int start, end;
+    long int start, end;
 
-  assert(m != NULL);
-  start = (long)VECTOR(m->cidx)[col];
-  end = (long)VECTOR(m->cidx)[col + 1] - 1;
+    assert(m != NULL);
+    start = (long) VECTOR(m->cidx)[col];
+    end = (long) VECTOR(m->cidx)[col + 1] - 1;
 
-  if (end < start) {
-    /* First element in the column */
-    if (value == 0.0) {
-      return 0;
+    if (end < start) {
+        /* First element in the column */
+        if (value == 0.0) {
+            return 0;
+        }
+        IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
+        IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
+        for (start = col + 1; start < m->ncol + 1; start++) {
+            VECTOR(m->cidx)[start]++;
+        }
+        return 0;
     }
-    IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
-    IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
-    for (start = col + 1; start < m->ncol + 1; start++) {
-      VECTOR(m->cidx)[start]++;
+
+    /* Elements residing in column col are between m->data[start] and
+     * m->data[end], inclusive, ordered by row index */
+    while (start < end - 1) {
+        long int mid = (start + end) / 2;
+        if (VECTOR(m->ridx)[mid] > row) {
+            end = mid;
+        } else if (VECTOR(m->ridx)[mid] < row) {
+            start = mid;
+        } else {
+            start = mid;
+            break;
+        }
+    }
+
+    if (VECTOR(m->ridx)[start] == row) {
+        /* Overwriting a value - or deleting it if it has been overwritten by zero */
+        if (value == 0) {
+            igraph_vector_remove(&m->ridx, start);
+            igraph_vector_remove(&m->data, start);
+            for (start = col + 1; start < m->ncol + 1; start++) {
+                VECTOR(m->cidx)[start]--;
+            }
+        } else {
+            VECTOR(m->data)[start] = value;
+        }
+        return 0;
+    } else if (VECTOR(m->ridx)[end] == row) {
+        /* Overwriting a value - or deleting it if it has been overwritten by zero */
+        if (value == 0) {
+            igraph_vector_remove(&m->ridx, end);
+            igraph_vector_remove(&m->data, end);
+            for (start = col + 1; start < m->ncol + 1; start++) {
+                VECTOR(m->cidx)[start]--;
+            }
+        } else {
+            VECTOR(m->data)[end] = value;
+        }
+        return 0;
+    }
+
+    /* New element has to be inserted, but only if not a zero is
+     * being written into the matrix */
+    if (value != 0.0) {
+        if (VECTOR(m->ridx)[end] < row) {
+            IGRAPH_CHECK(igraph_vector_insert(&m->ridx, end + 1, row));
+            IGRAPH_CHECK(igraph_vector_insert(&m->data, end + 1, value));
+        } else if (VECTOR(m->ridx)[start] < row) {
+            IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start + 1, row));
+            IGRAPH_CHECK(igraph_vector_insert(&m->data, start + 1, value));
+        } else {
+            IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
+            IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
+        }
+        for (start = col + 1; start < m->ncol + 1; start++) {
+            VECTOR(m->cidx)[start]++;
+        }
     }
     return 0;
-  }
-
-  /* Elements residing in column col are between m->data[start] and
-   * m->data[end], inclusive, ordered by row index */
-  while (start < end - 1) {
-    long int mid = (start + end) / 2;
-    if (VECTOR(m->ridx)[mid] > row) {
-      end = mid;
-    } else if (VECTOR(m->ridx)[mid] < row) {
-      start = mid;
-    } else {
-      start = mid;
-      break;
-    }
-  }
-
-  if (VECTOR(m->ridx)[start] == row) {
-    /* Overwriting a value - or deleting it if it has been overwritten by zero
-     */
-    if (value == 0) {
-      igraph_vector_remove(&m->ridx, start);
-      igraph_vector_remove(&m->data, start);
-      for (start = col + 1; start < m->ncol + 1; start++) {
-        VECTOR(m->cidx)[start]--;
-      }
-    } else {
-      VECTOR(m->data)[start] = value;
-    }
-    return 0;
-  } else if (VECTOR(m->ridx)[end] == row) {
-    /* Overwriting a value - or deleting it if it has been overwritten by zero
-     */
-    if (value == 0) {
-      igraph_vector_remove(&m->ridx, end);
-      igraph_vector_remove(&m->data, end);
-      for (start = col + 1; start < m->ncol + 1; start++) {
-        VECTOR(m->cidx)[start]--;
-      }
-    } else {
-      VECTOR(m->data)[end] = value;
-    }
-    return 0;
-  }
-
-  /* New element has to be inserted, but only if not a zero is
-   * being written into the matrix */
-  if (value != 0.0) {
-    if (VECTOR(m->ridx)[end] < row) {
-      IGRAPH_CHECK(igraph_vector_insert(&m->ridx, end + 1, row));
-      IGRAPH_CHECK(igraph_vector_insert(&m->data, end + 1, value));
-    } else if (VECTOR(m->ridx)[start] < row) {
-      IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start + 1, row));
-      IGRAPH_CHECK(igraph_vector_insert(&m->data, start + 1, value));
-    } else {
-      IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
-      IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
-    }
-    for (start = col + 1; start < m->ncol + 1; start++) {
-      VECTOR(m->cidx)[start]++;
-    }
-  }
-  return 0;
 }
+
 
 /**
  * \ingroup matrix
@@ -267,8 +266,8 @@ int igraph_spmatrix_set(igraph_spmatrix_t *m, long int row, long int col,
  * \brief Adding a real value to an element of a sparse matrix.
  *
  * Note that there are no range checks right now. This is implemented to avoid
- * double lookup of a given element in the matrix by using \ref
- * igraph_spmatrix_e() and \ref igraph_spmatrix_set() consecutively.
+ * double lookup of a given element in the matrix by using \ref igraph_spmatrix_e()
+ * and \ref igraph_spmatrix_set() consecutively.
  *
  * \param m The matrix object.
  * \param row The index of the row, starting with zero.
@@ -280,83 +279,83 @@ int igraph_spmatrix_set(igraph_spmatrix_t *m, long int row, long int col,
  */
 int igraph_spmatrix_add_e(igraph_spmatrix_t *m, long int row, long int col,
                           igraph_real_t value) {
-  long int start, end;
+    long int start, end;
 
-  assert(m != NULL);
-  start = (long)VECTOR(m->cidx)[col];
-  end = (long)VECTOR(m->cidx)[col + 1] - 1;
+    assert(m != NULL);
+    start = (long) VECTOR(m->cidx)[col];
+    end = (long) VECTOR(m->cidx)[col + 1] - 1;
 
-  if (end < start) {
-    /* First element in the column */
-    if (value == 0.0) {
-      return 0;
+    if (end < start) {
+        /* First element in the column */
+        if (value == 0.0) {
+            return 0;
+        }
+        IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
+        IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
+        for (start = col + 1; start < m->ncol + 1; start++) {
+            VECTOR(m->cidx)[start]++;
+        }
+        return 0;
     }
-    IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
-    IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
-    for (start = col + 1; start < m->ncol + 1; start++) {
-      VECTOR(m->cidx)[start]++;
+
+    /* Elements residing in column col are between m->data[start] and
+     * m->data[end], inclusive, ordered by row index */
+    while (start < end - 1) {
+        long int mid = (start + end) / 2;
+        if (VECTOR(m->ridx)[mid] > row) {
+            end = mid;
+        } else if (VECTOR(m->ridx)[mid] < row) {
+            start = mid;
+        } else {
+            start = mid;
+            break;
+        }
+    }
+
+    if (VECTOR(m->ridx)[start] == row) {
+        /* Overwriting a value */
+        if (VECTOR(m->data)[start] == -1) {
+            igraph_vector_remove(&m->ridx, start);
+            igraph_vector_remove(&m->data, start);
+            for (start = col + 1; start < m->ncol + 1; start++) {
+                VECTOR(m->cidx)[start]--;
+            }
+        } else {
+            VECTOR(m->data)[start] += value;
+        }
+        return 0;
+    } else if (VECTOR(m->ridx)[end] == row) {
+        /* Overwriting a value */
+        if (VECTOR(m->data)[end] == -1) {
+            igraph_vector_remove(&m->ridx, end);
+            igraph_vector_remove(&m->data, end);
+            for (start = col + 1; start < m->ncol + 1; start++) {
+                VECTOR(m->cidx)[start]--;
+            }
+        } else {
+            VECTOR(m->data)[end] += value;
+        }
+        return 0;
+    }
+
+    /* New element has to be inserted, but only if not a zero is
+     * being added to a zero element of the matrix */
+    if (value != 0.0) {
+        if (VECTOR(m->ridx)[end] < row) {
+            IGRAPH_CHECK(igraph_vector_insert(&m->ridx, end + 1, row));
+            IGRAPH_CHECK(igraph_vector_insert(&m->data, end + 1, value));
+        } else if (VECTOR(m->ridx)[start] < row) {
+            IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start + 1, row));
+            IGRAPH_CHECK(igraph_vector_insert(&m->data, start + 1, value));
+        } else {
+            IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
+            IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
+        }
+        for (start = col + 1; start < m->ncol + 1; start++) {
+            VECTOR(m->cidx)[start]++;
+        }
     }
     return 0;
-  }
-
-  /* Elements residing in column col are between m->data[start] and
-   * m->data[end], inclusive, ordered by row index */
-  while (start < end - 1) {
-    long int mid = (start + end) / 2;
-    if (VECTOR(m->ridx)[mid] > row) {
-      end = mid;
-    } else if (VECTOR(m->ridx)[mid] < row) {
-      start = mid;
-    } else {
-      start = mid;
-      break;
-    }
-  }
-
-  if (VECTOR(m->ridx)[start] == row) {
-    /* Overwriting a value */
-    if (VECTOR(m->data)[start] == -1) {
-      igraph_vector_remove(&m->ridx, start);
-      igraph_vector_remove(&m->data, start);
-      for (start = col + 1; start < m->ncol + 1; start++) {
-        VECTOR(m->cidx)[start]--;
-      }
-    } else {
-      VECTOR(m->data)[start] += value;
-    }
-    return 0;
-  } else if (VECTOR(m->ridx)[end] == row) {
-    /* Overwriting a value */
-    if (VECTOR(m->data)[end] == -1) {
-      igraph_vector_remove(&m->ridx, end);
-      igraph_vector_remove(&m->data, end);
-      for (start = col + 1; start < m->ncol + 1; start++) {
-        VECTOR(m->cidx)[start]--;
-      }
-    } else {
-      VECTOR(m->data)[end] += value;
-    }
-    return 0;
-  }
-
-  /* New element has to be inserted, but only if not a zero is
-   * being added to a zero element of the matrix */
-  if (value != 0.0) {
-    if (VECTOR(m->ridx)[end] < row) {
-      IGRAPH_CHECK(igraph_vector_insert(&m->ridx, end + 1, row));
-      IGRAPH_CHECK(igraph_vector_insert(&m->data, end + 1, value));
-    } else if (VECTOR(m->ridx)[start] < row) {
-      IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start + 1, row));
-      IGRAPH_CHECK(igraph_vector_insert(&m->data, start + 1, value));
-    } else {
-      IGRAPH_CHECK(igraph_vector_insert(&m->ridx, start, row));
-      IGRAPH_CHECK(igraph_vector_insert(&m->data, start, value));
-    }
-    for (start = col + 1; start < m->ncol + 1; start++) {
-      VECTOR(m->cidx)[start]++;
-    }
-  }
-  return 0;
 }
 
 /**
@@ -367,19 +366,18 @@ int igraph_spmatrix_add_e(igraph_spmatrix_t *m, long int row, long int col,
  * \param from The index of the column to be added
  * \return Error code.
  */
-int igraph_spmatrix_add_col_values(igraph_spmatrix_t *m, long int to,
-                                   long int from) {
-  long int i;
-  /* TODO: I think this implementation could be speeded up if I don't use
-   * igraph_spmatrix_add_e directly -- but maybe it's not worth the fuss */
-  for (i = (long int)VECTOR(m->cidx)[from]; i < VECTOR(m->cidx)[from + 1];
-       i++) {
-    IGRAPH_CHECK(igraph_spmatrix_add_e(m, (long int)VECTOR(m->ridx)[i], to,
-                                       VECTOR(m->data)[i]));
-  }
+int igraph_spmatrix_add_col_values(igraph_spmatrix_t *m, long int to, long int from) {
+    long int i;
+    /* TODO: I think this implementation could be speeded up if I don't use
+     * igraph_spmatrix_add_e directly -- but maybe it's not worth the fuss */
+    for (i = (long int) VECTOR(m->cidx)[from]; i < VECTOR(m->cidx)[from + 1]; i++) {
+        IGRAPH_CHECK(igraph_spmatrix_add_e(m, (long int) VECTOR(m->ridx)[i],
+                                           to, VECTOR(m->data)[i]));
+    }
 
-  return 0;
+    return 0;
 }
+
 
 /**
  * \ingroup matrix
@@ -400,35 +398,35 @@ int igraph_spmatrix_add_col_values(igraph_spmatrix_t *m, long int to,
  */
 
 int igraph_spmatrix_resize(igraph_spmatrix_t *m, long int nrow, long int ncol) {
-  long int i, j, ci, ei, mincol;
-  assert(m != NULL);
-  /* Iterating through the matrix data and deleting unnecessary data. */
-  /* At the same time, we create the new indices as well */
-  if (nrow < m->nrow) {
-    ei = j = 0;
-    mincol = (m->ncol < ncol) ? m->ncol : ncol;
-    for (ci = 0; ci < mincol; ci++) {
-      for (; ei < VECTOR(m->cidx)[ci + 1]; ei++) {
-        if (VECTOR(m->ridx)[ei] < nrow) {
-          VECTOR(m->ridx)[j] = VECTOR(m->ridx)[ei];
-          VECTOR(m->data)[j] = VECTOR(m->data)[ei];
-          j++;
+    long int i, j, ci, ei, mincol;
+    assert(m != NULL);
+    /* Iterating through the matrix data and deleting unnecessary data. */
+    /* At the same time, we create the new indices as well */
+    if (nrow < m->nrow) {
+        ei = j = 0;
+        mincol = (m->ncol < ncol) ? m->ncol : ncol;
+        for (ci = 0; ci < mincol; ci++) {
+            for (; ei < VECTOR(m->cidx)[ci + 1]; ei++) {
+                if (VECTOR(m->ridx)[ei] < nrow) {
+                    VECTOR(m->ridx)[j] = VECTOR(m->ridx)[ei];
+                    VECTOR(m->data)[j] = VECTOR(m->data)[ei];
+                    j++;
+                }
+            }
+            VECTOR(m->cidx)[ci] = j;
         }
-      }
-      VECTOR(m->cidx)[ci] = j;
+        /* Contract the row index and the data vector */
+        IGRAPH_CHECK(igraph_vector_resize(&m->ridx, j));
+        IGRAPH_CHECK(igraph_vector_resize(&m->cidx, j));
     }
-    /* Contract the row index and the data vector */
-    IGRAPH_CHECK(igraph_vector_resize(&m->ridx, j));
-    IGRAPH_CHECK(igraph_vector_resize(&m->cidx, j));
-  }
-  /* Updating cidx */
-  IGRAPH_CHECK(igraph_vector_resize(&m->cidx, ncol + 1));
-  for (i = m->ncol + 1; i < ncol + 1; i++) {
-    VECTOR(m->cidx)[i] = VECTOR(m->cidx)[m->ncol];
-  }
-  m->nrow = nrow;
-  m->ncol = ncol;
-  return 0;
+    /* Updating cidx */
+    IGRAPH_CHECK(igraph_vector_resize(&m->cidx, ncol + 1));
+    for (i = m->ncol + 1; i < ncol + 1; i++) {
+        VECTOR(m->cidx)[i] = VECTOR(m->cidx)[m->ncol];
+    }
+    m->nrow = nrow;
+    m->ncol = ncol;
+    return 0;
 }
 
 /**
@@ -443,9 +441,10 @@ int igraph_spmatrix_resize(igraph_spmatrix_t *m, long int nrow, long int ncol) {
  */
 
 long int igraph_spmatrix_count_nonzero(const igraph_spmatrix_t *m) {
-  assert(m != NULL);
-  return igraph_vector_size(&m->data);
+    assert(m != NULL);
+    return igraph_vector_size(&m->data);
 }
+
 
 /**
  * \ingroup matrix
@@ -459,8 +458,8 @@ long int igraph_spmatrix_count_nonzero(const igraph_spmatrix_t *m) {
  */
 
 long int igraph_spmatrix_size(const igraph_spmatrix_t *m) {
-  assert(m != NULL);
-  return (m->nrow) * (m->ncol);
+    assert(m != NULL);
+    return (m->nrow) * (m->ncol);
 }
 
 /**
@@ -475,8 +474,8 @@ long int igraph_spmatrix_size(const igraph_spmatrix_t *m) {
  */
 
 long int igraph_spmatrix_nrow(const igraph_spmatrix_t *m) {
-  assert(m != NULL);
-  return m->nrow;
+    assert(m != NULL);
+    return m->nrow;
 }
 
 /**
@@ -491,8 +490,8 @@ long int igraph_spmatrix_nrow(const igraph_spmatrix_t *m) {
  */
 
 long int igraph_spmatrix_ncol(const igraph_spmatrix_t *m) {
-  assert(m != NULL);
-  return m->ncol;
+    assert(m != NULL);
+    return m->ncol;
 }
 
 /**
@@ -514,16 +513,15 @@ long int igraph_spmatrix_ncol(const igraph_spmatrix_t *m) {
  */
 
 int igraph_spmatrix_copy_to(const igraph_spmatrix_t *m, igraph_real_t *to) {
-  long int c, dest_idx, idx;
+    long int c, dest_idx, idx;
 
-  memset(to, 0, sizeof(igraph_real_t) * (size_t)igraph_spmatrix_size(m));
-  for (c = 0, dest_idx = 0; c < m->ncol; c++, dest_idx += m->nrow) {
-    for (idx = (long int)VECTOR(m->cidx)[c]; idx < VECTOR(m->cidx)[c + 1];
-         idx++) {
-      to[dest_idx + (long)VECTOR(m->ridx)[idx]] = VECTOR(m->data)[idx];
+    memset(to, 0, sizeof(igraph_real_t) * (size_t) igraph_spmatrix_size(m));
+    for (c = 0, dest_idx = 0; c < m->ncol; c++, dest_idx += m->nrow) {
+        for (idx = (long int) VECTOR(m->cidx)[c]; idx < VECTOR(m->cidx)[c + 1]; idx++) {
+            to[dest_idx + (long)VECTOR(m->ridx)[idx]] = VECTOR(m->data)[idx];
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 /**
@@ -538,11 +536,11 @@ int igraph_spmatrix_copy_to(const igraph_spmatrix_t *m, igraph_real_t *to) {
  */
 
 int igraph_spmatrix_null(igraph_spmatrix_t *m) {
-  assert(m != NULL);
-  igraph_vector_clear(&m->data);
-  igraph_vector_clear(&m->ridx);
-  igraph_vector_null(&m->cidx);
-  return 0;
+    assert(m != NULL);
+    igraph_vector_clear(&m->data);
+    igraph_vector_clear(&m->ridx);
+    igraph_vector_null(&m->cidx);
+    return 0;
 }
 
 /**
@@ -557,8 +555,8 @@ int igraph_spmatrix_null(igraph_spmatrix_t *m) {
  */
 
 int igraph_spmatrix_add_cols(igraph_spmatrix_t *m, long int n) {
-  igraph_spmatrix_resize(m, m->nrow, m->ncol + n);
-  return 0;
+    igraph_spmatrix_resize(m, m->nrow, m->ncol + n);
+    return 0;
 }
 
 /**
@@ -573,8 +571,8 @@ int igraph_spmatrix_add_cols(igraph_spmatrix_t *m, long int n) {
  */
 
 int igraph_spmatrix_add_rows(igraph_spmatrix_t *m, long int n) {
-  igraph_spmatrix_resize(m, m->nrow + n, m->ncol);
-  return 0;
+    igraph_spmatrix_resize(m, m->nrow + n, m->ncol);
+    return 0;
 }
 
 /**
@@ -587,82 +585,80 @@ int igraph_spmatrix_add_rows(igraph_spmatrix_t *m, long int n) {
  */
 
 int igraph_spmatrix_clear_row(igraph_spmatrix_t *m, long int row) {
-  long int ci, ei, i, j, nremove = 0, nremove_old = 0;
-  igraph_vector_t permvec;
+    long int ci, ei, i, j, nremove = 0, nremove_old = 0;
+    igraph_vector_t permvec;
 
-  assert(m != NULL);
-  IGRAPH_VECTOR_INIT_FINALLY(&permvec, igraph_vector_size(&m->data));
-  for (ci = 0, i = 0, j = 1; ci < m->ncol; ci++) {
-    for (ei = (long int)VECTOR(m->cidx)[ci]; ei < VECTOR(m->cidx)[ci + 1];
-         ei++) {
-      if (VECTOR(m->ridx)[ei] == row) {
-        /* this element will be deleted, so all elements in cidx from the
-         * column index of this element will have to be decreased by one */
-        nremove++;
-      } else {
-        /* this element will be kept */
-        VECTOR(permvec)[i] = j;
-        j++;
-      }
-      i++;
+    assert(m != NULL);
+    IGRAPH_VECTOR_INIT_FINALLY(&permvec, igraph_vector_size(&m->data));
+    for (ci = 0, i = 0, j = 1; ci < m->ncol; ci++) {
+        for (ei = (long int) VECTOR(m->cidx)[ci]; ei < VECTOR(m->cidx)[ci + 1]; ei++) {
+            if (VECTOR(m->ridx)[ei] == row) {
+                /* this element will be deleted, so all elements in cidx from the
+                 * column index of this element will have to be decreased by one */
+                nremove++;
+            } else {
+                /* this element will be kept */
+                VECTOR(permvec)[i] = j;
+                j++;
+            }
+            i++;
+        }
+        if (ci > 0) {
+            VECTOR(m->cidx)[ci] -= nremove_old;
+        }
+        nremove_old = nremove;
     }
-    if (ci > 0) {
-      VECTOR(m->cidx)[ci] -= nremove_old;
-    }
-    nremove_old = nremove;
-  }
-  VECTOR(m->cidx)[m->ncol] -= nremove;
-  igraph_vector_permdelete(&m->ridx, &permvec, nremove);
-  igraph_vector_permdelete(&m->data, &permvec, nremove);
-  igraph_vector_destroy(&permvec);
-  IGRAPH_FINALLY_CLEAN(1);
-  return 0;
+    VECTOR(m->cidx)[m->ncol] -= nremove;
+    igraph_vector_permdelete(&m->ridx, &permvec, nremove);
+    igraph_vector_permdelete(&m->data, &permvec, nremove);
+    igraph_vector_destroy(&permvec);
+    IGRAPH_FINALLY_CLEAN(1);
+    return 0;
 }
 
 int igraph_i_spmatrix_clear_row_fast(igraph_spmatrix_t *m, long int row) {
-  long int ei, n;
+    long int ei, n;
 
-  assert(m != NULL);
-  n = igraph_vector_size(&m->data);
-  for (ei = 0; ei < n; ei++) {
-    if (VECTOR(m->ridx)[ei] == row) {
-      VECTOR(m->data)[ei] = 0.0;
+    assert(m != NULL);
+    n = igraph_vector_size(&m->data);
+    for (ei = 0; ei < n; ei++) {
+        if (VECTOR(m->ridx)[ei] == row) {
+            VECTOR(m->data)[ei] = 0.0;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 int igraph_i_spmatrix_cleanup(igraph_spmatrix_t *m) {
-  long int ci, ei, i, j, nremove = 0, nremove_old = 0;
-  igraph_vector_t permvec;
+    long int ci, ei, i, j, nremove = 0, nremove_old = 0;
+    igraph_vector_t permvec;
 
-  assert(m != NULL);
-  IGRAPH_VECTOR_INIT_FINALLY(&permvec, igraph_vector_size(&m->data));
-  for (ci = 0, i = 0, j = 1; ci < m->ncol; ci++) {
-    for (ei = (long int)VECTOR(m->cidx)[ci]; ei < VECTOR(m->cidx)[ci + 1];
-         ei++) {
-      if (VECTOR(m->data)[ei] == 0.0) {
-        /* this element will be deleted, so all elements in cidx from the
-         * column index of this element will have to be decreased by one */
-        nremove++;
-      } else {
-        /* this element will be kept */
-        VECTOR(permvec)[i] = j;
-        j++;
-      }
-      i++;
+    assert(m != NULL);
+    IGRAPH_VECTOR_INIT_FINALLY(&permvec, igraph_vector_size(&m->data));
+    for (ci = 0, i = 0, j = 1; ci < m->ncol; ci++) {
+        for (ei = (long int) VECTOR(m->cidx)[ci]; ei < VECTOR(m->cidx)[ci + 1]; ei++) {
+            if (VECTOR(m->data)[ei] == 0.0) {
+                /* this element will be deleted, so all elements in cidx from the
+                 * column index of this element will have to be decreased by one */
+                nremove++;
+            } else {
+                /* this element will be kept */
+                VECTOR(permvec)[i] = j;
+                j++;
+            }
+            i++;
+        }
+        if (ci > 0) {
+            VECTOR(m->cidx)[ci] -= nremove_old;
+        }
+        nremove_old = nremove;
     }
-    if (ci > 0) {
-      VECTOR(m->cidx)[ci] -= nremove_old;
-    }
-    nremove_old = nremove;
-  }
-  VECTOR(m->cidx)[m->ncol] -= nremove;
-  igraph_vector_permdelete(&m->ridx, &permvec, nremove);
-  igraph_vector_permdelete(&m->data, &permvec, nremove);
-  igraph_vector_destroy(&permvec);
-  IGRAPH_FINALLY_CLEAN(1);
-  return 0;
+    VECTOR(m->cidx)[m->ncol] -= nremove;
+    igraph_vector_permdelete(&m->ridx, &permvec, nremove);
+    igraph_vector_permdelete(&m->data, &permvec, nremove);
+    igraph_vector_destroy(&permvec);
+    IGRAPH_FINALLY_CLEAN(1);
+    return 0;
 }
 
 /**
@@ -676,20 +672,20 @@ int igraph_i_spmatrix_cleanup(igraph_spmatrix_t *m) {
  */
 
 int igraph_spmatrix_clear_col(igraph_spmatrix_t *m, long int col) {
-  long int i, n;
-  assert(m != NULL);
-  n = (long)VECTOR(m->cidx)[col + 1] - (long)VECTOR(m->cidx)[col];
-  if (n == 0) {
+    long int i, n;
+    assert(m != NULL);
+    n = (long)VECTOR(m->cidx)[col + 1] - (long)VECTOR(m->cidx)[col];
+    if (n == 0) {
+        return 0;
+    }
+    igraph_vector_remove_section(&m->ridx, (long int) VECTOR(m->cidx)[col],
+                                 (long int) VECTOR(m->cidx)[col + 1]);
+    igraph_vector_remove_section(&m->data, (long int) VECTOR(m->cidx)[col],
+                                 (long int) VECTOR(m->cidx)[col + 1]);
+    for (i = col + 1; i <= m->ncol; i++) {
+        VECTOR(m->cidx)[i] -= n;
+    }
     return 0;
-  }
-  igraph_vector_remove_section(&m->ridx, (long int)VECTOR(m->cidx)[col],
-                               (long int)VECTOR(m->cidx)[col + 1]);
-  igraph_vector_remove_section(&m->data, (long int)VECTOR(m->cidx)[col],
-                               (long int)VECTOR(m->cidx)[col + 1]);
-  for (i = col + 1; i <= m->ncol; i++) {
-    VECTOR(m->cidx)[i] -= n;
-  }
-  return 0;
 }
 
 /**
@@ -702,8 +698,8 @@ int igraph_spmatrix_clear_col(igraph_spmatrix_t *m, long int col) {
  */
 
 void igraph_spmatrix_scale(igraph_spmatrix_t *m, igraph_real_t by) {
-  assert(m != NULL);
-  igraph_vector_scale(&m->data, by);
+    assert(m != NULL);
+    igraph_vector_scale(&m->data, by);
 }
 
 /**
@@ -717,16 +713,16 @@ void igraph_spmatrix_scale(igraph_spmatrix_t *m, igraph_real_t by) {
  */
 
 int igraph_spmatrix_colsums(const igraph_spmatrix_t *m, igraph_vector_t *res) {
-  long int i, c;
-  assert(m != NULL);
-  IGRAPH_CHECK(igraph_vector_resize(res, m->ncol));
-  igraph_vector_null(res);
-  for (c = 0; c < m->ncol; c++) {
-    for (i = (long int)VECTOR(m->cidx)[c]; i < VECTOR(m->cidx)[c + 1]; i++) {
-      VECTOR(*res)[c] += VECTOR(m->data)[i];
+    long int i, c;
+    assert(m != NULL);
+    IGRAPH_CHECK(igraph_vector_resize(res, m->ncol));
+    igraph_vector_null(res);
+    for (c = 0; c < m->ncol; c++) {
+        for (i = (long int) VECTOR(m->cidx)[c]; i < VECTOR(m->cidx)[c + 1]; i++) {
+            VECTOR(*res)[c] += VECTOR(m->data)[i];
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 /**
@@ -740,16 +736,16 @@ int igraph_spmatrix_colsums(const igraph_spmatrix_t *m, igraph_vector_t *res) {
  */
 
 int igraph_spmatrix_rowsums(const igraph_spmatrix_t *m, igraph_vector_t *res) {
-  long int i, n;
-  assert(m != NULL);
+    long int i, n;
+    assert(m != NULL);
 
-  IGRAPH_CHECK(igraph_vector_resize(res, m->nrow));
-  n = igraph_vector_size(&m->data);
-  igraph_vector_null(res);
-  for (i = 0; i < n; i++) {
-    VECTOR(*res)[(long int)VECTOR(m->ridx)[i]] += VECTOR(m->data)[i];
-  }
-  return 0;
+    IGRAPH_CHECK(igraph_vector_resize(res, m->nrow));
+    n = igraph_vector_size(&m->data);
+    igraph_vector_null(res);
+    for (i = 0; i < n; i++) {
+        VECTOR(*res)[(long int)VECTOR(m->ridx)[i]] += VECTOR(m->data)[i];
+    }
+    return 0;
 }
 
 /**
@@ -764,40 +760,39 @@ int igraph_spmatrix_rowsums(const igraph_spmatrix_t *m, igraph_vector_t *res) {
  * Time complexity: O(n), the number of nonzero elements in the matrix.
  */
 igraph_real_t igraph_spmatrix_max_nonzero(const igraph_spmatrix_t *m,
-                                          igraph_real_t *ridx,
-                                          igraph_real_t *cidx) {
-  igraph_real_t res;
-  long int i, n, maxidx;
+        igraph_real_t *ridx, igraph_real_t *cidx) {
+    igraph_real_t res;
+    long int i, n, maxidx;
 
-  assert(m != NULL);
-  n = igraph_vector_size(&m->data);
-  if (n == 0) {
-    return 0.0;
-  }
-
-  maxidx = -1;
-  for (i = 0; i < n; i++)
-    if (VECTOR(m->data)[i] != 0.0 &&
-        (maxidx == -1 || VECTOR(m->data)[i] >= VECTOR(m->data)[maxidx])) {
-      maxidx = i;
+    assert(m != NULL);
+    n = igraph_vector_size(&m->data);
+    if (n == 0) {
+        return 0.0;
     }
 
-  if (maxidx == -1) {
-    return 0.0;
-  }
+    maxidx = -1;
+    for (i = 0; i < n; i++)
+        if (VECTOR(m->data)[i] != 0.0 &&
+            (maxidx == -1 || VECTOR(m->data)[i] >= VECTOR(m->data)[maxidx])) {
+            maxidx = i;
+        }
 
-  res = VECTOR(m->data)[maxidx];
-  if (ridx != 0) {
-    *ridx = VECTOR(m->ridx)[maxidx];
-  }
-  if (cidx != 0) {
-    igraph_vector_binsearch(&m->cidx, maxidx, &i);
-    while (VECTOR(m->cidx)[i + 1] == VECTOR(m->cidx)[i]) {
-      i++;
+    if (maxidx == -1) {
+        return 0.0;
     }
-    *cidx = (igraph_real_t)i;
-  }
-  return res;
+
+    res = VECTOR(m->data)[maxidx];
+    if (ridx != 0) {
+        *ridx = VECTOR(m->ridx)[maxidx];
+    }
+    if (cidx != 0) {
+        igraph_vector_binsearch(&m->cidx, maxidx, &i);
+        while (VECTOR(m->cidx)[i + 1] == VECTOR(m->cidx)[i]) {
+            i++;
+        }
+        *cidx = (igraph_real_t)i;
+    }
+    return res;
 }
 
 /**
@@ -813,87 +808,85 @@ igraph_real_t igraph_spmatrix_max_nonzero(const igraph_spmatrix_t *m,
  */
 igraph_real_t igraph_spmatrix_max(const igraph_spmatrix_t *m,
                                   igraph_real_t *ridx, igraph_real_t *cidx) {
-  igraph_real_t res;
-  long int i, j, k, maxidx;
+    igraph_real_t res;
+    long int i, j, k, maxidx;
 
-  assert(m != NULL);
-  i = igraph_vector_size(&m->data);
-  if (i == 0) {
-    return 0.0;
-  }
+    assert(m != NULL);
+    i = igraph_vector_size(&m->data);
+    if (i == 0) {
+        return 0.0;
+    }
 
-  maxidx = (long)igraph_vector_which_max(&m->data);
-  res = VECTOR(m->data)[maxidx];
-  if (res >= 0.0 || i == m->nrow * m->ncol) {
-    if (ridx != 0) {
-      *ridx = VECTOR(m->ridx)[maxidx];
-    }
-    if (cidx != 0) {
-      igraph_vector_binsearch(&m->cidx, maxidx, &i);
-      i--;
-      while (i < m->ncol - 1 && VECTOR(m->cidx)[i + 1] == VECTOR(m->cidx)[i]) {
-        i++;
-      }
-      *cidx = (igraph_real_t)i;
-    }
-    return res;
-  }
-  /* the maximal nonzero element is negative and there is at least a
-   * single zero
-   */
-  res = 0.0;
-  if (cidx != 0 || ridx != 0) {
-    for (i = 0; i < m->ncol; i++) {
-      if (VECTOR(m->cidx)[i + 1] - VECTOR(m->cidx)[i] < m->nrow) {
-        if (cidx != 0) {
-          *cidx = i;
-        }
+    maxidx = (long)igraph_vector_which_max(&m->data);
+    res = VECTOR(m->data)[maxidx];
+    if (res >= 0.0 || i == m->nrow * m->ncol) {
         if (ridx != 0) {
-          for (j = (long int)VECTOR(m->cidx)[i], k = 0;
-               j < VECTOR(m->cidx)[i + 1]; j++, k++) {
-            if (VECTOR(m->ridx)[j] != k) {
-              *ridx = k;
-              break;
-            }
-          }
+            *ridx = VECTOR(m->ridx)[maxidx];
         }
-        break;
-      }
+        if (cidx != 0) {
+            igraph_vector_binsearch(&m->cidx, maxidx, &i);
+            i--;
+            while (i < m->ncol - 1 && VECTOR(m->cidx)[i + 1] == VECTOR(m->cidx)[i]) {
+                i++;
+            }
+            *cidx = (igraph_real_t)i;
+        }
+        return res;
     }
-  }
+    /* the maximal nonzero element is negative and there is at least a
+     * single zero
+     */
+    res = 0.0;
+    if (cidx != 0 || ridx != 0) {
+        for (i = 0; i < m->ncol; i++) {
+            if (VECTOR(m->cidx)[i + 1] - VECTOR(m->cidx)[i] < m->nrow) {
+                if (cidx != 0) {
+                    *cidx = i;
+                }
+                if (ridx != 0) {
+                    for (j = (long int) VECTOR(m->cidx)[i], k = 0;
+                         j < VECTOR(m->cidx)[i + 1]; j++, k++) {
+                        if (VECTOR(m->ridx)[j] != k) {
+                            *ridx = k;
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
 
-  return res;
+    return res;
 }
 
 int igraph_i_spmatrix_get_col_nonzero_indices(const igraph_spmatrix_t *m,
-                                              igraph_vector_t *res,
-                                              long int col) {
-  long int i, n;
-  assert(m != NULL);
-  n = (long int)(VECTOR(m->cidx)[col + 1] - VECTOR(m->cidx)[col]);
-  IGRAPH_CHECK(igraph_vector_resize(res, n));
-  for (i = (long int)VECTOR(m->cidx)[col], n = 0; i < VECTOR(m->cidx)[col + 1];
-       i++, n++)
-    if (VECTOR(m->data)[i] != 0.0) {
-      VECTOR(*res)[n] = VECTOR(m->ridx)[i];
-    }
-  return 0;
+        igraph_vector_t *res, long int col) {
+    long int i, n;
+    assert(m != NULL);
+    n = (long int) (VECTOR(m->cidx)[col + 1] - VECTOR(m->cidx)[col]);
+    IGRAPH_CHECK(igraph_vector_resize(res, n));
+    for (i = (long int) VECTOR(m->cidx)[col], n = 0;
+         i < VECTOR(m->cidx)[col + 1]; i++, n++)
+        if (VECTOR(m->data)[i] != 0.0) {
+            VECTOR(*res)[n] = VECTOR(m->ridx)[i];
+        }
+    return 0;
 }
 
+
 /**
- * \section igraph_spmatrix_iterating Iterating over the non-zero elements of a
- * sparse matrix
+ * \section igraph_spmatrix_iterating Iterating over the non-zero elements of a sparse matrix
  *
  * <para>The \type igraph_spmatrix_iter_t type represents an iterator that can
  * be used to step over the non-zero elements of a sparse matrix in columnwise
- * order efficiently. In general, you shouldn't modify the elements of the
- * matrix while iterating over it; doing so will probably invalidate the
- * iterator, but there are no checks to prevent you from doing this.</para>
+ * order efficiently. In general, you shouldn't modify the elements of the matrix
+ * while iterating over it; doing so will probably invalidate the iterator, but
+ * there are no checks to prevent you from doing this.</para>
  *
  * <para>To access the row index of the current element of the iterator, use its
- * \c ri field. Similarly, the \c ci field stores the column index of the
- * current element and the \c value field stores the value of the
- * element.</para>
+ * \c ri field. Similarly, the \c ci field stores the column index of the current
+ * element and the \c value field stores the value of the element.</para>
  */
 
 /**
@@ -906,11 +899,10 @@ int igraph_i_spmatrix_get_col_nonzero_indices(const igraph_spmatrix_t *m,
  *
  * Time complexity: O(1).
  */
-int igraph_spmatrix_iter_create(igraph_spmatrix_iter_t *mit,
-                                const igraph_spmatrix_t *m) {
-  mit->m = m;
-  IGRAPH_CHECK(igraph_spmatrix_iter_reset(mit));
-  return 0;
+int igraph_spmatrix_iter_create(igraph_spmatrix_iter_t *mit, const igraph_spmatrix_t *m) {
+    mit->m = m;
+    IGRAPH_CHECK(igraph_spmatrix_iter_reset(mit));
+    return 0;
 }
 
 /**
@@ -918,8 +910,7 @@ int igraph_spmatrix_iter_create(igraph_spmatrix_iter_t *mit,
  * \brief Resets a sparse matrix iterator.
  *
  * </para><para>
- * After resetting, the iterator will point to the first nonzero element (if
- * any).
+ * After resetting, the iterator will point to the first nonzero element (if any).
  *
  * \param  mit  pointer to the matrix iterator being reset
  * \return  Error code. The current implementation is always successful.
@@ -927,20 +918,20 @@ int igraph_spmatrix_iter_create(igraph_spmatrix_iter_t *mit,
  * Time complexity: O(1).
  */
 int igraph_spmatrix_iter_reset(igraph_spmatrix_iter_t *mit) {
-  assert(mit->m);
+    assert(mit->m);
 
-  if (igraph_spmatrix_count_nonzero(mit->m) == 0) {
-    mit->pos = mit->ri = mit->ci = -1L;
-    mit->value = -1;
+    if (igraph_spmatrix_count_nonzero(mit->m) == 0) {
+        mit->pos = mit->ri = mit->ci = -1L;
+        mit->value = -1;
+        return 0;
+    }
+
+    mit->ci = 0;
+    mit->pos = -1;
+
+    IGRAPH_CHECK(igraph_spmatrix_iter_next(mit));
+
     return 0;
-  }
-
-  mit->ci = 0;
-  mit->pos = -1;
-
-  IGRAPH_CHECK(igraph_spmatrix_iter_next(mit));
-
-  return 0;
 }
 
 /**
@@ -957,20 +948,20 @@ int igraph_spmatrix_iter_reset(igraph_spmatrix_iter_t *mit) {
  * Time complexity: O(1).
  */
 int igraph_spmatrix_iter_next(igraph_spmatrix_iter_t *mit) {
-  mit->pos++;
+    mit->pos++;
 
-  if (igraph_spmatrix_iter_end(mit)) {
+    if (igraph_spmatrix_iter_end(mit)) {
+        return 0;
+    }
+
+    mit->ri = (long int)VECTOR(mit->m->ridx)[mit->pos];
+    mit->value = VECTOR(mit->m->data)[mit->pos];
+
+    while (VECTOR(mit->m->cidx)[mit->ci + 1] <= mit->pos) {
+        mit->ci++;
+    }
+
     return 0;
-  }
-
-  mit->ri = (long int)VECTOR(mit->m->ridx)[mit->pos];
-  mit->value = VECTOR(mit->m->data)[mit->pos];
-
-  while (VECTOR(mit->m->cidx)[mit->ci + 1] <= mit->pos) {
-    mit->ci++;
-  }
-
-  return 0;
 }
 
 /**
@@ -988,7 +979,7 @@ int igraph_spmatrix_iter_next(igraph_spmatrix_iter_t *mit) {
  * Time complexity: O(1).
  */
 igraph_bool_t igraph_spmatrix_iter_end(igraph_spmatrix_iter_t *mit) {
-  return mit->pos >= igraph_spmatrix_count_nonzero(mit->m);
+    return mit->pos >= igraph_spmatrix_count_nonzero(mit->m);
 }
 
 /**
@@ -1008,8 +999,8 @@ igraph_bool_t igraph_spmatrix_iter_end(igraph_spmatrix_iter_t *mit) {
  * Time complexity: O(1).
  */
 void igraph_spmatrix_iter_destroy(igraph_spmatrix_iter_t *mit) {
-  IGRAPH_UNUSED(mit);
-  /* Nothing to do at the moment */
+    IGRAPH_UNUSED(mit);
+    /* Nothing to do at the moment */
 }
 
 #ifndef USING_R
@@ -1024,8 +1015,8 @@ void igraph_spmatrix_iter_destroy(igraph_spmatrix_iter_t *mit) {
  *
  * Time complexity: O(n), the number of non-zero elements.
  */
-int igraph_spmatrix_print(const igraph_spmatrix_t *matrix) {
-  return igraph_spmatrix_fprint(matrix, stdout);
+int igraph_spmatrix_print(const igraph_spmatrix_t* matrix) {
+    return igraph_spmatrix_fprint(matrix, stdout);
 }
 #endif
 
@@ -1040,18 +1031,20 @@ int igraph_spmatrix_print(const igraph_spmatrix_t *matrix) {
  *
  * Time complexity: O(n), the number of non-zero elements.
  */
-int igraph_spmatrix_fprint(const igraph_spmatrix_t *matrix, FILE *file) {
-  igraph_spmatrix_iter_t mit;
+int igraph_spmatrix_fprint(const igraph_spmatrix_t* matrix, FILE *file) {
+    igraph_spmatrix_iter_t mit;
 
-  IGRAPH_CHECK(igraph_spmatrix_iter_create(&mit, matrix));
-  IGRAPH_FINALLY(igraph_spmatrix_iter_destroy, &mit);
-  while (!igraph_spmatrix_iter_end(&mit)) {
-    fprintf(file, "[%ld, %ld] = %.4f\n", (long int)mit.ri, (long int)mit.ci,
-            mit.value);
-    igraph_spmatrix_iter_next(&mit);
-  }
-  igraph_spmatrix_iter_destroy(&mit);
-  IGRAPH_FINALLY_CLEAN(1);
+    IGRAPH_CHECK(igraph_spmatrix_iter_create(&mit, matrix));
+    IGRAPH_FINALLY(igraph_spmatrix_iter_destroy, &mit);
+    while (!igraph_spmatrix_iter_end(&mit)) {
+        fprintf(file, "[%ld, %ld] = %.4f\n", (long int)mit.ri,
+                (long int)mit.ci, mit.value);
+        igraph_spmatrix_iter_next(&mit);
+    }
+    igraph_spmatrix_iter_destroy(&mit);
+    IGRAPH_FINALLY_CLEAN(1);
 
-  return 0;
+    return 0;
 }
+
+

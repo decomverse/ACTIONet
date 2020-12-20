@@ -21,59 +21,60 @@
 
 */
 
-#include "igraph_memory.h"
 #include "igraph_types_internal.h"
+#include "igraph_memory.h"
 
 void igraph_fixed_vectorlist_destroy(igraph_fixed_vectorlist_t *l) {
-  long int i, n = igraph_vector_ptr_size(&l->v);
-  for (i = 0; i < n; i++) {
-    igraph_vector_t *v = VECTOR(l->v)[i];
-    if (v) {
-      igraph_vector_destroy(v);
+    long int i, n = igraph_vector_ptr_size(&l->v);
+    for (i = 0; i < n; i++) {
+        igraph_vector_t *v = VECTOR(l->v)[i];
+        if (v) {
+            igraph_vector_destroy(v);
+        }
     }
-  }
-  igraph_vector_ptr_destroy(&l->v);
-  igraph_free(l->vecs);
+    igraph_vector_ptr_destroy(&l->v);
+    igraph_free(l->vecs);
 }
 
 int igraph_fixed_vectorlist_convert(igraph_fixed_vectorlist_t *l,
                                     const igraph_vector_t *from,
                                     long int size) {
 
-  igraph_vector_t sizes;
-  long int i, no = igraph_vector_size(from);
+    igraph_vector_t sizes;
+    long int i, no = igraph_vector_size(from);
 
-  l->vecs = igraph_Calloc(size, igraph_vector_t);
-  if (!l->vecs) {
-    IGRAPH_ERROR("Cannot merge attributes for simplify", IGRAPH_ENOMEM);
-  }
-  IGRAPH_FINALLY(igraph_free, l->vecs);
-  IGRAPH_CHECK(igraph_vector_ptr_init(&l->v, size));
-  IGRAPH_FINALLY(igraph_fixed_vectorlist_destroy, &l->v);
-  IGRAPH_VECTOR_INIT_FINALLY(&sizes, size);
-
-  for (i = 0; i < no; i++) {
-    long int to = (long int)VECTOR(*from)[i];
-    if (to >= 0) {
-      VECTOR(sizes)[to] += 1;
+    l->vecs = igraph_Calloc(size, igraph_vector_t);
+    if (!l->vecs) {
+        IGRAPH_ERROR("Cannot merge attributes for simplify",
+                     IGRAPH_ENOMEM);
     }
-  }
-  for (i = 0; i < size; i++) {
-    igraph_vector_t *v = &(l->vecs[i]);
-    IGRAPH_CHECK(igraph_vector_init(v, (long int)VECTOR(sizes)[i]));
-    igraph_vector_clear(v);
-    VECTOR(l->v)[i] = v;
-  }
-  for (i = 0; i < no; i++) {
-    long int to = (long int)VECTOR(*from)[i];
-    if (to >= 0) {
-      igraph_vector_t *v = &(l->vecs[to]);
-      igraph_vector_push_back(v, i);
+    IGRAPH_FINALLY(igraph_free, l->vecs);
+    IGRAPH_CHECK(igraph_vector_ptr_init(&l->v, size));
+    IGRAPH_FINALLY(igraph_fixed_vectorlist_destroy, &l->v);
+    IGRAPH_VECTOR_INIT_FINALLY(&sizes, size);
+
+    for (i = 0; i < no; i++) {
+        long int to = (long int) VECTOR(*from)[i];
+        if (to >= 0) {
+            VECTOR(sizes)[to] += 1;
+        }
     }
-  }
+    for (i = 0; i < size; i++) {
+        igraph_vector_t *v = &(l->vecs[i]);
+        IGRAPH_CHECK(igraph_vector_init(v, (long int) VECTOR(sizes)[i]));
+        igraph_vector_clear(v);
+        VECTOR(l->v)[i] = v;
+    }
+    for (i = 0; i < no; i++) {
+        long int to = (long int) VECTOR(*from)[i];
+        if (to >= 0) {
+            igraph_vector_t *v = &(l->vecs[to]);
+            igraph_vector_push_back(v, i);
+        }
+    }
 
-  igraph_vector_destroy(&sizes);
-  IGRAPH_FINALLY_CLEAN(3);
+    igraph_vector_destroy(&sizes);
+    IGRAPH_FINALLY_CLEAN(3);
 
-  return 0;
+    return 0;
 }

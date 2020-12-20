@@ -25,21 +25,23 @@
 #define STRUCTURAL_PROPERTIES_INTERNAL_H
 
 #include "igraph_constants.h"
-#include "igraph_iterators.h"
 #include "igraph_types.h"
+#include "igraph_iterators.h"
 
 int igraph_i_induced_subgraph_suggest_implementation(
     const igraph_t *graph, const igraph_vs_t vids,
-    igraph_subgraph_implementation_t *result);
+    igraph_subgraph_implementation_t* result
+);
 
 int igraph_i_subgraph_copy_and_delete(const igraph_t *graph, igraph_t *res,
                                       const igraph_vs_t vids,
                                       igraph_vector_t *map,
                                       igraph_vector_t *invmap);
 
-int igraph_i_subgraph_create_from_scratch(const igraph_t *graph, igraph_t *res,
-                                          const igraph_vs_t vids,
-                                          igraph_vector_t *map,
-                                          igraph_vector_t *invmap);
+int igraph_i_subgraph_create_from_scratch(const igraph_t *graph,
+        igraph_t *res,
+        const igraph_vs_t vids,
+        igraph_vector_t *map,
+        igraph_vector_t *invmap);
 
 #endif

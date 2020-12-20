@@ -24,8 +24,8 @@
 #ifndef IGRAPH_ITERATORS_H
 #define IGRAPH_ITERATORS_H
 
-#include "igraph_constants.h"
 #include "igraph_decls.h"
+#include "igraph_constants.h"
 
 __BEGIN_DECLS
 
@@ -33,36 +33,36 @@ __BEGIN_DECLS
 /* Vertex selectors                                   */
 /* -------------------------------------------------- */
 
-#define IGRAPH_VS_ALL 0
-#define IGRAPH_VS_ADJ 1
-#define IGRAPH_VS_NONE 2
-#define IGRAPH_VS_1 3
+#define IGRAPH_VS_ALL       0
+#define IGRAPH_VS_ADJ       1
+#define IGRAPH_VS_NONE      2
+#define IGRAPH_VS_1         3
 #define IGRAPH_VS_VECTORPTR 4
-#define IGRAPH_VS_VECTOR 5
-#define IGRAPH_VS_SEQ 6
-#define IGRAPH_VS_NONADJ 7
+#define IGRAPH_VS_VECTOR    5
+#define IGRAPH_VS_SEQ       6
+#define IGRAPH_VS_NONADJ    7
 
 typedef struct igraph_vs_t {
-  int type;
-  union {
-    igraph_integer_t vid;          /* single vertex  */
-    const igraph_vector_t *vecptr; /* vector of vertices  */
-    struct {
-      igraph_integer_t vid;
-      igraph_neimode_t mode;
-    } adj; /* adjacent vertices  */
-    struct {
-      igraph_integer_t from;
-      igraph_integer_t to;
-    } seq; /* sequence of vertices from:to */
-  } data;
+    int type;
+    union {
+        igraph_integer_t vid;               /* single vertex  */
+        const igraph_vector_t *vecptr;      /* vector of vertices  */
+        struct {
+            igraph_integer_t vid;
+            igraph_neimode_t mode;
+        } adj;                  /* adjacent vertices  */
+        struct {
+            igraph_integer_t from;
+            igraph_integer_t to;
+        } seq;                              /* sequence of vertices from:to */
+    } data;
 } igraph_vs_t;
 
 DECLDIR int igraph_vs_all(igraph_vs_t *vs);
 DECLDIR igraph_vs_t igraph_vss_all(void);
 
-DECLDIR int igraph_vs_adj(igraph_vs_t *vs, igraph_integer_t vid,
-                          igraph_neimode_t mode);
+DECLDIR int igraph_vs_adj(igraph_vs_t *vs,
+                          igraph_integer_t vid, igraph_neimode_t mode);
 DECLDIR igraph_vs_t igraph_vss_adj(igraph_integer_t vid, igraph_neimode_t mode);
 
 DECLDIR int igraph_vs_nonadj(igraph_vs_t *vs, igraph_integer_t vid,
@@ -74,22 +74,23 @@ DECLDIR igraph_vs_t igraph_vss_none(void);
 DECLDIR int igraph_vs_1(igraph_vs_t *vs, igraph_integer_t vid);
 DECLDIR igraph_vs_t igraph_vss_1(igraph_integer_t vid);
 
-DECLDIR int igraph_vs_vector(igraph_vs_t *vs, const igraph_vector_t *v);
+DECLDIR int igraph_vs_vector(igraph_vs_t *vs,
+                             const igraph_vector_t *v);
 DECLDIR igraph_vs_t igraph_vss_vector(const igraph_vector_t *v);
 
 DECLDIR int igraph_vs_vector_small(igraph_vs_t *vs, ...);
 
-DECLDIR int igraph_vs_vector_copy(igraph_vs_t *vs, const igraph_vector_t *v);
+DECLDIR int igraph_vs_vector_copy(igraph_vs_t *vs,
+                                  const igraph_vector_t *v);
 
-DECLDIR int igraph_vs_seq(igraph_vs_t *vs, igraph_integer_t from,
-                          igraph_integer_t to);
+DECLDIR int igraph_vs_seq(igraph_vs_t *vs, igraph_integer_t from, igraph_integer_t to);
 DECLDIR igraph_vs_t igraph_vss_seq(igraph_integer_t from, igraph_integer_t to);
 
 DECLDIR void igraph_vs_destroy(igraph_vs_t *vs);
 
 DECLDIR igraph_bool_t igraph_vs_is_all(const igraph_vs_t *vs);
 
-DECLDIR int igraph_vs_copy(igraph_vs_t *dest, const igraph_vs_t *src);
+DECLDIR int igraph_vs_copy(igraph_vs_t* dest, const igraph_vs_t* src);
 
 DECLDIR int igraph_vs_as_vector(const igraph_t *graph, igraph_vs_t vs,
                                 igraph_vector_t *v);
@@ -101,16 +102,16 @@ DECLDIR int igraph_vs_type(const igraph_vs_t *vs);
 /* Vertex iterators                                   */
 /* -------------------------------------------------- */
 
-#define IGRAPH_VIT_SEQ 0
-#define IGRAPH_VIT_VECTOR 1
+#define IGRAPH_VIT_SEQ       0
+#define IGRAPH_VIT_VECTOR    1
 #define IGRAPH_VIT_VECTORPTR 2
 
 typedef struct igraph_vit_t {
-  int type;
-  long int pos;
-  long int start;
-  long int end;
-  const igraph_vector_t *vec;
+    int type;
+    long int pos;
+    long int start;
+    long int end;
+    const igraph_vector_t *vec;
 } igraph_vit_t;
 
 /**
@@ -157,7 +158,7 @@ typedef struct igraph_vit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_VIT_NEXT(vit) (++((vit).pos))
+#define IGRAPH_VIT_NEXT(vit)  (++((vit).pos))
 /**
  * \define IGRAPH_VIT_END
  * \brief Are we at the end?
@@ -169,7 +170,7 @@ typedef struct igraph_vit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_VIT_END(vit) ((vit).pos >= (vit).end)
+#define IGRAPH_VIT_END(vit)   ((vit).pos >= (vit).end)
 /**
  * \define IGRAPH_VIT_SIZE
  * \brief Size of a vertex iterator.
@@ -180,7 +181,7 @@ typedef struct igraph_vit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_VIT_SIZE(vit) ((vit).end - (vit).start)
+#define IGRAPH_VIT_SIZE(vit)  ((vit).end - (vit).start)
 /**
  * \define IGRAPH_VIT_RESET
  * \brief Reset a vertex iterator.
@@ -203,13 +204,12 @@ typedef struct igraph_vit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_VIT_GET(vit)                                                    \
-  ((igraph_integer_t)(((vit).type == IGRAPH_VIT_SEQ)                           \
-                          ? (vit).pos                                          \
-                          : VECTOR(*(vit).vec)[(vit).pos]))
+#define IGRAPH_VIT_GET(vit)  \
+    ((igraph_integer_t)(((vit).type == IGRAPH_VIT_SEQ) ? (vit).pos : \
+                        VECTOR(*(vit).vec)[(vit).pos]))
 
-DECLDIR int igraph_vit_create(const igraph_t *graph, igraph_vs_t vs,
-                              igraph_vit_t *vit);
+DECLDIR int igraph_vit_create(const igraph_t *graph,
+                              igraph_vs_t vs, igraph_vit_t *vit);
 DECLDIR void igraph_vit_destroy(const igraph_vit_t *vit);
 
 DECLDIR int igraph_vit_as_vector(const igraph_vit_t *vit, igraph_vector_t *v);
@@ -218,47 +218,48 @@ DECLDIR int igraph_vit_as_vector(const igraph_vit_t *vit, igraph_vector_t *v);
 /* Edge Selectors                                     */
 /* -------------------------------------------------- */
 
-#define IGRAPH_ES_ALL 0
-#define IGRAPH_ES_ALLFROM 1
-#define IGRAPH_ES_ALLTO 2
-#define IGRAPH_ES_INCIDENT 3
-#define IGRAPH_ES_NONE 4
-#define IGRAPH_ES_1 5
+#define IGRAPH_ES_ALL       0
+#define IGRAPH_ES_ALLFROM   1
+#define IGRAPH_ES_ALLTO     2
+#define IGRAPH_ES_INCIDENT  3
+#define IGRAPH_ES_NONE      4
+#define IGRAPH_ES_1         5
 #define IGRAPH_ES_VECTORPTR 6
-#define IGRAPH_ES_VECTOR 7
-#define IGRAPH_ES_SEQ 8
-#define IGRAPH_ES_PAIRS 9
-#define IGRAPH_ES_PATH 10
+#define IGRAPH_ES_VECTOR    7
+#define IGRAPH_ES_SEQ       8
+#define IGRAPH_ES_PAIRS     9
+#define IGRAPH_ES_PATH      10
 #define IGRAPH_ES_MULTIPAIRS 11
 
 typedef struct igraph_es_t {
-  int type;
-  union {
-    igraph_integer_t vid;
-    igraph_integer_t eid;
-    const igraph_vector_t *vecptr;
-    struct {
-      igraph_integer_t vid;
-      igraph_neimode_t mode;
-    } incident;
-    struct {
-      igraph_integer_t from;
-      igraph_integer_t to;
-    } seq;
-    struct {
-      const igraph_vector_t *ptr;
-      igraph_bool_t mode;
-    } path;
-  } data;
+    int type;
+    union {
+        igraph_integer_t vid;
+        igraph_integer_t eid;
+        const igraph_vector_t *vecptr;
+        struct {
+            igraph_integer_t vid;
+            igraph_neimode_t mode;
+        } incident;
+        struct {
+            igraph_integer_t from;
+            igraph_integer_t to;
+        } seq;
+        struct {
+            const igraph_vector_t *ptr;
+            igraph_bool_t mode;
+        } path;
+    } data;
 } igraph_es_t;
 
-DECLDIR int igraph_es_all(igraph_es_t *es, igraph_edgeorder_type_t order);
+DECLDIR int igraph_es_all(igraph_es_t *es,
+                          igraph_edgeorder_type_t order);
 DECLDIR igraph_es_t igraph_ess_all(igraph_edgeorder_type_t order);
 
-DECLDIR int igraph_es_adj(igraph_es_t *es, igraph_integer_t vid,
-                          igraph_neimode_t mode); /* deprecated */
-DECLDIR int igraph_es_incident(igraph_es_t *es, igraph_integer_t vid,
-                               igraph_neimode_t mode);
+DECLDIR int igraph_es_adj(igraph_es_t *es,
+                          igraph_integer_t vid, igraph_neimode_t mode);     /* deprecated */
+DECLDIR int igraph_es_incident(igraph_es_t *es,
+                               igraph_integer_t vid, igraph_neimode_t mode);
 
 DECLDIR int igraph_es_none(igraph_es_t *es);
 DECLDIR igraph_es_t igraph_ess_none(void);
@@ -266,13 +267,14 @@ DECLDIR igraph_es_t igraph_ess_none(void);
 DECLDIR int igraph_es_1(igraph_es_t *es, igraph_integer_t eid);
 DECLDIR igraph_es_t igraph_ess_1(igraph_integer_t eid);
 
-DECLDIR int igraph_es_vector(igraph_es_t *es, const igraph_vector_t *v);
+DECLDIR int igraph_es_vector(igraph_es_t *es,
+                             const igraph_vector_t *v);
 DECLDIR igraph_es_t igraph_ess_vector(const igraph_vector_t *v);
 
-DECLDIR int igraph_es_fromto(igraph_es_t *es, igraph_vs_t from, igraph_vs_t to);
+DECLDIR int igraph_es_fromto(igraph_es_t *es,
+                             igraph_vs_t from, igraph_vs_t to);
 
-DECLDIR int igraph_es_seq(igraph_es_t *es, igraph_integer_t from,
-                          igraph_integer_t to);
+DECLDIR int igraph_es_seq(igraph_es_t *es, igraph_integer_t from, igraph_integer_t to);
 DECLDIR igraph_es_t igraph_ess_seq(igraph_integer_t from, igraph_integer_t to);
 
 DECLDIR int igraph_es_vector_copy(igraph_es_t *es, const igraph_vector_t *v);
@@ -292,7 +294,7 @@ DECLDIR void igraph_es_destroy(igraph_es_t *es);
 
 DECLDIR igraph_bool_t igraph_es_is_all(const igraph_es_t *es);
 
-DECLDIR int igraph_es_copy(igraph_es_t *dest, const igraph_es_t *src);
+DECLDIR int igraph_es_copy(igraph_es_t* dest, const igraph_es_t* src);
 
 DECLDIR int igraph_es_as_vector(const igraph_t *graph, igraph_es_t es,
                                 igraph_vector_t *v);
@@ -300,20 +302,21 @@ DECLDIR int igraph_es_size(const igraph_t *graph, const igraph_es_t *es,
                            igraph_integer_t *result);
 DECLDIR int igraph_es_type(const igraph_es_t *es);
 
+
 /* -------------------------------------------------- */
 /* Edge Iterators                                     */
 /* -------------------------------------------------- */
 
-#define IGRAPH_EIT_SEQ 0
-#define IGRAPH_EIT_VECTOR 1
+#define IGRAPH_EIT_SEQ       0
+#define IGRAPH_EIT_VECTOR    1
 #define IGRAPH_EIT_VECTORPTR 2
 
 typedef struct igraph_eit_t {
-  int type;
-  long int pos;
-  long int start;
-  long int end;
-  const igraph_vector_t *vec;
+    int type;
+    long int pos;
+    long int start;
+    long int end;
+    const igraph_vector_t *vec;
 } igraph_eit_t;
 
 /**
@@ -350,7 +353,7 @@ typedef struct igraph_eit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_EIT_END(eit) ((eit).pos >= (eit).end)
+#define IGRAPH_EIT_END(eit)   ((eit).pos >= (eit).end)
 /**
  * \define IGRAPH_EIT_SIZE
  * \brief Number of edges in the iterator.
@@ -361,7 +364,7 @@ typedef struct igraph_eit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_EIT_SIZE(eit) ((eit).end - (eit).start)
+#define IGRAPH_EIT_SIZE(eit)  ((eit).end - (eit).start)
 /**
  * \define IGRAPH_EIT_RESET
  * \brief Reset an edge iterator.
@@ -383,13 +386,12 @@ typedef struct igraph_eit_t {
  *
  * Time complexity: O(1).
  */
-#define IGRAPH_EIT_GET(eit)                                                    \
-  (igraph_integer_t)((((eit).type == IGRAPH_EIT_SEQ)                           \
-                          ? (eit).pos                                          \
-                          : VECTOR(*(eit).vec)[(eit).pos]))
+#define IGRAPH_EIT_GET(eit)  \
+    (igraph_integer_t)((((eit).type == IGRAPH_EIT_SEQ) ? (eit).pos : \
+                        VECTOR(*(eit).vec)[(eit).pos]))
 
-DECLDIR int igraph_eit_create(const igraph_t *graph, igraph_es_t es,
-                              igraph_eit_t *eit);
+DECLDIR int igraph_eit_create(const igraph_t *graph,
+                              igraph_es_t es, igraph_eit_t *eit);
 DECLDIR void igraph_eit_destroy(const igraph_eit_t *eit);
 
 DECLDIR int igraph_eit_as_vector(const igraph_eit_t *eit, igraph_vector_t *v);

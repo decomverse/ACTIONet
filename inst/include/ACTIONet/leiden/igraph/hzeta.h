@@ -35,14 +35,15 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-#define __BEGIN_DECLS extern "C" {
-#define __END_DECLS }
+# define __BEGIN_DECLS extern "C" {
+# define __END_DECLS }
 #else
-#define __BEGIN_DECLS /* empty */
-#define __END_DECLS   /* empty */
+# define __BEGIN_DECLS /* empty */
+# define __END_DECLS /* empty */
 #endif
 
 __BEGIN_DECLS
+
 
 /* Hurwitz Zeta Function
  * zeta(s,q) = Sum[ (k+q)^(-s), {k,0,Infinity} ]
@@ -81,16 +82,14 @@ double hsl_sf_lnhzeta_deriv(const double s, const double q);
 
 /* Logarithm and Logarithmic Derivative of Hurwitz Zeta Function:
  * nonredundant computation version:
- * - lnzeta(s,q) and lnzeta'(s,q) are stored in *deriv0 and *deriv1,
- * respectively;
+ * - lnzeta(s,q) and lnzeta'(s,q) are stored in *deriv0 and *deriv1, respectively;
  * - the return value and the value stored in *deriv0 are the same;
- * - deriv0 and deriv1 must be effective pointers, that is, not the NULL
- * pointer.
+ * - deriv0 and deriv1 must be effective pointers, that is, not the NULL pointer.
  *
  * s > 1.0, q > 0.0 (and q >> 1)
  */
-double hsl_sf_lnhzeta_deriv_tuple(const double s, const double q,
-                                  double *deriv0, double *deriv1);
+double hsl_sf_lnhzeta_deriv_tuple(const double s, const double q, double * deriv0, double * deriv1);
+
 
 __END_DECLS
 

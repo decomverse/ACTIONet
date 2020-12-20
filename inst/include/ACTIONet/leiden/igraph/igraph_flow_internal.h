@@ -24,16 +24,19 @@
 #ifndef IGRAPH_FLOW_INTERNAL_H
 #define IGRAPH_FLOW_INTERNAL_H
 
-#include "igraph_datatype.h"
-#include "igraph_estack.h"
-#include "igraph_marked_queue.h"
 #include "igraph_types.h"
+#include "igraph_marked_queue.h"
+#include "igraph_estack.h"
+#include "igraph_datatype.h"
 
 typedef int igraph_provan_shier_pivot_t(const igraph_t *graph,
                                         const igraph_marked_queue_t *S,
                                         const igraph_estack_t *T,
-                                        long int source, long int target,
-                                        long int *v, igraph_vector_t *Isv,
+                                        long int source,
+                                        long int target,
+                                        long int *v,
+                                        igraph_vector_t *Isv,
                                         void *arg);
 
 #endif
+
