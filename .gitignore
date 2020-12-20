@@ -12,6 +12,7 @@ dist/
 ACTIONet.egg-info/
 build/
 data/
+!ACTIONet/data
 .vscode
 __pycache__
 .ipynb_checkpoints
