@@ -21,9 +21,9 @@
 
 */
 
+#include "igraph_matrix.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
-#include "igraph_matrix.h"
 
 #ifndef IGRAPH_ARPACK_H
 #define IGRAPH_ARPACK_H
@@ -40,10 +40,10 @@ __BEGIN_DECLS
  * The package is designed to compute a few eigenvalues and corresponding
  * eigenvectors of a general \c n by \c n matrix \c A. It is
  * most appropriate for large sparse or structured matrices \c A where
- * structured means that a matrix-vector product <code>w &lt;- Av</code> requires
- * order \c n rather than the usual order <code>n^2</code> floating point
- * operations. Please see
- * http://www.caam.rice.edu/software/ARPACK/ for details.
+ * structured means that a matrix-vector product <code>w &lt;- Av</code>
+ * requires order \c n rather than the usual order <code>n^2</code> floating
+ * point operations. Please see http://www.caam.rice.edu/software/ARPACK/ for
+ * details.
  * </para>
  *
  * <para>
@@ -143,19 +143,16 @@ __BEGIN_DECLS
  *    than \c tol times its estimated value. If this is set to zero
  *    then machine precision is used.
  * \member ncv Number of Lanczos vectors to be generated. Setting this
- *    to zero means that \ref igraph_arpack_rssolve and \ref igraph_arpack_rnsolve
- *    will determine a suitable value for \c ncv automatically.
- * \member ldv Numberic scalar. It should be set to
- *    zero in the current igraph implementation.
- * \member ishift Either zero or one. If zero then the shifts are
- *    provided by the user via reverse communication. If one then exact
- *    shifts with respect to the reduced tridiagonal matrix \c T.
- *    Please always set this to one.
- * \member mxiter Maximum number of Arnoldi update iterations allowed.
- * \member nb Blocksize to be used in the recurrence. Please always
- *    leave this on the default value, one.
- * \member mode The type of the eigenproblem to be solved.
- *    Possible values if the input matrix is symmetric:
+ *    to zero means that \ref igraph_arpack_rssolve and \ref
+ * igraph_arpack_rnsolve will determine a suitable value for \c ncv
+ * automatically. \member ldv Numberic scalar. It should be set to zero in the
+ * current igraph implementation. \member ishift Either zero or one. If zero
+ * then the shifts are provided by the user via reverse communication. If one
+ * then exact shifts with respect to the reduced tridiagonal matrix \c T. Please
+ * always set this to one. \member mxiter Maximum number of Arnoldi update
+ * iterations allowed. \member nb Blocksize to be used in the recurrence. Please
+ * always leave this on the default value, one. \member mode The type of the
+ * eigenproblem to be solved. Possible values if the input matrix is symmetric:
  *    \olist
  *      \oli A*x=lambda*x, A is symmetric.
  *      \oli A*x=lambda*M*x, A is
@@ -221,38 +218,38 @@ __BEGIN_DECLS
  */
 
 typedef struct igraph_arpack_options_t {
-    /* INPUT */
-    char bmat[1];         /* I-standard problem, G-generalized */
-    int n;            /* Dimension of the eigenproblem */
-    char which[2];        /* LA, SA, LM, SM, BE */
-    int nev;                 /* Number of eigenvalues to be computed */
-    igraph_real_t tol;        /* Stopping criterion */
-    int ncv;          /* Number of columns in V */
-    int ldv;          /* Leading dimension of V */
-    int ishift;       /* 0-reverse comm., 1-exact with tridiagonal */
-    int mxiter;              /* Maximum number of update iterations to take */
-    int nb;           /* Block size on the recurrence, only 1 works */
-    int mode;     /* The kind of problem to be solved (1-5)
-                   1: A*x=l*x, A symmetric
-                   2: A*x=l*M*x, A symm. M pos. def.
-                   3: K*x = l*M*x, K symm., M pos. semidef.
-                   4: K*x = l*KG*x, K s. pos. semidef. KG s. indef.
-                   5: A*x = l*M*x, A symm., M symm. pos. semidef. */
-    int start;        /* 0: random, 1: use the supplied vector */
-    int lworkl;       /* Size of temporary storage, default is fine */
-    igraph_real_t sigma;          /* The shift for modes 3,4,5 */
-    igraph_real_t sigmai;     /* The imaginary part of shift for rnsolve */
-    /* OUTPUT */
-    int info;     /* What happened, see docs */
-    int ierr;     /* What happened  in the dseupd call */
-    int noiter;       /* The number of iterations taken */
-    int nconv;
-    int numop;        /* Number of OP*x operations */
-    int numopb;       /* Number of B*x operations if BMAT='G' */
-    int numreo;       /* Number of steps of re-orthogonalizations */
-    /* INTERNAL */
-    int iparam[11];
-    int ipntr[14];
+  /* INPUT */
+  char bmat[1];         /* I-standard problem, G-generalized */
+  int n;                /* Dimension of the eigenproblem */
+  char which[2];        /* LA, SA, LM, SM, BE */
+  int nev;              /* Number of eigenvalues to be computed */
+  igraph_real_t tol;    /* Stopping criterion */
+  int ncv;              /* Number of columns in V */
+  int ldv;              /* Leading dimension of V */
+  int ishift;           /* 0-reverse comm., 1-exact with tridiagonal */
+  int mxiter;           /* Maximum number of update iterations to take */
+  int nb;               /* Block size on the recurrence, only 1 works */
+  int mode;             /* The kind of problem to be solved (1-5)
+                         1: A*x=l*x, A symmetric
+                         2: A*x=l*M*x, A symm. M pos. def.
+                         3: K*x = l*M*x, K symm., M pos. semidef.
+                         4: K*x = l*KG*x, K s. pos. semidef. KG s. indef.
+                         5: A*x = l*M*x, A symm., M symm. pos. semidef. */
+  int start;            /* 0: random, 1: use the supplied vector */
+  int lworkl;           /* Size of temporary storage, default is fine */
+  igraph_real_t sigma;  /* The shift for modes 3,4,5 */
+  igraph_real_t sigmai; /* The imaginary part of shift for rnsolve */
+  /* OUTPUT */
+  int info;   /* What happened, see docs */
+  int ierr;   /* What happened  in the dseupd call */
+  int noiter; /* The number of iterations taken */
+  int nconv;
+  int numop;  /* Number of OP*x operations */
+  int numopb; /* Number of B*x operations if BMAT='G' */
+  int numreo; /* Number of steps of re-orthogonalizations */
+  /* INTERNAL */
+  int iparam[11];
+  int ipntr[14];
 } igraph_arpack_options_t;
 
 /**
@@ -277,22 +274,23 @@ typedef struct igraph_arpack_options_t {
  */
 
 typedef struct igraph_arpack_storage_t {
-    int maxn, maxncv, maxldv;
-    igraph_real_t *v;
-    igraph_real_t *workl;
-    igraph_real_t *workd;
-    igraph_real_t *d;
-    igraph_real_t *resid;
-    igraph_real_t *ax;
-    int *select;
-    igraph_real_t *di;        /* These two only for non-symmetric problems */
-    igraph_real_t *workev;
+  int maxn, maxncv, maxldv;
+  igraph_real_t *v;
+  igraph_real_t *workl;
+  igraph_real_t *workd;
+  igraph_real_t *d;
+  igraph_real_t *resid;
+  igraph_real_t *ax;
+  int *select;
+  igraph_real_t *di; /* These two only for non-symmetric problems */
+  igraph_real_t *workev;
 } igraph_arpack_storage_t;
 
 DECLDIR void igraph_arpack_options_init(igraph_arpack_options_t *o);
 
-DECLDIR int igraph_arpack_storage_init(igraph_arpack_storage_t *s, long int maxn,
-                                       long int maxncv, long int maxldv, igraph_bool_t symm);
+DECLDIR int igraph_arpack_storage_init(igraph_arpack_storage_t *s,
+                                       long int maxn, long int maxncv,
+                                       long int maxldv, igraph_bool_t symm);
 DECLDIR void igraph_arpack_storage_destroy(igraph_arpack_storage_t *s);
 
 /**
@@ -312,21 +310,24 @@ DECLDIR void igraph_arpack_storage_destroy(igraph_arpack_storage_t *s);
  *    this as an error, stops and calls the igraph error handler.
  */
 
-typedef int igraph_arpack_function_t(igraph_real_t *to, const igraph_real_t *from,
-                                     int n, void *extra);
+typedef int igraph_arpack_function_t(igraph_real_t *to,
+                                     const igraph_real_t *from, int n,
+                                     void *extra);
 
 DECLDIR int igraph_arpack_rssolve(igraph_arpack_function_t *fun, void *extra,
                                   igraph_arpack_options_t *options,
                                   igraph_arpack_storage_t *storage,
-                                  igraph_vector_t *values, igraph_matrix_t *vectors);
+                                  igraph_vector_t *values,
+                                  igraph_matrix_t *vectors);
 
 DECLDIR int igraph_arpack_rnsolve(igraph_arpack_function_t *fun, void *extra,
                                   igraph_arpack_options_t *options,
                                   igraph_arpack_storage_t *storage,
-                                  igraph_matrix_t *values, igraph_matrix_t *vectors);
+                                  igraph_matrix_t *values,
+                                  igraph_matrix_t *vectors);
 
-DECLDIR int igraph_arpack_unpack_complex(igraph_matrix_t *vectors, igraph_matrix_t *values,
-        long int nev);
+DECLDIR int igraph_arpack_unpack_complex(igraph_matrix_t *vectors,
+                                         igraph_matrix_t *values, long int nev);
 
 __END_DECLS
 

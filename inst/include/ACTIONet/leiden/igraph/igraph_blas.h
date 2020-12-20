@@ -24,10 +24,10 @@
 #ifndef IGRAPH_BLAS_H
 #define IGRAPH_BLAS_H
 
+#include "igraph_decls.h"
+#include "igraph_matrix.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
-#include "igraph_matrix.h"
-#include "igraph_decls.h"
 
 __BEGIN_DECLS
 
@@ -52,11 +52,14 @@ __BEGIN_DECLS
  */
 
 DECLDIR void igraph_blas_dgemv(igraph_bool_t transpose, igraph_real_t alpha,
-                               const igraph_matrix_t* a, const igraph_vector_t* x,
-                               igraph_real_t beta, igraph_vector_t* y);
-DECLDIR void igraph_blas_dgemv_array(igraph_bool_t transpose, igraph_real_t alpha,
-                                     const igraph_matrix_t* a, const igraph_real_t* x,
-                                     igraph_real_t beta, igraph_real_t* y);
+                               const igraph_matrix_t *a,
+                               const igraph_vector_t *x, igraph_real_t beta,
+                               igraph_vector_t *y);
+DECLDIR void igraph_blas_dgemv_array(igraph_bool_t transpose,
+                                     igraph_real_t alpha,
+                                     const igraph_matrix_t *a,
+                                     const igraph_real_t *x, igraph_real_t beta,
+                                     igraph_real_t *y);
 
 DECLDIR igraph_real_t igraph_blas_dnrm2(const igraph_vector_t *v);
 

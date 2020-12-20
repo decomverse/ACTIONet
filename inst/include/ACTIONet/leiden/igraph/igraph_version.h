@@ -34,13 +34,9 @@ __BEGIN_DECLS
 #define IGRAPH_VERSION_PATCH 2
 #define IGRAPH_VERSION_PRERELEASE ""
 
-int igraph_version(const char **version_string,
-                   int *major,
-                   int *minor,
+int igraph_version(const char **version_string, int *major, int *minor,
                    int *subminor);
 
 __END_DECLS
 
 #endif
-
-

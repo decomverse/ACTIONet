@@ -21,13 +21,13 @@
 
 */
 
-#include "igraph_random.h"
+#include "config.h"
 #include "igraph_error.h"
 #include "igraph_math.h"
+#include "igraph_memory.h"
+#include "igraph_random.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
-#include "igraph_memory.h"
-#include "config.h"
 #include <math.h>
 #include <string.h>
 
@@ -119,98 +119,95 @@
 /* ------------------------------------ */
 
 typedef struct {
-    int i, j;
-    long int x[31];
+  int i, j;
+  long int x[31];
 } igraph_i_rng_glibc2_state_t;
 
-static unsigned long int igraph_i_rng_glibc2_get(int *i, int *j, int n, long int *x) {
-    unsigned long int k;
+static unsigned long int igraph_i_rng_glibc2_get(int *i, int *j, int n,
+                                                 long int *x) {
+  unsigned long int k;
 
-    x[*i] += x[*j];
-    k = (x[*i] >> 1) & 0x7FFFFFFF;
+  x[*i] += x[*j];
+  k = (x[*i] >> 1) & 0x7FFFFFFF;
 
-    (*i)++;
-    if (*i == n) {
-        *i = 0;
-    }
+  (*i)++;
+  if (*i == n) {
+    *i = 0;
+  }
 
-    (*j)++ ;
-    if (*j == n) {
-        *j = 0;
-    }
+  (*j)++;
+  if (*j == n) {
+    *j = 0;
+  }
 
-    return k;
+  return k;
 }
 
 unsigned long int igraph_rng_glibc2_get(void *vstate) {
-    igraph_i_rng_glibc2_state_t *state =
-        (igraph_i_rng_glibc2_state_t*) vstate;
-    return igraph_i_rng_glibc2_get(&state->i, &state->j, 31, state->x);
+  igraph_i_rng_glibc2_state_t *state = (igraph_i_rng_glibc2_state_t *)vstate;
+  return igraph_i_rng_glibc2_get(&state->i, &state->j, 31, state->x);
 }
 
 igraph_real_t igraph_rng_glibc2_get_real(void *state) {
-    return igraph_rng_glibc2_get(state) / 2147483648.0;
+  return igraph_rng_glibc2_get(state) / 2147483648.0;
 }
 
 /* this function is independent of the bit size */
 
-static void igraph_i_rng_glibc2_init(long int *x, int n,
-                                     unsigned long int s) {
-    int i;
+static void igraph_i_rng_glibc2_init(long int *x, int n, unsigned long int s) {
+  int i;
 
-    if (s == 0) {
-        s = 1;
+  if (s == 0) {
+    s = 1;
+  }
+
+  x[0] = (long)s;
+  for (i = 1; i < n; i++) {
+    const long int h = s / 127773;
+    const long int t = 16807 * ((long)s - h * 127773) - h * 2836;
+    if (t < 0) {
+      s = (unsigned long)t + 2147483647;
+    } else {
+      s = (unsigned long)t;
     }
 
-    x[0] = (long) s;
-    for (i = 1 ; i < n ; i++) {
-        const long int h = s / 127773;
-        const long int t = 16807 * ((long) s - h * 127773) - h * 2836;
-        if (t < 0) {
-            s = (unsigned long) t + 2147483647 ;
-        } else {
-            s = (unsigned long) t ;
-        }
-
-        x[i] = (long int) s ;
-    }
+    x[i] = (long int)s;
+  }
 }
 
 int igraph_rng_glibc2_seed(void *vstate, unsigned long int seed) {
-    igraph_i_rng_glibc2_state_t *state =
-        (igraph_i_rng_glibc2_state_t*) vstate;
-    int i;
+  igraph_i_rng_glibc2_state_t *state = (igraph_i_rng_glibc2_state_t *)vstate;
+  int i;
 
-    igraph_i_rng_glibc2_init(state->x, 31, seed);
+  igraph_i_rng_glibc2_init(state->x, 31, seed);
 
-    state->i = 3;
-    state->j = 0;
+  state->i = 3;
+  state->j = 0;
 
-    for (i = 0; i < 10 * 31; i++) {
-        igraph_rng_glibc2_get(state);
-    }
+  for (i = 0; i < 10 * 31; i++) {
+    igraph_rng_glibc2_get(state);
+  }
 
-    return 0;
+  return 0;
 }
 
 int igraph_rng_glibc2_init(void **state) {
-    igraph_i_rng_glibc2_state_t *st;
+  igraph_i_rng_glibc2_state_t *st;
 
-    st = igraph_Calloc(1, igraph_i_rng_glibc2_state_t);
-    if (!st) {
-        IGRAPH_ERROR("Cannot initialize RNG", IGRAPH_ENOMEM);
-    }
-    (*state) = st;
+  st = igraph_Calloc(1, igraph_i_rng_glibc2_state_t);
+  if (!st) {
+    IGRAPH_ERROR("Cannot initialize RNG", IGRAPH_ENOMEM);
+  }
+  (*state) = st;
 
-    igraph_rng_glibc2_seed(st, 0);
+  igraph_rng_glibc2_seed(st, 0);
 
-    return 0;
+  return 0;
 }
 
 void igraph_rng_glibc2_destroy(void *vstate) {
-    igraph_i_rng_glibc2_state_t *state =
-        (igraph_i_rng_glibc2_state_t*) vstate;
-    igraph_Free(state);
+  igraph_i_rng_glibc2_state_t *state = (igraph_i_rng_glibc2_state_t *)vstate;
+  igraph_Free(state);
 }
 
 /**
@@ -225,61 +222,59 @@ void igraph_rng_glibc2_destroy(void *vstate) {
  */
 
 const igraph_rng_type_t igraph_rngtype_glibc2 = {
-    /* name= */      "LIBC",
-    /* min=  */      0,
-    /* max=  */      RAND_MAX,
-    /* init= */      igraph_rng_glibc2_init,
-    /* destroy= */   igraph_rng_glibc2_destroy,
-    /* seed= */      igraph_rng_glibc2_seed,
-    /* get= */       igraph_rng_glibc2_get,
-    /* get_real= */  igraph_rng_glibc2_get_real,
-    /* get_norm= */  0,
-    /* get_geom= */  0,
+    /* name= */ "LIBC",
+    /* min=  */ 0,
+    /* max=  */ RAND_MAX,
+    /* init= */ igraph_rng_glibc2_init,
+    /* destroy= */ igraph_rng_glibc2_destroy,
+    /* seed= */ igraph_rng_glibc2_seed,
+    /* get= */ igraph_rng_glibc2_get,
+    /* get_real= */ igraph_rng_glibc2_get_real,
+    /* get_norm= */ 0,
+    /* get_geom= */ 0,
     /* get_binom= */ 0,
-    /* get_exp= */   0,
-    /* get_gamma= */ 0
-};
+    /* get_exp= */ 0,
+    /* get_gamma= */ 0};
 
 /* ------------------------------------ */
 
 typedef struct {
-    unsigned long int x;
+  unsigned long int x;
 } igraph_i_rng_rand_state_t;
 
 unsigned long int igraph_rng_rand_get(void *vstate) {
-    igraph_i_rng_rand_state_t *state = vstate;
-    state->x = (1103515245 * state->x + 12345) & 0x7fffffffUL;
-    return state->x;
+  igraph_i_rng_rand_state_t *state = vstate;
+  state->x = (1103515245 * state->x + 12345) & 0x7fffffffUL;
+  return state->x;
 }
 
 igraph_real_t igraph_rng_rand_get_real(void *vstate) {
-    return igraph_rng_rand_get (vstate) / 2147483648.0 ;
+  return igraph_rng_rand_get(vstate) / 2147483648.0;
 }
 
 int igraph_rng_rand_seed(void *vstate, unsigned long int seed) {
-    igraph_i_rng_rand_state_t *state = vstate;
-    state->x = seed;
-    return 0;
+  igraph_i_rng_rand_state_t *state = vstate;
+  state->x = seed;
+  return 0;
 }
 
 int igraph_rng_rand_init(void **state) {
-    igraph_i_rng_rand_state_t *st;
+  igraph_i_rng_rand_state_t *st;
 
-    st = igraph_Calloc(1, igraph_i_rng_rand_state_t);
-    if (!st) {
-        IGRAPH_ERROR("Cannot initialize RNG", IGRAPH_ENOMEM);
-    }
-    (*state) = st;
+  st = igraph_Calloc(1, igraph_i_rng_rand_state_t);
+  if (!st) {
+    IGRAPH_ERROR("Cannot initialize RNG", IGRAPH_ENOMEM);
+  }
+  (*state) = st;
 
-    igraph_rng_rand_seed(st, 0);
+  igraph_rng_rand_seed(st, 0);
 
-    return 0;
+  return 0;
 }
 
 void igraph_rng_rand_destroy(void *vstate) {
-    igraph_i_rng_rand_state_t *state =
-        (igraph_i_rng_rand_state_t*) vstate;
-    igraph_Free(state);
+  igraph_i_rng_rand_state_t *state = (igraph_i_rng_rand_state_t *)vstate;
+  igraph_Free(state);
 }
 
 /**
@@ -302,24 +297,23 @@ void igraph_rng_rand_destroy(void *vstate) {
  */
 
 const igraph_rng_type_t igraph_rngtype_rand = {
-    /* name= */      "RAND",
-    /* min=  */      0,
-    /* max=  */      0x7fffffffUL,
-    /* init= */      igraph_rng_rand_init,
-    /* destroy= */   igraph_rng_rand_destroy,
-    /* seed= */      igraph_rng_rand_seed,
-    /* get= */       igraph_rng_rand_get,
-    /* get_real= */  igraph_rng_rand_get_real,
-    /* get_norm= */  0,
-    /* get_geom= */  0,
+    /* name= */ "RAND",
+    /* min=  */ 0,
+    /* max=  */ 0x7fffffffUL,
+    /* init= */ igraph_rng_rand_init,
+    /* destroy= */ igraph_rng_rand_destroy,
+    /* seed= */ igraph_rng_rand_seed,
+    /* get= */ igraph_rng_rand_get,
+    /* get_real= */ igraph_rng_rand_get_real,
+    /* get_norm= */ 0,
+    /* get_geom= */ 0,
     /* get_binom= */ 0,
-    /* get_exp= */   0,
-    /* get_gamma= */ 0
-};
+    /* get_exp= */ 0,
+    /* get_gamma= */ 0};
 
 /* ------------------------------------ */
 
-#define N 624   /* Period parameters */
+#define N 624 /* Period parameters */
 #define M 397
 
 /* most significant w-r bits */
@@ -329,100 +323,99 @@ static const unsigned long UPPER_MASK = 0x80000000UL;
 static const unsigned long LOWER_MASK = 0x7fffffffUL;
 
 typedef struct {
-    unsigned long mt[N];
-    int mti;
+  unsigned long mt[N];
+  int mti;
 } igraph_i_rng_mt19937_state_t;
 
 unsigned long int igraph_rng_mt19937_get(void *vstate) {
-    igraph_i_rng_mt19937_state_t *state = vstate;
+  igraph_i_rng_mt19937_state_t *state = vstate;
 
-    unsigned long k ;
-    unsigned long int *const mt = state->mt;
+  unsigned long k;
+  unsigned long int *const mt = state->mt;
 
 #define MAGIC(y) (((y)&0x1) ? 0x9908b0dfUL : 0)
 
-    if (state->mti >= N) {
-        /* generate N words at one time */
-        int kk;
+  if (state->mti >= N) {
+    /* generate N words at one time */
+    int kk;
 
-        for (kk = 0; kk < N - M; kk++) {
-            unsigned long y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-            mt[kk] = mt[kk + M] ^ (y >> 1) ^ MAGIC(y);
-        }
-        for (; kk < N - 1; kk++) {
-            unsigned long y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-            mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ MAGIC(y);
-        }
-
-        {
-            unsigned long y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
-            mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ MAGIC(y);
-        }
-
-        state->mti = 0;
+    for (kk = 0; kk < N - M; kk++) {
+      unsigned long y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+      mt[kk] = mt[kk + M] ^ (y >> 1) ^ MAGIC(y);
     }
+    for (; kk < N - 1; kk++) {
+      unsigned long y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+      mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ MAGIC(y);
+    }
+
+    {
+      unsigned long y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
+      mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ MAGIC(y);
+    }
+
+    state->mti = 0;
+  }
 
 #undef MAGIC
 
-    /* Tempering */
+  /* Tempering */
 
-    k = mt[state->mti];
-    k ^= (k >> 11);
-    k ^= (k << 7) & 0x9d2c5680UL;
-    k ^= (k << 15) & 0xefc60000UL;
-    k ^= (k >> 18);
+  k = mt[state->mti];
+  k ^= (k >> 11);
+  k ^= (k << 7) & 0x9d2c5680UL;
+  k ^= (k << 15) & 0xefc60000UL;
+  k ^= (k >> 18);
 
-    state->mti++;
+  state->mti++;
 
-    return k;
+  return k;
 }
 
 igraph_real_t igraph_rng_mt19937_get_real(void *vstate) {
-    return igraph_rng_mt19937_get (vstate) / 4294967296.0 ;
+  return igraph_rng_mt19937_get(vstate) / 4294967296.0;
 }
 
 int igraph_rng_mt19937_seed(void *vstate, unsigned long int seed) {
-    igraph_i_rng_mt19937_state_t *state = vstate;
-    int i;
+  igraph_i_rng_mt19937_state_t *state = vstate;
+  int i;
 
-    memset(state, 0, sizeof(igraph_i_rng_mt19937_state_t));
+  memset(state, 0, sizeof(igraph_i_rng_mt19937_state_t));
 
-    if (seed == 0) {
-        seed = 4357;   /* the default seed is 4357 */
-    }
-    state->mt[0] = seed & 0xffffffffUL;
+  if (seed == 0) {
+    seed = 4357; /* the default seed is 4357 */
+  }
+  state->mt[0] = seed & 0xffffffffUL;
 
-    for (i = 1; i < N; i++) {
-        /* See Knuth's "Art of Computer Programming" Vol. 2, 3rd
-           Ed. p.106 for multiplier. */
-        state->mt[i] =
-            (1812433253UL * (state->mt[i - 1] ^ (state->mt[i - 1] >> 30)) +
-             (unsigned long) i);
-        state->mt[i] &= 0xffffffffUL;
-    }
+  for (i = 1; i < N; i++) {
+    /* See Knuth's "Art of Computer Programming" Vol. 2, 3rd
+       Ed. p.106 for multiplier. */
+    state->mt[i] =
+        (1812433253UL * (state->mt[i - 1] ^ (state->mt[i - 1] >> 30)) +
+         (unsigned long)i);
+    state->mt[i] &= 0xffffffffUL;
+  }
 
-    state->mti = i;
-    return 0;
+  state->mti = i;
+  return 0;
 }
 
 int igraph_rng_mt19937_init(void **state) {
-    igraph_i_rng_mt19937_state_t *st;
+  igraph_i_rng_mt19937_state_t *st;
 
-    st = igraph_Calloc(1, igraph_i_rng_mt19937_state_t);
-    if (!st) {
-        IGRAPH_ERROR("Cannot initialize RNG", IGRAPH_ENOMEM);
-    }
-    (*state) = st;
+  st = igraph_Calloc(1, igraph_i_rng_mt19937_state_t);
+  if (!st) {
+    IGRAPH_ERROR("Cannot initialize RNG", IGRAPH_ENOMEM);
+  }
+  (*state) = st;
 
-    igraph_rng_mt19937_seed(st, 0);
+  igraph_rng_mt19937_seed(st, 0);
 
-    return 0;
+  return 0;
 }
 
 void igraph_rng_mt19937_destroy(void *vstate) {
-    igraph_i_rng_mt19937_state_t *state =
-        (igraph_i_rng_mt19937_state_t*) vstate;
-    igraph_Free(state);
+  igraph_i_rng_mt19937_state_t *state = (igraph_i_rng_mt19937_state_t *)vstate;
+  igraph_Free(state);
 }
 
 /**
@@ -456,20 +449,19 @@ void igraph_rng_mt19937_destroy(void *vstate) {
  */
 
 const igraph_rng_type_t igraph_rngtype_mt19937 = {
-    /* name= */      "MT19937",
-    /* min=  */      0,
-    /* max=  */      0xffffffffUL,
-    /* init= */      igraph_rng_mt19937_init,
-    /* destroy= */   igraph_rng_mt19937_destroy,
-    /* seed= */      igraph_rng_mt19937_seed,
-    /* get= */       igraph_rng_mt19937_get,
-    /* get_real= */  igraph_rng_mt19937_get_real,
-    /* get_norm= */  0,
-    /* get_geom= */  0,
+    /* name= */ "MT19937",
+    /* min=  */ 0,
+    /* max=  */ 0xffffffffUL,
+    /* init= */ igraph_rng_mt19937_init,
+    /* destroy= */ igraph_rng_mt19937_destroy,
+    /* seed= */ igraph_rng_mt19937_seed,
+    /* get= */ igraph_rng_mt19937_get,
+    /* get_real= */ igraph_rng_mt19937_get_real,
+    /* get_norm= */ 0,
+    /* get_geom= */ 0,
     /* get_binom= */ 0,
-    /* get_exp= */   0,
-    /* get_gamma= */ 0
-};
+    /* get_exp= */ 0,
+    /* get_gamma= */ 0};
 
 #undef N
 #undef M
@@ -497,10 +489,8 @@ igraph_i_rng_mt19937_state_t igraph_i_rng_default_state;
  */
 
 IGRAPH_THREAD_LOCAL igraph_rng_t igraph_i_rng_default = {
-    addr(igraph_rngtype_mt19937),
-    addr(igraph_i_rng_default_state),
-    /* def= */ 1
-};
+    addr(igraph_rngtype_mt19937), addr(igraph_i_rng_default_state),
+    /* def= */ 1};
 
 #undef addr
 
@@ -517,97 +507,85 @@ IGRAPH_THREAD_LOCAL igraph_rng_t igraph_i_rng_default = {
  */
 
 void igraph_rng_set_default(igraph_rng_t *rng) {
-    igraph_i_rng_default = (*rng);
+  igraph_i_rng_default = (*rng);
 }
 
 #endif
-
 
 /* ------------------------------------ */
 
 #ifdef USING_R
 
-double  unif_rand(void);
-double  norm_rand(void);
-double  exp_rand(void);
-double  Rf_rgeom(double);
-double  Rf_rbinom(double, double);
-double  Rf_rgamma(double, double);
+double unif_rand(void);
+double norm_rand(void);
+double exp_rand(void);
+double Rf_rgeom(double);
+double Rf_rbinom(double, double);
+double Rf_rgamma(double, double);
 
 int igraph_rng_R_init(void **state) {
-    IGRAPH_ERROR("R RNG error, unsupported function called",
-                 IGRAPH_EINTERNAL);
-    return 0;
+  IGRAPH_ERROR("R RNG error, unsupported function called", IGRAPH_EINTERNAL);
+  return 0;
 }
 
 void igraph_rng_R_destroy(void *state) {
-    igraph_error("R RNG error, unsupported function called",
-                 __FILE__, __LINE__, IGRAPH_EINTERNAL);
+  igraph_error("R RNG error, unsupported function called", __FILE__, __LINE__,
+               IGRAPH_EINTERNAL);
 }
 
 int igraph_rng_R_seed(void *state, unsigned long int seed) {
-    IGRAPH_ERROR("R RNG error, unsupported function called",
-                 IGRAPH_EINTERNAL);
-    return 0;
+  IGRAPH_ERROR("R RNG error, unsupported function called", IGRAPH_EINTERNAL);
+  return 0;
 }
 
 unsigned long int igraph_rng_R_get(void *state) {
-    return (unsigned long) (unif_rand() * 0x7FFFFFFFUL);
+  return (unsigned long)(unif_rand() * 0x7FFFFFFFUL);
 }
 
-igraph_real_t igraph_rng_R_get_real(void *state) {
-    return unif_rand();
-}
+igraph_real_t igraph_rng_R_get_real(void *state) { return unif_rand(); }
 
-igraph_real_t igraph_rng_R_get_norm(void *state) {
-    return norm_rand();
-}
+igraph_real_t igraph_rng_R_get_norm(void *state) { return norm_rand(); }
 
 igraph_real_t igraph_rng_R_get_geom(void *state, igraph_real_t p) {
-    return Rf_rgeom(p);
+  return Rf_rgeom(p);
 }
 
-igraph_real_t igraph_rng_R_get_binom(void *state, long int n,
-                                     igraph_real_t p) {
-    return Rf_rbinom(n, p);
+igraph_real_t igraph_rng_R_get_binom(void *state, long int n, igraph_real_t p) {
+  return Rf_rbinom(n, p);
 }
 
 igraph_real_t igraph_rng_R_get_gamma(void *state, igraph_real_t shape,
                                      igraph_real_t scale) {
-    return Rf_rgamma(shape, scale);
+  return Rf_rgamma(shape, scale);
 }
 
 igraph_real_t igraph_rng_R_get_exp(void *state, igraph_real_t rate) {
-    igraph_real_t scale = 1.0 / rate;
-    if (!IGRAPH_FINITE(scale) || scale <= 0.0) {
-        if (scale == 0.0) {
-            return 0.0;
-        }
-        return IGRAPH_NAN;
+  igraph_real_t scale = 1.0 / rate;
+  if (!IGRAPH_FINITE(scale) || scale <= 0.0) {
+    if (scale == 0.0) {
+      return 0.0;
     }
-    return scale * exp_rand();
+    return IGRAPH_NAN;
+  }
+  return scale * exp_rand();
 }
 
 igraph_rng_type_t igraph_rngtype_R = {
-    /* name= */      "GNU R",
-    /* min=  */      0,
-    /* max=  */      0x7FFFFFFFUL,
-    /* init= */      igraph_rng_R_init,
-    /* destroy= */   igraph_rng_R_destroy,
-    /* seed= */      igraph_rng_R_seed,
-    /* get= */       igraph_rng_R_get,
-    /* get_real= */  igraph_rng_R_get_real,
-    /* get_norm= */  igraph_rng_R_get_norm,
-    /* get_geom= */  igraph_rng_R_get_geom,
+    /* name= */ "GNU R",
+    /* min=  */ 0,
+    /* max=  */ 0x7FFFFFFFUL,
+    /* init= */ igraph_rng_R_init,
+    /* destroy= */ igraph_rng_R_destroy,
+    /* seed= */ igraph_rng_R_seed,
+    /* get= */ igraph_rng_R_get,
+    /* get_real= */ igraph_rng_R_get_real,
+    /* get_norm= */ igraph_rng_R_get_norm,
+    /* get_geom= */ igraph_rng_R_get_geom,
     /* get_binom= */ igraph_rng_R_get_binom,
-    /* get_exp= */   igraph_rng_R_get_exp
-};
+    /* get_exp= */ igraph_rng_R_get_exp};
 
-IGRAPH_THREAD_LOCAL igraph_rng_t igraph_i_rng_default = {
-    &igraph_rngtype_R,
-    0,
-    /* def= */ 1
-};
+IGRAPH_THREAD_LOCAL igraph_rng_t igraph_i_rng_default = {&igraph_rngtype_R, 0,
+                                                         /* def= */ 1};
 
 #endif
 
@@ -622,9 +600,7 @@ IGRAPH_THREAD_LOCAL igraph_rng_t igraph_i_rng_default = {
  * \sa igraph_rng_set_default()
  */
 
-igraph_rng_t *igraph_rng_default() {
-    return &igraph_i_rng_default;
-}
+igraph_rng_t *igraph_rng_default() { return &igraph_i_rng_default; }
 
 /* ------------------------------------ */
 
@@ -651,9 +627,9 @@ double igraph_rgamma(igraph_rng_t *rng, double shape, double scale);
  */
 
 int igraph_rng_init(igraph_rng_t *rng, const igraph_rng_type_t *type) {
-    rng->type = type;
-    IGRAPH_CHECK(rng->type->init(&rng->state));
-    return 0;
+  rng->type = type;
+  IGRAPH_CHECK(rng->type->init(&rng->state));
+  return 0;
 }
 
 /**
@@ -666,9 +642,7 @@ int igraph_rng_init(igraph_rng_t *rng, const igraph_rng_type_t *type) {
  * Time complexity: O(1).
  */
 
-void igraph_rng_destroy(igraph_rng_t *rng) {
-    rng->type->destroy(rng->state);
-}
+void igraph_rng_destroy(igraph_rng_t *rng) { rng->type->destroy(rng->state); }
 
 /**
  * \function igraph_rng_seed
@@ -682,10 +656,10 @@ void igraph_rng_destroy(igraph_rng_t *rng) {
  * RNG.
  */
 int igraph_rng_seed(igraph_rng_t *rng, unsigned long int seed) {
-    const igraph_rng_type_t *type = rng->type;
-    rng->def = 0;
-    IGRAPH_CHECK(type->seed(rng->state, seed));
-    return 0;
+  const igraph_rng_type_t *type = rng->type;
+  rng->def = 0;
+  IGRAPH_CHECK(type->seed(rng->state, seed));
+  return 0;
 }
 
 /**
@@ -700,8 +674,8 @@ int igraph_rng_seed(igraph_rng_t *rng, unsigned long int seed) {
  */
 
 unsigned long int igraph_rng_max(igraph_rng_t *rng) {
-    const igraph_rng_type_t *type = rng->type;
-    return type->max;
+  const igraph_rng_type_t *type = rng->type;
+  return type->max;
 }
 
 /**
@@ -716,8 +690,8 @@ unsigned long int igraph_rng_max(igraph_rng_t *rng) {
  */
 
 unsigned long int igraph_rng_min(igraph_rng_t *rng) {
-    const igraph_rng_type_t *type = rng->type;
-    return type->min;
+  const igraph_rng_type_t *type = rng->type;
+  return type->min;
 }
 
 /**
@@ -732,8 +706,8 @@ unsigned long int igraph_rng_min(igraph_rng_t *rng) {
  */
 
 const char *igraph_rng_name(igraph_rng_t *rng) {
-    const igraph_rng_type_t *type = rng->type;
-    return type->name;
+  const igraph_rng_type_t *type = rng->type;
+  return type->name;
 }
 
 /**
@@ -751,17 +725,17 @@ const char *igraph_rng_name(igraph_rng_t *rng) {
  * O(1).
  */
 
-long int igraph_rng_get_integer(igraph_rng_t *rng,
-                                long int l, long int h) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_real) {
-        return (long int)(type->get_real(rng->state) * (h - l + 1) + l);
-    } else if (type->get) {
-        unsigned long int max = type->max;
-        return (long int)(type->get(rng->state) / ((double)max + 1) * (h - l + 1) + l);
-    }
-    IGRAPH_ERROR("Internal random generator error", IGRAPH_EINTERNAL);
-    return 0;
+long int igraph_rng_get_integer(igraph_rng_t *rng, long int l, long int h) {
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_real) {
+    return (long int)(type->get_real(rng->state) * (h - l + 1) + l);
+  } else if (type->get) {
+    unsigned long int max = type->max;
+    return (long int)(type->get(rng->state) / ((double)max + 1) * (h - l + 1) +
+                      l);
+  }
+  IGRAPH_ERROR("Internal random generator error", IGRAPH_EINTERNAL);
+  return 0;
 }
 
 /**
@@ -777,14 +751,14 @@ long int igraph_rng_get_integer(igraph_rng_t *rng,
  * Time complexity: depends on the type of the RNG.
  */
 
-igraph_real_t igraph_rng_get_normal(igraph_rng_t *rng,
-                                    igraph_real_t m, igraph_real_t s) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_norm) {
-        return type->get_norm(rng->state) * s + m;
-    } else {
-        return igraph_norm_rand(rng) * s + m;
-    }
+igraph_real_t igraph_rng_get_normal(igraph_rng_t *rng, igraph_real_t m,
+                                    igraph_real_t s) {
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_norm) {
+    return type->get_norm(rng->state) * s + m;
+  } else {
+    return igraph_norm_rand(rng) * s + m;
+  }
 }
 
 /**
@@ -801,17 +775,17 @@ igraph_real_t igraph_rng_get_normal(igraph_rng_t *rng,
  * Time complexity: depends on the type of the RNG.
  */
 
-igraph_real_t igraph_rng_get_unif(igraph_rng_t *rng,
-                                  igraph_real_t l, igraph_real_t h) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_real) {
-        return type->get_real(rng->state) * (h - l) + l;
-    } else if (type->get) {
-        unsigned long int max = type->max;
-        return type->get(rng->state) / ((double)max + 1) * (double)(h - l) + l;
-    }
-    IGRAPH_ERROR("Internal random generator error", IGRAPH_EINTERNAL);
-    return 0;
+igraph_real_t igraph_rng_get_unif(igraph_rng_t *rng, igraph_real_t l,
+                                  igraph_real_t h) {
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_real) {
+    return type->get_real(rng->state) * (h - l) + l;
+  } else if (type->get) {
+    unsigned long int max = type->max;
+    return type->get(rng->state) / ((double)max + 1) * (double)(h - l) + l;
+  }
+  IGRAPH_ERROR("Internal random generator error", IGRAPH_EINTERNAL);
+  return 0;
 }
 
 /**
@@ -826,15 +800,15 @@ igraph_real_t igraph_rng_get_unif(igraph_rng_t *rng,
  */
 
 igraph_real_t igraph_rng_get_unif01(igraph_rng_t *rng) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_real) {
-        return type->get_real(rng->state);
-    } else if (type->get) {
-        unsigned long int max = type->max;
-        return type->get(rng->state) / ((double)max + 1);
-    }
-    IGRAPH_ERROR("Internal random generator error", IGRAPH_EINTERNAL);
-    return 0;
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_real) {
+    return type->get_real(rng->state);
+  } else if (type->get) {
+    unsigned long int max = type->max;
+    return type->get(rng->state) / ((double)max + 1);
+  }
+  IGRAPH_ERROR("Internal random generator error", IGRAPH_EINTERNAL);
+  return 0;
 }
 
 /**
@@ -851,12 +825,12 @@ igraph_real_t igraph_rng_get_unif01(igraph_rng_t *rng) {
  */
 
 igraph_real_t igraph_rng_get_geom(igraph_rng_t *rng, igraph_real_t p) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_geom) {
-        return type->get_geom(rng->state, p);
-    } else {
-        return igraph_rgeom(rng, p);
-    }
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_geom) {
+    return type->get_geom(rng->state, p);
+  } else {
+    return igraph_rgeom(rng, p);
+  }
 }
 
 /**
@@ -874,12 +848,12 @@ igraph_real_t igraph_rng_get_geom(igraph_rng_t *rng, igraph_real_t p) {
 
 igraph_real_t igraph_rng_get_binom(igraph_rng_t *rng, long int n,
                                    igraph_real_t p) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_binom) {
-        return type->get_binom(rng->state, n, p);
-    } else {
-        return igraph_rbinom(rng, n, p);
-    }
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_binom) {
+    return type->get_binom(rng->state, n, p);
+  } else {
+    return igraph_rbinom(rng, n, p);
+  }
 }
 
 /**
@@ -897,72 +871,69 @@ igraph_real_t igraph_rng_get_binom(igraph_rng_t *rng, long int n,
 
 igraph_real_t igraph_rng_get_gamma(igraph_rng_t *rng, igraph_real_t shape,
                                    igraph_real_t scale) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_gamma) {
-        return type->get_gamma(rng->state, shape, scale);
-    } else {
-        return igraph_rgamma(rng, shape, scale);
-    }
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_gamma) {
+    return type->get_gamma(rng->state, shape, scale);
+  } else {
+    return igraph_rgamma(rng, shape, scale);
+  }
 }
 
 unsigned long int igraph_rng_get_int31(igraph_rng_t *rng) {
-    const igraph_rng_type_t *type = rng->type;
-    unsigned long int max = type->max;
-    if (type->get && max == 0x7FFFFFFFUL) {
-        return type->get(rng->state);
-    } else if (type->get_real) {
-        return (unsigned long int) (type->get_real(rng->state) * 0x7FFFFFFFUL);
-    } else {
-        return (unsigned long int) (igraph_rng_get_unif01(rng) * 0x7FFFFFFFUL);
-    }
+  const igraph_rng_type_t *type = rng->type;
+  unsigned long int max = type->max;
+  if (type->get && max == 0x7FFFFFFFUL) {
+    return type->get(rng->state);
+  } else if (type->get_real) {
+    return (unsigned long int)(type->get_real(rng->state) * 0x7FFFFFFFUL);
+  } else {
+    return (unsigned long int)(igraph_rng_get_unif01(rng) * 0x7FFFFFFFUL);
+  }
 }
 
 igraph_real_t igraph_rng_get_exp(igraph_rng_t *rng, igraph_real_t rate) {
-    const igraph_rng_type_t *type = rng->type;
-    if (type->get_exp) {
-        return type->get_exp(rng->state, rate);
-    } else {
-        return igraph_rexp(rng, rate);
-    }
+  const igraph_rng_type_t *type = rng->type;
+  if (type->get_exp) {
+    return type->get_exp(rng->state, rate);
+  } else {
+    return igraph_rexp(rng, rate);
+  }
 }
 
-
 #ifndef HAVE_EXPM1
-#ifndef USING_R         /* R provides a replacement */
+#ifndef USING_R /* R provides a replacement */
 /* expm1 replacement */
-double expm1 (double x) {
-    if (fabs(x) < M_LN2) {
-        /* Compute the Taylor series S = x + (1/2!) x^2 + (1/3!) x^3 + ... */
+double expm1(double x) {
+  if (fabs(x) < M_LN2) {
+    /* Compute the Taylor series S = x + (1/2!) x^2 + (1/3!) x^3 + ... */
 
-        double i = 1.0;
-        double sum = x;
-        double term = x / 1.0;
+    double i = 1.0;
+    double sum = x;
+    double term = x / 1.0;
 
-        do {
-            term *= x / ++i;
-            sum += term;
-        } while (fabs(term) > fabs(sum) * 2.22e-16);
+    do {
+      term *= x / ++i;
+      sum += term;
+    } while (fabs(term) > fabs(sum) * 2.22e-16);
 
-        return sum;
-    }
+    return sum;
+  }
 
-    return expl(x) - 1.0L;
+  return expl(x) - 1.0L;
 }
 #endif
 #endif
 
 #ifndef HAVE_RINT
-#ifndef USING_R         /* R provides a replacement */
+#ifndef USING_R /* R provides a replacement */
 /* rint replacement */
-double rint (double x) {
-    return ( (x < 0.) ? -floor(-x + .5) : floor(x + .5) );
-}
+double rint(double x) { return ((x < 0.) ? -floor(-x + .5) : floor(x + .5)); }
 #endif
 #endif
 
 #ifndef HAVE_RINTF
-float rintf (float x) {
-    return ( (x < (float)0.) ? -(float)floor(-x + .5) : (float)floor(x + .5) );
+float rintf(float x) {
+  return ((x < (float)0.) ? -(float)floor(-x + .5) : (float)floor(x + .5));
 }
 #endif
 
@@ -973,39 +944,40 @@ float rintf (float x) {
  * result vector.
  */
 
-static int igraph_i_random_sample_alga(igraph_vector_t *res,
-                                       igraph_integer_t l, igraph_integer_t h,
+static int igraph_i_random_sample_alga(igraph_vector_t *res, igraph_integer_t l,
+                                       igraph_integer_t h,
                                        igraph_integer_t length) {
-    igraph_real_t N = h - l + 1;
-    igraph_real_t n = length;
+  igraph_real_t N = h - l + 1;
+  igraph_real_t n = length;
 
-    igraph_real_t top = N - n;
-    igraph_real_t Nreal = N;
-    igraph_real_t S = 0;
-    igraph_real_t V, quot;
+  igraph_real_t top = N - n;
+  igraph_real_t Nreal = N;
+  igraph_real_t S = 0;
+  igraph_real_t V, quot;
 
-    l = l - 1;
+  l = l - 1;
 
-    while (n >= 2) {
-        V = RNG_UNIF01();
-        S = 1;
-        quot = top / Nreal;
-        while (quot > V) {
-            S += 1;
-            top = -1.0 + top;
-            Nreal = -1.0 + Nreal;
-            quot = (quot * top) / Nreal;
-        }
-        l += S;
-        igraph_vector_push_back(res, l);    /* allocated */
-        Nreal = -1.0 + Nreal; n = -1 + n;
+  while (n >= 2) {
+    V = RNG_UNIF01();
+    S = 1;
+    quot = top / Nreal;
+    while (quot > V) {
+      S += 1;
+      top = -1.0 + top;
+      Nreal = -1.0 + Nreal;
+      quot = (quot * top) / Nreal;
     }
+    l += S;
+    igraph_vector_push_back(res, l); /* allocated */
+    Nreal = -1.0 + Nreal;
+    n = -1 + n;
+  }
 
-    S = floor(round(Nreal) * RNG_UNIF01());
-    l += S + 1;
-    igraph_vector_push_back(res, l);  /* allocated */
+  S = floor(round(Nreal) * RNG_UNIF01());
+  l += S + 1;
+  igraph_vector_push_back(res, l); /* allocated */
 
-    return 0;
+  return 0;
 }
 
 /**
@@ -1058,154 +1030,153 @@ static int igraph_i_random_sample_alga(igraph_vector_t *res,
 
 int igraph_random_sample(igraph_vector_t *res, igraph_real_t l, igraph_real_t h,
                          igraph_integer_t length) {
-    igraph_real_t N = h - l + 1;
-    igraph_real_t n = length;
-    int retval;
+  igraph_real_t N = h - l + 1;
+  igraph_real_t n = length;
+  int retval;
 
-    igraph_real_t nreal = length;
-    igraph_real_t ninv = (nreal != 0) ? 1.0 / nreal : 0.0;
-    igraph_real_t Nreal = N;
-    igraph_real_t Vprime;
-    igraph_real_t qu1 = -n + 1 + N;
-    igraph_real_t qu1real = -nreal + 1.0 + Nreal;
-    igraph_real_t negalphainv = -13;
-    igraph_real_t threshold = -negalphainv * n;
-    igraph_real_t S;
+  igraph_real_t nreal = length;
+  igraph_real_t ninv = (nreal != 0) ? 1.0 / nreal : 0.0;
+  igraph_real_t Nreal = N;
+  igraph_real_t Vprime;
+  igraph_real_t qu1 = -n + 1 + N;
+  igraph_real_t qu1real = -nreal + 1.0 + Nreal;
+  igraph_real_t negalphainv = -13;
+  igraph_real_t threshold = -negalphainv * n;
+  igraph_real_t S;
 
-    /* getting back some sense of sanity */
-    if (l > h) {
-        IGRAPH_ERROR("Lower limit is greater than upper limit", IGRAPH_EINVAL);
-    }
-    /* now we know that l <= h */
-    if (length > N) {
-        IGRAPH_ERROR("Sample size exceeds size of candidate pool", IGRAPH_EINVAL);
-    }
+  /* getting back some sense of sanity */
+  if (l > h) {
+    IGRAPH_ERROR("Lower limit is greater than upper limit", IGRAPH_EINVAL);
+  }
+  /* now we know that l <= h */
+  if (length > N) {
+    IGRAPH_ERROR("Sample size exceeds size of candidate pool", IGRAPH_EINVAL);
+  }
 
-    /* treat rare cases quickly */
-    if (l == h) {
-        IGRAPH_CHECK(igraph_vector_resize(res, 1));
-        VECTOR(*res)[0] = l;
-        return 0;
-    }
-    if (length == 0) {
-        igraph_vector_clear(res);
-        return 0;
-    }
-    if (length == N) {
-        long int i = 0;
-        IGRAPH_CHECK(igraph_vector_resize(res, length));
-        for (i = 0; i < length; i++) {
-            VECTOR(*res)[i] = l++;
-        }
-        return 0;
-    }
-
+  /* treat rare cases quickly */
+  if (l == h) {
+    IGRAPH_CHECK(igraph_vector_resize(res, 1));
+    VECTOR(*res)[0] = l;
+    return 0;
+  }
+  if (length == 0) {
     igraph_vector_clear(res);
-    IGRAPH_CHECK(igraph_vector_reserve(res, length));
+    return 0;
+  }
+  if (length == N) {
+    long int i = 0;
+    IGRAPH_CHECK(igraph_vector_resize(res, length));
+    for (i = 0; i < length; i++) {
+      VECTOR(*res)[i] = l++;
+    }
+    return 0;
+  }
 
-    RNG_BEGIN();
+  igraph_vector_clear(res);
+  IGRAPH_CHECK(igraph_vector_reserve(res, length));
 
-    Vprime = exp(log(RNG_UNIF01()) * ninv);
-    l = l - 1;
+  RNG_BEGIN();
 
-    while (n > 1 && threshold < N) {
-        igraph_real_t X, U;
-        igraph_real_t limit, t;
-        igraph_real_t negSreal, y1, y2, top, bottom;
-        igraph_real_t nmin1inv = 1.0 / (-1.0 + nreal);
-        while (1) {
-            while (1) {
-                X = Nreal * (-Vprime + 1.0);
-                S = floor(X);
-                // if (S==0) { S=1; }
-                if (S < qu1) {
-                    break;
-                }
-                Vprime = exp(log(RNG_UNIF01()) * ninv);
-            }
-            U = RNG_UNIF01();
-            negSreal = -S;
+  Vprime = exp(log(RNG_UNIF01()) * ninv);
+  l = l - 1;
 
-            y1 = exp(log(U * Nreal / qu1real) * nmin1inv);
-            Vprime = y1 * (-X / Nreal + 1.0) * (qu1real / (negSreal + qu1real));
-            if (Vprime <= 1.0) {
-                break;
-            }
-
-            y2 = 1.0;
-            top = -1.0 + Nreal;
-            if (-1 + n > S) {
-                bottom = -nreal + Nreal;
-                limit = -S + N;
-            } else {
-                bottom = -1.0 + negSreal + Nreal;
-                limit = qu1;
-            }
-            for (t = -1 + N; t >= limit; t--) {
-                y2 = (y2 * top) / bottom;
-                top = -1.0 + top;
-                bottom = -1.0 + bottom;
-            }
-            if (Nreal / (-X + Nreal) >= y1 * exp(log(y2)*nmin1inv)) {
-                Vprime = exp(log(RNG_UNIF01()) * nmin1inv);
-                break;
-            }
-            Vprime = exp(log(RNG_UNIF01()) * ninv);
+  while (n > 1 && threshold < N) {
+    igraph_real_t X, U;
+    igraph_real_t limit, t;
+    igraph_real_t negSreal, y1, y2, top, bottom;
+    igraph_real_t nmin1inv = 1.0 / (-1.0 + nreal);
+    while (1) {
+      while (1) {
+        X = Nreal * (-Vprime + 1.0);
+        S = floor(X);
+        // if (S==0) { S=1; }
+        if (S < qu1) {
+          break;
         }
+        Vprime = exp(log(RNG_UNIF01()) * ninv);
+      }
+      U = RNG_UNIF01();
+      negSreal = -S;
 
-        l += S + 1;
-        igraph_vector_push_back(res, l);    /* allocated */
-        N = -S + (-1 + N);   Nreal = negSreal + (-1.0 + Nreal);
-        n = -1 + n;   nreal = -1.0 + nreal; ninv = nmin1inv;
-        qu1 = -S + qu1; qu1real = negSreal + qu1real;
-        threshold = threshold + negalphainv;
+      y1 = exp(log(U * Nreal / qu1real) * nmin1inv);
+      Vprime = y1 * (-X / Nreal + 1.0) * (qu1real / (negSreal + qu1real));
+      if (Vprime <= 1.0) {
+        break;
+      }
+
+      y2 = 1.0;
+      top = -1.0 + Nreal;
+      if (-1 + n > S) {
+        bottom = -nreal + Nreal;
+        limit = -S + N;
+      } else {
+        bottom = -1.0 + negSreal + Nreal;
+        limit = qu1;
+      }
+      for (t = -1 + N; t >= limit; t--) {
+        y2 = (y2 * top) / bottom;
+        top = -1.0 + top;
+        bottom = -1.0 + bottom;
+      }
+      if (Nreal / (-X + Nreal) >= y1 * exp(log(y2) * nmin1inv)) {
+        Vprime = exp(log(RNG_UNIF01()) * nmin1inv);
+        break;
+      }
+      Vprime = exp(log(RNG_UNIF01()) * ninv);
     }
 
-    if (n > 1) {
-        retval = igraph_i_random_sample_alga(res, (igraph_integer_t) l + 1,
-                                             (igraph_integer_t) h,
-                                             (igraph_integer_t) n);
-    } else {
-        retval = 0;
-        S = floor(N * Vprime);
-        l += S + 1;
-        igraph_vector_push_back(res, l);    /* allocated */
-    }
+    l += S + 1;
+    igraph_vector_push_back(res, l); /* allocated */
+    N = -S + (-1 + N);
+    Nreal = negSreal + (-1.0 + Nreal);
+    n = -1 + n;
+    nreal = -1.0 + nreal;
+    ninv = nmin1inv;
+    qu1 = -S + qu1;
+    qu1real = negSreal + qu1real;
+    threshold = threshold + negalphainv;
+  }
 
-    RNG_END();
+  if (n > 1) {
+    retval = igraph_i_random_sample_alga(
+        res, (igraph_integer_t)l + 1, (igraph_integer_t)h, (igraph_integer_t)n);
+  } else {
+    retval = 0;
+    S = floor(N * Vprime);
+    l += S + 1;
+    igraph_vector_push_back(res, l); /* allocated */
+  }
 
-    return retval;
+  RNG_END();
+
+  return retval;
 }
 
 #ifdef USING_R
 
 /* These are never called. But they are correct, nevertheless */
 
-double igraph_norm_rand(igraph_rng_t *rng) {
-    return norm_rand();
-}
+double igraph_norm_rand(igraph_rng_t *rng) { return norm_rand(); }
 
-double igraph_rgeom(igraph_rng_t *rng, double p) {
-    return Rf_rgeom(p);
-}
+double igraph_rgeom(igraph_rng_t *rng, double p) { return Rf_rgeom(p); }
 
 double igraph_rbinom(igraph_rng_t *rng, double nin, double pp) {
-    return Rf_rbinom(nin, pp);
+  return Rf_rbinom(nin, pp);
 }
 
 double igraph_rexp(igraph_rng_t *rng, double rate) {
-    igraph_real_t scale = 1.0 / rate;
-    if (!IGRAPH_FINITE(scale) || scale <= 0.0) {
-        if (scale == 0.0) {
-            return 0.0;
-        }
-        return IGRAPH_NAN;
+  igraph_real_t scale = 1.0 / rate;
+  if (!IGRAPH_FINITE(scale) || scale <= 0.0) {
+    if (scale == 0.0) {
+      return 0.0;
     }
-    return scale * exp_rand();
+    return IGRAPH_NAN;
+  }
+  return scale * exp_rand();
 }
 
 double igraph_rgamma(igraph_rng_t *rng, double shape, double scale) {
-    return Rf_rgamma(shape, scale);
+  return Rf_rgamma(shape, scale);
 }
 
 #else
@@ -1284,26 +1255,30 @@ double igraph_rgamma(igraph_rng_t *rng, double shape, double scale) {
 
 #define ML_POSINF IGRAPH_INFINITY
 #define ML_NEGINF -IGRAPH_INFINITY
-#define ML_NAN    IGRAPH_NAN
+#define ML_NAN IGRAPH_NAN
 
 #define ML_ERROR(x) /* nothing */
-#define ML_UNDERFLOW    (DBL_MIN * DBL_MIN)
+#define ML_UNDERFLOW (DBL_MIN * DBL_MIN)
 #define ML_VALID(x) (!ISNAN(x))
 
-#define ME_NONE     0
+#define ME_NONE 0
 /*  no error */
-#define ME_DOMAIN   1
+#define ME_DOMAIN 1
 /*  argument out of domain */
-#define ME_RANGE    2
+#define ME_RANGE 2
 /*  value out of range */
-#define ME_NOCONV   4
+#define ME_NOCONV 4
 /*  process did not converge */
-#define ME_PRECISION    8
+#define ME_PRECISION 8
 /*  does not have "full" precision */
-#define ME_UNDERFLOW    16
+#define ME_UNDERFLOW 16
 /*  and underflow occurred (important for IEEE)*/
 
-#define ML_ERR_return_NAN { ML_ERROR(ME_DOMAIN); return ML_NAN; }
+#define ML_ERR_return_NAN                                                      \
+  {                                                                            \
+    ML_ERROR(ME_DOMAIN);                                                       \
+    return ML_NAN;                                                             \
+  }
 
 /* Wilcoxon Rank Sum Distribution */
 
@@ -1316,44 +1291,42 @@ double igraph_rgamma(igraph_rng_t *rng, double shape, double scale) {
 /* Formerly private part of Mathlib.h */
 
 /* always remap internal functions */
-#define bd0         Rf_bd0
-#define chebyshev_eval  Rf_chebyshev_eval
-#define chebyshev_init  Rf_chebyshev_init
-#define i1mach      Rf_i1mach
-#define gammalims   Rf_gammalims
+#define bd0 Rf_bd0
+#define chebyshev_eval Rf_chebyshev_eval
+#define chebyshev_init Rf_chebyshev_init
+#define i1mach Rf_i1mach
+#define gammalims Rf_gammalims
 #define lfastchoose Rf_lfastchoose
-#define lgammacor   Rf_lgammacor
-#define stirlerr        Rf_stirlerr
+#define lgammacor Rf_lgammacor
+#define stirlerr Rf_stirlerr
 
 /* Chebyshev Series */
 
-int chebyshev_init(double*, int, double);
-double  chebyshev_eval(double, const double *, const int);
+int chebyshev_init(double *, int, double);
+double chebyshev_eval(double, const double *, const int);
 
 /* Gamma and Related Functions */
 
-void    gammalims(double*, double*);
-double  lgammacor(double); /* log(gamma) correction */
-double  stirlerr(double);  /* Stirling expansion "error" */
+void gammalims(double *, double *);
+double lgammacor(double); /* log(gamma) correction */
+double stirlerr(double);  /* Stirling expansion "error" */
 
-double  lfastchoose(double, double);
+double lfastchoose(double, double);
 
-double  bd0(double, double);
+double bd0(double, double);
 
 /* Consider adding these two to the API (Rmath.h): */
-double  dbinom_raw(double, double, double, double, int);
-double  dpois_raw (double, double, int);
-double  pnchisq_raw(double, double, double, double, double, int);
+double dbinom_raw(double, double, double, double, int);
+double dpois_raw(double, double, int);
+double pnchisq_raw(double, double, double, double, double, int);
 
 int i1mach(int);
 
 /* From toms708.c */
-void bratio(double a, double b, double x, double y,
-            double *w, double *w1, int *ierr);
-
+void bratio(double a, double b, double x, double y, double *w, double *w1,
+            int *ierr);
 
 #endif /* MATHLIB_PRIVATE_H */
-
 
 /* Utilities for `dpq' handling (density/probability/quantile) */
 
@@ -1361,235 +1334,271 @@ void bratio(double a, double b, double x, double y,
 #define give_log log_p
 /* "DEFAULT" */
 /* --------- */
-#define R_D__0  (log_p ? ML_NEGINF : 0.)        /* 0 */
-#define R_D__1  (log_p ? 0. : 1.)           /* 1 */
-#define R_DT_0  (lower_tail ? R_D__0 : R_D__1)      /* 0 */
-#define R_DT_1  (lower_tail ? R_D__1 : R_D__0)      /* 1 */
+#define R_D__0 (log_p ? ML_NEGINF : 0.)       /* 0 */
+#define R_D__1 (log_p ? 0. : 1.)              /* 1 */
+#define R_DT_0 (lower_tail ? R_D__0 : R_D__1) /* 0 */
+#define R_DT_1 (lower_tail ? R_D__1 : R_D__0) /* 1 */
 
-#define R_D_Lval(p) (lower_tail ? (p) : (1 - (p)))  /*  p  */
-#define R_D_Cval(p) (lower_tail ? (1 - (p)) : (p))  /*  1 - p */
+#define R_D_Lval(p) (lower_tail ? (p) : (1 - (p))) /*  p  */
+#define R_D_Cval(p) (lower_tail ? (1 - (p)) : (p)) /*  1 - p */
 
-#define R_D_val(x)  (log_p  ? log(x) : (x))     /*  x  in pF(x,..) */
-#define R_D_qIv(p)  (log_p  ? exp(p) : (p))     /*  p  in qF(p,..) */
-#define R_D_exp(x)  (log_p  ?  (x)   : exp(x))  /* exp(x) */
-#define R_D_log(p)  (log_p  ?  (p)   : log(p))  /* log(p) */
-#define R_D_Clog(p) (log_p  ? log1p(-(p)) : (1 - (p)))/* [log](1-p) */
+#define R_D_val(x) (log_p ? log(x) : (x))             /*  x  in pF(x,..) */
+#define R_D_qIv(p) (log_p ? exp(p) : (p))             /*  p  in qF(p,..) */
+#define R_D_exp(x) (log_p ? (x) : exp(x))             /* exp(x) */
+#define R_D_log(p) (log_p ? (p) : log(p))             /* log(p) */
+#define R_D_Clog(p) (log_p ? log1p(-(p)) : (1 - (p))) /* [log](1-p) */
 
 /* log(1-exp(x)):  R_D_LExp(x) == (log1p(- R_D_qIv(x))) but even more stable:*/
-#define R_D_LExp(x)     (log_p ? R_Log1_Exp(x) : log1p(-x))
+#define R_D_LExp(x) (log_p ? R_Log1_Exp(x) : log1p(-x))
 
 /*till 1.8.x:
  * #define R_DT_val(x)  R_D_val(R_D_Lval(x))
  * #define R_DT_Cval(x) R_D_val(R_D_Cval(x)) */
-#define R_DT_val(x) (lower_tail ? R_D_val(x)  : R_D_Clog(x))
-#define R_DT_Cval(x)    (lower_tail ? R_D_Clog(x) : R_D_val(x))
+#define R_DT_val(x) (lower_tail ? R_D_val(x) : R_D_Clog(x))
+#define R_DT_Cval(x) (lower_tail ? R_D_Clog(x) : R_D_val(x))
 
 /*#define R_DT_qIv(p)   R_D_Lval(R_D_qIv(p))         *  p  in qF ! */
-#define R_DT_qIv(p) (log_p ? (lower_tail ? exp(p) : - expm1(p)) \
-                     : R_D_Lval(p))
+#define R_DT_qIv(p) (log_p ? (lower_tail ? exp(p) : -expm1(p)) : R_D_Lval(p))
 
 /*#define R_DT_CIv(p)   R_D_Cval(R_D_qIv(p))         *  1 - p in qF */
-#define R_DT_CIv(p) (log_p ? (lower_tail ? -expm1(p) : exp(p)) \
-                     : R_D_Cval(p))
+#define R_DT_CIv(p) (log_p ? (lower_tail ? -expm1(p) : exp(p)) : R_D_Cval(p))
 
-#define R_DT_exp(x) R_D_exp(R_D_Lval(x))        /* exp(x) */
-#define R_DT_Cexp(x)    R_D_exp(R_D_Cval(x))        /* exp(1 - x) */
+#define R_DT_exp(x) R_D_exp(R_D_Lval(x))  /* exp(x) */
+#define R_DT_Cexp(x) R_D_exp(R_D_Cval(x)) /* exp(1 - x) */
 
-#define R_DT_log(p) (lower_tail? R_D_log(p) : R_D_LExp(p))/* log(p) in qF */
-#define R_DT_Clog(p)    (lower_tail? R_D_LExp(p): R_D_log(p))/* log(1-p) in qF*/
-#define R_DT_Log(p) (lower_tail? (p) : R_Log1_Exp(p))
+#define R_DT_log(p) (lower_tail ? R_D_log(p) : R_D_LExp(p)) /* log(p) in qF */
+#define R_DT_Clog(p)                                                           \
+  (lower_tail ? R_D_LExp(p) : R_D_log(p)) /* log(1-p) in                       \
+                                             qF*/
+#define R_DT_Log(p) (lower_tail ? (p) : R_Log1_Exp(p))
 /* ==   R_DT_log when we already "know" log_p == TRUE :*/
 
-#define R_Q_P01_check(p)            \
-    if ((log_p  && p > 0) ||            \
-        (!log_p && (p < 0 || p > 1)) )      \
-        ML_ERR_return_NAN
+#define R_Q_P01_check(p)                                                       \
+  if ((log_p && p > 0) || (!log_p && (p < 0 || p > 1)))                        \
+  ML_ERR_return_NAN
 
 /* additions for density functions (C.Loader) */
-#define R_D_fexp(f,x)     (give_log ? -0.5*log(f)+(x) : exp(x)/sqrt(f))
-#define R_D_forceint(x)   floor((x) + 0.5)
-#define R_D_nonint(x)     (fabs((x) - floor((x)+0.5)) > 1e-7)
+#define R_D_fexp(f, x) (give_log ? -0.5 * log(f) + (x) : exp(x) / sqrt(f))
+#define R_D_forceint(x) floor((x) + 0.5)
+#define R_D_nonint(x) (fabs((x)-floor((x) + 0.5)) > 1e-7)
 /* [neg]ative or [non int]eger : */
 #define R_D_negInonint(x) (x < 0. || R_D_nonint(x))
 
-#define R_D_nonint_check(x)                 \
-    if(R_D_nonint(x)) {                  \
-        MATHLIB_WARNING("non-integer x = %f", x);   \
-        return R_D__0;                  \
-    }
+#define R_D_nonint_check(x)                                                    \
+  if (R_D_nonint(x)) {                                                         \
+    MATHLIB_WARNING("non-integer x = %f", x);                                  \
+    return R_D__0;                                                             \
+  }
 
-double igraph_qnorm5(double p, double mu, double sigma, int lower_tail, int log_p) {
-    double p_, q, r, val;
+double igraph_qnorm5(double p, double mu, double sigma, int lower_tail,
+                     int log_p) {
+  double p_, q, r, val;
 
 #ifdef IEEE_754
-    if (ISNAN(p) || ISNAN(mu) || ISNAN(sigma)) {
-        return p + mu + sigma;
-    }
+  if (ISNAN(p) || ISNAN(mu) || ISNAN(sigma)) {
+    return p + mu + sigma;
+  }
 #endif
-    if (p == R_DT_0) {
-        return ML_NEGINF;
+  if (p == R_DT_0) {
+    return ML_NEGINF;
+  }
+  if (p == R_DT_1) {
+    return ML_POSINF;
+  }
+  R_Q_P01_check(p);
+
+  if (sigma < 0) {
+    ML_ERR_return_NAN;
+  }
+  if (sigma == 0) {
+    return mu;
+  }
+
+  p_ = R_DT_qIv(p); /* real lower_tail prob. p */
+  q = p_ - 0.5;
+
+  /*-- use AS 241 --- */
+  /* double ppnd16_(double *p, long *ifault)*/
+  /*      ALGORITHM AS241  APPL. STATIST. (1988) VOL. 37, NO. 3
+
+          Produces the normal deviate Z corresponding to a given lower
+          tail area of P; Z is accurate to about 1 part in 10**16.
+
+          (original fortran code used PARAMETER(..) for the coefficients
+           and provided hash codes for checking them...)
+  */
+  if (fabs(q) <= .425) { /* 0.075 <= p <= 0.925 */
+    r = .180625 - q * q;
+    val = q *
+          (((((((r * 2509.0809287301226727 + 33430.575583588128105) * r +
+                67265.770927008700853) *
+                   r +
+               45921.953931549871457) *
+                  r +
+              13731.693765509461125) *
+                 r +
+             1971.5909503065514427) *
+                r +
+            133.14166789178437745) *
+               r +
+           3.387132872796366608) /
+          (((((((r * 5226.495278852854561 + 28729.085735721942674) * r +
+                39307.89580009271061) *
+                   r +
+               21213.794301586595867) *
+                  r +
+              5394.1960214247511077) *
+                 r +
+             687.1870074920579083) *
+                r +
+            42.313330701600911252) *
+               r +
+           1.);
+  } else { /* closer than 0.075 from {0,1} boundary */
+
+    /* r = min(p, 1-p) < 0.075 */
+    if (q > 0) {
+      r = R_DT_CIv(p); /* 1-p */
+    } else {
+      r = p_; /* = R_DT_Iv(p) ^=  p */
     }
-    if (p == R_DT_1) {
-        return ML_POSINF;
+
+    r = sqrt(-((log_p && ((lower_tail && q <= 0) || (!lower_tail && q > 0)))
+                   ? p
+                   : /* else */ log(r)));
+    /* r = sqrt(-log(r))  <==>  min(p, 1-p) = exp( - r^2 ) */
+
+    if (r <= 5.) { /* <==> min(p,1-p) >= exp(-25) ~= 1.3888e-11 */
+      r += -1.6;
+      val =
+          (((((((r * 7.7454501427834140764e-4 + .0227238449892691845833) * r +
+                .24178072517745061177) *
+                   r +
+               1.27045825245236838258) *
+                  r +
+              3.64784832476320460504) *
+                 r +
+             5.7694972214606914055) *
+                r +
+            4.6303378461565452959) *
+               r +
+           1.42343711074968357734) /
+          (((((((r * 1.05075007164441684324e-9 + 5.475938084995344946e-4) * r +
+                .0151986665636164571966) *
+                   r +
+               .14810397642748007459) *
+                  r +
+              .68976733498510000455) *
+                 r +
+             1.6763848301838038494) *
+                r +
+            2.05319162663775882187) *
+               r +
+           1.);
+    } else { /* very close to  0 or 1 */
+      r += -5.;
+      val = (((((((r * 2.01033439929228813265e-7 + 2.71155556874348757815e-5) *
+                      r +
+                  .0012426609473880784386) *
+                     r +
+                 .026532189526576123093) *
+                    r +
+                .29656057182850489123) *
+                   r +
+               1.7848265399172913358) *
+                  r +
+              5.4637849111641143699) *
+                 r +
+             6.6579046435011037772) /
+            (((((((r * 2.04426310338993978564e-15 + 1.4215117583164458887e-7) *
+                      r +
+                  1.8463183175100546818e-5) *
+                     r +
+                 7.868691311456132591e-4) *
+                    r +
+                .0148753612908506148525) *
+                   r +
+               .13692988092273580531) *
+                  r +
+              .59983220655588793769) *
+                 r +
+             1.);
     }
-    R_Q_P01_check(p);
 
-    if (sigma  < 0) {
-        ML_ERR_return_NAN;
+    if (q < 0.0) {
+      val = -val;
     }
-    if (sigma == 0) {
-        return mu;
-    }
-
-    p_ = R_DT_qIv(p);/* real lower_tail prob. p */
-    q = p_ - 0.5;
-
-    /*-- use AS 241 --- */
-    /* double ppnd16_(double *p, long *ifault)*/
-    /*      ALGORITHM AS241  APPL. STATIST. (1988) VOL. 37, NO. 3
-
-            Produces the normal deviate Z corresponding to a given lower
-            tail area of P; Z is accurate to about 1 part in 10**16.
-
-            (original fortran code used PARAMETER(..) for the coefficients
-             and provided hash codes for checking them...)
-    */
-    if (fabs(q) <= .425) {/* 0.075 <= p <= 0.925 */
-        r = .180625 - q * q;
-        val =
-            q * (((((((r * 2509.0809287301226727 +
-                       33430.575583588128105) * r + 67265.770927008700853) * r +
-                     45921.953931549871457) * r + 13731.693765509461125) * r +
-                   1971.5909503065514427) * r + 133.14166789178437745) * r +
-                 3.387132872796366608)
-            / (((((((r * 5226.495278852854561 +
-                     28729.085735721942674) * r + 39307.89580009271061) * r +
-                   21213.794301586595867) * r + 5394.1960214247511077) * r +
-                 687.1870074920579083) * r + 42.313330701600911252) * r + 1.);
-    } else { /* closer than 0.075 from {0,1} boundary */
-
-        /* r = min(p, 1-p) < 0.075 */
-        if (q > 0) {
-            r = R_DT_CIv(p);    /* 1-p */
-        } else {
-            r = p_;    /* = R_DT_Iv(p) ^=  p */
-        }
-
-        r = sqrt(- ((log_p &&
-                     ((lower_tail && q <= 0) || (!lower_tail && q > 0))) ?
-                    p : /* else */ log(r)));
-        /* r = sqrt(-log(r))  <==>  min(p, 1-p) = exp( - r^2 ) */
-
-        if (r <= 5.) { /* <==> min(p,1-p) >= exp(-25) ~= 1.3888e-11 */
-            r += -1.6;
-            val = (((((((r * 7.7454501427834140764e-4 +
-                         .0227238449892691845833) * r + .24178072517745061177) *
-                       r + 1.27045825245236838258) * r +
-                      3.64784832476320460504) * r + 5.7694972214606914055) *
-                    r + 4.6303378461565452959) * r +
-                   1.42343711074968357734)
-                  / (((((((r *
-                           1.05075007164441684324e-9 + 5.475938084995344946e-4) *
-                          r + .0151986665636164571966) * r +
-                         .14810397642748007459) * r + .68976733498510000455) *
-                       r + 1.6763848301838038494) * r +
-                      2.05319162663775882187) * r + 1.);
-        } else { /* very close to  0 or 1 */
-            r += -5.;
-            val = (((((((r * 2.01033439929228813265e-7 +
-                         2.71155556874348757815e-5) * r +
-                        .0012426609473880784386) * r + .026532189526576123093) *
-                      r + .29656057182850489123) * r +
-                     1.7848265399172913358) * r + 5.4637849111641143699) *
-                   r + 6.6579046435011037772)
-                  / (((((((r *
-                           2.04426310338993978564e-15 + 1.4215117583164458887e-7) *
-                          r + 1.8463183175100546818e-5) * r +
-                         7.868691311456132591e-4) * r + .0148753612908506148525)
-                       * r + .13692988092273580531) * r +
-                      .59983220655588793769) * r + 1.);
-        }
-
-        if (q < 0.0) {
-            val = -val;
-        }
-        /* return (q >= 0.)? r : -r ;*/
-    }
-    return mu + sigma * val;
+    /* return (q >= 0.)? r : -r ;*/
+  }
+  return mu + sigma * val;
 }
 
 double fsign(double x, double y) {
 #ifdef IEEE_754
-    if (ISNAN(x) || ISNAN(y)) {
-        return x + y;
-    }
+  if (ISNAN(x) || ISNAN(y)) {
+    return x + y;
+  }
 #endif
-    return ((y >= 0) ? fabs(x) : -fabs(x));
+  return ((y >= 0) ? fabs(x) : -fabs(x));
 }
 
-int imax2(int x, int y) {
-    return (x < y) ? y : x;
-}
+int imax2(int x, int y) { return (x < y) ? y : x; }
 
-int imin2(int x, int y) {
-    return (x < y) ? x : y;
-}
+int imin2(int x, int y) { return (x < y) ? x : y; }
 
 #if HAVE_WORKING_ISFINITE || HAVE_DECL_ISFINITE
-    /* isfinite is defined in <math.h> according to C99 */
-    #define R_FINITE(x)    isfinite(x)
+/* isfinite is defined in <math.h> according to C99 */
+#define R_FINITE(x) isfinite(x)
 #elif HAVE_WORKING_FINITE || HAVE_FINITE
-    /* include header needed to define finite() */
-    #ifdef HAVE_IEEE754_H
-        #include <ieee754.h>         /* newer Linuxen */
-    #else
-        #ifdef HAVE_IEEEFP_H
-            #include <ieeefp.h>         /* others [Solaris], .. */
-        #endif
-    #endif
-    #define R_FINITE(x)    finite(x)
+/* include header needed to define finite() */
+#ifdef HAVE_IEEE754_H
+#include <ieee754.h> /* newer Linuxen */
 #else
-    #define R_FINITE(x)    R_finite(x)
+#ifdef HAVE_IEEEFP_H
+#include <ieeefp.h> /* others [Solaris], .. */
+#endif
+#endif
+#define R_FINITE(x) finite(x)
+#else
+#define R_FINITE(x) R_finite(x)
 #endif
 
 int R_finite(double x) {
 #if HAVE_WORKING_ISFINITE || HAVE_DECL_ISFINITE
-    return isfinite(x);
+  return isfinite(x);
 #elif HAVE_WORKING_FINITE || HAVE_FINITE
-    return finite(x);
+  return finite(x);
 #else
-    /* neither finite nor isfinite work. Do we really need the AIX exception? */
-# ifdef _AIX
-#  include <fp.h>
-    return FINITE(x);
-# elif defined(_MSC_VER)
-    return _finite(x);
+  /* neither finite nor isfinite work. Do we really need the AIX exception? */
+#ifdef _AIX
+#include <fp.h>
+  return FINITE(x);
+#elif defined(_MSC_VER)
+  return _finite(x);
 #else
-    return (!isnan(x) & (x != 1 / 0.0) & (x != -1.0 / 0.0));
-# endif
+  return (!isnan(x) & (x != 1 / 0.0) & (x != -1.0 / 0.0));
+#endif
 #endif
 }
 
-int R_isnancpp(double x) {
-    return (isnan(x) != 0);
-}
+int R_isnancpp(double x) { return (isnan(x) != 0); }
 
 #ifdef __cplusplus
-    int R_isnancpp(double); /* in arithmetic.c */
-    #define ISNAN(x)     R_isnancpp(x)
+int R_isnancpp(double); /* in arithmetic.c */
+#define ISNAN(x) R_isnancpp(x)
 #else
-    #define ISNAN(x)     (isnan(x)!=0)
+#define ISNAN(x) (isnan(x) != 0)
 #endif
 
 double igraph_norm_rand(igraph_rng_t *rng) {
 
-    double u1;
+  double u1;
 
 #define BIG 134217728 /* 2^27 */
-    /* unif_rand() alone is not of high enough precision */
-    u1 = igraph_rng_get_unif01(rng);
-    u1 = (int)(BIG * u1) + igraph_rng_get_unif01(rng);
-    return igraph_qnorm5(u1 / BIG, 0.0, 1.0, 1, 0);
+  /* unif_rand() alone is not of high enough precision */
+  u1 = igraph_rng_get_unif01(rng);
+  u1 = (int)(BIG * u1) + igraph_rng_get_unif01(rng);
+  return igraph_qnorm5(u1 / BIG, 0.0, 1.0, 1, 0);
 }
 
 /*
@@ -1629,60 +1638,49 @@ double igraph_norm_rand(igraph_rng_t *rng) {
  */
 
 double igraph_exp_rand(igraph_rng_t *rng) {
-    /* q[k-1] = sum(log(2)^k / k!)  k=1,..,n, */
-    /* The highest n (here 8) is determined by q[n-1] = 1.0 */
-    /* within standard precision */
-    const double q[] = {
-        0.6931471805599453,
-        0.9333736875190459,
-        0.9888777961838675,
-        0.9984959252914960,
-        0.9998292811061389,
-        0.9999833164100727,
-        0.9999985691438767,
-        0.9999998906925558,
-        0.9999999924734159,
-        0.9999999995283275,
-        0.9999999999728814,
-        0.9999999999985598,
-        0.9999999999999289,
-        0.9999999999999968,
-        0.9999999999999999,
-        1.0000000000000000
-    };
-    double a, u, ustar, umin;
-    int i;
+  /* q[k-1] = sum(log(2)^k / k!)  k=1,..,n, */
+  /* The highest n (here 8) is determined by q[n-1] = 1.0 */
+  /* within standard precision */
+  const double q[] = {
+      0.6931471805599453, 0.9333736875190459, 0.9888777961838675,
+      0.9984959252914960, 0.9998292811061389, 0.9999833164100727,
+      0.9999985691438767, 0.9999998906925558, 0.9999999924734159,
+      0.9999999995283275, 0.9999999999728814, 0.9999999999985598,
+      0.9999999999999289, 0.9999999999999968, 0.9999999999999999,
+      1.0000000000000000};
+  double a, u, ustar, umin;
+  int i;
 
-    a = 0.;
-    /* precaution if u = 0 is ever returned */
+  a = 0.;
+  /* precaution if u = 0 is ever returned */
+  u = igraph_rng_get_unif01(rng);
+  while (u <= 0.0 || u >= 1.0) {
     u = igraph_rng_get_unif01(rng);
-    while (u <= 0.0 || u >= 1.0) {
-        u = igraph_rng_get_unif01(rng);
+  }
+  for (;;) {
+    u += u;
+    if (u > 1.0) {
+      break;
     }
-    for (;;) {
-        u += u;
-        if (u > 1.0) {
-            break;
-        }
-        a += q[0];
-    }
-    u -= 1.;
+    a += q[0];
+  }
+  u -= 1.;
 
-    if (u <= q[0]) {
-        return a + u;
-    }
+  if (u <= q[0]) {
+    return a + u;
+  }
 
-    i = 0;
+  i = 0;
+  ustar = igraph_rng_get_unif01(rng);
+  umin = ustar;
+  do {
     ustar = igraph_rng_get_unif01(rng);
-    umin = ustar;
-    do {
-        ustar = igraph_rng_get_unif01(rng);
-        if (ustar < umin) {
-            umin = ustar;
-        }
-        i++;
-    } while (u > q[i]);
-    return a + umin * q[0];
+    if (ustar < umin) {
+      umin = ustar;
+    }
+    i++;
+  } while (u > q[i]);
+  return a + umin * q[0];
 }
 
 /*
@@ -1721,221 +1719,225 @@ double igraph_exp_rand(igraph_rng_t *rng) {
  *    ACM Trans. Math. Software 8, 163-179.
  */
 
-#define a0  -0.5
-#define a1   0.3333333
-#define a2  -0.2500068
-#define a3   0.2000118
-#define a4  -0.1661269
-#define a5   0.1421878
-#define a6  -0.1384794
-#define a7   0.1250060
+#define a0 -0.5
+#define a1 0.3333333
+#define a2 -0.2500068
+#define a3 0.2000118
+#define a4 -0.1661269
+#define a5 0.1421878
+#define a6 -0.1384794
+#define a7 0.1250060
 
-#define one_7   0.1428571428571428571
-#define one_12  0.0833333333333333333
-#define one_24  0.0416666666666666667
+#define one_7 0.1428571428571428571
+#define one_12 0.0833333333333333333
+#define one_24 0.0416666666666666667
 
-#define repeat for(;;)
+#define repeat for (;;)
 
 #define FALSE 0
-#define TRUE  1
-#define M_1_SQRT_2PI    0.398942280401432677939946059934     /* 1/sqrt(2pi) */
+#define TRUE 1
+#define M_1_SQRT_2PI 0.398942280401432677939946059934 /* 1/sqrt(2pi) */
 
 double igraph_rpois(igraph_rng_t *rng, double mu) {
-    /* Factorial Table (0:9)! */
-    const double fact[10] = {
-        1., 1., 2., 6., 24., 120., 720., 5040., 40320., 362880.
-    };
+  /* Factorial Table (0:9)! */
+  const double fact[10] = {1.,   1.,   2.,    6.,     24.,
+                           120., 720., 5040., 40320., 362880.};
 
-    /* These are static --- persistent between calls for same mu : */
-    static IGRAPH_THREAD_LOCAL int l, m;
+  /* These are static --- persistent between calls for same mu : */
+  static IGRAPH_THREAD_LOCAL int l, m;
 
-    static IGRAPH_THREAD_LOCAL double b1, b2, c, c0, c1, c2, c3;
-    static IGRAPH_THREAD_LOCAL double pp[36], p0, p, q, s, d, omega;
-    static IGRAPH_THREAD_LOCAL double big_l;/* integer "w/o overflow" */
-    static IGRAPH_THREAD_LOCAL double muprev = 0., muprev2 = 0.;/*, muold    = 0.*/
+  static IGRAPH_THREAD_LOCAL double b1, b2, c, c0, c1, c2, c3;
+  static IGRAPH_THREAD_LOCAL double pp[36], p0, p, q, s, d, omega;
+  static IGRAPH_THREAD_LOCAL double big_l; /* integer "w/o overflow" */
+  static IGRAPH_THREAD_LOCAL double muprev = 0.,
+                                    muprev2 = 0.; /*, muold    = 0.*/
 
-    /* Local Vars  [initialize some for -Wall]: */
-    double del, difmuk = 0., E = 0., fk = 0., fx, fy, g, px, py, t, u = 0., v, x;
-    double pois = -1.;
-    int k, kflag, big_mu, new_big_mu = FALSE;
+  /* Local Vars  [initialize some for -Wall]: */
+  double del, difmuk = 0., E = 0., fk = 0., fx, fy, g, px, py, t, u = 0., v, x;
+  double pois = -1.;
+  int k, kflag, big_mu, new_big_mu = FALSE;
 
-    if (!R_FINITE(mu)) {
-        ML_ERR_return_NAN;
-    }
+  if (!R_FINITE(mu)) {
+    ML_ERR_return_NAN;
+  }
 
-    if (mu <= 0.) {
-        return 0.;
-    }
+  if (mu <= 0.) {
+    return 0.;
+  }
 
-    big_mu = mu >= 10.;
+  big_mu = mu >= 10.;
+  if (big_mu) {
+    new_big_mu = FALSE;
+  }
+
+  if (!(big_mu && mu == muprev)) { /* maybe compute new persistent par.s */
+
     if (big_mu) {
-        new_big_mu = FALSE;
-    }
+      new_big_mu = TRUE;
+      /* Case A. (recalculation of s,d,l  because mu has changed):
+       * The Poisson probabilities pk exceed the discrete normal
+       * probabilities fk whenever k >= m(mu).
+       */
+      muprev = mu;
+      s = sqrt(mu);
+      d = 6. * mu * mu;
+      big_l = floor(mu - 1.1484);
+      /* = an upper bound to m(mu) for all mu >= 10.*/
+    } else { /* Small mu ( < 10) -- not using normal approx. */
 
-    if (!(big_mu && mu == muprev)) {/* maybe compute new persistent par.s */
+      /* Case B. (start new table and calculate p0 if necessary) */
 
-        if (big_mu) {
-            new_big_mu = TRUE;
-            /* Case A. (recalculation of s,d,l  because mu has changed):
-             * The Poisson probabilities pk exceed the discrete normal
-             * probabilities fk whenever k >= m(mu).
-             */
-            muprev = mu;
-            s = sqrt(mu);
-            d = 6. * mu * mu;
-            big_l = floor(mu - 1.1484);
-            /* = an upper bound to m(mu) for all mu >= 10.*/
-        } else { /* Small mu ( < 10) -- not using normal approx. */
+      /*muprev = 0.;-* such that next time, mu != muprev ..*/
+      if (mu != muprev) {
+        muprev = mu;
+        m = imax2(1, (int)mu);
+        l = 0; /* pp[] is already ok up to pp[l] */
+        q = p0 = p = exp(-mu);
+      }
 
-            /* Case B. (start new table and calculate p0 if necessary) */
-
-            /*muprev = 0.;-* such that next time, mu != muprev ..*/
-            if (mu != muprev) {
-                muprev = mu;
-                m = imax2(1, (int) mu);
-                l = 0; /* pp[] is already ok up to pp[l] */
-                q = p0 = p = exp(-mu);
-            }
-
-            repeat {
-                /* Step U. uniform sample for inversion method */
-                u = igraph_rng_get_unif01(rng);
-                if (u <= p0) {
-                    return 0.;
-                }
-
-                /* Step T. table comparison until the end pp[l] of the
-                   pp-table of cumulative Poisson probabilities
-                   (0.458 > ~= pp[9](= 0.45792971447) for mu=10 ) */
-                if (l != 0) {
-                    for (k = (u <= 0.458) ? 1 : imin2(l, m);  k <= l; k++)
-                        if (u <= pp[k]) {
-                            return (double)k;
-                        }
-                    if (l == 35) { /* u > pp[35] */
-                        continue;
-                    }
-                }
-                /* Step C. creation of new Poisson
-                   probabilities p[l..] and their cumulatives q =: pp[k] */
-                l++;
-                for (k = l; k <= 35; k++) {
-                    p *= mu / k;
-                    q += p;
-                    pp[k] = q;
-                    if (u <= q) {
-                        l = k;
-                        return (double)k;
-                    }
-                }
-                l = 35;
-            } /* end(repeat) */
-        }/* mu < 10 */
-
-    } /* end {initialize persistent vars} */
-
-    /* Only if mu >= 10 : ----------------------- */
-
-    /* Step N. normal sample */
-    g = mu + s * igraph_norm_rand(rng);/* norm_rand() ~ N(0,1), standard normal */
-
-    if (g >= 0.) {
-        pois = floor(g);
-        /* Step I. immediate acceptance if pois is large enough */
-        if (pois >= big_l) {
-            return pois;
+      repeat {
+        /* Step U. uniform sample for inversion method */
+        u = igraph_rng_get_unif01(rng);
+        if (u <= p0) {
+          return 0.;
         }
-        /* Step S. squeeze acceptance */
-        fk = pois;
-        difmuk = mu - fk;
-        u = igraph_rng_get_unif01(rng); /* ~ U(0,1) - sample */
-        if (d * u >= difmuk * difmuk * difmuk) {
-            return pois;
-        }
-    }
 
-    /* Step P. preparations for steps Q and H.
-       (recalculations of parameters if necessary) */
-
-    if (new_big_mu || mu != muprev2) {
-        /* Careful! muprev2 is not always == muprev
-        because one might have exited in step I or S
-        */
-        muprev2 = mu;
-        omega = M_1_SQRT_2PI / s;
-        /* The quantities b1, b2, c3, c2, c1, c0 are for the Hermite
-         * approximations to the discrete normal probabilities fk. */
-
-        b1 = one_24 / mu;
-        b2 = 0.3 * b1 * b1;
-        c3 = one_7 * b1 * b2;
-        c2 = b2 - 15. * c3;
-        c1 = b1 - 6. * b2 + 45. * c3;
-        c0 = 1. - b1 + 3. * b2 - 15. * c3;
-        c = 0.1069 / mu; /* guarantees majorization by the 'hat'-function. */
-    }
-
-    if (g >= 0.) {
-        /* 'Subroutine' F is called (kflag=0 for correct return) */
-        kflag = 0;
-        goto Step_F;
-    }
-
-
-    repeat {
-        /* Step E. Exponential Sample */
-
-        E = igraph_exp_rand(rng);/* ~ Exp(1) (standard exponential) */
-
-        /*  sample t from the laplace 'hat'
-            (if t <= -0.6744 then pk < fk for all mu >= 10.) */
-        u = 2 * igraph_rng_get_unif01(rng) - 1.;
-        t = 1.8 + fsign(E, u);
-        if (t > -0.6744) {
-            pois = floor(mu + s * t);
-            fk = pois;
-            difmuk = mu - fk;
-
-            /* 'subroutine' F is called (kflag=1 for correct return) */
-            kflag = 1;
-
-Step_F: /* 'subroutine' F : calculation of px,py,fx,fy. */
-
-            if (pois < 10) { /* use factorials from table fact[] */
-                px = -mu;
-                py = pow(mu, pois) / fact[(int)pois];
-            } else {
-                /* Case pois >= 10 uses polynomial approximation
-                   a0-a7 for accuracy when advisable */
-                del = one_12 / fk;
-                del = del * (1. - 4.8 * del * del);
-                v = difmuk / fk;
-                if (fabs(v) <= 0.25)
-                    px = fk * v * v * (((((((a7 * v + a6) * v + a5) * v + a4) *
-                                          v + a3) * v + a2) * v + a1) * v + a0)
-                    - del;
-                else { /* |v| > 1/4 */
-                    px = fk * log(1. + v) - difmuk - del;
-                }
-                py = M_1_SQRT_2PI / sqrt(fk);
+        /* Step T. table comparison until the end pp[l] of the
+           pp-table of cumulative Poisson probabilities
+           (0.458 > ~= pp[9](= 0.45792971447) for mu=10 ) */
+        if (l != 0) {
+          for (k = (u <= 0.458) ? 1 : imin2(l, m); k <= l; k++)
+            if (u <= pp[k]) {
+              return (double)k;
             }
-            x = (0.5 - difmuk) / s;
-            x *= x;/* x^2 */
-            fx = -0.5 * x;
-            fy = omega * (((c3 * x + c2) * x + c1) * x + c0);
-            if (kflag > 0) {
-                /* Step H. Hat acceptance (E is repeated on rejection) */
-                if (c * fabs(u) <= py * exp(px + E) - fy * exp(fx + E)) {
-                    break;
-                }
-            } else
-                /* Step Q. Quotient acceptance (rare case) */
-                if (fy - u * fy <= py * exp(px - fx)) {
-                    break;
-                }
-        }/* t > -.67.. */
+          if (l == 35) { /* u > pp[35] */
+            continue;
+          }
+        }
+        /* Step C. creation of new Poisson
+           probabilities p[l..] and their cumulatives q =: pp[k] */
+        l++;
+        for (k = l; k <= 35; k++) {
+          p *= mu / k;
+          q += p;
+          pp[k] = q;
+          if (u <= q) {
+            l = k;
+            return (double)k;
+          }
+        }
+        l = 35;
+      } /* end(repeat) */
+    }   /* mu < 10 */
+
+  } /* end {initialize persistent vars} */
+
+  /* Only if mu >= 10 : ----------------------- */
+
+  /* Step N. normal sample */
+  g = mu +
+      s * igraph_norm_rand(rng); /* norm_rand() ~ N(0,1), standard normal */
+
+  if (g >= 0.) {
+    pois = floor(g);
+    /* Step I. immediate acceptance if pois is large enough */
+    if (pois >= big_l) {
+      return pois;
     }
-    return pois;
+    /* Step S. squeeze acceptance */
+    fk = pois;
+    difmuk = mu - fk;
+    u = igraph_rng_get_unif01(rng); /* ~ U(0,1) - sample */
+    if (d * u >= difmuk * difmuk * difmuk) {
+      return pois;
+    }
+  }
+
+  /* Step P. preparations for steps Q and H.
+     (recalculations of parameters if necessary) */
+
+  if (new_big_mu || mu != muprev2) {
+    /* Careful! muprev2 is not always == muprev
+    because one might have exited in step I or S
+    */
+    muprev2 = mu;
+    omega = M_1_SQRT_2PI / s;
+    /* The quantities b1, b2, c3, c2, c1, c0 are for the Hermite
+     * approximations to the discrete normal probabilities fk. */
+
+    b1 = one_24 / mu;
+    b2 = 0.3 * b1 * b1;
+    c3 = one_7 * b1 * b2;
+    c2 = b2 - 15. * c3;
+    c1 = b1 - 6. * b2 + 45. * c3;
+    c0 = 1. - b1 + 3. * b2 - 15. * c3;
+    c = 0.1069 / mu; /* guarantees majorization by the 'hat'-function. */
+  }
+
+  if (g >= 0.) {
+    /* 'Subroutine' F is called (kflag=0 for correct return) */
+    kflag = 0;
+    goto Step_F;
+  }
+
+  repeat {
+    /* Step E. Exponential Sample */
+
+    E = igraph_exp_rand(rng); /* ~ Exp(1) (standard exponential) */
+
+    /*  sample t from the laplace 'hat'
+        (if t <= -0.6744 then pk < fk for all mu >= 10.) */
+    u = 2 * igraph_rng_get_unif01(rng) - 1.;
+    t = 1.8 + fsign(E, u);
+    if (t > -0.6744) {
+      pois = floor(mu + s * t);
+      fk = pois;
+      difmuk = mu - fk;
+
+      /* 'subroutine' F is called (kflag=1 for correct return) */
+      kflag = 1;
+
+    Step_F: /* 'subroutine' F : calculation of px,py,fx,fy. */
+
+      if (pois < 10) { /* use factorials from table fact[] */
+        px = -mu;
+        py = pow(mu, pois) / fact[(int)pois];
+      } else {
+        /* Case pois >= 10 uses polynomial approximation
+           a0-a7 for accuracy when advisable */
+        del = one_12 / fk;
+        del = del * (1. - 4.8 * del * del);
+        v = difmuk / fk;
+        if (fabs(v) <= 0.25)
+          px = fk * v * v *
+                   (((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) * v + a2) *
+                         v +
+                     a1) *
+                        v +
+                    a0) -
+               del;
+        else { /* |v| > 1/4 */
+          px = fk * log(1. + v) - difmuk - del;
+        }
+        py = M_1_SQRT_2PI / sqrt(fk);
+      }
+      x = (0.5 - difmuk) / s;
+      x *= x; /* x^2 */
+      fx = -0.5 * x;
+      fy = omega * (((c3 * x + c2) * x + c1) * x + c0);
+      if (kflag > 0) {
+        /* Step H. Hat acceptance (E is repeated on rejection) */
+        if (c * fabs(u) <= py * exp(px + E) - fy * exp(fx + E)) {
+          break;
+        }
+      } else
+          /* Step Q. Quotient acceptance (rare case) */
+          if (fy - u * fy <= py * exp(px - fx)) {
+        break;
+      }
+    } /* t > -.67.. */
+  }
+  return pois;
 }
 
 #undef a1
@@ -1947,204 +1949,219 @@ Step_F: /* 'subroutine' F : calculation of px,py,fx,fy. */
 #undef a7
 
 double igraph_rgeom(igraph_rng_t *rng, double p) {
-    if (ISNAN(p) || p <= 0 || p > 1) {
-        ML_ERR_return_NAN;
-    }
+  if (ISNAN(p) || p <= 0 || p > 1) {
+    ML_ERR_return_NAN;
+  }
 
-    return igraph_rpois(rng, igraph_exp_rand(rng) * ((1 - p) / p));
+  return igraph_rpois(rng, igraph_exp_rand(rng) * ((1 - p) / p));
 }
 
 /* This is from nmath/rbinom.c */
 
-#define repeat for(;;)
+#define repeat for (;;)
 
 double igraph_rbinom(igraph_rng_t *rng, double nin, double pp) {
-    /* FIXME: These should become THREAD_specific globals : */
+  /* FIXME: These should become THREAD_specific globals : */
 
-    static IGRAPH_THREAD_LOCAL double c, fm, npq, p1, p2, p3, p4, qn;
-    static IGRAPH_THREAD_LOCAL double xl, xll, xlr, xm, xr;
+  static IGRAPH_THREAD_LOCAL double c, fm, npq, p1, p2, p3, p4, qn;
+  static IGRAPH_THREAD_LOCAL double xl, xll, xlr, xm, xr;
 
-    static IGRAPH_THREAD_LOCAL double psave = -1.0;
-    static IGRAPH_THREAD_LOCAL int nsave = -1;
-    static IGRAPH_THREAD_LOCAL int m;
+  static IGRAPH_THREAD_LOCAL double psave = -1.0;
+  static IGRAPH_THREAD_LOCAL int nsave = -1;
+  static IGRAPH_THREAD_LOCAL int m;
 
-    double f, f1, f2, u, v, w, w2, x, x1, x2, z, z2;
-    double p, q, np, g, r, al, alv, amaxp, ffm, ynorm;
-    int i, ix, k, n;
+  double f, f1, f2, u, v, w, w2, x, x1, x2, z, z2;
+  double p, q, np, g, r, al, alv, amaxp, ffm, ynorm;
+  int i, ix, k, n;
 
-    if (!R_FINITE(nin)) {
-        ML_ERR_return_NAN;
+  if (!R_FINITE(nin)) {
+    ML_ERR_return_NAN;
+  }
+  n = floor(nin + 0.5);
+  if (n != nin) {
+    ML_ERR_return_NAN;
+  }
+
+  if (!R_FINITE(pp) ||
+      /* n=0, p=0, p=1 are not errors <TSL>*/
+      n < 0 || pp < 0. || pp > 1.) {
+    ML_ERR_return_NAN;
+  }
+
+  if (n == 0 || pp == 0.) {
+    return 0;
+  }
+  if (pp == 1.) {
+    return n;
+  }
+
+  p = fmin(pp, 1. - pp);
+  q = 1. - p;
+  np = n * p;
+  r = p / q;
+  g = r * (n + 1);
+
+  /* Setup, perform only when parameters change [using static (globals): */
+
+  /* FIXING: Want this thread safe
+     -- use as little (thread globals) as possible
+  */
+  if (pp != psave || n != nsave) {
+    psave = pp;
+    nsave = n;
+    if (np < 30.0) {
+      /* inverse cdf logic for mean less than 30 */
+      qn = pow(q, (double)n);
+      goto L_np_small;
+    } else {
+      ffm = np + p;
+      m = ffm;
+      fm = m;
+      npq = np * q;
+      p1 = (int)(2.195 * sqrt(npq) - 4.6 * q) + 0.5;
+      xm = fm + 0.5;
+      xl = xm - p1;
+      xr = xm + p1;
+      c = 0.134 + 20.5 / (15.3 + fm);
+      al = (ffm - xl) / (ffm - xl * p);
+      xll = al * (1.0 + 0.5 * al);
+      al = (xr - ffm) / (xr * q);
+      xlr = al * (1.0 + 0.5 * al);
+      p2 = p1 * (1.0 + c + c);
+      p3 = p2 + c / xll;
+      p4 = p3 + c / xlr;
     }
-    n = floor(nin + 0.5);
-    if (n != nin) {
-        ML_ERR_return_NAN;
+  } else if (n == nsave) {
+    if (np < 30.0) {
+      goto L_np_small;
     }
+  }
 
-    if (!R_FINITE(pp) ||
-        /* n=0, p=0, p=1 are not errors <TSL>*/
-        n < 0 || pp < 0. || pp > 1.) {
-        ML_ERR_return_NAN;
+  /*-------------------------- np = n*p >= 30 : ------------------- */
+  repeat {
+    u = igraph_rng_get_unif01(rng) * p4;
+    v = igraph_rng_get_unif01(rng);
+    /* triangular region */
+    if (u <= p1) {
+      ix = xm - p1 * v + u;
+      goto finis;
     }
-
-    if (n == 0 || pp == 0.) {
-        return 0;
-    }
-    if (pp == 1.) {
-        return n;
-    }
-
-    p = fmin(pp, 1. - pp);
-    q = 1. - p;
-    np = n * p;
-    r = p / q;
-    g = r * (n + 1);
-
-    /* Setup, perform only when parameters change [using static (globals): */
-
-    /* FIXING: Want this thread safe
-       -- use as little (thread globals) as possible
-    */
-    if (pp != psave || n != nsave) {
-        psave = pp;
-        nsave = n;
-        if (np < 30.0) {
-            /* inverse cdf logic for mean less than 30 */
-            qn = pow(q, (double) n);
-            goto L_np_small;
-        } else {
-            ffm = np + p;
-            m = ffm;
-            fm = m;
-            npq = np * q;
-            p1 = (int)(2.195 * sqrt(npq) - 4.6 * q) + 0.5;
-            xm = fm + 0.5;
-            xl = xm - p1;
-            xr = xm + p1;
-            c = 0.134 + 20.5 / (15.3 + fm);
-            al = (ffm - xl) / (ffm - xl * p);
-            xll = al * (1.0 + 0.5 * al);
-            al = (xr - ffm) / (xr * q);
-            xlr = al * (1.0 + 0.5 * al);
-            p2 = p1 * (1.0 + c + c);
-            p3 = p2 + c / xll;
-            p4 = p3 + c / xlr;
+    /* parallelogram region */
+    if (u <= p2) {
+      x = xl + (u - p1) / c;
+      v = v * c + 1.0 - fabs(xm - x) / p1;
+      if (v > 1.0 || v <= 0.) {
+        continue;
+      }
+      ix = x;
+    } else {
+      if (u > p3) { /* right tail */
+        ix = xr - log(v) / xlr;
+        if (ix > n) {
+          continue;
         }
-    } else if (n == nsave) {
-        if (np < 30.0) {
-            goto L_np_small;
+        v = v * (u - p3) * xlr;
+      } else { /* left tail */
+        ix = xl + log(v) / xll;
+        if (ix < 0) {
+          continue;
         }
+        v = v * (u - p2) * xll;
+      }
     }
-
-    /*-------------------------- np = n*p >= 30 : ------------------- */
-    repeat {
-        u = igraph_rng_get_unif01(rng) * p4;
-        v = igraph_rng_get_unif01(rng);
-        /* triangular region */
-        if (u <= p1) {
-            ix = xm - p1 * v + u;
-            goto finis;
+    /* determine appropriate way to perform accept/reject test */
+    k = abs(ix - m);
+    if (k <= 20 || k >= npq / 2 - 1) {
+      /* explicit evaluation */
+      f = 1.0;
+      if (m < ix) {
+        for (i = m + 1; i <= ix; i++) {
+          f *= (g / i - r);
         }
-        /* parallelogram region */
-        if (u <= p2) {
-            x = xl + (u - p1) / c;
-            v = v * c + 1.0 - fabs(xm - x) / p1;
-            if (v > 1.0 || v <= 0.) {
-                continue;
-            }
-            ix = x;
-        } else {
-            if (u > p3) { /* right tail */
-                ix = xr - log(v) / xlr;
-                if (ix > n) {
-                    continue;
-                }
-                v = v * (u - p3) * xlr;
-            } else {/* left tail */
-                ix = xl + log(v) / xll;
-                if (ix < 0) {
-                    continue;
-                }
-                v = v * (u - p2) * xll;
-            }
+      } else if (m != ix) {
+        for (i = ix + 1; i <= m; i++) {
+          f /= (g / i - r);
         }
-        /* determine appropriate way to perform accept/reject test */
-        k = abs(ix - m);
-        if (k <= 20 || k >= npq / 2 - 1) {
-            /* explicit evaluation */
-            f = 1.0;
-            if (m < ix) {
-                for (i = m + 1; i <= ix; i++) {
-                    f *= (g / i - r);
-                }
-            } else if (m != ix) {
-                for (i = ix + 1; i <= m; i++) {
-                    f /= (g / i - r);
-                }
-            }
-            if (v <= f) {
-                goto finis;
-            }
-        } else {
-            /* squeezing using upper and lower bounds on log(f(x)) */
-            amaxp = (k / npq) * ((k * (k / 3. + 0.625) + 0.1666666666666) / npq + 0.5);
-            ynorm = -k * k / (2.0 * npq);
-            alv = log(v);
-            if (alv < ynorm - amaxp) {
-                goto finis;
-            }
-            if (alv <= ynorm + amaxp) {
-                /* Stirling's formula to machine accuracy */
-                /* for the final acceptance/rejection test */
-                x1 = ix + 1;
-                f1 = fm + 1.0;
-                z = n + 1 - fm;
-                w = n - ix + 1.0;
-                z2 = z * z;
-                x2 = x1 * x1;
-                f2 = f1 * f1;
-                w2 = w * w;
-                if (alv <= xm * log(f1 / x1) + (n - m + 0.5) * log(z / w) + (ix - m) * log(w * p / (x1 * q)) + (13860.0 - (462.0 - (132.0 - (99.0 - 140.0 / f2) / f2) / f2) / f2) / f1 / 166320.0 + (13860.0 - (462.0 - (132.0 - (99.0 - 140.0 / z2) / z2) / z2) / z2) / z / 166320.0 + (13860.0 - (462.0 - (132.0 - (99.0 - 140.0 / x2) / x2) / x2) / x2) / x1 / 166320.0 + (13860.0 - (462.0 - (132.0 - (99.0 - 140.0 / w2) / w2) / w2) / w2) / w / 166320.) {
-                    goto finis;
-                }
-            }
+      }
+      if (v <= f) {
+        goto finis;
+      }
+    } else {
+      /* squeezing using upper and lower bounds on log(f(x)) */
+      amaxp =
+          (k / npq) * ((k * (k / 3. + 0.625) + 0.1666666666666) / npq + 0.5);
+      ynorm = -k * k / (2.0 * npq);
+      alv = log(v);
+      if (alv < ynorm - amaxp) {
+        goto finis;
+      }
+      if (alv <= ynorm + amaxp) {
+        /* Stirling's formula to machine accuracy */
+        /* for the final acceptance/rejection test */
+        x1 = ix + 1;
+        f1 = fm + 1.0;
+        z = n + 1 - fm;
+        w = n - ix + 1.0;
+        z2 = z * z;
+        x2 = x1 * x1;
+        f2 = f1 * f1;
+        w2 = w * w;
+        if (alv <=
+            xm * log(f1 / x1) + (n - m + 0.5) * log(z / w) +
+                (ix - m) * log(w * p / (x1 * q)) +
+                (13860.0 -
+                 (462.0 - (132.0 - (99.0 - 140.0 / f2) / f2) / f2) / f2) /
+                    f1 / 166320.0 +
+                (13860.0 -
+                 (462.0 - (132.0 - (99.0 - 140.0 / z2) / z2) / z2) / z2) /
+                    z / 166320.0 +
+                (13860.0 -
+                 (462.0 - (132.0 - (99.0 - 140.0 / x2) / x2) / x2) / x2) /
+                    x1 / 166320.0 +
+                (13860.0 -
+                 (462.0 - (132.0 - (99.0 - 140.0 / w2) / w2) / w2) / w2) /
+                    w / 166320.) {
+          goto finis;
         }
+      }
     }
+  }
 
 L_np_small:
-    /*---------------------- np = n*p < 30 : ------------------------- */
+  /*---------------------- np = n*p < 30 : ------------------------- */
 
+  repeat {
+    ix = 0;
+    f = qn;
+    u = igraph_rng_get_unif01(rng);
     repeat {
-        ix = 0;
-        f = qn;
-        u = igraph_rng_get_unif01(rng);
-        repeat {
-            if (u < f) {
-                goto finis;
-            }
-            if (ix > 110) {
-                break;
-            }
-            u -= f;
-            ix++;
-            f *= (g / ix - r);
-        }
+      if (u < f) {
+        goto finis;
+      }
+      if (ix > 110) {
+        break;
+      }
+      u -= f;
+      ix++;
+      f *= (g / ix - r);
     }
+  }
 finis:
-    if (psave > 0.5) {
-        ix = n - ix;
-    }
-    return (double)ix;
+  if (psave > 0.5) {
+    ix = n - ix;
+  }
+  return (double)ix;
 }
 
 igraph_real_t igraph_rexp(igraph_rng_t *rng, double rate) {
-    igraph_real_t scale = 1.0 / rate;
-    if (!IGRAPH_FINITE(scale) || scale <= 0.0) {
-        if (scale == 0.0) {
-            return 0.0;
-        }
-        return IGRAPH_NAN;
+  igraph_real_t scale = 1.0 / rate;
+  if (!IGRAPH_FINITE(scale) || scale <= 0.0) {
+    if (scale == 0.0) {
+      return 0.0;
     }
-    return scale * igraph_exp_rand(rng);
+    return IGRAPH_NAN;
+  }
+  return scale * igraph_exp_rand(rng);
 }
 
 /*
@@ -2179,32 +2196,31 @@ igraph_real_t igraph_rexp(igraph_rng_t *rng, double rate) {
 
 double igraph_dnorm(double x, double mu, double sigma, int give_log) {
 #ifdef IEEE_754
-    if (ISNAN(x) || ISNAN(mu) || ISNAN(sigma)) {
-        return x + mu + sigma;
-    }
+  if (ISNAN(x) || ISNAN(mu) || ISNAN(sigma)) {
+    return x + mu + sigma;
+  }
 #endif
-    if (!R_FINITE(sigma)) {
-        return R_D__0;
+  if (!R_FINITE(sigma)) {
+    return R_D__0;
+  }
+  if (!R_FINITE(x) && mu == x) {
+    return ML_NAN; /* x-mu is NaN */
+  }
+  if (sigma <= 0) {
+    if (sigma < 0) {
+      ML_ERR_return_NAN;
     }
-    if (!R_FINITE(x) && mu == x) {
-        return ML_NAN;    /* x-mu is NaN */
-    }
-    if (sigma <= 0) {
-        if (sigma < 0) {
-            ML_ERR_return_NAN;
-        }
-        /* sigma == 0 */
-        return (x == mu) ? ML_POSINF : R_D__0;
-    }
-    x = (x - mu) / sigma;
+    /* sigma == 0 */
+    return (x == mu) ? ML_POSINF : R_D__0;
+  }
+  x = (x - mu) / sigma;
 
-    if (!R_FINITE(x)) {
-        return R_D__0;
-    }
-    return (give_log ?
-            -(M_LN_SQRT_2PI  +  0.5 * x * x + log(sigma)) :
-            M_1_SQRT_2PI * exp(-0.5 * x * x)  /   sigma);
-    /* M_1_SQRT_2PI = 1 / sqrt(2 * pi) */
+  if (!R_FINITE(x)) {
+    return R_D__0;
+  }
+  return (give_log ? -(M_LN_SQRT_2PI + 0.5 * x * x + log(sigma))
+                   : M_1_SQRT_2PI * exp(-0.5 * x * x) / sigma);
+  /* M_1_SQRT_2PI = 1 / sqrt(2 * pi) */
 }
 
 /* This is from nmath/rgamma.c */
@@ -2259,211 +2275,215 @@ double igraph_dnorm(double x, double mu, double sigma, int give_log) {
  */
 
 double igraph_rgamma(igraph_rng_t *rng, double a, double scale) {
-    /* Constants : */
-    const static double sqrt32 = 5.656854;
-    const static double exp_m1 = 0.36787944117144232159;/* exp(-1) = 1/e */
+  /* Constants : */
+  const static double sqrt32 = 5.656854;
+  const static double exp_m1 = 0.36787944117144232159; /* exp(-1) = 1/e */
 
-    /* Coefficients q[k] - for q0 = sum(q[k]*a^(-k))
-     * Coefficients a[k] - for q = q0+(t*t/2)*sum(a[k]*v^k)
-     * Coefficients e[k] - for exp(q)-1 = sum(e[k]*q^k)
-     */
-    const static double q1 = 0.04166669;
-    const static double q2 = 0.02083148;
-    const static double q3 = 0.00801191;
-    const static double q4 = 0.00144121;
-    const static double q5 = -7.388e-5;
-    const static double q6 = 2.4511e-4;
-    const static double q7 = 2.424e-4;
+  /* Coefficients q[k] - for q0 = sum(q[k]*a^(-k))
+   * Coefficients a[k] - for q = q0+(t*t/2)*sum(a[k]*v^k)
+   * Coefficients e[k] - for exp(q)-1 = sum(e[k]*q^k)
+   */
+  const static double q1 = 0.04166669;
+  const static double q2 = 0.02083148;
+  const static double q3 = 0.00801191;
+  const static double q4 = 0.00144121;
+  const static double q5 = -7.388e-5;
+  const static double q6 = 2.4511e-4;
+  const static double q7 = 2.424e-4;
 
-    const static double a1 = 0.3333333;
-    const static double a2 = -0.250003;
-    const static double a3 = 0.2000062;
-    const static double a4 = -0.1662921;
-    const static double a5 = 0.1423657;
-    const static double a6 = -0.1367177;
-    const static double a7 = 0.1233795;
+  const static double a1 = 0.3333333;
+  const static double a2 = -0.250003;
+  const static double a3 = 0.2000062;
+  const static double a4 = -0.1662921;
+  const static double a5 = 0.1423657;
+  const static double a6 = -0.1367177;
+  const static double a7 = 0.1233795;
 
-    /* State variables [FIXME for threading!] :*/
-    static double aa = 0.;
-    static double aaa = 0.;
-    static double s, s2, d;    /* no. 1 (step 1) */
-    static double q0, b, si, c;/* no. 2 (step 4) */
+  /* State variables [FIXME for threading!] :*/
+  static double aa = 0.;
+  static double aaa = 0.;
+  static double s, s2, d;     /* no. 1 (step 1) */
+  static double q0, b, si, c; /* no. 2 (step 4) */
 
-    double e, p, q, r, t, u, v, w, x, ret_val;
+  double e, p, q, r, t, u, v, w, x, ret_val;
 
-    if (!R_FINITE(a) || !R_FINITE(scale) || a < 0.0 || scale <= 0.0) {
-        if (scale == 0.) {
-            return 0.;
-        }
-        ML_ERR_return_NAN;
+  if (!R_FINITE(a) || !R_FINITE(scale) || a < 0.0 || scale <= 0.0) {
+    if (scale == 0.) {
+      return 0.;
     }
+    ML_ERR_return_NAN;
+  }
 
-    if (a < 1.) { /* GS algorithm for parameters a < 1 */
-        if (a == 0) {
-            return 0.;
-        }
-        e = 1.0 + exp_m1 * a;
-        repeat {
-            p = e * igraph_rng_get_unif01(rng);
-            if (p >= 1.0) {
-                x = -log((e - p) / a);
-                if (igraph_exp_rand(rng) >= (1.0 - a) * log(x)) {
-                    break;
-                }
-            } else {
-                x = exp(log(p) / a);
-                if (igraph_exp_rand(rng) >= x) {
-                    break;
-                }
-            }
-        }
-        return scale * x;
+  if (a < 1.) { /* GS algorithm for parameters a < 1 */
+    if (a == 0) {
+      return 0.;
     }
-
-    /* --- a >= 1 : GD algorithm --- */
-
-    /* Step 1: Recalculations of s2, s, d if a has changed */
-    if (a != aa) {
-        aa = a;
-        s2 = a - 0.5;
-        s = sqrt(s2);
-        d = sqrt32 - s * 12.0;
-    }
-    /* Step 2: t = standard normal deviate,
-               x = (s,1/2) -normal deviate. */
-
-    /* immediate acceptance (i) */
-    t = igraph_norm_rand(rng);
-    x = s + 0.5 * t;
-    ret_val = x * x;
-    if (t >= 0.0) {
-        return scale * ret_val;
-    }
-
-    /* Step 3: u = 0,1 - uniform sample. squeeze acceptance (s) */
-    u = igraph_rng_get_unif01(rng);
-    if (d * u <= t * t * t) {
-        return scale * ret_val;
-    }
-
-    /* Step 4: recalculations of q0, b, si, c if necessary */
-
-    if (a != aaa) {
-        aaa = a;
-        r = 1.0 / a;
-        q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r
-               + q2) * r + q1) * r;
-
-        /* Approximation depending on size of parameter a */
-        /* The constants in the expressions for b, si and c */
-        /* were established by numerical experiments */
-
-        if (a <= 3.686) {
-            b = 0.463 + s + 0.178 * s2;
-            si = 1.235;
-            c = 0.195 / s - 0.079 + 0.16 * s;
-        } else if (a <= 13.022) {
-            b = 1.654 + 0.0076 * s2;
-            si = 1.68 / s + 0.275;
-            c = 0.062 / s + 0.024;
-        } else {
-            b = 1.77;
-            si = 0.75;
-            c = 0.1515 / s;
-        }
-    }
-    /* Step 5: no quotient test if x not positive */
-
-    if (x > 0.0) {
-        /* Step 6: calculation of v and quotient q */
-        v = t / (s + s);
-        if (fabs(v) <= 0.25)
-            q = q0 + 0.5 * t * t * ((((((a7 * v + a6) * v + a5) * v + a4) * v
-                                      + a3) * v + a2) * v + a1) * v;
-        else {
-            q = q0 - s * t + 0.25 * t * t + (s2 + s2) * log(1.0 + v);
-        }
-
-
-        /* Step 7: quotient acceptance (q) */
-        if (log(1.0 - u) <= q) {
-            return scale * ret_val;
-        }
-    }
-
+    e = 1.0 + exp_m1 * a;
     repeat {
-        /* Step 8: e = standard exponential deviate
-         *  u =  0,1 -uniform deviate
-         *  t = (b,si)-double exponential (laplace) sample */
-        e = igraph_exp_rand(rng);
-        u = igraph_rng_get_unif01(rng);
-        u = u + u - 1.0;
-        if (u < 0.0) {
-            t = b - si * e;
-        } else {
-            t = b + si * e;
+      p = e * igraph_rng_get_unif01(rng);
+      if (p >= 1.0) {
+        x = -log((e - p) / a);
+        if (igraph_exp_rand(rng) >= (1.0 - a) * log(x)) {
+          break;
         }
-        /* Step  9:  rejection if t < tau(1) = -0.71874483771719 */
-        if (t >= -0.71874483771719) {
-            /* Step 10:  calculation of v and quotient q */
-            v = t / (s + s);
-            if (fabs(v) <= 0.25)
-                q = q0 + 0.5 * t * t *
-                ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) * v
-                  + a2) * v + a1) * v;
-            else {
-                q = q0 - s * t + 0.25 * t * t + (s2 + s2) * log(1.0 + v);
-            }
-            /* Step 11:  hat acceptance (h) */
-            /* (if q not positive go to step 8) */
-            if (q > 0.0) {
-                w = expm1(q);
-                /*  ^^^^^ original code had approximation with rel.err < 2e-7 */
-                /* if t is rejected sample again at step 8 */
-                if (c * fabs(u) <= w * exp(e - 0.5 * t * t)) {
-                    break;
-                }
-            }
+      } else {
+        x = exp(log(p) / a);
+        if (igraph_exp_rand(rng) >= x) {
+          break;
         }
-    } /* repeat .. until  `t' is accepted */
-    x = s + 0.5 * t;
-    return scale * x * x;
+      }
+    }
+    return scale * x;
+  }
+
+  /* --- a >= 1 : GD algorithm --- */
+
+  /* Step 1: Recalculations of s2, s, d if a has changed */
+  if (a != aa) {
+    aa = a;
+    s2 = a - 0.5;
+    s = sqrt(s2);
+    d = sqrt32 - s * 12.0;
+  }
+  /* Step 2: t = standard normal deviate,
+             x = (s,1/2) -normal deviate. */
+
+  /* immediate acceptance (i) */
+  t = igraph_norm_rand(rng);
+  x = s + 0.5 * t;
+  ret_val = x * x;
+  if (t >= 0.0) {
+    return scale * ret_val;
+  }
+
+  /* Step 3: u = 0,1 - uniform sample. squeeze acceptance (s) */
+  u = igraph_rng_get_unif01(rng);
+  if (d * u <= t * t * t) {
+    return scale * ret_val;
+  }
+
+  /* Step 4: recalculations of q0, b, si, c if necessary */
+
+  if (a != aaa) {
+    aaa = a;
+    r = 1.0 / a;
+    q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r + q2) * r + q1) *
+         r;
+
+    /* Approximation depending on size of parameter a */
+    /* The constants in the expressions for b, si and c */
+    /* were established by numerical experiments */
+
+    if (a <= 3.686) {
+      b = 0.463 + s + 0.178 * s2;
+      si = 1.235;
+      c = 0.195 / s - 0.079 + 0.16 * s;
+    } else if (a <= 13.022) {
+      b = 1.654 + 0.0076 * s2;
+      si = 1.68 / s + 0.275;
+      c = 0.062 / s + 0.024;
+    } else {
+      b = 1.77;
+      si = 0.75;
+      c = 0.1515 / s;
+    }
+  }
+  /* Step 5: no quotient test if x not positive */
+
+  if (x > 0.0) {
+    /* Step 6: calculation of v and quotient q */
+    v = t / (s + s);
+    if (fabs(v) <= 0.25)
+      q = q0 +
+          0.5 * t * t *
+              ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) * v + a2) * v +
+               a1) *
+              v;
+    else {
+      q = q0 - s * t + 0.25 * t * t + (s2 + s2) * log(1.0 + v);
+    }
+
+    /* Step 7: quotient acceptance (q) */
+    if (log(1.0 - u) <= q) {
+      return scale * ret_val;
+    }
+  }
+
+  repeat {
+    /* Step 8: e = standard exponential deviate
+     *  u =  0,1 -uniform deviate
+     *  t = (b,si)-double exponential (laplace) sample */
+    e = igraph_exp_rand(rng);
+    u = igraph_rng_get_unif01(rng);
+    u = u + u - 1.0;
+    if (u < 0.0) {
+      t = b - si * e;
+    } else {
+      t = b + si * e;
+    }
+    /* Step  9:  rejection if t < tau(1) = -0.71874483771719 */
+    if (t >= -0.71874483771719) {
+      /* Step 10:  calculation of v and quotient q */
+      v = t / (s + s);
+      if (fabs(v) <= 0.25)
+        q = q0 +
+            0.5 * t * t *
+                ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) * v + a2) * v +
+                 a1) *
+                v;
+      else {
+        q = q0 - s * t + 0.25 * t * t + (s2 + s2) * log(1.0 + v);
+      }
+      /* Step 11:  hat acceptance (h) */
+      /* (if q not positive go to step 8) */
+      if (q > 0.0) {
+        w = expm1(q);
+        /*  ^^^^^ original code had approximation with rel.err < 2e-7 */
+        /* if t is rejected sample again at step 8 */
+        if (c * fabs(u) <= w * exp(e - 0.5 * t * t)) {
+          break;
+        }
+      }
+    }
+  } /* repeat .. until  `t' is accepted */
+  x = s + 0.5 * t;
+  return scale * x * x;
 }
 
 #endif
 
-int igraph_rng_get_dirichlet(igraph_rng_t *rng,
-                             const igraph_vector_t *alpha,
+int igraph_rng_get_dirichlet(igraph_rng_t *rng, const igraph_vector_t *alpha,
                              igraph_vector_t *result) {
 
-    igraph_integer_t len = igraph_vector_size(alpha);
-    igraph_integer_t j;
-    igraph_real_t sum = 0.0;
+  igraph_integer_t len = igraph_vector_size(alpha);
+  igraph_integer_t j;
+  igraph_real_t sum = 0.0;
 
-    if (len < 2) {
-        IGRAPH_ERROR("Dirichlet parameter vector too short, must "
-                     "have at least two entries", IGRAPH_EINVAL);
-    }
-    if (igraph_vector_min(alpha) <= 0) {
-        IGRAPH_ERROR("Dirichlet concentration parameters must be positive",
-                     IGRAPH_EINVAL);
-    }
+  if (len < 2) {
+    IGRAPH_ERROR("Dirichlet parameter vector too short, must "
+                 "have at least two entries",
+                 IGRAPH_EINVAL);
+  }
+  if (igraph_vector_min(alpha) <= 0) {
+    IGRAPH_ERROR("Dirichlet concentration parameters must be positive",
+                 IGRAPH_EINVAL);
+  }
 
-    IGRAPH_CHECK(igraph_vector_resize(result, len));
+  IGRAPH_CHECK(igraph_vector_resize(result, len));
 
-    RNG_BEGIN();
+  RNG_BEGIN();
 
-    for (j = 0; j < len; j++) {
-        VECTOR(*result)[j] = igraph_rng_get_gamma(rng, VECTOR(*alpha)[j], 1.0);
-        sum += VECTOR(*result)[j];
-    }
-    for (j = 0; j < len; j++) {
-        VECTOR(*result)[j] /= sum;
-    }
+  for (j = 0; j < len; j++) {
+    VECTOR(*result)[j] = igraph_rng_get_gamma(rng, VECTOR(*alpha)[j], 1.0);
+    sum += VECTOR(*result)[j];
+  }
+  for (j = 0; j < len; j++) {
+    VECTOR(*result)[j] /= sum;
+  }
 
-    RNG_END();
+  RNG_END();
 
-    return 0;
+  return 0;
 }
 
 /**********************************************************
