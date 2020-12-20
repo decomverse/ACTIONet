@@ -18,7 +18,6 @@
 /* typedef unsigned long int setelement; */
 /* #define ELEMENTSIZE 64 */
 
-
 /*
  * INLINE is a command prepended to function declarations to instruct the
  * compiler to inline the function.  If inlining is not desired, define blank.
@@ -29,17 +28,16 @@
 /* #define INLINE */
 /* #define INLINE __inline__ */
 #if __STDC_VERSION__ >= 199901L
- #define INLINE inline
+#define INLINE inline
 #else
- #if defined(_MSC_VER)
-  #define INLINE __inline
- #elif defined(__GNUC__)
-  #define INLINE __inline__
- #else
-  #define INLINE
- #endif
+#if defined(_MSC_VER)
+#define INLINE __inline
+#elif defined(__GNUC__)
+#define INLINE __inline__
+#else
+#define INLINE
 #endif
-
+#endif
 
 /*
  * Set handling functions are defined as static functions in set.h for
@@ -54,7 +52,6 @@
 
 /* #define UNUSED_FUNCTION __attribute__((unused)) */
 /* #define UNUSED_FUNCTION */
-
 
 /*
  * Uncommenting the following will disable all assertions  (checks that

@@ -37,15 +37,16 @@ __BEGIN_DECLS
  */
 
 typedef struct {
-    igraph_vector_t v;
-    long int size;
-    long int offset;
+  igraph_vector_t v;
+  long int size;
+  long int offset;
 } igraph_psumtree_t;
 
 DECLDIR int igraph_psumtree_init(igraph_psumtree_t *t, long int size);
 DECLDIR void igraph_psumtree_reset(igraph_psumtree_t *t);
 DECLDIR void igraph_psumtree_destroy(igraph_psumtree_t *t);
-DECLDIR igraph_real_t igraph_psumtree_get(const igraph_psumtree_t *t, long int idx);
+DECLDIR igraph_real_t igraph_psumtree_get(const igraph_psumtree_t *t,
+                                          long int idx);
 DECLDIR long int igraph_psumtree_size(const igraph_psumtree_t *t);
 DECLDIR int igraph_psumtree_search(const igraph_psumtree_t *t, long int *idx,
                                    igraph_real_t elem);

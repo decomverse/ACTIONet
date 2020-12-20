@@ -39,44 +39,45 @@ __BEGIN_DECLS
 
 #define BASE_IGRAPH_REAL
 #define HEAP_TYPE_MAX
-#include "igraph_pmt.h"
 #include "igraph_heap_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef HEAP_TYPE_MAX
 #define HEAP_TYPE_MIN
-#include "igraph_pmt.h"
 #include "igraph_heap_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef HEAP_TYPE_MIN
 #undef BASE_IGRAPH_REAL
 
 #define BASE_LONG
 #define HEAP_TYPE_MAX
-#include "igraph_pmt.h"
 #include "igraph_heap_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef HEAP_TYPE_MAX
 #define HEAP_TYPE_MIN
-#include "igraph_pmt.h"
 #include "igraph_heap_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef HEAP_TYPE_MIN
 #undef BASE_LONG
 
 #define BASE_CHAR
 #define HEAP_TYPE_MAX
-#include "igraph_pmt.h"
 #include "igraph_heap_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef HEAP_TYPE_MAX
 #define HEAP_TYPE_MIN
-#include "igraph_pmt.h"
 #include "igraph_heap_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef HEAP_TYPE_MIN
 #undef BASE_CHAR
 
-#define IGRAPH_HEAP_NULL { 0,0,0 }
+#define IGRAPH_HEAP_NULL                                                       \
+  { 0, 0, 0 }
 
 __END_DECLS
 

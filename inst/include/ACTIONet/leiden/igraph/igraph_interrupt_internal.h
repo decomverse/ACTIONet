@@ -30,40 +30,43 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-    #define __BEGIN_DECLS extern "C" {
-    #define __END_DECLS }
+#define __BEGIN_DECLS extern "C" {
+#define __END_DECLS }
 #else
-    #define __BEGIN_DECLS /* empty */
-    #define __END_DECLS /* empty */
+#define __BEGIN_DECLS /* empty */
+#define __END_DECLS   /* empty */
 #endif
 
 __BEGIN_DECLS
 
 extern IGRAPH_THREAD_LOCAL igraph_interruption_handler_t
-*igraph_i_interruption_handler;
+    *igraph_i_interruption_handler;
 
 /**
  * \define IGRAPH_ALLOW_INTERRUPTION
  * \brief
  *
  * This macro should be called when interruption is allowed.  It calls
- * \ref igraph_allow_interruption() with the proper parameters and if that returns
- * anything but \c IGRAPH_SUCCESS then
- * the macro returns the "calling" function as well, with the proper
- * error code (\c IGRAPH_INTERRUPTED).
+ * \ref igraph_allow_interruption() with the proper parameters and if that
+ * returns anything but \c IGRAPH_SUCCESS then the macro returns the "calling"
+ * function as well, with the proper error code (\c IGRAPH_INTERRUPTED).
  */
 
-#define IGRAPH_ALLOW_INTERRUPTION() \
-    do { \
-        if (igraph_i_interruption_handler) { if (igraph_allow_interruption(NULL) != IGRAPH_SUCCESS) return IGRAPH_INTERRUPTED; \
-        } } while (0)
+#define IGRAPH_ALLOW_INTERRUPTION()                                            \
+  do {                                                                         \
+    if (igraph_i_interruption_handler) {                                       \
+      if (igraph_allow_interruption(NULL) != IGRAPH_SUCCESS)                   \
+        return IGRAPH_INTERRUPTED;                                             \
+    }                                                                          \
+  } while (0)
 
-#define IGRAPH_ALLOW_INTERRUPTION_NORETURN() \
-    do { \
-        if (igraph_i_interruption_handler) { igraph_allow_interruption(NULL); } \
-    } while (0)
+#define IGRAPH_ALLOW_INTERRUPTION_NORETURN()                                   \
+  do {                                                                         \
+    if (igraph_i_interruption_handler) {                                       \
+      igraph_allow_interruption(NULL);                                         \
+    }                                                                          \
+  } while (0)
 
 __END_DECLS
 
 #endif
-

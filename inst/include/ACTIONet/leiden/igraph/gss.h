@@ -14,7 +14,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
+ * USA.
  */
 
 #ifndef __GSS_H__
@@ -23,11 +24,11 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-# define __BEGIN_DECLS extern "C" {
-# define __END_DECLS }
+#define __BEGIN_DECLS extern "C" {
+#define __END_DECLS }
 #else
-# define __BEGIN_DECLS /* empty */
-# define __END_DECLS /* empty */
+#define __BEGIN_DECLS /* empty */
+#define __END_DECLS   /* empty */
 #endif
 
 __BEGIN_DECLS
@@ -36,16 +37,16 @@ __BEGIN_DECLS
  * Enum specifying what the search should do when the function is not U-shaped.
  */
 typedef enum {
-	GSS_ERROR_STOP,              /**< Stop and return an error code */
-	GSS_ERROR_WARN               /**< Continue and set the warning flag */
+  GSS_ERROR_STOP, /**< Stop and return an error code */
+  GSS_ERROR_WARN  /**< Continue and set the warning flag */
 } gss_error_handling_t;
 
 /**
  * Parameter settings for a golden section search.
  */
 typedef struct {
-    double epsilon;
-	gss_error_handling_t on_error;
+  double epsilon;
+  gss_error_handling_t on_error;
 } gss_parameter_t;
 
 /**
@@ -53,8 +54,8 @@ typedef struct {
  * section search.
  *
  * The gss() function calls this function to obtain the values of the objective
- * function when needed. A client program must implement this function to evaluate
- * the value of the objective function, given the location.
+ * function when needed. A client program must implement this function to
+ * evaluate the value of the objective function, given the location.
  *
  * @param  instance    The user data sent for the gss() function by the client.
  * @param  x           The current value of the variable.
@@ -84,7 +85,7 @@ typedef double (*gss_evaluate_t)(void *instance, double x);
  *                     non-zero value will cancel the optimization process.
  */
 typedef int (*gss_progress_t)(void *instance, double x, double fx, double min,
-        double fmin, double left, double right, int k);
+                              double fmin, double left, double right, int k);
 
 /**
  * Start a golden section search optimization.
@@ -92,12 +93,12 @@ typedef int (*gss_progress_t)(void *instance, double x, double fx, double min,
  * @param  a    The left side of the bracket to start from
  * @param  b    The right side of the bracket to start from
  * @param  min  The pointer to the variable that receives the location of the
- *              final value of the objective function. This argument can be set to
- *              \c NULL if the location of the final value of the objective
- *              function is unnecessary.
+ *              final value of the objective function. This argument can be set
+ * to \c NULL if the location of the final value of the objective function is
+ * unnecessary.
  * @param  fmin The pointer to the variable that receives the final value of
- *              the objective function. This argument can be st to \c NULL if the
- *              final value of the objective function is unnecessary.
+ *              the objective function. This argument can be st to \c NULL if
+ * the final value of the objective function is unnecessary.
  * @param  proc_evaluate  The callback function to evaluate the objective
  *                        function at a given location.
  * @param  proc_progress  The callback function to receive the progress (the
@@ -121,7 +122,7 @@ typedef int (*gss_progress_t)(void *instance, double x, double fx, double min,
  */
 int gss(double a, double b, double *min, double *fmin,
         gss_evaluate_t proc_evaluate, gss_progress_t proc_progress,
-        void* instance, const gss_parameter_t *_param);
+        void *instance, const gss_parameter_t *_param);
 
 /**
  * Return the state of the warning flag.

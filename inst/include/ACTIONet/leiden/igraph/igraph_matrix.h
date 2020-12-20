@@ -34,45 +34,48 @@ __BEGIN_DECLS
 /* -------------------------------------------------- */
 
 #define BASE_IGRAPH_REAL
-#include "igraph_pmt.h"
 #include "igraph_matrix_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_IGRAPH_REAL
 
 #define BASE_INT
-#include "igraph_pmt.h"
 #include "igraph_matrix_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_INT
 
 #define BASE_LONG
-#include "igraph_pmt.h"
 #include "igraph_matrix_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_LONG
 
 #define BASE_CHAR
-#include "igraph_pmt.h"
 #include "igraph_matrix_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_CHAR
 
 #define BASE_BOOL
-#include "igraph_pmt.h"
 #include "igraph_matrix_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_BOOL
 
 #define BASE_COMPLEX
-#include "igraph_pmt.h"
 #include "igraph_matrix_pmt.h"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_COMPLEX
 
-#define IGRAPH_MATRIX_NULL { IGRAPH_VECTOR_NULL, 0, 0 }
-#define IGRAPH_MATRIX_INIT_FINALLY(m, nr, nc) \
-    do { IGRAPH_CHECK(igraph_matrix_init(m, nr, nc)); \
-        IGRAPH_FINALLY(igraph_matrix_destroy, m); } while (0)
+#define IGRAPH_MATRIX_NULL                                                     \
+  { IGRAPH_VECTOR_NULL, 0, 0 }
+#define IGRAPH_MATRIX_INIT_FINALLY(m, nr, nc)                                  \
+  do {                                                                         \
+    IGRAPH_CHECK(igraph_matrix_init(m, nr, nc));                               \
+    IGRAPH_FINALLY(igraph_matrix_destroy, m);                                  \
+  } while (0)
 
 /**
  * \ingroup matrix
@@ -87,7 +90,7 @@ __BEGIN_DECLS
  *
  * Time complexity: O(1).
  */
-#define MATRIX(m,i,j) ((m).data.stor_begin[(m).nrow*(j)+(i)])
+#define MATRIX(m, i, j) ((m).data.stor_begin[(m).nrow * (j) + (i)])
 
 igraph_bool_t igraph_matrix_all_e_tol(const igraph_matrix_t *lhs,
                                       const igraph_matrix_t *rhs,
