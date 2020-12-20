@@ -29,27 +29,27 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-#define __BEGIN_DECLS extern "C" {
-#define __END_DECLS }
+    #define __BEGIN_DECLS extern "C" {
+    #define __END_DECLS }
 #else
-#define __BEGIN_DECLS /* empty */
-#define __END_DECLS   /* empty */
+    #define __BEGIN_DECLS /* empty */
+    #define __END_DECLS /* empty */
 #endif
 
 __BEGIN_DECLS
 
 #ifndef HAVE_STRDUP
-#define strdup igraph_i_strdup
-char *igraph_i_strdup(const char *s);
+    #define strdup igraph_i_strdup
+    char* igraph_i_strdup(const char *s);
 #endif
 
 #ifndef HAVE_STPCPY
-#define stpcpy igraph_i_stpcpy
-char *igraph_i_stpcpy(char *s1, const char *s2);
+    #define stpcpy igraph_i_stpcpy
+    char* igraph_i_stpcpy(char* s1, const char* s2);
 #else
-#ifndef HAVE_STPCPY_SIGNATURE
-char *stpcpy(char *s1, const char *s2);
-#endif
+    #ifndef HAVE_STPCPY_SIGNATURE
+        char* stpcpy(char* s1, const char* s2);
+    #endif
 #endif
 
 __END_DECLS

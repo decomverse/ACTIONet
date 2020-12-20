@@ -38,7 +38,7 @@ nodes_to_calc = IGRAPH_VIT_SIZE(vit);
 
 neis = igraph_Calloc(no_of_nodes, long int);
 if (neis == 0) {
-  IGRAPH_ERROR("local undirected transitivity failed", IGRAPH_ENOMEM);
+    IGRAPH_ERROR("local undirected transitivity failed", IGRAPH_ENOMEM);
 }
 IGRAPH_FINALLY(igraph_free, neis);
 
@@ -48,37 +48,37 @@ igraph_lazy_adjlist_init(graph, &adjlist, IGRAPH_ALL, IGRAPH_SIMPLIFY);
 IGRAPH_FINALLY(igraph_lazy_adjlist_destroy, &adjlist);
 
 for (i = 0; !IGRAPH_VIT_END(vit); IGRAPH_VIT_NEXT(vit), i++) {
-  long int node = IGRAPH_VIT_GET(vit);
+    long int node = IGRAPH_VIT_GET(vit);
 
-  IGRAPH_ALLOW_INTERRUPTION();
+    IGRAPH_ALLOW_INTERRUPTION();
 
-  neis1 = igraph_lazy_adjlist_get(&adjlist, (igraph_integer_t)node);
-  neilen1 = igraph_vector_size(neis1);
-  for (j = 0; j < neilen1; j++) {
-    neis[(long int)VECTOR(*neis1)[j]] = i + 1;
-  }
-  triangles = 0;
-
-  for (j = 0; j < neilen1; j++) {
-    long int v = (long int)VECTOR(*neis1)[j];
-    neis2 = igraph_lazy_adjlist_get(&adjlist, (igraph_integer_t)v);
-    neilen2 = igraph_vector_size(neis2);
-    for (k = 0; k < neilen2; k++) {
-      long int v2 = (long int)VECTOR(*neis2)[k];
-      if (neis[v2] == i + 1) {
-        triangles += 1.0;
-      }
+    neis1 = igraph_lazy_adjlist_get(&adjlist, (igraph_integer_t) node);
+    neilen1 = igraph_vector_size(neis1);
+    for (j = 0; j < neilen1; j++) {
+        neis[ (long int)VECTOR(*neis1)[j] ] = i + 1;
     }
-  }
+    triangles = 0;
+
+    for (j = 0; j < neilen1; j++) {
+        long int v = (long int) VECTOR(*neis1)[j];
+        neis2 = igraph_lazy_adjlist_get(&adjlist, (igraph_integer_t) v);
+        neilen2 = igraph_vector_size(neis2);
+        for (k = 0; k < neilen2; k++) {
+            long int v2 = (long int) VECTOR(*neis2)[k];
+            if (neis[v2] == i + 1) {
+                triangles += 1.0;
+            }
+        }
+    }
 
 #ifdef TRANSIT
-  if (mode == IGRAPH_TRANSITIVITY_ZERO && neilen1 < 2) {
-    VECTOR(*res)[i] = 0.0;
-  } else {
-    VECTOR(*res)[i] = triangles / neilen1 / (neilen1 - 1);
-  }
+    if (mode == IGRAPH_TRANSITIVITY_ZERO && neilen1 < 2) {
+        VECTOR(*res)[i] = 0.0;
+    } else {
+        VECTOR(*res)[i] = triangles / neilen1 / (neilen1 - 1);
+    }
 #else
-  VECTOR(*res)[i] = triangles / 2;
+    VECTOR(*res)[i] = triangles / 2;
 #endif
 }
 

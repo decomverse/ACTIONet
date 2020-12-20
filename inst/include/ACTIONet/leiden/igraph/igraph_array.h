@@ -33,26 +33,26 @@ __BEGIN_DECLS
 /* -------------------------------------------------- */
 
 #define BASE_IGRAPH_REAL
-#include "igraph_array_pmt.h"
 #include "igraph_pmt.h"
+#include "igraph_array_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_IGRAPH_REAL
 
 #define BASE_LONG
-#include "igraph_array_pmt.h"
 #include "igraph_pmt.h"
+#include "igraph_array_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_LONG
 
 #define BASE_CHAR
-#include "igraph_array_pmt.h"
 #include "igraph_pmt.h"
+#include "igraph_array_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_CHAR
 
 #define BASE_BOOL
-#include "igraph_array_pmt.h"
 #include "igraph_pmt.h"
+#include "igraph_array_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_BOOL
 

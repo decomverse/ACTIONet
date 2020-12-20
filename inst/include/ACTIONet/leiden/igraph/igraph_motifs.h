@@ -24,10 +24,10 @@
 #ifndef IGRAPH_MOTIFS_H
 #define IGRAPH_MOTIFS_H
 
-#include "igraph_datatype.h"
 #include "igraph_decls.h"
-#include "igraph_iterators.h"
 #include "igraph_types.h"
+#include "igraph_datatype.h"
+#include "igraph_iterators.h"
 
 __BEGIN_DECLS
 
@@ -60,25 +60,24 @@ __BEGIN_DECLS
  */
 
 typedef igraph_bool_t igraph_motifs_handler_t(const igraph_t *graph,
-                                              igraph_vector_t *vids,
-                                              int isoclass, void *extra);
+        igraph_vector_t *vids,
+        int isoclass,
+        void* extra);
 
 DECLDIR int igraph_motifs_randesu(const igraph_t *graph, igraph_vector_t *hist,
                                   int size, const igraph_vector_t *cut_prob);
 
 DECLDIR int igraph_motifs_randesu_callback(const igraph_t *graph, int size,
-                                           const igraph_vector_t *cut_prob,
-                                           igraph_motifs_handler_t *callback,
-                                           void *extra);
+        const igraph_vector_t *cut_prob,
+        igraph_motifs_handler_t *callback,
+        void* extra);
 
-DECLDIR int igraph_motifs_randesu_estimate(const igraph_t *graph,
-                                           igraph_integer_t *est, int size,
-                                           const igraph_vector_t *cut_prob,
-                                           igraph_integer_t sample_size,
-                                           const igraph_vector_t *sample);
-DECLDIR int igraph_motifs_randesu_no(const igraph_t *graph,
-                                     igraph_integer_t *no, int size,
-                                     const igraph_vector_t *cut_prob);
+DECLDIR int igraph_motifs_randesu_estimate(const igraph_t *graph, igraph_integer_t *est,
+        int size, const igraph_vector_t *cut_prob,
+        igraph_integer_t sample_size,
+        const igraph_vector_t *sample);
+DECLDIR int igraph_motifs_randesu_no(const igraph_t *graph, igraph_integer_t *no,
+                                     int size, const igraph_vector_t *cut_prob);
 
 DECLDIR int igraph_dyad_census(const igraph_t *graph, igraph_integer_t *mut,
                                igraph_integer_t *asym, igraph_integer_t *null);

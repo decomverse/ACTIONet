@@ -34,8 +34,7 @@ __BEGIN_DECLS
 /* -------------------------------------------------- */
 
 /**
- * \section about_igraph_spmatrix_t_objects About \type igraph_spmatrix_t
- * objects
+ * \section about_igraph_spmatrix_t_objects About \type igraph_spmatrix_t objects
  *
  * <para>The \type igraph_spmatrix_t type stores a sparse matrix with the
  * assumption that the number of nonzero elements in the matrix scales
@@ -51,74 +50,60 @@ __BEGIN_DECLS
  * the vector type for an explanation.</para>
  */
 typedef struct s_spmatrix {
-  igraph_vector_t ridx, cidx, data;
-  long int nrow, ncol;
+    igraph_vector_t ridx, cidx, data;
+    long int nrow, ncol;
 } igraph_spmatrix_t;
 
-#define IGRAPH_SPMATRIX_INIT_FINALLY(m, nr, nc)                                \
-  do {                                                                         \
-    IGRAPH_CHECK(igraph_spmatrix_init(m, nr, nc));                             \
-    IGRAPH_FINALLY(igraph_spmatrix_destroy, m);                                \
-  } while (0)
+#define IGRAPH_SPMATRIX_INIT_FINALLY(m, nr, nc) \
+    do { IGRAPH_CHECK(igraph_spmatrix_init(m, nr, nc)); \
+        IGRAPH_FINALLY(igraph_spmatrix_destroy, m); } while (0)
 
-DECLDIR int igraph_spmatrix_init(igraph_spmatrix_t *m, long int nrow,
-                                 long int ncol);
+DECLDIR int igraph_spmatrix_init(igraph_spmatrix_t *m, long int nrow, long int ncol);
 DECLDIR void igraph_spmatrix_destroy(igraph_spmatrix_t *m);
-DECLDIR int igraph_spmatrix_resize(igraph_spmatrix_t *m, long int nrow,
-                                   long int ncol);
-DECLDIR igraph_real_t igraph_spmatrix_e(const igraph_spmatrix_t *m,
-                                        long int row, long int col);
-DECLDIR int igraph_spmatrix_set(igraph_spmatrix_t *m, long int row,
-                                long int col, igraph_real_t value);
-DECLDIR int igraph_spmatrix_add_e(igraph_spmatrix_t *m, long int row,
-                                  long int col, igraph_real_t value);
-DECLDIR int igraph_spmatrix_add_col_values(igraph_spmatrix_t *m, long int to,
-                                           long int from);
+DECLDIR int igraph_spmatrix_resize(igraph_spmatrix_t *m, long int nrow, long int ncol);
+DECLDIR igraph_real_t igraph_spmatrix_e(const igraph_spmatrix_t *m, long int row, long int col);
+DECLDIR int igraph_spmatrix_set(igraph_spmatrix_t *m, long int row, long int col,
+                                igraph_real_t value);
+DECLDIR int igraph_spmatrix_add_e(igraph_spmatrix_t *m, long int row, long int col,
+                                  igraph_real_t value);
+DECLDIR int igraph_spmatrix_add_col_values(igraph_spmatrix_t *m, long int to, long int from);
 DECLDIR long int igraph_spmatrix_count_nonzero(const igraph_spmatrix_t *m);
 DECLDIR long int igraph_spmatrix_size(const igraph_spmatrix_t *m);
 DECLDIR long int igraph_spmatrix_nrow(const igraph_spmatrix_t *m);
 DECLDIR long int igraph_spmatrix_ncol(const igraph_spmatrix_t *m);
-DECLDIR int igraph_spmatrix_copy_to(const igraph_spmatrix_t *m,
-                                    igraph_real_t *to);
+DECLDIR int igraph_spmatrix_copy_to(const igraph_spmatrix_t *m, igraph_real_t *to);
 DECLDIR int igraph_spmatrix_null(igraph_spmatrix_t *m);
 DECLDIR int igraph_spmatrix_add_cols(igraph_spmatrix_t *m, long int n);
 DECLDIR int igraph_spmatrix_add_rows(igraph_spmatrix_t *m, long int n);
 DECLDIR int igraph_spmatrix_clear_col(igraph_spmatrix_t *m, long int col);
 DECLDIR int igraph_spmatrix_clear_row(igraph_spmatrix_t *m, long int row);
-DECLDIR int igraph_spmatrix_copy(igraph_spmatrix_t *to,
-                                 const igraph_spmatrix_t *from);
+DECLDIR int igraph_spmatrix_copy(igraph_spmatrix_t *to, const igraph_spmatrix_t *from);
 DECLDIR igraph_real_t igraph_spmatrix_max_nonzero(const igraph_spmatrix_t *m,
-                                                  igraph_real_t *ridx,
-                                                  igraph_real_t *cidx);
+        igraph_real_t *ridx, igraph_real_t *cidx);
 DECLDIR igraph_real_t igraph_spmatrix_max(const igraph_spmatrix_t *m,
-                                          igraph_real_t *ridx,
-                                          igraph_real_t *cidx);
+        igraph_real_t *ridx, igraph_real_t *cidx);
 DECLDIR void igraph_spmatrix_scale(igraph_spmatrix_t *m, igraph_real_t by);
-DECLDIR int igraph_spmatrix_colsums(const igraph_spmatrix_t *m,
-                                    igraph_vector_t *res);
-DECLDIR int igraph_spmatrix_rowsums(const igraph_spmatrix_t *m,
-                                    igraph_vector_t *res);
+DECLDIR int igraph_spmatrix_colsums(const igraph_spmatrix_t *m, igraph_vector_t *res);
+DECLDIR int igraph_spmatrix_rowsums(const igraph_spmatrix_t *m, igraph_vector_t *res);
 
 DECLDIR int igraph_spmatrix_print(const igraph_spmatrix_t *matrix);
-DECLDIR int igraph_spmatrix_fprint(const igraph_spmatrix_t *matrix, FILE *file);
+DECLDIR int igraph_spmatrix_fprint(const igraph_spmatrix_t *matrix, FILE* file);
 
-DECLDIR int
-igraph_i_spmatrix_get_col_nonzero_indices(const igraph_spmatrix_t *m,
-                                          igraph_vector_t *res, long int col);
-DECLDIR int igraph_i_spmatrix_clear_row_fast(igraph_spmatrix_t *m,
-                                             long int row);
+DECLDIR int igraph_i_spmatrix_get_col_nonzero_indices(const igraph_spmatrix_t *m,
+        igraph_vector_t *res, long int col);
+DECLDIR int igraph_i_spmatrix_clear_row_fast(igraph_spmatrix_t *m, long int row);
 DECLDIR int igraph_i_spmatrix_cleanup(igraph_spmatrix_t *m);
 
+
 typedef struct s_spmatrix_iter {
-  const igraph_spmatrix_t *m; /* pointer to the matrix we are iterating over */
-  long int pos;               /* internal index into the data vector */
-  long int ri;                /* row index */
-  long int ci;                /* column index */
-  igraph_real_t value;        /* value at the given cell */
+    const igraph_spmatrix_t *m; /* pointer to the matrix we are iterating over */
+    long int pos;               /* internal index into the data vector */
+    long int ri;                /* row index */
+    long int ci;                /* column index */
+    igraph_real_t value;        /* value at the given cell */
 } igraph_spmatrix_iter_t;
 
-DECLDIR int igraph_spmatrix_iter_create(igraph_spmatrix_iter_t *mit,
-                                        const igraph_spmatrix_t *m);
+DECLDIR int igraph_spmatrix_iter_create(igraph_spmatrix_iter_t *mit, const igraph_spmatrix_t *m);
 DECLDIR int igraph_spmatrix_iter_reset(igraph_spmatrix_iter_t *mit);
 DECLDIR int igraph_spmatrix_iter_next(igraph_spmatrix_iter_t *mit);
 DECLDIR igraph_bool_t igraph_spmatrix_iter_end(igraph_spmatrix_iter_t *mit);

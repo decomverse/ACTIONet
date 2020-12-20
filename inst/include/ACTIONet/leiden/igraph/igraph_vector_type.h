@@ -27,7 +27,8 @@
  */
 
 typedef struct TYPE(igraph_vector) {
-  BASE *stor_begin;
-  BASE *stor_end;
-  BASE *end;
+    BASE* stor_begin;
+    BASE* stor_end;
+    BASE* end;
 } TYPE(igraph_vector);
+
