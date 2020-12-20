@@ -5,6 +5,7 @@ from scipy.sparse import issparse, spmatrix
 
 import _ACTIONet as _an
 
+
 def spa(
     A: Union[np.ndarray, spmatrix],
     k: int,

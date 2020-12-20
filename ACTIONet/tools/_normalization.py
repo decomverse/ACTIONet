@@ -2,11 +2,12 @@ from typing import Optional
 
 import numpy as np
 
+
 def double_normalize(
     X: np.ndarray,
     log1p: Optional[bool] = True,
     min_threshold: Optional[int] = 0,
-    copy: Optional[bool] = True
+    copy: Optional[bool] = True,
 ) -> np.ndarray:
     X = X.copy() if copy else X
 
@@ -26,6 +27,7 @@ def double_normalize(
     X_scaled = D_r @ X @ D_c
     X_scaled = X_scaled / np.max(X_scaled)
     return X_scaled
+
 
 def scale_matrix(
     X: np.ndarray,

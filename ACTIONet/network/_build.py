@@ -5,12 +5,13 @@ from scipy import sparse
 
 import _ACTIONet as _an
 
+
 def build_network(
     adata: AnnData,
     density: Optional[float] = 1.0,
     n_threads: Optional[int] = 0,
     mutual_edges_only: Optional[bool] = True,
-    copy: Optional[bool] = False
+    copy: Optional[bool] = False,
 ) -> AnnData:
     """\
     Build ACTIIONet
@@ -39,21 +40,25 @@ def build_network(
         `.obsp['ACTIONet']`
         `.uns['ACTIONet']['params']`
     """
-    if 'ACTION_H_stacked' not in adata.obsm.keys():
+    if "ACTION_H_stacked" not in adata.obsm.keys():
         raise ValueError(
-            'Did not find adata.obsm[\'ACTION_H_stacked\']. '
-            'Please run pp.prune_archetypes() first.'
+            "Did not find adata.obsm['ACTION_H_stacked']. "
+            "Please run pp.prune_archetypes() first."
         )
     adata = adata.copy() if copy else adata
-    H_stacked = adata.obsm['ACTION_H_stacked'].T
+    H_stacked = adata.obsm["ACTION_H_stacked"].T
     if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
     G = _an.build_ACTIONet(H_stacked, density, n_threads, mutual_edges_only)
 
-    adata.uns.setdefault('ACTIONet', {}).update({'params': {
-        'density': density,
-        'mutual_edges_only': mutual_edges_only,
-    }})
-    adata.obsp['ACTIONet'] = G
+    adata.uns.setdefault("ACTIONet", {}).update(
+        {
+            "params": {
+                "density": density,
+                "mutual_edges_only": mutual_edges_only,
+            }
+        }
+    )
+    adata.obsp["ACTIONet"] = G
 
     return adata if copy else None

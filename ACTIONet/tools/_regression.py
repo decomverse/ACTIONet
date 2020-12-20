@@ -2,10 +2,9 @@ import numpy as np
 
 import _ACTIONet as _an
 
+
 def run_simplex_regression(
-    A: np.ndarray,
-    B: np.ndarray,
-    computeXtX: bool = False
+    A: np.ndarray, B: np.ndarray, computeXtX: bool = False
 ) -> np.ndarray:
     """
     Simplex-Constrained Regression (AX-B).
@@ -18,7 +17,7 @@ def run_simplex_regression(
         Matrix of independent variables (design matrix)
     B:
         Matrix of dependent variables (response variable)
-        
+
     computeXtX:
         Parameter to simplex regression
 

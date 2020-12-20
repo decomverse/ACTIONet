@@ -1,10 +1,12 @@
-from typing import Literal, Optional, Union
+from typing import Optional, Union
+from typing_extensions import Literal
 
 import numpy as np
 from anndata import AnnData
 from scipy.sparse import issparse, spmatrix
 
 import _ACTIONet as _an
+
 
 def reduce_kernel(
     data: Union[AnnData, np.ndarray, spmatrix],
@@ -15,7 +17,7 @@ def reduce_kernel(
     prenormalize: Optional[bool] = False,
     return_info: bool = False,
     use_highly_variable: Optional[bool] = None,
-    copy: bool = False
+    copy: bool = False,
 ) -> [AnnData, np.ndarray, spmatrix]:
     """\
     Kernel Reduction Method [Mohammadi2020].
@@ -80,16 +82,16 @@ def reduce_kernel(
     else:
         adata = AnnData(data)
 
-    if use_highly_variable is True and 'highly_variable' not in adata.var.keys():
+    if use_highly_variable is True and "highly_variable" not in adata.var.keys():
         raise ValueError(
-            'Did not find adata.var[\'highly_variable\']. '
-            'Either your data already only consists of highly-variable genes '
-            'or consider running `pp.highly_variable_genes` first.'
+            "Did not find adata.var['highly_variable']. "
+            "Either your data already only consists of highly-variable genes "
+            "or consider running `pp.highly_variable_genes` first."
         )
     if use_highly_variable is None:
-        use_highly_variable = True if 'highly_variable' in adata.var.keys() else False
+        use_highly_variable = True if "highly_variable" in adata.var.keys() else False
     adata_comp = (
-        adata[:, adata.var['highly_variable']] if use_highly_variable else adata
+        adata[:, adata.var["highly_variable"]] if use_highly_variable else adata
     )
 
     # ACTIONet C++ library takes cells as columns
@@ -101,34 +103,36 @@ def reduce_kernel(
     # feng  = 2
     if svd_solver == 0:
         n_iters = 100 * n_iters
-    reduced = _an.reduce_kernel(
-        X, dim, n_iters, seed, svd_solver, prenormalize
-    ) if issparse(X) else _an.reduce_kernel_full(
-        X, dim, n_iters, seed, svd_solver, prenormalize
+    reduced = (
+        _an.reduce_kernel(X, dim, n_iters, seed, svd_solver, prenormalize)
+        if issparse(X)
+        else _an.reduce_kernel_full(X, dim, n_iters, seed, svd_solver, prenormalize)
     )
 
     # Note S_r.T
     S_r, V, sigma, A, B = (
-        reduced['S_r'].T, reduced['V'], reduced['sigma'], reduced['A'], reduced['B']
+        reduced["S_r"].T,
+        reduced["V"],
+        reduced["sigma"],
+        reduced["A"],
+        reduced["B"],
     )
 
     if data_is_AnnData:
-        adata.obsm['ACTION_S_r'] = S_r
-        adata.uns['ACTION'] = {}
-        adata.uns['ACTION']['params'] = {
-            'use_highly_variable': use_highly_variable
-        }
-        adata.uns['ACTION']['sigma'] = sigma
-        adata.obsm['ACTION_B'] = B
+        adata.obsm["ACTION_S_r"] = S_r
+        adata.uns["ACTION"] = {}
+        adata.uns["ACTION"]["params"] = {"use_highly_variable": use_highly_variable}
+        adata.uns["ACTION"]["sigma"] = sigma
+        adata.obsm["ACTION_B"] = B
 
         if use_highly_variable:
-            adata.varm['ACTION_V'] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm['ACTION_V'][adata.var['highly_variable']] = V
-            adata.varm['ACTION_A'] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm['ACTION_A'][adata.var['highly_variable']] = A
+            adata.varm["ACTION_V"] = np.zeros(shape=(adata.n_vars, dim))
+            adata.varm["ACTION_V"][adata.var["highly_variable"]] = V
+            adata.varm["ACTION_A"] = np.zeros(shape=(adata.n_vars, dim))
+            adata.varm["ACTION_A"][adata.var["highly_variable"]] = A
         else:
-            adata.varm['ACTION_V'] = V
-            adata.varm['ACTION_A'] = A
+            adata.varm["ACTION_V"] = V
+            adata.varm["ACTION_A"] = A
 
         return adata if copy else None
     else:

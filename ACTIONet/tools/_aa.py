@@ -4,11 +4,12 @@ import numpy as np
 
 import _ACTIONet as _an
 
+
 def aa(
     A: np.ndarray,
     k: int,
     max_iter: Optional[int] = 50,
-    min_delta: Optional[float] = 1e-16
+    min_delta: Optional[float] = 1e-16,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """\
     Archetypal Analysis (AA)

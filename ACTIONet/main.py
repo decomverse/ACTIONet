@@ -4,7 +4,7 @@ from anndata import AnnData
 
 from . import network as nt
 from . import preprocessing as pp
-from . import tools as tl
+
 
 def run_ACTIONet(
     adata: AnnData,
@@ -17,7 +17,9 @@ def run_ACTIONet(
     layout_epochs: Optional[int] = 500,
     layout_in_parallel: Optional[bool] = False,
     n_threads: Optional[int] = 0,
-    unification_sensitivity: Optional[float] = 1.0,
+    unification_alpha: Optional[float] =  0.99, 
+    unification_outlier_threshold: Optional[float] = 2, 
+    unification_sim_threshold: Optional[float] = 0, 
     footprint_alpha: Optional[float] = 0.85,
     max_iter_ACTION: Optional[int] = 50,
     full_trace: Optional[bool] = False,
@@ -32,7 +34,7 @@ def run_ACTIONet(
         k_max=k_max,
         n_threads=n_threads,
         max_it=max_iter_ACTION,
-        min_delta=1e-300
+        min_delta=1e-300,
     )
 
     # Prune nonspecific and/or unreliable archetypes
@@ -41,7 +43,7 @@ def run_ACTIONet(
         C,
         H,
         min_specificity_z_threshold=min_specificity_z_threshold,
-        min_cells=min_cells_per_archetype
+        min_cells=min_cells_per_archetype,
     )
 
     # Build ACTIONet
@@ -49,7 +51,7 @@ def run_ACTIONet(
         adata,
         density=network_density,
         n_threads=n_threads,
-        mutual_edges_only=mutual_edges_only
+        mutual_edges_only=mutual_edges_only,
     )
 
     # Layout ACTIONet
@@ -71,10 +73,10 @@ def run_ACTIONet(
     # Identiy equivalent classes of archetypes and group them together
     pp.unify_archetypes(
         adata,
-        sensitivity=unification_sensitivity,
-        normalization_type=1,
-        edge_threshold=0.5,
-    )
+        unification_alpha, 
+        unification_outlier_threshold, 
+        unification_sim_threshold, 
+        n_threads)
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
@@ -91,7 +93,7 @@ def run_ACTIONet(
         network_density=network_density,
         mutual_edges_only=mutual_edges_only,
         layout_compactness=layout_compactness,
-        layout_epochs=layout_epochs/5,
+        layout_epochs=layout_epochs / 5,
         n_threads=1,
     )
 
