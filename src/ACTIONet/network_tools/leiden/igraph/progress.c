@@ -21,10 +21,11 @@
 
 */
 
-#include "igraph_progress.h"
 #include "config.h"
+#include "igraph_progress.h"
 
-static IGRAPH_THREAD_LOCAL igraph_progress_handler_t *igraph_i_progress_handler = 0;
+static IGRAPH_THREAD_LOCAL igraph_progress_handler_t
+    *igraph_i_progress_handler = 0;
 static IGRAPH_THREAD_LOCAL char igraph_i_progressmsg_buffer[1000];
 
 /**
@@ -52,12 +53,12 @@ static IGRAPH_THREAD_LOCAL char igraph_i_progressmsg_buffer[1000];
  */
 
 int igraph_progress(const char *message, igraph_real_t percent, void *data) {
-    if (igraph_i_progress_handler) {
-        if (igraph_i_progress_handler(message, percent, data) != IGRAPH_SUCCESS) {
-            return IGRAPH_INTERRUPTED;
-        }
+  if (igraph_i_progress_handler) {
+    if (igraph_i_progress_handler(message, percent, data) != IGRAPH_SUCCESS) {
+      return IGRAPH_INTERRUPTED;
     }
-    return IGRAPH_SUCCESS;
+  }
+  return IGRAPH_SUCCESS;
 }
 
 /**
@@ -91,11 +92,11 @@ int igraph_progress(const char *message, igraph_real_t percent, void *data) {
 
 int igraph_progressf(const char *message, igraph_real_t percent, void *data,
                      ...) {
-    va_list ap;
-    va_start(ap, data);
-    vsnprintf(igraph_i_progressmsg_buffer,
-              sizeof(igraph_i_progressmsg_buffer) / sizeof(char), message, ap);
-    return igraph_progress(igraph_i_progressmsg_buffer, percent, data);
+  va_list ap;
+  va_start(ap, data);
+  vsnprintf(igraph_i_progressmsg_buffer,
+            sizeof(igraph_i_progressmsg_buffer) / sizeof(char), message, ap);
+  return igraph_progress(igraph_i_progressmsg_buffer, percent, data);
 }
 
 #ifndef USING_R
@@ -122,11 +123,11 @@ int igraph_progressf(const char *message, igraph_real_t percent, void *data,
  */
 
 int igraph_progress_handler_stderr(const char *message, igraph_real_t percent,
-                                   void* data) {
-    IGRAPH_UNUSED(data);
-    fputs(message, stderr);
-    fprintf(stderr, "%.1f percent ready\n", (double)percent);
-    return 0;
+                                   void *data) {
+  IGRAPH_UNUSED(data);
+  fputs(message, stderr);
+  fprintf(stderr, "%.1f percent ready\n", (double)percent);
+  return 0;
 }
 #endif
 
@@ -147,7 +148,7 @@ int igraph_progress_handler_stderr(const char *message, igraph_real_t percent,
 
 igraph_progress_handler_t *
 igraph_set_progress_handler(igraph_progress_handler_t new_handler) {
-    igraph_progress_handler_t *previous_handler = igraph_i_progress_handler;
-    igraph_i_progress_handler = new_handler;
-    return previous_handler;
+  igraph_progress_handler_t *previous_handler = igraph_i_progress_handler;
+  igraph_i_progress_handler = new_handler;
+  return previous_handler;
 }

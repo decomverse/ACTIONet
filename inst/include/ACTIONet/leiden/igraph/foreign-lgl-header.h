@@ -20,16 +20,16 @@
 
 */
 
-#include "igraph_vector.h"
 #include "igraph_types_internal.h"
+#include "igraph_vector.h"
 
 typedef struct {
-    void *scanner;
-    int eof;
-    char errmsg[300];
-    int has_weights;
-    igraph_vector_t *vector;
-    igraph_vector_t *weights;
-    igraph_trie_t *trie;
-    int actvertex;
+  void *scanner;
+  int eof;
+  char errmsg[300];
+  int has_weights;
+  igraph_vector_t *vector;
+  igraph_vector_t *weights;
+  igraph_trie_t *trie;
+  int actvertex;
 } igraph_i_lgl_parsedata_t;
