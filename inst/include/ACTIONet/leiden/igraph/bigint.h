@@ -27,16 +27,16 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-#define __BEGIN_DECLS extern "C" {
-#define __END_DECLS }
+    #define __BEGIN_DECLS extern "C" {
+    #define __END_DECLS }
 #else
-#define __BEGIN_DECLS /* empty */
-#define __END_DECLS   /* empty */
+    #define __BEGIN_DECLS /* empty */
+    #define __END_DECLS /* empty */
 #endif
 
-#include "bignum.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
+#include "bignum.h"
 
 #include <stdio.h>
 
@@ -44,15 +44,15 @@
 
 #define BASE_LIMB
 #include "igraph_pmt.h"
-#include "igraph_pmt_off.h"
-#include "igraph_vector_pmt.h"
 #include "igraph_vector_type.h"
+#include "igraph_vector_pmt.h"
+#include "igraph_pmt_off.h"
 #undef BASE_LIMB
 
 __BEGIN_DECLS
 
 typedef struct igraph_biguint_t {
-  igraph_vector_limb_t v;
+    igraph_vector_limb_t v;
 } igraph_biguint_t;
 
 #define IGRAPH_BIGUINT_DEFAULT_SIZE 5
@@ -74,12 +74,11 @@ igraph_real_t igraph_biguint_get(igraph_biguint_t *b);
 
 int igraph_biguint_compare_limb(igraph_biguint_t *b, limb_t l);
 int igraph_biguint_compare(igraph_biguint_t *left, igraph_biguint_t *right);
-igraph_bool_t igraph_biguint_equal(igraph_biguint_t *left,
-                                   igraph_biguint_t *right);
+igraph_bool_t igraph_biguint_equal(igraph_biguint_t *left, igraph_biguint_t *right);
 igraph_bool_t igraph_biguint_bigger(igraph_biguint_t *left,
                                     igraph_biguint_t *right);
 igraph_bool_t igraph_biguint_biggerorequal(igraph_biguint_t *left,
-                                           igraph_biguint_t *right);
+        igraph_biguint_t *right);
 
 int igraph_biguint_inc(igraph_biguint_t *res, igraph_biguint_t *b);
 int igraph_biguint_dec(igraph_biguint_t *res, igraph_biguint_t *b);

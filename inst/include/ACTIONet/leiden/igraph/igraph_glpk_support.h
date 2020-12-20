@@ -35,15 +35,13 @@
 
 #include <glpk.h>
 
-int igraph_i_glpk_check(int retval, const char *message);
+int igraph_i_glpk_check(int retval, const char* message);
 void igraph_i_glpk_interruption_hook(glp_tree *tree, void *info);
-#define IGRAPH_GLPK_CHECK(func, message)                                       \
-  do {                                                                         \
-    int igraph_i_ret = igraph_i_glpk_check(func, message);                     \
-    if (IGRAPH_UNLIKELY(igraph_i_ret != 0)) {                                  \
-      return igraph_i_ret;                                                     \
-    }                                                                          \
-  } while (0)
+#define IGRAPH_GLPK_CHECK(func, message) do {\
+        int igraph_i_ret = igraph_i_glpk_check(func, message); \
+        if (IGRAPH_UNLIKELY(igraph_i_ret != 0)) {\
+            return igraph_i_ret; \
+        } } while (0)
 
 #endif
 

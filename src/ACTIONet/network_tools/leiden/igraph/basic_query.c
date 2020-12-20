@@ -21,11 +21,11 @@
 
 */
 
-#include "config.h"
 #include "igraph_datatype.h"
+#include "igraph_types.h"
 #include "igraph_interface.h"
 #include "igraph_structural.h"
-#include "igraph_types.h"
+#include "config.h"
 
 /**
  * \ingroup structural
@@ -46,18 +46,19 @@
  * Time complexity: O( min(log(d1), log(d2)) ),
  * d1 is the (out-)degree of \p v1 and d2 is the (in-)degree of \p v2.
  */
-int igraph_are_connected(const igraph_t *graph, igraph_integer_t v1,
-                         igraph_integer_t v2, igraph_bool_t *res) {
+int igraph_are_connected(const igraph_t *graph,
+                         igraph_integer_t v1, igraph_integer_t v2,
+                         igraph_bool_t *res) {
 
-  long int nov = igraph_vcount(graph);
-  igraph_integer_t eid = -1;
+    long int nov = igraph_vcount(graph);
+    igraph_integer_t eid = -1;
 
-  if (v1 < 0 || v2 < 0 || v1 > nov - 1 || v2 > nov - 1) {
-    IGRAPH_ERROR("are connected", IGRAPH_EINVVID);
-  }
+    if (v1 < 0 || v2 < 0 || v1 > nov - 1 || v2 > nov - 1) {
+        IGRAPH_ERROR("are connected", IGRAPH_EINVVID);
+    }
 
-  igraph_get_eid(graph, &eid, v1, v2, /*directed=*/1, /*error=*/0);
-  *res = (eid >= 0);
+    igraph_get_eid(graph, &eid, v1, v2, /*directed=*/1, /*error=*/ 0);
+    *res = (eid >= 0);
 
-  return IGRAPH_SUCCESS;
+    return IGRAPH_SUCCESS;
 }

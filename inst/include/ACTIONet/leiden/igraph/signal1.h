@@ -18,18 +18,18 @@
 #endif
 #endif /*Sigarg_t*/
 
-#ifdef USE_SIG_PF /* compile with -DUSE_SIG_PF under IRIX */
+#ifdef USE_SIG_PF	/* compile with -DUSE_SIG_PF under IRIX */
 #define sig_pf SIG_PF
 #else
 typedef Sigret_t (*sig_pf)(Sigarg_t);
 #endif
 
-#define signal1(a, b) signal(a, (sig_pf)b)
+#define signal1(a,b) signal(a,(sig_pf)b)
 
 #ifdef __cplusplus
 #define Sigarg ...
 #define Use_Sigarg
 #else
 #define Sigarg Int n
-#define Use_Sigarg n = n /* shut up compiler warning */
+#define Use_Sigarg n = n	/* shut up compiler warning */
 #endif

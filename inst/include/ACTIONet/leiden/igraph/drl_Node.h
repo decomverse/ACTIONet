@@ -44,21 +44,23 @@ namespace drl {
 class Node {
 
 public:
-  bool fixed; // if true do not change the
-  // position of this node
-  int id;
 
-  float x, y;
-  float sub_x, sub_y;
-  float energy;
+    bool fixed;   // if true do not change the
+    // position of this node
+    int id;
+
+    float x, y;
+    float sub_x, sub_y;
+    float energy;
 
 public:
-  Node(int node_id) {
-    x = y = 0.0;
-    fixed = false;
-    id = node_id;
-  }
-  ~Node() {}
+
+    Node( int node_id ) {
+        x = y = 0.0; fixed = false;
+        id = node_id;
+    }
+    ~Node() { }
+
 };
 
 } // namespace drl

@@ -24,10 +24,10 @@
 #ifndef IGRAPH_VISITOR_H
 #define IGRAPH_VISITOR_H
 
-#include "igraph_constants.h"
-#include "igraph_datatype.h"
 #include "igraph_decls.h"
+#include "igraph_constants.h"
 #include "igraph_types.h"
+#include "igraph_datatype.h"
 
 __BEGIN_DECLS
 
@@ -67,19 +67,23 @@ __BEGIN_DECLS
  * \sa \ref igraph_bfs()
  */
 
-typedef igraph_bool_t
-igraph_bfshandler_t(const igraph_t *graph, igraph_integer_t vid,
-                    igraph_integer_t pred, igraph_integer_t succ,
-                    igraph_integer_t rank, igraph_integer_t dist, void *extra);
+typedef igraph_bool_t igraph_bfshandler_t(const igraph_t *graph,
+        igraph_integer_t vid,
+        igraph_integer_t pred,
+        igraph_integer_t succ,
+        igraph_integer_t rank,
+        igraph_integer_t dist,
+        void *extra);
 
-DECLDIR int igraph_bfs(const igraph_t *graph, igraph_integer_t root,
-                       const igraph_vector_t *roots, igraph_neimode_t mode,
-                       igraph_bool_t unreachable,
-                       const igraph_vector_t *restricted,
-                       igraph_vector_t *order, igraph_vector_t *rank,
-                       igraph_vector_t *father, igraph_vector_t *pred,
-                       igraph_vector_t *succ, igraph_vector_t *dist,
-                       igraph_bfshandler_t *callback, void *extra);
+DECLDIR int igraph_bfs(const igraph_t *graph,
+               igraph_integer_t root, const igraph_vector_t *roots,
+               igraph_neimode_t mode, igraph_bool_t unreachable,
+               const igraph_vector_t *restricted,
+               igraph_vector_t *order, igraph_vector_t *rank,
+               igraph_vector_t *father,
+               igraph_vector_t *pred, igraph_vector_t *succ,
+               igraph_vector_t *dist, igraph_bfshandler_t *callback,
+               void *extra);
 
 int igraph_i_bfs(igraph_t *graph, igraph_integer_t vid, igraph_neimode_t mode,
                  igraph_vector_t *vids, igraph_vector_t *layers,
@@ -111,15 +115,17 @@ int igraph_i_bfs(igraph_t *graph, igraph_integer_t vid, igraph_neimode_t mode,
  */
 
 typedef igraph_bool_t igraph_dfshandler_t(const igraph_t *graph,
-                                          igraph_integer_t vid,
-                                          igraph_integer_t dist, void *extra);
+        igraph_integer_t vid,
+        igraph_integer_t dist,
+        void *extra);
 
 DECLDIR int igraph_dfs(const igraph_t *graph, igraph_integer_t root,
-                       igraph_neimode_t mode, igraph_bool_t unreachable,
-                       igraph_vector_t *order, igraph_vector_t *order_out,
-                       igraph_vector_t *father, igraph_vector_t *dist,
-                       igraph_dfshandler_t *in_callback,
-                       igraph_dfshandler_t *out_callback, void *extra);
+               igraph_neimode_t mode, igraph_bool_t unreachable,
+               igraph_vector_t *order,
+               igraph_vector_t *order_out, igraph_vector_t *father,
+               igraph_vector_t *dist, igraph_dfshandler_t *in_callback,
+               igraph_dfshandler_t *out_callback,
+               void *extra);
 
 __END_DECLS
 

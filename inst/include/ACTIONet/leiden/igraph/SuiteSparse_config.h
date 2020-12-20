@@ -70,10 +70,10 @@ extern "C" {
 /* For backward compatibility with prior versions of SuiteSparse.  The UF_*
  * macros are deprecated and will be removed in a future version. */
 #ifndef UF_long
-#define UF_long SuiteSparse_long
+#define UF_long     SuiteSparse_long
 #define UF_long_max SuiteSparse_long_max
 #define UF_long_idd SuiteSparse_long_idd
-#define UF_long_id SuiteSparse_long_id
+#define UF_long_id  SuiteSparse_long_id
 #endif
 
 /* ========================================================================== */
@@ -82,41 +82,48 @@ extern "C" {
 
 /* SuiteSparse-wide parameters will be placed in this struct. */
 
-typedef struct SuiteSparse_config_struct {
-  void *(*malloc_memory)(size_t);          /* pointer to malloc */
-  void *(*realloc_memory)(void *, size_t); /* pointer to realloc */
-  void (*free_memory)(void *);             /* pointer to free */
-  void *(*calloc_memory)(size_t, size_t);  /* pointer to calloc */
+typedef struct SuiteSparse_config_struct
+{
+    void *(*malloc_memory) (size_t) ;           /* pointer to malloc */
+    void *(*realloc_memory) (void *, size_t) ;  /* pointer to realloc */
+    void (*free_memory) (void *) ;              /* pointer to free */
+    void *(*calloc_memory) (size_t, size_t) ;   /* pointer to calloc */
 
-} SuiteSparse_config;
+} SuiteSparse_config ;
 
-void *SuiteSparse_malloc  /* pointer to allocated block of memory */
-    (size_t nitems,       /* number of items to malloc (>=1 is enforced) */
-     size_t size_of_item, /* sizeof each item */
-     int *ok,             /* TRUE if successful, FALSE otherwise */
-     SuiteSparse_config *config /* SuiteSparse-wide configuration */
-    );
+void *SuiteSparse_malloc    /* pointer to allocated block of memory */
+(
+    size_t nitems,          /* number of items to malloc (>=1 is enforced) */
+    size_t size_of_item,    /* sizeof each item */
+    int *ok,                /* TRUE if successful, FALSE otherwise */
+    SuiteSparse_config *config        /* SuiteSparse-wide configuration */
+) ;
 
-void *SuiteSparse_free          /* always returns NULL */
-    (void *p,                   /* block to free */
-     SuiteSparse_config *config /* SuiteSparse-wide configuration */
-    );
+void *SuiteSparse_free      /* always returns NULL */
+(
+    void *p,                /* block to free */
+    SuiteSparse_config *config        /* SuiteSparse-wide configuration */
+) ;
 
-void SuiteSparse_tic /* start the timer */
-    (double tic[2]   /* output, contents undefined on input */
-    );
+void SuiteSparse_tic    /* start the timer */
+(
+    double tic [2]      /* output, contents undefined on input */
+) ;
 
-double SuiteSparse_toc /* return time in seconds since last tic */
-    (double tic[2]     /* input: from last call to SuiteSparse_tic */
-    );
+double SuiteSparse_toc  /* return time in seconds since last tic */
+(
+    double tic [2]      /* input: from last call to SuiteSparse_tic */
+) ;
 
-double SuiteSparse_time /* returns current wall clock time in seconds */
-    (void);
+double SuiteSparse_time  /* returns current wall clock time in seconds */
+(
+    void
+) ;
 
 /* determine which timer to use, if any */
 #ifndef NTIMER
 #ifdef _POSIX_C_SOURCE
-#if _POSIX_C_SOURCE >= 199309L
+#if    _POSIX_C_SOURCE >= 199309L
 #define SUITESPARSE_TIMER_ENABLED
 #endif
 #endif
@@ -158,15 +165,17 @@ double SuiteSparse_time /* returns current wall clock time in seconds */
  *  METIS 4.0.1     required by CHOLMOD (optional) and KLU (optional)
  */
 
-int SuiteSparse_version /* returns SUITESPARSE_VERSION */
-    (
-        /* output, not defined on input.  Not used if NULL.  Returns
-           the three version codes in version [0..2]:
-           version [0] is SUITESPARSE_MAIN_VERSION
-           version [1] is SUITESPARSE_SUB_VERSION
-           version [2] is SUITESPARSE_SUBSUB_VERSION
-           */
-        int version[3]);
+
+int SuiteSparse_version     /* returns SUITESPARSE_VERSION */
+(
+    /* output, not defined on input.  Not used if NULL.  Returns
+       the three version codes in version [0..2]:
+       version [0] is SUITESPARSE_MAIN_VERSION
+       version [1] is SUITESPARSE_SUB_VERSION
+       version [2] is SUITESPARSE_SUBSUB_VERSION
+       */
+    int version [3]
+) ;
 
 /* Versions prior to 4.2.0 do not have the above function.  The following
    code fragment will work with any version of SuiteSparse:
@@ -180,12 +189,12 @@ int SuiteSparse_version /* returns SUITESPARSE_VERSION */
 #define SUITESPARSE_HAS_VERSION_FUNCTION
 
 #define SUITESPARSE_DATE "April 25, 2013"
-#define SUITESPARSE_VER_CODE(main, sub) ((main)*1000 + (sub))
+#define SUITESPARSE_VER_CODE(main,sub) ((main) * 1000 + (sub))
 #define SUITESPARSE_MAIN_VERSION 4
 #define SUITESPARSE_SUB_VERSION 2
 #define SUITESPARSE_SUBSUB_VERSION 1
-#define SUITESPARSE_VERSION                                                    \
-  SUITESPARSE_VER_CODE(SUITESPARSE_MAIN_VERSION, SUITESPARSE_SUB_VERSION)
+#define SUITESPARSE_VERSION \
+    SUITESPARSE_VER_CODE(SUITESPARSE_MAIN_VERSION,SUITESPARSE_SUB_VERSION)
 
 #ifdef __cplusplus
 }

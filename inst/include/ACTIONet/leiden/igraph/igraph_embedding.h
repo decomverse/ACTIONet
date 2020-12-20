@@ -24,33 +24,43 @@
 #ifndef IGRAPH_EMBEDDING_H
 #define IGRAPH_EMBEDDING_H
 
-#include "igraph_arpack.h"
-#include "igraph_constants.h"
-#include "igraph_datatype.h"
 #include "igraph_decls.h"
+#include "igraph_datatype.h"
+#include "igraph_arpack.h"
 #include "igraph_eigen.h"
+#include "igraph_constants.h"
 
 __BEGIN_DECLS
 
-DECLDIR int igraph_adjacency_spectral_embedding(
-    const igraph_t *graph, igraph_integer_t no, const igraph_vector_t *weights,
-    igraph_eigen_which_position_t which, igraph_bool_t scaled,
-    igraph_matrix_t *X, igraph_matrix_t *Y, igraph_vector_t *D,
-    const igraph_vector_t *cvec, igraph_arpack_options_t *options);
+DECLDIR int igraph_adjacency_spectral_embedding(const igraph_t *graph,
+        igraph_integer_t no,
+        const igraph_vector_t *weights,
+        igraph_eigen_which_position_t which,
+        igraph_bool_t scaled,
+        igraph_matrix_t *X,
+        igraph_matrix_t *Y,
+        igraph_vector_t *D,
+        const igraph_vector_t *cvec,
+        igraph_arpack_options_t *options);
 
 typedef enum {
-  IGRAPH_EMBEDDING_D_A = 0,
-  IGRAPH_EMBEDDING_I_DAD,
-  IGRAPH_EMBEDDING_DAD,
-  IGRAPH_EMBEDDING_OAP
+    IGRAPH_EMBEDDING_D_A = 0,
+    IGRAPH_EMBEDDING_I_DAD,
+    IGRAPH_EMBEDDING_DAD,
+    IGRAPH_EMBEDDING_OAP
 } igraph_laplacian_spectral_embedding_type_t;
 
-DECLDIR int igraph_laplacian_spectral_embedding(
-    const igraph_t *graph, igraph_integer_t no, const igraph_vector_t *weights,
-    igraph_eigen_which_position_t which, igraph_neimode_t degmode,
-    igraph_laplacian_spectral_embedding_type_t type, igraph_bool_t scaled,
-    igraph_matrix_t *X, igraph_matrix_t *Y, igraph_vector_t *D,
-    igraph_arpack_options_t *options);
+DECLDIR int igraph_laplacian_spectral_embedding(const igraph_t *graph,
+        igraph_integer_t no,
+        const igraph_vector_t *weights,
+        igraph_eigen_which_position_t which,
+        igraph_neimode_t degmode,
+        igraph_laplacian_spectral_embedding_type_t type,
+        igraph_bool_t scaled,
+        igraph_matrix_t *X,
+        igraph_matrix_t *Y,
+        igraph_vector_t *D,
+        igraph_arpack_options_t *options);
 
 DECLDIR int igraph_dim_select(const igraph_vector_t *sv, igraph_integer_t *dim);
 

@@ -25,25 +25,26 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <utility>
 #include <vector>
+#include <utility>
 
 #include "igraph_interface.h"
 
 class Node {
 public:
-  Node();
-  Node(int modulenr, double tpweight);
 
-  std::vector<int> members;
-  std::vector<std::pair<int, double>> inLinks;
-  std::vector<std::pair<int, double>> outLinks;
-  double selfLink;
+    Node();
+    Node(int modulenr, double tpweight);
 
-  double teleportWeight;
-  double danglingSize;
-  double exit;
-  double size;
+    std::vector<int> members;
+    std::vector< std::pair<int, double> > inLinks;
+    std::vector< std::pair<int, double> > outLinks;
+    double selfLink;
+
+    double teleportWeight;
+    double danglingSize;
+    double exit;
+    double size;
 };
 
 void cpyNode(Node *newNode, Node *oldNode);
