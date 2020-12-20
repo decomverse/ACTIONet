@@ -24,8 +24,8 @@
 #ifndef IGRAPH_INTERRUPT_H
 #define IGRAPH_INTERRUPT_H
 
-#include "igraph_error.h"
 #include "igraph_decls.h"
+#include "igraph_error.h"
 
 __BEGIN_DECLS
 
@@ -76,16 +76,16 @@ __BEGIN_DECLS
  * Your interruption handler will be called regularly during long operations
  * (so it is not guaranteed to be called during operations which tend to be
  * short, like adding single edges). An interruption handler accepts no
- * parameters and must return \c IGRAPH_SUCCESS if the calculation should go on. All
- * other return values are considered to be a request for interruption,
- * and the caller function would return a special error code, \c IGRAPH_INTERRUPTED.
+ * parameters and must return \c IGRAPH_SUCCESS if the calculation should go on.
+ * All other return values are considered to be a request for interruption, and
+ * the caller function would return a special error code, \c IGRAPH_INTERRUPTED.
  * It is up to your error handler function to handle this error properly.
  * </para>
  */
 
 /**
- * \section writing_functions_interruption_handling Writing \a igraph functions with
- * proper interruption handling
+ * \section writing_functions_interruption_handling Writing \a igraph functions
+ * with proper interruption handling
  *
  * <para>
  * There is practically a simple rule that should be obeyed when writing
@@ -103,10 +103,11 @@ __BEGIN_DECLS
  * This is the type of the interruption handler functions.
  *
  * \param data reserved for possible future use
- * \return \c IGRAPH_SUCCESS if the calculation should go on, anything else otherwise.
+ * \return \c IGRAPH_SUCCESS if the calculation should go on, anything else
+ * otherwise.
  */
 
-typedef int igraph_interruption_handler_t (void* data);
+typedef int igraph_interruption_handler_t(void *data);
 
 /**
  * \function igraph_allow_interruption
@@ -116,12 +117,14 @@ typedef int igraph_interruption_handler_t (void* data);
  * requests.
  *
  * \param data reserved for possible future use, now it is always \c NULL
- * \return \c IGRAPH_SUCCESS if the calculation should go on, anything else otherwise.
+ * \return \c IGRAPH_SUCCESS if the calculation should go on, anything else
+ * otherwise.
  */
 
-DECLDIR int igraph_allow_interruption(void* data);
+DECLDIR int igraph_allow_interruption(void *data);
 
-DECLDIR igraph_interruption_handler_t * igraph_set_interruption_handler (igraph_interruption_handler_t * new_handler);
+DECLDIR igraph_interruption_handler_t *
+igraph_set_interruption_handler(igraph_interruption_handler_t *new_handler);
 
 __END_DECLS
 

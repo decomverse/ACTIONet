@@ -21,35 +21,35 @@
 
 */
 
-#include "igraph_types.h"
 #include "igraph_dqueue.h"
+#include "igraph_types.h"
 
 #define BASE_IGRAPH_REAL
-#include "igraph_pmt.h"
 #include "dqueue.pmt"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_IGRAPH_REAL
 
 #define BASE_LONG
-#include "igraph_pmt.h"
 #include "dqueue.pmt"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_LONG
 
 #define BASE_CHAR
-#include "igraph_pmt.h"
 #include "dqueue.pmt"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_CHAR
 
 #define BASE_BOOL
-#include "igraph_pmt.h"
 #include "dqueue.pmt"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_BOOL
 
 #define BASE_INT
-#include "igraph_pmt.h"
 #include "dqueue.pmt"
+#include "igraph_pmt.h"
 #include "igraph_pmt_off.h"
 #undef BASE_INT

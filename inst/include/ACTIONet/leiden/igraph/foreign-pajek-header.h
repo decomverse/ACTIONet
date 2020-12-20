@@ -20,24 +20,24 @@
 
 */
 
-#include "igraph_vector.h"
 #include "igraph_types_internal.h"
+#include "igraph_vector.h"
 
 typedef struct {
-    void *scanner;
-    int eof;
-    char errmsg[300];
-    igraph_vector_t *vector;
-    igraph_bool_t directed;
-    int vcount, vcount2;
-    int actfrom;
-    int actto;
-    int mode; /* 0: general, 1: vertex, 2: edge */
-    igraph_trie_t *vertex_attribute_names;
-    igraph_vector_ptr_t *vertex_attributes;
-    igraph_trie_t *edge_attribute_names;
-    igraph_vector_ptr_t *edge_attributes;
-    int vertexid;
-    int actvertex;
-    int actedge;
+  void *scanner;
+  int eof;
+  char errmsg[300];
+  igraph_vector_t *vector;
+  igraph_bool_t directed;
+  int vcount, vcount2;
+  int actfrom;
+  int actto;
+  int mode; /* 0: general, 1: vertex, 2: edge */
+  igraph_trie_t *vertex_attribute_names;
+  igraph_vector_ptr_t *vertex_attributes;
+  igraph_trie_t *edge_attribute_names;
+  igraph_vector_ptr_t *edge_attributes;
+  int vertexid;
+  int actvertex;
+  int actedge;
 } igraph_i_pajek_parsedata_t;

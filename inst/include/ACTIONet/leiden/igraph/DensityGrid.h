@@ -33,13 +33,12 @@
 #ifndef __DENSITY_GRID_H__
 #define __DENSITY_GRID_H__
 
-
 // Compile time adjustable parameters
 
-#include "drl_layout.h"
 #include "drl_Node.h"
+#include "drl_layout.h"
 #ifdef MUSE_MPI
-    #include <mpi.h>
+#include <mpi.h>
 #endif
 
 #include <deque>
@@ -49,37 +48,34 @@ namespace drl {
 class DensityGrid {
 
 public:
+  // Methods
+  void Init();
+  void Subtract(Node &n, bool first_add, bool fine_first_add, bool fineDensity);
+  void Add(Node &n, bool fineDensity);
+  float GetDensity(float Nx, float Ny, bool fineDensity);
 
-    // Methods
-    void Init();
-    void Subtract(Node &n, bool first_add, bool fine_first_add, bool fineDensity);
-    void Add(Node &n, bool fineDensity );
-    float GetDensity(float Nx, float Ny, bool fineDensity);
-
-    // Contructor/Destructor
-    DensityGrid() {};
-    ~DensityGrid();
+  // Contructor/Destructor
+  DensityGrid(){};
+  ~DensityGrid();
 
 private:
+  // Private Members
+  void Subtract(Node &N);
+  void Add(Node &N);
+  void fineSubtract(Node &N);
+  void fineAdd(Node &N);
 
-    // Private Members
-    void Subtract( Node &N );
-    void Add( Node &N );
-    void fineSubtract( Node &N );
-    void fineAdd( Node &N );
+  // new dynamic variables -- SBM
+  float (*fall_off)[RADIUS * 2 + 1];
+  float (*Density)[GRID_SIZE];
+  std::deque<Node> *Bins;
 
-    // new dynamic variables -- SBM
-    float (*fall_off)[RADIUS * 2 + 1];
-    float (*Density)[GRID_SIZE];
-    std::deque<Node>* Bins;
-
-    // old static variables
-    //float fall_off[RADIUS*2+1][RADIUS*2+1];
-    //float Density[GRID_SIZE][GRID_SIZE];
-    //deque<Node *> Bins[GRID_SIZE][GRID_SIZE];
+  // old static variables
+  // float fall_off[RADIUS*2+1][RADIUS*2+1];
+  // float Density[GRID_SIZE][GRID_SIZE];
+  // deque<Node *> Bins[GRID_SIZE][GRID_SIZE];
 };
 
 } // namespace drl
 
 #endif // __DENSITY_GRID_H__
-

@@ -31,11 +31,11 @@
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-    #define __BEGIN_DECLS extern "C" {
-    #define __END_DECLS }
+#define __BEGIN_DECLS extern "C" {
+#define __END_DECLS }
 #else
-    #define __BEGIN_DECLS /* empty */
-    #define __END_DECLS /* empty */
+#define __BEGIN_DECLS /* empty */
+#define __END_DECLS   /* empty */
 #endif
 
 __BEGIN_DECLS
@@ -59,36 +59,37 @@ double igraph_log1p(double a);
 long double igraph_fabsl(long double a);
 double igraph_fmin(double a, double b);
 #ifndef HAVE_LOG2
-    #define log2(a) igraph_log2(a)
+#define log2(a) igraph_log2(a)
 #endif
 #ifndef HAVE_LOG1P
-    #define log1p(a) igraph_log1p(a)
+#define log1p(a) igraph_log1p(a)
 #endif
 #ifndef HAVE_FABSL
-    #define fabsl(a) igraph_fabsl(a)
+#define fabsl(a) igraph_fabsl(a)
 #endif
 #ifndef HAVE_FMIN
-    #define fmin(a,b) igraph_fmin((a),(b))
+#define fmin(a, b) igraph_fmin((a), (b))
 #endif
 #ifndef HAVE_ROUND
-    #define round igraph_i_round
+#define round igraph_i_round
 #endif
 
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 #ifndef M_PI_2
-    #define M_PI_2 1.57079632679489661923
+#define M_PI_2 1.57079632679489661923
 #endif
 #ifndef M_LN2
-    #define M_LN2 0.69314718055994530942
+#define M_LN2 0.69314718055994530942
 #endif
 #ifndef M_SQRT2
-    #define M_SQRT2 1.4142135623730950488016887
+#define M_SQRT2 1.4142135623730950488016887
 #endif
 #ifndef M_LN_SQRT_2PI
-    #define M_LN_SQRT_2PI   0.918938533204672741780329736406 /* log(sqrt(2*pi))
-    == log(2*pi)/2 */
+#define M_LN_SQRT_2PI                                                          \
+  0.918938533204672741780329736406 /* log(sqrt(2*pi))                          \
+== log(2*pi)/2 */
 #endif
 
 int igraph_almost_equals(double a, double b, double eps);
@@ -97,4 +98,3 @@ int igraph_cmp_epsilon(double a, double b, double eps);
 __END_DECLS
 
 #endif
-

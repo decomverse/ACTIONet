@@ -24,17 +24,17 @@
 #ifndef IGRAPH_GRAPHLETS_H
 #define IGRAPH_GRAPHLETS_H
 
-#include "igraph_decls.h"
 #include "igraph_datatype.h"
-#include "igraph_vector_ptr.h"
+#include "igraph_decls.h"
 #include "igraph_interface.h"
+#include "igraph_vector_ptr.h"
 
 __BEGIN_DECLS
 
 DECLDIR int igraph_graphlets_candidate_basis(const igraph_t *graph,
-        const igraph_vector_t *weights,
-        igraph_vector_ptr_t *cliques,
-        igraph_vector_t *thresholds);
+                                             const igraph_vector_t *weights,
+                                             igraph_vector_ptr_t *cliques,
+                                             igraph_vector_t *thresholds);
 
 DECLDIR int igraph_graphlets_project(const igraph_t *graph,
                                      const igraph_vector_t *weights,
@@ -44,8 +44,8 @@ DECLDIR int igraph_graphlets_project(const igraph_t *graph,
 
 DECLDIR int igraph_graphlets(const igraph_t *graph,
                              const igraph_vector_t *weights,
-                             igraph_vector_ptr_t *cliques,
-                             igraph_vector_t *Mu, int niter);
+                             igraph_vector_ptr_t *cliques, igraph_vector_t *Mu,
+                             int niter);
 
 __END_DECLS
 

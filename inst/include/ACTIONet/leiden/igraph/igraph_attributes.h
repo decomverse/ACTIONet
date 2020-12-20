@@ -24,13 +24,13 @@
 #ifndef IGRAPH_ATTRIBUTES_H
 #define IGRAPH_ATTRIBUTES_H
 
-#include "igraph_decls.h"
 #include "igraph_datatype.h"
+#include "igraph_decls.h"
+#include "igraph_iterators.h"
+#include "igraph_strvector.h"
 #include "igraph_types.h"
 #include "igraph_vector.h"
-#include "igraph_strvector.h"
 #include "igraph_vector_ptr.h"
-#include "igraph_iterators.h"
 
 __BEGIN_DECLS
 
@@ -98,68 +98,72 @@ __BEGIN_DECLS
  *   ignored by the igraph functions.
  *
  */
-typedef enum { IGRAPH_ATTRIBUTE_DEFAULT = 0,
-               IGRAPH_ATTRIBUTE_NUMERIC = 1,
-               IGRAPH_ATTRIBUTE_BOOLEAN = 5,
-               IGRAPH_ATTRIBUTE_STRING = 2,
-               IGRAPH_ATTRIBUTE_R_OBJECT = 3,
-               IGRAPH_ATTRIBUTE_PY_OBJECT = 4
-             } igraph_attribute_type_t;
+typedef enum {
+  IGRAPH_ATTRIBUTE_DEFAULT = 0,
+  IGRAPH_ATTRIBUTE_NUMERIC = 1,
+  IGRAPH_ATTRIBUTE_BOOLEAN = 5,
+  IGRAPH_ATTRIBUTE_STRING = 2,
+  IGRAPH_ATTRIBUTE_R_OBJECT = 3,
+  IGRAPH_ATTRIBUTE_PY_OBJECT = 4
+} igraph_attribute_type_t;
 
 typedef struct igraph_attribute_record_t {
-    const char *name;
-    igraph_attribute_type_t type;
-    const void *value;
+  const char *name;
+  igraph_attribute_type_t type;
+  const void *value;
 } igraph_attribute_record_t;
 
-typedef enum { IGRAPH_ATTRIBUTE_GRAPH = 0,
-               IGRAPH_ATTRIBUTE_VERTEX,
-               IGRAPH_ATTRIBUTE_EDGE
-             } igraph_attribute_elemtype_t;
+typedef enum {
+  IGRAPH_ATTRIBUTE_GRAPH = 0,
+  IGRAPH_ATTRIBUTE_VERTEX,
+  IGRAPH_ATTRIBUTE_EDGE
+} igraph_attribute_elemtype_t;
 
 typedef enum {
-    IGRAPH_ATTRIBUTE_COMBINE_IGNORE = 0,
-    IGRAPH_ATTRIBUTE_COMBINE_DEFAULT = 1,
-    IGRAPH_ATTRIBUTE_COMBINE_FUNCTION = 2,
-    IGRAPH_ATTRIBUTE_COMBINE_SUM = 3,
-    IGRAPH_ATTRIBUTE_COMBINE_PROD = 4,
-    IGRAPH_ATTRIBUTE_COMBINE_MIN = 5,
-    IGRAPH_ATTRIBUTE_COMBINE_MAX = 6,
-    IGRAPH_ATTRIBUTE_COMBINE_RANDOM = 7,
-    IGRAPH_ATTRIBUTE_COMBINE_FIRST = 8,
-    IGRAPH_ATTRIBUTE_COMBINE_LAST = 9,
-    IGRAPH_ATTRIBUTE_COMBINE_MEAN = 10,
-    IGRAPH_ATTRIBUTE_COMBINE_MEDIAN = 11,
-    IGRAPH_ATTRIBUTE_COMBINE_CONCAT = 12
+  IGRAPH_ATTRIBUTE_COMBINE_IGNORE = 0,
+  IGRAPH_ATTRIBUTE_COMBINE_DEFAULT = 1,
+  IGRAPH_ATTRIBUTE_COMBINE_FUNCTION = 2,
+  IGRAPH_ATTRIBUTE_COMBINE_SUM = 3,
+  IGRAPH_ATTRIBUTE_COMBINE_PROD = 4,
+  IGRAPH_ATTRIBUTE_COMBINE_MIN = 5,
+  IGRAPH_ATTRIBUTE_COMBINE_MAX = 6,
+  IGRAPH_ATTRIBUTE_COMBINE_RANDOM = 7,
+  IGRAPH_ATTRIBUTE_COMBINE_FIRST = 8,
+  IGRAPH_ATTRIBUTE_COMBINE_LAST = 9,
+  IGRAPH_ATTRIBUTE_COMBINE_MEAN = 10,
+  IGRAPH_ATTRIBUTE_COMBINE_MEDIAN = 11,
+  IGRAPH_ATTRIBUTE_COMBINE_CONCAT = 12
 } igraph_attribute_combination_type_t;
 
 typedef void (*igraph_function_pointer_t)(void);
 
 typedef struct igraph_attribute_combination_record_t {
-    const char *name;     /* can be NULL, meaning: the rest */
-    igraph_attribute_combination_type_t type;
-    igraph_function_pointer_t func;
+  const char *name; /* can be NULL, meaning: the rest */
+  igraph_attribute_combination_type_t type;
+  igraph_function_pointer_t func;
 } igraph_attribute_combination_record_t;
 
 typedef struct igraph_attribute_combination_t {
-    igraph_vector_ptr_t list;
+  igraph_vector_ptr_t list;
 } igraph_attribute_combination_t;
 
-#define IGRAPH_NO_MORE_ATTRIBUTES ((const char*)0)
+#define IGRAPH_NO_MORE_ATTRIBUTES ((const char *)0)
 
-DECLDIR int igraph_attribute_combination_init(igraph_attribute_combination_t *comb);
-DECLDIR int igraph_attribute_combination(igraph_attribute_combination_t *comb, ...);
-DECLDIR void igraph_attribute_combination_destroy(igraph_attribute_combination_t *comb);
-DECLDIR int igraph_attribute_combination_add(igraph_attribute_combination_t *comb,
-        const char *name,
-        igraph_attribute_combination_type_t type,
-        igraph_function_pointer_t func);
-DECLDIR int igraph_attribute_combination_remove(igraph_attribute_combination_t *comb,
-        const char *name);
-DECLDIR int igraph_attribute_combination_query(const igraph_attribute_combination_t *comb,
-        const char *name,
-        igraph_attribute_combination_type_t *type,
-        igraph_function_pointer_t *func);
+DECLDIR int
+igraph_attribute_combination_init(igraph_attribute_combination_t *comb);
+DECLDIR int igraph_attribute_combination(igraph_attribute_combination_t *comb,
+                                         ...);
+DECLDIR void
+igraph_attribute_combination_destroy(igraph_attribute_combination_t *comb);
+DECLDIR int igraph_attribute_combination_add(
+    igraph_attribute_combination_t *comb, const char *name,
+    igraph_attribute_combination_type_t type, igraph_function_pointer_t func);
+DECLDIR int
+igraph_attribute_combination_remove(igraph_attribute_combination_t *comb,
+                                    const char *name);
+DECLDIR int igraph_attribute_combination_query(
+    const igraph_attribute_combination_t *comb, const char *name,
+    igraph_attribute_combination_type_t *type, igraph_function_pointer_t *func);
 
 /**
  * \struct igraph_attribute_table_t
@@ -240,189 +244,190 @@ DECLDIR int igraph_attribute_combination_query(const igraph_attribute_combinatio
  */
 
 typedef struct igraph_attribute_table_t {
-    int (*init)(igraph_t *graph, igraph_vector_ptr_t *attr);
-    void (*destroy)(igraph_t *graph);
-    int (*copy)(igraph_t *to, const igraph_t *from, igraph_bool_t ga,
-                igraph_bool_t va, igraph_bool_t ea);
-    int (*add_vertices)(igraph_t *graph, long int nv, igraph_vector_ptr_t *attr);
-    int (*permute_vertices)(const igraph_t *graph,
-                            igraph_t *newgraph,
-                            const igraph_vector_t *idx);
-    int (*combine_vertices)(const igraph_t *graph,
-                            igraph_t *newgraph,
-                            const igraph_vector_ptr_t *merges,
-                            const igraph_attribute_combination_t *comb);
-    int (*add_edges)(igraph_t *graph, const igraph_vector_t *edges,
-                     igraph_vector_ptr_t *attr);
-    int (*permute_edges)(const igraph_t *graph,
-                         igraph_t *newgraph, const igraph_vector_t *idx);
-    int (*combine_edges)(const igraph_t *graph,
-                         igraph_t *newgraph,
-                         const igraph_vector_ptr_t *merges,
-                         const igraph_attribute_combination_t *comb);
-    int (*get_info)(const igraph_t *graph,
-                    igraph_strvector_t *gnames, igraph_vector_t *gtypes,
-                    igraph_strvector_t *vnames, igraph_vector_t *vtypes,
-                    igraph_strvector_t *enames, igraph_vector_t *etypes);
-    igraph_bool_t (*has_attr)(const igraph_t *graph, igraph_attribute_elemtype_t type,
-                              const char *name);
-    int (*gettype)(const igraph_t *graph, igraph_attribute_type_t *type,
-                   igraph_attribute_elemtype_t elemtype, const char *name);
-    int (*get_numeric_graph_attr)(const igraph_t *graph, const char *name,
-                                  igraph_vector_t *value);
-    int (*get_string_graph_attr)(const igraph_t *graph, const char *name,
-                                 igraph_strvector_t *value);
-    int (*get_bool_graph_attr)(const igraph_t *igraph, const char *name,
-                               igraph_vector_bool_t *value);
-    int (*get_numeric_vertex_attr)(const igraph_t *graph, const char *name,
-                                   igraph_vs_t vs,
-                                   igraph_vector_t *value);
-    int (*get_string_vertex_attr)(const igraph_t *graph, const char *name,
-                                  igraph_vs_t vs,
-                                  igraph_strvector_t *value);
-    int (*get_bool_vertex_attr)(const igraph_t *graph, const char *name,
-                                igraph_vs_t vs,
-                                igraph_vector_bool_t *value);
-    int (*get_numeric_edge_attr)(const igraph_t *graph, const char *name,
-                                 igraph_es_t es,
-                                 igraph_vector_t *value);
-    int (*get_string_edge_attr)(const igraph_t *graph, const char *name,
-                                igraph_es_t es,
-                                igraph_strvector_t *value);
-    int (*get_bool_edge_attr)(const igraph_t *graph, const char *name,
-                              igraph_es_t es,
-                              igraph_vector_bool_t *value);
+  int (*init)(igraph_t *graph, igraph_vector_ptr_t *attr);
+  void (*destroy)(igraph_t *graph);
+  int (*copy)(igraph_t *to, const igraph_t *from, igraph_bool_t ga,
+              igraph_bool_t va, igraph_bool_t ea);
+  int (*add_vertices)(igraph_t *graph, long int nv, igraph_vector_ptr_t *attr);
+  int (*permute_vertices)(const igraph_t *graph, igraph_t *newgraph,
+                          const igraph_vector_t *idx);
+  int (*combine_vertices)(const igraph_t *graph, igraph_t *newgraph,
+                          const igraph_vector_ptr_t *merges,
+                          const igraph_attribute_combination_t *comb);
+  int (*add_edges)(igraph_t *graph, const igraph_vector_t *edges,
+                   igraph_vector_ptr_t *attr);
+  int (*permute_edges)(const igraph_t *graph, igraph_t *newgraph,
+                       const igraph_vector_t *idx);
+  int (*combine_edges)(const igraph_t *graph, igraph_t *newgraph,
+                       const igraph_vector_ptr_t *merges,
+                       const igraph_attribute_combination_t *comb);
+  int (*get_info)(const igraph_t *graph, igraph_strvector_t *gnames,
+                  igraph_vector_t *gtypes, igraph_strvector_t *vnames,
+                  igraph_vector_t *vtypes, igraph_strvector_t *enames,
+                  igraph_vector_t *etypes);
+  igraph_bool_t (*has_attr)(const igraph_t *graph,
+                            igraph_attribute_elemtype_t type, const char *name);
+  int (*gettype)(const igraph_t *graph, igraph_attribute_type_t *type,
+                 igraph_attribute_elemtype_t elemtype, const char *name);
+  int (*get_numeric_graph_attr)(const igraph_t *graph, const char *name,
+                                igraph_vector_t *value);
+  int (*get_string_graph_attr)(const igraph_t *graph, const char *name,
+                               igraph_strvector_t *value);
+  int (*get_bool_graph_attr)(const igraph_t *igraph, const char *name,
+                             igraph_vector_bool_t *value);
+  int (*get_numeric_vertex_attr)(const igraph_t *graph, const char *name,
+                                 igraph_vs_t vs, igraph_vector_t *value);
+  int (*get_string_vertex_attr)(const igraph_t *graph, const char *name,
+                                igraph_vs_t vs, igraph_strvector_t *value);
+  int (*get_bool_vertex_attr)(const igraph_t *graph, const char *name,
+                              igraph_vs_t vs, igraph_vector_bool_t *value);
+  int (*get_numeric_edge_attr)(const igraph_t *graph, const char *name,
+                               igraph_es_t es, igraph_vector_t *value);
+  int (*get_string_edge_attr)(const igraph_t *graph, const char *name,
+                              igraph_es_t es, igraph_strvector_t *value);
+  int (*get_bool_edge_attr)(const igraph_t *graph, const char *name,
+                            igraph_es_t es, igraph_vector_bool_t *value);
 } igraph_attribute_table_t;
 
-DECLDIR igraph_attribute_table_t * igraph_i_set_attribute_table(const igraph_attribute_table_t * table);
+DECLDIR igraph_attribute_table_t *
+igraph_i_set_attribute_table(const igraph_attribute_table_t *table);
 
 DECLDIR igraph_bool_t igraph_has_attribute_table(void);
 
-#define IGRAPH_I_ATTRIBUTE_DESTROY(graph) \
-    do {if ((graph)->attr) igraph_i_attribute_destroy(graph);} while(0)
-#define IGRAPH_I_ATTRIBUTE_COPY(to,from,ga,va,ea) do { \
-        int igraph_i_ret2=0; \
-        if ((from)->attr) { \
-            IGRAPH_CHECK(igraph_i_ret2=igraph_i_attribute_copy((to),(from),(ga),(va),(ea))); \
-        } else { \
-            (to)->attr = 0; \
-        } \
-        if (igraph_i_ret2 != 0) { \
-            IGRAPH_ERROR("", igraph_i_ret2); \
-        } \
-    } while(0)
+#define IGRAPH_I_ATTRIBUTE_DESTROY(graph)                                      \
+  do {                                                                         \
+    if ((graph)->attr)                                                         \
+      igraph_i_attribute_destroy(graph);                                       \
+  } while (0)
+#define IGRAPH_I_ATTRIBUTE_COPY(to, from, ga, va, ea)                          \
+  do {                                                                         \
+    int igraph_i_ret2 = 0;                                                     \
+    if ((from)->attr) {                                                        \
+      IGRAPH_CHECK(igraph_i_ret2 = igraph_i_attribute_copy((to), (from), (ga), \
+                                                           (va), (ea)));       \
+    } else {                                                                   \
+      (to)->attr = 0;                                                          \
+    }                                                                          \
+    if (igraph_i_ret2 != 0) {                                                  \
+      IGRAPH_ERROR("", igraph_i_ret2);                                         \
+    }                                                                          \
+  } while (0)
 
 int igraph_i_attribute_init(igraph_t *graph, void *attr);
 void igraph_i_attribute_destroy(igraph_t *graph);
 int igraph_i_attribute_copy(igraph_t *to, const igraph_t *from,
-                            igraph_bool_t ga, igraph_bool_t va, igraph_bool_t ea);
+                            igraph_bool_t ga, igraph_bool_t va,
+                            igraph_bool_t ea);
 int igraph_i_attribute_add_vertices(igraph_t *graph, long int nv, void *attr);
 int igraph_i_attribute_permute_vertices(const igraph_t *graph,
                                         igraph_t *newgraph,
                                         const igraph_vector_t *idx);
-int igraph_i_attribute_combine_vertices(const igraph_t *graph,
-                                        igraph_t *newgraph,
-                                        const igraph_vector_ptr_t *merges,
-                                        const igraph_attribute_combination_t *comb);
-int igraph_i_attribute_add_edges(igraph_t *graph,
-                                 const igraph_vector_t *edges, void *attr);
-int igraph_i_attribute_permute_edges(const igraph_t *graph,
-                                     igraph_t *newgraph,
+int igraph_i_attribute_combine_vertices(
+    const igraph_t *graph, igraph_t *newgraph,
+    const igraph_vector_ptr_t *merges,
+    const igraph_attribute_combination_t *comb);
+int igraph_i_attribute_add_edges(igraph_t *graph, const igraph_vector_t *edges,
+                                 void *attr);
+int igraph_i_attribute_permute_edges(const igraph_t *graph, igraph_t *newgraph,
                                      const igraph_vector_t *idx);
-int igraph_i_attribute_combine_edges(const igraph_t *graph,
-                                     igraph_t *newgraph,
-                                     const igraph_vector_ptr_t *merges,
-                                     const igraph_attribute_combination_t *comb);
+int igraph_i_attribute_combine_edges(
+    const igraph_t *graph, igraph_t *newgraph,
+    const igraph_vector_ptr_t *merges,
+    const igraph_attribute_combination_t *comb);
 
-int igraph_i_attribute_get_info(const igraph_t *graph,
-                                igraph_strvector_t *gnames,
-                                igraph_vector_t *gtypes,
-                                igraph_strvector_t *vnames,
-                                igraph_vector_t *vtypes,
-                                igraph_strvector_t *enames,
-                                igraph_vector_t *etypes);
+int igraph_i_attribute_get_info(
+    const igraph_t *graph, igraph_strvector_t *gnames, igraph_vector_t *gtypes,
+    igraph_strvector_t *vnames, igraph_vector_t *vtypes,
+    igraph_strvector_t *enames, igraph_vector_t *etypes);
 igraph_bool_t igraph_i_attribute_has_attr(const igraph_t *graph,
-        igraph_attribute_elemtype_t type,
-        const char *name);
+                                          igraph_attribute_elemtype_t type,
+                                          const char *name);
 int igraph_i_attribute_gettype(const igraph_t *graph,
                                igraph_attribute_type_t *type,
                                igraph_attribute_elemtype_t elemtype,
                                const char *name);
 
 int igraph_i_attribute_get_numeric_graph_attr(const igraph_t *graph,
-        const char *name,
-        igraph_vector_t *value);
+                                              const char *name,
+                                              igraph_vector_t *value);
 int igraph_i_attribute_get_numeric_vertex_attr(const igraph_t *graph,
-        const char *name,
-        igraph_vs_t vs,
-        igraph_vector_t *value);
+                                               const char *name, igraph_vs_t vs,
+                                               igraph_vector_t *value);
 int igraph_i_attribute_get_numeric_edge_attr(const igraph_t *graph,
-        const char *name,
-        igraph_es_t es,
-        igraph_vector_t *value);
+                                             const char *name, igraph_es_t es,
+                                             igraph_vector_t *value);
 int igraph_i_attribute_get_string_graph_attr(const igraph_t *graph,
-        const char *name,
-        igraph_strvector_t *value);
+                                             const char *name,
+                                             igraph_strvector_t *value);
 int igraph_i_attribute_get_string_vertex_attr(const igraph_t *graph,
-        const char *name,
-        igraph_vs_t vs,
-        igraph_strvector_t *value);
+                                              const char *name, igraph_vs_t vs,
+                                              igraph_strvector_t *value);
 int igraph_i_attribute_get_string_edge_attr(const igraph_t *graph,
-        const char *name,
-        igraph_es_t es,
-        igraph_strvector_t *value);
+                                            const char *name, igraph_es_t es,
+                                            igraph_strvector_t *value);
 int igraph_i_attribute_get_bool_graph_attr(const igraph_t *graph,
-        const char *name,
-        igraph_vector_bool_t *value);
+                                           const char *name,
+                                           igraph_vector_bool_t *value);
 int igraph_i_attribute_get_bool_vertex_attr(const igraph_t *graph,
-        const char *name,
-        igraph_vs_t vs,
-        igraph_vector_bool_t *value);
+                                            const char *name, igraph_vs_t vs,
+                                            igraph_vector_bool_t *value);
 int igraph_i_attribute_get_bool_edge_attr(const igraph_t *graph,
-        const char *name,
-        igraph_es_t es,
-        igraph_vector_bool_t *value);
+                                          const char *name, igraph_es_t es,
+                                          igraph_vector_bool_t *value);
 
 /* Experimental attribute handler in C */
 
 extern const igraph_attribute_table_t igraph_cattribute_table;
 
-DECLDIR igraph_real_t igraph_cattribute_GAN(const igraph_t *graph, const char *name);
-DECLDIR igraph_bool_t igraph_cattribute_GAB(const igraph_t *graph, const char *name);
-DECLDIR const char* igraph_cattribute_GAS(const igraph_t *graph, const char *name);
-DECLDIR igraph_real_t igraph_cattribute_VAN(const igraph_t *graph, const char *name,
-        igraph_integer_t vid);
-DECLDIR igraph_bool_t igraph_cattribute_VAB(const igraph_t *graph, const char *name,
-        igraph_integer_t vid);
-DECLDIR const char* igraph_cattribute_VAS(const igraph_t *graph, const char *name,
-        igraph_integer_t vid);
-DECLDIR igraph_real_t igraph_cattribute_EAN(const igraph_t *graph, const char *name,
-        igraph_integer_t eid);
-DECLDIR igraph_bool_t igraph_cattribute_EAB(const igraph_t *graph, const char *name,
-        igraph_integer_t eid);
-DECLDIR const char* igraph_cattribute_EAS(const igraph_t *graph, const char *name,
-        igraph_integer_t eid);
+DECLDIR igraph_real_t igraph_cattribute_GAN(const igraph_t *graph,
+                                            const char *name);
+DECLDIR igraph_bool_t igraph_cattribute_GAB(const igraph_t *graph,
+                                            const char *name);
+DECLDIR const char *igraph_cattribute_GAS(const igraph_t *graph,
+                                          const char *name);
+DECLDIR igraph_real_t igraph_cattribute_VAN(const igraph_t *graph,
+                                            const char *name,
+                                            igraph_integer_t vid);
+DECLDIR igraph_bool_t igraph_cattribute_VAB(const igraph_t *graph,
+                                            const char *name,
+                                            igraph_integer_t vid);
+DECLDIR const char *igraph_cattribute_VAS(const igraph_t *graph,
+                                          const char *name,
+                                          igraph_integer_t vid);
+DECLDIR igraph_real_t igraph_cattribute_EAN(const igraph_t *graph,
+                                            const char *name,
+                                            igraph_integer_t eid);
+DECLDIR igraph_bool_t igraph_cattribute_EAB(const igraph_t *graph,
+                                            const char *name,
+                                            igraph_integer_t eid);
+DECLDIR const char *igraph_cattribute_EAS(const igraph_t *graph,
+                                          const char *name,
+                                          igraph_integer_t eid);
 
 DECLDIR int igraph_cattribute_VANV(const igraph_t *graph, const char *name,
                                    igraph_vs_t vids, igraph_vector_t *result);
 DECLDIR int igraph_cattribute_EANV(const igraph_t *graph, const char *name,
                                    igraph_es_t eids, igraph_vector_t *result);
 DECLDIR int igraph_cattribute_VASV(const igraph_t *graph, const char *name,
-                                   igraph_vs_t vids, igraph_strvector_t *result);
+                                   igraph_vs_t vids,
+                                   igraph_strvector_t *result);
 DECLDIR int igraph_cattribute_EASV(const igraph_t *graph, const char *name,
-                                   igraph_es_t eids, igraph_strvector_t *result);
+                                   igraph_es_t eids,
+                                   igraph_strvector_t *result);
 DECLDIR int igraph_cattribute_VABV(const igraph_t *graph, const char *name,
-                                   igraph_vs_t vids, igraph_vector_bool_t *result);
+                                   igraph_vs_t vids,
+                                   igraph_vector_bool_t *result);
 DECLDIR int igraph_cattribute_EABV(const igraph_t *graph, const char *name,
-                                   igraph_es_t eids, igraph_vector_bool_t *result);
+                                   igraph_es_t eids,
+                                   igraph_vector_bool_t *result);
 
-DECLDIR int igraph_cattribute_list(const igraph_t *graph,
-                                   igraph_strvector_t *gnames, igraph_vector_t *gtypes,
-                                   igraph_strvector_t *vnames, igraph_vector_t *vtypes,
-                                   igraph_strvector_t *enames, igraph_vector_t *etypes);
-DECLDIR igraph_bool_t igraph_cattribute_has_attr(const igraph_t *graph,
-        igraph_attribute_elemtype_t type,
-        const char *name);
+DECLDIR int
+igraph_cattribute_list(const igraph_t *graph, igraph_strvector_t *gnames,
+                       igraph_vector_t *gtypes, igraph_strvector_t *vnames,
+                       igraph_vector_t *vtypes, igraph_strvector_t *enames,
+                       igraph_vector_t *etypes);
+DECLDIR igraph_bool_t igraph_cattribute_has_attr(
+    const igraph_t *graph, igraph_attribute_elemtype_t type, const char *name);
 
 DECLDIR int igraph_cattribute_GAN_set(igraph_t *graph, const char *name,
                                       igraph_real_t value);
@@ -431,15 +436,19 @@ DECLDIR int igraph_cattribute_GAB_set(igraph_t *graph, const char *name,
 DECLDIR int igraph_cattribute_GAS_set(igraph_t *graph, const char *name,
                                       const char *value);
 DECLDIR int igraph_cattribute_VAN_set(igraph_t *graph, const char *name,
-                                      igraph_integer_t vid, igraph_real_t value);
+                                      igraph_integer_t vid,
+                                      igraph_real_t value);
 DECLDIR int igraph_cattribute_VAB_set(igraph_t *graph, const char *name,
-                                      igraph_integer_t vid, igraph_bool_t value);
+                                      igraph_integer_t vid,
+                                      igraph_bool_t value);
 DECLDIR int igraph_cattribute_VAS_set(igraph_t *graph, const char *name,
                                       igraph_integer_t vid, const char *value);
 DECLDIR int igraph_cattribute_EAN_set(igraph_t *graph, const char *name,
-                                      igraph_integer_t eid, igraph_real_t value);
+                                      igraph_integer_t eid,
+                                      igraph_real_t value);
 DECLDIR int igraph_cattribute_EAB_set(igraph_t *graph, const char *name,
-                                      igraph_integer_t eid, igraph_bool_t value);
+                                      igraph_integer_t eid,
+                                      igraph_bool_t value);
 DECLDIR int igraph_cattribute_EAS_set(igraph_t *graph, const char *name,
                                       igraph_integer_t eid, const char *value);
 
@@ -460,7 +469,7 @@ DECLDIR void igraph_cattribute_remove_g(igraph_t *graph, const char *name);
 DECLDIR void igraph_cattribute_remove_v(igraph_t *graph, const char *name);
 DECLDIR void igraph_cattribute_remove_e(igraph_t *graph, const char *name);
 DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
-        igraph_bool_t v, igraph_bool_t e);
+                                          igraph_bool_t v, igraph_bool_t e);
 
 /**
  * \define GAN
@@ -471,7 +480,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param n The name of the attribute.
  * \return The value of the attribute.
  */
-#define GAN(graph,n) (igraph_cattribute_GAN((graph), (n)))
+#define GAN(graph, n) (igraph_cattribute_GAN((graph), (n)))
 /**
  * \define GAB
  * Query a boolean graph attribute.
@@ -481,7 +490,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param n The name of the attribute.
  * \return The value of the attribute.
  */
-#define GAB(graph,n) (igraph_cattribute_GAB((graph), (n)))
+#define GAB(graph, n) (igraph_cattribute_GAB((graph), (n)))
 /**
  * \define GAS
  * Query a string graph attribute.
@@ -491,7 +500,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param n The name of the attribute.
  * \return The value of the attribute.
  */
-#define GAS(graph,n) (igraph_cattribute_GAS((graph), (n)))
+#define GAS(graph, n) (igraph_cattribute_GAS((graph), (n)))
 /**
  * \define VAN
  * Query a numeric vertex attribute.
@@ -502,7 +511,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param v The id of the vertex.
  * \return The value of the attribute.
  */
-#define VAN(graph,n,v) (igraph_cattribute_VAN((graph), (n), (v)))
+#define VAN(graph, n, v) (igraph_cattribute_VAN((graph), (n), (v)))
 /**
  * \define VAB
  * Query a boolean vertex attribute.
@@ -513,7 +522,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param v The id of the vertex.
  * \return The value of the attribute.
  */
-#define VAB(graph,n,v) (igraph_cattribute_VAB((graph), (n), (v)))
+#define VAB(graph, n, v) (igraph_cattribute_VAB((graph), (n), (v)))
 /**
  * \define VAS
  * Query a string vertex attribute.
@@ -524,7 +533,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param v The id of the vertex.
  * \return The value of the attribute.
  */
-#define VAS(graph,n,v) (igraph_cattribute_VAS((graph), (n), (v)))
+#define VAS(graph, n, v) (igraph_cattribute_VAS((graph), (n), (v)))
 /**
  * \define VANV
  * Query a numeric vertex attribute for all vertices.
@@ -536,8 +545,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  *        stored here. It will be resized, if needed.
  * \return Error code.
  */
-#define VANV(graph,n,vec) (igraph_cattribute_VANV((graph),(n), \
-                           igraph_vss_all(), (vec)))
+#define VANV(graph, n, vec)                                                    \
+  (igraph_cattribute_VANV((graph), (n), igraph_vss_all(), (vec)))
 /**
  * \define VABV
  * Query a boolean vertex attribute for all vertices.
@@ -549,8 +558,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  *        stored here. It will be resized, if needed.
  * \return Error code.
  */
-#define VABV(graph,n,vec) (igraph_cattribute_VABV((graph),(n), \
-                           igraph_vss_all(), (vec)))
+#define VABV(graph, n, vec)                                                    \
+  (igraph_cattribute_VABV((graph), (n), igraph_vss_all(), (vec)))
 /**
  * \define VASV
  * Query a string vertex attribute for all vertices.
@@ -562,8 +571,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  *        stored here. It will be resized, if needed.
  * \return Error code.
  */
-#define VASV(graph,n,vec) (igraph_cattribute_VASV((graph),(n), \
-                           igraph_vss_all(), (vec)))
+#define VASV(graph, n, vec)                                                    \
+  (igraph_cattribute_VASV((graph), (n), igraph_vss_all(), (vec)))
 /**
  * \define EAN
  * Query a numeric edge attribute.
@@ -574,7 +583,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param e The id of the edge.
  * \return The value of the attribute.
  */
-#define EAN(graph,n,e) (igraph_cattribute_EAN((graph), (n), (e)))
+#define EAN(graph, n, e) (igraph_cattribute_EAN((graph), (n), (e)))
 /**
  * \define EAB
  * Query a boolean edge attribute.
@@ -585,7 +594,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param e The id of the edge.
  * \return The value of the attribute.
  */
-#define EAB(graph,n,e) (igraph_cattribute_EAB((graph), (n), (e)))
+#define EAB(graph, n, e) (igraph_cattribute_EAB((graph), (n), (e)))
 /**
  * \define EAS
  * Query a string edge attribute.
@@ -596,7 +605,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param e The id of the edge.
  * \return The value of the attribute.
  */
-#define EAS(graph,n,e) (igraph_cattribute_EAS((graph), (n), (e)))
+#define EAS(graph, n, e) (igraph_cattribute_EAS((graph), (n), (e)))
 /**
  * \define EANV
  * Query a numeric edge attribute for all edges.
@@ -608,8 +617,9 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  *        stored here. It will be resized, if needed.
  * \return Error code.
  */
-#define EANV(graph,n,vec) (igraph_cattribute_EANV((graph),(n), \
-                           igraph_ess_all(IGRAPH_EDGEORDER_ID), (vec)))
+#define EANV(graph, n, vec)                                                    \
+  (igraph_cattribute_EANV((graph), (n), igraph_ess_all(IGRAPH_EDGEORDER_ID),   \
+                          (vec)))
 /**
  * \define EABV
  * Query a boolean edge attribute for all edges.
@@ -621,8 +631,9 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  *        stored here. It will be resized, if needed.
  * \return Error code.
  */
-#define EABV(graph,n,vec) (igraph_cattribute_EABV((graph),(n), \
-                           igraph_ess_all(IGRAPH_EDGEORDER_ID), (vec)))
+#define EABV(graph, n, vec)                                                    \
+  (igraph_cattribute_EABV((graph), (n), igraph_ess_all(IGRAPH_EDGEORDER_ID),   \
+                          (vec)))
 
 /**
  * \define EASV
@@ -635,8 +646,9 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  *        stored here. It will be resized, if needed.
  * \return Error code.
  */
-#define EASV(graph,n,vec) (igraph_cattribute_EASV((graph),(n), \
-                           igraph_ess_all(IGRAPH_EDGEORDER_ID), (vec)))
+#define EASV(graph, n, vec)                                                    \
+  (igraph_cattribute_EASV((graph), (n), igraph_ess_all(IGRAPH_EDGEORDER_ID),   \
+                          (vec)))
 /**
  * \define SETGAN
  * Set a numeric graph attribute
@@ -647,7 +659,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETGAN(graph,n,value) (igraph_cattribute_GAN_set((graph),(n),(value)))
+#define SETGAN(graph, n, value)                                                \
+  (igraph_cattribute_GAN_set((graph), (n), (value)))
 /**
  * \define SETGAB
  * Set a boolean graph attribute
@@ -658,7 +671,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETGAB(graph,n,value) (igraph_cattribute_GAB_set((graph),(n),(value)))
+#define SETGAB(graph, n, value)                                                \
+  (igraph_cattribute_GAB_set((graph), (n), (value)))
 /**
  * \define SETGAS
  * Set a string graph attribute
@@ -669,7 +683,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETGAS(graph,n,value) (igraph_cattribute_GAS_set((graph),(n),(value)))
+#define SETGAS(graph, n, value)                                                \
+  (igraph_cattribute_GAS_set((graph), (n), (value)))
 /**
  * \define SETVAN
  * Set a numeric vertex attribute
@@ -681,7 +696,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETVAN(graph,n,vid,value) (igraph_cattribute_VAN_set((graph),(n),(vid),(value)))
+#define SETVAN(graph, n, vid, value)                                           \
+  (igraph_cattribute_VAN_set((graph), (n), (vid), (value)))
 /**
  * \define SETVAB
  * Set a boolean vertex attribute
@@ -693,7 +709,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETVAB(graph,n,vid,value) (igraph_cattribute_VAB_set((graph),(n),(vid),(value)))
+#define SETVAB(graph, n, vid, value)                                           \
+  (igraph_cattribute_VAB_set((graph), (n), (vid), (value)))
 /**
  * \define SETVAS
  * Set a string vertex attribute
@@ -705,7 +722,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETVAS(graph,n,vid,value) (igraph_cattribute_VAS_set((graph),(n),(vid),(value)))
+#define SETVAS(graph, n, vid, value)                                           \
+  (igraph_cattribute_VAS_set((graph), (n), (vid), (value)))
 /**
  * \define SETEAN
  * Set a numeric edge attribute
@@ -717,7 +735,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETEAN(graph,n,eid,value) (igraph_cattribute_EAN_set((graph),(n),(eid),(value)))
+#define SETEAN(graph, n, eid, value)                                           \
+  (igraph_cattribute_EAN_set((graph), (n), (eid), (value)))
 /**
  * \define SETEAB
  * Set a boolean edge attribute
@@ -729,7 +748,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETEAB(graph,n,eid,value) (igraph_cattribute_EAB_set((graph),(n),(eid),(value)))
+#define SETEAB(graph, n, eid, value)                                           \
+  (igraph_cattribute_EAB_set((graph), (n), (eid), (value)))
 /**
  * \define SETEAS
  * Set a string edge attribute
@@ -741,7 +761,8 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param value The new value of the attribute.
  * \return Error code.
  */
-#define SETEAS(graph,n,eid,value) (igraph_cattribute_EAS_set((graph),(n),(eid),(value)))
+#define SETEAS(graph, n, eid, value)                                           \
+  (igraph_cattribute_EAS_set((graph), (n), (eid), (value)))
 
 /**
  * \define SETVANV
@@ -753,7 +774,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param v Vector containing the new values of the attributes.
  * \return Error code.
  */
-#define SETVANV(graph,n,v) (igraph_cattribute_VAN_setv((graph),(n),(v)))
+#define SETVANV(graph, n, v) (igraph_cattribute_VAN_setv((graph), (n), (v)))
 /**
  * \define SETVABV
  *  Set a boolean vertex attribute for all vertices
@@ -764,7 +785,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param v Vector containing the new values of the attributes.
  * \return Error code.
  */
-#define SETVABV(graph,n,v) (igraph_cattribute_VAB_setv((graph),(n),(v)))
+#define SETVABV(graph, n, v) (igraph_cattribute_VAB_setv((graph), (n), (v)))
 /**
  * \define SETVASV
  *  Set a string vertex attribute for all vertices
@@ -775,7 +796,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param v Vector containing the new values of the attributes.
  * \return Error code.
  */
-#define SETVASV(graph,n,v) (igraph_cattribute_VAS_setv((graph),(n),(v)))
+#define SETVASV(graph, n, v) (igraph_cattribute_VAS_setv((graph), (n), (v)))
 /**
  * \define SETEANV
  *  Set a numeric edge attribute for all vertices
@@ -785,7 +806,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param n The name of the attribute.
  * \param v Vector containing the new values of the attributes.
  */
-#define SETEANV(graph,n,v) (igraph_cattribute_EAN_setv((graph),(n),(v)))
+#define SETEANV(graph, n, v) (igraph_cattribute_EAN_setv((graph), (n), (v)))
 /**
  * \define SETEABV
  *  Set a boolean edge attribute for all vertices
@@ -795,7 +816,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param n The name of the attribute.
  * \param v Vector containing the new values of the attributes.
  */
-#define SETEABV(graph,n,v) (igraph_cattribute_EAB_setv((graph),(n),(v)))
+#define SETEABV(graph, n, v) (igraph_cattribute_EAB_setv((graph), (n), (v)))
 /**
  * \define SETEASV
  *  Set a string edge attribute for all vertices
@@ -805,7 +826,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param n The name of the attribute.
  * \param v Vector containing the new values of the attributes.
  */
-#define SETEASV(graph,n,v) (igraph_cattribute_EAS_setv((graph),(n),(v)))
+#define SETEASV(graph, n, v) (igraph_cattribute_EAS_setv((graph), (n), (v)))
 
 /**
  * \define DELGA
@@ -815,7 +836,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param graph The graph.
  * \param n The name of the attribute to remove.
  */
-#define DELGA(graph,n) (igraph_cattribute_remove_g((graph),(n)))
+#define DELGA(graph, n) (igraph_cattribute_remove_g((graph), (n)))
 /**
  * \define DELVA
  * Remove a vertex attribute.
@@ -824,7 +845,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param graph The graph.
  * \param n The name of the attribute to remove.
  */
-#define DELVA(graph,n) (igraph_cattribute_remove_v((graph),(n)))
+#define DELVA(graph, n) (igraph_cattribute_remove_v((graph), (n)))
 /**
  * \define DELEA
  * Remove an edge attribute.
@@ -833,7 +854,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * \param graph The graph.
  * \param n The name of the attribute to remove.
  */
-#define DELEA(graph,n) (igraph_cattribute_remove_e((graph),(n)))
+#define DELEA(graph, n) (igraph_cattribute_remove_e((graph), (n)))
 /**
  * \define DELGAS
  * Remove all graph attributes.
@@ -841,7 +862,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * Calls \ref igraph_cattribute_remove_all().
  * \param graph The graph.
  */
-#define DELGAS(graph) (igraph_cattribute_remove_all((graph),1,0,0))
+#define DELGAS(graph) (igraph_cattribute_remove_all((graph), 1, 0, 0))
 /**
  * \define DELVAS
  * Remove all vertex attributes.
@@ -849,7 +870,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * Calls \ref igraph_cattribute_remove_all().
  * \param graph The graph.
  */
-#define DELVAS(graph) (igraph_cattribute_remove_all((graph),0,1,0))
+#define DELVAS(graph) (igraph_cattribute_remove_all((graph), 0, 1, 0))
 /**
  * \define DELEAS
  * Remove all edge attributes.
@@ -857,7 +878,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * Calls \ref igraph_cattribute_remove_all().
  * \param graph The graph.
  */
-#define DELEAS(graph) (igraph_cattribute_remove_all((graph),0,0,1))
+#define DELEAS(graph) (igraph_cattribute_remove_all((graph), 0, 0, 1))
 /**
  * \define DELALL
  * Remove all attributes.
@@ -866,7 +887,7 @@ DECLDIR void igraph_cattribute_remove_all(igraph_t *graph, igraph_bool_t g,
  * Calls \ref igraph_cattribute_remove_all().
  * \param graph The graph.
  */
-#define DELALL(graph) (igraph_cattribute_remove_all((graph),1,1,1))
+#define DELALL(graph) (igraph_cattribute_remove_all((graph), 1, 1, 1))
 
 __END_DECLS
 

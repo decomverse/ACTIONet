@@ -24,8 +24,8 @@
 #ifndef IGRAPH_MARKED_QUEUE_H
 #define IGRAPH_MARKED_QUEUE_H
 
-#include "igraph_vector.h"
 #include "igraph_dqueue.h"
+#include "igraph_vector.h"
 
 #include <stdio.h>
 
@@ -40,14 +40,13 @@
 */
 
 typedef struct igraph_marked_queue_t {
-    igraph_dqueue_t Q;
-    igraph_vector_long_t set;
-    long int mark;
-    long int size;
+  igraph_dqueue_t Q;
+  igraph_vector_long_t set;
+  long int mark;
+  long int size;
 } igraph_marked_queue_t;
 
-int igraph_marked_queue_init(igraph_marked_queue_t *q,
-                             long int size);
+int igraph_marked_queue_init(igraph_marked_queue_t *q, long int size);
 void igraph_marked_queue_destroy(igraph_marked_queue_t *q);
 void igraph_marked_queue_reset(igraph_marked_queue_t *q);
 
@@ -57,7 +56,7 @@ int igraph_marked_queue_print(const igraph_marked_queue_t *q);
 int igraph_marked_queue_fprint(const igraph_marked_queue_t *q, FILE *file);
 
 igraph_bool_t igraph_marked_queue_iselement(const igraph_marked_queue_t *q,
-        long int elem);
+                                            long int elem);
 
 int igraph_marked_queue_push(igraph_marked_queue_t *q, long int elem);
 

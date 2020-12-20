@@ -24,14 +24,14 @@
 #ifndef IGRAPH_CONVERSION_H
 #define IGRAPH_CONVERSION_H
 
-#include "igraph_decls.h"
+#include "igraph_attributes.h"
 #include "igraph_constants.h"
-#include "igraph_types.h"
 #include "igraph_datatype.h"
-#include "igraph_spmatrix.h"
+#include "igraph_decls.h"
 #include "igraph_matrix.h"
 #include "igraph_sparsemat.h"
-#include "igraph_attributes.h"
+#include "igraph_spmatrix.h"
+#include "igraph_types.h"
 
 __BEGIN_DECLS
 
@@ -40,8 +40,10 @@ __BEGIN_DECLS
 /* -------------------------------------------------- */
 
 DECLDIR int igraph_get_adjacency(const igraph_t *graph, igraph_matrix_t *res,
-                                 igraph_get_adjacency_t type, igraph_bool_t eids);
-DECLDIR int igraph_get_adjacency_sparse(const igraph_t *graph, igraph_spmatrix_t *res,
+                                 igraph_get_adjacency_t type,
+                                 igraph_bool_t eids);
+DECLDIR int igraph_get_adjacency_sparse(const igraph_t *graph,
+                                        igraph_spmatrix_t *res,
                                         igraph_get_adjacency_t type);
 
 DECLDIR int igraph_get_stochastic(const igraph_t *graph,
@@ -49,17 +51,18 @@ DECLDIR int igraph_get_stochastic(const igraph_t *graph,
                                   igraph_bool_t column_wise);
 
 DECLDIR int igraph_get_stochastic_sparsemat(const igraph_t *graph,
-        igraph_sparsemat_t *sparsemat,
-        igraph_bool_t column_wise);
+                                            igraph_sparsemat_t *sparsemat,
+                                            igraph_bool_t column_wise);
 
-DECLDIR int igraph_get_edgelist(const igraph_t *graph, igraph_vector_t *res, igraph_bool_t bycol);
+DECLDIR int igraph_get_edgelist(const igraph_t *graph, igraph_vector_t *res,
+                                igraph_bool_t bycol);
 
-DECLDIR int igraph_to_directed(igraph_t *graph,
-                               igraph_to_directed_t flags);
-DECLDIR int igraph_to_undirected(igraph_t *graph,
-                                 igraph_to_undirected_t flags,
-                                 const igraph_attribute_combination_t *edge_comb);
-DECLDIR int igraph_to_prufer(const igraph_t *graph, igraph_vector_int_t *prufer);
+DECLDIR int igraph_to_directed(igraph_t *graph, igraph_to_directed_t flags);
+DECLDIR int
+igraph_to_undirected(igraph_t *graph, igraph_to_undirected_t flags,
+                     const igraph_attribute_combination_t *edge_comb);
+DECLDIR int igraph_to_prufer(const igraph_t *graph,
+                             igraph_vector_int_t *prufer);
 
 __END_DECLS
 

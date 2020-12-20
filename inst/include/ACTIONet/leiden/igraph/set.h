@@ -9,11 +9,11 @@
 #ifndef CLIQUER_SET_H
 #define CLIQUER_SET_H
 
+#include "misc.h"
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include "misc.h"
 
 /*
  * Sets are arrays of setelement's (typically unsigned long int's) with
@@ -21,9 +21,7 @@
  * are numbered 0,...,n-1.
  */
 
-
 /*** Variable types and constants. ***/
-
 
 /*
  * If setelement hasn't been declared:
@@ -33,71 +31,59 @@
 
 #ifndef ELEMENTSIZE
 typedef unsigned long int setelement;
-# if (ULONG_MAX == 65535)
-#  define ELEMENTSIZE 16
-# elif (ULONG_MAX == 4294967295)
-#  define ELEMENTSIZE 32
-# else
-#  define ELEMENTSIZE 64
-# endif
-#endif  /* !ELEMENTSIZE */
+#if (ULONG_MAX == 65535)
+#define ELEMENTSIZE 16
+#elif (ULONG_MAX == 4294967295)
+#define ELEMENTSIZE 32
+#else
+#define ELEMENTSIZE 64
+#endif
+#endif /* !ELEMENTSIZE */
 
-typedef setelement * set_t;
-
+typedef setelement *set_t;
 
 /*** Counting amount of 1 bits in a setelement ***/
 
 /* Array for amount of 1 bits in a byte. */
 static int set_bit_count[256] = {
-	0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8 };
+    0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4,
+    2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4,
+    2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
+    4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5,
+    3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
+    4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+    4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8};
 
 /* The following macros assume that all higher bits are 0.
  * They may in some cases be useful also on with other ELEMENTSIZE's,
  * so we define them all.  */
-#define SET_ELEMENT_BIT_COUNT_8(a)  (set_bit_count[(a)])
-#define SET_ELEMENT_BIT_COUNT_16(a) (set_bit_count[(a)>>8] + \
-				     set_bit_count[(a)&0xFF])
-#define SET_ELEMENT_BIT_COUNT_32(a) (set_bit_count[(a)>>24] + \
-				     set_bit_count[((a)>>16)&0xFF] + \
-				     set_bit_count[((a)>>8)&0xFF] + \
-				     set_bit_count[(a)&0xFF])
-#define SET_ELEMENT_BIT_COUNT_64(a) (set_bit_count[(a)>>56] + \
-				     set_bit_count[((a)>>48)&0xFF] + \
-				     set_bit_count[((a)>>40)&0xFF] + \
-				     set_bit_count[((a)>>32)&0xFF] + \
-				     set_bit_count[((a)>>24)&0xFF] + \
-				     set_bit_count[((a)>>16)&0xFF] + \
-				     set_bit_count[((a)>>8)&0xFF] + \
-				     set_bit_count[(a)&0xFF])
-#if (ELEMENTSIZE==64)
-# define SET_ELEMENT_BIT_COUNT(a) SET_ELEMENT_BIT_COUNT_64(a)
-# define FULL_ELEMENT ((setelement)0xFFFFFFFFFFFFFFFF)
-#elif (ELEMENTSIZE==32)
-# define SET_ELEMENT_BIT_COUNT(a) SET_ELEMENT_BIT_COUNT_32(a)
-# define FULL_ELEMENT ((setelement)0xFFFFFFFF)
-#elif (ELEMENTSIZE==16)
-# define SET_ELEMENT_BIT_COUNT(a) SET_ELEMENT_BIT_COUNT_16(a)
-# define FULL_ELEMENT ((setelement)0xFFFF)
+#define SET_ELEMENT_BIT_COUNT_8(a) (set_bit_count[(a)])
+#define SET_ELEMENT_BIT_COUNT_16(a)                                            \
+  (set_bit_count[(a) >> 8] + set_bit_count[(a)&0xFF])
+#define SET_ELEMENT_BIT_COUNT_32(a)                                            \
+  (set_bit_count[(a) >> 24] + set_bit_count[((a) >> 16) & 0xFF] +              \
+   set_bit_count[((a) >> 8) & 0xFF] + set_bit_count[(a)&0xFF])
+#define SET_ELEMENT_BIT_COUNT_64(a)                                            \
+  (set_bit_count[(a) >> 56] + set_bit_count[((a) >> 48) & 0xFF] +              \
+   set_bit_count[((a) >> 40) & 0xFF] + set_bit_count[((a) >> 32) & 0xFF] +     \
+   set_bit_count[((a) >> 24) & 0xFF] + set_bit_count[((a) >> 16) & 0xFF] +     \
+   set_bit_count[((a) >> 8) & 0xFF] + set_bit_count[(a)&0xFF])
+#if (ELEMENTSIZE == 64)
+#define SET_ELEMENT_BIT_COUNT(a) SET_ELEMENT_BIT_COUNT_64(a)
+#define FULL_ELEMENT ((setelement)0xFFFFFFFFFFFFFFFF)
+#elif (ELEMENTSIZE == 32)
+#define SET_ELEMENT_BIT_COUNT(a) SET_ELEMENT_BIT_COUNT_32(a)
+#define FULL_ELEMENT ((setelement)0xFFFFFFFF)
+#elif (ELEMENTSIZE == 16)
+#define SET_ELEMENT_BIT_COUNT(a) SET_ELEMENT_BIT_COUNT_16(a)
+#define FULL_ELEMENT ((setelement)0xFFFF)
 #else
-# error "SET_ELEMENT_BIT_COUNT(a) not defined for current ELEMENTSIZE"
+#error "SET_ELEMENT_BIT_COUNT(a) not defined for current ELEMENTSIZE"
 #endif
-
-
 
 /*** Macros and functions ***/
 
@@ -108,33 +94,30 @@ static int set_bit_count[256] = {
  * (though on most modern machines it's faster to shift instead of
  * using memory).  Making it a macro makes it easy to change.
  */
-#define SET_BIT_MASK(x) ((setelement)1<<(x))
-
-
+#define SET_BIT_MASK(x) ((setelement)1 << (x))
 
 /* Set element handling macros */
 
-#define SET_ELEMENT_INTERSECT(a,b)  ((a)&(b))
-#define SET_ELEMENT_UNION(a,b)      ((a)|(b))
-#define SET_ELEMENT_DIFFERENCE(a,b) ((a)&(~(b)))
-#define SET_ELEMENT_CONTAINS(e,v)   ((e)&SET_BIT_MASK(v))
-
+#define SET_ELEMENT_INTERSECT(a, b) ((a) & (b))
+#define SET_ELEMENT_UNION(a, b) ((a) | (b))
+#define SET_ELEMENT_DIFFERENCE(a, b) ((a) & (~(b)))
+#define SET_ELEMENT_CONTAINS(e, v) ((e)&SET_BIT_MASK(v))
 
 /* Set handling macros */
 
-#define SET_ADD_ELEMENT(s,a) \
-                       ((s)[(a)/ELEMENTSIZE] |= SET_BIT_MASK((a)%ELEMENTSIZE))
-#define SET_DEL_ELEMENT(s,a) \
-                       ((s)[(a)/ELEMENTSIZE] &= ~SET_BIT_MASK((a)%ELEMENTSIZE))
-#define SET_CONTAINS_FAST(s,a) (SET_ELEMENT_CONTAINS((s)[(a)/ELEMENTSIZE], \
-						      (a)%ELEMENTSIZE))
-#define SET_CONTAINS(s,a) (((a)<SET_MAX_SIZE(s))?SET_CONTAINS_FAST(s,a):FALSE)
+#define SET_ADD_ELEMENT(s, a)                                                  \
+  ((s)[(a) / ELEMENTSIZE] |= SET_BIT_MASK((a) % ELEMENTSIZE))
+#define SET_DEL_ELEMENT(s, a)                                                  \
+  ((s)[(a) / ELEMENTSIZE] &= ~SET_BIT_MASK((a) % ELEMENTSIZE))
+#define SET_CONTAINS_FAST(s, a)                                                \
+  (SET_ELEMENT_CONTAINS((s)[(a) / ELEMENTSIZE], (a) % ELEMENTSIZE))
+#define SET_CONTAINS(s, a)                                                     \
+  (((a) < SET_MAX_SIZE(s)) ? SET_CONTAINS_FAST(s, a) : FALSE)
 
 /* Sets can hold values between 0,...,SET_MAX_SIZE(s)-1 */
 #define SET_MAX_SIZE(s) ((s)[-1])
 /* Sets consist of an array of SET_ARRAY_LENGTH(s) setelements */
-#define SET_ARRAY_LENGTH(s) (((s)[-1]+ELEMENTSIZE-1)/ELEMENTSIZE)
-
+#define SET_ARRAY_LENGTH(s) (((s)[-1] + ELEMENTSIZE - 1) / ELEMENTSIZE)
 
 /*
  * set_new()
@@ -143,16 +126,16 @@ static int set_bit_count[256] = {
  */
 UNUSED_FUNCTION
 static set_t set_new(int size) {
-	int n;
-	set_t s;
+  int n;
+  set_t s;
 
-	ASSERT(size>0);
+  ASSERT(size > 0);
 
-	n=(size/ELEMENTSIZE+1)+1;
-	s=calloc(n,sizeof(setelement));
-	s[0]=size;
+  n = (size / ELEMENTSIZE + 1) + 1;
+  s = calloc(n, sizeof(setelement));
+  s[0] = size;
 
-	return &(s[1]);
+  return &(s[1]);
 }
 
 /*
@@ -160,10 +143,9 @@ static set_t set_new(int size) {
  *
  * Free the memory associated with set s.
  */
-UNUSED_FUNCTION INLINE
-static void set_free(set_t s) {
-	ASSERT(s!=NULL);
-	free(&(s[-1]));
+UNUSED_FUNCTION INLINE static void set_free(set_t s) {
+  ASSERT(s != NULL);
+  free(&(s[-1]));
 }
 
 /*
@@ -174,24 +156,23 @@ static void set_free(set_t s) {
  *
  * Returns a pointer to the newx set.
  */
-UNUSED_FUNCTION INLINE
-static set_t set_resize(set_t s, int size) {
-	int n;
+UNUSED_FUNCTION INLINE static set_t set_resize(set_t s, int size) {
+  int n;
 
-	ASSERT(size>0);
+  ASSERT(size > 0);
 
-	n=(size/ELEMENTSIZE+1);
-	s=((setelement *)realloc(s-1,(n+1)*sizeof(setelement)))+1;
+  n = (size / ELEMENTSIZE + 1);
+  s = ((setelement *)realloc(s - 1, (n + 1) * sizeof(setelement))) + 1;
 
-	if (n>SET_ARRAY_LENGTH(s))
-		memset(s+SET_ARRAY_LENGTH(s),0,
-		       (n-SET_ARRAY_LENGTH(s))*sizeof(setelement));
-	if (size < SET_MAX_SIZE(s))
-		s[(size-1)/ELEMENTSIZE] &= (FULL_ELEMENT >>
-					    (ELEMENTSIZE-size%ELEMENTSIZE));
-	s[-1]=size;
+  if (n > SET_ARRAY_LENGTH(s))
+    memset(s + SET_ARRAY_LENGTH(s), 0,
+           (n - SET_ARRAY_LENGTH(s)) * sizeof(setelement));
+  if (size < SET_MAX_SIZE(s))
+    s[(size - 1) / ELEMENTSIZE] &=
+        (FULL_ELEMENT >> (ELEMENTSIZE - size % ELEMENTSIZE));
+  s[-1] = size;
 
-	return s;
+  return s;
 }
 
 /*
@@ -199,14 +180,13 @@ static set_t set_resize(set_t s, int size) {
  *
  * Returns the number of elements in set s.
  */
-UNUSED_FUNCTION INLINE
-static int set_size(set_t s) {
-	int count=0;
-	setelement *c;
+UNUSED_FUNCTION INLINE static int set_size(set_t s) {
+  int count = 0;
+  setelement *c;
 
-	for (c=s; c < s+SET_ARRAY_LENGTH(s); c++)
-		count+=SET_ELEMENT_BIT_COUNT(*c);
-	return count;
+  for (c = s; c < s + SET_ARRAY_LENGTH(s); c++)
+    count += SET_ELEMENT_BIT_COUNT(*c);
+  return count;
 }
 
 /*
@@ -214,13 +194,12 @@ static int set_size(set_t s) {
  *
  * Returns a newly allocated duplicate of set s.
  */
-UNUSED_FUNCTION INLINE
-static set_t set_duplicate(set_t s) {
-	set_t newx;
+UNUSED_FUNCTION INLINE static set_t set_duplicate(set_t s) {
+  set_t newx;
 
-	newx=set_new(SET_MAX_SIZE(s));
-	memcpy(newx,s,SET_ARRAY_LENGTH(s)*sizeof(setelement));
-	return newx;
+  newx = set_new(SET_MAX_SIZE(s));
+  memcpy(newx, s, SET_ARRAY_LENGTH(s) * sizeof(setelement));
+  return newx;
 }
 
 /*
@@ -230,19 +209,18 @@ static set_t set_duplicate(set_t s) {
  * If dest smaller than src, it is freed and a newx set of the same size as
  * src is returned.
  */
-UNUSED_FUNCTION INLINE
-static set_t set_copy(set_t dest,set_t src) {
-	if (dest==NULL)
-		return set_duplicate(src);
-	if (SET_MAX_SIZE(dest)<SET_MAX_SIZE(src)) {
-		set_free(dest);
-		return set_duplicate(src);
-	}
-	memcpy(dest,src,SET_ARRAY_LENGTH(src)*sizeof(setelement));
-	memset(dest+SET_ARRAY_LENGTH(src),0,((SET_ARRAY_LENGTH(dest) -
-					      SET_ARRAY_LENGTH(src)) *
-					     sizeof(setelement)));
-	return dest;
+UNUSED_FUNCTION INLINE static set_t set_copy(set_t dest, set_t src) {
+  if (dest == NULL)
+    return set_duplicate(src);
+  if (SET_MAX_SIZE(dest) < SET_MAX_SIZE(src)) {
+    set_free(dest);
+    return set_duplicate(src);
+  }
+  memcpy(dest, src, SET_ARRAY_LENGTH(src) * sizeof(setelement));
+  memset(
+      dest + SET_ARRAY_LENGTH(src), 0,
+      ((SET_ARRAY_LENGTH(dest) - SET_ARRAY_LENGTH(src)) * sizeof(setelement)));
+  return dest;
 }
 
 /*
@@ -250,10 +228,9 @@ static set_t set_copy(set_t dest,set_t src) {
  *
  * Removes all elements from the set s.
  */
-UNUSED_FUNCTION INLINE
-static void set_empty(set_t s) {
-	memset(s,0,SET_ARRAY_LENGTH(s)*sizeof(setelement));
-	return;
+UNUSED_FUNCTION INLINE static void set_empty(set_t s) {
+  memset(s, 0, SET_ARRAY_LENGTH(s) * sizeof(setelement));
+  return;
 }
 
 /*
@@ -268,25 +245,25 @@ static void set_empty(set_t s) {
  *
  * Note:  res may not be a or b.
  */
-UNUSED_FUNCTION INLINE
-static set_t set_intersection(set_t res,set_t a,set_t b) {
-	int i,max;
+UNUSED_FUNCTION INLINE static set_t set_intersection(set_t res, set_t a,
+                                                     set_t b) {
+  int i, max;
 
-	if (res==NULL) {
-		res = set_new(MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b)));
-	} else if (SET_MAX_SIZE(res) < MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b))) {
-		set_free(res);
-		res = set_new(MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b)));
-	} else {
-		set_empty(res);
-	}
+  if (res == NULL) {
+    res = set_new(MAX(SET_MAX_SIZE(a), SET_MAX_SIZE(b)));
+  } else if (SET_MAX_SIZE(res) < MAX(SET_MAX_SIZE(a), SET_MAX_SIZE(b))) {
+    set_free(res);
+    res = set_new(MAX(SET_MAX_SIZE(a), SET_MAX_SIZE(b)));
+  } else {
+    set_empty(res);
+  }
 
-	max=MIN(SET_ARRAY_LENGTH(a),SET_ARRAY_LENGTH(b));
-	for (i=0; i<max; i++) {
-		res[i]=SET_ELEMENT_INTERSECT(a[i],b[i]);
-	}
+  max = MIN(SET_ARRAY_LENGTH(a), SET_ARRAY_LENGTH(b));
+  for (i = 0; i < max; i++) {
+    res[i] = SET_ELEMENT_INTERSECT(a[i], b[i]);
+  }
 
-	return res;
+  return res;
 }
 
 /*
@@ -301,27 +278,25 @@ static set_t set_intersection(set_t res,set_t a,set_t b) {
  *
  * Note:  res may not be a or b.
  */
-UNUSED_FUNCTION INLINE
-static set_t set_union(set_t res,set_t a,set_t b) {
-	int i,max;
+UNUSED_FUNCTION INLINE static set_t set_union(set_t res, set_t a, set_t b) {
+  int i, max;
 
-	if (res==NULL) {
-		res = set_new(MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b)));
-	} else if (SET_MAX_SIZE(res) < MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b))) {
-		set_free(res);
-		res = set_new(MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b)));
-	} else {
-		set_empty(res);
-	}
+  if (res == NULL) {
+    res = set_new(MAX(SET_MAX_SIZE(a), SET_MAX_SIZE(b)));
+  } else if (SET_MAX_SIZE(res) < MAX(SET_MAX_SIZE(a), SET_MAX_SIZE(b))) {
+    set_free(res);
+    res = set_new(MAX(SET_MAX_SIZE(a), SET_MAX_SIZE(b)));
+  } else {
+    set_empty(res);
+  }
 
-	max=MAX(SET_ARRAY_LENGTH(a),SET_ARRAY_LENGTH(b));
-	for (i=0; i<max; i++) {
-		res[i]=SET_ELEMENT_UNION(a[i],b[i]);
-	}
+  max = MAX(SET_ARRAY_LENGTH(a), SET_ARRAY_LENGTH(b));
+  for (i = 0; i < max; i++) {
+    res[i] = SET_ELEMENT_UNION(a[i], b[i]);
+  }
 
-	return res;
+  return res;
 }
-
 
 /*
  * set_return_next()
@@ -336,36 +311,34 @@ static set_t set_union(set_t res,set_t a,set_t b) {
  *         // i is in set s
  * }
  */
-UNUSED_FUNCTION INLINE
-static int set_return_next(set_t s, int n) {
-	if (n<0)
-		n=0;
-	else
-		n++;
-	if (n >= SET_MAX_SIZE(s))
-		return -1;
+UNUSED_FUNCTION INLINE static int set_return_next(set_t s, int n) {
+  if (n < 0)
+    n = 0;
+  else
+    n++;
+  if (n >= SET_MAX_SIZE(s))
+    return -1;
 
-	while (n%ELEMENTSIZE) {
-		if (SET_CONTAINS(s,n))
-			return n;
-		n++;
-		if (n >= SET_MAX_SIZE(s))
-			return -1;
-	}
+  while (n % ELEMENTSIZE) {
+    if (SET_CONTAINS(s, n))
+      return n;
+    n++;
+    if (n >= SET_MAX_SIZE(s))
+      return -1;
+  }
 
-	while (s[n/ELEMENTSIZE]==0) {
-		n+=ELEMENTSIZE;
-		if (n >= SET_MAX_SIZE(s))
-			return -1;
-	}
-	while (!SET_CONTAINS(s,n)) {
-		n++;
-		if (n >= SET_MAX_SIZE(s))
-			return -1;
-	}
-	return n;
+  while (s[n / ELEMENTSIZE] == 0) {
+    n += ELEMENTSIZE;
+    if (n >= SET_MAX_SIZE(s))
+      return -1;
+  }
+  while (!SET_CONTAINS(s, n)) {
+    n++;
+    if (n >= SET_MAX_SIZE(s))
+      return -1;
+  }
+  return n;
 }
-
 
 /*
  * set_print()
@@ -376,13 +349,13 @@ static int set_return_next(set_t s, int n) {
 /*
 UNUSED_FUNCTION
 static void set_print(set_t s) {
-	int i;
-	printf("size=%d(max %d)",set_size(s),(int)SET_MAX_SIZE(s));
-	for (i=0; i<SET_MAX_SIZE(s); i++)
-		if (SET_CONTAINS(s,i))
-			printf(" %d",i);
-	printf("\n");
-	return;
+        int i;
+        printf("size=%d(max %d)",set_size(s),(int)SET_MAX_SIZE(s));
+        for (i=0; i<SET_MAX_SIZE(s); i++)
+                if (SET_CONTAINS(s,i))
+                        printf(" %d",i);
+        printf("\n");
+        return;
 }
 */
 

@@ -29,27 +29,27 @@
    include this header.
 */
 
-#include "igraph_types.h"
 #include "config.h"
+#include "igraph_types.h"
 
 #ifndef INTERNAL_BLAS
-    #define igraphdaxpy_    daxpy
-    #define igraphdger_ dger
-    #define igraphdcopy_    dcopy
-    #define igraphdscal_    dscal
-    #define igraphdswap_    dswap
-    #define igraphdgemm_    dgemm
-    #define igraphdgemv_    dgemv
-    #define igraphddot_ ddot
-    #define igraphdnrm2_    dnrm2
-    #define igraphlsame_    lsame
-    #define igraphdrot_     drot
-    #define igraphidamax_   idamax
-    #define igraphdtrmm_    dtrmm
-    #define igraphdasum_    dasum
-    #define igraphdtrsm_    dtrsm
-    #define igraphdtrsv_    dtrsv
-    #define igraphdnrm2_    dnrm2
+#define igraphdaxpy_ daxpy
+#define igraphdger_ dger
+#define igraphdcopy_ dcopy
+#define igraphdscal_ dscal
+#define igraphdswap_ dswap
+#define igraphdgemm_ dgemm
+#define igraphdgemv_ dgemv
+#define igraphddot_ ddot
+#define igraphdnrm2_ dnrm2
+#define igraphlsame_ lsame
+#define igraphdrot_ drot
+#define igraphidamax_ idamax
+#define igraphdtrmm_ dtrmm
+#define igraphdasum_ dasum
+#define igraphdtrsm_ dtrsm
+#define igraphdtrsv_ dtrsv
+#define igraphdnrm2_ dnrm2
 #endif
 
 int igraphdgemv_(char *trans, int *m, int *n, igraph_real_t *alpha,

@@ -24,10 +24,10 @@
 #ifndef IGRAPH_HRG_H
 #define IGRAPH_HRG_H
 
+#include "igraph_datatype.h"
 #include "igraph_decls.h"
 #include "igraph_vector.h"
 #include "igraph_vector_ptr.h"
-#include "igraph_datatype.h"
 
 __BEGIN_DECLS
 
@@ -65,7 +65,7 @@ __BEGIN_DECLS
  */
 
 typedef struct igraph_hrg_t {
-    igraph_vector_t left, right, prob, edges, vertices;
+  igraph_vector_t left, right, prob, edges, vertices;
 } igraph_hrg_t;
 
 DECLDIR int igraph_hrg_init(igraph_hrg_t *hrg, int n);
@@ -73,42 +73,30 @@ DECLDIR void igraph_hrg_destroy(igraph_hrg_t *hrg);
 DECLDIR int igraph_hrg_size(const igraph_hrg_t *hrg);
 DECLDIR int igraph_hrg_resize(igraph_hrg_t *hrg, int newsize);
 
-DECLDIR int igraph_hrg_fit(const igraph_t *graph,
-                           igraph_hrg_t *hrg,
-                           igraph_bool_t start,
-                           int steps);
+DECLDIR int igraph_hrg_fit(const igraph_t *graph, igraph_hrg_t *hrg,
+                           igraph_bool_t start, int steps);
 
-DECLDIR int igraph_hrg_sample(const igraph_t *graph,
-                              igraph_t *sample,
-                              igraph_vector_ptr_t *samples,
-                              igraph_hrg_t *hrg,
+DECLDIR int igraph_hrg_sample(const igraph_t *graph, igraph_t *sample,
+                              igraph_vector_ptr_t *samples, igraph_hrg_t *hrg,
                               igraph_bool_t start);
 
-DECLDIR int igraph_hrg_game(igraph_t *graph,
-                            const igraph_hrg_t *hrg);
+DECLDIR int igraph_hrg_game(igraph_t *graph, const igraph_hrg_t *hrg);
 
-DECLDIR int igraph_hrg_dendrogram(igraph_t *graph,
-                                  const igraph_hrg_t *hrg);
+DECLDIR int igraph_hrg_dendrogram(igraph_t *graph, const igraph_hrg_t *hrg);
 
 DECLDIR int igraph_hrg_consensus(const igraph_t *graph,
                                  igraph_vector_t *parents,
-                                 igraph_vector_t *weights,
-                                 igraph_hrg_t *hrg,
-                                 igraph_bool_t start,
-                                 int num_samples);
+                                 igraph_vector_t *weights, igraph_hrg_t *hrg,
+                                 igraph_bool_t start, int num_samples);
 
-DECLDIR int igraph_hrg_predict(const igraph_t *graph,
-                               igraph_vector_t *edges,
-                               igraph_vector_t *prob,
-                               igraph_hrg_t *hrg,
-                               igraph_bool_t start,
-                               int num_samples,
+DECLDIR int igraph_hrg_predict(const igraph_t *graph, igraph_vector_t *edges,
+                               igraph_vector_t *prob, igraph_hrg_t *hrg,
+                               igraph_bool_t start, int num_samples,
                                int num_bins);
 
-DECLDIR int igraph_hrg_create(igraph_hrg_t *hrg,
-                              const igraph_t *graph,
+DECLDIR int igraph_hrg_create(igraph_hrg_t *hrg, const igraph_t *graph,
                               const igraph_vector_t *prob);
 
 __END_DECLS
 
-#endif  /* IGRAPH_HRG_H */
+#endif /* IGRAPH_HRG_H */

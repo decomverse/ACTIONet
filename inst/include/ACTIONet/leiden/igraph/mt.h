@@ -15,24 +15,24 @@
 #define __MT_H__
 
 #ifdef _MSC_VER
-#  define uint32_t __int32
+#define uint32_t __int32
 #else
-#  include <stdint.h>
+#include <stdint.h>
 #endif
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
-# define __BEGIN_DECLS extern "C" {
-# define __END_DECLS }
+#define __BEGIN_DECLS extern "C" {
+#define __END_DECLS }
 #else
-# define __BEGIN_DECLS /* empty */
-# define __END_DECLS /* empty */
+#define __BEGIN_DECLS /* empty */
+#define __END_DECLS   /* empty */
 #endif
 
 __BEGIN_DECLS
 
-#define MT_LEN       624
+#define MT_LEN 624
 
 /**
  * \def MT_RAND_MAX
@@ -46,8 +46,8 @@ __BEGIN_DECLS
  * generator.
  */
 typedef struct {
-    int mt_index;
-    uint32_t mt_buffer[MT_LEN];
+  int mt_index;
+  uint32_t mt_buffer[MT_LEN];
 } mt_rng_t;
 
 /**
@@ -59,7 +59,7 @@ typedef struct {
  *
  * \param  rng  the random number generator to initialize
  */
-void mt_init(mt_rng_t* rng);
+void mt_init(mt_rng_t *rng);
 
 /**
  * \brief Initializes a Mersenne Twister random number generator, seeding it
@@ -74,7 +74,7 @@ void mt_init(mt_rng_t* rng);
  *                 be initialized from the built-in RNG as if \ref mt_init()
  *                 was called.
  */
-void mt_init_from_rng(mt_rng_t* rng, mt_rng_t* seeder);
+void mt_init_from_rng(mt_rng_t *rng, mt_rng_t *seeder);
 
 /**
  * \brief Returns the next 32-bit random number from the given Mersenne Twister
@@ -83,7 +83,7 @@ void mt_init_from_rng(mt_rng_t* rng, mt_rng_t* seeder);
  * \param  rng  the random number generator to use
  * \return the next 32-bit random number from the generator
  */
-uint32_t mt_random(mt_rng_t* rng);
+uint32_t mt_random(mt_rng_t *rng);
 
 /**
  * \brief Returns a uniformly distributed double from the interval [0;1)
@@ -93,10 +93,8 @@ uint32_t mt_random(mt_rng_t* rng);
  * \param  rng  the random number generator to use
  * \return a uniformly distributed random number from the interval [0;1)
  */
-double mt_uniform_01(mt_rng_t* rng);
+double mt_uniform_01(mt_rng_t *rng);
 
 __END_DECLS
 
 #endif
-
-

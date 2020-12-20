@@ -1,9 +1,7 @@
 #ifndef ARMA_BASE_H
 #define ARMA_BASE_H
 
-
 //#undef FC_LEN_T
-
 
 #include <my_cblas.h>
 
@@ -12,17 +10,14 @@
 //#define ARMA_BLAS_LONG_LONG
 //#define ARMA_USE_FORTRAN_HIDDEN_ARGS
 
-
 #define ARMA_DONT_USE_WRAPPER
 #undef ARMA_BLAS_CAPITALS
 #define ARMA_BLAS_UNDERSCORE
 
-
-#include <RcppArmadillo.h>
 #include <Rcpp.h>
+#include <RcppArmadillo.h>
 
 using namespace arma;
 using namespace std;
-
 
 #endif

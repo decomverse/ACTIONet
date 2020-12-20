@@ -67,15 +67,15 @@ __BEGIN_DECLS
  * and \c |E| edges is \c O(|E|+|V|).
  */
 typedef struct igraph_s {
-    igraph_integer_t n;
-    igraph_bool_t directed;
-    igraph_vector_t from;
-    igraph_vector_t to;
-    igraph_vector_t oi;
-    igraph_vector_t ii;
-    igraph_vector_t os;
-    igraph_vector_t is;
-    void *attr;
+  igraph_integer_t n;
+  igraph_bool_t directed;
+  igraph_vector_t from;
+  igraph_vector_t to;
+  igraph_vector_t oi;
+  igraph_vector_t ii;
+  igraph_vector_t os;
+  igraph_vector_t is;
+  void *attr;
 } igraph_t;
 
 __END_DECLS

@@ -1,8 +1,11 @@
-struct syl
-{	int op;
-	int p1;
-	union { int i[2]; char *s;} p2;
-	};
+struct syl {
+  int op;
+  int p1;
+  union {
+    int i[2];
+    char *s;
+  } p2;
+};
 #define RET1 1
 #define REVERT 2
 #define GOTO 3
@@ -39,26 +42,26 @@ struct syl
 #define OM 34
 #define Z 35
 #define ZM 36
-typedef union
-{	real pf;
-	doublereal pd;
+typedef union {
+  real pf;
+  doublereal pd;
 } ufloat;
-typedef union
-{	short is;
+typedef union {
+  short is;
 #ifndef KR_headers
-	signed
+  signed
 #endif
-		char ic;
-	integer il;
+      char ic;
+  integer il;
 #ifdef Allow_TYQUAD
-	longint ili;
+  longint ili;
 #endif
 } Uint;
 #ifdef KR_headers
-extern int (*f__doed)(),(*f__doned)();
+extern int (*f__doed)(), (*f__doned)();
 extern int (*f__dorevert)();
-extern int rd_ed(),rd_ned();
-extern int w_ed(),w_ned();
+extern int rd_ed(), rd_ned();
+extern int w_ed(), w_ned();
 extern int signbit_f2c();
 extern char *f__fmtbuf;
 #else
@@ -69,25 +72,27 @@ extern "C" {
 #define Cextern extern
 #endif
 extern const char *f__fmtbuf;
-extern int (*f__doed)(struct syl*, char*, ftnlen),(*f__doned)(struct syl*);
+extern int (*f__doed)(struct syl *, char *, ftnlen), (*f__doned)(struct syl *);
 extern int (*f__dorevert)(void);
 extern void fmt_bg(void);
-extern int pars_f(const char*);
-extern int rd_ed(struct syl*, char*, ftnlen),rd_ned(struct syl*);
-extern int signbit_f2c(double*);
-extern int w_ed(struct syl*, char*, ftnlen),w_ned(struct syl*);
-extern int wrt_E(ufloat*, int, int, int, ftnlen);
-extern int wrt_F(ufloat*, int, int, ftnlen);
-extern int wrt_L(Uint*, int, ftnlen);
+extern int pars_f(const char *);
+extern int rd_ed(struct syl *, char *, ftnlen), rd_ned(struct syl *);
+extern int signbit_f2c(double *);
+extern int w_ed(struct syl *, char *, ftnlen), w_ned(struct syl *);
+extern int wrt_E(ufloat *, int, int, int, ftnlen);
+extern int wrt_F(ufloat *, int, int, ftnlen);
+extern int wrt_L(Uint *, int, ftnlen);
 #endif
-extern int f__pc,f__parenlvl,f__revloc;
-extern flag f__cblank,f__cplus,f__workdone, f__nonl;
+extern int f__pc, f__parenlvl, f__revloc;
+extern flag f__cblank, f__cplus, f__workdone, f__nonl;
 extern int f__scale;
 #ifdef __cplusplus
-	}
+}
 #endif
-#define GET(x) if((x=(*f__getn)())<0) return(x)
-#define VAL(x) (x!='\n'?x:' ')
+#define GET(x)                                                                 \
+  if ((x = (*f__getn)()) < 0)                                                  \
+  return (x)
+#define VAL(x) (x != '\n' ? x : ' ')
 #define PUT(x) (*f__putn)(x)
 
 #undef TYQUAD
@@ -101,5 +106,5 @@ extern int f__scale;
 #ifdef KR_headers
 extern char *f__icvt();
 #else
-Cextern char *f__icvt(longint, int*, int*, int);
+Cextern char *f__icvt(longint, int *, int *, int);
 #endif

@@ -24,8 +24,8 @@
 #ifndef IGRAPH_EPIDEMICS_H
 #define IGRAPH_EPIDEMICS_H
 
-#include "igraph_decls.h"
 #include "igraph_datatype.h"
+#include "igraph_decls.h"
 #include "igraph_vector.h"
 #include "igraph_vector_ptr.h"
 
@@ -50,8 +50,8 @@ __BEGIN_DECLS
  */
 
 typedef struct igraph_sir_t {
-    igraph_vector_t times;
-    igraph_vector_int_t no_s, no_i, no_r;
+  igraph_vector_t times;
+  igraph_vector_int_t no_s, no_i, no_r;
 } igraph_sir_t;
 
 DECLDIR int igraph_sir_init(igraph_sir_t *sir);

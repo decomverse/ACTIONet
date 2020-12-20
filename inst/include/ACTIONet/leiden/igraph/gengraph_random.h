@@ -25,33 +25,33 @@
 
 namespace KW_RNG {
 
-typedef signed int  sint;
+typedef signed int sint;
 typedef unsigned int uint;
-typedef signed long  slong;
+typedef signed long slong;
 typedef unsigned long ulong;
 
 class RNG {
 public:
-    RNG() { }
-    RNG(ulong z_, ulong w_, ulong jsr_, ulong jcong_ ) {
-        IGRAPH_UNUSED(z_); IGRAPH_UNUSED(w_); IGRAPH_UNUSED(jsr_);
-        IGRAPH_UNUSED(jcong_);
-    };
-    ~RNG() { }
+  RNG() {}
+  RNG(ulong z_, ulong w_, ulong jsr_, ulong jcong_) {
+    IGRAPH_UNUSED(z_);
+    IGRAPH_UNUSED(w_);
+    IGRAPH_UNUSED(jsr_);
+    IGRAPH_UNUSED(jcong_);
+  };
+  ~RNG() {}
 
-    void init(ulong z_, ulong w_, ulong jsr_, ulong jcong_ ) {
-        IGRAPH_UNUSED(z_); IGRAPH_UNUSED(w_); IGRAPH_UNUSED(jsr_);
-        IGRAPH_UNUSED(jcong_);
-    }
-    long rand_int31() {
-        return RNG_INT31();
-    }
-    double rand_halfopen01() { // (0,1]
-        return RNG_UNIF01();
-    }
-    int binomial(double pp, int n) {
-        return RNG_BINOM(n, pp);
-    }
+  void init(ulong z_, ulong w_, ulong jsr_, ulong jcong_) {
+    IGRAPH_UNUSED(z_);
+    IGRAPH_UNUSED(w_);
+    IGRAPH_UNUSED(jsr_);
+    IGRAPH_UNUSED(jcong_);
+  }
+  long rand_int31() { return RNG_INT31(); }
+  double rand_halfopen01() { // (0,1]
+    return RNG_UNIF01();
+  }
+  int binomial(double pp, int n) { return RNG_BINOM(n, pp); }
 };
 
 } // namespace KW_RNG
@@ -144,7 +144,6 @@ public:
 //     z(z_), w(w_), jsr(jsr_), jcong(jcong_) { zigset(); }
 //   ~RNG() { }
 
-
 //   inline ulong znew()
 //     { return (z = 36969 * (z & 65535) + (z >> 16)); }
 //   inline ulong wnew()
@@ -152,7 +151,8 @@ public:
 //   inline ulong MWC()
 //     { return (((znew() & 65535) << 16) + wnew()); }
 //   inline ulong SHR3()
-//     { jsr ^= ((jsr & 32767) << 17); jsr ^= (jsr >> 13); return (jsr ^= ((jsr << 5) & 0xFFFFFFFF)); }
+//     { jsr ^= ((jsr & 32767) << 17); jsr ^= (jsr >> 13); return (jsr ^= ((jsr
+//     << 5) & 0xFFFFFFFF)); }
 //   inline ulong CONG()
 //     { return (jcong = (69069 * jcong + 1234567) & 0xFFFFFFFF); }
 //   inline double RNOR() {
@@ -211,4 +211,3 @@ public:
 // } // namespace
 
 #endif // RNG_H
-

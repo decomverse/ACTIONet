@@ -51,8 +51,8 @@
 #endif
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #define FOPEN fopen64
 #define FREOPEN freopen64
 #define FSEEK fseeko64
@@ -66,10 +66,10 @@
 
 #ifndef NON_UNIX_STDIO
 #ifndef USE_LARGEFILE
-#define _INCLUDE_POSIX_SOURCE	/* for HP-UX */
-#define _INCLUDE_XOPEN_SOURCE	/* for HP-UX */
-#include "sys/types.h"
+#define _INCLUDE_POSIX_SOURCE /* for HP-UX */
+#define _INCLUDE_XOPEN_SOURCE /* for HP-UX */
 #include "sys/stat.h"
+#include "sys/types.h"
 #endif
 #endif
 
