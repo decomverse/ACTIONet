@@ -15,3 +15,5 @@ data/
 .vscode
 __pycache__
 .ipynb_checkpoints
+.DS_*
+._DS*
