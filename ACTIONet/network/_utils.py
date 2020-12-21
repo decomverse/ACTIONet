@@ -2,6 +2,7 @@ from typing import Optional
 
 import numpy as np
 from anndata import AnnData
+from scipy import sparse
 
 import _ACTIONet as _an
 
