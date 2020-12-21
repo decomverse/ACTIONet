@@ -73,7 +73,7 @@ def svd(
         raise Exception(f"Unknown SVD solver: {solver}")
 
     return (
-        result["U"],
-        result["sigma"],
-        result["V"],
+        result["u"],
+        result["d"],
+        result["v"],
     )
