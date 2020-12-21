@@ -46,7 +46,7 @@ adata.var_names_make_unique(join='.')
 an.pp.filter_adata(adata, min_cells_per_feature=0.01, min_features_per_cell=1000)
 
 # Run ACTIONet
-an.pp.reduce_adata(adata)
+an.pp.reduce_kernel(adata)
 an.run_ACTIONet(adata)
 
 # Annotate cell-types
