@@ -114,9 +114,10 @@ def construct_backbone(
         W = np.exp(archetype_footprint)
 
 
-    W = sparse.csc_matrix(W)
+    Adj = sparse.csc_matrix(W)
+    
     arch_vis_out = _an.transform_layout(
-        W,
+        Adj,
         coor2D=adata.obsm["X_ACTIONet_2D"].T,
         coor3D=adata.obsm["X_ACTIONet_3D"].T,
         colRGB=adata.uns["ACTIONet"]["colors"].T,
