@@ -4,11 +4,31 @@ import platform
 import re
 import sys
 import subprocess
+import distutils
 
 from setuptools import find_packages, setup, Extension
 from setuptools.command.build_ext import build_ext
 
 __version__ = '1.0'
+
+
+
+
+def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
+    # those lines are copied from distutils.ccompiler.CCompiler directly
+    macros, objects, extra_postargs, pp_opts, build = self._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
+    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
+    # parallel code
+    N=multiprocessing.cpu_count() - 2
+    import multiprocessing.pool
+    def _single_compile(obj):
+        try: src, ext = build[obj]
+        except KeyError: return
+        self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+    # convert to list, imap is evaluated on-demand
+    list(multiprocessing.pool.ThreadPool(N).imap(_single_compile,objects))
+    return objects
+distutils.ccompiler.CCompiler.compile=parallelCCompile
 
 def read(path):
     with open(path, 'r') as f:

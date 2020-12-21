@@ -15,7 +15,7 @@ def run_ACTIONet(
     mutual_edges_only: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 500,
-    layout_in_parallel: Optional[bool] = False,
+    layout_in_parallel: Optional[bool] = True,
     n_threads: Optional[int] = 0,
     unification_alpha: Optional[float] =  0.99, 
     unification_outlier_threshold: Optional[float] = 2, 
