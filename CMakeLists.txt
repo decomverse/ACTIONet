@@ -25,13 +25,13 @@ else()
 endif()
 include_directories(${Python_INCLUDE_DIRS})
 
-# Check for MKL and depending on whether or not MKL is present
-# check for lapack and blas with suitesparse
-find_package(MKL)
-include_directories(${MKL_INCLUDE_DIRS})
-if(NOT ${MKL_FOUND})
-    set(SUITESPARSE_USE_LAPACK_BLAS ON)
-endif()
+# Check for BLAS/LAPACK
+find_package(BLAS REQUIRED)
+message(STATUS "BLAS_COMPILER_FLAGS: ${BLAS_COMPILER_FLAGS}")
+add_definitions("-DEIGEN_USE_BLAS") # is adding  ${BLAS_COMPILER_FLAGS} necessary?
+list(APPEND EXTERNAL_LIBS "${BLAS_LIBRARIES}")
+
+# Check for CHOLMOD
 find_package(SuiteSparse REQUIRED)
 include_directories(${SUITESPARSE_INCLUDE_DIRS})
 
