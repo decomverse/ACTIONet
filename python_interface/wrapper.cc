@@ -387,7 +387,7 @@ py::dict unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   out_list["selected_archetypes"] = results.selected_archetypes;
 
   out_list["C_unified"] = sp_mat(results.C_unified);
-  out_list["H_unified"] = sp_mat)results.H_unified);
+  out_list["H_unified"] = sp_mat(results.H_unified);
 
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
