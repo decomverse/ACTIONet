@@ -93,7 +93,7 @@ def run_ACTIONet(
         network_density=network_density,
         mutual_edges_only=mutual_edges_only,
         layout_compactness=layout_compactness,
-        layout_epochs=layout_epochs / 5,
+        layout_epochs=round(layout_epochs / 5),
         n_threads=1,
     )
 
