@@ -112,15 +112,18 @@ def construct_backbone(
     else:
         W = np.exp(archetype_footprint)
 
+
+    W = sparse.csc_matrix(W)
     arch_vis_out = _an.transform_layout(
         W,
         coor2D=adata.obsm["X_ACTIONet_2D"].T,
         coor3D=adata.obsm["X_ACTIONet_3D"].T,
-        colRGB=adata.uns["ACTIONet"]["colors"],
+        colRGB=adata.uns["ACTIONet"]["colors"].T,
         n_epochs=layout_epochs,
         compactness_level=layout_compactness,
         thread_no=n_threads,
     )
+    
     arch_G = _an.compute_full_sim(archetype_footprint)
     backbone = {
         "G": arch_G,
