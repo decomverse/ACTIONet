@@ -65,7 +65,7 @@ def compute_network_diffusion(
         )
 
     adata = adata.copy() if copy else adata
-    H = adata.obsm[archetypes_key].T
+    H = adata.obsm[archetypes_key]
     G = adata.obsp["ACTIONet"]
     archetype_footprint = _an.compute_network_diffusion(
         G, H, alpha=alpha, thread_no=n_threads

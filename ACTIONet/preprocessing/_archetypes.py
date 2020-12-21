@@ -121,7 +121,6 @@ def unify_archetypes(
             "Please run pp.prune_archetypes() first."
         )
 
-    adata = adata.copy() if copy else adata
     if "ACTIONet" not in adata.obsp.keys():
         raise ValueError(
             "Did not find adata.obsp['ACTIONet']. "
@@ -134,9 +133,7 @@ def unify_archetypes(
     C = adata.obsm["ACTION_C_stacked"]
     if sparse.issparse(C):
         C = C.toarray()
-    H = adata.obsm["ACTION_H_stacked"].T
-    if sparse.issparse(H):
-        H = H.toarray()
+
     unified = _an.unify_archetypes(
         G,
         S_r,
