@@ -4,8 +4,6 @@
 #' @param reduced_dim Dimension of SVD used for reducing kernel matrix
 #' @param max_iter Number of SVD iterations
 #' @param assay_name Name of assay to reduce.
-#' @param norm_method Normalization method to use. See normalize.ace() function (default:'default')
-#' (used only if the ace object is not already normalized)
 #' @param reduction_slot Name of slot to store reduction.
 #'
 #' @return ACTIONetExperiment object with reduction in colMaps(ace).
@@ -14,8 +12,7 @@
 #' ace = import.ace.from.10X(input_path)
 #' ace = reduce.ace(ace)
 #' @export
-reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logcounts",
-    norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+reduce.ace <- function(ace, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 
   ace <- as(ace, "ACTIONetExperiment")
   if (!(assay_name %in% names(assays(ace)))) {
