@@ -9,7 +9,6 @@ reduce.ace(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  norm_method = "default",
   reduction_slot = "ACTION",
   seed = 0,
   SVD_algorithm = 0
@@ -23,9 +22,6 @@ reduce.ace(
 \item{max_iter}{Number of SVD iterations}
 
 \item{assay_name}{Name of assay to reduce.}
-
-\item{norm_method}{Normalization method to use. See normalize.ace() function (default:'default')
-(used only if the ace object is not already normalized)}
 
 \item{reduction_slot}{Name of slot to store reduction.}
 }
