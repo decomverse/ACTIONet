@@ -1,7 +1,7 @@
 #' @export
 normalize.scran <- function(ace, batch_attr = NULL, assay_name = "counts", BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "scater"))
-    batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
+    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
     ace = scran::computeSumFactors(ace, clusters = batch_attr, assay.type = assay_name, BPPARAM = BPPARAM)
     ace = scater::logNormCounts(ace, exprs_values = assay_name)
     return(ace)
@@ -10,7 +10,7 @@ normalize.scran <- function(ace, batch_attr = NULL, assay_name = "counts", BPPAR
 #' @export
 normalize.multiBatchNorm <- function(ace, batch_attr, assay_name = "counts", BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "batchelor"))
-    batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
+    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
     ace = batchelor::multiBatchNorm(ace, batch = batch_attr, assay.type = assay_name, BPPARAM = BPPARAM)
     return(ace)
 }

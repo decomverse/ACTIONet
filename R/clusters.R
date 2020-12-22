@@ -62,8 +62,8 @@ compute.cluster.feature.specificity <- function(ace, clusters, output.slot.name,
 #' @export
 annotate.clusters.using.labels <- function(ace, clusters, labels) {
 
-    clusters = preprocess.labels(clusters, ace)
-    Labels = preprocess.labels(labels, ace)
+    clusters = .preprocess_annotation_labels(clusters, ace)
+    Labels = .preprocess_annotation_labels(labels, ace)
 
 
     pop.size = length(Labels)
