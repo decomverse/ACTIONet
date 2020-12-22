@@ -27,8 +27,8 @@ Interpolates cell scores from archetype enrichment matrix
 \examples{
 
 data('curatedMarkers_human') # pre-packaged in ACTIONet
-marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
+marker_set = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+arch.annot = annotate.archetypes.using.markers(ace, markers = markers)
 enrichment.mat = arch.annot$enrichment
 cell.enrichment.mat = map.cell.scores.from.archetype.enrichment(ace, enrichment.mat)
 cell.assignments = colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
