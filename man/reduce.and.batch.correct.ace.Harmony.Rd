@@ -10,7 +10,6 @@ reduce.and.batch.correct.ace.Harmony(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  norm_method = "none",
   reduction_slot = "ACTION",
   seed = 0,
   SVD_algorithm = 0
@@ -24,9 +23,6 @@ reduce.and.batch.correct.ace.Harmony(
 \item{reduced_dim}{Dimension of SVD used for reducing kernel matrix}
 
 \item{max_iter}{Number of SVD iterations}
-
-\item{norm_method}{Normalization method to use. See normalize.ace() function (default:'default')
-(used only if the ace object is not already normalized)}
 }
 \value{
 Reduced ace object with added colMaps(ace)

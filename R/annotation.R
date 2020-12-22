@@ -210,7 +210,7 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' cell.labels = arch.annot$Labels
 #' @export
 annotate.cells.using.markers <- function(ace, marker_set, features_use = NULL, rand_sample_no = 100,
-    alpha_val = 0.9, thread_no = 8, imputation = "PageRank", data_slot = "logcounts") {
+    alpha_val = 0.9, thread_no = 8, imputation = "PageRank", assay_name = "logcounts") {
 
     marker_set = .preprocess_annotation_markers(markers)
     features_use = .preprocess_annotation_features(ace, features_use)
@@ -248,13 +248,13 @@ annotate.cells.using.markers <- function(ace, marker_set, features_use = NULL, r
         # PageRank-based imputation
         print("Using PageRank for imptation of marker genes")
         imputed.marker.expression = impute.genes.using.ACTIONet(ace, markers.table$Gene,
-            alpha_val, thread_no, data_slot = data_slot)
+            alpha_val, thread_no, assay_name = assay_name)
     } else if (imputation == "archImpute") {
         # PCA-based imputation
         print("Using archImpute for imptation of marker genes")
         imputed.marker.expression = impute.specific.genes.using.archetypes(ace, markers.table$Gene)
     } else {
-        imputed.marker.expression = ace@assays[[data_slot]]
+        imputed.marker.expression = SummarizedExperiment::assays(ace)[[assay_name]]
     }
 
 
@@ -321,7 +321,7 @@ annotate.cells.from.archetypes.using.markers <- function(ace, markers, rand_samp
 
     marker_set = markers
     significance.slot = sprintf("%s_feature_specificity", unified_suffix)
-    arch.annot = annotate.archetypes.using.markers(ace, marker_set = marker_set,
+    arch.annot = annotate.archetypes.using.markers(ace, markers = marker_set,
         rand_sample_no = rand_sample_no, significance.slot = significance.slot)
 
     enrichment.mat = arch.annot$Enrichment

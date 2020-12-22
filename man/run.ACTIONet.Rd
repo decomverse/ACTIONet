@@ -7,7 +7,7 @@
 run.ACTIONet(
   ace,
   k_max = 30,
-  min.cells.per.arch = 2,
+  min_cells_per_arch = 2,
   min_specificity_z_threshold = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
@@ -16,13 +16,13 @@ run.ACTIONet(
   unification_alpha = 0.99,
   unification_outlier_threshold = 2,
   unification_sim_threshold = 0,
-  layout.in.parallel = TRUE,
+  layout_in_parallel = TRUE,
   thread_no = 0,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
   footprint_alpha = 0.85,
   max_iter_ACTION = 50,
-  full.trace = FALSE
+  full_trace = FALSE
 )
 }
 \arguments{
@@ -37,18 +37,15 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
+
+\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
+
 \item{thread_no}{Number of parallel threads (default=0).}
 
 \item{assay_name}{Name of assay to be used (default='logcounts').}
 
 \item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r').}
-
-\item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
-
-\item{n_epochs}{Number of epochs for SGD algorithm (default=1000).}
-
-\item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes.
-If it is NULL, values of logcounts(ace) would be directly used without renormalization for computing speicificity scores}
 }
 \value{
 A named list: \itemize{
