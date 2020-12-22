@@ -44,8 +44,6 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
 #' (It uses Harmony for batch-correction: https://github.com/immunogenomics/harmony)
 #'
 #' @param ace ACTIONetExperiment object
-#' @param norm_method Normalization method to use. See normalize.ace() function (default:'default')
-#' (used only if the ace object is not already normalized)
 #' @param batch_attr Vector of length ncol(ace) or column name of colData(ace) containing batch labels.
 #' @param reduced_dim Dimension of SVD used for reducing kernel matrix
 #' @param max_iter Number of SVD iterations
@@ -57,7 +55,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
 #' batch_attr = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
 #' ace = reduce.and.batch.correct.ace.Harmony(ace)
 #' @export
-reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", norm_method = "none", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
   if (!require(harmony)) {
       err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
       stop(err)
@@ -69,10 +67,9 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
 	}
 
   ace = .check_and_convert_se_like(ace, "ACE")
-  # norm_method = match.arg(norm_method)
   batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
 
-  ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, norm_method = norm_method,
+  ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter,
       assay_name = assay_name, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
 
   ace = batch.correct.ace.Harmony(ace, batch_attr, reduction_slot = reduction_slot)
@@ -152,15 +149,14 @@ orthogonalize.ace.batch.simple <- function(ace, batch_attr, reduction_slot = "AC
 }
 
 #' @export
-reduce.and.batch.orthogonalize.ace <- function (ace, design_mat, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", norm_method = "default", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
+reduce.and.batch.orthogonalize.ace <- function (ace, design_mat, reduced_dim = 50, max_iter = 10, assay_name = "logcounts", reduction_slot = "ACTION", seed = 0, SVD_algorithm = 0) {
 
 	if(!is.matrix(design_mat)) {
 		err = sprintf("'design_mat' must be a matrix.\n")
 		stop(err)
 	}
 
-	ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, assay_name = assay_name,
-    norm_method = norm_method, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
+	ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, assay_name = assay_name, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
 
 	ace = orthogonalize.ace.batch(ace, design_mat, reduction_slot = reduction_slot, assay_name = assay_name)
 	return(ace)
