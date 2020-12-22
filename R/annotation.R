@@ -238,29 +238,31 @@ annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand
         }
     }))
     markers.table = markers.table[markers.table$Gene %in% features_use, ]
+
     if (dim(markers.table)[1] == 0) {
-        print("No markers are left")
-        return()
+        err = sprintf("No given markers found in feature set.\n")
+        stop(err, call. = F)
     }
 
     rows = match(markers.table$Gene, features_use)
     if (imputation == "PageRank") {
         # PageRank-based imputation
-        print("Using PageRank for imptation of marker genes")
+        cat("Imputing marker expression using PageRank ... ")
         expression_profile = impute.genes.using.ACTIONet(ace, markers.table$Gene, features_use = features_use, alpha_val = alpha_val, thread_no = thread_no, assay_name = assay_name, diffusion_iters = diffusion_iters)
+        cat(sprintf("done.\n"))
     } else if (imputation == "archImpute") {
         # PCA-based imputation
-        print("Using archImpute for imptation of marker genes")
+        cat("Imputing marker expression using archImpute ... ")
         expression_profile = impute.specific.genes.using.archetypes(ace, markers.table$Gene)
+        cat(sprintf("done.\n"))
     } else {
         expression_profile = SummarizedExperiment::assays(ace)[[assay_name]]
     }
 
-
     IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
 
-    print("Computing significance scores")
     set.seed(0)
+    cat("Computing significance scores ... ")
     Z = sapply(IDX, function(idx) {
         markers = (as.character(markers.table$Gene[idx]))
         directions = markers.table$Direction[idx]
@@ -281,14 +283,12 @@ annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand
 
         return(cell.zscores)
     })
+    cat(sprintf("done.\n"))
 
     Z[is.na(Z)] = 0
     Labels = apply(Z, 1, which.max)
     Labels = colnames(Z)[Labels]
-
-    #Labels = reannotate.labels(ace, Labels)
     Labels.conf = apply(Z, 1, max)
-
 
     res = list(Labels = Labels, Labels.confidence = Labels.conf, Enrichment = Z)
 
