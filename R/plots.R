@@ -913,7 +913,9 @@ visualize.markers <- function(ace, markers, features_use = NULL, assay_name = "l
   }
 
   print(sprintf("Markers Visualized: %s", paste0(marker_set, collapse = ", ")))
-  print(sprintf("Markers Missing: %s", paste0(setdiff(markers_all, marker_set), collapse = ", ")))
+  markers_missing = setdiff(markers_all, marker_set)
+  if(length(markers_missing) > 0)
+    print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
 
   for(i in 1:NCOL(expression_profile)){
     feat_name = colnames(expression_profile)[i]
