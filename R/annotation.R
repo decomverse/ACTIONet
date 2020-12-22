@@ -210,7 +210,7 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' cell.labels = arch.annot$Labels
 #' @export
 annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand_sample_no = 100,
-    alpha_val = 0.9, thread_no = 8, imputation = "PageRank", assay_name = "logcounts") {
+    alpha_val = 0.9, thread_no = 8, imputation = "PageRank", assay_name = "logcounts", diffusion_iters = 5) {
 
     marker_set = .preprocess_annotation_markers(markers)
     features_use = .preprocess_annotation_features(ace, features_use)
@@ -247,14 +247,13 @@ annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand
     if (imputation == "PageRank") {
         # PageRank-based imputation
         print("Using PageRank for imptation of marker genes")
-        imputed.marker.expression = impute.genes.using.ACTIONet(ace, markers.table$Gene,
-            alpha_val, thread_no, assay_name = assay_name)
+        expression_profile = impute.genes.using.ACTIONet(ace, markers.table$Gene, features_use = features_use, alpha_val = alpha_val, thread_no = thread_no, assay_name = assay_name, diffusion_iters = diffusion_iters)
     } else if (imputation == "archImpute") {
         # PCA-based imputation
         print("Using archImpute for imptation of marker genes")
-        imputed.marker.expression = impute.specific.genes.using.archetypes(ace, markers.table$Gene)
+        expression_profile = impute.specific.genes.using.archetypes(ace, markers.table$Gene)
     } else {
-        imputed.marker.expression = SummarizedExperiment::assays(ace)[[assay_name]]
+        expression_profile = SummarizedExperiment::assays(ace)[[assay_name]]
     }
 
 
@@ -265,15 +264,15 @@ annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand
     Z = sapply(IDX, function(idx) {
         markers = (as.character(markers.table$Gene[idx]))
         directions = markers.table$Direction[idx]
-        mask = markers %in% colnames(imputed.marker.expression)
+        mask = markers %in% colnames(expression_profile)
 
-        A = as.matrix(imputed.marker.expression[, markers[mask]])
+        A = as.matrix(expression_profile[, markers[mask]])
         sgn = as.numeric(directions[mask])
         stat = A %*% sgn
 
         rand.stats = sapply(1:rand_sample_no, function(i) {
-            rand.samples = sample.int(dim(imputed.marker.expression)[2], sum(mask))
-            rand.A = as.matrix(imputed.marker.expression[, rand.samples])
+            rand.samples = sample.int(dim(expression_profile)[2], sum(mask))
+            rand.A = as.matrix(expression_profile[, rand.samples])
             rand.stat = rand.A %*% sgn
         })
 
