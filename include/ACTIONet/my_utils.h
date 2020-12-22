@@ -19,8 +19,11 @@ void convtests(int Bsz, int n, double tol, double svtol, double Smax,
                double S);
 void orthog(double *X, double *Y, double *T, int xm, int xn, int yn);
 
+uint32_t lfsr113(uint64_t **state);
+void lfsr113_seed(uint32_t seed, uint64_t **state);
+
 void randN_Marsaglia(double *values, int n);
-void randN_BM(double *values, int n);
+void randN_BM(double *values, int n, uint64_t **state);
 void randN_normsinv(double *values, int n);
 
 void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,

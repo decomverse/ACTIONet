@@ -19,9 +19,10 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   // double eps = 2.22e-16;
   double tol = 1e-05, svtol = 1e-5;
 
-  srand(seed);
-  std::default_random_engine gen(seed);
-  std::normal_distribution<double> normDist(0.0, 1.0);
+  uint64_t *state = (uint64_t*)malloc(sizeof(uint64_t)*4);
+
+  lfsr113_seed(seed, &state);
+
 
   int work = dim + 7;
   int lwork = 7 * work * (1 + work);
@@ -60,7 +61,7 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   vec v, y;
 
   // Initialize first column of V
-  randN_BM(V, n);
+  randN_BM(V, n, &state);
   /*
 for ( int i = 0; i < n; i ++ ) {
 V[i]   = normDist(gen);;
@@ -113,7 +114,7 @@ V[i]   = normDist(gen);;
         R = 1.0 / R_F;
 
         if (R_F < eps) {  // near invariant subspace
-          randN_BM(F, n);
+          randN_BM(F, n, &state);
           /*
           for (int i = 0; i < n; i++) {
             F[i] = normDist(gen);
@@ -150,7 +151,7 @@ V[i]   = normDist(gen);;
 
         if (S < eps) {
           jj = (j + 1) * m;
-          randN_BM(W+jj, m);
+          randN_BM(W+jj, m, &state);
           /*
           for (int i = 0; i < m; i++) {
             W[jj + i] = normDist(gen);
@@ -286,6 +287,8 @@ V[i]   = normDist(gen);;
 
   cholmod_finish(&chol_c);
 
+  delete state;
+
   if (converged != 1) {
     fprintf(stderr,
             "IRLB_SVD did NOT converge! Try in creasing the number of "
@@ -303,7 +306,8 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   // double eps = 2.22e-16;
   double tol = 1e-05, svtol = 1e-5;
 
-  srand(seed);
+  uint64_t *state = (uint64_t*)malloc(sizeof(uint64_t)*4);
+  lfsr113_seed(seed, &state);
 
   int m = A.n_rows;
   int n = A.n_cols;
@@ -344,7 +348,7 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   vec v, y;
 
   // Initialize first column of V
-  randN_BM(V, n);
+  randN_BM(V, n, &state);
 
   /* Main iteration */
   while (iter < iters) {
@@ -385,7 +389,7 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
         R = 1.0 / R_F;
 
         if (R_F < eps) {  // near invariant subspace
-          randN_BM(F, n);
+          randN_BM(F, n, &state);
 
           orthog(V, F, T, n, j + 1, 1);
           R_F = cblas_dnrm2(n, F, inc);
@@ -414,7 +418,7 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
 
         if (S < eps) {
           jj = (j + 1) * m;
-          randN_BM(W + jj, m);
+          randN_BM(W + jj, m, &state);
 
           orthog(W, W + (j + 1) * m, T, m, j + 1, 1);
           S = cblas_dnrm2(m, W + (j + 1) * m, inc);
@@ -530,6 +534,8 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   delete[] res;
   delete[] T;
   delete[] svratio;
+
+  delete state;
 
   if (converged != 1) {
     fprintf(stderr,
