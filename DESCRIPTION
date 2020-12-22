@@ -16,7 +16,7 @@ Description:
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
 Depends: R (>= 3.6.0), Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ineq, rmdformats, pals, seriation, networkD3, BiocParallel
-Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, igraph, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ComplexHeatmap, metap, rmdformats, pals, seriation, BiocParallel
+Imports: Rcpp, RcppArmadillo, Matrix, R.utils, SummarizedExperiment, scran, scater, batchelor, hdf5r, igraph, stringr, ComplexHeatmap, ggpubr, corrplot, wordcloud, threejs, plotly, RColorBrewer, ComplexHeatmap, metap, rmdformats, pals, seriation, BiocParallel
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
 Remotes: immunogenomics/harmony,shmohammadi86/SCINET

@@ -13,8 +13,8 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
     ace = normalize.ace(ace, norm_method = "multiBatchNorm", assay_name = assay_name, batch_attr = batch_attr, BPPARAM = BPPARAM)
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
-    mnn_batch = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
-    IDX = .get_ace_split_IDX(ace, batch_attr)
+    mnn_batch = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    IDX = .get_attr_or_split_idx(ace, batch_attr)
     merge_order = order(sapply(IDX, function(idx) length(idx)), decreasing = TRUE)
 
     set.seed(0)
@@ -24,7 +24,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
     rownames(S_r) = colnames(ace)
     colnames(S_r) = sapply(1:dim(S_r)[2], function(i) sprintf("PC%d", i))
 
-    ACTIONet::colMaps(ace)[[reduction_slot]] <- S_r
+    colMaps(ace)[[reduction_slot]] <- S_r
     colMapTypes(ace)[[reduction_slot]] = "reduction"
 
     if (return_V) {
@@ -67,7 +67,7 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
 	}
 
   ace = .check_and_convert_se_like(ace, "ACE")
-  batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
+  batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
   ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter,
       assay_name = assay_name, reduction_slot = reduction_slot, seed = seed, SVD_algorithm = SVD_algorithm)
@@ -90,8 +90,8 @@ batch.correct.ace.Harmony <- function(ace, batch_attr = NULL, reduction_slot = "
 	}
 
   ace = .check_and_convert_se_like(ace, "ACE")
-  batch_attr = .get_ace_split_IDX(ace, batch_attr, return_split_vec = TRUE)
-  ACTIONet::colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(ACTIONet::colMaps(ace)[[reduction_slot]],
+  batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+  colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(colMaps(ace)[[reduction_slot]],
       meta_data = batch_attr, do_pca = FALSE)
   return(ace)
 }
@@ -140,7 +140,7 @@ orthogonalize.ace.batch <- function(ace, design_mat, reduction_slot = "ACTION", 
 
 #' @export
 orthogonalize.ace.batch.simple <- function(ace, batch_attr, reduction_slot = "ACTION") {
-  batch_attr = .get_ace_split_IDX(ace, attr = batch_attr, return_split_vec = TRUE) %>% as.factor
+  batch_attr = .get_attr_or_split_idx(ace, attr = batch_attr, return_vec = TRUE) %>% as.factor
 	design_mat = model.matrix(~batch_attr)
 
 	ace = orthogonalize.ace.batch(ace, design_mat, reduction_slot = reduction_slot)

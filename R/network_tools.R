@@ -19,16 +19,16 @@ infer.missing.cell.annotations <- function(ace, initial_labels, double.stochasti
     A = as(Adj, "dgTMatrix")
 
     eps = 1e-16
-    rs = ACTIONet::fast_row_sums(A)
+    rs = fastRowSums(A)
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
     if (double.stochastic == TRUE) {
-        w = sqrt(ACTIONet::fast_column_sums(P) + eps)
+        w = sqrt(fastColSums(P) + eps)
         W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
         P = W %*% Matrix::t(W)
     }
 
 
-    Labels = preprocess.labels(initial_labels, ace)
+    Labels = .preprocess_annotation_labels(initial_labels, ace)
     if (is.null(Labels)) {
         return(ace)
     }
@@ -41,7 +41,7 @@ infer.missing.cell.annotations <- function(ace, initial_labels, double.stochasti
 
     i = 1
     while (sum(na.mask) > 0) {
-        R.utils::printf("iter %d\n", i)
+        # R.utils::printf("iter %d\n", i)
 
         new.Labels = assess.label.local.enrichment(P, Labels)
 
@@ -92,16 +92,16 @@ correct.cell.annotations <- function(ace, initial_labels, LFR.threshold = 2,
     A = as(Adj, "dgTMatrix")
 
     eps = 1e-16
-    rs = ACTIONet::fast_row_sums(A)
+    rs = fastRowSums(A)
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
     if (double.stochastic == TRUE) {
-        w = sqrt(ACTIONet::fast_column_sums(P) + eps)
+        w = sqrt(fastColSums(P) + eps)
         W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
         P = W %*% Matrix::t(W)
     }
 
 
-    Labels = preprocess.labels(initial_labels, ace)
+    Labels = .preprocess_annotation_labels(initial_labels, ace)
     if (is.null(Labels)) {
         return(ace)
     }
@@ -123,7 +123,7 @@ correct.cell.annotations <- function(ace, initial_labels, LFR.threshold = 2,
 
 
     for (i in 1:max_iter) {
-        R.utils::printf("iter %d\n", i)
+        # R.utils::printf("iter %d\n", i)
 
         new.Labels = assess.label.local.enrichment(P, Labels)
         Enrichment = new.Labels$Enrichment
@@ -145,6 +145,7 @@ correct.cell.annotations <- function(ace, initial_labels, LFR.threshold = 2,
         Labels = updated.Labels
     }
 
+    Labels = names(Labels)
     return(Labels)
 }
 
@@ -155,10 +156,10 @@ EnhAdj <- function(Adj) {
     A = as(Adj, "dgTMatrix")
     diag(A) = 0
     eps = 1e-16
-    rs = ACTIONet::fast_row_sums(A)
+    rs = fastRowSums(A)
     rs[rs == 0] = 1
     P = sparseMatrix(i = A@i + 1, j = A@j + 1, x = A@x/rs[A@i + 1], dims = dim(A))
-    w = sqrt(ACTIONet::fast_column_sums(P) + eps)
+    w = sqrt(fastColSums(P) + eps)
     W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
     P = W %*% Matrix::t(W)
     P = as.matrix(P)
