@@ -8,7 +8,7 @@ create_formula <- function(vars){
 get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assay = "counts", colData = NULL, pseudocount = 0, with_S = FALSE, with_E = FALSE, with_V = FALSE, BPPARAM = SerialParam()){
 
   counts.mat = SummarizedExperiment::assays(ace)[[assay]]
-  IDX = .get_ace_split_IDX(ace, batch_attr)
+  IDX = .get_attr_or_split_idx(ace, batch_attr)
   sample_names = names(IDX)
   counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = FALSE])
 
