@@ -16,7 +16,7 @@ def reduce_kernel(
     seed: Optional[int] = 0,
     prenormalize: Optional[bool] = False,
     return_info: bool = False,
-    use_highly_variable: Optional[bool] = None,
+    use_highly_variable: Optional[bool] = False,
     copy: bool = False,
 ) -> [AnnData, np.ndarray, spmatrix]:
     """\

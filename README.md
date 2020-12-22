@@ -44,6 +44,8 @@ urllib.request.urlretrieve('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbm
 adata = sc.read_10x_h5('pbmc_10k_v3.h5')
 adata.var_names_make_unique(join='.')
 an.pp.filter_adata(adata, min_cells_per_feature=0.01, min_features_per_cell=1000)
+sc.pp.normalize_total(adata)
+sc.pp.log1p(adata)
 
 # Run ACTIONet
 an.pp.reduce_kernel(adata)

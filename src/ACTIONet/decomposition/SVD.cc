@@ -113,12 +113,13 @@ V[i]   = normDist(gen);;
         R = 1.0 / R_F;
 
         if (R_F < eps) {  // near invariant subspace
-          // randN_BM(F, n);
+          randN_BM(F, n);
+          /*
           for (int i = 0; i < n; i++) {
             F[i] = normDist(gen);
             ;
           }
-
+		*/
           orthog(V, F, T, n, j + 1, 1);
           R_F = cblas_dnrm2(n, F, inc);
           R = 1.0 / R_F;
@@ -149,12 +150,14 @@ V[i]   = normDist(gen);;
 
         if (S < eps) {
           jj = (j + 1) * m;
-          // randN_BM(W+jj, m);
+          randN_BM(W+jj, m);
+          /*
           for (int i = 0; i < m; i++) {
             W[jj + i] = normDist(gen);
             ;
           }
-
+		*/
+		
           orthog(W, W + (j + 1) * m, T, m, j + 1, 1);
           S = cblas_dnrm2(m, W + (j + 1) * m, inc);
           SS = 1.0 / S;
