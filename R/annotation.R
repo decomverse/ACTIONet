@@ -209,7 +209,7 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' arch.annot = annotate.cells.using.markers(ace, markers = markers)
 #' cell.labels = arch.annot$Labels
 #' @export
-annotate.cells.using.markers <- function(ace, marker_set, features_use = NULL, rand_sample_no = 100,
+annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand_sample_no = 100,
     alpha_val = 0.9, thread_no = 8, imputation = "PageRank", assay_name = "logcounts") {
 
     marker_set = .preprocess_annotation_markers(markers)

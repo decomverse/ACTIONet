@@ -12,7 +12,7 @@ annotate.cells.using.markers(
   alpha_val = 0.9,
   thread_no = 8,
   imputation = "PageRank",
-  data_slot = "logcounts"
+  assay_name = "logcounts"
 )
 }
 \arguments{
