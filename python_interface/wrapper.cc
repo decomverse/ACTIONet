@@ -160,7 +160,7 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
   }
 
   // Armadillo employs delayed evaluation, but pybind11 doesn't know that.
-  mat S_r = trans(V).eval());
+  mat S_r = trans(V).eval();
   S_r = round(S_r*1000)/1000.0;
   res["S_r"] = S_r;
 
