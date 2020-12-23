@@ -195,6 +195,18 @@ fastRowVars <- function (mat){
   return(V)
 }
 
+orthoProject <- function(A, S) {
+    A = scale(A)
+    S = scale(S)
+    A_r = A - S %*% MASS::ginv(t(S) %*% S) %*% (t(S) %*% A)
+    A_r = scale(A_r)
+    return(A_r)
+}
+
+is.sparseMatrix <- function(A) {
+    return(length(which(is(A) == "sparseMatrix")) != 0)
+}
+
 #' @export
 revert_ace_as_sce <- function (ace){
 	sce = SingleCellExperiment::SingleCellExperiment(assays = assays(ace), colData = colData(ace), rowData = rowData(ace))

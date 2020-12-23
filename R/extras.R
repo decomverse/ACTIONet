@@ -41,19 +41,6 @@ map.clusters <- function(Labels, clusters) {
     return(updated.Labels)
 }
 
-
-orthoProject <- function(A, S) {
-    A = scale(A)
-    S = scale(S)
-    A_r = A - S %*% MASS::ginv(t(S) %*% S) %*% (t(S) %*% A)
-    A_r = scale(A_r)
-    return(A_r)
-}
-
-is.sparseMatrix <- function(aa) {
-    return(length(which(is(aa) == "sparseMatrix")) != 0)
-}
-
 # HGT tail bound
 Kappa <- function(p, q) {
     kl = array(1, length(p))
@@ -534,4 +521,3 @@ add.count.metadata <- function(ace) {
 
     return(ace)
 }
-
