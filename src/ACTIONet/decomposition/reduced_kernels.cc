@@ -43,16 +43,16 @@ field<mat> perturbedSVD(field<mat> SVD_results, mat &A, mat &B) {
   stdout_printf("done\n");  // fflush(stdout);
 
   field<mat> output(5);
-  output(0) = round(U_updated.cols(0, dim - 1)*1e3)/1e3;
-  output(1) = round(s_prime(span(0, dim - 1))*1e6)/1e3;
-  output(2) = round(V_updated.cols(0, dim - 1)*1e3)/1e3;
+  output(0) = U_updated.cols(0, dim - 1);
+  output(1) = s_prime(span(0, dim - 1));
+  output(2) = V_updated.cols(0, dim - 1);
 
   if ((SVD_results.n_elem == 5) && (SVD_results(3).n_elem != 0)) {
-    output(3) = round(join_rows(SVD_results(3), A)*1e3)/1e3;
-    output(4) = round(join_rows(SVD_results(4), B)*1e3)/1e3;
+    output(3) = join_rows(SVD_results(3), A);
+    output(4) = join_rows(SVD_results(4), B);
   } else {
-    output(3) = round(A*1e3)/1e3;
-    output(4) = round(B*1e3)/1e3;
+    output(3) = A;
+    output(4) = B;
   }
 
   return output;
