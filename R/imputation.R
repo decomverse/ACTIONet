@@ -6,7 +6,7 @@
 #' @return A matrix of imputed expression values
 #'
 #' @examples
-#' imputed.gene.expression = impute.genes.using.archetype(ace, genes)
+#' expression_imputed = impute.genes.using.archetype(ace, genes)
 #' @export
 impute.genes.using.archetypes <- function(ace, genes) {
 
@@ -17,10 +17,10 @@ impute.genes.using.archetypes <- function(ace, genes) {
     Z = rowMaps(ace)[["archetype_gene_profile"]][genes, ]
     H = Matrix::t(colMaps(ace)[["H_unified"]])
 
-    imputed.gene.expression = t(Z %*% H)
-    colnames(imputed.gene.expression) = genes
+    expression_imputed = t(Z %*% H)
+    colnames(expression_imputed) = genes
 
-    return(imputed.gene.expression)
+    return(expression_imputed)
 }
 
 
@@ -32,7 +32,7 @@ impute.genes.using.archetypes <- function(ace, genes) {
 #' @return A matrix of imputed expression values
 #'
 #' @examples
-#' imputed.gene.expression = impute.genes.using.archetype(ace, genes)
+#' expression_imputed = impute.genes.using.archetype(ace, genes)
 #' @export
 impute.specific.genes.using.archetypes <- function(ace, genes) {
 
@@ -43,10 +43,10 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
     Z = log1p(rowMaps(ace)[["unified_feature_specificity"]][genes, ])
     H = Matrix::t(colMaps(ace)[["H_unified"]])
 
-    imputed.gene.expression = t(Z %*% H)
-    colnames(imputed.gene.expression) = genes
+    expression_imputed = t(Z %*% H)
+    colnames(expression_imputed) = genes
 
-    return(imputed.gene.expression)
+    return(expression_imputed)
 }
 
 #' Gene expression imputation using network diffusion.
@@ -82,32 +82,47 @@ impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_v
       stop(err)
     }
 
-    if (length(matched.idx) > 1) {
-        raw.gene.expression = Matrix::t(as(SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,
-            ], "dgTMatrix"))
-        U = raw.gene.expression
-        U[U < 0] = 0
-        cs = ACTIONet::fastColSums(U)
-        U = Matrix::sparseMatrix(i = U@i + 1, j = U@j + 1, x = U@x/cs[U@j + 1], dims = dim(U))
-        U = U[, cs > 0]
-        gg = matched.genes[cs > 0]
-    } else {
-        raw.gene.expression = SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,]
-        U = raw.gene.expression/sum(raw.gene.expression)
-        gg = matched.genes
+    expression_raw = SummarizedExperiment::assays(ace)[[assay_name]][matched.idx, , drop = FALSE]
+    if(is.sparseMatrix(expression_raw)){
+      expression_raw = U = Matrix::t(as(expression_raw, "dgTMatrix"))
+      U[U < 0] = 0
+      cs = fastColSums(U)
+      U = Matrix::sparseMatrix(i = U@i + 1, j = U@j + 1, x = U@x/cs[U@j + 1], dims = dim(U))
+    } else{
+      expression_raw = U = Matrix::t(expression_raw)
+      U[U < 0] = 0
+      cs = fastColSums(U)
+      U = expression_raw / fastColSums(expression_raw)
     }
+    U = U[, cs > 0]
+    gg = matched.genes[cs > 0]
+
+    # if (length(matched.idx) > 1) {
+    #     expression_raw = Matrix::t(as(SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,
+    #         ], "dgTMatrix"))
+    #     U = expression_raw
+    #     U[U < 0] = 0
+    #     cs = ACTIONet::fastColSums(U)
+    #     U = Matrix::sparseMatrix(i = U@i + 1, j = U@j + 1, x = U@x/cs[U@j + 1], dims = dim(U))
+    #     U = U[, cs > 0]
+    #     gg = matched.genes[cs > 0]
+    # } else {
+    #     expression_raw = SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,]
+    #     U = expression_raw/sum(expression_raw)
+    #     gg = matched.genes
+    # }
 
     # Perform network-diffusion
     G = colNets(ace)$ACTIONet
-    imputed.gene.expression = compute_network_diffusion(G, as(U, "sparseMatrix"), thread_no = thread_no, alpha = alpha_val, max_it = diffusion_iters)
+    expression_imputed = compute_network_diffusion(G, as(U, "sparseMatrix"), thread_no = thread_no, alpha = alpha_val, max_it = diffusion_iters)
 
-    imputed.gene.expression[is.na(imputed.gene.expression)] = 0
+    expression_imputed[is.na(expression_imputed)] = 0
 
 
     # Rescale the baseline expression of each gene
-    imputed.gene.expression = sapply(1:dim(imputed.gene.expression)[2], function(col) {
-        x = raw.gene.expression[, col]
-        y = imputed.gene.expression[, col]
+    expression_imputed = sapply(1:dim(expression_imputed)[2], function(col) {
+        x = expression_raw[, col]
+        y = expression_imputed[, col]
 
         x.Q = quantile(x, 1)
         y.Q = quantile(y, 1)
@@ -117,13 +132,12 @@ impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_v
         }
 
         y = y * x.Q/y.Q
-
         y[y > max(x)] = max(x)
 
         return(y)
     })
 
-    colnames(imputed.gene.expression) = gg
+    colnames(expression_imputed) = gg
 
-    return(imputed.gene.expression)
+    return(expression_imputed)
 }
