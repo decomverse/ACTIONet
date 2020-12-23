@@ -62,6 +62,9 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
 
   // Initialize first column of V
   randN_BM(V, n, &state);
+  for(int i = 0; i < 10; i++)
+	printf("%d- %f\n", i, V[i]);
+  
   /*
 for ( int i = 0; i < n; i ++ ) {
 V[i]   = normDist(gen);;
