@@ -280,7 +280,6 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 
 .insert_mapping <- function(object, value, d) {
     
-    
     if (length(value) == 0) {
         value = S4Vectors::SimpleList()
     } else {

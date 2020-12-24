@@ -22,8 +22,7 @@ filter.ace <- function(ace, assay_name = "counts", min_cells_per_feat = NULL, mi
         }
         
         if (!is.null(min_feats_per_cell)) {
-            feature_mask = ACTIONet::fastColSums(assays(ace.fil)[[assay_name]] > 
-                0) >= min_feats_per_cell
+            feature_mask = fastColSums(assays(ace.fil)[[assay_name]] > 0) >= min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
         
@@ -33,8 +32,7 @@ filter.ace <- function(ace, assay_name = "counts", min_cells_per_feat = NULL, mi
             } else {
                 min_fc = min_cells_per_feat
             }
-            cell_count_mask = ACTIONet::fastRowSums(assays(ace.fil)[[assay_name]] > 
-                0) >= min_fc
+            cell_count_mask = fastRowSums(assays(ace.fil)[[assay_name]] > 0) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
         ace.fil <- ace.fil[rows_mask, cols_mask]
@@ -65,7 +63,7 @@ filter.ace.by.attr <- function(ace, by, assay_name = "counts", min_cells_per_fea
     
     # if( length(by) == 1) { IDX = split(1:dim(ace)[2],
     # droplevels(colData(ace))[[by]]) } else { IDX = split(1:dim(ace)[2], by) }
-    IDX = ACTIONet:::.get_ace_split_IDX(ace, by)
+    IDX = .get_attr_or_split_idx(ace, by)
     
     if (any(duplicated(rownames(ace)))) {
         msg = sprintf("Adding suffix to duplicate rownames.\n")

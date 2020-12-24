@@ -7,17 +7,17 @@
 \usage{
 annotate.archetypes.using.markers(
   ace,
-  marker.genes,
-  rand.sample.no = 1000,
+  markers,
+  rand_sample_no = 1000,
   significance.slot = "unified_feature_specificity"
 )
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{marker.genes}{A list of lists (each a set of markers for a given cell type)}
+\item{markers}{A list of lists (each a set of markers for a given cell type)}
 
-\item{rand.sample.no}{Number of random permutations (default=1000)}
+\item{rand_sample_no}{Number of random permutations (default=1000)}
 }
 \value{
 A named list: \itemize{
@@ -32,6 +32,6 @@ Annotate clusters using known marker genes
 }
 \examples{
 data('curatedMarkers_human') # pre-packaged in ACTIONet
-marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-arch.annot = annotate.archetypes.using.markers(ace, marker.genes = marker.genes)
+markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+arch.annot = annotate.archetypes.using.markers(ace, markers = markers)
 }
