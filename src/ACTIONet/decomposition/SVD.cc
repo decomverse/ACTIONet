@@ -1,5 +1,8 @@
 #include "ACTIONet.h"
 
+#define StdNorm(v, n, engine) for(int ii = 0; ii < n; ii++) v[ii] = stats::rnorm(0, 1, engine)
+
+
 namespace ACTIONet {
 
 field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
@@ -18,10 +21,6 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   double eps = 3e-13;
   // double eps = 2.22e-16;
   double tol = 1e-05, svtol = 1e-5;
-
-  uint64_t *state = (uint64_t*)malloc(sizeof(uint64_t)*4);
-
-  lfsr113_seed(seed, &state);
 
 
   int work = dim + 7;
@@ -44,6 +43,14 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   double *T = new double[lwork];
   double *svratio = new double[work];
 
+    mat tmp(B, work, work, false);
+    mat BUmat(BU, work, work, false);
+    vec BSvec(BS, work, false);
+    mat BVmat(BV, work, work, false);
+	mat Vmat(V, n, work, false);
+	mat Fmat(V, n, work, false);
+	mat Wmat(W, m, work, false);
+	
   double d, S, R, R_F, SS;
   double *x;
   int jj, kk;
@@ -61,9 +68,13 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   vec v, y;
 
   // Initialize first column of V
-  randN_BM(V, n, &state);
-  for(int i = 0; i < 10; i++)
-	printf("%d- %f\n", i, V[i]);
+	std::mt19937_64 engine(seed);
+
+	StdNorm(Vmat.col(0), n, engine);
+	//Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
+	
+	  Vmat(span(0, 10), 0).print("V");
+
   
   /*
 for ( int i = 0; i < n; i ++ ) {
@@ -117,7 +128,10 @@ V[i]   = normDist(gen);;
         R = 1.0 / R_F;
 
         if (R_F < eps) {  // near invariant subspace
-          randN_BM(F, n, &state);
+			
+			StdNorm(Fmat.col(0), n, engine);
+          	//Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
+
           /*
           for (int i = 0; i < n; i++) {
             F[i] = normDist(gen);
@@ -153,8 +167,10 @@ V[i]   = normDist(gen);;
         SS = 1.0 / S;
 
         if (S < eps) {
-          jj = (j + 1) * m;
-          randN_BM(W+jj, m, &state);
+          	StdNorm(Wmat.col(j), m, engine);
+
+          //Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
+
           /*
           for (int i = 0; i < m; i++) {
             W[jj + i] = normDist(gen);
@@ -176,19 +192,15 @@ V[i]   = normDist(gen);;
       j++;
     }
 
-    mat tmp(B, work, work, false);
-    mat Umat(BU, work, work, false);
-    vec svec(BS, work, false);
-    mat Vmat(BV, work, work, false);
 
-    arma::svd(Umat, svec, Vmat, tmp, "dc");
-    Vmat = trans(Vmat);
+    arma::svd(BUmat, BSvec, BVmat, tmp, "dc");
+    BVmat = trans(BVmat);
 
     /*
-    Umat(span(0, 5), span(0, 5)).print("U1");
-    Vmat(span(0, 5), span(0, 5)).print("V1");
+    BUmat(span(0, 5), span(0, 5)).print("U1");
+    BVmat(span(0, 5), span(0, 5)).print("V1");
     *
-    Umat(span(0, 5), span(0, 5)).print("tmp (after)");
+    BUmat(span(0, 5), span(0, 5)).print("tmp (after)");
 
     for(int i = 0; i < 20; i++) {
             printf("%d- %f\n", i, BU[i]);
@@ -198,10 +210,10 @@ V[i]   = normDist(gen);;
     B int *BI = (int *) T; F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS,
     BU, &work, BV, &work, BW, &lwork, BI, &info);
 
-    mat Umat2(BU, work, work, false);
-    mat Vmat2(BV, work, work, false);
-    Umat2(span(0, 5), span(0, 5)).print("U2");
-    Vmat2(span(0, 5), span(0, 5)).print("V2");
+    mat BUmat2(BU, work, work, false);
+    mat BVmat2(BV, work, work, false);
+    BUmat2(span(0, 5), span(0, 5)).print("U2");
+    BVmat2(span(0, 5), span(0, 5)).print("V2");
     */
 
     /*
@@ -290,8 +302,6 @@ V[i]   = normDist(gen);;
 
   cholmod_finish(&chol_c);
 
-  delete state;
-
   if (converged != 1) {
     fprintf(stderr,
             "IRLB_SVD did NOT converge! Try in creasing the number of "
@@ -308,9 +318,6 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   double eps = 3e-13;
   // double eps = 2.22e-16;
   double tol = 1e-05, svtol = 1e-5;
-
-  uint64_t *state = (uint64_t*)malloc(sizeof(uint64_t)*4);
-  lfsr113_seed(seed, &state);
 
   int m = A.n_rows;
   int n = A.n_cols;
@@ -334,6 +341,15 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   double *T = new double[lwork];
   double *svratio = new double[work];
 
+
+    mat tmp(B, work, work, false);
+    mat BUmat(BU, work, work, false);
+    vec BSvec(BS, work, false);
+    mat BVmat(BV, work, work, false);
+	mat Vmat(V, n, work, false);
+	mat Fmat(V, n, work, false);
+	mat Wmat(W, m, work, false);
+
   double d, S, R, R_F, SS;
   double *x;
   int jj, kk;
@@ -351,7 +367,10 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   vec v, y;
 
   // Initialize first column of V
-  randN_BM(V, n, &state);
+	std::mt19937_64 engine(seed);
+
+	StdNorm(Vmat.col(0), n, engine);
+	//Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
   /* Main iteration */
   while (iter < iters) {
@@ -392,7 +411,9 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
         R = 1.0 / R_F;
 
         if (R_F < eps) {  // near invariant subspace
-          randN_BM(F, n, &state);
+			StdNorm(Fmat.col(0), n, engine);
+			//Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
+
 
           orthog(V, F, T, n, j + 1, 1);
           R_F = cblas_dnrm2(n, F, inc);
@@ -420,8 +441,9 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
         SS = 1.0 / S;
 
         if (S < eps) {
-          jj = (j + 1) * m;
-          randN_BM(W + jj, m, &state);
+			StdNorm(Wmat.col(j), m, engine);
+
+			//Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
 
           orthog(W, W + (j + 1) * m, T, m, j + 1, 1);
           S = cblas_dnrm2(m, W + (j + 1) * m, inc);
@@ -437,19 +459,14 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
       j++;
     }
 
-    mat tmp(B, work, work, false);
-    mat Umat(BU, work, work, false);
-    vec svec(BS, work, false);
-    mat Vmat(BV, work, work, false);
-
-    arma::svd(Umat, svec, Vmat, tmp, "dc");
-    Vmat = trans(Vmat);
+    arma::svd(BUmat, BSvec, BVmat, tmp, "dc");
+    BVmat = trans(BVmat);
 
     /*
-    Umat(span(0, 5), span(0, 5)).print("U1");
-    Vmat(span(0, 5), span(0, 5)).print("V1");
+    BUmat(span(0, 5), span(0, 5)).print("U1");
+    BVmat(span(0, 5), span(0, 5)).print("V1");
     *
-    Umat(span(0, 5), span(0, 5)).print("tmp (after)");
+    BUmat(span(0, 5), span(0, 5)).print("tmp (after)");
 
     for(int i = 0; i < 20; i++) {
             printf("%d- %f\n", i, BU[i]);
@@ -459,10 +476,10 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
     B int *BI = (int *) T; F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS,
     BU, &work, BV, &work, BW, &lwork, BI, &info);
 
-    mat Umat2(BU, work, work, false);
-    mat Vmat2(BV, work, work, false);
-    Umat2(span(0, 5), span(0, 5)).print("U2");
-    Vmat2(span(0, 5), span(0, 5)).print("V2");
+    mat BUmat2(BU, work, work, false);
+    mat BVmat2(BV, work, work, false);
+    BUmat2(span(0, 5), span(0, 5)).print("U2");
+    BVmat2(span(0, 5), span(0, 5)).print("V2");
     */
 
     R_F = cblas_dnrm2(n, F, inc);
@@ -538,8 +555,6 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   delete[] T;
   delete[] svratio;
 
-  delete state;
-
   if (converged != 1) {
     fprintf(stderr,
             "IRLB_SVD did NOT converge! Try in creasing the number of "
@@ -572,7 +587,9 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
     // arma_rng::set_seed(seed);
     // Q = randn( n, dim+s );
     // Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
-    Q = randNorm(n, dim + s, seed);
+    //Q = stats::rnorm<arma::mat>(n, dim + s, 0, 1);
+
+    randNorm(n, dim + s, seed);
     Q = A * Q;
     if (iters == 0) {
       SVD_out = eigSVD(Q);
