@@ -33,7 +33,7 @@ namespace uwot {
 
 // Weighted edge sampler
 class Sampler {
-public:
+ public:
   Sampler(const std::vector<double> &epochs_per_sample,
           double negative_sample_rate)
 
@@ -64,13 +64,13 @@ public:
         num_neg_samples * epochs_per_negative_sample[i];
   }
 
-private:
+ private:
   std::vector<double> epochs_per_sample;
   std::vector<double> epoch_of_next_sample;
   std::vector<double> epochs_per_negative_sample;
   std::vector<double> epoch_of_next_negative_sample;
 };
 
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_SAMPLER_H
+#endif  // UWOT_SAMPLER_H
