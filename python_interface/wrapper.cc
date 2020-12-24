@@ -155,12 +155,16 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
   res["sigma"] = sigma;
 
   mat V = reduction(2);
+  printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
-    V.col(i) *= sigma(i);
+	  vec v = V.col(i) * sigma(i);
+	  v = round(v*1e5)/1e5;
+    double cs = sum(v);
+    if( cs < 0)
+		v = -v;
+	V.col(i) = v;
   }
-
-  // Armadillo employs delayed evaluation, but pybind11 doesn't know that.
-  V = arma::round(trans(V)*1000.0)/1000.0;  
+  V = trans(V);
   res["S_r"] = V.eval();
 
   res["A"] = reduction(3);
@@ -182,12 +186,16 @@ py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50,
   res["sigma"] = sigma;
 
   mat V = reduction(2);
+  printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
-    V.col(i) *= sigma(i);
+	  vec v = V.col(i) * sigma(i);
+	  v = round(v*1e5)/1e5;
+    double cs = sum(v);
+    if( cs < 0)
+		v = -v;
+	V.col(i) = v;
   }
-
-  // Armadillo employs delayed evaluation, but pybind11 doesn't know that.
-  V = arma::round(trans(V)*1000.0)/1000.0;  
+  V = trans(V);
   res["S_r"] = V.eval();
 
   res["A"] = reduction(3);

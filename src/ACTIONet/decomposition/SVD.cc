@@ -73,8 +73,6 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
 	StdNorm(Vmat.col(0), n, engine);
 	//Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 	
-	  Vmat(span(0, 10), 0).print("V");
-
   
   /*
 for ( int i = 0; i < n; i ++ ) {
