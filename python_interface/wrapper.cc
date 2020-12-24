@@ -280,7 +280,7 @@ py::dict run_AA(arma::Mat<npdouble> &A, arma::Mat<npdouble> W0, int max_it = 50,
 // values of k
 py::dict run_ACTION(arma::Mat<npdouble> &S_r, int k_min = 2, int k_max = 30,
                     int thread_no = 0, int max_it = 50,
-                    double min_delta = 0.01) {
+                    double min_delta = 1e-16) {
   ACTIONet::ACTION_results trace =
       ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
 

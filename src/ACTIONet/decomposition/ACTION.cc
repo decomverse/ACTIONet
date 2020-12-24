@@ -240,7 +240,7 @@ SPA_results run_SPA(mat &A, int k) {
   mat U(A.n_rows, k);
 
   vec norm_trace = zeros(k);
-  double eps = 1e-9;
+  double eps = 1e-6;
 
   for (int i = 1; i <= k; i++) {
     // Find the column with maximum norm. In case of having more than one column
