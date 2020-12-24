@@ -18,13 +18,13 @@ rerun.layout(
 \arguments{
 \item{ace}{ACTIONetExperiment object containing the results}
 
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
+
+\item{layout_epochs}{Number of epochs for SGD algorithm (default=500).}
+
 \item{thread_no}{Number of parallel threads (default=8)}
 
 \item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r')}
-
-\item{compactness_level}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
-
-\item{n_epochs}{Number of epochs for SGD algorithm (default=500).}
 }
 \value{
 ace Updated ace object

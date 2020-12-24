@@ -18,52 +18,6 @@ CPal20 = c("#1f77b4", "#ff7f0e", "#279e68", "#d62728", "#aa40fc", "#8c564b", "#e
     "#b5bd61", "#17becf", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", 
     "#c49c94", "#f7b6d2", "#dbdb8d", "#9edae5", "#ad494a", "#8c6d31")
 
-
-preprocess.labels <- function(labels, ace = NULL) {
-    if (is.null(labels)) {
-        return(NULL)
-    }
-    if ((length(labels) == 1) & is.character(labels)) {
-        if (is.null(ace)) {
-            R.utils::printf("Error preprocess.labels: annotation.name %s not found (no ace object provided)\n", 
-                labels)
-            return(NULL)
-        }
-        idx = which(names(colData(ace)) == labels)
-        if (length(idx) == 0) {
-            R.utils::printf("Error preprocess.labels: annotation.name %s not found\n", 
-                labels)
-            return(NULL)
-        }
-        labels = colData(ace)[, idx]
-    }
-    
-    if ((length(labels) > 1) & is.logical(labels)) {
-        labels = factor(as.numeric(labels), levels = c(0, 1), labels = c("No", "Yes"))
-    }
-    
-    if ((length(labels) > 1) & is.character(labels)) {
-        labels = factor(labels)
-    }
-    
-    if (is.factor(labels)) {
-        v = as.numeric(labels)
-        names(v) = levels(labels)[v]
-        labels = v
-    }
-    if (is.matrix(labels)) {
-        L = as.numeric(labels)
-        names(L) = names(labels)
-        labels = L
-    }
-    
-    if (is.null(names(labels)) | length(unique(names(labels))) > 100) {
-        names(labels) = as.character(labels)
-    }
-    
-    return(labels)
-}
-
 layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, cex = 1, 
     ...) {
     require(wordcloud)
@@ -117,7 +71,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
     node.size = node.size * 0.25
     
     if (class(ace) == "ACTIONetExperiment") {
-        labels = preprocess.labels(labels, ace)
+        labels = .preprocess_annotation_labels(labels, ace)
         if (is.character(coordinate_slot)) {
             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
             coor.mu = apply(coors, 2, mean)
@@ -135,7 +89,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
             coors = scale(coors)
-            labels = preprocess.labels(labels)
+            labels = .preprocess_annotation_labels(labels)
         } else {
             print("Unknown type for ace")
             return()
@@ -277,7 +231,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     
     
     if (class(ace) == "ACTIONetExperiment") {
-        labels = preprocess.labels(labels, ace)
+        labels = .preprocess_annotation_labels(labels, ace)
         if (is.character(coordinate_slot)) {
             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
             coor.mu = apply(coors, 2, mean)
@@ -295,7 +249,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
             coors = scale(coors)
-            labels = preprocess.labels(labels)
+            labels = .preprocess_annotation_labels(labels)
         } else {
             print("Unknown type for ace")
             return()
@@ -508,7 +462,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 #' @examples
 #' plot.ACTIONet.gene.view(ace, 5)
 #' @export
-plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", 
+plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH", 
     title = "", label.text.size = 0.8, renormalize = F) {
     require(wordcloud)
     
@@ -544,7 +498,7 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' @export
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL, 
     trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, enrichment.table = NULL, 
-    top.features = 7, Alt_Text = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH", 
+    top.features = 7, Alt_Text = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH", 
     threeD = FALSE, title = "ACTIONet", coordinate_slot = "ACTIONet2D") {
     
     require(plotly)
@@ -557,7 +511,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
         coordinate_slot = "ACTIONet3D"
     
     if (class(ace) == "ACTIONetExperiment") {
-        labels = preprocess.labels(labels, ace)
+        labels = .preprocess_annotation_labels(labels, ace)
         if (is.character(coordinate_slot)) {
             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
             coor.mu = apply(coors, 2, mean)
@@ -575,7 +529,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
             coors = scale(coors)
-            labels = preprocess.labels(labels)
+            labels = .preprocess_annotation_labels(labels)
         } else {
             print("Unknown type for ace")
             return()
@@ -765,7 +719,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 #'
 #' @param ace ACTIONet output object
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-#' @param gene.name Name of the gene to plot
+#' @param gene_name Name of the gene to plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #'
 #' @return Visualized ACTIONet
@@ -773,12 +727,11 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 #' @examples
 #' plot.individual.gene(ace, ace$assigned_archetype, 'CD14')
 #' @export
-plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
-    require(igraph)
-    require(ACTIONet)
-    require(ggpubr)
+plot.individual.gene <- function(ace, labels, gene_name, features_use = NULL, assay_name = "logcounts", 
+    CPal = CPal20) {
     
-    clusters = preprocess.labels(ace, labels)
+    clusters = .preprocess_annotation_labels(ace, labels)
+    features_use = .preprocess_annotation_features(ace, features_use)
     
     Labels = names(clusters)
     Annot = sort(unique(Labels))
@@ -807,22 +760,20 @@ plot.individual.gene <- function(ace, labels, gene.name, CPal = CPal20) {
     
     names(Pal) = Annot
     
-    if (!(gene.name %in% rownames(ace))) {
-        R.utils::printf("Gene %s not found\n", gene.name)
-        return()
+    if (!(gene_name %in% features_use)) {
+        err = sprintf("Gene %s not found\n", gene_name)
+        stop(err)
     }
     
-    x = SummarizedExperiment::assays(ace)$logcounts[gene.name, ]
+    x = SummarizedExperiment::assays(ace)[[assay_name]][gene_name, ]
     if (sum(x) == 0) {
         print("Gene is not expressed")
         return()
     }
     
     
-    require(ggpubr)
-    require(ggplot2)
     df = data.frame(Annotation = Labels, Expression = x)
-    gp = ggviolin(df, "Annotation", "Expression", fill = "Annotation", palette = Pal, 
+    gp = ggpubr::ggviolin(df, "Annotation", "Expression", fill = "Annotation", palette = Pal, 
         add = "boxplot", add.params = list(fill = "white"))
     print(gp)
 }
@@ -931,7 +882,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' It also optionally imputes the markers.
 #'
 #' @param ace ACTIONet output object
-#' @param x Score vector
+#' @param markers Set of row features (e.g. genes) to visualize .
 #' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
 #' @param node.size Size of nodes in the ACTIONet plot
@@ -943,61 +894,60 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #'
 #' @examples
 #' ace = run.ACTIONet(sce)
-#' x = logcounts(ace)['CD14', ]
-#' visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
-visualize.markers <- function(ace, marker.genes, feat.attr = NULL, assay.name = "logcounts", 
+#' visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
+visualize.markers <- function(ace, markers, features_use = NULL, assay_name = "logcounts", 
     transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, 
     CPal = "magma", alpha_val = 0.9, export_path = NA) {
-    if (!sum(sapply(marker.genes, length) != 1) & is.null(names(marker.genes))) {
-        names(marker.genes) = marker.genes
+    
+    features_use = .preprocess_annotation_features(ace, features_use = features_use)
+    markers_all = sort(unique(unlist(markers)))
+    marker_set = intersect(markers_all, features_use)
+    
+    if (length(marker_set) == 0) {
+        err = sprintf("No given markers found in feature set.\n")
+        stop(err, call. = F)
     }
     
-    if (is.null(feat.attr)) {
-        feats = rownames(ace)
+    if (length(marker_set) == 1) 
+        alpha_val = 0
+    
+    if (alpha_val > 0) {
+        expression_profile = impute.genes.using.ACTIONet(ace, marker_set, features_use = features_use, 
+            alpha_val = alpha_val)
     } else {
-        feats = SummarizedExperiment::rowData(ace)[[feat.attr]]
+        expression_profile = assays(ace)[[assay_name]][match(marker_set, features_use), 
+            , drop = FALSE]
+        expression_profile = Matrix::t(expression_profile)
+        colnames(expression_profile) = marker_set
     }
     
-    gg = intersect(unique(unlist(marker.genes)), feats)
-    all.marker.genes = sort(intersect(gg, feats))
-    if (length(all.marker.genes) == 0) {
-        return()
-    }
+    print(sprintf("Markers Visualized: %s", paste0(marker_set, collapse = ", ")))
+    markers_missing = setdiff(markers_all, marker_set)
+    if (length(markers_missing) > 0) 
+        print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
     
-    if (alpha_val > 0) 
-        imputed.marker.expression = impute.genes.using.ACTIONet(ace, all.marker.genes, 
-            alpha_val = alpha_val) else {
-        imputed.marker.expression = Matrix::t(assays(ace)[[assay.name]])
-    }
-    
-    lapply(all.marker.genes, function(gene) {
-        print(gene)
-        if (!(gene %in% colnames(imputed.marker.expression))) 
-            return()
+    for (i in 1:NCOL(expression_profile)) {
+        feat_name = colnames(expression_profile)[i]
+        x = expression_profile[, i]
         
-        idx = which(sapply(marker.genes, function(gs) gene %in% gs))[1]
-        celltype.name = names(marker.genes)[idx]
-        
-        x = imputed.marker.expression[, gene]
         nnz = round(sum(x^2)^2/sum(x^4))
         x.threshold = sort(x, decreasing = T)[nnz]
         x[x < x.threshold] = 0
         x = x/max(x)
         
         plot.ACTIONet.gradient(ace, x, transparency.attr, trans.z.threshold, trans.fact, 
-            node.size, CPal = CPal, title = gene, alpha_val = 0)
+            node.size, CPal = CPal, title = feat_name, alpha_val = 0)
         
         if (!is.na(export_path)) {
-            fname = sprintf("%s/%s.pdf", export_path, ifelse(celltype.name == gene, 
-                gene, sprintf("%s_%s", celltype.name, gene)))
+            fname = sprintf("%s/%s.pdf", export_path, feat_name)
             dir.create(dirname(fname), showWarnings = F, recursive = T)
             pdf(fname)
             par(mar = c(0, 0, 1, 0))
             plot.ACTIONet.gradient(ace, x, transparency.attr, trans.z.threshold, 
-                trans.fact, node.size, CPal = CPal, title = gene, alpha_val = 0)
+                trans.fact, node.size, CPal = CPal, title = feat_name, alpha_val = 0)
             dev.off()
         }
-    })
+    }
 }
 
 
@@ -1168,7 +1118,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
     node.size = node.size * 0.3
     
     if (class(ace) == "ACTIONetExperiment") {
-        labels = preprocess.labels(labels, ace)
+        labels = .preprocess_annotation_labels(labels, ace)
         if (is.character(coordinate_slot)) {
             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
             coor.mu = apply(coors, 2, mean)
@@ -1186,7 +1136,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
             coors = scale(coors)
-            labels = preprocess.labels(labels)
+            labels = .preprocess_annotation_labels(labels)
         } else {
             print("Unknown type for ace")
             return()
@@ -1324,7 +1274,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
     node.size = node.size * 0.3
     
     if (class(ace) == "ACTIONetExperiment") {
-        labels = preprocess.labels(labels, ace)
+        labels = .preprocess_annotation_labels(labels, ace)
         if (is.character(coordinate_slot)) {
             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
             coor.mu = apply(coors, 2, mean)
@@ -1342,7 +1292,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
             coors = scale(coors)
-            labels = preprocess.labels(labels)
+            labels = .preprocess_annotation_labels(labels)
         } else {
             print("Unknown type for ace")
             return()
