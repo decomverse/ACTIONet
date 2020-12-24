@@ -49,6 +49,8 @@ include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/leiden)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/leiden/igraph)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/s_gd2)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/uwot)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/gcem)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/StatsLib)
 
 ############ Compile
 add_subdirectory(src)
