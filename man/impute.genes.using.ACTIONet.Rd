@@ -7,10 +7,11 @@
 impute.genes.using.ACTIONet(
   ace,
   genes,
+  features_use = NULL,
   alpha_val = 0.85,
-  thread_no = 8,
+  thread_no = 0,
   diffusion_iters = 5,
-  data_slot = "logcounts"
+  assay_name = "logcounts"
 )
 }
 \arguments{
@@ -26,7 +27,7 @@ The larger it is, the deeper the diffusion, which results in less nonzeros (defa
 
 \item{diffusion_iters}{Number of diffusion iterations (default = 5)}
 
-\item{data_slot}{Slot in the ace object with normalized counts.}
+\item{assay_name}{Slot in the ace object with normalized counts.}
 }
 \value{
 Imputed gene expression matrix. Column names are set with imputed genes names and rows are cells.

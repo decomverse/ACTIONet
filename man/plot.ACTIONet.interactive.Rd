@@ -15,7 +15,7 @@
   enrichment.table = NULL,
   top.features = 7,
   Alt_Text = NULL,
-  blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+  blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   threeD = FALSE,
   title = "ACTIONet",
   coordinate_slot = "ACTIONet2D"
