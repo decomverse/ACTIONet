@@ -50,9 +50,14 @@ struct PerplexityWorker {
   PerplexityWorker(const std::vector<double> &nn_dist,
                    const std::vector<int> &nn_idx, std::size_t n_vertices,
                    double perplexity, std::size_t n_iter, double tol)
-      : nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(n_vertices),
-        n_neighbors(nn_dist.size() / n_vertices), target(std::log(perplexity)),
-        n_iter(n_iter), tol(tol), res(n_vertices * n_neighbors),
+      : nn_dist(nn_dist),
+        nn_idx(nn_idx),
+        n_vertices(n_vertices),
+        n_neighbors(nn_dist.size() / n_vertices),
+        target(std::log(perplexity)),
+        n_iter(n_iter),
+        tol(tol),
+        res(n_vertices * n_neighbors),
         n_search_fails(0) {}
 
   void operator()(std::size_t begin, std::size_t end) {
@@ -154,6 +159,6 @@ struct PerplexityWorker {
   }
 };
 
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_PERPLEXITY_H
+#endif  // UWOT_PERPLEXITY_H

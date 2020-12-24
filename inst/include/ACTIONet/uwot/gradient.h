@@ -58,8 +58,9 @@ inline auto fastPrecisePow(double a, double b) -> double {
 }
 
 // Class templated on the powfun function as suggested by Aaron Lun
-template <double (*powfun)(double, double)> class base_umap_gradient {
-public:
+template <double (*powfun)(double, double)>
+class base_umap_gradient {
+ public:
   base_umap_gradient(double a, double b, double gamma)
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
   auto grad_attr(double dist_squared) const -> double {
@@ -74,7 +75,7 @@ public:
   static const constexpr double clamp_hi = 4.0;
   static const constexpr double clamp_lo = -4.0;
 
-private:
+ private:
   double a;
   double b;
   double a_b_m2;
@@ -93,7 +94,7 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 // default. Also gamma is absent from this, because I believe it to be
 // un-necessary in the UMAP cost function.
 class tumap_gradient {
-public:
+ public:
   tumap_gradient() = default;
   auto grad_attr(double dist_squared) const -> double {
     return -2.0 / (dist_squared + 1.0);
@@ -106,7 +107,7 @@ public:
 };
 
 class largevis_gradient {
-public:
+ public:
   largevis_gradient(double gamma) : gamma_2(gamma * 2.0) {}
   auto grad_attr(double dist_squared) const -> double {
     return -2.0 / (dist_squared + 1.0);
@@ -118,9 +119,9 @@ public:
   static const constexpr double clamp_hi = 5.0;
   static const constexpr double clamp_lo = -5.0;
 
-private:
+ private:
   double gamma_2;
 };
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_GRADIENT_H
+#endif  // UWOT_GRADIENT_H
