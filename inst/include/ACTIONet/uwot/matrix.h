@@ -47,6 +47,6 @@ void set_row(std::vector<T> &m, std::size_t nrow, std::size_t ncol,
   }
 }
 
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_MATRIX_H
+#endif  // UWOT_MATRIX_H

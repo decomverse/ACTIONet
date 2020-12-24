@@ -25,20 +25,18 @@ auto worker_thread(Worker &worker, const IndexRange &range) -> void {
 inline auto split_input_range(const IndexRange &range, std::size_t thread_no,
                               std::size_t grain_size)
     -> std::vector<IndexRange> {
-
   // determine max number of threads
   if (thread_no <= 0) {
-	thread_no = std::thread::hardware_concurrency() - 2;
+    thread_no = SYS_THREADS_DEF;
   }
-
 
   // compute grain_size (including enforcing requested minimum)
   std::size_t length = range.second - range.first;
   if (thread_no == 1)
     grain_size = length;
-  else if ((length % thread_no) == 0) // perfect division
+  else if ((length % thread_no) == 0)  // perfect division
     grain_size = (std::max)(length / thread_no, grain_size);
-  else // imperfect division, divide by threads - 1
+  else  // imperfect division, divide by threads - 1
     grain_size = (std::max)(length / (thread_no - 1), grain_size);
 
   // allocate ranges
@@ -73,6 +71,6 @@ inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
   }
 }
 
-} // namespace Perpendicular
+}  // namespace Perpendicular
 
-#endif // PERPENDICULAR
+#endif  // PERPENDICULAR

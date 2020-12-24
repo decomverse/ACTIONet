@@ -7,7 +7,7 @@ PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_6
 UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
     $(info Using Linux configurations)
-    NPROC=$(shell nproc)
+    NPROC=${shell nproc}
     ifeq ($(MKLROOT),)
         $(warning Can not find MKL)
         PKG_CPPFLAGS+=-I/usr/include/suitesparse
@@ -44,4 +44,4 @@ else
     $(error Unsupported OS ${UNAME})
 endif
 PKG_LIBS+=-lcholmod
-MAKEFLAGS+="-j $(NPROC)"
+MAKEFLAGS+="-j ${NPROC}"
