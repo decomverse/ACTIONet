@@ -71,8 +71,9 @@ struct SgdWorker {
   std::size_t ndim;
   std::size_t head_nvert;
   std::size_t tail_nvert;
-  std::mt19937 rng;
-  std::uniform_int_distribution<long> gen;
+  
+  std::mt19937_64 engine;
+
   double dist_eps;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
@@ -95,20 +96,15 @@ struct SgdWorker {
         ndim(ndim),
         head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-        rng(seed),
-        gen(-2147483647, 2147483646),
+        engine(seed),
         dist_eps(std::numeric_limits<double>::epsilon()) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
-    long s1, s2, s3;
-    {
-      s1 = gen(rng);
-      s2 = gen(rng);  // technically this needs to always be > 7
-      s3 = gen(rng);  // should be > 15
-    }
-    // printf("States: s1 = %ld, s2 = %ld, s3 = %ld\n", s1, s2, s3);
-
+    long s1 = stats::runif(-2147483647, 2147483646, engine);
+    long s2 = stats::runif(-2147483647, 2147483646, engine);
+    long s3 = stats::runif(-2147483647, 2147483646, engine);
+	
     tau_prng prng(s1, s2, s3);
 
     std::vector<double> dys(ndim);
