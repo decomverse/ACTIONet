@@ -93,10 +93,11 @@ multilevel_archetypal_decomposition prune_archetypes(
   // stdout_printf("done (%d archs removed)\n", bad_archs); //fflush(stdout);
   stdout_printf("\tUnreliable archetypes: %d\n", bad_archs);
 
-  uvec idx = find(C_stacked > 0);
+  uvec idx = find(C_stacked > 1e-6);
   mat C_bin = C_stacked;
   C_bin(idx).ones();
   uvec trivial_idx = find(sum(C_bin) < min_cells);
+  trivial_idx.print("trivial");
   pruned(trivial_idx).ones();
 
   // stdout_printf("Found (and removed) %d trivial archetypes\n",

@@ -289,8 +289,8 @@ py::dict run_ACTION(arma::Mat<npdouble> &S_r, int k_min = 2, int k_max = 30,
   py::list C(k_max);
   for (int i = 0; i < k_max; i++) {
 	mat curr_C = trace.C[i + 1];
-    curr_C = clamp(curr_C, 1e-5, 1);
-	curr_C = normalise(curr_C, 1);
+    //curr_C = clamp(curr_C, 1e-5, 1);
+	//curr_C = normalise(curr_C, 1);
     C[i] = curr_C;
   }
   res["C"] = C;
@@ -298,8 +298,8 @@ py::dict run_ACTION(arma::Mat<npdouble> &S_r, int k_min = 2, int k_max = 30,
   py::list H(k_max);
   for (int i = 0; i < k_max; i++) {
 	mat curr_H = trace.H[i + 1];
-    curr_H = clamp(curr_H, 1e-5, 1);
-	curr_H = normalise(curr_H, 1);
+    //curr_H = clamp(curr_H, 1e-5, 1);
+	//curr_H = normalise(curr_H, 1);
     H[i] = curr_H;
   }
   res["H"] = H;
