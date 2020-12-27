@@ -288,13 +288,13 @@ py::dict run_ACTION(arma::Mat<npdouble> &S_r, int k_min = 2, int k_max = 30,
 
   py::list C(k_max);
   for (int i = 0; i < k_max; i++) {
-    C[i] = trace.C[i + 1];
+	  C[i] = round(trace.C[i + 1]*1e5)/1e5;
   }
   res["C"] = C;
 
   py::list H(k_max);
   for (int i = 0; i < k_max; i++) {
-    H[i] = trace.H[i + 1];
+	H[i] = round(trace.H[i + 1]*1e5)/1e5;
   }
   res["H"] = H;
 
