@@ -101,6 +101,8 @@ struct SgdWorker {
     srand(begin+seed);
       long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
     tau_prng prng(s1, s2, s3);
+
+    printf("RNG: %d %d %d\n", s1, s2, s3);
     
       //std::mt19937_64 engine(begin*(seed+13));
     //stats::rand_engine_t engine(begin+seed);
