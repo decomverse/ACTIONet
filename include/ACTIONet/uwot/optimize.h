@@ -129,6 +129,9 @@ struct SgdWorker {
       for (std::size_t d = 0; d < ndim; d++) {
         double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
+        if(i < begin+10) {
+			printf("2- <%d, %d> %e\n", i, d, grad_d);
+		}
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
@@ -138,9 +141,6 @@ struct SgdWorker {
 //        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
 //        std::size_t dkn = (rand() % tail_nvert) * ndim;
         std::size_t dkn = prng(tail_nvert) * ndim;
-        if(i < begin+10) {
-			printf("<%d, %d> %d\n", i, p, dkn);
-		}
 
         if (dj == dkn) {
           continue;
@@ -157,6 +157,9 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
+        if(i < begin+10) {
+			printf("1- <%d, %d> %e\n", i, d, grad_d);
+		}
           head_embedding[dj + d] += grad_d;
         }
       }
