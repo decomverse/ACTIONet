@@ -98,6 +98,7 @@ struct SgdWorker {
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> dys(ndim);
+    printf("*********** %d - %d (%f) ************\n", beging, end, alpha);
     srand(begin+seed);
       long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
     tau_prng prng(s1, s2, s3);
@@ -130,7 +131,7 @@ struct SgdWorker {
         double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         if(i < begin+10) {
-			printf("2- <%d, %d> %e\n", i, d, grad_d);
+			printf("1- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
 		}
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
@@ -158,7 +159,7 @@ struct SgdWorker {
           double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
         if(i < begin+10) {
-			printf("1- <%d, %d> %e\n", i, d, grad_d);
+			printf("2- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
 		}
           head_embedding[dj + d] += grad_d;
         }
