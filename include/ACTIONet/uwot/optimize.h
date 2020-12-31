@@ -98,7 +98,7 @@ struct SgdWorker {
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> dys(ndim);
-    printf("*********** %d - %d (%f) ************\n", beging, end, alpha);
+    printf("*********** %d - %d (%f) ************\n", begin, end, alpha);
     srand(begin+seed);
       long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
     tau_prng prng(s1, s2, s3);
