@@ -452,9 +452,9 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
 // }
 py::dict layout_ACTIONet(arma::SpMat<npdouble> &G, arma::Mat<npdouble> S_r,
                          int compactness_level = 50,
-                         unsigned int n_epochs = 500, int thread_no = 0) {
+                         unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
   field<arma::Mat<npdouble>> res =
-      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no);
+      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no, seed);
 
   py::dict out_list;
   out_list["coordinates"] = res(0);
@@ -875,9 +875,9 @@ arma::Mat<npdouble> Prune_PageRank(arma::Mat<npdouble> &U,
 py::dict transform_layout(arma::SpMat<npdouble> &W, arma::Mat<npdouble> &coor2D,
                           Mat<npdouble> &coor3D, arma::Mat<npdouble> &colRGB,
                           int compactness_level = 50,
-                          unsigned int n_epochs = 500, int thread_no = 0) {
+                          unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
   field<mat> res = ACTIONet::transform_layout(
-      W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no);
+      W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no, seed);
 
   py::dict out_list;
   out_list["coordinates"] = res(0);

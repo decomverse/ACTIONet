@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "sampler.h"
+#include "tauprng.h"
 
 namespace uwot {
 
@@ -71,12 +72,12 @@ struct SgdWorker {
   std::size_t tail_nvert;
   double dist_eps;
 
-  std::mt19937_64 engine;
-  
+  int seed;
+
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
             std::vector<double> &head_embedding,
-            std::vector<double> &tail_embedding, std::size_t ndim, unsigned int seed)
+            std::vector<double> &tail_embedding, std::size_t ndim, uint64_t seed = std::mt19937_64::default_seed)
       :
 
         n(0),
@@ -92,13 +93,20 @@ struct SgdWorker {
         ndim(ndim),
         head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<double>::epsilon()),
-
-        engine(seed)
-        {}
+        dist_eps(std::numeric_limits<double>::epsilon()),        
+        seed(seed) {}        
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> dys(ndim);
+    srand(begin+seed);
+      long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
+    tau_prng prng(s1, s2, s3);
+    
+      //std::mt19937_64 engine(begin*(seed+13));
+    //stats::rand_engine_t engine(begin+seed);
+
+//	stdout_printf("X0 = %d (%d, %d)\n", (int) (round(stats::runif(tail_nvert-1, 0, engine)) * ndim), tail_nvert, ndim);
+    
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
@@ -106,6 +114,7 @@ struct SgdWorker {
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
+		
       double dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         double diff = head_embedding[dj + d] - tail_embedding[dk + d];
@@ -124,7 +133,10 @@ struct SgdWorker {
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        std::size_t dkn = stats::runif(0, tail_nvert, engine) * ndim;
+//        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
+//        std::size_t dkn = (rand() % tail_nvert) * ndim;
+        std::size_t dkn = prng(tail_nvert) * ndim;
+
         if (dj == dkn) {
           continue;
         }
@@ -145,13 +157,14 @@ struct SgdWorker {
       }
       sampler.next_sample(i, n_neg_samples);
     }
+    
   }
 
   void set_n(int n) { this->n = n; }
 
   void set_alpha(double alpha) { this->alpha = alpha; }
 
-  void reseed(uint64_t new_seed = std::mt19937_64::default_seed) { engine.seed(new_seed); }
+  void reseed(uint64_t new_seed) { srand(new_seed); }
 };
 }  // namespace uwot
 

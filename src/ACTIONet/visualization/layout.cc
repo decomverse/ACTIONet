@@ -76,7 +76,7 @@ std::vector<double> optimize_layout_umap(
     unsigned int n_vertices, const std::vector<double> epochs_per_sample,
     double a, double b, double gamma, double initial_alpha,
     double negative_sample_rate, bool approx_pow, std::size_t n_threads,
-    std::size_t grain_size, bool move_other);
+    std::size_t grain_size, bool move_other, int seed);
 
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t thread_no,
@@ -203,7 +203,7 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
 }
 
 field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
-                           unsigned int n_epochs = 500, int thread_no = 0) {
+                           unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
   }
@@ -284,7 +284,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);
+      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
 
   mat coordinates(result.data(), 2, nV);
   // coordinates = robust_zscore(trans(coordinates));
@@ -309,7 +309,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);
+      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
 
   mat coordinates_3D(result.data(), 3, nV);
   // coordinates_3D = robust_zscore(trans(coordinates_3D));
@@ -376,7 +376,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 // coor2D, coor3D, colRGB: {2, 3, 3} x cells
 field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
                             int compactness_level = 50,
-                            unsigned int n_epochs = 500, int thread_no = 8) {
+                            unsigned int n_epochs = 500, int thread_no = 8, int seed = 0) {
   int nV = W.n_cols;
 
   if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
@@ -432,7 +432,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false);
+      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
 
   mat coordinates(result.data(), 2, nV);
   // stdout_printf("done\n"); FLUSH;//fflush(stdout);
@@ -447,7 +447,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);
+      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false, seed);
 
   mat coordinates_3D(result.data(), 3, nV);
   // stdout_printf("done\n"); FLUSH; //fflush(stdout);
