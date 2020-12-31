@@ -97,7 +97,6 @@ multilevel_archetypal_decomposition prune_archetypes(
   mat C_bin = C_stacked;
   C_bin(idx).ones();
   uvec trivial_idx = find(sum(C_bin) < min_cells);
-  trivial_idx.print("trivial");
   pruned(trivial_idx).ones();
 
   // stdout_printf("Found (and removed) %d trivial archetypes\n",

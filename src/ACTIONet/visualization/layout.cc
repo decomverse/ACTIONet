@@ -69,11 +69,11 @@ const double UMAP_B[101] = {
 #define UMAP_SEED 0
 #define GAMMA 1.0
 
-std::vector<double> optimize_layout_umap(
-    std::vector<double> head_vec, std::vector<double> tail_vec,
+std::vector<float> optimize_layout_umap(
+    std::vector<float> head_vec, std::vector<float> tail_vec,
     const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<double> epochs_per_sample,
+    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
     double a, double b, double gamma, double initial_alpha,
     double negative_sample_rate, bool approx_pow, std::size_t n_threads,
     std::size_t grain_size, bool move_other, int seed);
@@ -231,7 +231,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   unsigned int nE = G.n_nonzero;
   vector<unsigned int> positive_head(nE);
   vector<unsigned int> positive_tail(nE);
-  vector<double> epochs_per_sample(nE);
+  vector<float> epochs_per_sample(nE);
 
   const double* values = G.values;
   const uword* rows = G.row_indices;
@@ -273,20 +273,22 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   // Initial coordinates of vertices (0-simplices)
   mat initial_coor2D = init_coors.rows(0, 1);
-  vector<double> head_vec(initial_coor2D.memptr(),
+  vector<float> head_vec(initial_coor2D.memptr(),
                           initial_coor2D.memptr() + initial_coor2D.n_elem);
-  vector<double> tail_vec(head_vec);
+  vector<float> tail_vec(head_vec);
 
   stdout_printf("\tComputing 2D layout ... ");  // fflush(stdout);
   // Stores linearized coordinates [x1, y1, x2, y2, ...]
-  vector<double> result;
+  vector<float> result;
 
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
       NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
 
-  mat coordinates(result.data(), 2, nV);
+  fmat coordinates_float(result.data(), 2, nV);  
+  mat coordinates = conv_to<mat>::from(coordinates_float);
+  
   // coordinates = robust_zscore(trans(coordinates));
   coordinates = trans(coordinates);
 
@@ -311,7 +313,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
       NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
 
-  mat coordinates_3D(result.data(), 3, nV);
+  fmat coordinates_3D_float(result.data(), 3, nV);  
+  mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
   // coordinates_3D = robust_zscore(trans(coordinates_3D));
   coordinates_3D = trans(coordinates_3D);
 
@@ -398,9 +401,9 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   arch_colRGB = clamp(arch_colRGB, 0, 1);
 
   // 3) Store old (ACTIONet) and new (initial) coordinates
-  vector<double> head_vec(arch_coor2D.memptr(),
+  vector<float> head_vec(arch_coor2D.memptr(),
                           arch_coor2D.memptr() + arch_coor2D.n_elem);
-  vector<double> tail_vec(coor2D.memptr(), coor2D.memptr() + coor2D.n_elem);
+  vector<float> tail_vec(coor2D.memptr(), coor2D.memptr() + coor2D.n_elem);
 
   // 4) Linearize edges and estimate epochs
   double global_max = arma::max(arma::max(W));
@@ -409,7 +412,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   positive_head.reserve(W.n_nonzero);
   vector<unsigned int> positive_tail;
   positive_tail.reserve(W.n_nonzero);
-  vector<double> epochs_per_sample;
+  vector<float> epochs_per_sample;
   epochs_per_sample.reserve(W.n_nonzero);
 
   sp_mat::const_iterator it = W.begin();
@@ -427,18 +430,19 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   // positive_tail.resize(idx); positive_head.resize(idx);
   // epochs_per_sample.resize(idx);
 
-  vector<double> result;
+  vector<float> result;
 
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
       NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
 
-  mat coordinates(result.data(), 2, nV);
+  fmat coordinates_float(result.data(), 2, nV);  
+  mat coordinates = conv_to<mat>::from(coordinates_float);
   // stdout_printf("done\n"); FLUSH;//fflush(stdout);
 
-  vector<double> head_vec3D(coor3D.memptr(), coor3D.memptr() + coor3D.n_elem);
-  vector<double> tail_vec3D(arch_coor3D.memptr(),
+  vector<float> head_vec3D(coor3D.memptr(), coor3D.memptr() + coor3D.n_elem);
+  vector<float> tail_vec3D(arch_coor3D.memptr(),
                             arch_coor3D.memptr() + arch_coor3D.n_elem);
 
   // stdout_printf("Computing 3D layout ... "); //fflush(stdout);
@@ -449,7 +453,8 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
       NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false, seed);
 
-  mat coordinates_3D(result.data(), 3, nV);
+  fmat coordinates_3D_float(result.data(), 3, nV);  
+  mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
   // stdout_printf("done\n"); FLUSH; //fflush(stdout);
 
   field<mat> res(3);

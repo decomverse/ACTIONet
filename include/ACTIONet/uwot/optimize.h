@@ -39,19 +39,19 @@ namespace uwot {
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<double> &, double, std::size_t, std::size_t) {
+void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {
 }
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
 template <>
-void move_other_vertex<true>(std::vector<double> &embedding, double grad_d,
+void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
                              std::size_t i, std::size_t nrj) {
   embedding[nrj + i] -= grad_d;
 }
 
-inline auto clamp(double v, double lo, double hi) -> double {
-  double t = v < lo ? lo : v;
+inline auto clamp(float v, float lo, float hi) -> float {
+  float t = v < lo ? lo : v;
   return t > hi ? hi : t;
 }
 
@@ -60,24 +60,24 @@ inline auto clamp(double v, double lo, double hi) -> double {
 template <typename Gradient, bool DoMoveVertex>
 struct SgdWorker {
   int n;  // epoch counter
-  double alpha;
+  float alpha;
   const Gradient gradient;
   const std::vector<unsigned int> positive_head;
   const std::vector<unsigned int> positive_tail;
   uwot::Sampler sampler;
-  std::vector<double> &head_embedding;
-  std::vector<double> &tail_embedding;
+  std::vector<float> &head_embedding;
+  std::vector<float> &tail_embedding;
   std::size_t ndim;
   std::size_t head_nvert;
   std::size_t tail_nvert;
-  double dist_eps;
+  float dist_eps;
 
   int seed;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
-            std::vector<double> &head_embedding,
-            std::vector<double> &tail_embedding, std::size_t ndim, uint64_t seed = std::mt19937_64::default_seed)
+            std::vector<float> &head_embedding,
+            std::vector<float> &tail_embedding, std::size_t ndim, uint64_t seed = std::mt19937_64::default_seed)
       :
 
         n(0),
@@ -93,17 +93,18 @@ struct SgdWorker {
         ndim(ndim),
         head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<double>::epsilon()),        
+        dist_eps(std::numeric_limits<float>::epsilon()),        
         seed(seed) {}        
 
   void operator()(std::size_t begin, std::size_t end) {
-    std::vector<double> dys(ndim);
+    std::vector<float> dys(ndim);
     printf("*********** %d - %d (%f) ************\n", begin, end, alpha);
+    
     srand(begin+seed);
       long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
     tau_prng prng(s1, s2, s3);
-
 //    printf("RNG: %d %d %d\n", s1, s2, s3);
+    
     
       //std::mt19937_64 engine(begin*(seed+13));
     //stats::rand_engine_t engine(begin+seed);
@@ -118,17 +119,17 @@ struct SgdWorker {
       std::size_t dk = ndim * positive_tail[i];
 
 		
-      double dist_squared = 0.0;
+      float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
-        double diff = head_embedding[dj + d] - tail_embedding[dk + d];
+        float diff = head_embedding[dj + d] - tail_embedding[dk + d];
         dys[d] = diff;
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
-      double grad_coeff = gradient.grad_attr(dist_squared);
+      float grad_coeff = gradient.grad_attr(dist_squared);
 
       for (std::size_t d = 0; d < ndim; d++) {
-        double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         if(i < begin+20) {
 			printf("1- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
@@ -146,17 +147,17 @@ struct SgdWorker {
         if (dj == dkn) {
           continue;
         }
-        double dist_squared = 0.0;
+        float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
-          double diff = head_embedding[dj + d] - tail_embedding[dkn + d];
+          float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] = diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
-        double grad_coeff = gradient.grad_rep(dist_squared);
+        float grad_coeff = gradient.grad_rep(dist_squared);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
         if(i < begin+20) {
 			printf("2- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
@@ -171,7 +172,7 @@ struct SgdWorker {
 
   void set_n(int n) { this->n = n; }
 
-  void set_alpha(double alpha) { this->alpha = alpha; }
+  void set_alpha(float alpha) { this->alpha = alpha; }
 
   void reseed(uint64_t new_seed) { srand(new_seed); }
 };
