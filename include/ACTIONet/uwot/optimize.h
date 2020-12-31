@@ -117,11 +117,16 @@ struct SgdWorker {
       }
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
-
+	if(i < begin+20) {
+		printf("%d- <%d, %d>\n", i, dj, dk);
+	}
 		
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+		if(i < begin+20) {
+			printf("Diff 1- <%d, %d> = %e\n", i, d, diff);
+		}
         dys[d] = diff;
         dist_squared += diff * diff;
       }
@@ -143,13 +148,18 @@ struct SgdWorker {
 //        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
 //        std::size_t dkn = (rand() % tail_nvert) * ndim;
         std::size_t dkn = prng(tail_nvert) * ndim;
-
+			if(i < begin+20) {
+				printf("%d- NEg = %d\n", i, dkn);
+			}
         if (dj == dkn) {
           continue;
         }
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
+			if(i < begin+20) {
+				printf("Diff 2- <%d, %d> = %e\n", i, d, diff);
+			}
           dys[d] = diff;
           dist_squared += diff * diff;
         }
