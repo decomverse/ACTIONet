@@ -1019,10 +1019,10 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def(
       "layout_ACTIONet",
       py::overload_cast<arma::SpMat<npdouble> &, arma::Mat<npdouble>, int,
-                        unsigned int, int>(&layout_ACTIONet),
+                        unsigned int, int, int>(&layout_ACTIONet),
       "Performs stochastic force-directed layout on the input graph (ACTIONet)",
       py::arg("G"), py::arg("S_r"), py::arg("compactness_level") = 50,
-      py::arg("n_epochs") = 500, py::arg("thread_no") = 0);
+      py::arg("n_epochs") = 500, py::arg("thread_no") = 0, py::arg("seed") = 0);
 
   // Pseudobulk
   m.def("compute_pseudo_bulk_per_archetype",
@@ -1162,11 +1162,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def("transform_layout",
         py::overload_cast<arma::SpMat<npdouble> &, Mat<npdouble> &,
                           Mat<npdouble> &, Mat<npdouble> &, int, unsigned int,
-                          int>(&transform_layout),
+                          int, int>(&transform_layout),
         "Project a new data into current embedding", py::arg("W"),
         py::arg("coor2D"), py::arg("coor3D"), py::arg("colRGB"),
         py::arg("compactness_level") = 50, py::arg("n_epochs") = 500,
-        py::arg("thread_no") = 0);
+        py::arg("thread_no") = 0, py::arg("seed") = 0);
   m.def("compute_full_sim",
         py::overload_cast<arma::Mat<npdouble> &, int>(&compute_full_sim), "",
         py::arg("H"), py::arg("thread_no") = 0);
