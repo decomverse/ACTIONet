@@ -125,7 +125,7 @@ struct SgdWorker {
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
 		if(i < begin+20) {
-			printf("Diff 1- <%d, %d> = %e\n", i, d, diff);
+			printf("Diff 1- <%d, %d> => %e - %e == %e\n", i, d, head_embedding[dj + d], tail_embedding[dk + d], diff);
 		}
         dys[d] = diff;
         dist_squared += diff * diff;
@@ -158,7 +158,7 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
 			if(i < begin+20) {
-				printf("Diff 2- <%d, %d> = %e\n", i, d, diff);
+				printf("Diff 1- <%d, %d> => %e - %e == %e\n", i, d, head_embedding[dj + d], tail_embedding[dk + d], diff);
 			}
           dys[d] = diff;
           dist_squared += diff * diff;
