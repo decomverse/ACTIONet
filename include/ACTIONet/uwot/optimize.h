@@ -130,7 +130,7 @@ struct SgdWorker {
       for (std::size_t d = 0; d < ndim; d++) {
         double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
-        if(i < begin+10) {
+        if(i < begin+20) {
 			printf("1- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
 		}
         head_embedding[dj + d] += grad_d;
@@ -158,7 +158,7 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           double grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
-        if(i < begin+10) {
+        if(i < begin+20) {
 			printf("2- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
 		}
           head_embedding[dj + d] += grad_d;
