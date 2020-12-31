@@ -102,7 +102,7 @@ struct SgdWorker {
       long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
     tau_prng prng(s1, s2, s3);
 
-    printf("RNG: %d %d %d\n", s1, s2, s3);
+//    printf("RNG: %d %d %d\n", s1, s2, s3);
     
       //std::mt19937_64 engine(begin*(seed+13));
     //stats::rand_engine_t engine(begin+seed);
@@ -138,6 +138,9 @@ struct SgdWorker {
 //        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
 //        std::size_t dkn = (rand() % tail_nvert) * ndim;
         std::size_t dkn = prng(tail_nvert) * ndim;
+        if(i < begin+10) {
+			printf("<%d, %d> %d\n", i, p, dkn);
+		}
 
         if (dj == dkn) {
           continue;

@@ -26,12 +26,6 @@ auto optimize_layout(const T &gradient, std::vector<double> &head_embedding,
   const auto n_epochs_per_sample = epochs_per_sample.size();
   double alpha = initial_alpha;
 
-	for(int i = 0; i < 10; i++) printf("head_embedding[%d] = %f\n", i, head_embedding[i]);
-	for(int i = 0; i < 10; i++) printf("tail_embedding[%d] = %f\n", i, tail_embedding[i]);
-	for(int i = 0; i < 10; i++) printf("positive_head[%d] = %d\n", i, positive_head[i]);
-	for(int i = 0; i < 10; i++) printf("positive_tail[%d] = %d\n", i, positive_tail[i]);
-	for(int i = 0; i < 10; i++) printf("epochs_per_sample[%d] = %f\n", i, epochs_per_sample[i]);
-
 	
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
