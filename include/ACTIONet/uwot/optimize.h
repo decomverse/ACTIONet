@@ -114,6 +114,7 @@ struct SgdWorker {
 
 //	stdout_printf("X0 = %d (%d, %d)\n", (int) (round(stats::runif(tail_nvert-1, 0, engine)) * ndim), tail_nvert, ndim);
     
+    long long int ss = 0;
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
@@ -145,7 +146,9 @@ struct SgdWorker {
       for (std::size_t p = 0; p < n_neg_samples; p++) {
 //        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
 //        std::size_t dkn = (rand() % tail_nvert) * ndim;
-        std::size_t dkn = uniform_dist(rng) * ndim;
+		int r = uniform_dist(rng);
+		ss += r;
+        std::size_t dkn = r * ndim;
 			if(i < begin+20) {
 				printf("%d- Neg = %d\n", i, dkn);
 			}
@@ -172,7 +175,8 @@ struct SgdWorker {
       }
       sampler.next_sample(i, n_neg_samples);
     }
-        
+       
+    printf("ss = %ld\n", ss);
     
   }
 
