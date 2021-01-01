@@ -117,10 +117,12 @@ struct SgdWorker {
     long long int ss = 0;
     double g1 = 0, g2 = 0;
     
+    long long tt = 0;
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
+      tt += i;
       
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
@@ -182,7 +184,7 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
        
-    printf("ss = %ld, g1 = %e, g2 = %e\n", ss, g1, g2);
+    printf("ss = %ld, tt = %ld, g1 = %e, g2 = %e\n", ss, tt, g1, g2);
     
   }
 
