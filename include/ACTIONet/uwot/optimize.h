@@ -41,8 +41,7 @@ namespace uwot {
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {
-}
+void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
@@ -74,14 +73,13 @@ struct SgdWorker {
   std::size_t tail_nvert;
   float dist_eps;
 
-	pcg32 rng;
-	
-  int seed;
+  pcg32 rng;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
             std::vector<float> &head_embedding,
-            std::vector<float> &tail_embedding, std::size_t ndim, uint64_t seed = std::mt19937_64::default_seed)
+            std::vector<float> &tail_embedding, std::size_t ndim,
+            uint64_t seed = std::mt19937_64::default_seed)
       :
 
         n(0),
@@ -97,36 +95,23 @@ struct SgdWorker {
         ndim(ndim),
         head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<float>::epsilon()) { rng.seed(seed); }        
+        dist_eps(std::numeric_limits<float>::epsilon()) {
+    rng.seed(seed);
+  }
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<float> dys(ndim);
-    printf("*********** %d - %d (%f) ************\n", begin, end, alpha);
 
-    std::uniform_int_distribution<int> uniform_dist(0, tail_nvert-1);
+    std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
-    
-//    printf("RNG: %d %d %d\n", s1, s2, s3);
-    
-    
-      //std::mt19937_64 engine(begin*(seed+13));
-    //stats::rand_engine_t engine(begin+seed);
-
-//	stdout_printf("X0 = %d (%d, %d)\n", (int) (round(stats::runif(tail_nvert-1, 0, engine)) * ndim), tail_nvert, ndim);
-    
-    long long int ss = 0;
-    double g1 = 0, g2 = 0;
-    
-    long long tt = 0;
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
-      tt += i;
-      
+
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
-		
+
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
@@ -134,30 +119,20 @@ struct SgdWorker {
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
-      
+
       float grad_coeff = gradient.grad_attr(dist_squared);
-      g1 += grad_coeff;
 
       for (std::size_t d = 0; d < ndim; d++) {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
-        if(i < begin+20) {
-			printf("1- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
-		}
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-//        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
-//        std::size_t dkn = (rand() % tail_nvert) * ndim;
-		int r = uniform_dist(rng);
-		ss += r;
+        int r = uniform_dist(rng);
         std::size_t dkn = r * ndim;
-			if(i < begin+20) {
-				printf("%d- Neg = %d\n", i, dkn);
-			}
         if (dj == dkn) {
           continue;
         }
@@ -168,31 +143,25 @@ struct SgdWorker {
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
-        
+
         float grad_coeff = gradient.grad_rep(dist_squared);
-        g2 += grad_coeff;
 
         for (std::size_t d = 0; d < ndim; d++) {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
-        if(i < begin+20) {
-			printf("2- <%d, %d> %e (= %f * %f)\n", i, d, grad_d, grad_coeff, dys[d]);
-		}
+
           head_embedding[dj + d] += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
     }
-       
-    printf("ss = %ld, tt = %ld, g1 = %e, g2 = %e\n", ss, tt, g1, g2);
-    
   }
 
   void set_n(int n) { this->n = n; }
 
   void set_alpha(float alpha) { this->alpha = alpha; }
 
-  void reseed(uint64_t new_seed) { srand(new_seed); }
+  void reseed(int new_seed) { rng.seed(new_seed); }
 };
 }  // namespace uwot
 

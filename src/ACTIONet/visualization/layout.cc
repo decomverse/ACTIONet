@@ -203,7 +203,8 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
 }
 
 field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
-                           unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
+                           unsigned int n_epochs = 500, int thread_no = 0,
+                           int seed = 0) {
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
   }
@@ -242,7 +243,6 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   uvec cv(col_offsets, G.n_cols + 1);
   vec delta = diff(conv_to<vec>::from(cv));
   vec kk = join_vert(zeros(1), cumsum(delta));
-  // for(int j = 0; j < nV; j++) {
   ParallelFor(0, nV, thread_no, [&](size_t j, size_t threadId) {
     int k = (int)kk[j];
     int M = (int)delta[j];
@@ -252,8 +252,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   });
 
   double w_max = arma::max(vec(values, G.n_nonzero));
-  //ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
-  for(int i = 0; i < nE; i++) {
+  ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
+    // for(int i = 0; i < nE; i++) {
     epochs_per_sample[i] =
         w_max /
         values[i];  // Higher the weight of the edge, the more likely it is to
@@ -273,9 +273,6 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   */
 
   // Initial coordinates of vertices (0-simplices)
-  vec v = sum(init_coors, 1);
-  v.print("Coor Sums");
-  
   fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
   vector<float> head_vec(initial_coor2D.memptr(),
                           initial_coor2D.memptr() + initial_coor2D.n_elem);
@@ -383,7 +380,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 // coor2D, coor3D, colRGB: {2, 3, 3} x cells
 field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
                             int compactness_level = 50,
-                            unsigned int n_epochs = 500, int thread_no = 8, int seed = 0) {
+                            unsigned int n_epochs = 500, int thread_no = 8,
+                            int seed = 0) {
   int nV = W.n_cols;
 
   if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
@@ -406,7 +404,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
 
   // 3) Store old (ACTIONet) and new (initial) coordinates
   vector<float> head_vec(arch_coor2D.memptr(),
-                          arch_coor2D.memptr() + arch_coor2D.n_elem);
+                         arch_coor2D.memptr() + arch_coor2D.n_elem);
   vector<float> tail_vec(coor2D.memptr(), coor2D.memptr() + coor2D.n_elem);
 
   // 4) Linearize edges and estimate epochs
@@ -441,13 +439,13 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
       NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
 
-  fmat coordinates_float(result.data(), 2, nV);  
+  fmat coordinates_float(result.data(), 2, nV);
   mat coordinates = conv_to<mat>::from(coordinates_float);
   // stdout_printf("done\n"); FLUSH;//fflush(stdout);
 
   vector<float> head_vec3D(coor3D.memptr(), coor3D.memptr() + coor3D.n_elem);
   vector<float> tail_vec3D(arch_coor3D.memptr(),
-                            arch_coor3D.memptr() + arch_coor3D.n_elem);
+                           arch_coor3D.memptr() + arch_coor3D.n_elem);
 
   // stdout_printf("Computing 3D layout ... "); //fflush(stdout);
   result.clear();
@@ -457,7 +455,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
       NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false, seed);
 
-  fmat coordinates_3D_float(result.data(), 3, nV);  
+  fmat coordinates_3D_float(result.data(), 3, nV);
   mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
   // stdout_printf("done\n"); FLUSH; //fflush(stdout);
 
