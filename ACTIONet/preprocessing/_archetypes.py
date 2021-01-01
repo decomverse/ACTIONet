@@ -105,7 +105,7 @@ def unify_archetypes(
         `.obsm['H_unified']`
         `.uns['ACTION']['archetypes']['unified']`
     """
-    # Check for ACTION and ACTION_H_stacked
+    # Check for ACTION and H_stacked
     if "ACTION" not in adata.obsm.keys():
         raise ValueError(
             "Did not find adata.obsm['ACTION']. "
@@ -113,10 +113,10 @@ def unify_archetypes(
         )
     if (
         "C_stacked" not in adata.obsm.keys()
-        or "ACTION_H_stacked" not in adata.obsm.keys()
+        or "H_stacked" not in adata.obsm.keys()
     ):
         raise ValueError(
-            "Did not find adata.obsm['C_stacked'] or adata.obsm['ACTION_H_stacked']. "
+            "Did not find adata.obsm['C_stacked'] or adata.obsm['H_stacked']. "
             "Please run pp.prune_archetypes() first."
         )
 
