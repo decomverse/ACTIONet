@@ -51,6 +51,7 @@ include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/s_gd2)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/uwot)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/gcem)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/StatsLib)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/pcg)
 
 ############ Compile
 add_subdirectory(src)
