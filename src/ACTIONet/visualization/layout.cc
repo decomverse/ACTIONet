@@ -211,7 +211,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   field<mat> res(3);
 
-  mat init_coors = trans(zscore(trans(S_r.rows(0, 2))));
+  mat init_coors = S_r.rows(0, 2);
 
   stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
                 compactness_level, n_epochs);
@@ -252,14 +252,15 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   });
 
   double w_max = arma::max(vec(values, G.n_nonzero));
-  ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
+  //ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
+  for(int i = 0; i < nE; i++) {
     epochs_per_sample[i] =
         w_max /
         values[i];  // Higher the weight of the edge, the more likely it is to
                     // be sampled (inversely proportional to epochs_per_sample)
     positive_head[i] = rows[i];
-    positive_tail[i++] = cols[i];
-  });
+    positive_tail[i] = cols[i];
+  }
 
   /*
   int i = 0;
@@ -272,7 +273,10 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   */
 
   // Initial coordinates of vertices (0-simplices)
-  mat initial_coor2D = init_coors.rows(0, 1);
+  vec v = sum(init_coors, 1);
+  v.print("Coor Sums");
+  
+  fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
   vector<float> head_vec(initial_coor2D.memptr(),
                           initial_coor2D.memptr() + initial_coor2D.n_elem);
   vector<float> tail_vec(head_vec);
@@ -298,7 +302,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   /****************************
    *  Compute 3D Embedding	*
    ***************************/
-  mat initial_coor3D = join_vert(trans(zscore(coordinates)), init_coors.row(2));
+  fmat initial_coor3D = conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
 
   head_vec.clear();
   head_vec.resize(initial_coor3D.n_elem);
