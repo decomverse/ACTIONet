@@ -119,7 +119,7 @@ def construct_backbone(
     arch_vis_out = _an.transform_layout(
         Adj,
         coor2D=adata.obsm["X_ACTIONet2D"].T,
-        coor3D=adata.obsm["X_ACTIONet_3D"].T,
+        coor3D=adata.obsm["X_ACTIONet3D"].T,
         colRGB=adata.uns["ACTIONet"]["colors"].T,
         n_epochs=layout_epochs,
         compactness_level=layout_compactness,
