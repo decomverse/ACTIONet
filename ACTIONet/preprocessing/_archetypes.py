@@ -41,8 +41,8 @@ def prune_archetypes(
     adata : anndata.AnnData
         if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm['ACTION_C_stacked']`
-        `.obsm['ACTION_H_stacked']`
+        `.obsm['C_stacked']`
+        `.obsm['H_stacked']`
         `.uns['ACTION']['archetypes']['pruned']`
     """
     if "ACTION" not in adata.uns.keys():
@@ -55,8 +55,8 @@ def prune_archetypes(
     )
 
     adata = adata.copy() if copy else adata
-    adata.obsm["ACTION_C_stacked"] = sparse.csc_matrix(pruned["C_stacked"])
-    adata.obsm["ACTION_H_stacked"] = sparse.csc_matrix(pruned["H_stacked"].T)
+    adata.obsm["C_stacked"] = sparse.csc_matrix(pruned["C_stacked"])
+    adata.obsm["H_stacked"] = sparse.csc_matrix(pruned["H_stacked"].T)
     adata.uns["ACTION"].setdefault("archetypes", {}).update(
         {"pruned": {"selected_archetypes": pruned["selected_archs"]}}
     )
@@ -101,22 +101,22 @@ def unify_archetypes(
         adata : anndata.AnnData
         if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm['ACTION_C_unified']`
-        `.obsm['ACTION_H_unified']`
+        `.obsm['C_unified']`
+        `.obsm['H_unified']`
         `.uns['ACTION']['archetypes']['unified']`
     """
-    # Check for ACTION_S_r and ACTION_H_stacked
-    if "ACTION_S_r" not in adata.obsm.keys():
+    # Check for ACTION and ACTION_H_stacked
+    if "ACTION" not in adata.obsm.keys():
         raise ValueError(
-            "Did not find adata.obsm['ACTION_S_r']. "
+            "Did not find adata.obsm['ACTION']. "
             "Please run pp.reduce_kernel() first."
         )
     if (
-        "ACTION_C_stacked" not in adata.obsm.keys()
+        "C_stacked" not in adata.obsm.keys()
         or "ACTION_H_stacked" not in adata.obsm.keys()
     ):
         raise ValueError(
-            "Did not find adata.obsm['ACTION_C_stacked'] or adata.obsm['ACTION_H_stacked']. "
+            "Did not find adata.obsm['C_stacked'] or adata.obsm['ACTION_H_stacked']. "
             "Please run pp.prune_archetypes() first."
         )
 
@@ -128,8 +128,8 @@ def unify_archetypes(
 
     adata = adata.copy() if copy else adata
     G = adata.obsp["ACTIONet"]
-    S_r = adata.obsm["ACTION_S_r"].T
-    C = adata.obsm["ACTION_C_stacked"]
+    S_r = adata.obsm["ACTION"].T
+    C = adata.obsm["C_stacked"]
     if sparse.issparse(C):
         C = C.toarray()
 
@@ -143,8 +143,8 @@ def unify_archetypes(
         n_threads
     )
 
-    adata.obsm["ACTION_C_unified"] = sparse.csc_matrix(unified["C_unified"])
-    adata.obsm["ACTION_H_unified"] = sparse.csc_matrix(unified["H_unified"].T)
+    adata.obsm["C_unified"] = sparse.csc_matrix(unified["C_unified"])
+    adata.obsm["H_unified"] = sparse.csc_matrix(unified["H_unified"].T)
     adata.uns["ACTION"].setdefault("archetypes", {}).update(
         {"unified": {"selected_archetypes": unified["selected_archetypes"]}}
     )

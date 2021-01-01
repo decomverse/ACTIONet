@@ -61,13 +61,13 @@ def reduce_kernel(
 
     Returns
     -------
-    ACTION_S_r : :class:`~scipy.sparse.spmatrix`, :class:`~numpy.ndarray`
+    ACTION : :class:`~scipy.sparse.spmatrix`, :class:`~numpy.ndarray`
         If `data` is array-like and `return_info=False` was passed,
-        this function only returns `ACTION_S_r`…
+        this function only returns `ACTION`…
     adata : anndata.AnnData
         …otherwise if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm['ACTION_S_r']`
+        `.obsm['ACTION']`
              Scaled right singular vectors (reduced cell representations)
         `.varm['ACTION_V']`
              Left singular vectors (signifying gene modules)
@@ -119,7 +119,7 @@ def reduce_kernel(
     )
 
     if data_is_AnnData:
-        adata.obsm["ACTION_S_r"] = S_r
+        adata.obsm["ACTION"] = S_r
         adata.uns["ACTION"] = {}
         adata.uns["ACTION"]["params"] = {"use_highly_variable": use_highly_variable}
         adata.uns["ACTION"]["sigma"] = sigma

@@ -38,12 +38,12 @@ def ACTION(
     """
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
-        if "ACTION_S_r" not in data.obsm.keys():
+        if "ACTION" not in data.obsm.keys():
             raise ValueError(
-                "Did not find adata.obsm['ACTION_S_r']. "
+                "Did not find adata.obsm['ACTION']. "
                 "Please run pp.reduce_kernel() first."
             )
-        X = data.obsm["ACTION_S_r"].T
+        X = data.obsm["ACTION"].T
     else:
         X = data.T
 

@@ -40,13 +40,13 @@ def build_network(
         `.obsp['ACTIONet']`
         `.uns['ACTIONet']['params']`
     """
-    if "ACTION_H_stacked" not in adata.obsm.keys():
+    if "H_stacked" not in adata.obsm.keys():
         raise ValueError(
-            "Did not find adata.obsm['ACTION_H_stacked']. "
+            "Did not find adata.obsm['H_stacked']. "
             "Please run pp.prune_archetypes() first."
         )
     adata = adata.copy() if copy else adata
-    H_stacked = adata.obsm["ACTION_H_stacked"].T
+    H_stacked = adata.obsm["H_stacked"].T
     if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
     G = _an.build_ACTIONet(H_stacked, density, n_threads, mutual_edges_only)

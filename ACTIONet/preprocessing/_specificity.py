@@ -21,7 +21,7 @@ def _compute_cluster_specificity(S, assignments):
 
 def compute_archetype_feature_specificity(
     adata: AnnData,
-    archetypes_key: Optional[str] = "ACTION_archetype_footprint",
+    archetypes_key: Optional[str] = "archetype_footprint",
     copy: Optional[bool] = False,
 ) -> AnnData:
     """\

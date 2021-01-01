@@ -52,7 +52,7 @@ def compute_archetype_core_centrality(
 
 def compute_network_diffusion(
     adata: AnnData,
-    archetypes_key: Optional[str] = "ACTION_H_unified",
+    archetypes_key: Optional[str] = "H_unified",
     alpha: Optional[float] = 0.85,
     n_threads: Optional[int] = 0,
     copy: Optional[bool] = False,
@@ -71,15 +71,15 @@ def compute_network_diffusion(
     archetype_footprint = _an.compute_network_diffusion(
         G, H, alpha=alpha, thread_no=n_threads
     )
-    adata.obsm["ACTION_archetype_footprint"] = archetype_footprint
+    adata.obsm["archetype_footprint"] = archetype_footprint
 
     return adata if copy else None
 
 
 def construct_backbone(
     adata: AnnData,
-    archetypes_key: Optional[str] = "ACTION_H_unified",
-    footprint_key: Optional[str] = "ACTION_archetype_footprint",
+    archetypes_key: Optional[str] = "H_unified",
+    footprint_key: Optional[str] = "archetype_footprint",
     scale: Optional[bool] = True,
     network_density: Optional[float] = 1.0,
     mutual_edges_only: Optional[bool] = True,
@@ -118,7 +118,7 @@ def construct_backbone(
     
     arch_vis_out = _an.transform_layout(
         Adj,
-        coor2D=adata.obsm["X_ACTIONet_2D"].T,
+        coor2D=adata.obsm["X_ACTIONet2D"].T,
         coor3D=adata.obsm["X_ACTIONet_3D"].T,
         colRGB=adata.uns["ACTIONet"]["colors"].T,
         n_epochs=layout_epochs,

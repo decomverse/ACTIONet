@@ -38,8 +38,8 @@ def layout_network(
         adata : anndata.AnnData
         if `copy=True` returns None or else adds fields to `adata`:
 
-        `.obsm['X_ACTIONet_2D']`
-        `.obsm['X_ACTIONet_3D']`
+        `.obsm['X_ACTIONet2D']`
+        `.obsm['X_ACTIONet3D']`
         `.uns['ACTIONet']['colors']`
     """
     if "ACTIONet" not in adata.obsp.keys():
@@ -51,14 +51,14 @@ def layout_network(
     adata = adata.copy() if copy else adata
     G = adata.obsp["ACTIONet"]
     if scale:
-        S_r = scale_matrix(adata.obsm["ACTION_S_r"]).T
+        S_r = scale_matrix(adata.obsm["ACTION"]).T
     else:
-        S_r = adata.obsm["ACTION_S_r"].T
+        S_r = adata.obsm["ACTION"].T
 
     layout = _an.layout_ACTIONet(G, S_r, compactness_level, n_epochs, n_threads)
 
-    adata.obsm["X_ACTIONet_2D"] = layout["coordinates"]
-    adata.obsm["X_ACTIONet_3D"] = layout["coordinates_3D"]
+    adata.obsm["X_ACTIONet2D"] = layout["coordinates"]
+    adata.obsm["X_ACTIONet3D"] = layout["coordinates_3D"]
     adata.uns["ACTIONet"].update({"colors": layout["colors"]})
 
     return ACE if copy else None

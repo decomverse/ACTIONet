@@ -10,7 +10,7 @@ import _ACTIONet as _an
 
 
 def impute_genes_using_archetypes(
-    adata: AnnData, genes: list, archetypes_key: Optional[str] = "ACTION_H_unified"
+    adata: AnnData, genes: list, archetypes_key: Optional[str] = "H_unified"
 ) -> AnnData:
     """
     Impute expression of genes by interpolating over archetype profile
@@ -49,7 +49,7 @@ def impute_genes_using_archetypes(
 def impute_specific_genes_using_archetypes(
     adata: AnnData,
     genes: list,
-    archetypes_key: Optional[str] = "ACTION_H_unified",
+    archetypes_key: Optional[str] = "H_unified",
     significance: Optional[Literal["upper", "lower"]] = "upper",
 ) -> AnnData:
     """
