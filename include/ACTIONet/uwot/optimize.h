@@ -30,6 +30,8 @@
 #include <limits>
 #include <utility>
 
+#include <pcg_random.hpp>
+
 #include "sampler.h"
 #include "tauprng.h"
 
@@ -72,6 +74,8 @@ struct SgdWorker {
   std::size_t tail_nvert;
   float dist_eps;
 
+	pcg32 rng;
+	
   int seed;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
@@ -93,16 +97,15 @@ struct SgdWorker {
         ndim(ndim),
         head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<float>::epsilon()),        
-        seed(seed) {}        
+        dist_eps(std::numeric_limits<float>::epsilon()) { rng.seed(seed); }        
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<float> dys(ndim);
     printf("*********** %d - %d (%f) ************\n", begin, end, alpha);
+
+    std::uniform_int_distribution<int> uniform_dist(0, tail_nvert-1);
+
     
-    srand(begin+seed);
-      long s1 = rand(), s2 = rand() + 8, s3 = rand() + 16;
-    tau_prng prng(s1, s2, s3);
 //    printf("RNG: %d %d %d\n", s1, s2, s3);
     
     
@@ -111,25 +114,17 @@ struct SgdWorker {
 
 //	stdout_printf("X0 = %d (%d, %d)\n", (int) (round(stats::runif(tail_nvert-1, 0, engine)) * ndim), tail_nvert, ndim);
     
-    int kk = 0;
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
-      kk ++;
       
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
-	if(i < begin+20) {
-		printf("%d- <%d, %d>\n", i, dj, dk);
-	}
 		
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
-		if(i < begin+20) {
-			printf("Diff 1- <%d, %d> => %e - %e == %e\n", i, d, head_embedding[dj + d], tail_embedding[dk + d], diff);
-		}
         dys[d] = diff;
         dist_squared += diff * diff;
       }
@@ -150,9 +145,9 @@ struct SgdWorker {
       for (std::size_t p = 0; p < n_neg_samples; p++) {
 //        std::size_t dkn = (std::size_t) (round(stats::runif(0, tail_nvert-1, engine)) * ndim);
 //        std::size_t dkn = (rand() % tail_nvert) * ndim;
-        std::size_t dkn = prng(tail_nvert) * ndim;
+        std::size_t dkn = uniform_dist(rng) * ndim;
 			if(i < begin+20) {
-				printf("%d- NEg = %d\n", i, dkn);
+				printf("%d- Neg = %d\n", i, dkn);
 			}
         if (dj == dkn) {
           continue;
@@ -160,9 +155,6 @@ struct SgdWorker {
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
-			if(i < begin+20) {
-				printf("Diff 1- <%d, %d> => %e - %e == %e\n", i, d, head_embedding[dj + d], tail_embedding[dk + d], diff);
-			}
           dys[d] = diff;
           dist_squared += diff * diff;
         }
@@ -180,10 +172,7 @@ struct SgdWorker {
       }
       sampler.next_sample(i, n_neg_samples);
     }
-    
-    
-    printf("kk = %d (last RNG = %d)\n", kk, prng(tail_nvert));
-    
+        
     
   }
 
