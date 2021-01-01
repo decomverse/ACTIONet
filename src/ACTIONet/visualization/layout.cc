@@ -252,15 +252,15 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   });
 
   double w_max = arma::max(vec(values, G.n_nonzero));
-  ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
-    // for(int i = 0; i < nE; i++) {
+  //ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
+  for(int i = 0; i < nE; i++) {
     epochs_per_sample[i] =
         w_max /
         values[i];  // Higher the weight of the edge, the more likely it is to
                     // be sampled (inversely proportional to epochs_per_sample)
     positive_head[i] = rows[i];
     positive_tail[i] = cols[i];
-  });
+  }
 
   /*
   int i = 0;
