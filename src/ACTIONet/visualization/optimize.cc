@@ -25,7 +25,7 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
 
   const auto n_epochs_per_sample = epochs_per_sample.size();
   double alpha = initial_alpha;
-	
+
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
   }

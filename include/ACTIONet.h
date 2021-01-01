@@ -31,6 +31,8 @@
 #include <cryptor.hpp>
 #include <hdbscan.hpp>
 
+#include <pcg_random.hpp>
+
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"

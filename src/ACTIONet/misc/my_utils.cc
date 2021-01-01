@@ -33,22 +33,21 @@
 /* P_high = 1 - p_low*/
 #define P_HIGH 0.97575
 
-
 namespace ACTIONet {
 
 /**
  * @brief Generate a single random number using the capped Tausworthe RNG
  *
  * @details
- * This generates random numbers according to the process described in [1]. As 
- * an additional step, the resulting random number is capped to 0xFFFFFFFF 
- * using a bitwise and. This is done to yield the range [0, 2^32-1]. On 
+ * This generates random numbers according to the process described in [1]. As
+ * an additional step, the resulting random number is capped to 0xFFFFFFFF
+ * using a bitwise and. This is done to yield the range [0, 2^32-1]. On
  * return, the state variables are updated.
  *
  * [1]: @article{l1996maximally,
  *   title={Maximally equidistributed combined Tausworthe generators},
  *   author={L’ecuyer, Pierre},
- *   journal={Mathematics of Computation of the American Mathematical 
+ *   journal={Mathematics of Computation of the American Mathematical
  *   Society},
  *   volume={65},
  *   number={213},
@@ -60,74 +59,68 @@ namespace ACTIONet {
  *
  * @return a generated random number
  */
-uint32_t lfsr113(uint64_t **state)
-{
-	uint64_t z1, z2, z3, z4;
-	uint64_t b;
+uint32_t lfsr113(uint64_t **state) {
+  uint64_t z1, z2, z3, z4;
+  uint64_t b;
 
-	z1 = (*state)[0];
-	z2 = (*state)[1];
-	z3 = (*state)[2];
-	z4 = (*state)[3];
+  z1 = (*state)[0];
+  z2 = (*state)[1];
+  z3 = (*state)[2];
+  z4 = (*state)[3];
 
-	b = (((z1 << 6) ^ z1) >> 13);
-	z1 = (((z1 & 4294967294) << 18) ^ b);
+  b = (((z1 << 6) ^ z1) >> 13);
+  z1 = (((z1 & 4294967294) << 18) ^ b);
 
-	b = (((z2 << 2) ^ z2) >> 27);
-	z2 = (((z2 & 4294967288) << 2) ^ b);
+  b = (((z2 << 2) ^ z2) >> 27);
+  z2 = (((z2 & 4294967288) << 2) ^ b);
 
-	b = (((z3 << 13) ^ z3) >> 21);
-	z3 = (((z3 & 4294967280) << 7) ^ b);
+  b = (((z3 << 13) ^ z3) >> 21);
+  z3 = (((z3 & 4294967280) << 7) ^ b);
 
-	b = (((z4 << 3) ^ z4) >> 12);
-	z4 = (((z4 & 4294967168) << 13) ^ b);
+  b = (((z4 << 3) ^ z4) >> 12);
+  z4 = (((z4 & 4294967168) << 13) ^ b);
 
-	b = (z1 ^ z2 ^ z3 ^ z4);
+  b = (z1 ^ z2 ^ z3 ^ z4);
 
-	(*state)[0] = z1;
-	(*state)[1] = z2;
-	(*state)[2] = z3;
-	(*state)[3] = z4;
+  (*state)[0] = z1;
+  (*state)[1] = z2;
+  (*state)[2] = z3;
+  (*state)[3] = z4;
 
-	b = b & 0xFFFFFFFF;
+  b = b & 0xFFFFFFFF;
 
-	return((uint32_t) b);
+  return ((uint32_t)b);
 }
 
 /**
  * @brief Seed the Tausworthe RNG using a seed value
  *
  * @details
- * This function seeds the state array using a supplied seed value. As noted 
- * in [1] (see lfsr113()), the values of z1, z2, z3, and z4 should be larger 
+ * This function seeds the state array using a supplied seed value. As noted
+ * in [1] (see lfsr113()), the values of z1, z2, z3, and z4 should be larger
  * than 1, 7, 15, and 127 respectively.
  *
  * @param[in] seed 	user supplied seed value for the RNG
  * @param[out] state  	state of the RNG
  */
-void lfsr113_seed(uint32_t seed, uint64_t **state)
-{
-	uint64_t z1 = 2,
-		 z2 = 8,
-		 z3 = 16,
-		 z4 = 128;
+void lfsr113_seed(uint32_t seed, uint64_t **state) {
+  uint64_t z1 = 2, z2 = 8, z3 = 16, z4 = 128;
 
-	z1 = (z1 * (seed + 1));
-	z2 = (z2 * (seed + 1));
-	z3 = (z3 * (seed + 1));
-	z4 = (z4 * (seed + 1));
+  z1 = (z1 * (seed + 1));
+  z2 = (z2 * (seed + 1));
+  z3 = (z3 * (seed + 1));
+  z4 = (z4 * (seed + 1));
 
-	z1 = (z1 > 1) ? z1 : z1 + 1;
-	z2 = (z2 > 7) ? z2 : z2 + 7;
-	z3 = (z3 > 15) ? z3 : z3 + 15;
-	z4 = (z4 > 127) ? z4 : z4 + 127;
+  z1 = (z1 > 1) ? z1 : z1 + 1;
+  z2 = (z2 > 7) ? z2 : z2 + 7;
+  z3 = (z3 > 15) ? z3 : z3 + 15;
+  z4 = (z4 > 127) ? z4 : z4 + 127;
 
-	(*state)[0] = z1;
-	(*state)[1] = z2;
-	(*state)[2] = z3;
-	(*state)[3] = z4;
+  (*state)[0] = z1;
+  (*state)[1] = z2;
+  (*state)[2] = z3;
+  (*state)[3] = z4;
 }
-
 
 long double normsinv(long double p) {
   long double x;
@@ -186,12 +179,14 @@ void randN_normsinv(double *values, int n) {
 }
 
 // Marsaglia algorithm
-void randN_Marsaglia(double *values, int n) {
+void randN_Marsaglia(double *values, int n, pcg32 rng) {
+  std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
+
   for (int i = 0; i < n; i += 2) {
     double x, y, rsq, f;
     do {
-      x = 2.0 * rand() / (double)RAND_MAX - 1.0;
-      y = 2.0 * rand() / (double)RAND_MAX - 1.0;
+      x = 2.0 * uniform_dist(rng) - 1.0;
+      y = 2.0 * uniform_dist(rng) - 1.0;
       rsq = x * x + y * y;
     } while (rsq >= 1. || rsq == 0.);
     f = sqrt(-2.0 * log(rsq) / rsq);
@@ -211,14 +206,14 @@ void randN_BM(double *values, int n, uint64_t **state) {
   static const double two_pi = 2.0 * 3.14159265358979323846;
 
   double kk = (1.0 / 4294967288.0);
-  
+
   double z0, z1;
   for (int i = 0; i < n; i += 2) {
     double u1, u2;
     do {
       u1 = lfsr113(state) * kk;
       u2 = lfsr113(state) * kk;
-		      
+
     } while (u1 <= epsilon);
 
     z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
