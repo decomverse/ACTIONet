@@ -115,6 +115,8 @@ struct SgdWorker {
 //	stdout_printf("X0 = %d (%d, %d)\n", (int) (round(stats::runif(tail_nvert-1, 0, engine)) * ndim), tail_nvert, ndim);
     
     long long int ss = 0;
+    double g1 = 0, g2 = 0;
+    
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
@@ -130,7 +132,9 @@ struct SgdWorker {
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
+      
       float grad_coeff = gradient.grad_attr(dist_squared);
+      g1 += grad_coeff;
 
       for (std::size_t d = 0; d < ndim; d++) {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
@@ -162,7 +166,9 @@ struct SgdWorker {
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
+        
         float grad_coeff = gradient.grad_rep(dist_squared);
+        g2 += grad_coeff;
 
         for (std::size_t d = 0; d < ndim; d++) {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
@@ -176,7 +182,7 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
        
-    printf("ss = %ld\n", ss);
+    printf("ss = %ld, g1 = %e, g2 = %e\n", ss, g1, g2);
     
   }
 
