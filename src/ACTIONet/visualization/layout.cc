@@ -234,6 +234,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   vector<unsigned int> positive_tail(nE);
   vector<float> epochs_per_sample(nE);
 
+/*
   const double* values = G.values;
   const uword* rows = G.row_indices;
   const uword* col_offsets = G.col_ptrs;
@@ -261,16 +262,15 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
     positive_head[i] = rows[i];
     positive_tail[i] = cols[i];
   }
+*/
 
-  /*
   int i = 0;
   double w_max = max(max(G));
   for(sp_mat::iterator it = G.begin(); it != G.end(); ++ it) {
-          epochs_per_sample[i] = w_max / (*it); // Higher the weight of the
-  edge, the more likely it is to be sampled (inversely proportional to
-  epochs_per_sample) positive_head[i] = it.row(); positive_tail[i++] = it.col();
+	epochs_per_sample[i] = w_max / (*it); 
+	positive_head[i] = it.row(); 
+	positive_tail[i++] = it.col();
   }
-  */
 
   // Initial coordinates of vertices (0-simplices)
   fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
