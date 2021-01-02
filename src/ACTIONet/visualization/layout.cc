@@ -243,7 +243,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   uvec cv(col_offsets, G.n_cols + 1);
   vec delta = diff(conv_to<vec>::from(cv));
   vec kk = join_vert(zeros(1), cumsum(delta));
-  for(j = 0, j < nV; j++) {
+  for(int j = 0; j < nV; j++) {
     int k = (int)kk[j];
     int M = (int)delta[j];
     for (int l = 0; l < M; l++) {
