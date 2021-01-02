@@ -274,6 +274,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   // Initial coordinates of vertices (0-simplices)
   fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
+  sum(initial_coor2D, 1).print("S sum");
+  
   vector<float> head_vec(initial_coor2D.memptr(),
                          initial_coor2D.memptr() + initial_coor2D.n_elem);
   vector<float> tail_vec(head_vec);
