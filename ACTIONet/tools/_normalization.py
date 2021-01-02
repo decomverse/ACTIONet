@@ -38,7 +38,7 @@ def scale_matrix(
     if center:
         X -= X.mean(axis=0)
     if scale:
-        X /= X.std(axis=0, ddof=1)
+        X /= X.std(axis=0, ddof=0)
     return X
 
 def rescale_matrix(
