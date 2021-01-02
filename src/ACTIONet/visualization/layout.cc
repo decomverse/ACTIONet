@@ -243,13 +243,13 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   uvec cv(col_offsets, G.n_cols + 1);
   vec delta = diff(conv_to<vec>::from(cv));
   vec kk = join_vert(zeros(1), cumsum(delta));
-  ParallelFor(0, nV, thread_no, [&](size_t j, size_t threadId) {
+  for(j = 0, j < nV; j++) {
     int k = (int)kk[j];
     int M = (int)delta[j];
     for (int l = 0; l < M; l++) {
       cols[k + l] = j;
     }
-  });
+  }
 
   double w_max = arma::max(vec(values, G.n_nonzero));
   //ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
