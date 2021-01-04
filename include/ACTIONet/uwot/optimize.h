@@ -125,7 +125,7 @@ struct SgdWorker {
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       uu += n_neg_samples;
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        int r = uniform_dist(rng);
+        int r = p; //uniform_dist(rng);
         ss += r;
         std::size_t dkn = r * ndim;
         if (dj == dkn) {
@@ -146,7 +146,7 @@ struct SgdWorker {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
 
-          //head_embedding[dj + d] += grad_d;
+          head_embedding[dj + d] += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
