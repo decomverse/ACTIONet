@@ -37,20 +37,6 @@
 
 namespace uwot {
 
-// Function to decide whether to move both vertices in an edge
-// Default empty version does nothing: used in umap_transform when
-// some of the vertices should be held fixed
-template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
-
-// Specialization to move the vertex: used in umap when both
-// vertices in an edge should be moved
-template <>
-void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
-                             std::size_t i, std::size_t nrj) {
-  embedding[nrj + i] -= grad_d;
-}
-
 inline auto clamp(float v, float lo, float hi) -> float {
   float t = v < lo ? lo : v;
   return t > hi ? hi : t;
@@ -130,7 +116,8 @@ struct SgdWorker {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
-		tail_embedding[dk + d] -= grad_d;
+		if(DoMoveVertex)
+			tail_embedding[dk + d] -= grad_d;
 
         //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
@@ -158,7 +145,7 @@ struct SgdWorker {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
 
-          //head_embedding[dj + d] += grad_d;
+          head_embedding[dj + d] += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
