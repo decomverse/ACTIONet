@@ -85,8 +85,8 @@ struct SgdWorker {
         n(0),
         alpha(0.0),
         gradient(gradient),
-        positive_head(std::move(positive_head)),
-        positive_tail(std::move(positive_tail)),
+        positive_head(positive_head),
+        positive_tail(positive_tail),
 
         sampler(sampler),
 
