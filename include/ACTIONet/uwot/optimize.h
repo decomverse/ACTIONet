@@ -147,7 +147,7 @@ struct SgdWorker {
                                        Gradient::clamp_hi);
 
           //head_embedding[dj + d] += grad_d;
-          g3 += head_embedding[dj + d];
+          g3 += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
