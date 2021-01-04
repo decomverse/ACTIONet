@@ -90,7 +90,7 @@ struct SgdWorker {
 	
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
-	long long ss = 0, tt = 0;
+	long long ss = 0, tt = 0, uu = 0;
 	double g1 = 0, g2 = 0;
 	
     for (auto i = begin; i < end; i++) {
@@ -123,6 +123,7 @@ struct SgdWorker {
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
+      uu += n_neg_samples;
       for (std::size_t p = 0; p < n_neg_samples; p++) {
         int r = uniform_dist(rng);
         ss += r;
@@ -145,13 +146,13 @@ struct SgdWorker {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
 
-          head_embedding[dj + d] += grad_d;
+          //head_embedding[dj + d] += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
     }
     
-    printf("ss = %ld, tt = %ld, g1 = %e, g2 = %e\n", ss, tt, g1, g2);
+    printf("ss = %ld, tt = %ld, uu = %ld, g1 = %e, g2 = %e\n", ss, tt, g1, g2);
   }
 
   void set_n(int n) { this->n = n; }
