@@ -125,7 +125,7 @@ struct SgdWorker {
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       uu += n_neg_samples;
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        int r = uniform_dist(rng);
+        int r = p; //uniform_dist(rng);
         ss += r;
         std::size_t dkn = r * ndim;
         if (dj == dkn) {
@@ -152,7 +152,7 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
     
-    printf("ss = %ld, tt = %ld, uu = %ld, g1 = %e, g2 = %e, g3 = %e\n", ss, tt, g1, g2, g3);
+    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3));
   }
 
   void set_n(int n) { this->n = n; }
