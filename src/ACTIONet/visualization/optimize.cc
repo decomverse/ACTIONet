@@ -34,9 +34,11 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
     worker.set_alpha(alpha);
     worker.set_n(n);
     if (thread_no > 1) {
+		printf("Multi-thread (%d)\n", thread_no);
       Perpendicular::parallel_for(0, n_epochs_per_sample, worker, thread_no,
                                   grain_size);
     } else {
+		printf("Single thread\n");
       worker(0, n_epochs_per_sample);
     }
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));

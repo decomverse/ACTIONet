@@ -102,6 +102,8 @@ struct SgdWorker {
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<float> dys(ndim);
 
+	printf("eps = %e, grad low = %e, grad hi = %e\n", dist_eps, Gradient::clamp_lo, Gradient::clamp_hi);
+	
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
 	long long ss = 0, tt = 0;
