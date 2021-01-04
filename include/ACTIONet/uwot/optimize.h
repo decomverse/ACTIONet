@@ -130,6 +130,8 @@ struct SgdWorker {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
+		tail_embedding[dk + d] -= grad_d;
+
         //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
