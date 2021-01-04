@@ -218,8 +218,9 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
                 compactness_level, n_epochs);
   FLUSH;
 
-  G.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
-  G = smoothKNN(G, thread_no);
+  sp_mat H = G;
+  H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
+  H = smoothKNN(H, thread_no);
 
   unsigned int nV = G.n_rows;
 
@@ -267,9 +268,10 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   int i = 0;
   double w_max = max(max(G));
   for(sp_mat::iterator it = G.begin(); it != G.end(); ++ it) {
-	epochs_per_sample[i] = w_max / (*it); 
+	epochs_per_sample[i] = (*it); 
 	positive_head[i] = it.row(); 
-	positive_tail[i++] = it.col();
+	positive_tail[i] = it.col();
+	i++;
   }
 
   // Initial coordinates of vertices (0-simplices)
@@ -288,8 +290,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 	mat Y = zeros(nE, 3);
 	for(int i = 0; i < nE; i++) {
 		Y(i, 0) = positive_head[i];
-		Y(i, 2) = positive_tail[i];
-		Y(i, 3) = epochs_per_sample[i];
+		Y(i, 1) = positive_tail[i];
+		Y(i, 2) = epochs_per_sample[i];
 	}
 	
 	res(0) = X;
