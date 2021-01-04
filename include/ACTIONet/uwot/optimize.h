@@ -143,7 +143,7 @@ struct SgdWorker {
 		g2 += grad_coeff;
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+          float grad_d = alpha * clamp(grad_coeff * 1, Gradient::clamp_lo,
                                        Gradient::clamp_hi);
 
           //head_embedding[dj + d] += grad_d;
