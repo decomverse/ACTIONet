@@ -291,4 +291,4 @@ struct SgdWorker {
 }  // namespace uwot
 
 #endif  // UWOT_OPTIMIZE_H
-   
+  
