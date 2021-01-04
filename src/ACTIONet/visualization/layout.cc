@@ -222,7 +222,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
   H = smoothKNN(H, thread_no);
 
-  unsigned int nV = G.n_rows;
+  unsigned int nV = H.n_rows;
 
   if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
 
@@ -230,7 +230,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   double b_param = UMAP_B[compactness_level];
 
   // linearized list of edges (1-simplices)
-  unsigned int nE = G.n_nonzero;
+  unsigned int nE = H.n_nonzero;
   vector<unsigned int> positive_head(nE);
   vector<unsigned int> positive_tail(nE);
   vector<float> epochs_per_sample(nE);
@@ -266,8 +266,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 */
 
   int i = 0;
-  double w_max = max(max(G));
-  for(sp_mat::iterator it = G.begin(); it != G.end(); ++ it) {
+  double w_max = max(max(H));
+  for(sp_mat::iterator it = H.begin(); it != H.end(); ++ it) {
 	epochs_per_sample[i] = (*it); 
 	positive_head[i] = it.row(); 
 	positive_tail[i] = it.col();
