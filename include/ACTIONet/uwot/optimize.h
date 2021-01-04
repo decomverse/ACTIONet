@@ -42,6 +42,7 @@ inline auto clamp(float v, float lo, float hi) -> float {
   return t > hi ? hi : t;
 }
 
+static thread_local pcg32 rng;
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient, bool DoMoveVertex>
@@ -59,7 +60,6 @@ struct SgdWorker {
   std::size_t tail_nvert;
   float dist_eps;
 
-  static thread_local pcg32 rng;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
