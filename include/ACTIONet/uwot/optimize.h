@@ -145,7 +145,7 @@ struct SgdWorker {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
 
-          head_embedding[dj + d] += grad_d;
+          //head_embedding[dj + d] += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
