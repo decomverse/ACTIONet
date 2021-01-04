@@ -268,7 +268,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   int i = 0;
   double w_max = max(max(H));
   for(sp_mat::iterator it = H.begin(); it != H.end(); ++ it) {
-	epochs_per_sample[i] = (*it); 
+	epochs_per_sample[i] = w_max / (*it); 
 	positive_head[i] = it.row(); 
 	positive_tail[i] = it.col();
 	i++;
@@ -282,7 +282,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
                          initial_coor2D.memptr() + initial_coor2D.n_elem);
   vector<float> tail_vec(head_vec);
 
-/*
+
 	fmat coordinates_float_back(head_vec.data(), 2, nV);
 	mat X = conv_to<mat>::from(coordinates_float_back);
 
@@ -297,7 +297,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 	res(0) = X;
 	res(1) = Y;
 	return res;
-*/
+
 
   stdout_printf("\tComputing 2D layout ... ");  // fflush(stdout);
   // Stores linearized coordinates [x1, y1, x2, y2, ...]
