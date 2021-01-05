@@ -105,7 +105,7 @@ struct SgdWorker {
 	
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
-	long long ss = 0, tt = 0, uu = 0;
+	long long ss = 0, tt = 0, uu = 0, ii1 = 0, ii2 = 0;
 	double g1 = 0, g2 = 0, g3 = 0;
 	
 	int max_head_idx = 0, max_tail_idx;
@@ -119,8 +119,8 @@ struct SgdWorker {
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
-		max_head_idx = max(max_head_idx, (int)dj);
-		max_tail_idx = max(max_tail_idx, (int)dk);
+		ii1 += dj;
+		ii2 += dk;
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
@@ -180,7 +180,7 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
     
-    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld, max1 = %d, max2 = %d\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3), max_head_idx, max_tail_idx);
+    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld, ii1 = %ld, ii2 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3), ii1, ii2);
   }
 
   void set_n(int n) { this->n = n; }

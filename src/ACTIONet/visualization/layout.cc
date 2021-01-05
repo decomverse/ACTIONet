@@ -222,6 +222,9 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
   H = smoothKNN(H, thread_no);
 
+res(0) = H;
+return(res);
+
   unsigned int nV = H.n_rows;
 
   if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
@@ -234,6 +237,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   vector<unsigned int> positive_head(nE);
   vector<unsigned int> positive_tail(nE);
   vector<float> epochs_per_sample(nE);
+  
+ 
 
 /*
   const double* values = G.values;
