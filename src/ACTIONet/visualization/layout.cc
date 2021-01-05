@@ -222,8 +222,6 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
   H = smoothKNN(H, thread_no);
 
-res(0) = H;
-return(res);
 
   unsigned int nV = H.n_rows;
 
@@ -286,7 +284,7 @@ return(res);
                          initial_coor2D.memptr() + initial_coor2D.n_elem);
   vector<float> tail_vec(head_vec);
 
-/*
+
 	fmat coordinates_float_back(head_vec.data(), 2, nV);
 	mat X = conv_to<mat>::from(coordinates_float_back);
 
@@ -301,7 +299,7 @@ return(res);
 	res(0) = X;
 	res(1) = Y;
 	return res;
-*/
+
 
   stdout_printf("\tComputing 2D layout ... ");  // fflush(stdout);
   // Stores linearized coordinates [x1, y1, x2, y2, ...]
