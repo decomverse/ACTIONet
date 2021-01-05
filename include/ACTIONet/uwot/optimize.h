@@ -131,6 +131,8 @@ struct SgdWorker {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
+        head_embedding[dj + d] -= 3*grad_d;
+        head_embedding[dj + d] += 2*grad_d;
 		//if(DoMoveVertex)
 			//tail_embedding[dk + d] -= grad_d;
 
