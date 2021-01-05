@@ -132,9 +132,9 @@ struct SgdWorker {
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
 		//if(DoMoveVertex)
-			//tail_embedding[dk + d] -= grad_d;
+			tail_embedding[dk + d] -= grad_d;
 
-        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+        //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
