@@ -108,6 +108,9 @@ struct SgdWorker {
 	long long ss = 0, tt = 0, uu = 0;
 	double g1 = 0, g2 = 0, g3 = 0;
 	
+	printf("end = %d, size head = %d, size tail = %d\h", end, positive_head.size(), positive_tail.size());
+	int max_head_idx = 0, max_tail_idx;
+	
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
@@ -117,9 +120,15 @@ struct SgdWorker {
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
+		max_head_idx = max(max_head_idx, (int)dj);
+		max_tail_idx = max(max_tail_idx, (int)dk);
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+		if(i < 50) {
+			printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
+		}
+        
         dys[d] = diff;
         dist_squared += diff * diff;
       }
@@ -131,12 +140,15 @@ struct SgdWorker {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
-        head_embedding[dj + d] -= 3*grad_d;
-        head_embedding[dj + d] += 2*grad_d;
 		//if(DoMoveVertex)
 			//tail_embedding[dk + d] -= grad_d;
 
-        //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+        
+		if(i < 50) {
+			printf("%d- <%d, %d> -> dim%d-- New: <%f, %f> \n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d]);
+		}
+                
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -162,14 +174,14 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           float grad_d = alpha * grad_coeff; //clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
 
-          //head_embedding[dj + d] += grad_d;
+          head_embedding[dj + d] += grad_d;
           g3 += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
     }
     
-    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3));
+    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld, max1 = %d, max2 = %d\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3), max_head_idx, max_tail_idx);
   }
 
   void set_n(int n) { this->n = n; }
