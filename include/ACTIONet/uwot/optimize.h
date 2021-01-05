@@ -108,7 +108,6 @@ struct SgdWorker {
 	long long ss = 0, tt = 0, uu = 0;
 	double g1 = 0, g2 = 0, g3 = 0;
 	
-	printf("end = %d, size head = %d, size tail = %d\h", end, positive_head.size(), positive_tail.size());
 	int max_head_idx = 0, max_tail_idx;
 	
     for (auto i = begin; i < end; i++) {
@@ -126,7 +125,7 @@ struct SgdWorker {
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
 		if(i < 50) {
-			printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
+		//	printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
 		}
         
         dys[d] = diff;
@@ -146,7 +145,7 @@ struct SgdWorker {
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
         
 		if(i < 50) {
-			printf("%d- <%d, %d> -> dim%d-- New: <%f, %f> \n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d]);
+			//printf("%d- <%d, %d> -> dim%d-- New: <%f, %f> \n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d]);
 		}
                 
       }
@@ -154,7 +153,7 @@ struct SgdWorker {
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       uu += n_neg_samples;
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        int r = p; //uniform_dist(rng);
+        int r = uniform_dist(rng);
         ss += r;
         std::size_t dkn = r * ndim;
         if (dj == dkn) {
@@ -172,7 +171,7 @@ struct SgdWorker {
 		g2 += grad_coeff;
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * grad_coeff; //clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
 
           head_embedding[dj + d] += grad_d;
           g3 += grad_d;

@@ -153,8 +153,8 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
   sp_mat G = D;
 
   //#pragma omp parallel for num_threads(thread_no)
-  // for(int i = 0; i < nV; i++) {
-  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
+  for(int i = 0; i < nV; i++) {
+//  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
     sp_mat v = D.col(i);
     vec vals = nonzeros(v);
     if (vals.n_elem > 0) {
@@ -197,7 +197,7 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
         *it = max(1e-16, exp(-max(0.0, (*it) - rho) / sigma));
       }
     }
-  });
+  }
 
   return (G);
 }
