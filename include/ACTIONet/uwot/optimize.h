@@ -142,7 +142,7 @@ struct SgdWorker {
 		//if(DoMoveVertex)
 			//tail_embedding[dk + d] -= grad_d;
 
-        //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
         
 		if(i < 50) {
 			//printf("%d- <%d, %d> -> dim%d-- New: <%f, %f> \n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d]);
