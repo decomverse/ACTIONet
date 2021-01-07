@@ -106,7 +106,7 @@ struct SgdWorker {
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
 	long long ss = 0, tt = 0, uu = 0;
-	double g1 = 0, g2 = 0, g3 = 0, d1 = 0, d2 = 0;
+	double g1 = 0, g2 = 0, g3 = 0;
 	
 	int max_head_idx = 0, max_tail_idx;
 	
@@ -119,20 +119,19 @@ struct SgdWorker {
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
-
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+		if(i < 50) {
+			printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
+		}
         
         dys[d] = diff;
-        d1 += diff;
-        
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
 
       float grad_coeff = gradient.grad_attr(dist_squared);
-      
 		g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
         float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
@@ -142,8 +141,7 @@ struct SgdWorker {
 			//tail_embedding[dk + d] -= grad_d;
 
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
-
-                
+                        
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -159,13 +157,11 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] = diff;
-          
-          d2 += diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
 
-        float grad_coeff = 0.5*(double)i/end; //gradient.grad_rep(dist_squared);
+        float grad_coeff = gradient.grad_rep(dist_squared);
 		g2 += grad_coeff;
 
         for (std::size_t d = 0; d < ndim; d++) {
@@ -178,7 +174,7 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
     
-    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld, d1 = %ld, d2 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3), (long)round(d1), (long)round(d2));
+    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3));
   }
 
   void set_n(int n) { this->n = n; }
