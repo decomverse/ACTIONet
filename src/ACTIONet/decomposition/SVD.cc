@@ -1,7 +1,6 @@
 #include "ACTIONet.h"
 
-#define StdNorm(v, n, engine) \
-  for (int ii = 0; ii < n; ii++) v[ii] = stats::rnorm(0, 1, engine)
+#define StdNorm(v, n, engine) randN_Marsaglia(v, n, engine)
 
 namespace ACTIONet {
 
@@ -46,9 +45,6 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   mat BUmat(BU, work, work, false);
   vec BSvec(BS, work, false);
   mat BVmat(BV, work, work, false);
-  mat Vmat(V, n, work, false);
-  mat Fmat(V, n, work, false);
-  mat Wmat(W, m, work, false);
 
   double d, S, R, R_F, SS;
   double *x;
@@ -67,9 +63,12 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   vec v, y;
 
   // Initialize first column of V
-  std::mt19937_64 engine(seed);
+  pcg32 engine(seed);
 
-  StdNorm(Vmat.col(0), n, engine);
+	double ss;
+  StdNorm(V, n, engine);
+  ss = 0; for(int i = 0; i < n; i++) ss += V[i]; printf("V.ss = %e\n", ss);
+  
   // Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
   /*
@@ -125,7 +124,8 @@ V[i]   = normDist(gen);;
 
         if (R_F < eps) {  // near invariant subspace
 
-          StdNorm(Fmat.col(0), n, engine);
+          StdNorm(F, n, engine);
+		ss = 0; for(int i = 0; i < n; i++) ss += F[i]; printf("%d- j = %d, F.ss = %e\n", iter, j, ss);
           // Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
           /*
@@ -163,7 +163,8 @@ V[i]   = normDist(gen);;
         SS = 1.0 / S;
 
         if (S < eps) {
-          StdNorm(Wmat.col(j), m, engine);
+          StdNorm(W + (j + 1) * m, m, engine);
+			ss = 0; for(int i = 0; i < n; i++) ss += W[(j + 1) * m + i]; printf("%d- W[%d].ss = %e\n", iter, j, ss);
 
           // Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
 
@@ -340,9 +341,6 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   mat BUmat(BU, work, work, false);
   vec BSvec(BS, work, false);
   mat BVmat(BV, work, work, false);
-  mat Vmat(V, n, work, false);
-  mat Fmat(V, n, work, false);
-  mat Wmat(W, m, work, false);
 
   double d, S, R, R_F, SS;
   double *x;
@@ -361,9 +359,9 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   vec v, y;
 
   // Initialize first column of V
-  std::mt19937_64 engine(seed);
+  pcg32 engine(seed);
 
-  StdNorm(Vmat.col(0), n, engine);
+  StdNorm(V, n, engine);
   // Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
   /* Main iteration */
@@ -405,7 +403,7 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
         R = 1.0 / R_F;
 
         if (R_F < eps) {  // near invariant subspace
-          StdNorm(Fmat.col(0), n, engine);
+          StdNorm(F, n, engine);
           // Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
           orthog(V, F, T, n, j + 1, 1);
@@ -434,7 +432,7 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
         SS = 1.0 / S;
 
         if (S < eps) {
-          StdNorm(Wmat.col(j), m, engine);
+          StdNorm(W + (j + 1) * m, m, engine);
 
           // Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
 

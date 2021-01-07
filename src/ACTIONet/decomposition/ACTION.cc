@@ -240,7 +240,7 @@ SPA_results run_SPA(mat &A, int k) {
   mat U(A.n_rows, k);
 
   vec norm_trace = zeros(k);
-  double eps = 1e-9;
+  double eps = 1e-16;
 
   for (int i = 1; i <= k; i++) {
     // Find the column with maximum norm. In case of having more than one column
@@ -326,6 +326,7 @@ ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no,
   stderr_printf("\n\t%s %d/%d finished", status_msg, current_k,
                 (k_max - k_min + 1));
   FLUSH;
+ 
   ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId) {
     SPA_results SPA_res = run_SPA(X_r, kk);
     trace.selected_cols[kk] = SPA_res.selected_columns;

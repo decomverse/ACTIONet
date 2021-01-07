@@ -32,6 +32,8 @@
 #include <cryptor.hpp>
 #include <hdbscan.hpp>
 
+#include <pcg_random.hpp>
+
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"
@@ -244,7 +246,7 @@ mat computeFullSim(mat &H, int thread_no);
 // SGD-based force-directed layout (adopted and modified from the UMAP
 // implementation)
 field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
-                           unsigned int n_epochs, int thread_no);
+                           unsigned int n_epochs, int thread_no, int seed);
 
 // Methods for pseudo-bulk construction
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
@@ -296,7 +298,7 @@ umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
 mat Prune_PageRank(mat &U, double density);
 field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB,
                             int compactness_level, unsigned int n_epochs,
-                            int thread_no);
+                            int thread_no, int seed);
 
 vec unsigned_cluster(sp_mat A, double resolution_parameter,
                      uvec initial_clusters, int seed);
