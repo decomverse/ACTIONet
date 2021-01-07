@@ -69,14 +69,14 @@ const double UMAP_B[101] = {
 #define UMAP_SEED 0
 #define GAMMA 1.0
 
-std::vector<double> optimize_layout_umap(
-    std::vector<double> head_vec, std::vector<double> tail_vec,
+std::vector<float> optimize_layout_umap(
+    std::vector<float> head_vec, std::vector<float> tail_vec,
     const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<double> epochs_per_sample,
+    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
     double a, double b, double gamma, double initial_alpha,
     double negative_sample_rate, bool approx_pow, std::size_t n_threads,
-    std::size_t grain_size, bool move_other);
+    std::size_t grain_size, bool move_other, int seed);
 
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t thread_no,
@@ -153,8 +153,8 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
   sp_mat G = D;
 
   //#pragma omp parallel for num_threads(thread_no)
-  // for(int i = 0; i < nV; i++) {
-  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
+  for(int i = 0; i < nV; i++) {
+//  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
     sp_mat v = D.col(i);
     vec vals = nonzeros(v);
     if (vals.n_elem > 0) {
@@ -197,13 +197,14 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
         *it = max(1e-16, exp(-max(0.0, (*it) - rho) / sigma));
       }
     }
-  });
+  }
 
   return (G);
 }
 
 field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
-                           unsigned int n_epochs = 500, int thread_no = 0) {
+                           unsigned int n_epochs = 500, int thread_no = 0,
+                           int seed = 0) {
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
   }
@@ -211,16 +212,18 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   field<mat> res(3);
 
-  mat init_coors = trans(zscore(trans(S_r.rows(0, 2))));
+  mat init_coors = S_r.rows(0, 2);
 
   stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
                 compactness_level, n_epochs);
   FLUSH;
 
-  G.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
-  G = smoothKNN(G, thread_no);
+  sp_mat H = G;
+  H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
+  H = smoothKNN(H, thread_no);
 
-  unsigned int nV = G.n_rows;
+
+  unsigned int nV = H.n_rows;
 
   if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
 
@@ -228,11 +231,14 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   double b_param = UMAP_B[compactness_level];
 
   // linearized list of edges (1-simplices)
-  unsigned int nE = G.n_nonzero;
+  unsigned int nE = H.n_nonzero;
   vector<unsigned int> positive_head(nE);
   vector<unsigned int> positive_tail(nE);
-  vector<double> epochs_per_sample(nE);
+  vector<float> epochs_per_sample(nE);
+  
+ 
 
+/*
   const double* values = G.values;
   const uword* rows = G.row_indices;
   const uword* col_offsets = G.col_ptrs;
@@ -242,51 +248,71 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   uvec cv(col_offsets, G.n_cols + 1);
   vec delta = diff(conv_to<vec>::from(cv));
   vec kk = join_vert(zeros(1), cumsum(delta));
-  // for(int j = 0; j < nV; j++) {
-  ParallelFor(0, nV, thread_no, [&](size_t j, size_t threadId) {
+  for(int j = 0; j < nV; j++) {
     int k = (int)kk[j];
     int M = (int)delta[j];
     for (int l = 0; l < M; l++) {
       cols[k + l] = j;
     }
-  });
+  }
 
   double w_max = arma::max(vec(values, G.n_nonzero));
-  ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
+  //ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
+  for(int i = 0; i < nE; i++) {
     epochs_per_sample[i] =
         w_max /
         values[i];  // Higher the weight of the edge, the more likely it is to
                     // be sampled (inversely proportional to epochs_per_sample)
     positive_head[i] = rows[i];
-    positive_tail[i++] = cols[i];
-  });
-
-  /*
-  int i = 0;
-  double w_max = max(max(G));
-  for(sp_mat::iterator it = G.begin(); it != G.end(); ++ it) {
-          epochs_per_sample[i] = w_max / (*it); // Higher the weight of the
-  edge, the more likely it is to be sampled (inversely proportional to
-  epochs_per_sample) positive_head[i] = it.row(); positive_tail[i++] = it.col();
+    positive_tail[i] = cols[i];
   }
-  */
+*/
+
+  int i = 0;
+  double w_max = max(max(H));
+  for(sp_mat::iterator it = H.begin(); it != H.end(); ++ it) {
+	epochs_per_sample[i] = w_max / (*it); 
+	positive_head[i] = it.row(); 
+	positive_tail[i] = it.col();
+	i++;
+  }
 
   // Initial coordinates of vertices (0-simplices)
-  mat initial_coor2D = init_coors.rows(0, 1);
-  vector<double> head_vec(initial_coor2D.memptr(),
-                          initial_coor2D.memptr() + initial_coor2D.n_elem);
-  vector<double> tail_vec(head_vec);
+  fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
+  
+  vector<float> head_vec(initial_coor2D.memptr(),
+                         initial_coor2D.memptr() + initial_coor2D.n_elem);
+  vector<float> tail_vec(head_vec);
+
+/*
+	fmat coordinates_float_back(head_vec.data(), 2, nV);
+	mat X = conv_to<mat>::from(coordinates_float_back);
+
+
+	mat Y = zeros(nE, 3);
+	for(int i = 0; i < nE; i++) {
+		Y(i, 0) = positive_head[i];
+		Y(i, 1) = positive_tail[i];
+		Y(i, 2) = epochs_per_sample[i];
+	}
+	
+	res(0) = X;
+	res(1) = Y;
+	return res;
+*/
 
   stdout_printf("\tComputing 2D layout ... ");  // fflush(stdout);
   // Stores linearized coordinates [x1, y1, x2, y2, ...]
-  vector<double> result;
+  vector<float> result;
 
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);
+      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
 
-  mat coordinates(result.data(), 2, nV);
+  fmat coordinates_float(result.data(), 2, nV);
+  mat coordinates = conv_to<mat>::from(coordinates_float);
+
   // coordinates = robust_zscore(trans(coordinates));
   coordinates = trans(coordinates);
 
@@ -296,7 +322,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   /****************************
    *  Compute 3D Embedding	*
    ***************************/
-  mat initial_coor3D = join_vert(trans(zscore(coordinates)), init_coors.row(2));
+  fmat initial_coor3D =
+      conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
 
   head_vec.clear();
   head_vec.resize(initial_coor3D.n_elem);
@@ -309,9 +336,10 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true);
+      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
 
-  mat coordinates_3D(result.data(), 3, nV);
+  fmat coordinates_3D_float(result.data(), 3, nV);
+  mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
   // coordinates_3D = robust_zscore(trans(coordinates_3D));
   coordinates_3D = trans(coordinates_3D);
 
@@ -376,7 +404,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 // coor2D, coor3D, colRGB: {2, 3, 3} x cells
 field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
                             int compactness_level = 50,
-                            unsigned int n_epochs = 500, int thread_no = 8) {
+                            unsigned int n_epochs = 500, int thread_no = 8,
+                            int seed = 0) {
   int nV = W.n_cols;
 
   if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
@@ -398,9 +427,9 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   arch_colRGB = clamp(arch_colRGB, 0, 1);
 
   // 3) Store old (ACTIONet) and new (initial) coordinates
-  vector<double> head_vec(arch_coor2D.memptr(),
-                          arch_coor2D.memptr() + arch_coor2D.n_elem);
-  vector<double> tail_vec(coor2D.memptr(), coor2D.memptr() + coor2D.n_elem);
+  vector<float> head_vec(arch_coor2D.memptr(),
+                         arch_coor2D.memptr() + arch_coor2D.n_elem);
+  vector<float> tail_vec(coor2D.memptr(), coor2D.memptr() + coor2D.n_elem);
 
   // 4) Linearize edges and estimate epochs
   double global_max = arma::max(arma::max(W));
@@ -409,7 +438,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   positive_head.reserve(W.n_nonzero);
   vector<unsigned int> positive_tail;
   positive_tail.reserve(W.n_nonzero);
-  vector<double> epochs_per_sample;
+  vector<float> epochs_per_sample;
   epochs_per_sample.reserve(W.n_nonzero);
 
   sp_mat::const_iterator it = W.begin();
@@ -427,19 +456,20 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   // positive_tail.resize(idx); positive_head.resize(idx);
   // epochs_per_sample.resize(idx);
 
-  vector<double> result;
+  vector<float> result;
 
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false);
+      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
 
-  mat coordinates(result.data(), 2, nV);
+  fmat coordinates_float(result.data(), 2, nV);
+  mat coordinates = conv_to<mat>::from(coordinates_float);
   // stdout_printf("done\n"); FLUSH;//fflush(stdout);
 
-  vector<double> head_vec3D(coor3D.memptr(), coor3D.memptr() + coor3D.n_elem);
-  vector<double> tail_vec3D(arch_coor3D.memptr(),
-                            arch_coor3D.memptr() + arch_coor3D.n_elem);
+  vector<float> head_vec3D(coor3D.memptr(), coor3D.memptr() + coor3D.n_elem);
+  vector<float> tail_vec3D(arch_coor3D.memptr(),
+                           arch_coor3D.memptr() + arch_coor3D.n_elem);
 
   // stdout_printf("Computing 3D layout ... "); //fflush(stdout);
   result.clear();
@@ -447,9 +477,10 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false);
+      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false, seed);
 
-  mat coordinates_3D(result.data(), 3, nV);
+  fmat coordinates_3D_float(result.data(), 3, nV);
+  mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
   // stdout_printf("done\n"); FLUSH; //fflush(stdout);
 
   field<mat> res(3);

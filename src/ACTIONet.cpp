@@ -405,13 +405,20 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
 
   List C(k_max);
   for (int i = k_min; i <= k_max; i++) {
-    C[i - 1] = trace.C[i];
+	mat cur_C = trace.C[i];
+	//cur_C.transform( [](double val) { return (val < 1e-5? 0:val); } );
+	//cur_C = round(cur_C*1e5)/1e-5;
+	//cur_C = normalise(cur_C, 1);
+	C[i-1] = cur_C;  
   }
   res["C"] = C;
 
   List H(k_max);
   for (int i = k_min; i <= k_max; i++) {
-    H[i - 1] = trace.H[i];
+	mat cur_H = trace.H[i];
+	//cur_H.transform( [](double val) { return (val < 1e-5? 0:val); } );
+	//cur_H = normalise(cur_H, 1);
+	H[i-1] = cur_H;  
   }
   res["H"] = H;
 
@@ -692,9 +699,9 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
 //'	vis.out = layout_ACTIONet(G, S_r)
 // [[Rcpp::export]]
 List layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level = 50,
-                     unsigned int n_epochs = 500, int thread_no = 0) {
+                     unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
   field<mat> res =
-      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no);
+      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no, seed);
 
   List out_list;
   out_list["coordinates"] = res(0);
@@ -1340,9 +1347,9 @@ mat Prune_PageRank(mat &U, double density = 1.0) {
 // [[Rcpp::export]]
 List transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB,
                       int compactness_level = 50, unsigned int n_epochs = 500,
-                      int thread_no = 0) {
+                      int thread_no = 0, int seed = 0) {
   field<mat> res = ACTIONet::transform_layout(
-      W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no);
+      W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no, seed);
 
   List out_list;
   out_list["coordinates"] = res(0);
