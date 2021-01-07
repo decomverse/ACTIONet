@@ -179,12 +179,14 @@ void randN_normsinv(double *values, int n) {
 }
 
 // Marsaglia algorithm
-void randN_Marsaglia(double *values, int n) {
+void randN_Marsaglia(double *values, int n, pcg32 rng) {
+  std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
+
   for (int i = 0; i < n; i += 2) {
     double x, y, rsq, f;
     do {
-      x = 2.0 * rand() / (double)RAND_MAX - 1.0;
-      y = 2.0 * rand() / (double)RAND_MAX - 1.0;
+      x = 2.0 * uniform_dist(rng) - 1.0;
+      y = 2.0 * uniform_dist(rng) - 1.0;
       rsq = x * x + y * y;
     } while (rsq >= 1. || rsq == 0.);
     f = sqrt(-2.0 * log(rsq) / rsq);

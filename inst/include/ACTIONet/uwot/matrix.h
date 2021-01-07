@@ -32,7 +32,7 @@
 namespace uwot {
 
 template <typename T>
-void get_row(const std::vector<double> &m, std::size_t nrow, std::size_t ncol,
+void get_row(const std::vector<float> &m, std::size_t nrow, std::size_t ncol,
              std::size_t r, std::vector<T> &out) {
   for (std::size_t j = 0; j < ncol; j++) {
     out[j] = m[r + j * nrow];
