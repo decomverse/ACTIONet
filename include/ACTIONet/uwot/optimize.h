@@ -106,7 +106,7 @@ struct SgdWorker {
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
 	long long ss = 0, tt = 0, uu = 0, ii1 = 0, ii2 = 0;
-	double g1 = 0, g2 = 0, g3 = 0;
+	double g1 = 0, g2 = 0, g3 = 0, d1 = 0, d2 = 0;
 	
 	int max_head_idx = 0, max_tail_idx;
 	
@@ -124,16 +124,15 @@ struct SgdWorker {
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
-		if(i < 50) {
-			printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
-		}
         
         dys[d] = diff;
+        d1 += diff;
+        
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
 
-      float grad_coeff = 0.3*(double)i/end; //gradient.grad_attr(dist_squared);
+      float grad_coeff = gradient.grad_attr(dist_squared);
       
 		g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
@@ -161,6 +160,8 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] = diff;
+          
+          d2 += diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
@@ -178,7 +179,7 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
     
-    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld, ii1 = %ld, ii2 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3), ii1, ii2);
+    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld, ii1 = %ld, ii2 = %ld, d1 = %e, d2 = %e\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3), ii1, ii2, d1, d2);
   }
 
   void set_n(int n) { this->n = n; }
