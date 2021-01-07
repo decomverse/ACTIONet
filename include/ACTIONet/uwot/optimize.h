@@ -133,7 +133,7 @@ struct SgdWorker {
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
 
-      float grad_coeff = 0.3; //gradient.grad_attr(dist_squared);
+      float grad_coeff = gradient.grad_attr(dist_squared);
       
 		g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
@@ -165,7 +165,7 @@ struct SgdWorker {
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
 
-        float grad_coeff = 0.3; //gradient.grad_rep(dist_squared);
+        float grad_coeff = gradient.grad_rep(dist_squared);
 		g2 += grad_coeff;
 
         for (std::size_t d = 0; d < ndim; d++) {

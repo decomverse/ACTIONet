@@ -55,6 +55,7 @@ std::vector<float> optimize_layout_umap(
     std::size_t grain_size = 1, bool move_other = true, int seed = 0) {
   std::vector<float> result;
   if (approx_pow) {
+	  printf("Approx Pow\n");
     const uwot::apumap_gradient gradient(a, b, gamma);
     if (move_other) {
       result = optimize_layout<uwot::apumap_gradient, true>(
@@ -62,6 +63,7 @@ std::vector<float> optimize_layout_umap(
           n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
           thread_no, grain_size, seed);
     } else {
+	  printf("Actual Pow\n");
       result = optimize_layout<uwot::apumap_gradient, false>(
           gradient, head_vec, tail_vec, positive_head, positive_tail, n_epochs,
           n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
