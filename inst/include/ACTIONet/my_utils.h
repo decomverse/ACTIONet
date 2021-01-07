@@ -1,6 +1,7 @@
 #ifndef MY_UTILS_H
 #define MY_UTILS_H
 
+#include <pcg_random.hpp>
 #include "cholmod.h"
 
 namespace ACTIONet {
@@ -22,7 +23,7 @@ void orthog(double *X, double *Y, double *T, int xm, int xn, int yn);
 uint32_t lfsr113(uint64_t **state);
 void lfsr113_seed(uint32_t seed, uint64_t **state);
 
-void randN_Marsaglia(double *values, int n);
+void randN_Marsaglia(double *values, int n, pcg32 rng);
 void randN_BM(double *values, int n, uint64_t **state);
 void randN_normsinv(double *values, int n);
 
