@@ -68,11 +68,11 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 
     if (layout_in_parallel == FALSE) {
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, thread_no = 1)
+            n_epochs = layout_epochs, thread_no = 1, seed = 0)
     } else {
         # WARNING! This makes the results none reproducible
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, thread_no = thread_no)
+            n_epochs = layout_epochs, thread_no = thread_no, seed = 0)
     }
 
     X = vis.out$coordinates
@@ -242,7 +242,8 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' plot.ACTIONet(ace.updated)
 #' @export
 rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thread_no = 0,
-    network_density = 1, mutual_edges_only = T, reduction_slot = "ACTION", net_slot = "ACTIONet") {
+    network_density = 1, mutual_edges_only = T, reduction_slot = "ACTIONet", net_slot = "ACTIONet", 
+    seed = 0) {
     G = colNets(ace)[[net_slot]]
 
     # re-Layout ACTIONet
@@ -250,7 +251,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thr
 
     initial.coordinates = t(scale(t(S_r)))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-        n_epochs = layout_epochs, thread_no = thread_no)
+        n_epochs = layout_epochs, thread_no = thread_no, seed = seed)
 
     X = vis.out$coordinates
     colnames(X) = c("x", "y")

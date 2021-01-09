@@ -1,48 +1,40 @@
 #pragma once
+#include <ACTIONet.h>
 #include <string>
 #include <vector>
-#include "hdbscanRunner.hpp"
 #include "hdbscanParameters.hpp"
 #include "hdbscanResult.hpp"
+#include "hdbscanRunner.hpp"
 #include "outlierScore.hpp"
-#include <ACTIONet.h>
 
 using namespace std;
-
 
 class Hdbscan
 
 {
+ private:
+  hdbscanResult result;
 
-private:
+ public:
+  Hdbscan(mat& X);
 
-	hdbscanResult result;
+  void import_arma(mat& X);
 
-public:
-	Hdbscan(mat& X);
+  vector<vector<double> > dataset;
 
-	void import_arma(mat& X);	
-	
-	vector < vector <double > > dataset;
+  std::vector<int> labels_;
 
-	std::vector<int> labels_;
+  std::vector<int> normalizedLabels_;
 
-	std::vector<int> normalizedLabels_;
+  std::vector<outlierScore> outlierScores_;
 
-	std::vector<outlierScore>outlierScores_;
+  std::vector<double> membershipProbabilities_;
 
-	std::vector <double> membershipProbabilities_;
+  uint32_t noisyPoints_;
 
-	uint32_t noisyPoints_;
+  uint32_t numClusters_;
 
-	uint32_t numClusters_;
+  void execute(int minPoints, int minClusterSize, string distanceMetric);
 
-
-	void execute(int minPoints, int minClusterSize, string distanceMetric);
-
-	void displayResult();
-
-	
-
+  void displayResult();
 };
-

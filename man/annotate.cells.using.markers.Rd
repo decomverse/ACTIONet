@@ -6,17 +6,20 @@
 \usage{
 annotate.cells.using.markers(
   ace,
-  marker_set,
+  markers,
   features_use = NULL,
   rand_sample_no = 100,
   alpha_val = 0.9,
   thread_no = 8,
   imputation = "PageRank",
-  assay_name = "logcounts"
+  assay_name = "logcounts",
+  diffusion_iters = 5
 )
 }
 \arguments{
 \item{ace}{ACTIONet output object}
+
+\item{markers}{A list of lists (each a set of markers for a given cell type)}
 
 \item{rand_sample_no}{Number of random permutations (default=1000)}
 
@@ -25,8 +28,6 @@ annotate.cells.using.markers(
 \item{thread_no}{Number of parallel threads used for gene imputation (if imputation = 'PageRank')}
 
 \item{imputation}{Gene imputation method. Can be either 'PageRank' (default) or 'archImpute'}
-
-\item{markers}{A list of lists (each a set of markers for a given cell type)}
 }
 \value{
 A named list: \itemize{
