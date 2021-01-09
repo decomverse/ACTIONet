@@ -75,6 +75,6 @@ auto connected_components_undirected(std::size_t N,
   }
   return {label, labels};
 }
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_CONNECTED_COMPONENTS_H
+#endif  // UWOT_CONNECTED_COMPONENTS_H
