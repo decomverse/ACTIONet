@@ -9,7 +9,7 @@ annotate.archetypes.using.markers(
   ace,
   markers,
   rand_sample_no = 1000,
-  significance.slot = "unified_feature_specificity"
+  significance_slot = "unified_feature_specificity"
 )
 }
 \arguments{
