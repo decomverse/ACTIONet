@@ -278,10 +278,17 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   }
 
   // Initial coordinates of vertices (0-simplices)
+  /*
   fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
-  
   vector<float> head_vec(initial_coor2D.memptr(),
-                         initial_coor2D.memptr() + initial_coor2D.n_elem);
+                        initial_coor2D.memptr() + initial_coor2D.n_elem);
+  */
+ vector<float> head_vec(init_coors.n_cols*2);
+ mat coor_t = trans(init_coors);
+ double *ptr = coor_t.memptr();
+  for(int i = 0; i < head_vec.size(); i++) {
+	  head_vec[i] = (float)ptr[i];
+  }  
   vector<float> tail_vec(head_vec);
 
 /*
@@ -322,6 +329,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   /****************************
    *  Compute 3D Embedding	*
    ***************************/
+/*
   fmat initial_coor3D =
       conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
 
@@ -330,6 +338,17 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   std::copy(initial_coor3D.memptr(),
             initial_coor3D.memptr() + initial_coor3D.n_elem, head_vec.begin());
   tail_vec = head_vec;
+*/
+
+  head_vec.clear();
+  head_vec.resize(init_coors.n_cols*3);
+
+  for(int i = 0; i < head_vec.size(); i++) {
+	  head_vec[i] = (float)ptr[i];
+  }  
+  tail_vec = head_vec;
+
+
 
   stdout_printf("\tComputing 3D layout ... ");  // fflush(stdout);
   result.clear();
