@@ -131,7 +131,7 @@ struct SgdWorker {
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
 
-      float grad_coeff = 0.5; //gradient.grad_attr(dist_squared);
+      float grad_coeff = gradient.grad_attr(dist_squared);
       if(i < 50)
 		printf("%d- <%d, %d> (+) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
 	  
@@ -159,12 +159,12 @@ struct SgdWorker {
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
-          dys[d] = diff;
+          dys[d] = 0.1; //diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
 
-        float grad_coeff = 0.5; //gradient.grad_rep(dist_squared);
+        float grad_coeff = gradient.grad_rep(dist_squared);
 		g2 += grad_coeff;
 
 		  if(i < 50)
