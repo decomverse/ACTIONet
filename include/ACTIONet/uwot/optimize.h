@@ -121,10 +121,10 @@ struct SgdWorker {
 
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
-        //float diff = uniform_dist(rng)/(float)tail_nvert;
-        float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+        float diff = uniform_dist(rng)/(float)tail_nvert;
+        //float diff = head_embedding[dj + d] - tail_embedding[dk + d];
 		if(i < 50) {
-			printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
+			//printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
 		}
         
         dys[d] = diff;
@@ -134,7 +134,7 @@ struct SgdWorker {
 
       float grad_coeff = gradient.grad_attr(dist_squared);
       if(i < 50)
-		printf("%d- <%d, %d> (+) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
+		//printf("%d- <%d, %d> (+) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
 	  
 	  g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
@@ -159,8 +159,8 @@ struct SgdWorker {
         }
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
-          //float diff = uniform_dist(rng)/(float)tail_nvert;
-          float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
+          float diff = uniform_dist(rng)/(float)tail_nvert;
+          //float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] =  diff;
           dist_squared += diff * diff;
         }
@@ -170,7 +170,7 @@ struct SgdWorker {
 		g2 += grad_coeff;
 
 		  if(i < 50)
-			printf("%d- <%d, %d> (-) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
+			//printf("%d- <%d, %d> (-) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
 
         for (std::size_t d = 0; d < ndim; d++) {
           float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
