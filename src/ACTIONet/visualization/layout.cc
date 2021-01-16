@@ -212,7 +212,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   field<mat> res(3);
 
-  mat init_coors = round(S_r.rows(0, 2)*1e6)/1e-6;
+  mat init_coors = round(S_r.rows(0, 2) * 1e6) * 1e-6;
 
   stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
                 compactness_level, n_epochs);
