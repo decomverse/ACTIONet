@@ -292,4 +292,4 @@ struct SgdWorker {
 
 #endif  // UWOT_OPTIMIZE_H
   
- 
+  
