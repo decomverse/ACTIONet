@@ -47,12 +47,15 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
         } else {
             noncat.num.vars = noncat.vars
         }
-        
+
+        noncat.nonnum.vars = setdiff(noncat.vars, noncat.num.vars)
+
         if (length(cat.vars) > 0) {
             cat.vars = setdiff(cat.vars, noncat.num.vars)
         }
         
-        cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
+        # cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
+        cn = colnames(DF)
         catDF = DF[, cat.vars, drop = F]
         catDF = apply(catDF, 2, as.character)
         catDF[is.na(catDF)] = "NA"
@@ -60,7 +63,11 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
         numDF = DF[, noncat.num.vars, drop = F]
         numDF = apply(numDF, 2, as.numeric)
         numDF[is.na(numDF)] = NA
-        
+
+        nonNumDF = DF[, noncat.nonnum.vars, drop = F]
+        nonNumDF = apply(nonNumDF, 2, as.character)
+        nonNumDF[is.na(nonNumDF)] = NA
+
         if (length(cn) == 0) {
             dtype = H5T_STRING$new(type = "c", size = Inf)
             dtype = dtype$set_cset(cset = "UTF-8")
@@ -72,11 +79,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
         } else {
             h5addAttr.str_array(h5group, "column-order", cn)
         }
-        
-        
-        
-        
-        
+
         if (length(cat.vars) > 0) {
             cat = h5group$create_group("__categories")
             
@@ -124,6 +127,17 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
                 nn = colnames(numDF)[i]
                 h5group$create_dataset(nn, as.single(x), gzip_level = compression.level, 
                   dtype = h5types$H5T_IEEE_F32LE)
+            }
+        }
+
+        if (length(noncat.nonnum.vars) > 0) {
+            for (i in 1:ncol(nonNumDF)) {
+                x = nonNumDF[, i]
+                nn = colnames(nonNumDF)[i]
+                dtype = H5T_STRING$new(type = "c", size = Inf)
+                dtype = dtype$set_cset(cset = "UTF-8")
+                h5group$create_dataset(nn, x, gzip_level = compression.level,
+                  dtype = string.dtype)
             }
         }
     } else {
