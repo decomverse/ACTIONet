@@ -976,6 +976,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_LPA
+vec run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_);
+RcppExport SEXP _ACTIONet_run_LPA(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< vec >::type labels(labelsSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
+    Rcpp::traits::input_parameter< double >::type sig_threshold(sig_thresholdSEXP);
+    Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type fixed_labels_(fixed_labels_SEXP);
+    rcpp_result_gen = Rcpp::wrap(run_LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -1118,6 +1134,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
+    {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
