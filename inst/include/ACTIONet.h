@@ -313,6 +313,9 @@ mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
                            int seed);
 
 vec sweepcut(sp_mat A, vec s);
+
+vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold, uvec fixed_labels);
+
 }  // namespace ACTIONet
 
 #endif
