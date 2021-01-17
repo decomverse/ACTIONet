@@ -37,7 +37,7 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
       Perpendicular::parallel_for(0, n_epochs_per_sample, worker, thread_no,
                                   grain_size);
     } else {
-           worker(0, n_epochs_per_sample);
+      worker(0, n_epochs_per_sample);
     }
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
   }
@@ -126,3 +126,5 @@ std::vector<float> optimize_layout_largevis(
 
   return (result);
 }
+ 
+     
