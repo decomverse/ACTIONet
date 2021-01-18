@@ -5,3 +5,4 @@ from ._normalization import *
 from ._regression import *
 from ._spa import *
 from ._svd import *
+from ._utils import *
