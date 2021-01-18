@@ -505,6 +505,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_network_diffusion_fast
+mat compute_network_diffusion_fast(sp_mat& G, sp_mat& X0, int thread_no, double alpha, int max_it);
+RcppExport SEXP _ACTIONet_compute_network_diffusion_fast(SEXP GSEXP, SEXP X0SEXP, SEXP thread_noSEXP, SEXP alphaSEXP, SEXP max_itSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type X0(X0SEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_network_diffusion_fast(G, X0, thread_no, alpha, max_it));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_network_diffusion_direct
 mat compute_network_diffusion_direct(sp_mat& G, sp_mat& X0, int thread_no, double alpha);
 RcppExport SEXP _ACTIONet_compute_network_diffusion_direct(SEXP GSEXP, SEXP X0SEXP, SEXP thread_noSEXP, SEXP alphaSEXP) {
@@ -1101,6 +1116,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_core_number", (DL_FUNC) &_ACTIONet_compute_core_number, 1},
     {"_ACTIONet_compute_archetype_core_centrality", (DL_FUNC) &_ACTIONet_compute_archetype_core_centrality, 2},
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 5},
+    {"_ACTIONet_compute_network_diffusion_fast", (DL_FUNC) &_ACTIONet_compute_network_diffusion_fast, 5},
     {"_ACTIONet_compute_network_diffusion_direct", (DL_FUNC) &_ACTIONet_compute_network_diffusion_direct, 4},
     {"_ACTIONet_compute_sparse_network_diffusion", (DL_FUNC) &_ACTIONet_compute_sparse_network_diffusion, 6},
     {"_ACTIONet_assess_enrichment", (DL_FUNC) &_ACTIONet_assess_enrichment, 3},
