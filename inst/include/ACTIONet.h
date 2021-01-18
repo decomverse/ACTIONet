@@ -283,6 +283,8 @@ uvec compute_core_number(sp_mat &G);
 vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments);
 mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no,
                               double alpha, int max_it);
+mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no,
+                              double alpha, int max_it);
 mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no,
                                      double alpha);
 sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha,
