@@ -338,6 +338,14 @@ NULL
 #' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) ==
 NULL
 
+#' Computes network diffusion over a given network, starting with an arbitrarty
+NULL
+
+#'
+#' @param G Input graph
+#' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) ==
+NULL
+
 #' Computes sparse network diffusion over a given network, starting with an
 NULL
 
@@ -791,6 +799,17 @@ compute_archetype_core_centrality <- function(G, sample_assignments) {
 #' smoothed.expression = compute_network_diffusion(G, gene.expression)
 compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 3L) {
     .Call(`_ACTIONet_compute_network_diffusion`, G, X0, thread_no, alpha, max_it)
+}
+
+#'
+#' @return Matrix of diffusion scores
+#'
+#' @examples
+#' G = colNets(ace)$ACTIONet
+#' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
+#' smoothed.expression = compute_network_diffusion(G, gene.expression)
+compute_network_diffusion_fast <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 3L) {
+    .Call(`_ACTIONet_compute_network_diffusion_fast`, G, X0, thread_no, alpha, max_it)
 }
 
 #'
