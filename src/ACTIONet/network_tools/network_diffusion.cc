@@ -102,9 +102,12 @@ mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no = 4,
 
   X0 *= N;
   rowvec zt = trans(z);
-  ParallelFor(0, X.n_cols, thread_no, [&](size_t i, size_t threadId) {
-    X.col(i) = P * X.col(i) + X0.col(i) * (zt * X.col(i));
-  });
+  
+  for(int it = 0; it < max_it; it++) {
+	  ParallelFor(0, X.n_cols, thread_no, [&](size_t i, size_t threadId) {
+		X.col(i) = P * X.col(i) + X0.col(i) * (zt * X.col(i));
+	  });
+  }
   // X = normalise(X, 1)
 
   return (X);
@@ -215,5 +218,67 @@ mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no = 4,
 
   return (PR);
 }
+
+mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no = 4,
+                              double alpha = 0.85, int max_it = 3) {
+  thread_no = std::min(thread_no, (int)X0.n_cols);
+  
+  int n = G.n_rows;
+  
+  cholmod_common chol_c;
+  cholmod_start(&chol_c);
+
+  int *Ti, *Tj;
+  double *Tx;
+
+  sp_mat P = alpha * normalise(G, 1, 0);
+  
+  cholmod_triplet *T = cholmod_allocate_triplet(P.n_rows, P.n_cols, P.n_nonzero,
+                                                0, CHOLMOD_REAL, &chol_c);
+  T->nnz = P.n_nonzero;
+  Ti = static_cast<int *>(T->i);
+  Tj = static_cast<int *>(T->j);
+  Tx = static_cast<double *>(T->x);
+  int idx = 0;
+  for (sp_mat::const_iterator it = P.begin(); it != P.end(); ++it) {
+    Ti[idx] = it.row();
+    Tj[idx] = it.col();
+    Tx[idx] = (*it);
+    idx++;
+  }
+  cholmod_sparse *AS = cholmod_triplet_to_sparse(T, P.n_nonzero, &chol_c);
+  cholmod_free_triplet(&T, &chol_c);
+
+
+  vec z = ones(n);
+  vec cs = vec(trans(sum(G, 0)));
+  uvec nnz_idx = find(cs>0);
+  z(nnz_idx) = ones(nnz_idx.n_elem) * (1.0 - alpha);
+  z = z / n;
+  
+  X0 = normalise(X0, 1, 0);
+  mat X = mat(X0);
+  X0 *= n;
+  rowvec zt = trans(z);
+
+  for(int it = 0; it < max_it; it++) {
+	  mat Y = X;
+	  ParallelFor(0, X.n_cols, thread_no, [&](size_t i, size_t threadId) {
+		dsdmult('n', n, n, AS, X.colptr(i), Y.colptr(i), &chol_c);	  
+		X.col(i) = Y.col(i) + X0.col(i) * (zt * X.col(i));
+	  });
+  }
+  
+  // Free up matrices
+  cholmod_free_triplet(&T, &chol_c);
+  cholmod_free_sparse(&AS, &chol_c);
+  cholmod_finish(&chol_c);
+
+  return (X);
+}
+
+
+
+
 
 }  // namespace ACTIONet
