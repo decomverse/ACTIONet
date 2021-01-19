@@ -121,8 +121,8 @@ struct SgdWorker {
 
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
-	    //float diff = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+	    //float diff = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
 		if(i < 50) {
 			//printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
 		}
@@ -138,21 +138,21 @@ struct SgdWorker {
 	  
 	  g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
-        //float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
-	    float grad_d = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
+        float grad_d = 0.1; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+	    //float grad_d = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
                                      
         head_embedding[dj + d] += grad_d;
 		if(DoMoveVertex)
 			tail_embedding[dk + d] -= grad_d;
 
-        //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
                         
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       uu += n_neg_samples;
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        int r = 10*p; //uniform_dist(rng);
+        int r = uniform_dist(rng);
         ss += r;
         std::size_t dkn = r * ndim;
         if (dj == dkn) {
@@ -174,8 +174,8 @@ struct SgdWorker {
 			//printf("%d- <%d, %d> (-) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          //float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
-			float grad_d = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
+          float grad_d = 0.1; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+		  //float grad_d = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
 
           head_embedding[dj + d] += grad_d;
           g3 += grad_d;
