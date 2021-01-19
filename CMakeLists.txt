@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_compile_options(-w)
-add_compile_options(-O3)
+add_compile_options(-O2)
 
 ############ Third-party dependencies
 find_package(HDF5 REQUIRED)
