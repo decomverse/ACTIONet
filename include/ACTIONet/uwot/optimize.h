@@ -137,7 +137,7 @@ struct SgdWorker {
 	  
 	  g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * 0.1, Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
                                      
         head_embedding[dj + d] += grad_d;
 		if(DoMoveVertex)
@@ -171,7 +171,7 @@ struct SgdWorker {
 			//printf("%d- <%d, %d> (-) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * 0.1, Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
 
           head_embedding[dj + d] += grad_d;
           g3 += grad_d;
