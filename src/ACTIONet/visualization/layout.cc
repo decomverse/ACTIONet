@@ -284,8 +284,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
                         initial_coor2D.memptr() + initial_coor2D.n_elem);
   */
  vector<float> head_vec(init_coors.n_cols*2);
- mat coor_t = trans(init_coors);
- double *ptr = coor_t.memptr();
+ double *ptr = init_coors.memptr();
   for(int i = 0; i < head_vec.size(); i++) {
 	  head_vec[i] = (float)ptr[i];
   }  
