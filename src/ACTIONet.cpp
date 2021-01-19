@@ -2062,3 +2062,12 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
   }
 }
 
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha = 0.85, int max_it = 5, int thread_no = 0) {	
+	mat stats = ACTIONet::compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no);
+
+	return(stats);
+}
