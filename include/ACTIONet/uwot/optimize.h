@@ -30,7 +30,10 @@
 #include <limits>
 #include <utility>
 
+#include <pcg_random.hpp>
+
 #include "sampler.h"
+#include "tauprng.h"
 
 namespace uwot {
 
@@ -53,11 +56,13 @@ inline auto clamp(float v, float lo, float hi) -> float {
   return t > hi ? hi : t;
 }
 
+
+static thread_local pcg32 rng;
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
-template <typename Gradient, bool DoMoveVertex, typename RngFactory>
+template <typename Gradient, bool DoMoveVertex>
 struct SgdWorker {
-  int n; // epoch counter
+  int n;  // epoch counter
   float alpha;
   const Gradient gradient;
   const std::vector<unsigned int> positive_head;
@@ -69,86 +74,113 @@ struct SgdWorker {
   std::size_t head_nvert;
   std::size_t tail_nvert;
   float dist_eps;
-  RngFactory rng_factory;
+
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
             std::vector<float> &head_embedding,
-            std::vector<float> &tail_embedding, std::size_t ndim)
+            std::vector<float> &tail_embedding, std::size_t ndim,
+            uint64_t seed = std::mt19937_64::default_seed)
       :
 
-        n(0), alpha(0.0), gradient(gradient),
-        positive_head(std::move(positive_head)),
-        positive_tail(std::move(positive_tail)),
+        n(0),
+        alpha(0.0),
+        gradient(gradient),
+        positive_head(positive_head),
+        positive_tail(positive_tail),
 
         sampler(sampler),
 
-        head_embedding(head_embedding), tail_embedding(tail_embedding),
-        ndim(ndim), head_nvert(head_embedding.size() / ndim),
+        head_embedding(head_embedding),
+        tail_embedding(tail_embedding),
+        ndim(ndim),
+        head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<float>::epsilon()),
-
-        rng_factory() {}
+        dist_eps(std::numeric_limits<float>::epsilon()) {
+    rng.seed(seed);
+  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    // Each window gets its own PRNG state, to prevent locking inside the loop.
-    auto prng = rng_factory.create(end);
-
     std::vector<float> dys(ndim);
+	
+    std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
+
+	long long ss = 0, tt = 0, uu = 0;
+	double g1 = 0, g2 = 0, g3 = 0;
+	
+	int max_head_idx = 0, max_tail_idx;
+	
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
+		tt += i;
+		
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+        
         dys[d] = diff;
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
-      float grad_coeff = gradient.grad_attr(dist_squared);
 
+      float grad_coeff = gradient.grad_attr(dist_squared);
+      //float grad_coeff = 0.5; //gradient.grad_attr(0.5);; //gradient.grad_attr(dist_squared);
+	  
+	  g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
-        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-                                     Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+                                     
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+                        
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
+      uu += n_neg_samples;
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        std::size_t dkn = prng(tail_nvert) * ndim;
+        int r = uniform_dist(rng);
+        ss += r;
+        std::size_t dkn = r * ndim;
         if (dj == dkn) {
           continue;
         }
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
-          dys[d] = diff;
+          dys[d] =  diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
+
         float grad_coeff = gradient.grad_rep(dist_squared);
+        //float grad_coeff = 0.5; //gradient.grad_rep(0.5);; //gradient.grad_rep(dist_squared);
+		g2 += grad_coeff;
+
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-                                       Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+
           head_embedding[dj + d] += grad_d;
+          g3 += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
     }
+    
+    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3));
   }
 
   void set_n(int n) { this->n = n; }
 
   void set_alpha(float alpha) { this->alpha = alpha; }
 
-  void reseed() { this->rng_factory.reseed(); }
+  void reseed(int new_seed) { rng.seed(new_seed); }
 };
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_OPTIMIZE_H
+#endif  // UWOT_OPTIMIZE_H
