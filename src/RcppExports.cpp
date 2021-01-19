@@ -1007,6 +1007,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_marker_aggregate_stats
+mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& annotations, double alpha, int max_it, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats(SEXP GSEXP, SEXP SSEXP, SEXP annotationsSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type annotations(annotationsSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -1151,6 +1167,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
     {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
+    {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 6},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},

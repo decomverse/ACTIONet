@@ -318,6 +318,8 @@ vec sweepcut(sp_mat A, vec s);
 
 vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold, uvec fixed_labels);
 
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha, int max_it, int thread_no);
+
 }  // namespace ACTIONet
 
 #endif
