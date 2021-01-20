@@ -2,7 +2,7 @@
 normalize.scran <- function(ace, batch_attr = NULL, assay_name = "counts", BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "scater"))
     batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
-    ace = scran::computeSumFactors(ace, clusters = batch_attr, assay.type = assay_name, 
+    ace = scran::computeSumFactors(ace, clusters = batch_attr, assay.type = assay_name,
         BPPARAM = BPPARAM)
     ace = scater::logNormCounts(ace, exprs_values = assay_name)
     return(ace)
@@ -12,7 +12,7 @@ normalize.scran <- function(ace, batch_attr = NULL, assay_name = "counts", BPPAR
 normalize.multiBatchNorm <- function(ace, batch_attr, assay_name = "counts", BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "batchelor"))
     batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
-    ace = batchelor::multiBatchNorm(ace, batch = batch_attr, assay.type = assay_name, 
+    ace = batchelor::multiBatchNorm(ace, batch = batch_attr, assay.type = assay_name,
         BPPARAM = BPPARAM)
     return(ace)
 }
@@ -38,7 +38,8 @@ rescale.matrix <- function(S, log_scale = FALSE) {
     if (is.matrix(S)) {
         cs = ACTIONet::fastColSums(S)
         cs[cs == 0] = 1
-        B = median(cs) * scale(S, center = F, scale = cs)
+        # B = median(cs) * scale(S, center = F, scale = cs)
+        B = median(cs) * Matrix::t(Matrix::t(S) / cs)
         if (log_scale == TRUE) {
             B = log1p(B)
         }
@@ -56,13 +57,13 @@ rescale.matrix <- function(S, log_scale = FALSE) {
 }
 
 #' @export
-normalize.ace <- function(ace, norm_method = "default", batch_attr = NULL, assay_name = "counts", 
+normalize.ace <- function(ace, norm_method = "default", batch_attr = NULL, assay_name = "counts",
     BPPARAM = SerialParam()) {
-    
+
     if (norm_method == "scran") {
         ace = normalize.scran(ace, batch_attr, assay_name = assay_name, BPPARAM = BPPARAM)
     } else if (norm_method == "multiBatchNorm") {
-        ace = normalize.multiBatchNorm(ace, batch_attr, assay_name = assay_name, 
+        ace = normalize.multiBatchNorm(ace, batch_attr, assay_name = assay_name,
             BPPARAM = BPPARAM)
     } else if (norm_method == "linnorm") {
         ace = normalize.Linnorm(ace, assay_name = assay_name)
@@ -70,7 +71,7 @@ normalize.ace <- function(ace, norm_method = "default", batch_attr = NULL, assay
         ace = normalize.default(ace, assay_name = assay_name, log_scale = TRUE)
         norm_method = "default"
     }
-    
+
     metadata(ace)$normalization.method = norm_method
     return(ace)
 }
