@@ -85,6 +85,11 @@ namespace ACTIONet {
 	mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha = 0.85, int max_it = 5, int thread_no = 0) {	
 		mat stats = zeros(S.n_cols, annotations.n_cols);
 		
+		int n = G.n_rows;
+		sp_mat o = sp_mat(ones(n, 1));
+		vec pr = compute_network_diffusion(G, o, thread_no, alpha, max_it).col(0);
+		
+		
 		vec cs = vec(trans(sum(annotations)));
 		for(int i = 0; i < annotations.n_cols; i++) {
 		
@@ -99,7 +104,7 @@ namespace ACTIONet {
 			w = w / sum(w);
 			
 			mat imputed_expression = compute_network_diffusion(G, raw_expression, thread_no, alpha, max_it);
-			stats.col(i) = (imputed_expression * w);
+			stats.col(i) = log2((imputed_expression * w) / pr);
 			
 			/*
 			mat imputed_expression_Z = RIN_transform(imputed_expression);			

@@ -78,6 +78,23 @@ std::vector<float> optimize_layout_umap(
     double negative_sample_rate, bool approx_pow, std::size_t n_threads,
     std::size_t grain_size, bool move_other, int seed);
 
+
+std::vector<float> optimize_layout_tumap(
+    std::vector<float> head_vec, std::vector<float> tail_vec,
+    const std::vector<unsigned int> positive_head,
+    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
+    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
+    double initial_alpha, double negative_sample_rate,
+    std::size_t thread_no = 0, std::size_t grain_size = 1,
+    bool move_other = true, int seed = 0);
+
+std::vector<float> optimize_layout_largevis(
+    std::vector<float> head_vec, const std::vector<unsigned int> positive_head,
+    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
+    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
+    double gamma, double initial_alpha, double negative_sample_rate,
+    std::size_t thread_no = 0, std::size_t grain_size = 1, int seed = 0);
+
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t thread_no,
                         Function fn) {
@@ -284,11 +301,10 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
                         initial_coor2D.memptr() + initial_coor2D.n_elem);
   */
  vector<float> head_vec(init_coors.n_cols*2);
- double *ptr = init_coors.memptr();
-  for(int i = 0; i < head_vec.size(); i++) {
-	  head_vec[i] = (float)ptr[i];
-  }  
-  vector<float> tail_vec(head_vec);
+ fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
+ float *ptr = sub_coor.memptr();
+ memcpy(head_vec.data(), ptr, sizeof(float)*head_vec.size()); 
+ vector<float> tail_vec(head_vec);
 
 /*
 	fmat coordinates_float_back(head_vec.data(), 2, nV);
@@ -311,15 +327,24 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   // Stores linearized coordinates [x1, y1, x2, y2, ...]
   vector<float> result;
 
-  result = optimize_layout_umap(
+	/*result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
+      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
+    */
+
+	result = optimize_layout_tumap(
+    head_vec, tail_vec,
+    positive_head,
+    positive_tail, n_epochs,
+    nV, epochs_per_sample,
+    LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
+    thread_no, 1,
+    true, seed);
+      
 
   fmat coordinates_float(result.data(), 2, nV);
   mat coordinates = conv_to<mat>::from(coordinates_float);
-
-  // coordinates = robust_zscore(trans(coordinates));
   coordinates = trans(coordinates);
 
   stdout_printf("done\n");
@@ -339,29 +364,41 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   tail_vec = head_vec;
 */
 
+
   head_vec.clear();
   head_vec.resize(init_coors.n_cols*3);
-
-  for(int i = 0; i < head_vec.size(); i++) {
-	  head_vec[i] = (float)ptr[i];
-  }  
+  sub_coor = conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
+  ptr = sub_coor.memptr();
+  memcpy(head_vec.data(), ptr, sizeof(float)*head_vec.size()); 
   tail_vec = head_vec;
 
 
 
   stdout_printf("\tComputing 3D layout ... ");  // fflush(stdout);
   result.clear();
+  /*
   result = optimize_layout_umap(
       head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
       epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
+      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
+  */
+
+	result = optimize_layout_tumap(
+	head_vec, tail_vec,
+	positive_head,
+	positive_tail, n_epochs,
+	nV, epochs_per_sample,
+	LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
+	thread_no, 1,
+	true, seed);
+
 
   fmat coordinates_3D_float(result.data(), 3, nV);
   mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
   // coordinates_3D = robust_zscore(trans(coordinates_3D));
   coordinates_3D = trans(coordinates_3D);
 
-  stdout_printf("done\n");
+  stdout_printf("done (%d x %d)\n", coordinates_3D.n_rows, coordinates_3D.n_cols);
   FLUSH;  // fflush(stdout);
 
   /****************************
