@@ -4,14 +4,21 @@
 \alias{plot.individual.gene}
 \title{Plot gene expression violin plot}
 \usage{
-\method{plot}{individual.gene}(ace, labels, gene.name, CPal = CPal20)
+\method{plot}{individual.gene}(
+  ace,
+  labels,
+  gene_name,
+  features_use = NULL,
+  assay_name = "logcounts",
+  CPal = CPal20
+)
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
 \item{labels}{Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot}
 
-\item{gene.name}{Name of the gene to plot}
+\item{gene_name}{Name of the gene to plot}
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 }
