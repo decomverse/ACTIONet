@@ -225,27 +225,27 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
   }
+
   stdout_printf("Computing layout (%d threads):\n", thread_no);
 
   field<mat> res(3);
 
   mat init_coors = round(S_r.rows(0, 2) * 1e6) * 1e-6;
 
-  stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
-                compactness_level, n_epochs);
-  FLUSH;
-
   sp_mat H = G;
   H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
   H = smoothKNN(H, thread_no);
 
-
   unsigned int nV = H.n_rows;
 
-  if(compactness_level < 0){
-    compactness_level = 0;
-  } else if (compactness_level > 100){
-    compactness_level = 100;
+  if(layout_alg == UMAP_LAYOUT){
+    compactness_level = (compactness_level < 0) ? 0 : compactness_level;
+    compactness_level = (compactness_level > 100) ? 100 : compactness_level;
+    stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n", compactness_level, n_epochs);
+    FLUSH;
+  } else {
+    stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs);
+    FLUSH;
   }
 
   double a_param = UMAP_A[compactness_level];
@@ -256,8 +256,6 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   vector<unsigned int> positive_head(nE);
   vector<unsigned int> positive_tail(nE);
   vector<float> epochs_per_sample(nE);
-
-
 
 /*
   const double* values = G.values;
