@@ -26,7 +26,7 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
 
     DF = as.data.frame(DF)
 
-    N = nrow(DF)
+    N = NROW(DF)
 
     h5group = h5file$create_group(gname)
 
@@ -34,25 +34,28 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
     h5addAttr.str(h5group, "encoding-version", "0.1.0")
     h5addAttr.str(h5group, "encoding-type", "dataframe")
 
-    if (0 < ncol(DF)) {
-        cat.vars = which(sapply(1:ncol(DF), function(i) length(unique(DF[, i])) <
+    if (0 < NCOL(DF)) {
+        cat.vars = which(sapply(1:NCOL(DF), function(i) length(unique(DF[, i])) <
             256))
 
-		noncat.vars = setdiff(1:ncol(DF), cat.vars)
-		if(length(noncat.vars) > 0) {
-			noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
-				x = as.numeric(DF[, i])
-				return(sum(!is.na(x)) > 0) 
-			})]
-		} else {
-			noncat.num.vars = noncat.vars
-		}
-		
-		if(length(cat.vars) > 0) {
-			cat.vars = setdiff(cat.vars, noncat.num.vars)
-		}
-		
-        cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
+        noncat.vars = setdiff(1:NCOL(DF), cat.vars)
+        if (length(noncat.vars) > 0) {
+            noncat.num.vars = noncat.vars[sapply(noncat.vars, function(i) {
+                x = as.numeric(DF[, i])
+                return(sum(!is.na(x)) > 0)
+            })]
+        } else {
+            noncat.num.vars = noncat.vars
+        }
+
+        noncat.nonnum.vars = setdiff(noncat.vars, noncat.num.vars)
+
+        if (length(cat.vars) > 0) {
+            cat.vars = setdiff(cat.vars, noncat.num.vars)
+        }
+
+        # cn = colnames(DF)[c(cat.vars, noncat.num.vars)]
+        cn = colnames(DF)
         catDF = DF[, cat.vars, drop = F]
         catDF = apply(catDF, 2, as.character)
         catDF[is.na(catDF)] = "NA"
@@ -60,6 +63,10 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
         numDF = DF[, noncat.num.vars, drop = F]
         numDF = apply(numDF, 2, as.numeric)
         numDF[is.na(numDF)] = NA
+
+        nonNumDF = DF[, noncat.nonnum.vars, drop = F]
+        nonNumDF = apply(nonNumDF, 2, as.character)
+        nonNumDF[is.na(nonNumDF)] = NA
 
         if (length(cn) == 0) {
             dtype = H5T_STRING$new(type = "c", size = Inf)
@@ -73,15 +80,11 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
             h5addAttr.str_array(h5group, "column-order", cn)
         }
 
-
-
-
-
         if (length(cat.vars) > 0) {
             cat = h5group$create_group("__categories")
 
             for (i in 1:length(cat.vars)) {
-                x = catDF[, i]#DF[, cat.vars[i]]
+                x = catDF[, i]  #DF[, cat.vars[i]]
                 if (class(x) == "factor") {
                   l = as.character(levels(x))
                   v = as.numeric(x) - 1
@@ -119,11 +122,22 @@ write.HD5DF <- function(h5file, gname, DF, compression.level = 0) {
             }
         }
         if (length(noncat.num.vars) > 0) {
-            for (i in 1:ncol(numDF)) {
+            for (i in 1:NCOL(numDF)) {
                 x = numDF[, i]
                 nn = colnames(numDF)[i]
                 h5group$create_dataset(nn, as.single(x), gzip_level = compression.level,
                   dtype = h5types$H5T_IEEE_F32LE)
+            }
+        }
+
+        if (length(noncat.nonnum.vars) > 0) {
+            for (i in 1:NCOL(nonNumDF)) {
+                x = nonNumDF[, i]
+                nn = colnames(nonNumDF)[i]
+                dtype = H5T_STRING$new(type = "c", size = Inf)
+                dtype = dtype$set_cset(cset = "UTF-8")
+                h5group$create_dataset(nn, x, gzip_level = compression.level,
+                  dtype = string.dtype)
             }
         }
     } else {
@@ -162,19 +176,22 @@ write.HD5List <- function(h5file, gname, obj_list, depth = 1, max.depth = 5, com
     obj_list = as.list(obj_list)
 
 
-    for(nn in names(obj_list)) {
-    	obj = obj_list[[nn]]
-    	if( (sum(sapply(c("list", "SimpleList"), function(x) return(length(which(is(obj) == x)) != 0))) != 0) & (depth < max.depth) ) {
-			write.HD5List(h5group, nn, obj, depth = depth+1, max.depth = max.depth, compression.level = compression.level)
-    	} else if(sum(sapply(c("data.frame", "DataFrame", "DFrame"), function(x) return(length(which(is(obj) == x)) != 0))) != 0) {
-			write.HD5DF(h5group, nn, obj, compression.level = compression.level)
-    	} else if(is.sparseMatrix(obj)) {
-    		write.HD5SpMat(h5group, nn, obj, compression.level = compression.level)
-    	} else if(is.matrix(obj) | is.numeric(obj)) {
-	        h5group$create_dataset(nn, obj, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
-		} else {
-    		h5group[[nn]] = obj
-    	}
+    for (nn in names(obj_list)) {
+        obj = obj_list[[nn]]
+        if ((sum(sapply(c("list", "SimpleList"), function(x) return(length(which(is(obj) ==
+            x)) != 0))) != 0) & (depth < max.depth)) {
+            write.HD5List(h5group, nn, obj, depth = depth + 1, max.depth = max.depth,
+                compression.level = compression.level)
+        } else if (sum(sapply(c("data.frame", "DataFrame", "DFrame"), function(x) return(length(which(is(obj) ==
+            x)) != 0))) != 0) {
+            write.HD5DF(h5group, nn, obj, compression.level = compression.level)
+        } else if (is.sparseMatrix(obj)) {
+            write.HD5SpMat(h5group, nn, obj, compression.level = compression.level)
+        } else if (is.matrix(obj) | is.numeric(obj)) {
+            h5group$create_dataset(nn, obj, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+        } else {
+            h5group[[nn]] = obj
+        }
     }
 }
 
@@ -207,9 +224,9 @@ read.HD5DF <- function(h5file, gname, compression.level = 0) {
             for (nn in names(cat)) {
                 l = cat[[nn]]$read()
                 l = setdiff(l, "NA")
-                if(length(l) < 2)
-					next
-					
+                if (length(l) < 2)
+                  next
+
                 vars[[nn]] = factor(l[vars[[nn]] + 1], l)
             }
         }
@@ -261,129 +278,135 @@ read.HD5List <- function(h5file, gname, depth = 1, max.depth = 5, compression.le
     L.out = vector("list", length(obj_names))
     names(L.out) = obj_names
 
-	if(length(obj_names) > 0) {
-		for(nn in obj_names) {
-			attr = h5attributes(h5group[[nn]])
-			if(length(attr) > 0 & ("encoding-type" %in% names(attr))) {
-				if ( (attr[["encoding-type"]] == "csc_matrix") | (attr[["encoding-type"]] == "csr_matrix") ) {
-					obj = read.HD5SpMat(h5group, nn, compression.level = compression.level)
-				} else if ((attr[["encoding-type"]] == "dataframe")) {
-					obj = read.HD5DF(h5group, nn, compression.level = compression.level)
-				} else {
-					warning(sprintf("Unknown encoding %s", attr[["encoding-type"]]))
-					next
-				}
-			} else if(h5group[[nn]]$get_obj_type() == 2 & (depth < max.depth)) {
-				obj = read.HD5List(h5group, nn, compression.level = compression.level, depth = depth + 1)
-			}
-			else {
-				obj = h5group[[nn]]$read()
-			}
-			L.out[[nn]] = obj
-		}
-		filter.mask = sapply(L.out, function(x) is.null(x))
-		if(sum(filter.mask) > 0) {
-			L.out = L.out[!filter.mask]
-		}
-	}
-	
+    if (length(obj_names) > 0) {
+        for (nn in obj_names) {
+            attr = h5attributes(h5group[[nn]])
+            if (length(attr) > 0 & ("encoding-type" %in% names(attr))) {
+                if ((attr[["encoding-type"]] == "csc_matrix") | (attr[["encoding-type"]] ==
+                  "csr_matrix")) {
+                  obj = read.HD5SpMat(h5group, nn, compression.level = compression.level)
+                } else if ((attr[["encoding-type"]] == "dataframe")) {
+                  obj = read.HD5DF(h5group, nn, compression.level = compression.level)
+                } else {
+                  warning(sprintf("Unknown encoding %s", attr[["encoding-type"]]))
+                  next
+                }
+            } else if (h5group[[nn]]$get_obj_type() == 2 & (depth < max.depth)) {
+                obj = read.HD5List(h5group, nn, compression.level = compression.level,
+                  depth = depth + 1)
+            } else {
+                obj = h5group[[nn]]$read()
+            }
+            L.out[[nn]] = obj
+        }
+        filter.mask = sapply(L.out, function(x) is.null(x))
+        if (sum(filter.mask) > 0) {
+            L.out = L.out[!filter.mask]
+        }
+    }
+
     return(L.out)
 }
 
 #' @export
-ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", full.export = T,
+ACE2AnnData <- function(ace, file = "ACTIONet.h5ad", main_assay = "logcounts", full.export = T,
     compression.level = 0) {
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
-        stop("Please install hdf5r to wrote HDF5 files")
-    }
-	
-
-    if (file.exists(fname)) {
-        file.remove(fname)
+        stop("Please install hdf5r to write HDF5 files")
     }
 
-	if(is.null(colnames(ace))) {
-		colnames(ace) = paste("Cell", 1:ncol(ace), sep = "")
-	}
-	if(is.null(rownames(ace))) {
-		rownames(ace) = paste("Feature", 1:nrow(ace), sep = "")
-	}
+    # Ensure it can be case as an ACE object
+    ace = as(ace, "ACTIONetExperiment")
 
-	# Fallback to counts if main assay doesn't exist
-	if( !(main.assay %in% names(assays(ace))) ) {
-		main.assay = "counts"
-	}
-	
-	# Make row/column-names unique
-	ucn = make.unique(colnames(ace))
-	urn = make.unique(rownames(ace))
-
-	rownames(ace) = urn
-	colnames(ace) = ucn
-
-	for(nn in names(assays(ace))) {
-		X = assays(ace)[[nn]]
-		rownames(X) = urn
-		colnames(X) = ucn
-		assays(ace)[[nn]] = X
-	}
-
-	# Ensure it can be case as an ACE object
-	ace = as(ace, "ACTIONetExperiment")
-	
-	
-    h5file = H5File$new(fname, mode = "w")
-
-    ## Write X (logcounts() in ace, in either sparse or dense format)
-    X = assays(ace)[[main.assay]]
-    if (is.sparseMatrix(X)) {
-        write.HD5SpMat(h5file, gname = "X", X, compression.level = compression.level)
-    } else {
-        h5file$create_dataset("X", X, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+    if (file.exists(file)) {
+        file.remove(file)
     }
 
-    remaining.assays = setdiff(names(assays(ace)), main.assay)
+    if (is.null(colnames(ace))) {
+        colnames(ace) = default_colnames(NCOL(ace))
+    }
+    if (is.null(rownames(ace))) {
+        rownames(ace) = .default_rownames(NROW(ace))
+    }
+
+    # Error is no assay specified.
+    # assay_opts = c(main_assay, raw_assay)
+    # if (!(main_assay %in% names(SummarizedExperiment::assays(ace)))) {
+    #     err = sprintf("Invalid valid assay selection.\n")
+    #     stop(err)
+    # }
+
+    # Make row/column-names unique
+    colnames(ace) = ucn = .make_chars_unique(colnames(ace))
+    rownames(ace) = urn = .make_chars_unique(rownames(ace))
+
+    for (nn in names(SummarizedExperiment::assays(ace))) {
+        dimnames(SummarizedExperiment::assays(ace)[[nn]]) = list(urn, ucn)
+    }
+
+    h5file = H5File$new(file, mode = "w")
+
+    ## Write X (assays in ace, in either sparse or dense format)
+    if(is.null(main_assay)){
+      main_mat = sparseMatrix(i = c(), j = c(), dims = dim(ace))
+      write.HD5SpMat(h5file, gname = "X", main_mat, compression.level = compression.level)
+    } else{
+      if (!(main_assay %in% names(SummarizedExperiment::assays(ace)))) {
+        err = sprintf("'main_assay' is not in assays of ace'.\n")
+        stop(err)
+      }
+      main_mat = SummarizedExperiment::assays(ace)[[main_assay]]
+      if (is.sparseMatrix(main_mat)) {
+          write.HD5SpMat(h5file, gname = "X", main_mat, compression.level = compression.level)
+      } else {
+          h5file$create_dataset("X", main_mat, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+      }
+    }
+
+    remaining.assays = setdiff(names(SummarizedExperiment::assays(ace)), main_assay)
     if ((full.export == T) & (0 < length(remaining.assays))) {
         layers = h5file$create_group("layers")
 
         for (an in remaining.assays) {
-            Xr = as(assays(ace)[[an]], "dgCMatrix")
+          Xr = SummarizedExperiment::assays(ace)[[an]]
+          if (is.sparseMatrix(Xr)) {
             write.HD5SpMat(layers, gname = an, Xr, compression.level = compression.level)
+          } else {
+            layers$create_dataset(an, Xr, gzip_level = compression.level, dtype = h5types$H5T_IEEE_F32LE)
+          }
         }
     }
-
 
     uns = h5file$create_group("uns")
     obsm_annot = uns$create_group("obsm_annot")
     varm_annot = uns$create_group("varm_annot")
-	
-	obj_list = metadata(ace)
-	write.HD5List(uns, "metadata", obj_list, depth = 1, max.depth = 10, compression.level = compression.level)
-	
+
+    obj_list = metadata(ace)
+    write.HD5List(uns, "metadata", obj_list, depth = 1, max.depth = 10, compression.level = compression.level)
 
     ## Write obs (colData() in ace)
-    obs.DF = as.data.frame(colData(ace))
-    if(0 < ncol(obs.DF)) {
-		obs.DF = as.data.frame(lapply(colData(ace), function(x) {
-			if(is.numeric(x) & (!is.null(names(x)))) {
-				return(factor(names(x), names(x)[match(unique(x), x)]))
-			} else {
-				return(x)
-			}
-		}))    
-	}
-	rownames(obs.DF) = colnames(ace)
-	
+    obs.DF = as.data.frame(SummarizedExperiment::colData(ace))
+    if (0 < NCOL(obs.DF)) {
+        obs.DF = as.data.frame(lapply(SummarizedExperiment::colData(ace), function(x) {
+            if (is.numeric(x) & (!is.null(names(x)))) {
+                return(factor(names(x), names(x)[match(unique(x), x)]))
+            } else {
+                return(x)
+            }
+        }))
+    }
+    rownames(obs.DF) = colnames(ace)
+
     write.HD5DF(h5file, gname = "obs", obs.DF, compression.level = compression.level)
 
     ## Write var (matching rowData() in ace)
-	var.DF = as.data.frame(rowData(ace))
-	rownames(var.DF) = rownames(ace)	
-    if(class(rowRanges(ace)) == "GRanges") {
-		GR = rowRanges(ace)
-		BED = data.frame(chr = as.character(seqnames(GR)), start = start(GR), end = end(GR))
-		var.DF = cbind(BED, var.DF)
-	}
+    var.DF = as.data.frame(SummarizedExperiment::rowData(ace))
+    rownames(var.DF) = rownames(ace)
+    if (class(SummarizedExperiment::rowRanges(ace)) == "GRanges") {
+        GR = SummarizedExperiment::rowRanges(ace)
+        BED = data.frame(chr = as.character(seqnames(GR)), start = start(GR), end = end(GR))
+        var.DF = cbind(BED, var.DF)
+    }
     write.HD5DF(h5file, "var", var.DF, compression.level = compression.level)
 
     ## Write subset of obsm related to the cell embeddings (Dim=2 or 3)
@@ -395,7 +418,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
         for (i in 1:length(obsm.subset)) {
             nn = names(obsm.subset)[[i]]
             Y = Matrix::t(obsm.subset[[i]])
-            if (nrow(Y) <= 3) {
+            if (NROW(Y) <= 3) {
                 AD_nn = paste("X", nn, sep = "_")
             } else {
                 AD_nn = nn
@@ -410,7 +433,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
             factor_info = obsm_annot$create_group(AD_nn)
             factor_info[["type"]] = colMapTypes(ace)[[nn]]
             factor.meta.DF = colMapMeta(ace)[[nn]]
-            if (ncol(factor.meta.DF) > 0) {
+            if (NCOL(factor.meta.DF) > 0) {
                 write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
             }
         }
@@ -435,7 +458,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
             factor_info = varm_annot$create_group(nn)
             factor_info[["type"]] = rowMapTypes(ace)[[nn]]
             factor.meta.DF = rowMapMeta(ace)[[nn]]
-            if (ncol(factor.meta.DF) > 0) {
+            if (NCOL(factor.meta.DF) > 0) {
                 write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
             }
         }
@@ -460,7 +483,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
                   factor_info = obsm_annot$create_group(nn)
                   factor_info[["type"]] = colMapTypes(ace)[[nn]]
                   factor.meta.DF = colMapMeta(ace)[[nn]]
-                  if (ncol(factor.meta.DF) > 0) {
+                  if (NCOL(factor.meta.DF) > 0) {
                     write.HD5DF(factor_info, "annotation", factor.meta.DF, compression.level = 0)
                   }
                 }
@@ -484,7 +507,7 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
                   factor_info = varm_annot$create_group(nn)
                   factor_info[["type"]] = rowMapTypes(ace)[[nn]]
                   factor.meta.DF = rowMapMeta(ace)[[nn]]
-                  if (ncol(factor.meta.DF) > 0) {
+                  if (NCOL(factor.meta.DF) > 0) {
                     write.HD5DF(factor_info, "annotatation", factor.meta.DF, compression.level = 0)
                   }
                 }
@@ -523,14 +546,14 @@ ACE2AnnData <- function(ace, fname = "ACTIONet.h5ad", main.assay = "logcounts", 
 }
 
 #' @export
-AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
+AnnData2ACE <- function(file = "ACTIONet.h5ad", main_assay = "logcounts") {
     if (!requireNamespace("hdf5r", quietly = TRUE)) {
         stop("Please install hdf5r to read HDF5 files")
     }
 
-		h5file = H5File$new(fname, mode = "r")
+    h5file = H5File$new(file, mode = "r")
 
-		objs = names(h5file)
+    objs = names(h5file)
 
 
     X.attr = h5attributes(h5file[["X"]])
@@ -540,8 +563,9 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     } else {
         X = read.HD5SpMat(h5file = h5file, gname = "X")
     }
+
     input_assays = list(X)
-    names(input_assays) = main.assay
+    names(input_assays) = main_assay
 
     if ("layers" %in% objs) {
         layers = h5file[["layers"]]
@@ -564,13 +588,13 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     if ("obs" %in% objs) {
         obs.DF = read.HD5DF(h5file = h5file, gname = "obs")
     } else {
-        obs.DF = DataFrame(row.names = paste("Cell", 1:ncol(X), sep = ""))
+        obs.DF = DataFrame(row.names = paste("Cell", 1:NCOL(X), sep = ""))
     }
 
     if ("var" %in% objs) {
         var.DF = read.HD5DF(h5file = h5file, gname = "var")
     } else {
-        var.DF = DataFrame(row.names = paste("Gene", 1:nrow(X), sep = ""))
+        var.DF = DataFrame(row.names = paste("Gene", 1:NROW(X), sep = ""))
     }
 
     input_assays = lapply(input_assays, function(X) {
@@ -582,15 +606,15 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
     ace = ACTIONetExperiment(assays = input_assays, rowData = var.DF, colData = obs.DF)
 
     var.DF = rowData(ace)
-    if(sum(colnames(var.DF) %in% c("chr", "start", "end")) == 3) {
-		cols = match(c("chr", "start", "end"), colnames(obs.DF))
-		BED = var.DF[, cols]
-		var.DF = var.DF[, -cols]
-		GR = GenomicRanges::makeGRangesFromDataFrame(BED)
-		elementMetadata(GR) = var.DF
+    if (sum(colnames(var.DF) %in% c("chr", "start", "end")) == 3) {
+        cols = match(c("chr", "start", "end"), colnames(obs.DF))
+        BED = var.DF[, cols]
+        var.DF = var.DF[, -cols]
+        GR = GenomicRanges::makeGRangesFromDataFrame(BED)
+        elementMetadata(GR) = var.DF
 
-		rowRanges(ace) = GR
-	}
+        rowRanges(ace) = GR
+    }
 
     if ("obsm" %in% objs) {
         obsm = h5file[["obsm"]]
@@ -683,25 +707,26 @@ AnnData2ACE <- function(fname = "ACTIONet.h5ad", main.assay = "logcounts") {
                   rowMapMeta(ace)[[nn]] = DF
                 }
             }
-        } 
-        if("metadata" %in% names(uns)) {
-			meta_data_objs = read.HD5List(uns, "metadata", depth = 1, max.depth = 10, compression.level = compression.level)
-		} else {
-			meta_data_objs = NULL
-		}
-        
-        
-    
-		meta = read.HD5List(h5file = h5file, gname = "uns")
-		meta = meta[setdiff(names(meta), c("obsm_annot", "varm_annot", "metadata"))]
-		if(!is.null(meta_data_objs)) {
-			if(length(meta) == 0) {
-				meta = meta_data_objs
-			} else {
-				meta = c(meta_data_objs, meta)
-			}
-		}
-		metadata(ace) = meta
+        }
+        if ("metadata" %in% names(uns)) {
+            meta_data_objs = read.HD5List(uns, "metadata", depth = 1, max.depth = 10,
+                compression.level = compression.level)
+        } else {
+            meta_data_objs = NULL
+        }
+
+
+
+        meta = read.HD5List(h5file = h5file, gname = "uns")
+        meta = meta[setdiff(names(meta), c("obsm_annot", "varm_annot", "metadata"))]
+        if (!is.null(meta_data_objs)) {
+            if (length(meta) == 0) {
+                meta = meta_data_objs
+            } else {
+                meta = c(meta_data_objs, meta)
+            }
+        }
+        metadata(ace) = meta
 
     }
 
