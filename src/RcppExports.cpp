@@ -294,8 +294,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // layout_ACTIONet
-List layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level, unsigned int n_epochs, int thread_no, int seed);
-RcppExport SEXP _ACTIONet_layout_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
+List layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level, unsigned int n_epochs, int layout_alg, int thread_no, int seed);
+RcppExport SEXP _ACTIONet_layout_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP layout_algSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -303,9 +303,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< int >::type compactness_level(compactness_levelSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
+    Rcpp::traits::input_parameter< int >::type layout_alg(layout_algSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no, seed));
+    rcpp_result_gen = Rcpp::wrap(layout_ACTIONet(G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1115,7 +1116,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
-    {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 6},
+    {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
     {"_ACTIONet_compute_pseudo_bulk", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk, 2},
