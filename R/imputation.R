@@ -67,7 +67,7 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
 #' plot.ACTIONet.gradient(ace, imputed.genes[, 1])
 #' @export
 impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_val = 0.85,
-    thread_no = 0, diffusion_iters = 5, assay_name = "logcounts", diffusion_algorithm = 0) {
+    thread_no = 0, diffusion_iters = 5, assay_name = "logcounts") {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
 
@@ -109,13 +109,8 @@ impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_v
     # Perform network-diffusion
     G = colNets(ace)$ACTIONet
 
-    if(diffusion_algorithm == 0){
-      expression_imputed = compute_network_diffusion(G, as(U, "sparseMatrix"), thread_no = thread_no,
-          alpha = alpha_val, max_it = diffusion_iters)
-    } else{
-      expression_imputed = compute_network_diffusion_fast(G, as(U, "sparseMatrix"), thread_no = thread_no,
-              alpha = alpha_val, max_it = diffusion_iters)
-    }
+    expression_imputed = compute_network_diffusion_fast(G, as(U, "sparseMatrix"), thread_no = thread_no,
+            alpha = alpha_val, max_it = diffusion_iters)
 
     expression_imputed[is.na(expression_imputed)] = 0
 

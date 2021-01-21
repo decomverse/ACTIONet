@@ -215,7 +215,7 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' @export
 annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand_sample_no = 100,
     alpha_val = 0.9, thread_no = 8, imputation = "PageRank", assay_name = "logcounts",
-    diffusion_iters = 5, diffusion_algorithm = 0) {
+    diffusion_iters = 5) {
 
     marker_set = .preprocess_annotation_markers(markers)
     features_use = .preprocess_annotation_features(ace, features_use)
@@ -255,7 +255,7 @@ annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand
         cat("Imputing marker expression using PageRank ... ")
         expression_profile = impute.genes.using.ACTIONet(ace, markers.table$Gene,
             features_use = features_use, alpha_val = alpha_val, thread_no = thread_no,
-            assay_name = assay_name, diffusion_iters = diffusion_iters, diffusion_algorithm = diffusion_algorithm)
+            assay_name = assay_name, diffusion_iters = diffusion_iters)
         cat(sprintf("done.\n"))
     } else if (imputation == "archImpute") {
         # PCA-based imputation
