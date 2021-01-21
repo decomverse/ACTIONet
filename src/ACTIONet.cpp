@@ -241,7 +241,7 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0,
   res["sigma"] = sigma;
 
   mat V = reduction(2);
-  printf("%d x %d\n", V.n_rows, V.n_cols);
+  // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
 	  vec v = V.col(i) * sigma(i);
 	  v = round(v*1e5)/1e5;
@@ -296,7 +296,7 @@ List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5,
 
 
   mat V = reduction(2);
-  printf("%d x %d\n", V.n_rows, V.n_cols);
+  // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
 	  vec v = V.col(i) * sigma(i);
 	  v = round(v*1e5)/1e5;
@@ -409,7 +409,7 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
 	//cur_C.transform( [](double val) { return (val < 1e-5? 0:val); } );
 	//cur_C = round(cur_C*1e5)/1e-5;
 	//cur_C = normalise(cur_C, 1);
-	C[i-1] = cur_C;  
+	C[i-1] = cur_C;
   }
   res["C"] = C;
 
@@ -418,7 +418,7 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
 	mat cur_H = trace.H[i];
 	//cur_H.transform( [](double val) { return (val < 1e-5? 0:val); } );
 	//cur_H = normalise(cur_H, 1);
-	H[i-1] = cur_H;  
+	H[i-1] = cur_H;
   }
   res["H"] = H;
 
@@ -2048,14 +2048,14 @@ mat NetEnh(mat A) {
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue) {
-	
+
   if (fixed_labels_.isNotNull()) {
-    NumericVector fixed_labels(fixed_labels_);	 
+    NumericVector fixed_labels(fixed_labels_);
     uvec fixed_labels_vec(fixed_labels.size());
     for(int i = 0; i < fixed_labels.size(); i++) {
 		fixed_labels_vec(i) = fixed_labels(i);
 	}
-	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));    
+	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
   } else {
     uvec fixed_labels_vec;
 	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
@@ -2066,7 +2066,7 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha = 0.85, int max_it = 5, int thread_no = 0) {	
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha = 0.85, int max_it = 5, int thread_no = 0) {
 	mat stats = ACTIONet::compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no);
 
 	return(stats);
