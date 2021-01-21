@@ -102,20 +102,20 @@ struct SgdWorker {
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<float> dys(ndim);
-	
+
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
 	long long ss = 0, tt = 0, uu = 0;
 	double g1 = 0, g2 = 0, g3 = 0;
-	
+
 	int max_head_idx = 0, max_tail_idx;
-	
+
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
 		tt += i;
-		
+
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
@@ -126,7 +126,7 @@ struct SgdWorker {
 		if(i < 50) {
 			//printf("%d- <%d, %d> -> dim%d-- <%f, %f> -> diff = %e\n", i+1, dj+1, dk+1, head_embedding[dj + d], d+1, tail_embedding[dk + d], diff);
 		}
-        
+
         dys[d] = diff;
         dist_squared += diff * diff;
       }
@@ -135,18 +135,18 @@ struct SgdWorker {
       float grad_coeff = gradient.grad_attr(dist_squared);
       if(i < 50)
 		//printf("%d- <%d, %d> (+) ->  dist_squared=%e, grad_coeff = %e\n", i+1, dj+1, dk+1, dist_squared, grad_coeff);
-	  
+
 	  g1 += grad_coeff;
       for (std::size_t d = 0; d < ndim; d++) {
         //float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
 	    float grad_d = 10*alpha*uniform_dist(rng)/(float)tail_nvert;
-                                     
+
         head_embedding[dj + d] += grad_d;
 		if(DoMoveVertex)
 			tail_embedding[dk + d] -= grad_d;
 
         //move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
-                        
+
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -183,8 +183,8 @@ struct SgdWorker {
       }
       sampler.next_sample(i, n_neg_samples);
     }
-    
-    printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3));
+
+    // printf("ss = %ld, tt = %ld, g1 = %ld, g2 = %ld, g3 = %ld\n", ss, tt, (long)round(g1), (long)round(g2), (long)round(g3));
   }
 
   void set_n(int n) { this->n = n; }
