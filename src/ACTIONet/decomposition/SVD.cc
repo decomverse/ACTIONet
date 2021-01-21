@@ -67,8 +67,8 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
 
 	double ss;
   StdNorm(V, n, engine);
-  ss = 0; for(int i = 0; i < n; i++) ss += V[i]; printf("V.ss = %e\n", ss);
-  
+  ss = 0; for(int i = 0; i < n; i++) ss += V[i];
+
   // Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
   /*
@@ -125,7 +125,7 @@ V[i]   = normDist(gen);;
         if (R_F < eps) {  // near invariant subspace
 
           StdNorm(F, n, engine);
-		ss = 0; for(int i = 0; i < n; i++) ss += F[i]; printf("%d- j = %d, F.ss = %e\n", iter, j, ss);
+		ss = 0; for(int i = 0; i < n; i++) ss += F[i];
           // Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
           /*
@@ -164,7 +164,7 @@ V[i]   = normDist(gen);;
 
         if (S < eps) {
           StdNorm(W + (j + 1) * m, m, engine);
-			ss = 0; for(int i = 0; i < n; i++) ss += W[(j + 1) * m + i]; printf("%d- W[%d].ss = %e\n", iter, j, ss);
+			ss = 0; for(int i = 0; i < n; i++) ss += W[(j + 1) * m + i];
 
           // Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
 
