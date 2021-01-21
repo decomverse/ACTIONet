@@ -24,8 +24,7 @@
 #' trace = ACTIONet.out$trace # for backup
 #' @export
 run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificity_z_threshold = -3,
-    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000,
-    unification_alpha = 0.99, unification_outlier_threshold = 2, unification_sim_threshold = 0,
+    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, unification_alpha = 0.99, unification_outlier_threshold = 2, unification_sim_threshold = 0,
     layout_in_parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
     footprint_alpha = 0.85, max_iter_ACTION = 50, full_trace = FALSE) {
     if (!(assay_name %in% names(assays(ace)))) {
@@ -68,11 +67,11 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 
     if (layout_in_parallel == FALSE) {
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, thread_no = 1, seed = 0)
+            n_epochs = layout_epochs, layout_alg = layout_algorithm,thread_no = 1, seed = 0)
     } else {
         # WARNING! This makes the results none reproducible
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, thread_no = thread_no, seed = 0)
+            n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = thread_no, seed = 0)
     }
 
     X = vis.out$coordinates
@@ -176,8 +175,7 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 #' plot.ACTIONet(ace.updated)
 #' @export
 reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE,
-    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout_in_parallel = FALSE,
-    reduction_slot = "ACTION") {
+    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout_in_parallel = FALSE, layout_algorithm = 0, reduction_slot = "ACTION") {
     set.seed(0)
 
     # re-Build ACTIONet
@@ -192,11 +190,11 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
     initial.coordinates = Matrix::t(scale(ACTIONet::colMaps(ace)[[reduction_slot]]))
     if (layout_in_parallel == FALSE) {
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, thread_no = 1)
+            n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = 1)
     } else {
         # WARNING! This makes the results none reproducible
         vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, thread_no = thread_no)
+            n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = thread_no)
     }
 
     X = vis.out$coordinates
@@ -241,8 +239,7 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' ace.updated = rerun.layout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
 #' @export
-rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thread_no = 0,
-    network_density = 1, mutual_edges_only = T, reduction_slot = "ACTIONet", net_slot = "ACTIONet", 
+rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, thread_no = 0, network_density = 1, mutual_edges_only = T, reduction_slot = "ACTIONet", net_slot = "ACTIONet",
     seed = 0) {
     G = colNets(ace)[[net_slot]]
 
@@ -251,7 +248,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, thr
 
     initial.coordinates = t(scale(t(S_r)))
     vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-        n_epochs = layout_epochs, thread_no = thread_no, seed = seed)
+        n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = thread_no, seed = seed)
 
     X = vis.out$coordinates
     colnames(X) = c("x", "y")

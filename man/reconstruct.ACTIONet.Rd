@@ -12,6 +12,7 @@ reconstruct.ACTIONet(
   layout_epochs = 1000,
   thread_no = 0,
   layout_in_parallel = FALSE,
+  layout_algorithm = 0,
   reduction_slot = "ACTION"
 )
 }

@@ -699,9 +699,9 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
 //'	vis.out = layout_ACTIONet(G, S_r)
 // [[Rcpp::export]]
 List layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level = 50,
-                     unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
+                     unsigned int n_epochs = 500, int layout_alg = 0, int thread_no = 0, int seed = 0) {
   field<mat> res =
-      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no, seed);
+      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed);
 
   List out_list;
   out_list["coordinates"] = res(0);
