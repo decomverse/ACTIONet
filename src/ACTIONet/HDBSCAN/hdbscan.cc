@@ -66,19 +66,19 @@ void Hdbscan::execute(int minPoints, int minClusterSize,
   this->membershipProbabilities_ = result.membershipProbabilities;
 }
 
-void Hdbscan::displayResult() {
-  hdbscanResult result = this->result;
-  uint32_t numClusters = 0;
-
-  cout << "HDBSCAN clustering for " << this->dataset.size() << " objects."
-       << endl;
-
-  for (uint32_t i = 0; i < result.labels.size(); i++) {
-    cout << result.labels[i] << " ";
-  }
-
-  cout << endl << endl;
-
-  cout << "The Clustering contains " << this->numClusters_ << " clusters with "
-       << this->noisyPoints_ << " noise Points." << endl;
-}
+// void Hdbscan::displayResult() {
+//   hdbscanResult result = this->result;
+//   uint32_t numClusters = 0;
+//
+//   cout << "HDBSCAN clustering for " << this->dataset.size() << " objects."
+//        << endl;
+//
+//   for (uint32_t i = 0; i < result.labels.size(); i++) {
+//     cout << result.labels[i] << " ";
+//   }
+//
+//   cout << endl << endl;
+//
+//   cout << "The Clustering contains " << this->numClusters_ << " clusters with "
+//        << this->noisyPoints_ << " noise Points." << endl;
+// }
