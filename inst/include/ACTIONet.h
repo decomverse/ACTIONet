@@ -246,7 +246,7 @@ mat computeFullSim(mat &H, int thread_no);
 // SGD-based force-directed layout (adopted and modified from the UMAP
 // implementation)
 field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
-                           unsigned int n_epochs, int thread_no, int seed);
+                           unsigned int n_epochs, int layout_alg, int thread_no, int seed);
 
 // Methods for pseudo-bulk construction
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);

@@ -8,6 +8,7 @@ rerun.layout(
   ace,
   layout_compactness = 50,
   layout_epochs = 1000,
+  layout_algorithm = 0,
   thread_no = 0,
   network_density = 1,
   mutual_edges_only = T,

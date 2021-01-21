@@ -220,7 +220,7 @@ sp_mat smoothKNN(sp_mat D, int thread_no = -1) {
 }
 
 field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
-                           unsigned int n_epochs = 500, int thread_no = 0,
+                           unsigned int n_epochs = 500, int layout_alg = TUMAP_LAYOUT, int thread_no = 0,
                            int seed = 0) {
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
@@ -242,7 +242,11 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   unsigned int nV = H.n_rows;
 
-  if (compactness_level < 0 || compactness_level > 100) compactness_level = 50;
+  if(compactness_level < 0){
+    compactness_level = 0;
+  } else if (compactness_level > 100){
+    compactness_level = 100;
+  }
 
   double a_param = UMAP_A[compactness_level];
   double b_param = UMAP_B[compactness_level];
@@ -252,8 +256,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   vector<unsigned int> positive_head(nE);
   vector<unsigned int> positive_tail(nE);
   vector<float> epochs_per_sample(nE);
-  
- 
+
+
 
 /*
   const double* values = G.values;
@@ -288,8 +292,8 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   int i = 0;
   double w_max = max(max(H));
   for(sp_mat::iterator it = H.begin(); it != H.end(); ++ it) {
-	epochs_per_sample[i] = w_max / (*it); 
-	positive_head[i] = it.row(); 
+	epochs_per_sample[i] = w_max / (*it);
+	positive_head[i] = it.row();
 	positive_tail[i] = it.col();
 	i++;
   }
@@ -303,7 +307,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
  vector<float> head_vec(init_coors.n_cols*2);
  fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
  float *ptr = sub_coor.memptr();
- memcpy(head_vec.data(), ptr, sizeof(float)*head_vec.size()); 
+ memcpy(head_vec.data(), ptr, sizeof(float)*head_vec.size());
  vector<float> tail_vec(head_vec);
 
 /*
@@ -317,7 +321,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 		Y(i, 1) = positive_tail[i];
 		Y(i, 2) = epochs_per_sample[i];
 	}
-	
+
 	res(0) = X;
 	res(1) = Y;
 	return res;
@@ -327,21 +331,37 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   // Stores linearized coordinates [x1, y1, x2, y2, ...]
   vector<float> result;
 
-	/*result = optimize_layout_umap(
-      head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-      epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
-    */
+  switch (layout_alg) {
+    case TUMAP_LAYOUT:
+      result = optimize_layout_tumap(
+        head_vec, tail_vec,
+        positive_head,
+        positive_tail, n_epochs,
+        nV, epochs_per_sample,
+        LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
+        thread_no, 1,
+        true, seed);
+      break;
+    case UMAP_LAYOUT:
+      result = optimize_layout_umap(
+          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
+          NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
+      break;
+    default:
+      stderr_printf("Unknown layout algorithm chosen (%d). Switching to TUMAP.\n",
+                    layout_alg);
+      result = optimize_layout_tumap(
+        head_vec, tail_vec,
+        positive_head,
+        positive_tail, n_epochs,
+        nV, epochs_per_sample,
+        LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
+        thread_no, 1,
+        true, seed);
+      break;
+  }
 
-	result = optimize_layout_tumap(
-    head_vec, tail_vec,
-    positive_head,
-    positive_tail, n_epochs,
-    nV, epochs_per_sample,
-    LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
-    thread_no, 1,
-    true, seed);
-      
 
   fmat coordinates_float(result.data(), 2, nV);
   mat coordinates = conv_to<mat>::from(coordinates_float);
@@ -369,28 +389,41 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   head_vec.resize(init_coors.n_cols*3);
   sub_coor = conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
   ptr = sub_coor.memptr();
-  memcpy(head_vec.data(), ptr, sizeof(float)*head_vec.size()); 
+  memcpy(head_vec.data(), ptr, sizeof(float)*head_vec.size());
   tail_vec = head_vec;
-
-
 
   stdout_printf("\tComputing 3D layout ... ");  // fflush(stdout);
   result.clear();
-  /*
-  result = optimize_layout_umap(
-      head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-      epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-      NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
-  */
 
-	result = optimize_layout_tumap(
-	head_vec, tail_vec,
-	positive_head,
-	positive_tail, n_epochs,
-	nV, epochs_per_sample,
-	LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
-	thread_no, 1,
-	true, seed);
+
+  switch (layout_alg) {
+    case TUMAP_LAYOUT:
+      result = optimize_layout_tumap(
+      	head_vec, tail_vec,
+      	positive_head,
+      	positive_tail, n_epochs,
+      	nV, epochs_per_sample,
+      	LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
+      	thread_no, 1,
+      	true, seed);
+      break;
+    case UMAP_LAYOUT:
+      result = optimize_layout_umap(
+          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
+          NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
+      break;
+    default:
+      result = optimize_layout_tumap(
+      	head_vec, tail_vec,
+      	positive_head,
+      	positive_tail, n_epochs,
+      	nV, epochs_per_sample,
+      	LEARNING_RATE, NEGATIVE_SAMPLE_RATE,
+      	thread_no, 1,
+      	true, seed);
+      break;
+  }
 
 
   fmat coordinates_3D_float(result.data(), 3, nV);
@@ -398,7 +431,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   // coordinates_3D = robust_zscore(trans(coordinates_3D));
   coordinates_3D = trans(coordinates_3D);
 
-  stdout_printf("done (%d x %d)\n", coordinates_3D.n_rows, coordinates_3D.n_cols);
+  stdout_printf("done\n");
   FLUSH;  // fflush(stdout);
 
   /****************************

@@ -692,8 +692,8 @@ build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edge
 #' @examples
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #'	vis.out = layout_ACTIONet(G, S_r)
-layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, thread_no = 0L, seed = 0L) {
-    .Call(`_ACTIONet_layout_ACTIONet`, G, S_r, compactness_level, n_epochs, thread_no, seed)
+layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, layout_alg = 0L, thread_no = 0L, seed = 0L) {
+    .Call(`_ACTIONet_layout_ACTIONet`, G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed)
 }
 
 #' Encrypts a set of given input ids
