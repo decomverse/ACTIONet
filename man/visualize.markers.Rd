@@ -7,9 +7,9 @@ It also optionally imputes the markers.}
 \usage{
 visualize.markers(
   ace,
-  marker.genes,
-  feat.attr = NULL,
-  assay.name = "logcounts",
+  markers,
+  features_use = NULL,
+  assay_name = "logcounts",
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
   trans.fact = 3,
@@ -22,6 +22,8 @@ visualize.markers(
 \arguments{
 \item{ace}{ACTIONet output object}
 
+\item{markers}{Set of row features (e.g. genes) to visualize .}
+
 \item{transparency.attr}{Additional continuous attribute to project onto the transparency of nodes}
 
 \item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
@@ -31,8 +33,6 @@ visualize.markers(
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
 \item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
-
-\item{x}{Score vector}
 
 \item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 }
@@ -45,6 +45,5 @@ It also optionally imputes the markers.
 }
 \examples{
 ace = run.ACTIONet(sce)
-x = logcounts(ace)['CD14', ]
-visualize.markers(ace, c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
+visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
 }

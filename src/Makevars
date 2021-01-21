@@ -1,13 +1,13 @@
 CSOURCES+=$(shell find ACTIONet -type f -name "*.c")
 SOURCES+=$(shell find ACTIONet -type f -name "*.cc")
 OBJECTS=ACTIONet.o RCpp_util.o RcppExports.o $(SOURCES:.cc=.o) $(CSOURCES:.c=.o)
-PKG_CPPFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
-PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++11 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+PKG_CPPFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O2 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O2 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
 
 UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
     $(info Using Linux configurations)
-    NPROC=$(shell nproc)
+    NPROC=${shell nproc}
     ifeq ($(MKLROOT),)
         $(warning Can not find MKL)
         PKG_CPPFLAGS+=-I/usr/include/suitesparse
@@ -44,4 +44,4 @@ else
     $(error Unsupported OS ${UNAME})
 endif
 PKG_LIBS+=-lcholmod
-MAKEFLAGS+="-j $(NPROC)"
+MAKEFLAGS+="-j ${NPROC}"

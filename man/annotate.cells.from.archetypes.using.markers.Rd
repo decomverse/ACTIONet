@@ -6,17 +6,17 @@
 \usage{
 annotate.cells.from.archetypes.using.markers(
   ace,
-  marker.genes,
-  rand.sample.no = 1000,
+  markers,
+  rand_sample_no = 1000,
   unified_suffix = "unified"
 )
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{marker.genes}{A list of lists (each a set of markers for a given cell type)}
+\item{markers}{A list of lists (each a set of markers for a given cell type)}
 
-\item{rand.sample.no}{Number of random permutations (default=1000)}
+\item{rand_sample_no}{Number of random permutations (default=1000)}
 }
 \value{
 A named list: \itemize{
@@ -31,7 +31,7 @@ Annotates cells by interpolating marker-based archetype annotations
 \examples{
 
 data('curatedMarkers_human') # pre-packaged in ACTIONet
-marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-cell.annotations = annotate.cells.from.archetypes.using.markers(ace, marker.genes)
+marker_set = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+cell.annotations = annotate.cells.from.archetypes.using.markers(ace, markers)
 labels = cell.annotations$Labels
 }

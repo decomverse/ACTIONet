@@ -6,20 +6,22 @@
 \usage{
 annotate.cells.using.markers(
   ace,
-  marker.genes,
-  rand.sample.no = 100,
+  markers,
+  features_use = NULL,
+  rand_sample_no = 100,
   alpha_val = 0.9,
   thread_no = 8,
   imputation = "PageRank",
-  data_slot = "logcounts"
+  assay_name = "logcounts",
+  diffusion_iters = 5
 )
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{marker.genes}{A list of lists (each a set of markers for a given cell type)}
+\item{markers}{A list of lists (each a set of markers for a given cell type)}
 
-\item{rand.sample.no}{Number of random permutations (default=1000)}
+\item{rand_sample_no}{Number of random permutations (default=1000)}
 
 \item{alpha_val}{Random-walk parameter for gene imputation (if imputation = 'PageRank')}
 
@@ -39,7 +41,7 @@ Directly inferring cell annotations from imputed gene expressions using permutat
 }
 \examples{
 data('curatedMarkers_human') # pre-packaged in ACTIONet
-marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-arch.annot = annotate.cells.using.markers(ace, marker.genes = marker.genes)
+markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+arch.annot = annotate.cells.using.markers(ace, markers = markers)
 cell.labels = arch.annot$Labels
 }

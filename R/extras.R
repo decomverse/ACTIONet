@@ -41,19 +41,6 @@ map.clusters <- function(Labels, clusters) {
     return(updated.Labels)
 }
 
-
-orthoProject <- function(A, S) {
-    A = scale(A)
-    S = scale(S)
-    A_r = A - S %*% MASS::ginv(t(S) %*% S) %*% (t(S) %*% A)
-    A_r = scale(A_r)
-    return(A_r)
-}
-
-is.sparseMatrix <- function(aa) {
-    return(length(which(is(aa) == "sparseMatrix")) != 0)
-}
-
 # HGT tail bound
 Kappa <- function(p, q) {
     kl = array(1, length(p))
@@ -74,7 +61,7 @@ Kappa <- function(p, q) {
 
 HGT_tail <- function(population.size, success.count, sample.size, observed.success) {
     if (sum(success.count) == 0)
-        return(rep(0, success.count))
+        return(rep(0, length(success.count)))
 
     success.rate = success.count/population.size
     expected.success = sample.size * success.rate
@@ -413,7 +400,7 @@ combine.logPvals <- function(logPvals, top.len = NULL, base = 10) {
 
 
 reannotate.labels <- function(ace, Labels) {
-    Labels = preprocess.labels(Labels, ace)
+    Labels = .preprocess_annotation_labels(Labels, ace)
 
 
     Annot = sort(unique(Labels))
@@ -534,4 +521,3 @@ add.count.metadata <- function(ace) {
 
     return(ace)
 }
-
