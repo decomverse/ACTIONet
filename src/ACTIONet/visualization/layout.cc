@@ -291,11 +291,11 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   int i = 0;
   double w_max = max(max(H));
-  for(sp_mat::iterator it = H.begin(); it != H.end(); ++ it) {
-	epochs_per_sample[i] = w_max / (*it);
-	positive_head[i] = it.row();
-	positive_tail[i] = it.col();
-	i++;
+    for(sp_mat::iterator it = H.begin(); it != H.end(); ++ it) {
+  	epochs_per_sample[i] = w_max / (*it);
+  	positive_head[i] = it.row();
+  	positive_tail[i] = it.col();
+  	i++;
   }
 
   // Initial coordinates of vertices (0-simplices)
@@ -346,7 +346,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
       result = optimize_layout_umap(
           head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
           epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-          NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
+          NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
       break;
     default:
       stderr_printf("Unknown layout algorithm chosen (%d). Switching to TUMAP.\n",
@@ -411,7 +411,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
       result = optimize_layout_umap(
           head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
           epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-          NEGATIVE_SAMPLE_RATE, true, thread_no, 1, true, seed);
+          NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
       break;
     default:
       result = optimize_layout_tumap(
