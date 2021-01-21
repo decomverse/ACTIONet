@@ -294,8 +294,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // layout_ACTIONet
-List layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level, unsigned int n_epochs, int thread_no);
-RcppExport SEXP _ACTIONet_layout_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP) {
+List layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level, unsigned int n_epochs, int layout_alg, int thread_no, int seed);
+RcppExport SEXP _ACTIONet_layout_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP layout_algSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -303,8 +303,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< int >::type compactness_level(compactness_levelSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
+    Rcpp::traits::input_parameter< int >::type layout_alg(layout_algSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no));
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(layout_ACTIONet(G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -504,6 +506,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_network_diffusion_fast
+mat compute_network_diffusion_fast(sp_mat& G, sp_mat& X0, int thread_no, double alpha, int max_it);
+RcppExport SEXP _ACTIONet_compute_network_diffusion_fast(SEXP GSEXP, SEXP X0SEXP, SEXP thread_noSEXP, SEXP alphaSEXP, SEXP max_itSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type X0(X0SEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_network_diffusion_fast(G, X0, thread_no, alpha, max_it));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_network_diffusion_direct
 mat compute_network_diffusion_direct(sp_mat& G, sp_mat& X0, int thread_no, double alpha);
 RcppExport SEXP _ACTIONet_compute_network_diffusion_direct(SEXP GSEXP, SEXP X0SEXP, SEXP thread_noSEXP, SEXP alphaSEXP) {
@@ -640,8 +657,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // transform_layout
-List transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no);
-RcppExport SEXP _ACTIONet_transform_layout(SEXP WSEXP, SEXP coor2DSEXP, SEXP coor3DSEXP, SEXP colRGBSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP) {
+List transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB, int compactness_level, unsigned int n_epochs, int thread_no, int seed);
+RcppExport SEXP _ACTIONet_transform_layout(SEXP WSEXP, SEXP coor2DSEXP, SEXP coor3DSEXP, SEXP colRGBSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -652,7 +669,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type compactness_level(compactness_levelSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(transform_layout(W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no));
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(transform_layout(W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no, seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -974,6 +992,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_LPA
+vec run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_);
+RcppExport SEXP _ACTIONet_run_LPA(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< vec >::type labels(labelsSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
+    Rcpp::traits::input_parameter< double >::type sig_threshold(sig_thresholdSEXP);
+    Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type fixed_labels_(fixed_labels_SEXP);
+    rcpp_result_gen = Rcpp::wrap(run_LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats
+mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& annotations, double alpha, int max_it, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats(SEXP GSEXP, SEXP SSEXP, SEXP annotationsSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type annotations(annotationsSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -1066,7 +1116,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
-    {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 5},
+    {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
     {"_ACTIONet_compute_pseudo_bulk", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk, 2},
@@ -1083,6 +1133,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_core_number", (DL_FUNC) &_ACTIONet_compute_core_number, 1},
     {"_ACTIONet_compute_archetype_core_centrality", (DL_FUNC) &_ACTIONet_compute_archetype_core_centrality, 2},
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 5},
+    {"_ACTIONet_compute_network_diffusion_fast", (DL_FUNC) &_ACTIONet_compute_network_diffusion_fast, 5},
     {"_ACTIONet_compute_network_diffusion_direct", (DL_FUNC) &_ACTIONet_compute_network_diffusion_direct, 4},
     {"_ACTIONet_compute_sparse_network_diffusion", (DL_FUNC) &_ACTIONet_compute_sparse_network_diffusion, 6},
     {"_ACTIONet_assess_enrichment", (DL_FUNC) &_ACTIONet_assess_enrichment, 3},
@@ -1093,7 +1144,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_unsigned_cluster_batch", (DL_FUNC) &_ACTIONet_unsigned_cluster_batch, 4},
     {"_ACTIONet_unsigned_cluster", (DL_FUNC) &_ACTIONet_unsigned_cluster, 4},
     {"_ACTIONet_Prune_PageRank", (DL_FUNC) &_ACTIONet_Prune_PageRank, 2},
-    {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 7},
+    {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 8},
     {"_ACTIONet_sgd2_layout_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted, 5},
     {"_ACTIONet_sgd2_layout_weighted_convergent", (DL_FUNC) &_ACTIONet_sgd2_layout_weighted_convergent, 7},
     {"_ACTIONet_sgd2_layout_sparse_weighted", (DL_FUNC) &_ACTIONet_sgd2_layout_sparse_weighted, 6},
@@ -1116,6 +1167,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
+    {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
+    {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 6},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
