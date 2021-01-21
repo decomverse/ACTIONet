@@ -13,6 +13,7 @@ run.ACTIONet(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
+  layout_algorithm = 0,
   unification_alpha = 0.99,
   unification_outlier_threshold = 2,
   unification_sim_threshold = 0,
