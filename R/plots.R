@@ -897,7 +897,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
 visualize.markers <- function(ace, markers, features_use = NULL, assay_name = "logcounts",
     transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
-    CPal = "magma", alpha_val = 0.9, export_path = NA, , diffusion_algorithm = 0) {
+    CPal = "magma", alpha_val = 0.9, export_path = NA, diffusion_algorithm = 0) {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
     markers_all = sort(unique(unlist(markers)))
