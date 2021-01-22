@@ -414,11 +414,12 @@ assess.categorical.autocorrelation <- function(ace, labels, perm.no = 100) {
     return(z)
 }
 
-get.top.specific.genes <- function(ace, clusters, top_genes = 10, feat_subset = NULL){
+get.top.specific.genes <- function(ace, clusters, top_genes = 10, features_use = NULL, feat_subset = NULL, assay_name = "logcounts"){
   cluster_vec = ACTIONet:::.get_attr_or_split_idx(ace, clusters, return_vec = T)
-  ace  = compute.cluster.feature.specificity(ace, clusters = cluster_vec, output.slot.name = "temp_slot")
+  features_use = .preprocess_annotation_features(ace, features_use = features_use)
+  ace  = compute.cluster.feature.specificity(ace, clusters = cluster_vec, output_slot = "temp_slot", assay_name = assay_name)
   feat_spec = rowMaps(ace)[["temp_slot_feature_specificity"]]
-
+  rownames(feat_spec) = features_use
   if(!is.null(feat_subset))
     feat_spec = feat_spec[rownames(feat_spec) %in% feat_subset, ]
 
