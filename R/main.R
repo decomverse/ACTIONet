@@ -26,7 +26,7 @@
 run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificity_z_threshold = -3,
     network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, unification_alpha = 0.99, unification_outlier_threshold = 2, unification_sim_threshold = 0,
     layout_in_parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
-    footprint_alpha = 0.85, max_iter_ACTION = 50, full_trace = FALSE) {
+    footprint_alpha = 0.85, max_iter_ACTION = 50, full_trace = FALSE, seed = 0) {
     if (!(assay_name %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
         stop(err)
@@ -54,7 +54,7 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 
 
     # Build ACTIONet
-    set.seed(0)
+    set.seed(seed)
     G = build_ACTIONet(H_stacked = pruning.out$H_stacked, density = network_density,
         thread_no = thread_no, mutual_edges_only = mutual_edges_only)
     colNets(ace)$ACTIONet = G
@@ -65,33 +65,16 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
     colMaps(ace)[["ACTIONred"]] = Matrix::t(initial.coordinates[1:3, ])
     colMapTypes(ace)[["ACTIONred"]] = "embedding"
 
-    if (layout_in_parallel == FALSE) {
-        vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, layout_alg = layout_algorithm,thread_no = 1, seed = 0)
-    } else {
-        # WARNING! This makes the results none reproducible
-        vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = thread_no, seed = 0)
-    }
-
-    X = vis.out$coordinates
-    colnames(X) = c("x", "y")
-    rownames(X) = colnames(ace)
-    colMaps(ace)$ACTIONet2D = X
-    colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
-
-    X = vis.out$coordinates_3D
-    colnames(X) = c("x", "y", "z")
-    rownames(X) = colnames(ace)
-    colMaps(ace)$ACTIONet3D = X
-    colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
-
-    X = vis.out$colors
-    colnames(X) = c("r", "g", "b")
-    rownames(X) = colnames(ace)
-    colMaps(ace)$denovo_color = X
-    colMapTypes(ace)[["denovo_color"]] = "embedding"
-
+    ace = .run.layout_ACTIONet(ace,
+      G = G,
+      S_r = initial.coordinates,
+      compactness_level = layout_compactness,
+      n_epochs = layout_epochs,
+      layout_alg = layout_algorithm,
+      thread_no = ifelse(layout_in_parallel, thread_no, 1),
+      reduction_slot = NULL,
+      net_slot = NULL,
+      seed = seed)
 
     # Identiy equivalent classes of archetypes and group them together
     unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.out$C_stacked,
@@ -175,49 +158,27 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 #' plot.ACTIONet(ace.updated)
 #' @export
 reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = TRUE,
-    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout_in_parallel = FALSE, layout_algorithm = 0, reduction_slot = "ACTION") {
-    set.seed(0)
+    layout_compactness = 50, layout_epochs = 1000, thread_no = 0, layout_in_parallel = TRUE, layout_algorithm = 0, reduction_slot = "ACTION", output_slot = "ACTIONet", seed = 0) {
+    set.seed(seed)
 
     # re-Build ACTIONet
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
 
     G = build_ACTIONet(H_stacked = H_stacked, density = network_density, thread_no = thread_no,
         mutual_edges_only = mutual_edges_only)
-    colNets(ace)$ACTIONet = G
-
+    colNets(ace)[[output_slot]] = G
 
     # Layout ACTIONet
-    initial.coordinates = Matrix::t(scale(ACTIONet::colMaps(ace)[[reduction_slot]]))
-    if (layout_in_parallel == FALSE) {
-        vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = 1)
-    } else {
-        # WARNING! This makes the results none reproducible
-        vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-            n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = thread_no)
-    }
-
-    X = vis.out$coordinates
-    colnames(X) = c("x", "y")
-    rownames(X) = colnames(ace)
-    colMaps(ace)$ACTIONet2D = X
-    colMapTypes(ace)[["ACTIONet2D"]] = "embedding"
-
-    X = vis.out$coordinates_3D
-    colnames(X) = c("x", "y", "z")
-    rownames(X) = colnames(ace)
-    colMaps(ace)$ACTIONet3D = X
-    colMapTypes(ace)[["ACTIONet3D"]] = "embedding"
-
-    X = vis.out$colors
-    colnames(X) = c("r", "g", "b")
-    rownames(X) = colnames(ace)
-    colMaps(ace)$denovo_color = X
-    colMapTypes(ace)[["denovo_color"]] = "embedding"
-
-    ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only,
-        layout_compactness = layout_compactness, layout_epochs = layout_epochs/5,
-        thread_no = 1)
+    ace <- rerun.layout(ace,
+      layout_compactness = layout_compactness,
+      layout_epochs = layout_epochs,
+      layout_algorithm = layout_algorithm,
+      thread_no = ifelse(layout_in_parallel, thread_no, 1),
+      network_density = network_density,
+      mutual_edges_only = mutual_edges_only,
+      reduction_slot = reduction_slot,
+      net_slot = output_slot,
+      seed = seed)
 
     return(ace)
 }
@@ -241,14 +202,47 @@ reconstruct.ACTIONet <- function(ace, network_density = 1, mutual_edges_only = T
 #' @export
 rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, thread_no = 0, network_density = 1, mutual_edges_only = T, reduction_slot = "ACTION", net_slot = "ACTIONet",
     seed = 0) {
+    # G = colNets(ace)[[net_slot]]
+    #
+    # # re-Layout ACTIONet
+    # S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
+    # initial.coordinates = t(scale(t(S_r)))
+
+    ace = .run.layout_ACTIONet(ace,
+      G = NULL,
+      S_r = NULL,
+      compactness_level = layout_compactness,
+      n_epochs = layout_epochs,
+      layout_alg = layout_algorithm,
+      thread_no = thread_no,
+      reduction_slot = reduction_slot,
+      net_slot = net_slot,
+      seed = seed)
+
+    ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only,
+        layout_compactness = layout_compactness, layout_epochs = layout_epochs/5,
+        thread_no = 1)
+
+    return(ace)
+}
+
+.run.layout_ACTIONet <- function(ace, G = NULL, S_r = NULL, compactness_level = 50, n_epochs = 1000, layout_alg = 0, thread_no = 0, reduction_slot = "ACTION", net_slot = "ACTIONet", seed = 0) {
+
+  if(is.null(G)){
     G = colNets(ace)[[net_slot]]
+  }
+  if(is.null(S_r)){
+    # S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
+    S_r = Matrix::t(scale(ACTIONet::colMaps(ace)[[reduction_slot]]))
+  }
 
-    # re-Layout ACTIONet
-    S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
-
-    initial.coordinates = t(scale(t(S_r)))
-    vis.out = layout_ACTIONet(G, S_r = initial.coordinates, compactness_level = layout_compactness,
-        n_epochs = layout_epochs, layout_alg = layout_algorithm, thread_no = thread_no, seed = seed)
+  vis.out = layout_ACTIONet(G,
+    S_r = S_r,
+    compactness_level = compactness_level,
+    n_epochs = n_epochs,
+    layout_alg = layout_alg,
+    thread_no = thread_no,
+    seed = seed)
 
     X = vis.out$coordinates
     colnames(X) = c("x", "y")
@@ -267,10 +261,6 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, lay
     rownames(X) = colnames(ace)
     colMaps(ace)$denovo_color = X
     colMapTypes(ace)[["denovo_color"]] = "embedding"
-
-    ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only,
-        layout_compactness = layout_compactness, layout_epochs = layout_epochs/5,
-        thread_no = 1)
 
     return(ace)
 }
@@ -353,7 +343,6 @@ construct.backbone <- function(ace, network_density = 1, mutual_edges_only = TRU
             thread_no = thread_no)
         colMaps(ace)$archetype_footprint = archetype_footprint
     }
-
 
     W = exp(scale(ace$archetype_footprint))
     W = as(W, "sparseMatrix")
