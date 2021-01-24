@@ -10,7 +10,8 @@ from scipy import stats
 
 from ._color import adjust_lightness, hex_to_rgba
 from .palettes import palette_20, palette_88
-from ..tools import scale_matrix
+from .. import _misc_utils as ut
+
 
 def layout_labels(
     X: np.ndarray,
@@ -56,7 +57,7 @@ def plot_ACTIONet(
     if transparency_key is not None and transparency_key not in adata.obs.columns:
         raise ValueError(f'Did not find adata.obs[\'{transparency_key}\'].')
 
-    coordinates = scale_matrix(adata.obsm[coordinate_key])
+    coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
 
     if label_key is None:
         v_col = [(r, g, b, 1.0) for r, g, b in adata.obsm['X_denovo_color']]

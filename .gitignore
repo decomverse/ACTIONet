@@ -17,3 +17,4 @@ data/
 __pycache__
 .ipynb_checkpoints
 .idea/
+docker_insitro.txt

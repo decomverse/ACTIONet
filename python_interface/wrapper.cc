@@ -442,6 +442,7 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
 // @param S_r Reduced kernel matrix (is used for reproducible initialization).
 // @param compactness_level A value between 0-100, indicating the compactness of
 // ACTIONet layout (default=50)
+// @param layout_alg Algorithm to use for visualization layout (default=0).
 // @param n_epochs Number of epochs for SGD algorithm (default=100).
 // @param thread_no Number of threads.
 //
@@ -451,10 +452,9 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
 // \item colors De novo color of nodes inferred from their 3D embedding.
 // }
 py::dict layout_ACTIONet(arma::SpMat<npdouble> &G, arma::Mat<npdouble> S_r,
-                         int compactness_level = 50,
-                         unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
+                         int compactness_level = 50, unsigned int n_epochs = 500, int layout_alg = 0, int thread_no = 0, int seed = 0) {
   field<arma::Mat<npdouble>> res =
-      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, thread_no, seed);
+      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed);
 
   py::dict out_list;
   out_list["coordinates"] = res(0);

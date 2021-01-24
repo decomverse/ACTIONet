@@ -37,7 +37,6 @@
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"
 
-
 // SVD algorithms
 #define FULL_SVD -1
 #define IRLB_ALG 0
@@ -246,7 +245,7 @@ mat computeFullSim(mat &H, int thread_no);
 // SGD-based force-directed layout (adopted and modified from the UMAP
 // implementation)
 field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
-                           unsigned int n_epochs, int thread_no, int seed);
+                           unsigned int n_epochs, int layout_alg, int thread_no, int seed);
 
 // Methods for pseudo-bulk construction
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
@@ -283,6 +282,8 @@ uvec compute_core_number(sp_mat &G);
 vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments);
 mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no,
                               double alpha, int max_it);
+mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no,
+                              double alpha, int max_it);
 mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no,
                                      double alpha);
 sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha,
@@ -311,6 +312,12 @@ mat NetEnh(mat Adj);
 
 mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
                            int seed);
+
+vec sweepcut(sp_mat A, vec s);
+
+vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold, uvec fixed_labels);
+
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha, int max_it, int thread_no);
 
 }  // namespace ACTIONet
 

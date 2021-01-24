@@ -3,7 +3,8 @@ from typing import Optional
 import numpy as np
 import scanpy as sc
 from anndata import AnnData
-from ..tools import rand_suffix
+from .. import _misc_utils as ut
+
 
 def filter_adata(
     adata: AnnData,
@@ -12,7 +13,7 @@ def filter_adata(
     min_features_per_cell: Optional[int] = None,
     min_umis_per_cell: Optional[int] = None,
     max_umis_per_cell: Optional[int] = None,
-    copy: Optional[bool] = False,
+    copy: Optional[bool] = False
 ) -> Optional[AnnData]:
     """Filter AnnData by cells or genes.
 
@@ -45,7 +46,7 @@ def filter_adata(
     previous_dims = None
 
     if layer_name is not None:
-        temp_layer = "X_fil_temp_" + rand_suffix(10)
+        temp_layer = "X_fil_temp_" + ut.rand_suffix(10)
         adata.layers[temp_layer] = adata.X
         adata.X = adata.layers[layer_name]
 
