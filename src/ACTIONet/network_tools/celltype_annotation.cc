@@ -57,62 +57,64 @@ namespace ACTIONet {
 		}
 
 	}
-		
+
 	mat RIN_transform(mat A, int thread_no = 4) {
 		int M = A.n_rows;
 		int N = A.n_cols;
-			
+
 		mat Zr = zeros(M, N);
 		ParallelFor(0, N, thread_no, [&](size_t i, size_t threadId) {
 			vec v = A.col(i);
-								
+
 			uvec row_perm_forward = stable_sort_index(v);
-			uvec row_perm = stable_sort_index(row_perm_forward);	
+			uvec row_perm = stable_sort_index(row_perm_forward);
 			vec p = (row_perm + ones(size(row_perm))) / (row_perm.n_elem + 1);
-			
+
 			vec v_RINT = zeros(size(p));
 			for (int j = 0; j < p.n_elem; j++) {
 				double norm_inv = r8_normal_01_cdf_inverse ( p(j) );
 				v_RINT(j) = norm_inv;
 			}
 
-			Zr.col(i) = v_RINT;						
+			Zr.col(i) = v_RINT;
 		});
 
 		return(Zr);
-	}	
-	
-	mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha = 0.85, int max_it = 5, int thread_no = 0) {	
-		mat stats = zeros(S.n_cols, annotations.n_cols);
-		
+	}
+
+	mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int thread_no = 0) {
+		mat stats = zeros(S.n_cols, marker_mat.n_cols);
+
 		int n = G.n_rows;
 		sp_mat o = sp_mat(ones(n, 1));
-		vec pr = compute_network_diffusion(G, o, thread_no, alpha, max_it).col(0);
-		
-		
-		vec cs = vec(trans(sum(annotations)));
-		for(int i = 0; i < annotations.n_cols; i++) {
-		
+		// vec pr = compute_network_diffusion(G, o, thread_no, alpha, max_it).col(0);
+		vec pr = compute_network_diffusion_fast(G, o, thread_no, alpha, max_it).col(0);
+
+
+		vec cs = vec(trans(sum(marker_mat)));
+		for(int i = 0; i < marker_mat.n_cols; i++) {
+
 			sp_mat raw_expression(S.n_cols, cs(i));
 			int idx = 0;
 			vec w = zeros(cs(i));
-			for(sp_mat::col_iterator it = annotations.begin_col(i); it != annotations.end_col(i); it++) {
+			for(sp_mat::col_iterator it = marker_mat.begin_col(i); it != marker_mat.end_col(i); it++) {
 				raw_expression.col(idx) = trans(S.row(it.row()));
 				w(idx) = sum(raw_expression.col(idx));
-				idx ++;				
+				idx ++;
 			}
 			w = w / sum(w);
-			
-			mat imputed_expression = compute_network_diffusion(G, raw_expression, thread_no, alpha, max_it);
+
+			// mat imputed_expression = compute_network_diffusion(G, raw_expression, thread_no, alpha, max_it);
+			mat imputed_expression = compute_network_diffusion_fast(G, raw_expression, thread_no, alpha, max_it);
 			stats.col(i) = log2((imputed_expression * w) / pr);
-			
+
 			/*
-			mat imputed_expression_Z = RIN_transform(imputed_expression);			
+			mat imputed_expression_Z = RIN_transform(imputed_expression);
 			stats.col(i) = (imputed_expression_Z * w) / (sqrt(sum(w)));
 			*/
 		}
-		
+
 		return(stats);
 	}
-	
+
 }

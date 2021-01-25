@@ -192,9 +192,49 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
     return(out.list)
 }
 
+#' Infer cell annotations from imputed gene expression for all cells.
+#'
+#' @param ace ACTIONetExperiment object
+#' @param markers A named list of marker genes.
+#' @param features_use A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'markers'.
+#' @param alpha_val Random-walk parameter for gene imputation.
+#' @param thread_no Number of parallel threads used for gene imputation.
+#' @param net_slot Name of slot in colNets(ace) containing the network to use for gene expression imputation (default="ACTIONet").
+#' @param assay_name Name of assay for which to impute gene expression (default="logcounts").
+#' @return A named list: \itemize{
+#' \item Label: Inferred cell type labels
+#' \item Confidence: Confidence of inferred labels
+#' \item Enrichment: Cell type score matrix.
+#'}
+#'
+#' @examples
+#' data('curatedMarkers_human') # pre-packaged in ACTIONet
+#' markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+#' annots = annotate.cells.using.markers(ace, markers = markers)
+#' plot.ACTIONet(ace, annots$Label, annots$Confidence)
+#' @export
+annotate.cells.using.markers <- function(ace, markers, features_use = NULL, alpha_val = 0.9, thread_no = 8, net_slot = "ACTIONet", assay_name = "logcounts", max_iter = 5) {
+
+    marker_set = .preprocess_annotation_markers(markers)
+    features_use = .preprocess_annotation_features(ace, features_use)
+
+    marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
+    G = colNets(ace)[[net_slot]]
+    S = SummarizedExperiment::assays(ace)[[assay_name]]
+
+    marker_stats = compute_marker_aggregate_stats(G, S, marker_mat, alpha_val, max_iter, thread_no)
+    colnames(marker_stats) = names(marker_set)
+
+    marker_stats[!is.finite(marker_stats)] = 0
+    annots = names(marker_set)[apply(marker_stats, 1, which.max)]
+    conf = apply(marker_stats, 1, max)
+    out = list(Label = annots, Confidence = conf, Enrichment = marker_stats)
+    return(out)
+}
+
 #' Directly inferring cell annotations from imputed gene expressions using permutation test
 #'
-#' @param ace ACTIONet output object
+#' @param ace ACTIONetExperiment object
 #' @param markers A list of lists (each a set of markers for a given cell type)
 #' @param rand_sample_no Number of random permutations (default=1000)
 #' @param alpha_val Random-walk parameter for gene imputation (if imputation = 'PageRank')
@@ -202,7 +242,7 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' @param thread_no Number of parallel threads used for gene imputation (if imputation = 'PageRank')
 #'
 #' @return A named list: \itemize{
-#' \item Labels: Inferred archetype labels
+#' \item Labels: Inferred cell type labels
 #' \item Labels.confidence: Confidence of inferred labels
 #' \item Enrichment: Full enrichment matrix
 #'}
@@ -210,10 +250,10 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' @examples
 #' data('curatedMarkers_human') # pre-packaged in ACTIONet
 #' markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-#' arch.annot = annotate.cells.using.markers(ace, markers = markers)
-#' cell.labels = arch.annot$Labels
+#' annots = annotate.cells.using.markers(ace, markers = markers)
+#' plot.ACTIONet(ace, annots$Labels, annots$Labels.confidence)
 #' @export
-annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand_sample_no = 100,
+annotate.cells.using.markers.old <- function(ace, markers, features_use = NULL, rand_sample_no = 100,
     alpha_val = 0.9, thread_no = 8, imputation = "PageRank", assay_name = "logcounts",
     diffusion_iters = 5) {
 
@@ -301,7 +341,6 @@ annotate.cells.using.markers <- function(ace, markers, features_use = NULL, rand
 
     return(res)
 }
-
 
 #' Annotates cells by interpolating marker-based archetype annotations
 #'

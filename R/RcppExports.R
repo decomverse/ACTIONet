@@ -1012,8 +1012,8 @@ run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_
     .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_)
 }
 
-compute_marker_aggregate_stats <- function(G, S, annotations, alpha = 0.85, max_it = 5L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, annotations, alpha, max_it, thread_no)
+compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no)
 }
 
 roll_var <- function(X) {
