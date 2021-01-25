@@ -44,7 +44,7 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
 #' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node.size Size of nodes in the ACTIONet plot
+#' @param node_size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param add.text Whether or not to add labels on the top of ACTIONet plot
 #' @param suppress.legend Whether to suppress legend or include one
@@ -61,14 +61,14 @@ layout.labels <- function(x, y, labels, col = "white", bg = "black", r = 0.1, ce
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 #' @export
 plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 1.5, node.size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
+    trans.fact = 1.5, node_size = 0.1, CPal = CPal20, add.text = TRUE, suppress.legend = TRUE,
     legend.pos = "bottomright", title = "", border.contrast.factor = 0.1, add.backbone = FALSE,
     arch.size.factor = 3, coordinate_slot = "ACTIONet2D") {
 
     text.halo.width = 0.1
-    label.text.size = 0.8
+    label_size = 0.8
 
-    node.size = node.size * 0.25
+    node_size = node_size * 0.25
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = .preprocess_annotation_labels(labels, ace)
@@ -158,7 +158,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 
 
     rand.perm = sample(nrow(coors))
-    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol[rand.perm],
+    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node_size, bg = vCol[rand.perm],
         col = vCol.border[rand.perm], axes = F, xlab = "", ylab = "", main = title,
         xlim = XL, ylim = YL)
 
@@ -178,7 +178,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
             return(anchor.coor)
         }))
         layout.labels(x = centroids[, 1], y = centroids[, 2], labels = Annot, col = colorspace::darken(Pal,
-            0.5), bg = "#eeeeee", r = text.halo.width, cex = label.text.size)
+            0.5), bg = "#eeeeee", r = text.halo.width, cex = label_size)
         # wordcloud::textplot(x = centroids[, 1], y = centroids[, 2], new = F, words =
         # Annot, col = colorspace::darken(Pal, 0.5), bg = '#eeeeee')
     }
@@ -207,7 +207,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
 #' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node.size Size of nodes in the ACTIONet plot
+#' @param node_size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param title Main title of the plot
 #' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
@@ -219,7 +219,7 @@ plot.ACTIONet <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.
 #' plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 #' @export
 plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans.z.threshold = -1,
-    trans.fact = 1, node.size = 1, CPal = CPal20, coordinate_slot = "ACTIONet3D") {
+    trans.fact = 1, node_size = 1, CPal = CPal20, coordinate_slot = "ACTIONet3D") {
     require(ggplot2)
     require(ggpubr)
     require(threejs)
@@ -227,7 +227,7 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
 
     nV = length(ncol(ace))
 
-    node.size = node.size * 0.2
+    node_size = node_size * 0.2
 
 
     if (class(ace) == "ACTIONetExperiment") {
@@ -303,26 +303,26 @@ plot.ACTIONet.3D <- function(ace, labels = NULL, transparency.attr = NULL, trans
     }
 
     scatterplot3js(x = coors[, 1], y = coors[, 2], z = coors[, 3], axis.scales = FALSE,
-        size = node.size, axis = F, grid = F, color = as.character(vCol), stroke = as.character(vCol.border),
+        size = node_size, axis = F, grid = F, color = as.character(vCol), stroke = as.character(vCol.border),
         bg = "black")
 }
 
 #' Plots heatmap of the top-ranked features of an enrichment table
 #'
-#' @param feature.enrichment.table An arbitrary enrichment table with columns being archetypes and rows being specificity of features
-#' @param top.features Number of features to return
-#' @param reorder.columns Whether to optimally re-order columns of the enrichment table
+#' @param feat_scores An arbitrary enrichment table with columns being archetypes and rows being specificity of features
+#' @param top_features Number of features to return
+#' @param reorder_columns Whether to optimally re-order columns of the enrichment table
 #'
 #' @return Enrichment heatmap
 #'
 #' @examples
-#' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-#' plot.top.k.features(feature.enrichment.table, 3)
+#' feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+#' plot.top.k.features(feat_scores, 3)
 #' @export
-plot.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = T,
-    reorder.columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
+plot.top.k.features <- function(feat_scores, top_features = 3, normalize = T,
+    reorder_columns = T, row.title = "Archetypes", column.title = "Genes", rowPal = "black") {
 
-    W = select.top.k.features(feature.enrichment.table, top.features = top.features,
+    W = select.top.k.features(feat_scores, top_features = top_features,
         normalize = normalize)
 
     gradPal = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
@@ -347,32 +347,32 @@ plot.top.k.features <- function(feature.enrichment.table, top.features = 3, norm
 #' Plots projection of features onto the ACTIONet plot
 #'
 #' @param ace ACTIONet output
-#' @param feature.enrichment.table An arbitrary enrichment table with columns being archetypes and rows being specificity of features
-#' @param top.features Number of features to return
-#' @param reorder.columns Whether to optimally re-order columns of the enrichment table
+#' @param feat_scores An arbitrary enrichment table with columns being archetypes and rows being specificity of features
+#' @param top_features Number of features to return
+#' @param reorder_columns Whether to optimally re-order columns of the enrichment table
 #' @param CPal Color palette to use
 #' @param title Main title of the plot
 #'
 #' @return Featur view
 #'
 #' @examples
-#' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-#' plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
+#' feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+#' plot.ACTIONet.feature.view(ace, feat_scores, 5)
 #' @export
-plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.features = 5,
-    CPal = NULL, title = "Feature view", label.text.size = 1, renormalize = F, footprint_slot = "H_unified") {
+plot.ACTIONet.feature.view <- function(ace, feat_scores, top_features = 5,
+    CPal = NULL, title = "Feature view", label_size = 1, renormalize = F, footprint_slot = "H_unified") {
     M = as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
 
-    if (ncol(feature.enrichment.table) != ncol(colMaps(ace)[["H_unified"]])) {
-        feature.enrichment.table = Matrix::t(feature.enrichment.table)
+    if (ncol(feat_scores) != ncol(colMaps(ace)[["H_unified"]])) {
+        feat_scores = Matrix::t(feat_scores)
     }
 
-    if (max(feature.enrichment.table) > 50)
-        feature.enrichment.table = log1p(feature.enrichment.table)
+    if (max(feat_scores) > 50)
+        feat_scores = log1p(feat_scores)
 
 
-    X = t(select.top.k.features(feature.enrichment.table, top.features = top.features,
-        normalize = renormalize, reorder.columns = F))
+    X = t(select.top.k.features(feat_scores, top_features = top_features,
+        normalize = renormalize, reorder_columns = F))
     selected.features = colnames(X)
 
     X = exp(scale(X))
@@ -425,7 +425,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 
 
     words = selected.features
-    lay <- wordlayout(x, y, words, label.text.size)
+    lay <- wordlayout(x, y, words, label_size)
     for (i in 1:length(x)) {
         xl <- lay[i, 1]
         yl <- lay[i, 2]
@@ -433,7 +433,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
         h <- lay[i, 4]
         if (x[i] < xl || x[i] > xl + w || y[i] < yl || y[i] > yl + h) {
             points(x[i], y[i], pch = 16, col = colorspace::darken(feature.colors[[i]],
-                0.6), cex = 0.75 * label.text.size)
+                0.6), cex = 0.75 * label_size)
             nx <- xl + 0.5 * w
             ny <- yl + 0.5 * h
             lines(c(x[i], nx), c(y[i], ny), col = colorspace::darken(feature.colors[[i]],
@@ -443,7 +443,7 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
     # plot.new()
     loc.x = lay[, 1] + 0.5 * lay[, 3]
     loc.y = lay[, 2] + 0.5 * lay[, 4]
-    text(loc.x, loc.y, words, col = feature.colors, cex = label.text.size)
+    text(loc.x, loc.y, words, col = feature.colors, cex = label_size)
 
 }
 
@@ -451,9 +451,9 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 #' Plots projection of genes onto the ACTIONet plot
 #'
 #' @param ace ACTIONet output
-#' @param top.genes Number of genes to return
-#' @param blacklist.pattern List of genes to filter-out
-#' @param reorder.columns Whether to optimally re-order columns of the enrichment table
+#' @param top_genes Number of genes to return
+#' @param blacklist_pattern List of genes to filter-out
+#' @param reorder_columns Whether to optimally re-order columns of the enrichment table
 #' @param CPal Color palette to use
 #' @param title Main title of the plot
 #'
@@ -462,17 +462,17 @@ plot.ACTIONet.feature.view <- function(ace, feature.enrichment.table, top.featur
 #' @examples
 #' plot.ACTIONet.gene.view(ace, 5)
 #' @export
-plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
-    title = "", label.text.size = 0.8, renormalize = F) {
+plot.ACTIONet.gene.view <- function(ace, top_genes = 5, CPal = NULL, blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
+    title = "", label_size = 0.8, renormalize = F) {
     require(wordcloud)
 
-    feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-    filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
+    feat_scores = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+    filtered.rows = grep(blacklist_pattern, rownames(feat_scores))
     if (length(filtered.rows) > 0)
-        feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
+        feat_scores = feat_scores[-filtered.rows, ]
 
-    plot.ACTIONet.feature.view(ace, feature.enrichment.table, title = "Gene view",
-        renormalize = renormalize, top.features = top.genes)
+    plot.ACTIONet.feature.view(ace, feat_scores, title = "Gene view",
+        renormalize = renormalize, top_features = top_genes)
 }
 
 
@@ -482,11 +482,11 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
 #' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node.size Size of nodes in the ACTIONet plot
+#' @param node_size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param enrichment.table To project the top-ranked features interactively.
-#' @param top.features Number of features to show per cell
-#' @param blacklist.pattern List of genes to filter-out
+#' @param top_features Number of features to show per cell
+#' @param blacklist_pattern List of genes to filter-out
 #' @param title Main title of the plot
 #' @param threeD Whether to show the plot in 3D
 #'
@@ -497,8 +497,8 @@ plot.ACTIONet.gene.view <- function(ace, top.genes = 5, CPal = NULL, blacklist.p
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
 #' @export
 plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NULL,
-    trans.z.threshold = -1, trans.fact = 1, node.size = 1, CPal = CPal20, enrichment.table = NULL,
-    top.features = 7, Alt_Text = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
+    trans.z.threshold = -1, trans.fact = 1, node_size = 1, CPal = CPal20, enrichment.table = NULL,
+    top_features = 7, Alt_Text = NULL, blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
     threeD = FALSE, title = "ACTIONet", coordinate_slot = "ACTIONet2D") {
 
     require(plotly)
@@ -506,7 +506,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     require(igraph)
 
     nV = ncol(ace)
-    node.size = node.size * 3
+    node_size = node_size * 3
     if (coordinate_slot == "ACTIONet2D" & threeD == T)
         coordinate_slot = "ACTIONet3D"
 
@@ -599,7 +599,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     } else {
         temp.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
         if (!is.null(row.names(temp.enrichment.table))) {
-            filtered.rows = grep(blacklist.pattern, rownames(temp.enrichment.table))
+            filtered.rows = grep(blacklist_pattern, rownames(temp.enrichment.table))
             if (length(filtered.rows) > 0)
                 enrichment.table = temp.enrichment.table[-filtered.rows, ] else enrichment.table = temp.enrichment.table
 
@@ -623,7 +623,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
         if (!is.null(cell.scores)) {
             selected.features = colnames(cell.scores)
             node.annotations = apply(cell.scores, 1, function(x) paste(selected.features[order(x,
-                decreasing = T)[1:top.features]], collapse = "\n"))
+                decreasing = T)[1:top_features]], collapse = "\n"))
             # node.annotations = sapply(1:length(ace$log$cells), function(i) sprintf('(%s)
             # %s', ace$log$cells[[i]], node.annotations[[i]]) )
         } else {
@@ -656,7 +656,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
     edge_shapes <- list()
 
     # Adjust parameters
-    node.data$size = node.size
+    node.data$size = node_size
 
     axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
 
@@ -666,7 +666,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             node.data$vCol.border = vCol.border
             network <- plot_ly(node.data, x = ~x3D, y = ~y3D, z = ~z3D, opacity = 1,
                 marker = list(color = ~vCol, size = ~size, opacity = 1, alpha = 1,
-                  line = list(width = 0.1 * node.size, alpha = 0.5, color = ~vCol.border)),
+                  line = list(width = 0.1 * node_size, alpha = 0.5, color = ~vCol.border)),
                 text = node.annotations, mode = "markers", hoverinfo = "text", type = "scatter3d",
                 showlegend = FALSE)
             p <- plotly::layout(network, title = title, shapes = edge_shapes, scene = list(xaxis = axis,
@@ -680,7 +680,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
 
             network <- plot_ly(node.data, x = ~x3D, y = ~y3D, z = ~z3D, opacity = 1,
                 color = ~type, colors = Pal, marker = list(size = ~size, opacity = 1,
-                  alpha = 1, line = list(width = 0.1 * node.size, alpha = 0.5, color = ~vCol.border)),
+                  alpha = 1, line = list(width = 0.1 * node_size, alpha = 0.5, color = ~vCol.border)),
                 text = node.annotations, mode = "markers", hoverinfo = "text", type = "scatter3d")
             p <- plotly::layout(network, title = title, shapes = edge_shapes, scene = list(xaxis = axis,
                 yaxis = axis, zaxis = axis), showlegend = TRUE, legend = list(marker = list(marker.size = 10)))
@@ -690,7 +690,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             node.data$vCol = vCol
             node.data$vCol.border = vCol.border
             network <- plot_ly(node.data, x = ~x, y = ~y, marker = list(color = ~vCol,
-                size = ~size, opacity = 1, alpha = 1, line = list(width = 0.1 * node.size,
+                size = ~size, opacity = 1, alpha = 1, line = list(width = 0.1 * node_size,
                   alpha = 0.5, color = ~vCol.border)), text = node.annotations, mode = "markers",
                 type = "scattergl", hoverinfo = "text", showlegend = FALSE)
             p <- plotly::layout(network, title = title, shapes = edge_shapes, xaxis = axis,
@@ -702,7 +702,7 @@ plot.ACTIONet.interactive <- function(ace, labels = NULL, transparency.attr = NU
             node.data$type = factor(names(labels), levels = Annot)
 
             network <- plot_ly(node.data, x = ~x, y = ~y, color = ~type, colors = Pal,
-                marker = list(size = ~size, line = list(width = 0.1 * node.size,
+                marker = list(size = ~size, line = list(width = 0.1 * node_size,
                   color = ~vCol.border)), text = node.annotations, mode = "markers",
                 type = "scattergl", hoverinfo = "text")
             p <- plotly::layout(network, title = title, shapes = edge_shapes, xaxis = axis,
@@ -785,7 +785,7 @@ plot.individual.gene <- function(ace, labels, gene_name, features_use = NULL, as
 #' @param x Score vector
 #' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node.size Size of nodes in the ACTIONet plot
+#' @param node_size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
@@ -798,10 +798,10 @@ plot.individual.gene <- function(ace, labels, gene_name, features_use = NULL, as
 #' plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
 #' @export
 plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5,
-    trans.fact = 3, node.size = 0.1, CPal = "magma", title = "", alpha_val = 0.85,
+    trans.fact = 3, node_size = 0.1, CPal = "magma", title = "", alpha_val = 0.85,
     nonparameteric = FALSE, coordinate_slot = "ACTIONet2D") {
 
-    node.size = node.size * 0.3
+    node_size = node_size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
         if (is.character(coordinate_slot)) {
@@ -872,7 +872,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
     }
 
     idx = order(x, decreasing = F)
-    plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol.border[idx], cex = node.size,
+    plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol.border[idx], cex = node_size,
         pch = 21, axes = FALSE, xlab = "", ylab = "", main = title)
 
 }
@@ -885,7 +885,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' @param markers Set of row features (e.g. genes) to visualize .
 #' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
 #' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node.size Size of nodes in the ACTIONet plot
+#' @param node_size Size of nodes in the ACTIONet plot
 #' @param CPal Color palette (named vector or a name for a given known palette)
 #' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
@@ -896,7 +896,7 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
 #' ace = run.ACTIONet(sce)
 #' visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
 visualize.markers <- function(ace, markers, features_use = NULL, assay_name = "logcounts",
-    transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1,
+    transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node_size = 1,
     CPal = "magma", alpha_val = 0.9, export_path = NA) {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
@@ -936,7 +936,7 @@ visualize.markers <- function(ace, markers, features_use = NULL, assay_name = "l
         x = x/max(x)
 
         plot.ACTIONet.gradient(ace, x, transparency.attr, trans.z.threshold, trans.fact,
-            node.size, CPal = CPal, title = feat_name, alpha_val = 0)
+            node_size, CPal = CPal, title = feat_name, alpha_val = 0)
 
         if (!is.na(export_path)) {
             fname = sprintf("%s/%s.pdf", export_path, feat_name)
@@ -944,39 +944,38 @@ visualize.markers <- function(ace, markers, features_use = NULL, assay_name = "l
             pdf(fname)
             par(mar = c(0, 0, 1, 0))
             plot.ACTIONet.gradient(ace, x, transparency.attr, trans.z.threshold,
-                trans.fact, node.size, CPal = CPal, title = feat_name, alpha_val = 0)
+                trans.fact, node_size, CPal = CPal, title = feat_name, alpha_val = 0)
             dev.off()
         }
     }
 }
 
-
-select.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-    top.features = 3, normalize = F, reorder.columns = F, specificity.slot.name = "unified_feature_specificity") {
-    feature.enrichment.table = as.matrix(rowMaps(ace)[[specificity.slot.name]])
-    filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
+select.top.k.genes <- function(ace, top_genes = 5, CPal = NULL, blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+    top_features = 3, normalize = F, reorder_columns = F, slot_name = "unified_feature_specificity") {
+    feat_scores = as.matrix(rowMaps(ace)[[slot_name]])
+    filtered.rows = grep(blacklist_pattern, rownames(feat_scores))
     if (length(filtered.rows) > 0)
-        feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
+        feat_scores = feat_scores[-filtered.rows, ]
 
-    tbl = select.top.k.features(feature.enrichment.table, top.features = top.features,
-        normalize = normalize, reorder.columns = reorder.columns)
+    tbl = select.top.k.features(feat_scores, top_features = top_features,
+        normalize = normalize, reorder_columns = reorder_columns)
 
     return(tbl)
 }
 
 
-plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-    top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes",
-    column.title = "Genes", rowPal = "black", specificity.slot.name = "unified_feature_specificity") {
+plot.top.k.genes <- function(ace, top_genes = 5, CPal = NULL, blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+    top_features = 3, normalize = F, reorder_columns = T, row.title = "Archetypes",
+    column.title = "Genes", rowPal = "black", slot_name = "unified_feature_specificity") {
     require(ComplexHeatmap)
 
-    feature.enrichment.table = as.matrix(rowMaps(ace)[[specificity.slot.name]])
-    filtered.rows = grep(blacklist.pattern, rownames(feature.enrichment.table))
+    feat_scores = as.matrix(rowMaps(ace)[[slot_name]])
+    filtered.rows = grep(blacklist_pattern, rownames(feat_scores))
     if (length(filtered.rows) > 0)
-        feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
+        feat_scores = feat_scores[-filtered.rows, ]
 
-    ht = plot.top.k.features(feature.enrichment.table, top.features = top.features,
-        normalize = normalize, reorder.columns = reorder.columns, row.title = row.title,
+    ht = plot.top.k.features(feat_scores, top_features = top_features,
+        normalize = normalize, reorder_columns = reorder_columns, row.title = row.title,
         column.title = column.title, rowPal = rowPal)
 
     return(ht)
@@ -984,23 +983,23 @@ plot.top.k.genes <- function(ace, top.genes = 5, CPal = NULL, blacklist.pattern 
 }
 
 
-plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist.pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-    top.features = 3, normalize = F, reorder.columns = T, row.title = "Archetypes",
-    column.title = "Genes", rowPal = "black", specificity.slot.name = "unified_feature_specificity") {
-    feature.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+plot.archetype.selected.genes <- function(ace, genes, CPal = NULL, blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+    top_features = 3, normalize = F, reorder_columns = T, row.title = "Archetypes",
+    column.title = "Genes", rowPal = "black", slot_name = "unified_feature_specificity") {
+    feat_scores = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
     filtered.rows = match(intersect(rownames(ace), genes), rownames(ace))
     if (length(filtered.rows) > 0)
-        feature.enrichment.table = feature.enrichment.table[-filtered.rows, ]
+        feat_scores = feat_scores[-filtered.rows, ]
 
-    ht = plot.top.k.features(feature.enrichment.table, top.features = top.features,
-        normalize = normalize, reorder.columns = reorder.columns, row.title = row.title,
+    ht = plot.top.k.features(feat_scores, top_features = top_features,
+        normalize = normalize, reorder_columns = reorder_columns, row.title = row.title,
         column.title = column.title, rowPal = rowPal)
 
     return(ht)
 
 }
 
-plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.1, CPal = "magma",
+plot.ACTIONet.archetype.footprint <- function(ace, node_size = 0.1, CPal = "magma",
     title = "", arch.labels = NULL, coordinate_slot = "ACTIONet2D", alpha_val = 0.9) {
     Ht = colMaps(ace)[["H_unified"]]
     cs = ACTIONet::fast_column_sums(Ht)
@@ -1008,7 +1007,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.1, CPal = "magm
     U = as(scale(Ht, center = F, scale = cs), "dgTMatrix")
     U.pr = compute_network_diffusion(colNets(ace)$ACTIONet, U, alpha = alpha_val)
 
-    node.size = node.size * 0.3
+    node_size = node_size * 0.3
     coors = scale(colMaps(ace)[[coordinate_slot]])
 
     if (CPal %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
@@ -1051,7 +1050,7 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.1, CPal = "magm
         vCol = scales::alpha(vCol, 0.05 + 0.95 * x/max(x))
         vCol = colorspace::lighten(vCol, 0.2)
         idx = order(x, decreasing = F)
-        plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol[idx], cex = node.size,
+        plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol[idx], cex = node_size,
             pch = 21, axes = FALSE, xlab = "", ylab = "", main = arch.labels[[i]])
 
     })
@@ -1061,24 +1060,23 @@ plot.ACTIONet.archetype.footprint <- function(ace, node.size = 0.1, CPal = "magm
 
 #' Report the top-rank features from a given enrichment table
 #'
-#' @param top.features Number of features to return
-#' @param reorder.columns Whether to optimally re-order columns of the enrichment table
+#' @param top_features Number of features to return
+#' @param reorder_columns Whether to optimally re-order columns of the enrichment table
 #'
 #' @return Sorted table with the selected top-ranked
 #'
 #' @examples
-#' feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-#' enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
+#' feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+#' enrichment.table.top = select.top.k.features(feat_scores, 3)
 #' @export
-select.top.k.features <- function(feature.enrichment.table, top.features = 3, normalize = F,
-    reorder.columns = T) {
+select.top.k.features <- function(feat_scores, top_features = 3, normalize = FALSE, reorder_columns = TRUE) {
 
-    W0 = (feature.enrichment.table)
+    W0 = (feat_scores)
     if (normalize == T)
         W0 = doubleNorm(W0)
 
-    IDX = matrix(0, nrow = top.features, ncol = ncol(W0))
-    VV = matrix(0, nrow = top.features, ncol = ncol(W0))
+    IDX = matrix(0, nrow = top_features, ncol = ncol(W0))
+    VV = matrix(0, nrow = top_features, ncol = ncol(W0))
     W = (W0)
     for (i in 1:nrow(IDX)) {
         W.m = as(MWM_hungarian(W), "dgTMatrix")
@@ -1088,10 +1086,9 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
         W[IDX[i, W.m@j + 1], ] = 0
     }
 
-    if (reorder.columns == T) {
-        feature.enrichment.table.aggregated = apply(IDX, 2, function(perm) as.numeric(Matrix::colMeans(W0[perm,
-            ])))
-        CC = cor(feature.enrichment.table.aggregated)
+    if (reorder_columns == T) {
+        feat_scores_agg = apply(IDX, 2, function(perm) as.numeric(Matrix::colMeans(W0[perm, ])))
+        CC = cor(feat_scores_agg)
         D = as.dist(1 - CC)
         cols = seriation::get_order(seriation::seriate(D, "OLO"))
         rows = as.numeric(IDX[, cols])
@@ -1099,15 +1096,15 @@ select.top.k.features <- function(feature.enrichment.table, top.features = 3, no
         cols = 1:ncol(W0)
         rows = unique(as.numeric(IDX))
     }
-    W = feature.enrichment.table[rows, cols]
+    W = feat_scores[rows, cols]
 
     return(W)
 }
 
 #' @export
 plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, transparency.attr = NULL,
-    trans.z.threshold = -0.5, trans.fact = 1.5, node.size = 0.1, CPal = CPal20, title = "",
-    border.contrast.factor = 0.1, arch.size.factor = 1, label.text.size = 1, coordinate_slot = "ACTIONet2D") {
+    trans.z.threshold = -0.5, trans.fact = 1.5, node_size = 0.1, CPal = CPal20, title = "",
+    border.contrast.factor = 0.1, arch.size.factor = 1, label_size = 1, coordinate_slot = "ACTIONet2D") {
 
     if (!("backbone" %in% names(metadata(ace)))) {
         message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
@@ -1115,7 +1112,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
     }
     backbone = metadata(ace)$backbone
 
-    node.size = node.size * 0.3
+    node_size = node_size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = .preprocess_annotation_labels(labels, ace)
@@ -1214,7 +1211,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
 
     rand.perm = sample(nrow(coors))
-    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol[rand.perm],
+    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node_size, bg = vCol[rand.perm],
         col = vCol.border[rand.perm], axes = F, xlab = "", ylab = "", main = title,
         xlim = XL, ylim = YL)
 
@@ -1236,7 +1233,7 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
         i]))
 
     text.halo.width = 0.1
-    label.text.size = label.text.size * 0.6
+    label_size = label_size * 0.6
 
 
     x = arch.coors[, 1]
@@ -1247,9 +1244,9 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
     yo <- text.halo.width * strheight("A")
     for (i in theta) {
         text(xy$x + cos(i) * xo, xy$y + sin(i) * yo, arch.labels, col = "#dddddd",
-            cex = label.text.size)
+            cex = label_size)
     }
-    text(xy$x, xy$y, arch.labels, col = colorspace::darken(aCol, 0.5), cex = label.text.size)
+    text(xy$x, xy$y, arch.labels, col = colorspace::darken(aCol, 0.5), cex = label_size)
 
 
     par(new = TRUE)
@@ -1261,9 +1258,9 @@ plot.ACTIONet.backbone <- function(ace, labels = NULL, arch.labels = NULL, trans
 
 #' @export
 plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
-    transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1.5, node.size = 0.1,
+    transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 1.5, node_size = 0.1,
     CPal = CPal20, title = "", border.contrast.factor = 0.1, arch.size.factor = 1,
-    label.text.size = 1, cell_lightening = 0.5, coordinate_slot = "ACTIONet2D", stretch.factor = 10) {
+    label_size = 1, cell_lightening = 0.5, coordinate_slot = "ACTIONet2D", stretch.factor = 10) {
 
     if (!("backbone" %in% names(metadata(ace)))) {
         message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
@@ -1271,7 +1268,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
     }
     backbone = metadata(ace)$backbone
 
-    node.size = node.size * 0.3
+    node_size = node_size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = .preprocess_annotation_labels(labels, ace)
@@ -1372,7 +1369,7 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
     rand.perm = sample(nrow(coors))
     vCol_lightend = colorspace::lighten(vCol, cell_lightening)
     vCol.border_lightend = colorspace::lighten(vCol.border, cell_lightening)
-    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node.size, bg = vCol_lightend[rand.perm],
+    graphics::plot(coors[rand.perm, c(1, 2)], pch = 21, cex = node_size, bg = vCol_lightend[rand.perm],
         col = vCol.border_lightend[rand.perm], axes = F, xlab = "", ylab = "", main = title,
         xlim = XL, ylim = YL)
 
@@ -1408,12 +1405,12 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 
 
     text.halo.width = 0.1
-    label.text.size = label.text.size * 0.6
+    label_size = label_size * 0.6
 
 
     layout.labels(x = arch.coors[, 1], y = arch.coors[, 2] - strheight("A"), labels = arch.labels,
         col = colorspace::darken(aCol, 0.5), bg = "#eeeeee", r = text.halo.width,
-        cex = label.text.size)
+        cex = label_size)
 
 
     par(new = TRUE)
@@ -1423,8 +1420,8 @@ plot.ACTIONet.backbone.graph <- function(ace, labels = NULL, arch.labels = NULL,
 }
 
 #' @export
-plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, node.size = 2,
-    label.text.size = 1, title = "", stretch.factor = 2) {
+plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, node_size = 2,
+    label_size = 1, title = "", stretch.factor = 2) {
 
     if (!("backbone" %in% names(metadata(ace)))) {
         message("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
@@ -1442,7 +1439,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
 
     w = ACTIONet::fast_column_sums(colMaps(ace)$H_unified)
     w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
-    arch.sizes = (0.25 + w) * node.size
+    arch.sizes = (0.25 + w) * node_size
 
     graphics::plot(arch.coors, pch = 25, cex = 0, bg = arch.colors, col = colorspace::darken(arch.colors,
         0.5), axes = F, xlab = "", ylab = "", main = title)
@@ -1456,7 +1453,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
 
 
     text.halo.width = 0.1
-    label.text.size = label.text.size * 0.6
+    label_size = label_size * 0.6
 
     if (is.null(arch.labels)) {
         arch.labels = paste("A", 1:nrow(arch.coors), sep = "")
@@ -1465,7 +1462,7 @@ plot.backbone.graph <- function(ace, arch.labels = NULL, arch.colors = NULL, nod
     }
     layout.labels(x = arch.coors[, 1], y = arch.coors[, 2] - strheight("A"), labels = arch.labels,
         col = colorspace::darken(arch.colors, 0.5), bg = "#eeeeee", r = text.halo.width,
-        cex = label.text.size)
+        cex = label_size)
 
 
     par(new = TRUE)

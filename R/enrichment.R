@@ -414,20 +414,34 @@ assess.categorical.autocorrelation <- function(ace, labels, perm.no = 100) {
     return(z)
 }
 
-get.top.specific.genes <- function(ace, clusters, top_genes = 10, features_use = NULL, feat_subset = NULL, assay_name = "logcounts"){
+#' @export
+get.top.specific.genes <- function(ace, clusters, top_genes = 10, features_use = NULL, feat_subset = NULL, assay_name = "logcounts", return_type = c("data.frame", "df", "list")){
+
+  return_type = match.arg(return_type)
+
   cluster_vec = ACTIONet:::.get_attr_or_split_idx(ace, clusters, return_vec = T)
   features_use = .preprocess_annotation_features(ace, features_use = features_use)
   ace  = compute.cluster.feature.specificity(ace, clusters = cluster_vec, output_slot = "temp_slot", assay_name = assay_name)
   feat_spec = rowMaps(ace)[["temp_slot_feature_specificity"]]
   rownames(feat_spec) = features_use
+
   if(!is.null(feat_subset))
     feat_spec = feat_spec[rownames(feat_spec) %in% feat_subset, ]
 
-  feat_spec_top = sapply(colnames(feat_spec), function(type){
-    c = feat_spec[, type]
-    names(head(sort(c, decreasing = T), top_genes))
-  })
+  W = select.top.k.features(feat_spec, top_features = top_genes, normalize = FALSE, reorder_columns = FALSE)
+  feat_spec_top = apply(W, 2, function(v) rownames(W)[order(v, decreasing = T)][1:top_genes])
+
+  # feat_spec_top = sapply(colnames(feat_spec), function(type){
+  #   c = feat_spec[, type]
+  #   names(head(sort(c, decreasing = T), top_genes))
+  # })
   df = data.frame(feat_spec_top)
-  colnames(df) = colnames(feat_spec)
-  return(df)
+
+  if(return_type == "list")
+    return(as.list(df))
+  else
+    return(df)
+
+  # colnames(df) = colnames(feat_spec)
+  # return(df)
 }
