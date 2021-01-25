@@ -1009,18 +1009,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_marker_aggregate_stats
-mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& annotations, double alpha, int max_it, int thread_no);
-RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats(SEXP GSEXP, SEXP SSEXP, SEXP annotationsSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP thread_noSEXP) {
+mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< sp_mat& >::type annotations(annotationsSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no));
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats(G, S, marker_mat, alpha, max_it, thread_no));
     return rcpp_result_gen;
 END_RCPP
 }
