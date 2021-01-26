@@ -100,7 +100,7 @@ namespace ACTIONet {
 			for(sp_mat::col_iterator it = marker_mat.begin_col(i); it != marker_mat.end_col(i); it++) {
 				raw_expression.col(idx) = trans(S.row(it.row()));
 				w(idx) = accu(raw_expression.col(idx));
-				idx ++;
+				idx++;
 			}
 			w = w / sum(w);
 
