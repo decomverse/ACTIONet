@@ -894,6 +894,18 @@ arma::Mat<npdouble> compute_full_sim(arma::Mat<npdouble> &H,
   return G;
 }
 
+arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, arma::vec fixed_labels_ = arma::vec()) {
+  arma::uvec fixed_labels_vec;
+  if (!fixed_labels_.is_empty()) {
+//    arma::uvec fixed_labels_vec(fixed_labels_.n_elem());
+    arma::uvec fixed_labels_vec(fixed_labels_.size());
+    for(int i = 0; i < fixed_labels_.size(); i++) {
+		    fixed_labels_vec(i) = fixed_labels_(i);
+    }
+ }
+  return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
+}
+
 PYBIND11_MODULE(_ACTIONet, m) {
   m.doc() = R"pbdoc(
         ACTIONet package
@@ -1019,10 +1031,10 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def(
       "layout_ACTIONet",
       py::overload_cast<arma::SpMat<npdouble> &, arma::Mat<npdouble>, int,
-                        unsigned int, int, int>(&layout_ACTIONet),
+                        unsigned int, int, int, int>(&layout_ACTIONet),
       "Performs stochastic force-directed layout on the input graph (ACTIONet)",
       py::arg("G"), py::arg("S_r"), py::arg("compactness_level") = 50,
-      py::arg("n_epochs") = 500, py::arg("thread_no") = 0, py::arg("seed") = 0);
+      py::arg("n_epochs") = 500, py::arg("layout_alg") = 0, py::arg("thread_no") = 0, py::arg("seed") = 0);
 
   // Pseudobulk
   m.def("compute_pseudo_bulk_per_archetype",
@@ -1170,6 +1182,13 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def("compute_full_sim",
         py::overload_cast<arma::Mat<npdouble> &, int>(&compute_full_sim), "",
         py::arg("H"), py::arg("thread_no") = 0);
+  m.def("run_LPA", &run_LPA, "",
+        py::arg("G"), py::arg("labels"), py::arg("lambda") = 1, py::arg("iters") = 3,
+        py::arg("sig_threshold") = 3, py::arg("fixed_labels_") = arma::vec());
+  // m.def("run_LPA",
+  //       py::overload_cast<arma::SpMat<npdouble> &, arma::vec, double, int, double, arma::vec, "",
+  //       py::arg("G"), py::arg("labels"), py::arg("lambda") = 1, py::arg("iters") = 3,
+  //       py::arg("sig_threshold") = 3, py::arg("fixed_labels_") = arma::vec());
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
