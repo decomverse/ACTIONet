@@ -99,7 +99,7 @@ namespace ACTIONet {
 			vec w = zeros(cs(i));
 			for(sp_mat::col_iterator it = marker_mat.begin_col(i); it != marker_mat.end_col(i); it++) {
 				raw_expression.col(idx) = trans(S.row(it.row()));
-				w(idx) = sum(raw_expression.col(idx));
+				w(idx) = accu(raw_expression.col(idx));
 				idx ++;
 			}
 			w = w / sum(w);

@@ -2043,26 +2043,19 @@ mat NetEnh(mat A) {
   return (A_enh);
 }
 
-
-
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue) {
-
+  uvec fixed_labels_vec;
   if (fixed_labels_.isNotNull()) {
     NumericVector fixed_labels(fixed_labels_);
     uvec fixed_labels_vec(fixed_labels.size());
     for(int i = 0; i < fixed_labels.size(); i++) {
-		fixed_labels_vec(i) = fixed_labels(i);
-	}
-	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
-  } else {
-    uvec fixed_labels_vec;
-	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
-  }
+		    fixed_labels_vec(i) = fixed_labels(i) - 1;
+    }
+ }
+  return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
 }
-
-
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
