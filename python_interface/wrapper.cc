@@ -904,7 +904,6 @@ arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3,
   }
   arma::vec new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
   return(new_labels);
-  // return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
 }
 
 PYBIND11_MODULE(_ACTIONet, m) {
