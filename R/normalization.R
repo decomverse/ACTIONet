@@ -11,8 +11,8 @@ normalize.scran <- function(ace, batch_attr = NULL, assay_name = "counts", BPPAR
 #' @export
 normalize.multiBatchNorm <- function(ace, batch_attr, assay_name = "counts", BPPARAM = SerialParam()) {
     .check_and_load_package(c("scran", "batchelor"))
+    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
     sce_temp = as.SingleCellExperiment(ace)
-    batch_attr = .get_attr_or_split_idx(sce_temp, batch_attr, return_vec = TRUE)
     sce_temp = batchelor::multiBatchNorm(sce_temp, batch = batch_attr, assay.type = assay_name,
         BPPARAM = BPPARAM)
     SummarizedExperiment::assays(ace)[["logcounts"]] = SummarizedExperiment::assays(sce_temp)[["logcounts"]]
