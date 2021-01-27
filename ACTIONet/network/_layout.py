@@ -4,7 +4,8 @@ import numpy as np
 from anndata import AnnData
 
 import _ACTIONet as _an
-from ..tools import scale_matrix
+from .. import _misc_utils as ut
+
 
 
 def layout_network(
@@ -51,7 +52,7 @@ def layout_network(
     adata = adata.copy() if copy else adata
     G = adata.obsp["ACTIONet"]
     if scale:
-        S_r = scale_matrix(adata.obsm["ACTION"]).T
+        S_r = ut.scale_matrix(adata.obsm["ACTION"]).T
     else:
         S_r = adata.obsm["ACTION"].T
 

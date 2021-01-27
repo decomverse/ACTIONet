@@ -7,17 +7,17 @@ from scipy.sparse import issparse, spmatrix
 
 import _ACTIONet as _an
 
-
 def reduce_kernel(
     data: Union[AnnData, np.ndarray, spmatrix],
     dim: Optional[int] = 50,
+    max_iter: Optional[int] = 10,
+    layer_name: Optional[str] = None,
+    reduction_name: Optional[str] = "ACTION",
     svd_solver: Literal[0, 1, 2] = 0,
-    n_iters: Optional[int] = 5,
     seed: Optional[int] = 0,
-    prenormalize: Optional[bool] = False,
-    return_info: bool = False,
+    return_info: Optional[bool] = False,
     use_highly_variable: Optional[bool] = False,
-    copy: bool = False,
+    copy: Optional[bool] = False
 ) -> [AnnData, np.ndarray, spmatrix]:
     """\
     Kernel Reduction Method [Mohammadi2020].
@@ -32,6 +32,12 @@ def reduce_kernel(
     dim
         Target dimension. Defaults to 50, or 1 - minimum
         dimension size of selected representation.
+    max_iter
+        Maximum number of iterations
+    reduction_name
+        Prefix of key to use for reduction output
+    layer_name
+        Key of 'layers' to use as matrix for filtering
     svd_solver
         SVD solver to use:
         `0` (the default)
@@ -40,12 +46,8 @@ def reduce_kernel(
           randomized SVD from Halko et al.
         `2`
           randomized SVD from Feng et al.
-    n_iters
-        Maximum number of iterations
     seed
         Random seed
-    prenormalise
-        Row-normalise the input matrix before SVD
     return_info
         Only relevant when not passing an :class:`~anndata.AnnData`:
         see “**Returns**”.
@@ -53,8 +55,6 @@ def reduce_kernel(
         Whether to use highly variable genes only, stored in
         `.var['highly_variable']`.
         By default uses them if they have been determined beforehand.
-    dtype
-        Numpy data type string to which to convert the result.
     copy
         If an :class:`~anndata.AnnData` is passed, determines whether a copy
         is returned. Is ignored otherwise.
@@ -82,32 +82,38 @@ def reduce_kernel(
     else:
         adata = AnnData(data)
 
-    if use_highly_variable is True and "highly_variable" not in adata.var.keys():
-        raise ValueError(
-            "Did not find adata.var['highly_variable']. "
-            "Either your data already only consists of highly-variable genes "
-            "or consider running `pp.highly_variable_genes` first."
-        )
-    if use_highly_variable is None:
-        use_highly_variable = True if "highly_variable" in adata.var.keys() else False
-    adata_comp = (
-        adata[:, adata.var["highly_variable"]] if use_highly_variable else adata
-    )
+    if use_highly_variable is True:
+        if "highly_variable" in adata.var.keys():
+            adata_temp = adata[:, adata.var["highly_variable"]]
+        else:
+            raise ValueError(
+                "Did not find adata.var['highly_variable']. "
+                "Either your data already only consists of highly-variable genes "
+                "or consider running `pp.highly_variable_genes` first."
+            )
+    else:
+        adata_temp = adata
 
     # ACTIONet C++ library takes cells as columns
-    X = adata_comp.X.T
+    if layer_name is not None:
+        X = adata_temp.layers[layer_name].T
+    else:
+        X = adata_temp.X.T
 
     # See ACTIONet.h for definitions
     # irlb  = 0
     # halko = 1
     # feng  = 2
     if svd_solver == 0:
-        n_iters = 100 * n_iters
-    reduced = (
-        _an.reduce_kernel(X, dim, n_iters, seed, svd_solver, prenormalize)
-        if issparse(X)
-        else _an.reduce_kernel_full(X, dim, n_iters, seed, svd_solver, prenormalize)
-    )
+        max_iter = 100 * max_iter
+
+    if issparse(X):
+        X = X.tocsc()
+        reduced = _an.reduce_kernel(X, dim, max_iter, seed, svd_solver, False)
+    else:
+        X = np.array(X)
+        reduced = _an.reduce_kernel_full(X, dim, max_iter, seed, svd_solver, False)
+
 
     # Note S_r.T
     S_r, V, sigma, A, B = (
@@ -119,20 +125,20 @@ def reduce_kernel(
     )
 
     if data_is_AnnData:
-        adata.obsm["ACTION"] = S_r
-        adata.uns["ACTION"] = {}
-        adata.uns["ACTION"]["params"] = {"use_highly_variable": use_highly_variable}
-        adata.uns["ACTION"]["sigma"] = sigma
-        adata.obsm["ACTION_B"] = B
+        adata.obsm[reduction_name] = S_r
+        adata.uns[reduction_name] = {}
+        adata.uns[reduction_name]["params"] = {"use_highly_variable": use_highly_variable}
+        adata.uns[reduction_name]["sigma"] = sigma
+        adata.obsm[reduction_name + "_B"] = B
 
         if use_highly_variable:
-            adata.varm["ACTION_V"] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm["ACTION_V"][adata.var["highly_variable"]] = V
-            adata.varm["ACTION_A"] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm["ACTION_A"][adata.var["highly_variable"]] = A
+            adata.varm[reduction_name + "_V"] = np.zeros(shape=(adata.n_vars, dim))
+            adata.varm[reduction_name + "_V"][adata.var["highly_variable"]] = V
+            adata.varm[reduction_name + "_A"] = np.zeros(shape=(adata.n_vars, dim))
+            adata.varm[reduction_name + "_A"][adata.var["highly_variable"]] = A
         else:
-            adata.varm["ACTION_V"] = V
-            adata.varm["ACTION_A"] = A
+            adata.varm[reduction_name + "_V"] = V
+            adata.varm[reduction_name + "_A"] = A
 
         return adata if copy else None
     else:

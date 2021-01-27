@@ -5,8 +5,7 @@ import numpy as np
 from anndata import AnnData
 
 from . import _imputation as imputation
-from . import _normalization as normalization
-
+from .. import _misc_utils as ut
 
 def annotate_archetypes_using_labels(
     adata: AnnData,
@@ -183,7 +182,7 @@ def map_cell_scores_from_archetype_enrichment(
         )
 
     if normalize:
-        enrichment_scaled = normalization.double_normalize(enrichment)
+        enrichment_scaled = ut.double_normalize(enrichment)
     else:
         enrichment_scaled = enrichment.copy()
         enrichment_scaled[enrichment_scaled < 0] = 0
