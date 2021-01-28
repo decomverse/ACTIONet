@@ -10,9 +10,10 @@ reduce.and.batch.correct.ace.fastMNN <- function(ace, batch_attr = NULL, assay_n
         return(ace)
     }
 
-    ace = .check_and_convert_se_like(ace, "ACE")
+    # ace = .check_and_convert_se_like(ace, "ACE")
+    ace = as.ACTIONetExperiment(ace)
     m_data = metadata(ace)
-    # ace = normalize.ace(ace, norm_method = "multiBatchNorm", assay_name = assay_name, 
+    # ace = normalize.ace(ace, norm_method = "multiBatchNorm", assay_name = assay_name,
     #     batch_attr = batch_attr, BPPARAM = BPPARAM)
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
@@ -72,7 +73,9 @@ reduce.and.batch.correct.ace.Harmony <- function(ace, batch_attr, reduced_dim = 
         stop(err)
     }
 
-    ace = .check_and_convert_se_like(ace, "ACE")
+    # ace = .check_and_convert_se_like(ace, "ACE")
+    ace = as.ACTIONetExperiment(ace)
+
     batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
     ace = reduce.ace(ace, reduced_dim = reduced_dim, max_iter = max_iter, assay_name = assay_name,
@@ -95,7 +98,8 @@ batch.correct.ace.Harmony <- function(ace, batch_attr = NULL, reduction_slot = "
         stop(err)
     }
 
-    ace = .check_and_convert_se_like(ace, "ACE")
+    # ace = .check_and_convert_se_like(ace, "ACE")
+    ace = as.ACTIONetExperiment(ace)
     batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
     colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(colMaps(ace)[[reduction_slot]],
         meta_data = batch_attr, do_pca = FALSE)
