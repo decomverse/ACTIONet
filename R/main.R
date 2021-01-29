@@ -23,10 +23,7 @@
 #' ace = ACTIONet.out$ace # main output
 #' trace = ACTIONet.out$trace # for backup
 #' @export
-run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificity_z_threshold = -3,
-    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, unification_alpha = 0.99, unification_outlier_threshold = 2, unification_sim_threshold = 0,
-    layout_in_parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
-    footprint_alpha = 0.85, max_iter_ACTION = 50, full_trace = FALSE, seed = 0) {
+run.ACTIONet <- function(ace, k_max = 30, assay_name = "logcounts", reduction_slot = "ACTION", net_slot_out = "ACTIONet", min_cells_per_arch = 2, max_iter_ACTION = 50, min_specificity_z_threshold = -3, network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, layout_in_parallel = TRUE, unification_alpha = 0.99, unification_outlier_threshold = 2, unification_sim_threshold = 0, footprint_alpha = 0.85, thread_no = 0, full_trace = FALSE, seed = 0) {
     if (!(assay_name %in% names(assays(ace)))) {
         err = sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
         stop(err)
@@ -57,7 +54,7 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
     set.seed(seed)
     G = build_ACTIONet(H_stacked = pruning.out$H_stacked, density = network_density,
         thread_no = thread_no, mutual_edges_only = mutual_edges_only)
-    colNets(ace)$ACTIONet = G
+    colNets(ace)[[net_slot_out]] = G
 
 
     # Layout ACTIONet
@@ -125,7 +122,7 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 
     ace = construct.backbone(ace, network_density = network_density, mutual_edges_only = mutual_edges_only,
         layout_compactness = layout_compactness, layout_epochs = layout_epochs/5,
-        thread_no = 1)
+        thread_no = 1, ACTIONet_slot = net_slot_out)
 
     if (full_trace == T) {
         # Prepare output
