@@ -92,7 +92,7 @@ run.ACTIONet <- function(ace, k_max = 30, assay_name = "logcounts", reduction_sl
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
-    ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+    ace$node_centrality = c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
     # Smooth archetype footprints
     Ht_unified = colMaps(ace)[["H_unified"]]
@@ -294,7 +294,7 @@ rerun.archetype.aggregation <- function(ace, assay_name = "logcounts", reduction
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
-    ace$node_centrality = compute_archetype_core_centrality(G, ace$assigned_archetype)
+    ace$node_centrality = c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
     Ht_unified = colMaps(ace)[[sprintf("H_%s", unified_suffix)]]
     archetype_footprint = compute_network_diffusion(G, Ht_unified, alpha = footprint_alpha,
