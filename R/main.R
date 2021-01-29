@@ -77,9 +77,9 @@ run.ACTIONet <- function(ace, k_max = 30, assay_name = "logcounts", reduction_sl
     unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.out$C_stacked,
         alpha = unification_alpha, outlier_threshold = unification_outlier_threshold,
         sim_threshold = unification_sim_threshold, thread_no)
-    metadata(ace)$selected_archetypes = unification.out$selected_archetypes
-    metadata(ace)$selected_archetypes_ontology = unification.out$ontology
-    metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
+    # metadata(ace)$selected_archetypes = unification.out$selected_archetypes
+    # metadata(ace)$selected_archetypes_ontology = unification.out$ontology
+    # metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
 
     Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
     colMaps(ace)[["H_unified"]] = Ht_unified
@@ -88,7 +88,7 @@ run.ACTIONet <- function(ace, k_max = 30, assay_name = "logcounts", reduction_sl
     colMaps(ace)[["C_unified"]] = as(unification.out$C_unified, "sparseMatrix")
     colMapTypes(ace)[["C_unified"]] = "internal"
 
-    ace$assigned_archetype = unification.out$assigned_archetype
+    ace$assigned_archetype = c(unification.out$assigned_archetype)
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
@@ -277,9 +277,9 @@ rerun.archetype.aggregation <- function(ace, assay_name = "logcounts", reduction
     unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = C_stacked, alpha = unification_alpha,
         outlier_threshold = unification_outlier_threshold, sim_threshold = unification_sim_threshold,
         thread_no)
-    metadata(ace)$selected_archetypes = unification.out$selected_archetypes
-    metadata(ace)$selected_archetypes_ontology = unification.out$ontology
-    metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
+    # metadata(ace)$selected_archetypes = unification.out$selected_archetypes
+    # metadata(ace)$selected_archetypes_ontology = unification.out$ontology
+    # metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
 
 
     colMaps(ace)[[sprintf("H_%s", unified_suffix)]] = as(Matrix::t(unification.out$H_unified),
@@ -290,7 +290,7 @@ rerun.archetype.aggregation <- function(ace, assay_name = "logcounts", reduction
         "sparseMatrix")
     colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] = "internal"
 
-    colData(ace)[["assigned_archetype"]] = unification.out$assigned_archetype
+    colData(ace)[["assigned_archetype"]] = c(unification.out$assigned_archetype)
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
