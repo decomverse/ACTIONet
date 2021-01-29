@@ -1,6 +1,7 @@
 from typing import Optional
 
 import numpy as np
+from scipy import sparse
 from anndata import AnnData
 from .. import _misc_utils as ut
 
@@ -19,6 +20,8 @@ def normalize_adata(
         S = ut.rescale_matrix(adata.layers[layer_name], log_scale=log_scale)
     else:
         S = ut.rescale_matrix(adata.X, log_scale=log_scale)
+
+    S = sparse.csc_matrix(S)
 
     if layer_name_out is not None:
         adata.layers[layer_name_out] = S

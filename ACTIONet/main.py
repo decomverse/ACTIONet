@@ -25,6 +25,7 @@ def run_ACTIONet(
         unification_alpha: Optional[float] = 0.99,
         unification_outlier_threshold: Optional[float] = 2,
         unification_sim_threshold: Optional[float] = 0,
+        footprint_key: Optional[str] = "archetype_footprint",
         footprint_alpha: Optional[float] = 0.85,
         thread_no: Optional[int] = 0,
         seed: Optional[int] = 0,
@@ -110,21 +111,52 @@ def run_ACTIONet(
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
     # each cell
-    nt.compute_archetype_core_centrality(adata)
+    nt.compute_archetype_core_centrality(
+        adata=adata,
+        G=None,
+        assignments=None,
+        net_name=net_name_out,
+        assignment_name="assigned_archetype",
+        copy=False,
+        return_raw=False
+    )
 
     # Smooth archetype footprints
-    nt.compute_network_diffusion(adata, alpha=footprint_alpha, thread_no=thread_no)
+    nt.compute_network_diffusion(
+        adata=adata,
+        G=None,
+        H_unified=None,
+        net_name=net_name_out,
+        footprint_key=footprint_key,
+        alpha_val=footprint_alpha,
+        thread_no=thread_no,
+        copy=False,
+        return_raw=False
+    )
 
     # Compute gene specificity for each archetype
-    pp.compute_archetype_feature_specificity(adata)
+    pp.compute_archetype_feature_specificity(
+        adata=adata,
+        S=S,
+        H=None,
+        layer_name=None,
+        footprint_key=footprint_key,
+        copy=False,
+        return_raw=False
+    )
 
     nt.construct_backbone(
-        adata,
-        network_density=network_density,
-        mutual_edges_only=mutual_edges_only,
+        adata=adata,
+        footprint=None,
+        net_name=net_name_out,
+        footprint_key=footprint_key,
+        scale=True,
         layout_compactness=layout_compactness,
         layout_epochs=round(layout_epochs / 5),
+        alpha_val=footprint_alpha,
         thread_no=1,
+        seed=seed,
+        copy=False
     )
 
     return adata if copy else None

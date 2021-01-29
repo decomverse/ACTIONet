@@ -30,7 +30,7 @@ def layout_network(
     Parameters
     ----------
     adata:
-        AnnData object containing 'reduction_name' in '.obsm' and 'net_name' ins '.obsp'.
+        AnnData object possibly containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
     G:
         Adjacency matrix to use for constructing layout.
         Required if 'adata=None'.

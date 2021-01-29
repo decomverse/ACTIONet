@@ -22,7 +22,7 @@ def build_network(
     Parameters
     ----------
     data
-       `n_obs` × `n_arch` Matrix or AnnData object containing output of the 'ACTIONet.prune_archetypes()'.
+       `n_obs` × `n_arch` Matrix or AnnData object containing output of the 'prune_archetypes()'.
     net_name_out
         If 'data' is AnnData, store output matrix G in '.obsp' with key 'net_name_out' (default="ACTIONet")
     density

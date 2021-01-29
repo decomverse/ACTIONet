@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import pandas as pd
 from anndata import AnnData
 from scipy import sparse
 
@@ -8,8 +9,14 @@ import _ACTIONet as _an
 
 
 def compute_archetype_core_centrality(
-    adata: AnnData, key: Optional[str] = "ACTIONet", copy: Optional[bool] = False
-) -> AnnData:
+    adata: Optional[AnnData] = None,
+    G: Union[np.ndarray, sparse.spmatrix] = None,
+    assignments: Union[np.ndarray, list, pd.Series] = None,
+    net_name: Optional[str] = "ACTIONet",
+    assignment_name: Optional[str] = "assigned_archetype",
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False
+) -> Union[AnnData, np.ndarray, None]:
     """
     Computes node centrality scores
 
@@ -18,120 +25,207 @@ def compute_archetype_core_centrality(
     Parameters
     ----------
     adata
-        AnnData object storing the ACTIONet results
-    key
-        `adata.obsp` key that stores the ACTIONet connectivities
+        AnnData object possibly containing 'assignment_name' in '.obs' and 'net_name' in '.obsp'.
+    G:
+        Adjacency matrix to use for computing centrality.
+        Required if 'adata=None'.
+    assignments:
+        list-like object containing archetype assignments of each observation.
+        Required if 'adata=None'.
+    assignment_name:
+        Key of 'adata.obs' containing list-like object of archetype assignments (default="assigned_archetype").
+        Ignored if 'adata=None'.
+    net_name:
+        Key of 'adata.obsp' containing adjacency matrix to use for 'G' in 'compute_archetype_core_centrality()' (default="ACTIONet").
+        Ignored if 'adata=None'.
     copy
-        Return a copy instead of writing to adata.
+        If 'adata' is given, return a copy instead of writing to `adata`
+    return_raw
+        If 'adata' is given, return array of raw node centrality scores instead of storing to 'adata'.
 
     Returns
     -------
-        None, if copy is False, ACE: AnnData, if copy is True.
-        "node_centrality" is to ACE.obs.
+    adata : anndata.AnnData
+        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
+
+        `.obs['node_centrality']`
+
+    node_centrality : np.ndarray
+        If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
     """
-    if "ACTIONet" not in adata.obsp.keys():
-        raise ValueError(
-            "Did not find adata.obsp['ACTIONet']. "
-            "Please run nt.build_network() first."
-        )
-    if "ACTION" not in adata.obs.keys():
-        raise ValueError(
-            "Did not find adata.obs['ACTION']. "
-            "Please run pp.unify_archetypes() first."
-        )
 
-    adata = adata.copy() if copy else adata
-    G = adata.obsp["ACTIONet"]
-    assignments = adata.obs["ACTION"]
+    if adata is not None:
+        if isinstance(adata, AnnData):
+            adata = adata.copy() if copy else adata
+            G = G if G is not None else adata.obsp[net_name]
+            assignments = assignments if assignments is not None else adata.obs[assignment_name]
+        else:
+            raise ValueError("'adata' is not an AnnData object.")
+    else:
+        if G is None or assignments is None:
+            raise ValueError("'G' and 'S_r' cannot be NoneType if 'adata=None'.")
+        if not isinstance(G, (np.ndarray, sparse.spmatrix)):
+            raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
+        if not isinstance(assignments, (np.ndarray, list, pd.Series)):
+            raise ValueError("'S_r' must be list, numpy.ndarray or pandas.Series.")
 
-    scores = _an.compute_archetype_core_centrality(G, assignments)
-    adata.obs["ACTIONet_centrality"] = scores
+    node_centrality = _an.compute_archetype_core_centrality(G, assignments)
 
-    return adata if copy else None
+    if return_raw or adata is None:
+        return node_centrality
+    else:
+        adata.obs["node_centrality"] = node_centrality
+        return adata if copy else None
 
 
 def compute_network_diffusion(
-    adata: AnnData,
-    archetypes_key: Optional[str] = "H_unified",
-    alpha: Optional[float] = 0.85,
+    adata: Optional[AnnData] = None,
+    G: Union[np.ndarray, sparse.spmatrix] = None,
+    H_unified: Union[np.ndarray, sparse.spmatrix] = None,
+    net_name: Optional[str] = "ACTIONet",
+    footprint_key: Optional[str] = "archetype_footprint",
+    alpha_val: Optional[float] = 0.85,
     thread_no: Optional[int] = 0,
     copy: Optional[bool] = False,
-):
-    if archetypes_key not in adata.obsm.keys():
-        raise ValueError(f"Did not find adata.obsm['{archetypes_key}'].")
-    if "ACTIONet" not in adata.obsp.keys():
-        raise ValueError(
-            "Did not find adata.obsp['ACTIONet']. "
-            "Please run nt.built_network() first."
-        )
+    return_raw: Optional[bool] = False
+) -> Union[AnnData, np.ndarray, None]:
 
-    adata = adata.copy() if copy else adata
-    H = adata.obsm[archetypes_key]
-    G = adata.obsp["ACTIONet"]
-    archetype_footprint = _an.compute_network_diffusion(
-        G, H, alpha=alpha, thread_no=thread_no
-    )
-    adata.obsm["archetype_footprint"] = archetype_footprint
+    """
+    Computes archetype footprint via network diffusion.
 
-    return adata if copy else None
+    Parameters
+    ----------
+    adata
+        AnnData object possibly containing '.obsm["H_unified]' and 'net_name' in '.obsp'.
+    G:
+        Adjacency matrix to use for computing diffusion.
+        Required if 'adata=None'.
+    H_unified:
+        Matrix containing output 'H_unified' of 'unify_archetypes()' to use for computing diffusion.
+        Required if 'adata=None', otherwise retrieved from '.obsm["H_unified"]'
+    net_name:
+        Key of 'adata.obsp' containing adjacency matrix to use for 'G' in 'compute_archetype_core_centrality()' (default="ACTIONet").
+        Ignored if 'adata=None'.
+    footprint_key:
+        Key of 'adata.obsp' to store archetype footprint (default="archetype_footprint").
+        Ignored if 'adata=None'.
+    alpha_val:
+        Diffusion parameter between 0-1.
+    thread_no:
+        Number of threads. Defaults to number of threads available - 2.
+    copy
+        If 'adata' is given, return a copy instead of writing to `adata`
+    return_raw
+        If 'adata' is given, return array of raw node centrality scores instead of storing to 'adata'.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
+
+        `.obsm["archetype_footprint"]`
+
+    archetype_footprint : np.ndarray
+        If 'adata=None' or 'return_raw=True', returns array of archetype footprint.
+    """
+
+    if adata is not None:
+        if isinstance(adata, AnnData):
+            adata = adata.copy() if copy else adata
+            G = G if G is not None else adata.obsp[net_name]
+            H_unified = H_unified if H_unified is not None else adata.obsm["H_unified"]
+        else:
+            raise ValueError("'adata' is not an AnnData object.")
+    else:
+        if G is None or H_unified is None:
+            raise ValueError("'G' and 'H_unified' cannot be NoneType if 'adata=None'.")
+        if not isinstance(G, (np.ndarray, sparse.spmatrix)):
+            raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
+        if not isinstance(H_unified, (np.ndarray, list, pd.Series)):
+            raise ValueError("'H_unified' must be numpy.ndarray or sparse.spmatrix.")
+
+    G = G.astype(dtype=np.float64)
+    H_unified = H_unified.astype(dtype=np.float64)
+
+    if not sparse.issparse(H_unified):
+        H_unified = sparse.csc_matrix(H_unified)
+
+    archetype_footprint = _an.compute_network_diffusion(G, H_unified, alpha=alpha_val, thread_no=thread_no)
+    archetype_footprint = np.array(archetype_footprint, dtype=np.float64)
+
+    if return_raw or adata is None:
+        return archetype_footprint
+    else:
+        adata.obsm[footprint_key] = archetype_footprint
+        return adata if copy else None
 
 
 def construct_backbone(
-    adata: AnnData,
-    archetypes_key: Optional[str] = "H_unified",
+    adata: Optional[AnnData] = None,
+    footprint: Union[np.ndarray, sparse.spmatrix] = None,
+    net_name: Optional[str] = "ACTIONet",
     footprint_key: Optional[str] = "archetype_footprint",
     scale: Optional[bool] = True,
-    network_density: Optional[float] = 1.0,
-    mutual_edges_only: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 100,
-    footprint_alpha: Optional[float] = 0.85,
+    alpha_val: Optional[float] = 0.85,
     thread_no: Optional[int] = 0,
+    seed: Optional[int] = 0,
     copy: Optional[bool] = False,
-):
-    if "ACTIONet" not in adata.obsp.keys():
-        raise ValueError(
-            "Did not find adata.obsp['ACTIONet']. "
-            "Please run nt.built_network() first."
-        )
+) -> Optional[AnnData]:
 
-    adata = adata.copy() if copy else adata
+    if adata is not None:
+        if isinstance(adata, AnnData):
+            adata = adata.copy() if copy else adata
+        else:
+            raise ValueError("'adata' is not an AnnData object.")
+
     if footprint_key not in adata.obsm.keys():
         compute_network_diffusion(
-            adata,
-            archetypes_key=archetypes_key,
-            alpha=footprint_alpha,
+            adata=adata,
+            G=None,
+            H_unified=None,
+            net_name=net_name,
+            footprint_key=footprint_key,
+            alpha_val=alpha_val,
             thread_no=thread_no,
+            copy=False,
+            return_raw=False
         )
 
-    archetype_footprint = adata.obsm[footprint_key]
+    footprint = footprint if footprint is not None else adata.obsm[footprint_key]
+
     if scale:
-        W = np.exp(
-            (archetype_footprint - np.mean(archetype_footprint, axis=0))
-            / np.std(archetype_footprint, axis=0, ddof=1)
-        )
+        W = np.exp( (footprint - np.mean(footprint, axis=0)) / np.std(footprint, axis=0, ddof=1) )
     else:
-        W = np.exp(archetype_footprint)
+        W = np.exp(footprint)
 
-
-    Adj = sparse.csc_matrix(W)
+    W = sparse.csc_matrix(W)
     
     arch_vis_out = _an.transform_layout(
-        Adj,
-        coor2D=adata.obsm["X_ACTIONet2D"].T,
-        coor3D=adata.obsm["X_ACTIONet3D"].T,
-        colRGB=adata.uns["ACTIONet"]["colors"].T,
-        n_epochs=layout_epochs,
+        W=W,
+        coor2D=adata.obsm["ACTIONet2D"].T,
+        coor3D=adata.obsm["ACTIONet3D"].T,
+        colRGB=adata.obsm["denovo_color"].T,
         compactness_level=layout_compactness,
+        n_epochs=layout_epochs,
         thread_no=thread_no,
+        seed=seed
     )
     
-    arch_G = _an.compute_full_sim(archetype_footprint)
+    arch_G = _an.compute_full_sim(footprint, thread_no)
+    np.fill_diagonal(arch_G, 0)
+
     backbone = {
         "G": arch_G,
         "coordinates": arch_vis_out["coordinates"],
         "coordinates_3D": arch_vis_out["coordinates_3D"],
     }
-    adata.uns["ACTIONet_backbone"] = backbone
+
+    # adata.uns['metadatas']["ACTIONet_backbone"] = backbone
+    adata.uns.setdefault("metadata", {}).update(
+        {
+            "backbone": backbone,
+        })
 
     return adata if copy else None

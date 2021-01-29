@@ -28,7 +28,7 @@ def prune_archetypes(
     C_trace, H_trace:
         Output of pp.ACTION()
     adata
-        Optional AnnData object in which to store output of 'ACTIONet.prune_archetypes()'
+        Optional AnnData object in which to store output of 'prune_archetypes()'
     min_specificity_z_threshold:
         Controls level of prunning for non-specific archetypes
         (larger values remove more archetypes)
@@ -100,7 +100,7 @@ def unify_archetypes(
     Parameters
     ----------
     adata:
-        AnnData object containing 'reduction_name' in '.obsm' and 'net_name' ins '.obsp'.
+        AnnData object containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
     G:
         Adjacency matrix to use for unification.
         Required if 'adata=None'.
@@ -108,7 +108,7 @@ def unify_archetypes(
         Reduced representation matrix to use for unification.
         Required if 'adata=None'.
     C_stacked:
-        Matrix containing output 'C_stacked' of 'ACTIONet.prune_archetypes()' to use for unification.
+        Matrix containing output 'C_stacked' of 'prune_archetypes()' to use for unification.
         Required if 'adata=None', otherwise retrieved from 'adata.obsm["C_stacked"]'
     reduction_name:
         Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'unify_archetypes()' (default="ACTION").

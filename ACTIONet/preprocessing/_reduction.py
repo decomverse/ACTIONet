@@ -117,12 +117,13 @@ def reduce_kernel(
         X = np.array(X)
         reduced = _an.reduce_kernel_full(X, dim, max_iter, seed, svd_solver, False)
 
+    reduced["S_r"] = reduced["S_r"].T
+
     if return_raw:
-        reduced["S_r"] = reduced["S_r"].T
         reduced["V"] = reduced["V"].T
         return reduced
     elif data_is_AnnData:
-        adata.obsm[reduction_name] = reduced["S_r"].T
+        adata.obsm[reduction_name] = reduced["S_r"]
         adata.uns[reduction_name] = {}
         adata.uns[reduction_name]["params"] = {"use_highly_variable": use_highly_variable}
         adata.uns[reduction_name]["sigma"] = reduced["sigma"]
@@ -150,4 +151,4 @@ def reduce_kernel(
 
         return adata if copy else None
     else:
-        return S_r
+        return reduced["S_r"]
