@@ -188,9 +188,8 @@ def unify_archetypes(
 
         groups = unified["assigned_archetype"]
         adata.obs["assigned_archetype"] = pd.Categorical(
-            # values=groups.astype("U"),
-            values=groups,
-            categories=natsorted(map(str, np.unique(groups))),
+            values=groups.astype(int),
+            categories=natsorted(map(int, np.unique(groups))),
         )
 
         return adata if copy else None
