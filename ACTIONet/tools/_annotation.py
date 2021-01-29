@@ -116,7 +116,7 @@ def annotate_cells_using_markers(
     alpha: Optional[float] = 0.85,
     archetypes_key: Optional[str] = "H_unified",
     significance: Optional[Literal["upper", "lower"]] = "upper",
-    n_threads: Optional[int] = 0,
+    thread_no: Optional[int] = 0,
     n_iters: Optional[int] = 1000,
     n_iters_diffusion: Optional[int] = 5,
 ) -> Tuple[list, np.ndarray, np.ndarray]:
@@ -124,7 +124,7 @@ def annotate_cells_using_markers(
 
     if method == "diffusion":
         adata_imputed = imputation.impute_genes_using_network(
-            adata, unique_genes, alpha, n_threads, n_iters_diffusion
+            adata, unique_genes, alpha, thread_no, n_iters_diffusion
         )
     elif method == "archetype":
         adata_imputed = imputation.impute_specific_genes_using_archetypes(

@@ -48,7 +48,9 @@ def filter_adata(
     if layer_name is not None:
         temp_layer = "X_fil_temp_" + ut.rand_suffix(10)
         adata.layers[temp_layer] = adata.X
-        adata.X = adata.layers[layer_name]
+        adata.X = adata.layers[layer_name].astype(dtype=np.float64)
+    else:
+        adata.X = adata.X.astype(dtype=np.float64)
 
     while previous_dims != adata.shape:
         previous_dims = adata.shape

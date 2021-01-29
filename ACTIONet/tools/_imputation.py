@@ -92,7 +92,7 @@ def impute_genes_using_network(
     adata: AnnData,
     genes: list,
     alpha: Optional[float] = 0.85,
-    n_threads: Optional[int] = 0,
+    thread_no: Optional[int] = 0,
     n_iters: Optional[int] = 5,
 ) -> AnnData:
     if "ACTIONet" not in adata.obsp.keys():
@@ -117,7 +117,7 @@ def impute_genes_using_network(
 
     # Network diffusion
     G = adata.obsp["ACTIONet"]
-    imputed = _an.compute_network_diffusion(G, csc_matrix(U), n_threads, alpha, n_iters)
+    imputed = _an.compute_network_diffusion(G, csc_matrix(U), thread_no, alpha, n_iters)
     np.nan_to_num(imputed, copy=False, nan=0.0)
 
     # Rescale the baseline expression of each gene

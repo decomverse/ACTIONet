@@ -26,19 +26,20 @@ def rescale_matrix(
     log_scale: Optional[bool] = False,
 ) -> np.ndarray:
 
+    X = X.astype(dtype=np.float64)
     if issparse(X):
         row_sums = np.array(np.sum(X, axis=1))
         row_sums[row_sums == 0] = 1
-        scaled = np.median(row_sums) * X.multiply(1/row_sums)
+        B = np.median(row_sums) * X.multiply(1/row_sums)
     else:
         X = np.array(X)
         row_sums = np.sum(X, axis=1, keepdims=True)
         row_sums[row_sums == 0] = 1
-        scaled = np.median(row_sums) * (X / row_sums)
+        B = np.median(row_sums) * (X / row_sums)
 
     if log_scale:
-        scaled = np.log1p(scaled)
-    return scaled
+        B = np.log1p(B)
+    return B
 
 def double_normalize(
     X: np.ndarray,

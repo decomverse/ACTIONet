@@ -407,7 +407,7 @@ py::dict unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
 
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
-  out_list["assigned_archetypes"] = results.assigned_archetypes;
+  out_list["assigned_archetype"] = results.assigned_archetypes;
 
   out_list["ontology"] = results.dag_adj;
   out_list["ontology_node_attributes"] = results.dag_node_annotations;

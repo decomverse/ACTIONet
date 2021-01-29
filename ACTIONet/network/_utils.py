@@ -54,7 +54,7 @@ def compute_network_diffusion(
     adata: AnnData,
     archetypes_key: Optional[str] = "H_unified",
     alpha: Optional[float] = 0.85,
-    n_threads: Optional[int] = 0,
+    thread_no: Optional[int] = 0,
     copy: Optional[bool] = False,
 ):
     if archetypes_key not in adata.obsm.keys():
@@ -69,7 +69,7 @@ def compute_network_diffusion(
     H = adata.obsm[archetypes_key]
     G = adata.obsp["ACTIONet"]
     archetype_footprint = _an.compute_network_diffusion(
-        G, H, alpha=alpha, thread_no=n_threads
+        G, H, alpha=alpha, thread_no=thread_no
     )
     adata.obsm["archetype_footprint"] = archetype_footprint
 
@@ -86,7 +86,7 @@ def construct_backbone(
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 100,
     footprint_alpha: Optional[float] = 0.85,
-    n_threads: Optional[int] = 0,
+    thread_no: Optional[int] = 0,
     copy: Optional[bool] = False,
 ):
     if "ACTIONet" not in adata.obsp.keys():
@@ -101,7 +101,7 @@ def construct_backbone(
             adata,
             archetypes_key=archetypes_key,
             alpha=footprint_alpha,
-            n_threads=n_threads,
+            thread_no=thread_no,
         )
 
     archetype_footprint = adata.obsm[footprint_key]
@@ -123,7 +123,7 @@ def construct_backbone(
         colRGB=adata.uns["ACTIONet"]["colors"].T,
         n_epochs=layout_epochs,
         compactness_level=layout_compactness,
-        thread_no=n_threads,
+        thread_no=thread_no,
     )
     
     arch_G = _an.compute_full_sim(archetype_footprint)

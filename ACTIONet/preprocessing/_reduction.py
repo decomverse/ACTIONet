@@ -7,18 +7,19 @@ from scipy.sparse import issparse, spmatrix
 
 import _ACTIONet as _an
 
+
 def reduce_kernel(
-    data: Union[AnnData, np.ndarray, spmatrix],
-    dim: Optional[int] = 50,
-    max_iter: Optional[int] = 10,
-    layer_name: Optional[str] = None,
-    reduction_name: Optional[str] = "ACTION",
-    svd_solver: Literal[0, 1, 2] = 0,
-    seed: Optional[int] = 0,
-    return_info: Optional[bool] = False,
-    use_highly_variable: Optional[bool] = False,
-    copy: Optional[bool] = False
-) -> [AnnData, np.ndarray, spmatrix]:
+        data: Union[AnnData, np.ndarray, spmatrix],
+        dim: Optional[int] = 50,
+        max_iter: Optional[int] = 10,
+        layer_name: Optional[str] = None,
+        reduction_name: Optional[str] = "ACTION",
+        svd_solver: Literal[0, 1, 2] = 0,
+        seed: Optional[int] = 0,
+        return_raw: Optional[bool] = False,
+        use_highly_variable: Optional[bool] = False,
+        copy: Optional[bool] = False
+) -> [AnnData, np.ndarray, spmatrix, dict]:
     """\
     Kernel Reduction Method [Mohammadi2020].
 
@@ -48,9 +49,8 @@ def reduce_kernel(
           randomized SVD from Feng et al.
     seed
         Random seed
-    return_info
-        Only relevant when not passing an :class:`~anndata.AnnData`:
-        see “**Returns**”.
+    return_raw
+        Returns raw output of 'reduce_kernel()' as dict:
     use_highly_variable
         Whether to use highly variable genes only, stored in
         `.var['highly_variable']`.
@@ -62,7 +62,7 @@ def reduce_kernel(
     Returns
     -------
     ACTION : :class:`~scipy.sparse.spmatrix`, :class:`~numpy.ndarray`
-        If `data` is array-like and `return_info=False` was passed,
+        If `data` is array-like and `return_raw=False` was passed,
         this function only returns `ACTION`…
     adata : anndata.AnnData
         …otherwise if `copy=True` returns None or else adds fields to `adata`:
@@ -75,6 +75,8 @@ def reduce_kernel(
         `.uns['ACTION']['sigma']`
         `.varm['ACTION_A']`
         `.obsm['ACTION_B']`
+    raw_output:
+        If 'return_raw=True' returns dict with S_r, V, sigma, A, and B matrices.
     """
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
@@ -107,6 +109,7 @@ def reduce_kernel(
     if svd_solver == 0:
         max_iter = 100 * max_iter
 
+    X = X.astype(dtype=np.float64)
     if issparse(X):
         X = X.tocsc()
         reduced = _an.reduce_kernel(X, dim, max_iter, seed, svd_solver, False)
@@ -114,35 +117,37 @@ def reduce_kernel(
         X = np.array(X)
         reduced = _an.reduce_kernel_full(X, dim, max_iter, seed, svd_solver, False)
 
-
-    # Note S_r.T
-    S_r, V, sigma, A, B = (
-        reduced["S_r"].T,
-        reduced["V"],
-        reduced["sigma"],
-        reduced["A"],
-        reduced["B"],
-    )
-
-    if data_is_AnnData:
-        adata.obsm[reduction_name] = S_r
+    if return_raw:
+        reduced["S_r"] = reduced["S_r"].T
+        reduced["V"] = reduced["V"].T
+        return reduced
+    elif data_is_AnnData:
+        adata.obsm[reduction_name] = reduced["S_r"].T
         adata.uns[reduction_name] = {}
         adata.uns[reduction_name]["params"] = {"use_highly_variable": use_highly_variable}
-        adata.uns[reduction_name]["sigma"] = sigma
-        adata.obsm[reduction_name + "_B"] = B
+        adata.uns[reduction_name]["sigma"] = reduced["sigma"]
+        adata.obsm[reduction_name + "_B"] = reduced["B"]
 
         if use_highly_variable:
             adata.varm[reduction_name + "_V"] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm[reduction_name + "_V"][adata.var["highly_variable"]] = V
+            adata.varm[reduction_name + "_V"][adata.var["highly_variable"]] = reduced["V"]
             adata.varm[reduction_name + "_A"] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm[reduction_name + "_A"][adata.var["highly_variable"]] = A
+            adata.varm[reduction_name + "_A"][adata.var["highly_variable"]] = reduced["A"]
         else:
-            adata.varm[reduction_name + "_V"] = V
-            adata.varm[reduction_name + "_A"] = A
+            adata.varm[reduction_name + "_V"] = reduced["V"]
+            adata.varm[reduction_name + "_A"] = reduced["A"]
+
+        adata.uns.setdefault("obsm_annot", {}).update(
+            {
+                "ACTION": {"type": np.array([b'reduction'], dtype=object)},
+                "ACTION_B": {"type": np.array([b'internal'], dtype=object)}
+            })
+        adata.uns.setdefault("varm_annot", {}).update(
+            {
+                "ACTION_A": {"type": np.array([b'internal'], dtype=object)},
+                "ACTION_V": {"type": np.array([b'internal'], dtype=object)}
+            })
 
         return adata if copy else None
     else:
-        if return_info:
-            return (S_r, V.T, sigma, A, B)
-        else:
-            return S_r
+        return S_r
