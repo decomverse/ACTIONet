@@ -196,7 +196,7 @@ run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, s
         print("No common genes found. Check rownames (or vertex names) for the input graph")
         return()
     }
-    A = gene.scores[common.genes, ]
+    A = gene.scores[common.genes,,drop=FALSE ]
     G = Adj[common.genes, common.genes]
     
     
