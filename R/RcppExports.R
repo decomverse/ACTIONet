@@ -668,8 +668,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
     .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
-unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.99, outlier_threshold = 0, sim_threshold = 0.0, thread_no = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no)
+unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.99, sensitivity = 0.0, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, sensitivity, thread_no)
 }
 
 #'
