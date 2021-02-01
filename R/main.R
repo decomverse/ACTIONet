@@ -24,7 +24,7 @@
 #' trace = ACTIONet.out$trace # for backup
 #' @export
 run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificity_z_threshold = -3,
-    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, unification_alpha = 0.99, unification_outlier_threshold = 2, unification_sim_threshold = 0,
+    network_density = 1, mutual_edges_only = TRUE, layout_compactness = 50, layout_epochs = 1000, layout_algorithm = 0, unification_diffusion_alpha = 0.99, unification_sensitivity = 0,
     layout_in_parallel = TRUE, thread_no = 0, assay_name = "logcounts", reduction_slot = "ACTION",
     footprint_alpha = 0.85, max_iter_ACTION = 50, full_trace = FALSE, seed = 0) {
     if (!(assay_name %in% names(assays(ace)))) {
@@ -78,8 +78,7 @@ run.ACTIONet <- function(ace, k_max = 30, min_cells_per_arch = 2, min_specificit
 
     # Identiy equivalent classes of archetypes and group them together
     unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.out$C_stacked,
-        alpha = unification_alpha, outlier_threshold = unification_outlier_threshold,
-        sim_threshold = unification_sim_threshold, thread_no)
+        alpha = unification_diffusion_alpha, sensitivity = unification_sensitivity, thread_no)
     metadata(ace)$selected_archetypes = unification.out$selected_archetypes
     metadata(ace)$selected_archetypes_ontology = unification.out$ontology
     metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
@@ -268,8 +267,7 @@ rerun.layout <- function(ace, layout_compactness = 50, layout_epochs = 1000, lay
 #' @export
 rerun.archetype.aggregation <- function(ace, assay_name = "logcounts", reduction_slot = "ACTION",
     unified_suffix = "unified", footprint_alpha = 0.85, network_density = 1, mutual_edges_only = TRUE,
-    layout_compactness = 50, layout_epochs = 100, thread_no = 0, unification_alpha = 0.99,
-    unification_outlier_threshold = 2, unification_sim_threshold = 0) {
+    layout_compactness = 50, layout_epochs = 100, thread_no = 0, unification_diffusion_alpha = 0.99, unification_sensitivity = 0) {
 
     S = assays(ace)[[assay_name]]
     S_r = Matrix::t(ACTIONet::colMaps(ace)[[reduction_slot]])
@@ -277,9 +275,8 @@ rerun.archetype.aggregation <- function(ace, assay_name = "logcounts", reduction
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
     G = colNets(ace)[["ACTIONet"]]
 
-    unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = C_stacked, alpha = unification_alpha,
-        outlier_threshold = unification_outlier_threshold, sim_threshold = unification_sim_threshold,
-        thread_no)
+    unification.out = unify_archetypes(G = G, S_r = S_r, C_stacked = pruning.out$C_stacked,
+        alpha = unification_diffusion_alpha, sensitivity = unification_sensitivity, thread_no)
     metadata(ace)$selected_archetypes = unification.out$selected_archetypes
     metadata(ace)$selected_archetypes_ontology = unification.out$ontology
     metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
