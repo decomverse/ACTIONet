@@ -10,7 +10,7 @@
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
   trans.fact = 1.5,
-  node.size = 0.1,
+  node_size = 0.1,
   CPal = CPal20,
   add.text = TRUE,
   suppress.legend = TRUE,
@@ -31,7 +31,7 @@
 
 \item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
 
-\item{node.size}{Size of nodes in the ACTIONet plot}
+\item{node_size}{Size of nodes in the ACTIONet plot}
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 

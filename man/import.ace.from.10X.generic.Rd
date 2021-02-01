@@ -10,7 +10,7 @@ import.ace.from.10X.generic(
   feature_metadata = "features.tsv.gz",
   sample_metadata = "barcodes.tsv.gz",
   sep = "\\t",
-  use.names = T,
+  use.names = TRUE,
   prefilter = FALSE,
   ...
 )
