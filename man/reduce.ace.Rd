@@ -10,8 +10,8 @@ reduce.ace(
   max_iter = 10,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
-  seed = 0,
-  SVD_algorithm = 0
+  SVD_algorithm = 0,
+  seed = 0
 )
 }
 \arguments{
