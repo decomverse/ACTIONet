@@ -627,6 +627,7 @@ plot.ACTIONet.gene.view <- function(
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
+#' @import plotly
 #' @export
 plot.ACTIONet.interactive <- function(
   ace,
@@ -775,12 +776,12 @@ plot.ACTIONet.interactive <- function(
     )
 
     if (threeD == FALSE) {
-        V(sketch.graph)$x = coors[, 1]
-        V(sketch.graph)$y = coors[, 2]
+        igraph::V(sketch.graph)$x = coors[, 1]
+        igraph::V(sketch.graph)$y = coors[, 2]
     } else {
-        V(sketch.graph)$x3D = coors[, 1]
-        V(sketch.graph)$y3D = coors[, 2]
-        V(sketch.graph)$z3D = coors[, 3]
+        igraph::V(sketch.graph)$x3D = coors[, 1]
+        igraph::V(sketch.graph)$y3D = coors[, 2]
+        igraph::V(sketch.graph)$z3D = coors[, 3]
     }
 
     sketch.graph = igraph::delete_edges(sketch.graph, igraph::E(sketch.graph))
@@ -1127,7 +1128,7 @@ plot.ACTIONet.gradient <- function(
         vCol = (scales::col_bin(
           palette = Pal_grad,
           domain = NULL,
-          NA_color = NA_col,
+          na.color = NA_col,
           bins = 7
         ))(rank(x))
 
@@ -1136,7 +1137,7 @@ plot.ACTIONet.gradient <- function(
         vCol = (scales::col_bin(
           palette = Pal_grad,
           domain = NULL,
-          NA_color = NA_col,
+          na.color = NA_col,
           bins = 7
         ))(x)
 
