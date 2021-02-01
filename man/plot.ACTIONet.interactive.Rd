@@ -10,12 +10,12 @@
   transparency.attr = NULL,
   trans.z.threshold = -1,
   trans.fact = 1,
-  node.size = 1,
+  node_size = 1,
   CPal = CPal20,
   enrichment.table = NULL,
-  top.features = 7,
+  top_features = 7,
   Alt_Text = NULL,
-  blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
+  blacklist_pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   threeD = FALSE,
   title = "ACTIONet",
   coordinate_slot = "ACTIONet2D"
@@ -30,15 +30,15 @@
 
 \item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
 
-\item{node.size}{Size of nodes in the ACTIONet plot}
+\item{node_size}{Size of nodes in the ACTIONet plot}
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
 \item{enrichment.table}{To project the top-ranked features interactively.}
 
-\item{top.features}{Number of features to show per cell}
+\item{top_features}{Number of features to show per cell}
 
-\item{blacklist.pattern}{List of genes to filter-out}
+\item{blacklist_pattern}{List of genes to filter-out}
 
 \item{threeD}{Whether to show the plot in 3D}
 
