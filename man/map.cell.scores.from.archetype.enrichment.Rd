@@ -6,15 +6,15 @@
 \usage{
 map.cell.scores.from.archetype.enrichment(
   ace,
-  enrichment.matrix,
-  normalize = F,
+  enrichment_mat,
+  normalize = FALSE,
   H.slot = "H_unified"
 )
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{enrichment.matrix}{Enrichment matrix with rows corresponding to archetypes and columns to an arbitrary annotation}
+\item{enrichment_mat}{Enrichment matrix with rows corresponding to archetypes and columns to an arbitrary annotation}
 
 \item{normalize}{If TRUE, enrichment matrix will be first doubly-normalized}
 }
