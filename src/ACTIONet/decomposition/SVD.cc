@@ -65,9 +65,10 @@ field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
   // Initialize first column of V
   pcg32 engine(seed);
 
-	double ss;
+  double ss;
   StdNorm(V, n, engine);
-  ss = 0; for(int i = 0; i < n; i++) ss += V[i];
+  ss = 0;
+  for (int i = 0; i < n; i++) ss += V[i];
 
   // Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
@@ -125,7 +126,8 @@ V[i]   = normDist(gen);;
         if (R_F < eps) {  // near invariant subspace
 
           StdNorm(F, n, engine);
-		ss = 0; for(int i = 0; i < n; i++) ss += F[i];
+          ss = 0;
+          for (int i = 0; i < n; i++) ss += F[i];
           // Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
           /*
@@ -164,7 +166,8 @@ V[i]   = normDist(gen);;
 
         if (S < eps) {
           StdNorm(W + (j + 1) * m, m, engine);
-			ss = 0; for(int i = 0; i < n; i++) ss += W[(j + 1) * m + i];
+          ss = 0;
+          for (int i = 0; i < n; i++) ss += W[(j + 1) * m + i];
 
           // Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
 

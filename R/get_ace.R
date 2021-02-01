@@ -25,10 +25,11 @@ setMethod("colNets", "ACTIONetExperiment", function(object) {
 #' @return List of matrices
 #' @rdname rowMaps
 #' @export
-setMethod("rowMaps", "ACTIONetExperiment", function(object, all = T) {
+setMethod("rowMaps", "ACTIONetExperiment", function(object, all = TRUE) {
+    
     out = as(lapply(object@rowMaps, function(M) assays(M)$X), "SimpleList")
     
-    if (all == F & length(out) > 0) {
+    if (all == FALSE & length(out) > 0) {
         mask = sapply(object@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
@@ -41,12 +42,14 @@ setMethod("rowMaps", "ACTIONetExperiment", function(object, all = T) {
 #' @return List of matrices
 #' @rdname colMaps
 #' @export
-setMethod("colMaps", "ACTIONetExperiment", function(object, all = T) {
+setMethod("colMaps", "ACTIONetExperiment", function(object, all = TRUE) {
+    
     out = as(lapply(object@colMaps, function(M) assays(M)$X), "SimpleList")
-    if (all == F & length(out) > 0) {
+    if (all == FALSE & length(out) > 0) {
         mask = sapply(object@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
+    
     out
 })
 
@@ -55,12 +58,14 @@ setMethod("colMaps", "ACTIONetExperiment", function(object, all = T) {
 #' @return List of types
 #' @rdname rowMapTypes
 #' @export
-setMethod("rowMapTypes", "ACTIONetExperiment", function(object, all = T) {
+setMethod("rowMapTypes", "ACTIONetExperiment", function(object, all = TRUE) {
+    
     out = lapply(object@rowMaps, function(M) metadata(M)$type)
-    if (all == F & length(out) > 0) {
+    if (all == FALSE & length(out) > 0) {
         mask = sapply(object@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
+    
     out
 })
 
@@ -69,12 +74,14 @@ setMethod("rowMapTypes", "ACTIONetExperiment", function(object, all = T) {
 #' @return List of types
 #' @rdname colMapTypes
 #' @export
-setMethod("colMapTypes", "ACTIONetExperiment", function(object, all = T) {
+setMethod("colMapTypes", "ACTIONetExperiment", function(object, all = TRUE) {
+    
     out = lapply(object@colMaps, function(M) metadata(M)$type)
-    if (all == F & length(out) > 0) {
+    if (all == FALSE & length(out) > 0) {
         mask = sapply(object@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
+    
     out
 })
 
@@ -83,12 +90,14 @@ setMethod("colMapTypes", "ACTIONetExperiment", function(object, all = T) {
 #' @return List of types
 #' @rdname rowMapTypes
 #' @export
-setMethod("rowMapMeta", "ACTIONetExperiment", function(object, all = T) {
+setMethod("rowMapMeta", "ACTIONetExperiment", function(object, all = TRUE) {
+    
     out = lapply(object@rowMaps, function(M) colData(M))
-    if (all == F & length(out) > 0) {
+    if (all == FALSE & length(out) > 0) {
         mask = sapply(object@rowMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
+    
     out
 })
 
@@ -97,12 +106,14 @@ setMethod("rowMapMeta", "ACTIONetExperiment", function(object, all = T) {
 #' @return List of types
 #' @rdname colMapTypes
 #' @export
-setMethod("colMapMeta", "ACTIONetExperiment", function(object, all = T) {
+setMethod("colMapMeta", "ACTIONetExperiment", function(object, all = TRUE) {
+    
     out = lapply(object@colMaps, function(M) colData(M))
-    if (all == F & length(out) > 0) {
+    if (all == FALSE & length(out) > 0) {
         mask = sapply(object@colMaps, function(M) metadata(M)$type != "internal")
         out = out[mask]
     }
+    
     out
 })
 
@@ -170,15 +181,15 @@ setMethod("sizeFactors", "ACTIONetExperiment", function(object) {
 #' @export
 setMethod("counts", "ACTIONetExperiment", function(object) {
     (object)
-    assays(object)$counts
+    SummarizedExperiment::assays(object)$counts
 })
 
 setMethod("logcounts", "ACTIONetExperiment", function(object) {
     (object)
-    assays(object)$logcounts
+    SummarizedExperiment::assays(object)$logcounts
 })
 
 setMethod("normcounts", "ACTIONetExperiment", function(object) {
     (object)
-    assays(object)$normcounts
+    SummarizedExperiment::assays(object)$normcounts
 })
