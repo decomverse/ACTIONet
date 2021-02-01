@@ -11,8 +11,8 @@ rerun.layout(
   layout_algorithm = 0,
   thread_no = 0,
   network_density = 1,
-  mutual_edges_only = T,
-  reduction_slot = "ACTIONet",
+  mutual_edges_only = TRUE,
+  reduction_slot = "ACTION",
   net_slot = "ACTIONet",
   seed = 0
 )

@@ -10,7 +10,7 @@ run.SCINET.gene.scores(
   min.edge.weight = 2,
   spec.sample_no = 1000,
   thread_no = 8,
-  compute.topo.specificity = T
+  compute.topo.specificity = TRUE
 )
 }
 \arguments{
