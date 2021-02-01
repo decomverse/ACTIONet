@@ -9,9 +9,9 @@
 \usage{
 rowMapTypes(object, ...)
 
-\S4method{rowMapTypes}{ACTIONetExperiment}(object, all = T)
+\S4method{rowMapTypes}{ACTIONetExperiment}(object, all = TRUE)
 
-\S4method{rowMapMeta}{ACTIONetExperiment}(object, all = T)
+\S4method{rowMapMeta}{ACTIONetExperiment}(object, all = TRUE)
 
 \S4method{rowMapTypes}{ACTIONetExperiment}(object) <- value
 }
