@@ -9,9 +9,9 @@
 \usage{
 colMapTypes(object, ...)
 
-\S4method{colMapTypes}{ACTIONetExperiment}(object, all = T)
+\S4method{colMapTypes}{ACTIONetExperiment}(object, all = TRUE)
 
-\S4method{colMapMeta}{ACTIONetExperiment}(object, all = T)
+\S4method{colMapMeta}{ACTIONetExperiment}(object, all = TRUE)
 
 \S4method{colMapTypes}{ACTIONetExperiment}(object) <- value
 }
