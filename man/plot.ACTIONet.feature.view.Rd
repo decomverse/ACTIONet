@@ -6,27 +6,27 @@
 \usage{
 \method{plot}{ACTIONet.feature.view}(
   ace,
-  feature.enrichment.table,
-  top.features = 5,
+  feat_scores,
+  top_features = 5,
   CPal = NULL,
   title = "Feature view",
-  label.text.size = 1,
-  renormalize = F,
+  label_size = 1,
+  renormalize = FALSE,
   footprint_slot = "H_unified"
 )
 }
 \arguments{
 \item{ace}{ACTIONet output}
 
-\item{feature.enrichment.table}{An arbitrary enrichment table with columns being archetypes and rows being specificity of features}
+\item{feat_scores}{An arbitrary enrichment table with columns being archetypes and rows being specificity of features}
 
-\item{top.features}{Number of features to return}
+\item{top_features}{Number of features to return}
 
 \item{CPal}{Color palette to use}
 
 \item{title}{Main title of the plot}
 
-\item{reorder.columns}{Whether to optimally re-order columns of the enrichment table}
+\item{reorder_columns}{Whether to optimally re-order columns of the enrichment table}
 }
 \value{
 Featur view
@@ -35,6 +35,6 @@ Featur view
 Plots projection of features onto the ACTIONet plot
 }
 \examples{
-feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-plot.ACTIONet.feature.view(ace, feature.enrichment.table, 5)
+feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+plot.ACTIONet.feature.view(ace, feat_scores, 5)
 }

@@ -13,7 +13,7 @@ visualize.markers(
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
   trans.fact = 3,
-  node.size = 1,
+  node_size = 1,
   CPal = "magma",
   alpha_val = 0.9,
   export_path = NA
@@ -28,7 +28,7 @@ visualize.markers(
 
 \item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
 
-\item{node.size}{Size of nodes in the ACTIONet plot}
+\item{node_size}{Size of nodes in the ACTIONet plot}
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 

@@ -11,9 +11,11 @@ reconstruct.ACTIONet(
   layout_compactness = 50,
   layout_epochs = 1000,
   thread_no = 0,
-  layout_in_parallel = FALSE,
+  layout_in_parallel = TRUE,
   layout_algorithm = 0,
-  reduction_slot = "ACTION"
+  reduction_slot = "ACTION",
+  output_slot = "ACTIONet",
+  seed = 0
 )
 }
 \arguments{

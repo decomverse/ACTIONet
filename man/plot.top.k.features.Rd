@@ -5,21 +5,21 @@
 \title{Plots heatmap of the top-ranked features of an enrichment table}
 \usage{
 \method{plot}{top.k.features}(
-  feature.enrichment.table,
-  top.features = 3,
-  normalize = T,
-  reorder.columns = T,
+  feat_scores,
+  top_features = 3,
+  normalize = TRUE,
+  reorder_columns = TRUE,
   row.title = "Archetypes",
   column.title = "Genes",
   rowPal = "black"
 )
 }
 \arguments{
-\item{feature.enrichment.table}{An arbitrary enrichment table with columns being archetypes and rows being specificity of features}
+\item{feat_scores}{An arbitrary enrichment table with columns being archetypes and rows being specificity of features}
 
-\item{top.features}{Number of features to return}
+\item{top_features}{Number of features to return}
 
-\item{reorder.columns}{Whether to optimally re-order columns of the enrichment table}
+\item{reorder_columns}{Whether to optimally re-order columns of the enrichment table}
 }
 \value{
 Enrichment heatmap
@@ -28,6 +28,6 @@ Enrichment heatmap
 Plots heatmap of the top-ranked features of an enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-plot.top.k.features(feature.enrichment.table, 3)
+feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+plot.top.k.features(feat_scores, 3)
 }

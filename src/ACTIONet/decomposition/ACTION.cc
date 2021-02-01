@@ -326,7 +326,7 @@ ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no,
   stderr_printf("\n\t%s %d/%d finished", status_msg, current_k,
                 (k_max - k_min + 1));
   FLUSH;
- 
+
   ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId) {
     SPA_results SPA_res = run_SPA(X_r, kk);
     trace.selected_cols[kk] = SPA_res.selected_columns;

@@ -30,13 +30,14 @@ ACTIONetExperiment <- function(..., rowNets = S4Vectors::SimpleList(), colNets =
     rowMaps = S4Vectors::SimpleList(), colMaps = S4Vectors::SimpleList()) {
     
     SE <- SummarizedExperiment::SummarizedExperiment(...)
+    
     if (!is(SE, "RangedSummarizedExperiment")) {
         SE <- as(SE, "RangedSummarizedExperiment")
     }
+    
     out = new("ACTIONetExperiment", SE, rowNets = rowNets, colNets = colNets)
     out = .insert_mapping(out, rowMaps, 1)
     out = .insert_mapping(out, colMaps, 2)
-    
     
     if (NROW(out) > 0) {
         # if(NCOL(SummarizedExperiment::rowData(out)) == 0){
@@ -73,18 +74,21 @@ ACTIONetExperiment <- function(..., rowNets = S4Vectors::SimpleList(), colNets =
 #' @method .DollarNames ACTIONetExperiment
 #' @export
 .DollarNames.ACTIONetExperiment <- function(x, pattern = "") {
+    
     ll = c(names(colData(x)), names(rowMaps(x, all = F)), names(colMaps(x, all = F)), 
         names(colNets(x)), names(rowNets(x)))
-    grep(pattern, ll, value = TRUE)
+    
+    out = grep(pattern, ll, value = TRUE)
+    out
 }
 
 #' @export
 setMethod(".DollarNames", "ACTIONetExperiment", .DollarNames.ACTIONetExperiment)
 
 
-
 #' @export
 setMethod("$", "ACTIONetExperiment", function(x, name) {
+    
     if (name %in% names(colData(x))) {
         colData(x)[[name]]
     } else if (name %in% names(rowMaps(x, all = F))) {
@@ -100,6 +104,7 @@ setMethod("$", "ACTIONetExperiment", function(x, name) {
     }
     
 })
+
 
 #' @export
 setReplaceMethod("$", "ACTIONetExperiment", function(x, name, value) {

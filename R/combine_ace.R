@@ -23,8 +23,8 @@ setMethod("rbind", "ACTIONetExperiment", function(..., deparse.level = 1) {
     used_slots = c()
     AN_slots = c("colMaps", "rowMaps", "colNets", "rowNets")
     used_slots = sapply(args, function(x) {
-        sl = c(length(ACTIONet::colMaps(x)) > 0, length(ACTIONet::rowMaps(x)) > 0, 
-            length(ACTIONet::colNets(x)) > 0, length(ACTIONet::rowNets(x)) > 0)
+        sl = c(length(colMaps(x)) > 0, length(rowMaps(x)) > 0, length(colNets(x)) > 
+            0, length(rowNets(x)) > 0)
         return(AN_slots[sl])
     })
     
