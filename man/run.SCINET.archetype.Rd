@@ -7,11 +7,11 @@
 run.SCINET.archetype(
   ace,
   G = NULL,
-  core = T,
+  core = TRUE,
   min.edge.weight = 2,
   spec.sample_no = 1000,
-  thread_no = 4,
-  compute.topo.specificity = T
+  thread_no = 8,
+  compute.topo.specificity = TRUE
 )
 }
 \arguments{
