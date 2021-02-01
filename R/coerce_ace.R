@@ -5,8 +5,8 @@
 #' @exportMethod coerce
 setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
     
-    ace = ACTIONet::ACTIONetExperiment(assays = SummarizedExperiment::assays(from), 
-        rowData = from@elementMetadata, colData = from@colData, metadata = from@metadata)
+    ace = ACTIONetExperiment(assays = SummarizedExperiment::assays(from), rowData = from@elementMetadata, 
+        colData = from@colData, metadata = from@metadata)
     
     rownames(ace) = rownames(from)
     
@@ -33,9 +33,6 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
     transposed_factors = as(lapply(Xs, function(X) X), "SimpleList")
     SingleCellExperiment::reducedDims(sce) = transposed_factors
     
-    # rowData(sce) = DataFrame(as.data.frame(rowData(from))) colData(sce) =
-    # DataFrame(as.data.frame(colData(from)))
-    
     return(sce)
 })
 
@@ -50,11 +47,11 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     rownames(SE) = rownames(from)
     rowData(SE) = rowData(from)
     
-    
     ace = as(SE, "ACTIONetExperiment")
     
     transposed_factors = as(lapply(SingleCellExperiment::reducedDims(from), function(x) SummarizedExperiment(assays = list(X = x))), 
         "SimpleList")
+    
     colMaps(ace) = transposed_factors
     
     rowData(ace) = DataFrame(as.data.frame(rowData(ace)))

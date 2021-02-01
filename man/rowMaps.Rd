@@ -8,7 +8,7 @@
 \usage{
 rowMaps(object, ...)
 
-\S4method{rowMaps}{ACTIONetExperiment}(object, all = T)
+\S4method{rowMaps}{ACTIONetExperiment}(object, all = TRUE)
 
 \S4method{rowMaps}{ACTIONetExperiment}(object) <- value
 }
