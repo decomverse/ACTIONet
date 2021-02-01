@@ -65,7 +65,7 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
         length(x) == 1)], names(object@rowMaps))
     
     for (n in common_names) {
-        metadata(object@rowMaps[[n]])$type = value[[n]]
+        S4Vectors::metadata(object@rowMaps[[n]])$type = value[[n]]
         object@rowMaps[[n]] = .validate_MapType(object@rowMaps[[n]])
     }
     validObject(object)
@@ -83,7 +83,7 @@ setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(object, value) {
         length(x) == 1)], names(object@colMaps))
     
     for (n in common_names) {
-        metadata(object@colMaps[[n]])$type = value[[n]]
+        S4Vectors::metadata(object@colMaps[[n]])$type = value[[n]]
         object@colMaps[[n]] = .validate_MapType(object@colMaps[[n]])
     }
     validObject(object)
@@ -322,12 +322,12 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
         if (any(is(M) == "SummarizedExperiment")) {
             return(M)
         } else if (is.matrix(M) | is.sparseMatrix(M)) {
-            M = SummarizedExperiment(assays = list(X = M))
+            M = SummarizedExperiment::SummarizedExperiment(assays = list(X = M))
             return(M)
         } else {
             M = as.matrix(value)
             if (is.numeric(M)) {
-                M = SummarizedExperiment(assays = list(X = M))
+                M = SummarizedExperiment::SummarizedExperiment(assays = list(X = M))
                 return(M)
             } else {
                 par_func = as.character(sys.call(-1)[1])

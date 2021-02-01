@@ -10,7 +10,7 @@ correct.cell.annotations(
   LFR.threshold = 2,
   double.stochastic = FALSE,
   max_iter = 3,
-  adjust.levels = T,
+  adjust.levels = TRUE,
   min.cell.fraction = 0.001
 )
 }
