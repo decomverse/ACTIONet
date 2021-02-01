@@ -221,8 +221,7 @@ multilevel_archetypal_decomposition prune_archetypes(
 // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
 // outlier_threshold, int reduced_dim);
 unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
-                                     double alpha, double outlier_threshold,
-                                     double sim_threshold, int thread_no);
+                                     double alpha, double sensitivity, int thread_no);
 
 // Main functions to build an interaction network from multi-level archetypal
 // decompositions
