@@ -130,7 +130,9 @@
 
     if (is.character(labels)) {
         if (length(labels) == 1)
-            labels = .get_attr_or_split_idx(ace, attr = labels, return_vec = T) else labels = factor(labels)
+          labels = .get_attr_or_split_idx(ace, attr = labels, return_vec = TRUE)
+        else
+          labels = factor(labels)
     }
 
     if ((length(labels) > 1) & is.logical(labels)) {
