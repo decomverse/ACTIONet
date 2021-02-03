@@ -484,7 +484,7 @@ construct.backbone <- function(
 
     W = exp(scale(ace$archetype_footprint))
     W = as(W, "sparseMatrix")
-    
+
     arch.vis.out = transform_layout(
       W = W,
       coor2D = Matrix::t(ace$ACTIONet2D),
