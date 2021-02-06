@@ -1,9 +1,11 @@
 
 .preprocess_annotation_markers <- function(markers) {
 
-    if (is.matrix(markers) | is.sparseMatrix(markers)) {
+    if (is.matrix(markers) || is.sparseMatrix(markers)) {
         marker_set = lapply(1:NCOL(markers), function(i) rownames(markers)[markers[, i] > 0])
         names(marker_set) = colnames(markers)
+    } else if (is.data.frame(markers) || is(DataFrame(), "DFrame")) {
+        marker_set = as.list(as.data.frame(markers))
     } else if (is.list(markers)) {
         marker_set = markers
     } else {
