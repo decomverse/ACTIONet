@@ -629,10 +629,10 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
 List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.99,
-                      double outlier_threshold = 0, double sim_threshold = 0.0,
+                      double sensitivity = 0.0,
                       int thread_no = 0) {
   ACTIONet::unification_results results = ACTIONet::unify_archetypes(
-      G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no);
+      G, S_r, C_stacked, alpha, sensitivity, thread_no);
 
   List out_list;
 
