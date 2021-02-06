@@ -274,13 +274,13 @@ sapply(1:ncol(PR), function(i) {
 
 
 ```{r}
-plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node.size = 1, CPal = "magma", title = "", alpha_val = 0.85, nonparameteric = FALSE, reduction.slot = "ACTIONet2D") {
+plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.threshold = -0.5, trans.fact = 3, node_size = 1, CPal = "magma", title = "", alpha_val = 0.85, nonparameteric = FALSE, reduction.slot = "ACTIONet2D") {
 
 	# nnz = round(sum(x)^2/sum(x^2))
 	# threshold = sort(x, decreasing = T)[nnz]
 	# x[x < threshold] = 0
 
-    node.size = node.size * 0.3
+    node_size = node_size * 0.3
 
     coors = reducedDims(ace)[[reduction.slot]]
 
@@ -324,16 +324,16 @@ plot.ACTIONet.gradient <- function(ace, x, transparency.attr = NULL, trans.z.thr
     }
 
     idx = order(x, decreasing = F)
-    plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol.border[idx], cex = node.size, pch = 21, axes = FALSE, xlab = "", ylab = "", main = title)
+    plot(coors[idx, 1], coors[idx, 2], bg = vCol[idx], col = vCol.border[idx], cex = node_size, pch = 21, axes = FALSE, xlab = "", ylab = "", main = title)
 
 }
 
 sapply(1:ncol(PR), function(i) {
 	x = U[, i]
-	plot.ACTIONet.gradient(ace, x, title = sprintf("%s (org)", genes[i]), node.size = 0.5)
+	plot.ACTIONet.gradient(ace, x, title = sprintf("%s (org)", genes[i]), node_size = 0.5)
 
 	x = PR[, i]
-	plot.ACTIONet.gradient(ace, x, title = genes[i], node.size = 0.5)
+	plot.ACTIONet.gradient(ace, x, title = genes[i], node_size = 0.5)
 
 })
 

@@ -266,7 +266,7 @@ read.HD5DF <- function(
     } else {
         DF = DataFrame(row.names = rn)
     }
-
+    invisible(gc())
     return(DF)
 }
 
@@ -301,7 +301,8 @@ read.HD5SpMat <- function(
         Xt = Matrix::sparseMatrix(j = indices + 1, p = indptr, x = data, dims = Dims)
         X = Matrix::t(Xt)
     }
-
+    rm(Xt)
+    invisible(gc())
     return(X)
 }
 
@@ -347,7 +348,7 @@ read.HD5List <- function(
             L.out = L.out[!filter.mask]
         }
     }
-
+    invisible(gc())
     return(L.out)
 }
 
@@ -616,6 +617,8 @@ AnnData2ACE <- function(
 
       input_assays = list(X)
       names(input_assays) = main_assay
+    } else {
+      input_assays = list()
     }
 
     if ("layers" %in% objs) {
@@ -634,7 +637,7 @@ AnnData2ACE <- function(
         }
         input_assays = c(input_assays, additional_assays)
     }
-
+    invisible(gc())
 
     if ("obs" %in% objs) {
         obs.DF = read.HD5DF(h5file = h5file, gname = "obs")
@@ -655,6 +658,8 @@ AnnData2ACE <- function(
     })
 
     ace = ACTIONetExperiment(assays = input_assays, rowData = var.DF, colData = obs.DF)
+    rm(input_assays)
+    invisible(gc())
 
     var.DF = rowData(ace)
     if (sum(colnames(var.DF) %in% c("chr", "start", "end")) == 3) {
@@ -692,6 +697,9 @@ AnnData2ACE <- function(
             colMaps(ace)[[nn]] = Matrix::t(Xr)
         }
     }
+    rm(Xr)
+    invisible(gc())
+
 
     if ("varm" %in% objs) {
         varm = h5file[["varm"]]
@@ -710,11 +718,11 @@ AnnData2ACE <- function(
                 Xr = varm[[nn]]$read()
             }
 
-
-
             rowMaps(ace)[[nn]] = Matrix::t(Xr)
         }
     }
+    rm(Xr)
+    invisible(gc())
 
     if ("obsp" %in% objs) {
         obsp = h5file[["obsp"]]
@@ -731,7 +739,8 @@ AnnData2ACE <- function(
             rowNets(ace)[[pn]] = Net
         }
     }
-
+    rm(Net)
+    invisible(gc())
 
     if ("uns" %in% objs) {
         uns = h5file[["uns"]]
