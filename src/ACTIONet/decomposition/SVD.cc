@@ -893,7 +893,7 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
     // Conduct normalized power iterations.=
     for (int it = 1; it <= iters; it++) {
       // stdout_printf("\tIteration %d\n", it);
-      stderr_printf("\r\tIteration %d/iters", it);
+      stderr_printf("\r\tIteration %d/%d", it, iters);
       FLUSH;
 
       Q = A * Q;
@@ -904,9 +904,9 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
       gram_schmidt(Q);
       // Q = orth(Q);
     }
-    stdout_printf("\r\tIteration %d/iters\n", it);
+    stdout_printf("\r\tIteration %d/%d\n", iters, iters);
     FLUSH;
-    
+
     X = mat(A * Q);
     stdout_printf("\tReduced SVD ... ");
     svd_econ(U, s, V, X);
