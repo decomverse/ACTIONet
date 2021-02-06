@@ -202,7 +202,7 @@ SPA_results run_SPA_rows_sparse(sp_mat &A, int k) {
 
     uvec idx = find(U > 0);
     double perc = 100 * idx.n_elem / U.n_elem;
-    printf("\t%d- res_norm = %f, U_density = %.2f%% (%d nnz)\n", i, a, perc,
+    stdout_printf("\t%d- res_norm = %f, U_density = %.2f%% (%d nnz)\n", i, a, perc,
            idx.n_elem);
 
     normM = normM - (r % r);
@@ -326,7 +326,7 @@ ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no,
   stderr_printf("\n\t%s %d/%d finished", status_msg, current_k,
                 (k_max - k_min + 1));
   FLUSH;
- 
+
   ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId) {
     SPA_results SPA_res = run_SPA(X_r, kk);
     trace.selected_cols[kk] = SPA_res.selected_columns;
@@ -353,7 +353,7 @@ ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no,
 
 ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 50,
                                double min_delta = 1e-16, int max_trial = 3) {
-  printf("Running ACTION++\n");
+  stdout_printf("Running ACTION++\n");
 
   int D = std::min((int)S_r.n_rows, (int)S_r.n_cols);
   if (k_max == -1) k_max = D;
@@ -375,14 +375,14 @@ ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 50,
 
   field<mat> AA_res;
   int cur_idx = 0, jj, kk;
-  printf("Iterating from k=%d ... %d (max trial = %d)\n", k_min, k_max,
+  stdout_printf("Iterating from k=%d ... %d (max trial = %d)\n", k_min, k_max,
          max_trial);
   for (kk = k_min; kk <= k_max; kk++) {
-    printf("\tk = %d\n", kk);
+    stdout_printf("\tk = %d\n", kk);
 
     for (jj = 0; jj < max_trial; jj++) {
       cur_idx++;
-      printf("\t\tTrial %d: candidate %d = %d ... ", jj + 1, cur_idx + 1,
+      stdout_printf("\t\tTrial %d: candidate %d = %d ... ", jj + 1, cur_idx + 1,
              selected_cols(cur_idx));
       mat W_tmp = join_rows(W, X_r.col(selected_cols(cur_idx)));
 
@@ -392,14 +392,14 @@ ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 50,
       int trivial_counts = (int)sum(influential_cells <= 1);
 
       if ((trivial_counts == 0)) {
-        printf("success\n");
+        stdout_printf("success\n");
         selected_cols(kk - 1) = selected_cols(cur_idx);
         break;
       }
 
-      printf("failed\n");
+      stdout_printf("failed\n");
       if ((cur_idx == (D - 1))) {
-        printf("Reached end of the line!\n");
+        stdout_printf("Reached end of the line!\n");
         break;
       }
     }
@@ -504,8 +504,7 @@ ACTION_results run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk,
                              int max_it = 50, double min_delta = 1e-16) {
   int feature_no = S_r.n_rows;
 
-  printf("Running subACTION (%d threads) for parent archetype %d\n", thread_no,
-         kk + 1);
+  stdout_printf("Running subACTION (%d threads) for parent archetype %d\n", thread_no, kk + 1);
 
   if (k_max == -1) k_max = (int)S_r.n_cols;
 
@@ -531,10 +530,10 @@ ACTION_results run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk,
 
   int current_k = 0;
   int total = k_min - 1;
-  printf("Iterating from k=%d ... %d\n", k_min, k_max);
+  stdout_printf("Iterating from k=%d ... %d\n", k_min, k_max);
   ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kkk, size_t threadId) {
     total++;
-    printf("\tk = %d\n", total);
+    stdout_printf("\tk = %d\n", total);
 
     SPA_results SPA_res = run_SPA(X_r_scaled, kkk);
     trace.selected_cols[kkk] = SPA_res.selected_columns;
