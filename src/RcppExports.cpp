@@ -263,8 +263,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, double outlier_threshold, double sim_threshold, int thread_no);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP outlier_thresholdSEXP, SEXP sim_thresholdSEXP, SEXP thread_noSEXP) {
+List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, double sensitivity, int thread_no);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP sensitivitySEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -272,10 +272,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type outlier_threshold(outlier_thresholdSEXP);
-    Rcpp::traits::input_parameter< double >::type sim_threshold(sim_thresholdSEXP);
+    Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no));
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, sensitivity, thread_no));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1114,7 +1113,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 6},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},

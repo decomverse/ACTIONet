@@ -39,8 +39,7 @@ run.ACTIONet <- function(
   layout_algorithm = 0,
   layout_in_parallel = TRUE,
   unification_alpha = 0.99,
-  unification_outlier_thresh = 2,
-  unification_sim_thresh = 0,
+  unification_sensitivity = 2,
   footprint_alpha = 0.85,
   thread_no = 0,
   full_trace = FALSE,
@@ -115,13 +114,8 @@ run.ACTIONet <- function(
       S_r = S_r,
       C_stacked = pruning.out$C_stacked,
       alpha = unification_alpha,
-      outlier_thresh = unification_outlier_thresh,
-      sim_thresh = unification_sim_thresh,
+      sensitivity = unification_sensitivity,
       thread_no = thread_no)
-
-    # metadata(ace)$selected_archetypes = unification.out$selected_archetypes
-    # metadata(ace)$selected_archetypes_ontology = unification.out$ontology
-    # metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
 
     Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
     colMaps(ace)[["H_unified"]] = Ht_unified
@@ -376,8 +370,7 @@ rerun.archetype.aggregation <- function(
   layout_epochs = 100,
   thread_no = 0,
   unification_alpha = 0.99,
-  unification_outlier_thresh = 2,
-  unification_sim_thresh = 0
+  unification_sensitivity = 2
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
@@ -391,15 +384,9 @@ rerun.archetype.aggregation <- function(
       S_r = S_r,
       C_stacked = C_stacked,
       alpha = unification_alpha,
-      outlier_thresh = unification_outlier_thresh,
-      sim_thresh = unification_sim_thresh,
+      sensitivity = unification_sensitivity,
       thread_no = thread_no
     )
-
-    # metadata(ace)$selected_archetypes = unification.out$selected_archetypes
-    # metadata(ace)$selected_archetypes_ontology = unification.out$ontology
-    # metadata(ace)$selected_archetypes_ontology_annotations = unification.out$ontology_node_attributes
-
 
     colMaps(ace)[[sprintf("H_%s", unified_suffix)]] = as(Matrix::t(unification.out$H_unified),
         "sparseMatrix")
