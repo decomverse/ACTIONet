@@ -81,7 +81,7 @@ layout.labels <- function(
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
 #' @export
-plot.ACTIONet <- function(
+old.plot.ACTIONet <- function(
   ace,
   labels = NULL,
   transparency.attr = NULL,

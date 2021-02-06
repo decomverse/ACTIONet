@@ -4,7 +4,7 @@
 \alias{select.top.k.features}
 \title{Report the top-rank features from a given enrichment table}
 \usage{
-select.top.k.features(
+\method{select}{top.k.features}(
   feat_scores,
   top_features = 3,
   normalize = FALSE,

@@ -135,13 +135,11 @@
     else
       z = alpha_fac
 
-    beta_val = 1/(1 + exp(-trans_fac * (z - trans_th)))
-    beta_val[z > trans_th] = 1
-    beta_val = beta_val^trans_fac
+    alpha_val = 1/(1 + exp(-trans_fac * (z - trans_th)))
+    alpha_val[z > trans_th] = 1
+    alpha_val = alpha_val^trans_fac
 
-    # plot_alpha = beta_val/max(beta_val)
-
-    return(beta_val)
+    return(alpha_val)
   }
 }
 

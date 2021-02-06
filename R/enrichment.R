@@ -209,7 +209,7 @@ assess.geneset.enrichment.gProfiler <- function(
   col = "tomato"
 ) {
 
-    .check_and_load_package("gprofiler2", "ggpubr")
+    .check_and_load_package(c("gprofiler2", "ggpubr"))
 
     gp.out = gprofiler2::gost(
       genes,
@@ -314,7 +314,7 @@ geneset.enrichment.gProfiler <- function(
   category = c("GO:BP", "REAC", "KEGG")
 ) {
 
-    .check_and_load_package("gprofiler2", "ggpubr")
+    .check_and_load_package(c("gprofiler2", "ggpubr"))
 
     gp.out = gprofiler2::gost(
       genes,
