@@ -294,15 +294,18 @@ read.HD5SpMat <- function(
         csc_sort_indices_inplace(indptr, indices, data)
         Xt = Matrix::sparseMatrix(i = indices + 1, p = indptr, x = data, dims = Dims)
         X = Matrix::t(Xt)
+        rm(Xt)
+        invisible(gc())
     } else if (attr[["encoding-type"]] == "csr_matrix") {
         # csr_sort_indices_inplace(indptr, indices, data) Xt = new('dgRMatrix', j =
         # indices, p = indptr, x = data, Dim = Dims) X = Matrix::t(Xt)
         csc_sort_indices_inplace(indptr, indices, data)
         Xt = Matrix::sparseMatrix(j = indices + 1, p = indptr, x = data, dims = Dims)
         X = Matrix::t(Xt)
+        rm(Xt)
+        invisible(gc())
     }
-    rm(Xt)
-    invisible(gc())
+
     return(X)
 }
 
@@ -695,10 +698,11 @@ AnnData2ACE <- function(
                 nn = mn
             }
             colMaps(ace)[[nn]] = Matrix::t(Xr)
+            rm(Xr)
+            invisible(gc())
         }
     }
-    rm(Xr)
-    invisible(gc())
+
 
 
     if ("varm" %in% objs) {
@@ -719,10 +723,11 @@ AnnData2ACE <- function(
             }
 
             rowMaps(ace)[[nn]] = Matrix::t(Xr)
+            rm(Xr)
+            invisible(gc())
         }
     }
-    rm(Xr)
-    invisible(gc())
+
 
     if ("obsp" %in% objs) {
         obsp = h5file[["obsp"]]
@@ -739,8 +744,7 @@ AnnData2ACE <- function(
             rowNets(ace)[[pn]] = Net
         }
     }
-    rm(Net)
-    invisible(gc())
+
 
     if ("uns" %in% objs) {
         uns = h5file[["uns"]]
