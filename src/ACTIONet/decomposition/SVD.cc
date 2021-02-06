@@ -888,8 +888,6 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
   // Q = orth(Q);
 
   if (m < n) {
-
-
     // Conduct normalized power iterations.=
     for (int it = 1; it <= iters; it++) {
       // stdout_printf("\tIteration %d\n", it);
@@ -915,7 +913,8 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
   } else {
     // Conduct normalized power iterations.
     for (int it = 1; it <= iters; it++) {
-      stdout_printf("\tIteration %d\n", it);
+      stderr_printf("\r\tIteration %d/%d", it, iters);
+      FLUSH;
 
       Q = A.t() * Q;
       gram_schmidt(Q);
@@ -925,7 +924,8 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
       gram_schmidt(Q);
       // Q = orth(Q);
     }
-
+    stdout_printf("\r\tIteration %d/%d\n", iters, iters);
+    FLUSH;
     // SVD Q' applied to the centered A to obtain approximations to the singular
     // values and right singular vectors of the A;
 
