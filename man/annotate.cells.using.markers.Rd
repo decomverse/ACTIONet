@@ -9,7 +9,7 @@ annotate.cells.using.markers(
   markers,
   features_use = NULL,
   alpha_val = 0.9,
-  thread_no = 8,
+  thread_no = 0,
   net_slot = "ACTIONet",
   assay_name = "logcounts",
   max_iter = 5
