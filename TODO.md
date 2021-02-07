@@ -1,10 +1,7 @@
 # TODO
 
 ## Primary
-* Finish tutorials (2 more to go, 1 hands-on tutorial, poke Jose to go through them).
-* Help Madhvi install ACTIONet
 * Test, debug, and run code on Windows
-* Python porting and testing
 * Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter. 1- Minimal (Alpine)
 * Write, test, and release singularity-lite and singularity-full
 * "gating" on archetypes
@@ -39,8 +36,5 @@
 * Supervized marker suggestion
 
 ## Minor
-* Remove R.utils dependencies
 * Fix annotate with single cell type bug
-* Add require() statements where appropriate
-* Contact BioTurning and debug `AnnData` import bug
 * Merge filter functions

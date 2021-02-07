@@ -1,10 +1,18 @@
 
 .preprocess_annotation_markers <- function(markers) {
+<<<<<<< HEAD
     
     if (is.matrix(markers) | is.sparseMatrix(markers)) {
         marker_set = lapply(1:NCOL(markers), function(i) rownames(markers)[markers[, 
             i] > 0])
+=======
+
+    if (is.matrix(markers) || is.sparseMatrix(markers)) {
+        marker_set = lapply(1:NCOL(markers), function(i) rownames(markers)[markers[, i] > 0])
+>>>>>>> 8ff0a9ea94e2ff78544aa6c8e91fc20c46dbf9b5
         names(marker_set) = colnames(markers)
+    } else if (is.data.frame(markers) || is(DataFrame(), "DFrame")) {
+        marker_set = as.list(as.data.frame(markers))
     } else if (is.list(markers)) {
         marker_set = markers
     } else {
@@ -212,9 +220,23 @@ annotate.archetypes.using.markers <- function(ace, markers, rand_sample_no = 100
 #' annots = annotate.cells.using.markers(ace, markers = markers)
 #' plot.ACTIONet(ace, annots$Label, annots$Confidence)
 #' @export
+<<<<<<< HEAD
 annotate.cells.using.markers <- function(ace, markers, features_use = NULL, alpha_val = 0.9, 
     thread_no = 8, net_slot = "ACTIONet", assay_name = "logcounts", max_iter = 5) {
     
+=======
+annotate.cells.using.markers <- function(
+  ace,
+  markers,
+  features_use = NULL,
+  alpha_val = 0.9,
+  thread_no = 0,
+  net_slot = "ACTIONet",
+  assay_name = "logcounts",
+  max_iter = 5
+) {
+
+>>>>>>> 8ff0a9ea94e2ff78544aa6c8e91fc20c46dbf9b5
     marker_set = .preprocess_annotation_markers(markers)
     features_use = .preprocess_annotation_features(ace, features_use)
     
