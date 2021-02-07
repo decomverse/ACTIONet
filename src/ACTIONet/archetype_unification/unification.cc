@@ -257,7 +257,7 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   LOR.transform([](double val) { return (val < 0 ? 0 : val); });
   mat LOR_norm = normalise(LOR, 1, 0);
 
-  field<mat> nndsvd_out = nndsvd(LOR_norm, min((int)LOR.n_cols, 100));
+  field<mat> nndsvd_out = nndsvd(LOR_norm, min((int)LOR_norm.n_cols, 100));
   mat Wpos = nndsvd_out(0);
   mat Hpos = nndsvd_out(1);
 
