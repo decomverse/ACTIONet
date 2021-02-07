@@ -275,9 +275,9 @@ run.ensemble.pseudobulk.Limma <- function(
         design_mat = design
     }
 
-    if (is.null(variable_name)) {
-        variable_name = colnames(design_mat)[ncol(design_mat)]
-    }
+    design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
+    design_mat = design_list$design_mat
+    variable_name = design_list$variable_name
 
     prog_bar <- progress::progress_bar$new(total = length(bins_use))
     prog_bar$tick(0)
@@ -368,9 +368,9 @@ variance.adjusted.DE.Limma <- function(
         design_mat = design
     }
 
-    if (is.null(variable_name)) {
-        variable_name = colnames(design_mat)[ncol(design_mat)]
-    }
+    design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
+    design_mat = design_list$design_mat
+    variable_name = design_list$variable_name
 
     W_masked = Matrix::t(apply(W, 1, function(w) {
         mask = (!is.na(w) & is.finite(w) & (w != 0))
