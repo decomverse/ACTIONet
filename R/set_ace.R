@@ -32,7 +32,7 @@ setReplaceMethod("rowMaps", "ACTIONetExperiment", function(object, value) {
     value <- as(value, "SimpleList")
     # if (length(value) == 0) { object@rowMaps = SimpleList() validObject(object)
     # return(object) }
-    
+
     object <- .insert_mapping(object, value, 1)
     validObject(object)
     object
@@ -48,7 +48,7 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(object, value) {
     value <- as(value, "SimpleList")
     # if (length(value) == 0) { object@colMaps = SimpleList() validObject(object)
     # return(object) }
-    
+
     object <- .insert_mapping(object, value, 2)
     validObject(object)
     object
@@ -60,10 +60,10 @@ setReplaceMethod("colMaps", "ACTIONetExperiment", function(object, value) {
 #' @rdname rowMapTypes
 #' @export
 setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
-    
-    common_names = intersect(names(value)[sapply(value, function(x) is.character(x) & 
+
+    common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
         length(x) == 1)], names(object@rowMaps))
-    
+
     for (n in common_names) {
         S4Vectors::metadata(object@rowMaps[[n]])$type = value[[n]]
         object@rowMaps[[n]] = .validate_MapType(object@rowMaps[[n]])
@@ -78,10 +78,10 @@ setReplaceMethod("rowMapTypes", "ACTIONetExperiment", function(object, value) {
 #' @rdname colMapTypes
 #' @export
 setReplaceMethod("colMapTypes", "ACTIONetExperiment", function(object, value) {
-    
-    common_names = intersect(names(value)[sapply(value, function(x) is.character(x) & 
+
+    common_names = intersect(names(value)[sapply(value, function(x) is.character(x) &
         length(x) == 1)], names(object@colMaps))
-    
+
     for (n in common_names) {
         S4Vectors::metadata(object@colMaps[[n]])$type = value[[n]]
         object@colMaps[[n]] = .validate_MapType(object@colMaps[[n]])
@@ -177,25 +177,25 @@ setReplaceMethod("reducedDims", "ACTIONetExperiment", function(x, value) {
         err = sprintf("value passed to 'reducedDims' cannot be empty. To clear column-associated reductions use 'colReductions'.\n")
         stop(err)
     }
-    
+
     # value = as(lapply(value, function(x) Matrix::t(x)), 'SimpleList')
     value = .coerce_input_to_SE(value)
     for (i in seq_along(value)) {
         value[[i]] = .set_map_type(value[[i]], "reduction", force_embed = TRUE)
     }
-    
+
     x <- .insert_mapping(x, value, 2)
-    
+
     validObject(x)
     x
 })
 
 setReplaceMethod("reducedDimNames", "ACTIONetExperiment", function(x, value) {
     .validate_names(value)
-    
+
     mask = colMapTypes(x) %in% c("embedding", "reduction")
     names(x@colMaps)[mask] <- value
-    
+
     validObject(x)
     x
 })
@@ -246,7 +246,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 })
 
 .insert_MapMeta <- function(object, value, d) {
-    
+
     value = lapply(value, function(v) {
         if (is(v, "DFrame")) {
             return(v)
@@ -255,10 +255,10 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
             return(v)
         }
     })
-    
+
     valid_names = switch(d, names(object@rowMaps), names(object@colMaps))
     .validate_names(value, valid_names)
-    
+
     for (n in names(value)) {
         DF = value[[n]]
         if (d == 1) {
@@ -279,7 +279,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
 }
 
 .insert_mapping <- function(object, value, d) {
-    
+
     if (length(value) == 0) {
         value = S4Vectors::SimpleList()
     } else {
@@ -287,7 +287,7 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
         map_types <- switch(d, rowMapTypes(object), colMapTypes(object))
         .validate_names(value)
         value = .coerce_input_to_SE(value)
-        
+
         value <- sapply(names(value), function(n) {
             v = value[[n]]
             if (dim(v)[1] != dim(object)[d]) {
@@ -295,22 +295,22 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
                 stop(err)
             }
             rownames(v) <- dimnames(object)[[d]]
-            if (is.null(colnames(v))) 
+            if (is.null(colnames(v)))
                 colnames(v) <- 1:NCOL(v)
-            
-            if (is.null(S4Vectors::metadata(v)$type)) 
+
+            if (is.null(S4Vectors::metadata(v)$type))
                 v <- .set_map_type(v, map_types[[n]])
-            
+
             return(v)
         }, simplify = FALSE)
     }
-    
+
     if (d == 1) {
         object@rowMaps <- as(value, "SimpleList")
     } else if (d == 2) {
         object@colMaps <- as(value, "SimpleList")
     }
-    
+
     return(object)
 }
 
@@ -331,42 +331,41 @@ setReplaceMethod("sizeFactors", "ACTIONetExperiment", function(object, ..., valu
                 return(M)
             } else {
                 par_func = as.character(sys.call(-1)[1])
-                err = sprintf("Values passed to '%s' must be coercible to matrix, of class 'SummarizedExperiment', or NULL.\n", 
-                  par_func)
+                err = sprintf("Values passed to '%s' must be coercible to matrix, of class 'SummarizedExperiment', or NULL.\n", par_func)
                 stop(err)
             }
         }
     })
-    
+
     return(value)
 }
 
 .check_if_mapping_list <- function(value) {
     err = sprintf("New mappings must be a named list.\n")
-    if (!(class(value) %in% c("list", "SimpleList"))) 
+    if (!(class(value) %in% c("list", "SimpleList")))
         stop(err)
-    if (is.null(names(value))) 
+    if (is.null(names(value)))
         stop(err)
-    
+
     value = as(value, "SimpleList")
     return(value)
 }
 
 .set_map_type <- function(value, map_type = NULL, force_embed = FALSE) {
-    if (is.null(map_type)) 
-        S4Vectors::metadata(value)$type <- ifelse(NROW(value) <= 3, "embedding", 
+    if (is.null(map_type))
+        S4Vectors::metadata(value)$type <- ifelse(NROW(value) <= 3, "embedding",
             "generic") else {
         S4Vectors::metadata(value)$type <- map_type
-        if (force_embed) 
-            S4Vectors::metadata(value)$type <- ifelse(NROW(value) <= 3, "embedding", 
+        if (force_embed)
+            S4Vectors::metadata(value)$type <- ifelse(NROW(value) <= 3, "embedding",
                 map_type)
     }
-    
+
     return(value)
 }
 
 .change_slot_dim_name <- function(object, d) {
-    
+
     if (d == 1) {
         X = object@rowMaps
         X = lapply(X, function(x) {

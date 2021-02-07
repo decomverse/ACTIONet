@@ -50,8 +50,11 @@ is.sparseMatrix <- function(A) {
 
 #' @export
 revert_ace_as_sce <- function(ace) {
-    sce = SingleCellExperiment::SingleCellExperiment(assays = SingleCellExperiment::assays(ace), 
-        colData = SingleCellExperiment::colData(ace), rowData = SingleCellExperiment::rowData(ace))
-    
+    sce = SingleCellExperiment::SingleCellExperiment(
+      assays = SingleCellExperiment::assays(ace),
+      colData = SingleCellExperiment::colData(ace),
+      rowData = SingleCellExperiment::rowData(ace)
+    )
+
     return(sce)
 }
