@@ -170,6 +170,6 @@
   colnames(design_mat) = make.names(colnames(design_mat), unique = TRUE, allow_ = FALSE)
   variable_name = colnames(design_mat)[vn_idx]
 
-  out = list(design_mat = design_mat, variable_name = variable_name_new)
+  out = list(design_mat = design_mat, variable_name = variable_name)
   return(out)
 }
