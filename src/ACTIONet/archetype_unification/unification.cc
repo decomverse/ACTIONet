@@ -255,9 +255,9 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   uvec zero_idx = find(C_imputed == 0);
   LOR(zero_idx).zeros();
   LOR.transform([](double val) { return (val < 0 ? 0 : val); });
-  // mat LOR_norm = normalise(LOR, 2, 0);
+  mat LOR_norm = normalise(LOR, 1, 0);
 
-  field<mat> nndsvd_out = nndsvd(LOR, min((int)LOR.n_cols, 100));
+  field<mat> nndsvd_out = nndsvd(LOR_norm, min((int)LOR.n_cols, 100));
   mat Wpos = nndsvd_out(0);
   mat Hpos = nndsvd_out(1);
 
@@ -284,8 +284,8 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   mat subH = Hpos.cols(selected_columns(span(0, state_no-1)));
   mat weights = normalise(subH, 1, 0);
   */
-  mat A = normalise(LOR, 2, 0);
-  mat B = normalise(Wpos.cols(selected_columns(span(0, state_no - 1))), 2, 0);
+  mat A = normalise(LOR, 1, 0);
+  mat B = normalise(Wpos.cols(selected_columns(span(0, state_no - 1))), 1, 0);
   mat weights = run_simplex_regression(A, B, false);
 
   // Compute unified archetypes
