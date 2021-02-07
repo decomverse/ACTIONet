@@ -370,7 +370,7 @@ rerun.archetype.aggregation <- function(
   layout_epochs = 100,
   thread_no = 0,
   unification_alpha = 0.99,
-  unification_sensitivity = 2
+  unification_sensitivity = 0
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
