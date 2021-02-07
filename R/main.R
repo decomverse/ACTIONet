@@ -39,7 +39,7 @@ run.ACTIONet <- function(
   layout_algorithm = 0,
   layout_in_parallel = TRUE,
   unification_alpha = 0.99,
-  unification_sensitivity = 2,
+  unification_sensitivity = 0,
   footprint_alpha = 0.85,
   thread_no = 0,
   full_trace = FALSE,
