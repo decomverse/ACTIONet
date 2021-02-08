@@ -30,7 +30,7 @@ CPal_default = c(
   plot_dims = 2
 ){
 
-  if (class(X) == "ACTIONetExperiment") {
+  if (is(X, "ACTIONetExperiment")) {
       if (!is.null(coordinate_attr)) {
           coors = as.matrix(colMaps(X)[[coordinate_attr]])
       } else {
@@ -58,13 +58,17 @@ CPal_default = c(
 
 
 
-.get_plot_labels <- function(label_attr, ace = NULL){
+.get_plot_labels <- function(label_attr, data = NULL){
 
   if(is.null(label_attr)){
     return(NULL)
   }
 
-  plot_labels = .get_attr_or_split_idx(ace, attr = label_attr, return_vec = TRUE)
+  if (is(data, "ACTIONetExperiment")) {
+    plot_labels = .get_attr_or_split_idx(data, attr = label_attr, return_vec = TRUE)
+  } else {
+    plot_labels = label_attr
+  }
 
   return(plot_labels)
 
@@ -74,7 +78,7 @@ CPal_default = c(
 .get_plot_colors <- function(
   color_attr,
   plot_labels,
-  ace,
+  data,
   color_slot = "denovo_color",
   palette = CPal_default
 ){
@@ -93,7 +97,7 @@ CPal_default = c(
     } else if (is.character(color_attr)) {
 
       if (length(color_attr) == 1) {
-        plot_colors = .get_attr_or_split_idx(ace, attr = color_attr, return_vec = TRUE)
+        plot_colors = .get_attr_or_split_idx(data, attr = color_attr, return_vec = TRUE)
       } else {
         plot_colors = color_attr
       }
@@ -109,7 +113,7 @@ CPal_default = c(
     num_unique = length(label_names)
 
     if (num_unique == 1) {
-      plot_colors = .default_colors(NROW(ace))
+      plot_colors = .default_colors(NROW(data))
     } else {
 
       if (length(palette) == 1) {
@@ -129,10 +133,10 @@ CPal_default = c(
 
   } else {
 
-    if (class(ace) == "ACTIONetExperiment"){
-      plot_colors = grDevices::rgb(colMaps(ace)[[color_slot]])
+    if (is(data, "ACTIONetExperiment")) {
+      plot_colors = grDevices::rgb(colMaps(data)[[color_slot]])
     } else {
-      plot_colors = .default_colors(NROW(ace))
+      plot_colors = .default_colors(NROW(data))
     }
 
   }
@@ -143,7 +147,7 @@ CPal_default = c(
 
 .get_plot_transparency <- function(
   trans_attr,
-  ace,
+  ace = NULL,
   trans_fac = 1.5,
   trans_th = -0.5,
   scale = TRUE

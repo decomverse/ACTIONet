@@ -42,7 +42,7 @@ Visualized ACTIONet with projected scores
 Projects a given continuous score on the ACTIONet plot
 }
 \examples{
-ace = run.ACTIONet(sce)
+ace = run.ACTIONet(ace)
 x = logcounts(ace)['CD14', ]
 plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
 }
