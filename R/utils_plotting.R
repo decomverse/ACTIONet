@@ -1,4 +1,34 @@
-.get_plot_coors <- function(X, coordinate_attr = NULL, scale_coors = TRUE, plot_dims = 2){
+CPal_default = c(
+  "#1F77B4", "#FF7F0E", "#279E68", "#D62728", "#AA40FC", "#8C564B", "#E377C2", "#B5BD61", "#17BECF", "#AEC7E8",
+  "#FFBB78", "#98DF8A", "#FF9896", "#C5B0D5", "#C49C94", "#F7B6D2", "#DBDB8D", "#9EDAE5", "#AD494A", "#8C6D31",
+  "#E31A1C", "#FFD700", "#771122", "#777711", "#1F78B4", "#68228B", "#AAAA44", "#60CC52", "#771155", "#DDDD77",
+  "#774411", "#AA7744", "#AA4455", "#117744", "#000080", "#44AA77", "#AA4488", "#DDAA77", "#D9D9D9", "#BC80BD",
+  "#FFED6F", "#7FC97F", "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17", "#666666", "#1B9E77",
+  "#D95F02", "#7570B3", "#E7298A", "#66A61E", "#E6AB02", "#A6761D", "#A6CEE3", "#B2DF8A", "#33A02C", "#FB9A99",
+  "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#B15928", "#FBB4AE", "#B3CDE3", "#CCEBC5", "#DECBE4", "#FED9A6",
+  "#FFFFCC", "#E5D8BD", "#FDDAEC", "#F2F2F2", "#B3E2CD", "#FDCDAC", "#CBD5E8", "#F4CAE4", "#E6F5C9", "#FFF2AE",
+  "#F1E2CC", "#CCCCCC", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FFFF33", "#A65628", "#F781BF", "#999999",
+  "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", "#8DD3C7", "#FFFFB3",
+  "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5"
+)
+
+
+.default_ggtheme <-  ggplot2::theme(axis.title = element_blank(),
+        axis.text = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        panel.background = ggplot2::element_blank(),
+        legend.title = ggplot2::element_blank(),
+        legend.background = ggplot2::element_blank(),
+        legend.key = ggplot2::element_blank(),
+        plot.margin = grid::unit(c(1,1,1,1),"lines"))
+
+
+.get_plot_coors <- function(
+  X,
+  coordinate_attr = NULL,
+  scale_coors = TRUE,
+  plot_dims = 2
+){
 
   if (class(X) == "ACTIONetExperiment") {
       if (!is.null(coordinate_attr)) {
@@ -147,4 +177,72 @@
 .default_colors <- function(l){
   plot_colors = rep("tomato", l)
   return(plot_colors)
+}
+
+
+#' @import ggplot2
+.layout_plot_labels <- function(
+  p,
+  plot_data = NULL,
+  label_names = NULL,
+  label_colors = NULL,
+  darken = TRUE,
+  alpha_val = 0.5,
+  text_size = 3,
+  constrast_fac = 0.5,
+  nudge = FALSE
+) {
+
+    if(is.null(label_names)){
+      label_names = sort(unique(plot_data$labels))
+    }
+
+    label_coors = split(plot_data[, 1:2], plot_data$labels)
+    label_coors = label_coors[label_names]
+    centroids = lapply(label_coors, function(df){
+      mat = as.matrix(df)
+      cent = apply(mat, 2, function(x) mean(x, trim = 0.25))
+      return(cent)
+    })
+
+    cent_sd = lapply(label_coors, function(df){
+      mat = as.matrix(df)
+      cent_sd = apply(mat, 2, sd)
+      return(cent_sd)
+    })
+    cent_sd = do.call(rbind, cent_sd)
+    colnames(cent_sd) = c("x_sd", "y_sd")
+
+    if(is.null(label_colors)){
+      label_colors = rep("black", length(label_names))
+    } else {
+        if(darken == TRUE)
+          label_colors = colorspace::darken(label_colors, constrast_fac)
+    }
+
+    layout_data = data.frame(do.call(rbind, centroids),
+                             cent_sd,
+                             labels = names(centroids),
+                             color = label_colors
+                           )
+
+    layout_data[, c("x", "y")] = gplots::space(layout_data$x, layout_data$y, s=c(1/20, 1/5), na.rm=TRUE, direction="y")
+
+    if(nudge == TRUE){
+      layout_data$x = layout_data$x + (1 - exp(-0.5 * abs(layout_data$x_sd - max(layout_data$x_sd))))
+      layout_data$y = layout_data$y + (1 - exp(-0.5 * abs(layout_data$y_sd - max(layout_data$y_sd))))
+    }
+
+    p <- p + geom_label(
+      data = layout_data,
+      mapping = aes(
+        x = x,
+        y = y,
+        label = labels,
+        color = color
+      ),
+      fill = scales::alpha(c("white"), alpha_val),
+      size = text_size)
+
+  return(p)
 }
