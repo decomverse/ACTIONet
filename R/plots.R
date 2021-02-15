@@ -1,260 +1,127 @@
-# From: SnapATAC
-CPal88 = c("#E31A1C", "#FFD700", "#771122", "#777711", "#1F78B4", "#68228B", "#AAAA44",
-    "#60CC52", "#771155", "#DDDD77", "#774411", "#AA7744", "#AA4455", "#117744",
-    "#000080", "#44AA77", "#AA4488", "#DDAA77", "#D9D9D9", "#BC80BD", "#FFED6F",
-    "#7FC97F", "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17",
-    "#666666", "#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", "#E6AB02",
-    "#A6761D", "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
-    "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#B15928", "#FBB4AE", "#B3CDE3",
-    "#CCEBC5", "#DECBE4", "#FED9A6", "#FFFFCC", "#E5D8BD", "#FDDAEC", "#F2F2F2",
-    "#B3E2CD", "#FDCDAC", "#CBD5E8", "#F4CAE4", "#E6F5C9", "#FFF2AE", "#F1E2CC",
-    "#CCCCCC", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FFFF33", "#A65628",
-    "#F781BF", "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854",
-    "#FFD92F", "#E5C494", "#B3B3B3", "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072",
-    "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5")
 
-# From: Scanpy
-CPal20 = c("#1f77b4", "#ff7f0e", "#279e68", "#d62728", "#aa40fc", "#8c564b", "#e377c2",
-    "#b5bd61", "#17becf", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5",
-    "#c49c94", "#f7b6d2", "#dbdb8d", "#9edae5", "#ad494a", "#8c6d31")
-
-layout.labels <- function(
-  x,
-  y,
-  labels,
-  col = "white",
-  bg = "black",
-  r = 0.1,
-  cex = 1,
-  ...
-) {
-
-    lay <- wordcloud::wordlayout(x, y, words = labels, cex = 1.25 * cex, ...)
-
-    x = lay[, 1] + 0.5 * lay[, 3]
-    y = lay[, 2] + 0.5 * lay[, 4]
-
-    theta = seq(0, 2 * pi, length.out = 50)
-    xy <- grDevices::xy.coords(x, y)
-    xo <- r * graphics::strwidth("A")
-    yo <- r * graphics::strheight("A")
-
-    for (i in theta) {
-        graphics::text(
-          x = xy$x + cos(i) * xo,
-          y = xy$y + sin(i) * yo,
-          labels = labels,
-          col = bg,
-          cex = cex,
-          ...
-        )
-    }
-    graphics::text(
-      x = xy$x,
-      y = xy$y,
-      labels = labels,
-      col = col,
-      cex = cex,
-      ...
-    )
-}
-
-#' Main ACTIONet plotting functions
+#' Plot ACTIONet scatter plot
 #'
-#' @param ace ACTIONet output object
-#' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-#' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
-#' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node_size Size of nodes in the ACTIONet plot
-#' @param CPal Color palette (named vector or a name for a given known palette)
-#' @param add.text Whether or not to add labels on the top of ACTIONet plot
-#' @param suppress.legend Whether to suppress legend or include one
-#' @param legend.pos If suppress.legend == F, where should we put the legend
-#' @param title Main title of the plot
-#' @param border.contrast.factor How much the node and its border should contrast
-#' @param add.states Whether or not to include interpolated cell state positions in the plot
-#' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
+#' @param data 'ACTIONetExperiment' object or two-column numeric matrix of X-Y coordinates.
+#' @param label_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, celltypes, etc.).
+#' @param color_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing hex colors to use for each point, or matrix/data.frame containing RGB values to pass to grDevices::rgb().
+#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
+#' @param trans_fac Transparency modifier (default:1.5).
+#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked  (default:-0.5).
+#' @param point_size Size of points in ggplot (default:1).
+#' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
+#' @param stroke_contrast_fac Factor by which to darken point outline for contrast (default:0.1).
+#' @param palette Color palette. character vector of hex colors or a palette name to pass to 'ggpubr::get_palette()').
+#' @param add_text_labels Whether or not to add floating text labels on the top of annotated clusters. Ignored if 'label_attr=NULL'. (default:'TRUE').
+#' @param text_size Size of floating text. Passed to 'ggplot2::geom_label()' (default:3).
+#' @param nudge_text_labels Slightly offset labels proportional to cluster size so as to not cover small clusters (default:'TRUE').
+#' @param show_legend Show legend based on labels. Ignored if 'label_attr=NULL' or 'color_attr!=NULL' (default:'FALSE').
+#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates if 'data' is an 'ACTIONetExperiment' object (default:'ACTIONet2D').
+#' @param color_slot Name of entry in colMaps(ace) containing RGB values for default point colors generated by 'layout_ACTIONet()'. Used only if no other coloring parameters are given or valid (default:'denovo_color').
+#' @param point_order Integer vector specifying order in which to plot individual points (default:'NULL').
 #'
-#' @return Visualized ACTIONet
+#' @return 'ggplot' object
 #'
 #' @examples
-#' ace = run.ACTIONet(sce)
-#' plot.ACTIONet(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+#' ace = run.ACTIONet(ace)
+#' plot.ACTIONet(ace, ace$assigned_archetype)
+
+#' @import ggplot2
 #' @export
-old.plot.ACTIONet <- function(
-  ace,
-  labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 1.5,
-  node_size = 0.1,
-  CPal = CPal20,
-  add.text = TRUE,
-  suppress.legend = TRUE,
-  legend.pos = "bottomright",
-  title = "",
-  border.contrast.factor = 0.1,
-  add.backbone = FALSE,
-  arch.size.factor = 3,
-  coordinate_slot = "ACTIONet2D"
+plot.ACTIONet <- function(
+  data,
+  label_attr = NULL,
+  color_attr = NULL,
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 1,
+  stroke_size = point_size * 0.1,
+  stroke_contrast_fac = 0.1,
+  palette = CPal_default,
+  add_text_labels = TRUE,
+  text_size = 3,
+  nudge_text_labels = FALSE,
+  show_legend = FALSE,
+  coordinate_attr = "ACTIONet2D",
+  color_slot = "denovo_color",
+  point_order = NULL
 ) {
 
-    text.halo.width = 0.1
-    label_size = 0.8
+    plot_coors = .get_plot_coors(data, coordinate_attr)
+    plot_labels = .get_plot_labels(label_attr, data)
+    plot_fill_col = .get_plot_colors(color_attr, plot_labels, data, color_slot, palette)
+    plot_alpha = .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
+    plot_border_col = colorspace::darken(plot_fill_col, stroke_contrast_fac)
 
-    node_size = node_size * 0.25
-
-    if (class(ace) == "ACTIONetExperiment") {
-        labels = .preprocess_annotation_labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        } else {
-            coors = as.matrix(coordinate_slot)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        }
+    if(is.null(plot_labels)){
+      data_labels = "NA"
+      add_text_labels = FALSE
+      show_legend = FALSE
+      legend_labels = NULL
+      legend_fill_colors = NULL
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
-            coors = as.matrix(ace)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-            labels = .preprocess_annotation_labels(labels)
-        } else {
-            err = sprintf("Unknown type for object 'ace'.\n")
-            stop(err)
-        }
+      data_labels = plot_labels
+      names(plot_fill_col) = plot_labels
+      legend_labels = sort(unique(plot_labels))
+      legend_fill_colors = plot_fill_col[legend_labels]
     }
 
-    if (is.null(labels) || length(unique(labels)) == 1) {
-        if (class(ace) == "ACTIONetExperiment") {
-            vCol = grDevices::rgb(colMaps(ace)$denovo_color)
-        } else {
-            vCol = rep("tomato", nrow(coors))
-        }
-        Annot = NULL
-    } else {
-        Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(CPal) > 1) {
-            if (length(CPal) < length(Annot)) {
-                if (length(Annot) <= 20) {
-                  CPal = CPal20
-                } else {
-                  CPal = CPal88
-                }
-            }
-            if (is.null(names(CPal))) {
-                Pal = CPal[1:length(Annot)]
-            } else {
-                Pal = CPal[Annot]
-            }
-        } else {
-            Pal = ggpubr::get_palette(CPal, length(Annot))
-        }
-
-        names(Pal) = Annot
-        vCol = Pal[names(labels)]
+    if(!is.null(color_attr)){
+      show_legend = FALSE
+      legend_fill_colors = NULL
     }
 
-    if (!is.null(transparency.attr)) {
-        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
-        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
-        beta[z > trans.z.threshold] = 1
-        beta = beta^trans.fact
-
-        vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
-        vCol = scales::alpha(vCol, beta)
-    } else {
-        vCol.border = colorspace::darken(vCol, border.contrast.factor)
-    }
-
-    x = coors[, 1]
-    y = coors[, 2]
-    x.min = min(x)
-    x.max = max(x)
-    y.min = min(y)
-    y.max = max(y)
-    x.min = x.min - (x.max - x.min)/20
-    x.max = x.max + (x.max - x.min)/20
-    y.min = y.min - (y.max - y.min)/20
-    y.max = y.max + (y.max - y.min)/20
-    XL = c(x.min, x.max)
-    YL = c(y.min, y.max)
-
-
-    rand.perm = sample(nrow(coors))
-    graphics::plot(
-      coors[rand.perm, c(1, 2)],
-      pch = 21,
-      cex = node_size,
-      bg = vCol[rand.perm],
-      col = vCol.border[rand.perm],
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
+    plot_data = data.frame(plot_coors,
+      labels = data_labels,
+      fill = plot_fill_col,
+      color = plot_border_col,
+      trans = plot_alpha
     )
 
-    if (add.text == TRUE & (!is.null(Annot))) {
-        graphics::par(xpd = TRUE, mar = graphics::par()$mar * c(1.1, 1.1, 1.1, 1.1))
+    if(is.null(point_order))
+      pidx = sample(NROW(plot_data))
+    else
+      pidx = point_order
 
-        centroids = Matrix::t(sapply(Annot, function(l) {
-            idx = which(names(labels) == l)
-            if (length(idx) == 1) {
-                return(as.numeric(coors[idx, ]))
-            }
+    p_out <- ggplot() +
+         geom_point(
+           data = plot_data[pidx, ],
+           mapping = aes(
+             x = x,
+             y = y,
+             color = color,
+             fill = fill,
+             alpha = trans
+           ),
+           shape = 21,
+           size = point_size,
+           stroke = stroke_size,
+           show.legend = show_legend
+         ) + scale_fill_identity(
+           guide = "legend",
+           labels = legend_labels,
+           breaks = legend_fill_colors
+         ) +
+         scale_color_identity() +
+         scale_alpha_identity() +
+         .default_ggtheme
 
-            sub.coors = coors[idx, ]
-            anchor.coor = as.numeric(apply(sub.coors, 2, function(x) mean(x, trim = 0.8)))
-
-            return(anchor.coor)
-        }))
-
-        layout.labels(
-          x = centroids[, 1],
-          y = centroids[, 2],
-          labels = Annot,
-          col = colorspace::darken(Pal, 0.5),
-          bg = "#eeeeee",
-          r = text.halo.width,
-          cex = label_size
+    if(!is.null(plot_labels) && add_text_labels ==  TRUE){
+        p_out <- .layout_plot_labels(
+          p_out,
+          plot_data = plot_data,
+          label_names = legend_labels,
+          label_colors = legend_fill_colors,
+          darken = TRUE,
+          alpha_val = 0.5,
+          text_size = text_size,
+          constrast_fac = 0.5,
+          nudge = nudge_text_labels
         )
     }
 
-    if ((suppress.legend == FALSE) & !is.null(Annot)) {
-        xmin <- graphics::par("usr")[1]
-        xmax <- graphics::par("usr")[2]
-        ymin <- graphics::par("usr")[3]
-        ymax <- graphics::par("usr")[4]
+    p_out
 
-        lgd <- graphics::legend(
-          x = mean(c(xmin, xmax)),
-          y = mean(c(ymin, ymax)),
-          legend = Annot,
-          fill = Pal,
-          cex = 0.5,
-          bty = "n",
-          plot = FALSE
-        )
-
-        graphics::par(xpd = TRUE, mai = c(0, 0, 0, lgd$rect$w))
-
-        graphics::legend(
-          x = xmax,
-          y = ymin + lgd$rect$h,
-          legend = Annot,
-          fill = Pal, cex = 0.5,
-          bty = "n",
-          plot = TRUE
-        )
-
-    }
 }
 
 #' Main ACTIONet 3D plotting functions
@@ -1048,7 +915,7 @@ plot.individual.gene <- function(
 #' @return Visualized ACTIONet with projected scores
 #'
 #' @examples
-#' ace = run.ACTIONet(sce)
+#' ace = run.ACTIONet(ace)
 #' x = logcounts(ace)['CD14', ]
 #' plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
 #' @export
@@ -2018,4 +1885,45 @@ gate.archetypes <- function(
     fig <- add_trace(p = fig, type = "histogram2dcontour")
 
     fig
+}
+
+layout.labels <- function(
+  x,
+  y,
+  labels,
+  col = "white",
+  bg = "black",
+  r = 0.1,
+  cex = 1,
+  ...
+) {
+
+    lay <- wordcloud::wordlayout(x, y, words = labels, cex = 1.25 * cex, ...)
+
+    x = lay[, 1] + 0.5 * lay[, 3]
+    y = lay[, 2] + 0.5 * lay[, 4]
+
+    theta = seq(0, 2 * pi, length.out = 50)
+    xy <- grDevices::xy.coords(x, y)
+    xo <- r * graphics::strwidth("A")
+    yo <- r * graphics::strheight("A")
+
+    for (i in theta) {
+        graphics::text(
+          x = xy$x + cos(i) * xo,
+          y = xy$y + sin(i) * yo,
+          labels = labels,
+          col = bg,
+          cex = cex,
+          ...
+        )
+    }
+    graphics::text(
+      x = xy$x,
+      y = xy$y,
+      labels = labels,
+      col = col,
+      cex = cex,
+      ...
+    )
 }
