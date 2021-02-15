@@ -132,15 +132,15 @@ struct unification_results {
 // Low-level functions
 // *********************************
 // Basic (randomized) SVD algorithms
-field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed);
-field<mat> FengSVD(mat &A, int dim, int iters, int seed);
+field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed, int verbose);
+field<mat> FengSVD(mat &A, int dim, int iters, int seed, int verbose);
 
-field<mat> HalkoSVD(mat &A, int dim, int max_it, int seed);
-field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed);
+field<mat> HalkoSVD(mat &A, int dim, int max_it, int seed, int verbose);
+field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed, int verbose);
 
-field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed);
+field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed, int verbose);
 // field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
-field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed);
+field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed, int verbose);
 
 // Successive Projection Algorithm (SPA) to solve separable NMF
 SPA_results run_SPA(mat &M, int k);
@@ -179,9 +179,9 @@ field<mat> PCA2SVD(sp_mat &S, field<mat> PCA_results);
 field<mat> PCA2SVD(mat &S, field<mat> PCA_results);
 
 field<mat> reduce_kernel(sp_mat &S, int dim, int iter, int seed,
-                         int SVD_algorithm, bool prenormalize);
+                         int SVD_algorithm, bool prenormalize, int verbose);
 field<mat> reduce_kernel(mat &S, int dim, int iter, int seed, int SVD_algorithm,
-                         bool prenormalize);
+                         bool prenormalize, int verbose);
 
 field<mat> ACTIONred2SVD(field<mat> SVD_results);
 
@@ -321,7 +321,7 @@ vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
         uvec fixed_labels);
 
 mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat,
-                                   double alpha, int max_it, int thread_no);
+                                   double alpha, int max_it, int thread_no, bool ignore_baseline_expression);
 
 }  // namespace ACTIONet
 

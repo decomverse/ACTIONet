@@ -1,22 +1,67 @@
 
-.preprocess_annotation_markers <- function(markers) {
-
+.preprocess_annotations <- function(annotations, feature_set) {
     if (is.matrix(markers) || is.sparseMatrix(markers)) {
-        marker_set = lapply(1:NCOL(markers), function(i) rownames(markers)[markers[, i] > 0])
-        names(marker_set) = colnames(markers)
-    } else if (is.data.frame(markers) || is(DataFrame(), "DFrame")) {
-        marker_set = as.list(as.data.frame(markers))
+		common_features = sort(unique(intersect(feature_set, rownames(annotations))))
+		row_idx = match(common_features, rownames(annotations))
+		X = annotations[row_idx, ]	
+		rownames(X) = common_features	
     } else if (is.list(markers)) {
-        marker_set = markers
-    } else {
-        err = sprintf("'markers' must be a list or matrix.\n")
-        stop(err)
-    }
-
-    if (is.null(names(marker_set))) {
-        names(marker_set) = sapply(1:length(marker_set), function(i) sprintf("Celltype %s", i))
-    }
-    return(marker_set)
+		X = do.call(cbind, lapply(annotations, function(gs) {
+			genes = unlist(strsplit(gs, "[+]|[-]"))
+			if(length(grep("[+|-]$", gs)) != 0) {
+				x = as.numeric(grepl("[+]", gs)) - as.numeric(grepl("[-]", gs))
+				genes = as.character(sapply(gs, function(gene) substr(gene, 1, stringr::str_length(gene)-1)))
+			} else {
+				x = rep(1, length(genes))
+				genes = gs
+			}
+			common.genes = sort(unique(intersect(genes, feature_set)))
+			idx1 = match(common.genes, genes)
+			idx2 = match(common.genes, feature_set)
+			
+			v = sparseMatrix(i = idx2, j = rep(1, length(idx2)), x = x[idx1], dims = c(length(feature_set), 1))
+			return(v)
+		}))
+		colnames(X) = names(annotations)		
+		rownames(X) = feature_set
+	} else if (is.data.frame(annotations) || (length(which(is(annotations) == "DFrame")) != 0)) { # marker, cell type, [weight]
+		if(ncol(annotations) == 2) {
+			annotations$weight = 1
+		} 
+		UL = sort(unique(annotations[, 2]))
+		X = do.call(cbind, lapply(UL, function(nn) {
+			idx = which(annotations[, 2]== nn)
+			genes = annotations[idx, 1]
+			x = annotations[idx, 3]
+			
+			common.genes = sort(unique(intersect(genes, feature_set)))
+			idx1 = match(common.genes, genes)
+			idx2 = match(common.genes, feature_set)
+			
+			v = sparseMatrix(i = idx2, j = rep(1, length(idx2)), x = x[idx1], dims = c(length(feature_set), 1))
+			return(v)
+			
+		}))
+		colnames(X) = UL
+		rownames(X) = feature_set
+	}
+	
+	row.mask = fast_row_sums(abs(X)) != 0
+	col.mask = fast_column_sums(abs(X)) != 0
+	X = X[row.mask, col.mask]
+	
+	
+	# cs = fast_column_sums(X)
+	# filtered_cols = which(cs < 0) 
+	# if(length(filtered_cols)) {
+	# 	not 
+	# }
+	# col.mask = cs != 0
+	# X.sp = as(X, 'dgTMatrix')
+	# X.sp@x = X.sp@x / cs[X.sp@j+1]
+	# X = as(X.sp, "dgCMatrix")
+    
+    return(X)
 }
 
 
@@ -245,26 +290,27 @@ annotate.cells.using.markers <- function(
   max_iter = 5
 ) {
 
-    marker_set = .preprocess_annotation_markers(markers)
-    features_use = .preprocess_annotation_features(ace, features_use)
-
-    marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
     G = colNets(ace)[[net_slot]]
     S = SummarizedExperiment::assays(ace)[[assay_name]]
 
-    marker_stats = compute_marker_aggregate_stats(
-      G = G,
-      S = S,
-      marker_mat = marker_mat,
-      alpha = alpha_val,
-      max_it = max_iter,
-      thread_no = thread_no
-    )
-    colnames(marker_stats) = names(marker_set)
+	annotations = ACTIONet:::.preprocess_annotations(markers, rownames(S))
+	row_idx = match(rownames(annotations), rownames(S))
+	subS = S[row_idx, ]
 
-    marker_stats[!is.finite(marker_stats)] = 0
-    annots = names(marker_set)[apply(marker_stats, 1, which.max)]
-    conf = apply(marker_stats, 1, max)
+	marker_stats = compute_marker_aggregate_stats(
+	  G = G,
+	  S = subS,
+	  marker_mat = annotations,
+	  alpha = 0.85,
+	  max_it = 5,
+	  thread_no = 6,
+	  ignore_baseline_expression = FALSE	
+	)
+	colnames(marker_stats) = colnames(annotations)
+
+	marker_stats[!is.finite(marker_stats)] = 0
+	annots = colnames(marker_stats)[apply(marker_stats, 1, which.max)]
+	conf = apply(marker_stats, 1, max)
 
     out = list(
       Label = annots,

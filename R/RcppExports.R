@@ -498,8 +498,8 @@ set_seed <- function(seed) {
 #' A = randn(100, 20)
 #' SVD.out = IRLBA_SVD(A, dim = 2)
 #' U = SVD.out$U
-IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L) {
-    .Call(`_ACTIONet_IRLB_SVD`, A, dim, iters, seed)
+IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_IRLB_SVD`, A, dim, iters, seed, verbose)
 }
 
 #' Computes SVD decomposition
@@ -518,8 +518,8 @@ IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = IRLBA_SVD_full(A, dim = 2)
 #' U = SVD.out$U
-IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L) {
-    .Call(`_ACTIONet_IRLB_SVD_full`, A, dim, iters, seed)
+IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_IRLB_SVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -534,8 +534,8 @@ IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = FengSVD(A, dim = 2)
 #' U = SVD.out$U
-FengSVD <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_FengSVD`, A, dim, iters, seed)
+FengSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_FengSVD`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -550,8 +550,8 @@ FengSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = FengSVD(A, dim = 2)
 #' U = SVD.out$U
-FengSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_FengSVD_full`, A, dim, iters, seed)
+FengSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_FengSVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -566,8 +566,8 @@ FengSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = HalkoSVD(A, dim = 2)
 #' U = SVD.out$U
-HalkoSVD <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_HalkoSVD`, A, dim, iters, seed)
+HalkoSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_HalkoSVD`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -582,8 +582,8 @@ HalkoSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = HalkoSVD(A, dim = 2)
 #' U = SVD.out$U
-HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_HalkoSVD_full`, A, dim, iters, seed)
+HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_HalkoSVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -591,8 +591,8 @@ HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
-reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
-    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize)
+reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE, verbose = 1L) {
+    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
 }
 
 #'
@@ -600,8 +600,8 @@ reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algori
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
-reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
-    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize)
+reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE, verbose = 1L) {
+    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
 }
 
 #' Solves min_{X} (|| AX - B ||) s.t. simplex constraint
@@ -1012,8 +1012,8 @@ run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_
     .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_)
 }
 
-compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no)
+compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L, ignore_baseline_expression = FALSE) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
 }
 
 roll_var <- function(X) {
