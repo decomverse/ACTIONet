@@ -188,7 +188,7 @@ run.ensemble.pseudobulk.DESeq <- function(
     prog_bar <- progress::progress_bar$new(total = length(bins_use))
     prog_bar$tick(0)
     dds_out = bplapply(paste0(slot_prefix, 1:bins), function(S) {
-        cts = assays(se)[[S]]
+        cts = SummarizedExperiment::assays(se)[[S]]
         invisible({
             dds = DESeq2::DESeqDataSetFromMatrix(
               cts,
