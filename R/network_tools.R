@@ -16,67 +16,17 @@
 infer.missing.cell.annotations <- function(
   ace,
   initial_labels,
-  double.stochastic = FALSE,
-  max_iter = 3,
-  adjust.levels = TRUE
-) {
-
-    Adj = colNets(ace)$ACTIONet
-    A = as(Adj, "dgTMatrix")
-
-    eps = 1e-16
-    rs = fastRowSums(A)
-    P = Matrix::sparseMatrix(
-      i = A@i + 1,
-      j = A@j + 1,
-      x = A@x/rs[A@i + 1],
-      dims = dim(A)
-    )
-
-    if (double.stochastic == TRUE) {
-        w = sqrt(fastColSums(P) + eps)
-        W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
-        P = W %*% Matrix::t(W)
-    }
-
-    Labels = .preprocess_annotation_labels(initial_labels, ace)
-    if (is.null(Labels)) {
-        return(ace)
-    }
-
-    Annot = sort(unique(Labels))
-    idx = match(Annot, Labels)
-    names(Annot) = names(Labels)[idx]
-
-    na.mask = is.na(Labels)
-
-    i = 1
-    while (sum(na.mask) > 0) {
-        new.Labels = assess.label.local.enrichment(P, Labels)
-
-        mask = na.mask & (new.Labels$Labels.confidence > 3 + log(length(Labels)))
-        Labels[mask] = new.Labels$Labels[mask]
-
-        na.mask = is.na(Labels)
-        if (i == max_iter)
-            break
-
-        i = i + 1
-    }
-    new.Labels = assess.label.local.enrichment(P, Labels)
-    Labels[na.mask] = new.Labels$Labels[na.mask]
-    Labels.conf = new.Labels$Labels.confidence
-
-    updated.Labels = as.numeric(Labels)
-    names(updated.Labels) = names(Annot)[match(Labels, Annot)]
-    if (adjust.levels == T) {
-        Labels = reannotate.labels(ace, updated.Labels)
-    } else {
-        Labels = updated.Labels
-    }
+  iters = 3,
+  lambda = 0, 
+  sig_threshold = 3) {
+	fixed_labels_ = which(!is.na(initial_labels))	
+	initial_labels[is.na(initial_labels)] = -1
+	
+	Labels = run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
 
     return(Labels)
 }
+
 
 #' Uses a variant of the label propagation algorithm to correct likely noisy labels
 #'
@@ -98,74 +48,19 @@ infer.missing.cell.annotations <- function(
 correct.cell.annotations <- function(
   ace,
   initial_labels,
-  LFR.threshold = 2,
-  double.stochastic = FALSE,
-  max_iter = 3,
-  adjust.levels = TRUE,
+  iters = 3,
+  lambda = 0, 
+  sig_threshold = 3,
   min.cell.fraction = 0.001
 ) {
+	min_cells = round(ncol(ace)*min.cell.fraction)
+	
+	cc = table(initial_labels)
+	initial_labels[initial_labels %in% as.numeric(names(cc)[cc < min_cells])] = -1
+	initial_labels[is.na(initial_labels)] = -1
+	
+	Labels = run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
 
-    Adj = colNets(ace)$ACTIONet
-    A = as(Adj, "dgTMatrix")
-
-    eps = 1e-16
-    rs = fastRowSums(A)
-    P = Matrix::sparseMatrix(
-      i = A@i + 1,
-      j = A@j + 1,
-      x = A@x/rs[A@i + 1],
-      dims = dim(A)
-    )
-
-    if (double.stochastic == TRUE) {
-        w = sqrt(fastColSums(P) + eps)
-        W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
-        P = W %*% Matrix::t(W)
-    }
-
-    Labels = .preprocess_annotation_labels(initial_labels, ace)
-    if (is.null(Labels)) {
-        return(ace)
-    }
-
-    # Prunes 'trivial' annotations and merges them to larger ones
-    min.cells = round(min.cell.fraction * length(Labels))
-    counts = table(Labels)
-    Labels[Labels %in% as.numeric(names(counts)[counts < min.cells])] = NA
-    mask = is.na(Labels)
-
-    if (sum(mask) > 0) {
-        Labels[mask] = NA
-        Labels = infer.missing.cell.annotations(ace, initial_labels = Labels)
-    }
-
-    Annot = sort(unique(Labels))
-    idx = match(Annot, Labels)
-    names(Annot) = names(Labels)[idx]
-
-    for (i in 1:max_iter) {
-        new.Labels = assess.label.local.enrichment(P, Labels)
-        Enrichment = new.Labels$Enrichment
-        curr.enrichment = sapply(1:nrow(Enrichment), function(k) Enrichment[k, names(Labels)[k]])
-
-        Diff.LFR = log2((new.Labels$Labels.confidence/curr.enrichment))
-        Diff.LFR[is.na(Diff.LFR)] = 0
-
-        Labels[Diff.LFR > LFR.threshold] = new.Labels$Labels[Diff.LFR > LFR.threshold]
-        names(Labels) = Annot[Labels]
-    }
-
-    Labels.conf = new.Labels$Labels.confidence
-    updated.Labels = as.numeric(Labels)
-    names(updated.Labels) = names(Annot)[match(Labels, Annot)]
-
-    if (adjust.levels == TRUE) {
-        Labels = reannotate.labels(ace, updated.Labels)
-    } else {
-        Labels = updated.Labels
-    }
-
-    Labels = names(Labels)
     return(Labels)
 }
 
