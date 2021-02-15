@@ -4,11 +4,15 @@
 
 namespace ACTIONet {
 
-field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
+field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0, int verbose = 1) {
   int m = A.n_rows;
   int n = A.n_cols;
-  stdout_printf("IRLB (sparse) -- A: %d x %d\n", m, n);  // fflush(stdout);
-
+  
+  if(verbose) {
+	stdout_printf("IRLB_ (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
+	FLUSH;
+  }
+    
   cholmod_common chol_c;
   cholmod_start(&chol_c);
   chol_c.final_ll = 1; /* LL' form of simplicial factorization */
@@ -308,9 +312,7 @@ V[i]   = normDist(gen);;
   return (out);
 }
 
-field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
-  stdout_printf("IRLB (dense) -- A: %d x %d\n", A.n_rows,
-                A.n_cols);  // fflush(stdout);
+field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0, int verbose = 1) {
 
   double eps = 3e-13;
   // double eps = 2.22e-16;
@@ -320,6 +322,12 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
   int n = A.n_cols;
   int work = dim + 7;
   int lwork = 7 * work * (1 + work);
+
+  if(verbose) {
+	stdout_printf("IRLB_ (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
+	FLUSH;
+  }
+
 
   double *s = new double[dim];
   double *U = new double[m * work];
@@ -559,21 +567,22 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0) {
 // Data," in Proc. the 10th Asian Conference on Machine Learning (ACML),
 // Beijing, China, Nov. 2018.
 //****************************************************************************************************************************************************************************
-field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
+field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
   int s = 5;
 
   int m = A.n_rows;
   int n = A.n_cols;
 
-  stdout_printf("Feng (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
-  FLUSH;
+  if(verbose) {
+	  stdout_printf("Feng (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
+	  FLUSH;
+  }
 
   vec S;
   mat Q, L, U, V;
   field<mat> SVD_out;
 
   if (m < n) {
-    stdout_printf("\t\tInitializing SVD (mode 1) ... ");
     // arma_rng::set_seed(seed);
     // Q = randn( n, dim+s );
     // Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
@@ -588,11 +597,13 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
       lu(L, U, Q);
       Q = L;
     }
-    stdout_printf("done\n");
 
     for (int i = 1; i <= iters; i++) {
-      stdout_printf("\t\t\tIter %d/%d ... ", i, iters);
-
+      if(verbose) {
+		stderr_printf("\r\tIteration %d/%d", i, iters);
+		FLUSH;
+	  }
+	  
       if (i == iters) {
         SVD_out = eigSVD(A * (trans(A) * Q));
         Q = SVD_out(0);
@@ -600,7 +611,7 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
         lu(L, U, A * (trans(A) * Q));
         Q = L;
       }
-      stdout_printf("done\n");
+
     }
 
     SVD_out = eigSVD(trans(A) * Q);
@@ -612,7 +623,6 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
     V = fliplr(V.cols(s, dim + s - 1));
     S = flipud(S(span(s, dim + s - 1)));
   } else {
-    stdout_printf("\t\tInitializing SVD (mode 2) ... ");
     // arma_rng::set_seed(seed);
     // Q = randn( m, dim+s );
     // Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
@@ -625,11 +635,13 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
       lu(L, U, Q);
       Q = L;
     }
-    stdout_printf("done\n");
 
     for (int i = 1; i <= iters; i++) {
-      stdout_printf("\t\t\tIter %d/%d ... ", i, iters);
-
+		if(verbose) {
+		  stderr_printf("\r\tIteration %d/%d", i, iters);
+		  FLUSH;
+		}
+		
       if (i == iters) {
         SVD_out = eigSVD(trans(A) * (A * Q));
         Q = SVD_out(0);
@@ -637,9 +649,12 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
         lu(L, U, trans(A) * (A * Q));
         Q = L;
       }
-      stdout_printf("done\n");
     }
-
+	if(verbose) {
+	  stdout_printf("\r\tIteration %d/%d", iters, iters);
+	  FLUSH;
+	}
+	
     SVD_out = eigSVD(A * Q);
     U = SVD_out(0);
     S = vec(SVD_out(1));
@@ -655,8 +670,6 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
   out(1) = S;
   out(2) = V;
 
-  stdout_printf("\t\tdone\n");
-  FLUSH;
 
   return (out);
 }
@@ -664,21 +677,21 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0) {
 // From: Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzisped SVD for Sparse
 // Data," in Proc. the 10th Asian Conference on Machine Learning (ACML),
 // Beijing, China, Nov. 2018.
-field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
+field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
   int s = 5;
 
   int m = A.n_rows;
   int n = A.n_cols;
-
-  stdout_printf("Feng (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
-  FLUSH;
-
+  if(verbose) {
+	  stdout_printf("Feng (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
+	  FLUSH;
+  }
+  
   vec S;
   mat Q, L, U, V;
   field<mat> SVD_out;
 
   if (m < n) {
-    stdout_printf("\t\tInitializing SVD (mode 1) ... ");
     // arma_rng::set_seed(seed);
     // Q = randn( n, dim+s );
     // Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
@@ -692,11 +705,12 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
       lu(L, U, Q);
       Q = L;
     }
-    stdout_printf("done\n");
 
     for (int i = 1; i <= iters; i++) {
-      stdout_printf("\t\t\tIter %d/%d ... ", i, iters);
-
+		if(verbose) {
+		  stderr_printf("\r\tIteration %d/%d", i, iters);
+		  FLUSH;
+		}
       if (i == iters) {
         SVD_out = eigSVD(A * (trans(A) * Q));
         Q = SVD_out(0);
@@ -704,9 +718,14 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
         lu(L, U, A * (trans(A) * Q));
         Q = L;
       }
-      stdout_printf("done\n");
+      if(verbose)
+		stdout_printf("done\n");
     }
-
+	if(verbose) {
+	  stdout_printf("\r\tIteration %d/%d", iters, iters);
+	  FLUSH;
+	}
+	
     SVD_out = eigSVD(trans(A) * Q);
     V = SVD_out(0);
     S = vec(SVD_out(1));
@@ -716,7 +735,6 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
     V = fliplr(V.cols(s, dim + s - 1));
     S = flipud(S(span(s, dim + s - 1)));
   } else {
-    stdout_printf("\t\tInitializing SVD (mode 2) ... ");
     // arma_rng::set_seed(seed);
     // Q = randn( m, dim+s );
     // Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
@@ -729,11 +747,12 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
       lu(L, U, Q);
       Q = L;
     }
-    stdout_printf("done\n");
 
     for (int i = 1; i <= iters; i++) {
-      stdout_printf("\t\t\tIter %d/%d ... ", i, iters);
-
+		if(verbose) {
+		  stderr_printf("\r\tIteration %d/%d", i, iters);
+		  FLUSH;
+		}
       if (i == iters) {
         SVD_out = eigSVD(trans(A) * (A * Q));
         Q = SVD_out(0);
@@ -741,9 +760,12 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
         lu(L, U, trans(A) * (A * Q));
         Q = L;
       }
-      stdout_printf("done\n");
     }
-
+	if(verbose) {
+	  stdout_printf("\r\tIteration %d/%d", iters, iters);
+	  FLUSH;
+	}
+	
     SVD_out = eigSVD(A * Q);
     U = SVD_out(0);
     S = vec(SVD_out(1));
@@ -759,8 +781,6 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
   out(1) = S;
   out(2) = V;
 
-  stdout_printf("\t\tdone\n");
-  FLUSH;
 
   return (out);
 }
@@ -770,20 +790,22 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0) {
 // randomness: Probabilistic algorithms for constructing approximate matrix
 // decompositions. Siam Review, 53(2):217-288, 2011.
 //**************************************************************************************************************************************************************************************************
-field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0) {
+field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
   field<mat> results(3);
 
   int m = A.n_rows;
   int n = A.n_cols;
   int l = dim + 2;
-
+  
   vec s;
   mat R, Q;
   mat U, V, X;
 
-  stdout_printf("Halko (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
-  FLUSH;
-
+  if(verbose) {
+	stdout_printf("Halko (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
+	FLUSH;
+  }
+  
   if (m < n) {
     // R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
     // R = sampleUnif(l, m, -1.0, 1.0, 0);
@@ -807,7 +829,10 @@ field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0) {
   if (m < n) {
     // Conduct normalized power iterations.
     for (int it = 1; it <= iters; it++) {
-      stdout_printf("\tIteration %d\n", it);
+		if(verbose) {
+		  stderr_printf("\r\tIteration %d/%d", it, iters);
+		  FLUSH;
+		}
 
       Q = A * Q;
       gram_schmidt(Q);
@@ -817,16 +842,21 @@ field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0) {
       gram_schmidt(Q);
       // Q = orth(Q);
     }
-
+	if(verbose) {
+	  stdout_printf("\r\tIteration %d/%d", iters, iters);
+	  FLUSH;
+	}
+	
     X = mat(A * Q);
-    stdout_printf("\tReduced SVD ... ");
     svd_econ(U, s, V, X);
-    stdout_printf("done\n");
     V = Q * V;
   } else {
     // Conduct normalized power iterations.
     for (int it = 1; it <= iters; it++) {
-      stdout_printf("\tIteration %d\n", it);
+		if(verbose) {
+		  stderr_printf("\r\tIteration %d/%d", it, iters);
+		  FLUSH;
+		}
 
       Q = A.t() * Q;
       gram_schmidt(Q);
@@ -836,7 +866,11 @@ field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0) {
       gram_schmidt(Q);
       // Q = orth(Q);
     }
-
+	if(verbose) {
+	  stdout_printf("\r\tIteration %d/%d", iters, iters);
+	  FLUSH;
+	}
+	
     // SVD Q' applied to the centered A to obtain approximations to the singular
     // values and right singular vectors of the A;
 
@@ -856,7 +890,7 @@ field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0) {
   return results;
 }
 
-field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
+field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
   field<mat> results(3);
 
   int m = A.n_rows;
@@ -867,9 +901,11 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
   mat R, Q;
   mat U, V, X;
 
-  stdout_printf("Halko (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
-  FLUSH;
-
+	if(verbose) {
+	  stdout_printf("Halko (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
+	  FLUSH;
+	}
+	
   if (m < n) {
     // R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
     // R = sampleUnif(l, m, -1.0, 1.0, 0);
@@ -894,9 +930,11 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
     // Conduct normalized power iterations.=
     for (int it = 1; it <= iters; it++) {
       // stdout_printf("\tIteration %d\n", it);
-      stderr_printf("\r\tIteration %d/%d", it, iters);
-      FLUSH;
-
+      if(verbose) {
+		stderr_printf("\r\tIteration %d/%d", it, iters);
+		FLUSH;
+	  }
+	  
       Q = A * Q;
       gram_schmidt(Q);
       // Q = orth(Q);
@@ -905,20 +943,22 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
       gram_schmidt(Q);
       // Q = orth(Q);
     }
-    stdout_printf("\r\tIteration %d/%d\n", iters, iters);
-    FLUSH;
-
+    if(verbose) {
+		stdout_printf("\r\tIteration %d/%d\n", iters, iters);
+		FLUSH;
+	}
+	
     X = mat(A * Q);
-    stdout_printf("\tReduced SVD ... ");
     svd_econ(U, s, V, X);
-    stdout_printf("done\n");
     V = Q * V;
   } else {
     // Conduct normalized power iterations.
     for (int it = 1; it <= iters; it++) {
-      stderr_printf("\r\tIteration %d/%d", it, iters);
-      FLUSH;
-
+		if(verbose) {
+		  stderr_printf("\r\tIteration %d/%d", it, iters);
+		  FLUSH;
+		}
+		
       Q = A.t() * Q;
       gram_schmidt(Q);
       // Q = orth(Q);
@@ -927,8 +967,10 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0) {
       gram_schmidt(Q);
       // Q = orth(Q);
     }
-    stdout_printf("\r\tIteration %d/%d\n", iters, iters);
-    FLUSH;
+    if(verbose) {
+		stdout_printf("\r\tIteration %d/%d\n", iters, iters);
+		FLUSH;
+	}
     // SVD Q' applied to the centered A to obtain approximations to the singular
     // values and right singular vectors of the A;
 
