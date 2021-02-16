@@ -12,6 +12,9 @@ def build_network(
         density: Optional[float] = 1.0,
         thread_no: Optional[int] = 0,
         mutual_edges_only: Optional[bool] = True,
+        distance_metric:str = "jsd",
+        nn_approach:str = "k*nn",
+        k: Optional[int] = None,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False
 ) -> Union[AnnData, sparse.spmatrix, None]:
@@ -33,6 +36,10 @@ def build_network(
         Defaults to available threads on the machine.
     mutual_edges_only
         Whether to return only edges that there is a bi-directional/mutual relationship.
+    distance_metric 
+        one of jsd, ip, l2 (default=jsd) 
+    nn_approach
+        one of k*nn, knn (default=k*nn) 
     copy
         If 'data' is AnnData, return a copy instead of writing to `data`.
     return_raw
@@ -60,7 +67,7 @@ def build_network(
     H_stacked = H_stacked.T.astype(dtype=np.float64)
     if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
-        G = _an.build_ACTIONet(H_stacked, density, thread_no, mutual_edges_only)
+        G = _an.build_ACTIONet(H_stacked, density, thread_no, mutual_edges_only,distance_metric, nn_approach,k)
 
     if return_raw or not data_is_AnnData:
         return G

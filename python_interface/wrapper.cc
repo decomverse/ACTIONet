@@ -423,15 +423,20 @@ py::dict unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
 // @param thread_no Number of parallel threads (default = 0).
 // @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges.
 // If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
+// @param distance_metric Distance metric to use: jsd, l2, ip
+// @param nn_approach Nearest neighbor alogirthm: k*nn, knn
+// @param k Optional parameter specifying k for knn algorithm 
 //
 // @return G Adjacency matrix of the ACTIONet graph.
 arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
                                      double density = 1.0, int thread_no = 0,
-                                     bool mutual_edges_only = true) {
+                                     bool mutual_edges_only = true,
+				     string distance_metric="jsd",
+				     string nn_approach="k*nn",
+				     int k) {
   double M = 16, ef_construction = 200, ef = 50;
 
-  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(
-      H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
+  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);
 
   return G;
 }
@@ -1003,10 +1008,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
   // Network
   m.def("build_ACTIONet", &build_ACTIONet,
-    "Builds an interaction network from the multi-level archetypal decompositions",
-    py::arg("H_stacked"), py::arg("density") = 1.0,
-    py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true);
-
+	"Builds an interaction network from the multi-level archetypal decompositions",
+	py::arg("H_stacked"), py::arg("density") = 1.0,
+	py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true,
+	py::arg("distance_metric")="jsd",py::arg("nn_approach")="k*nn",py::arg("k"));
+  
   m.def("layout_ACTIONet", &layout_ACTIONet,
     "Performs stochastic force-directed layout on the input graph (ACTIONet)",
     py::arg("G"), py::arg("S_r"), py::arg("compactness_level") = 50, py::arg("n_epochs") = 500, py::arg("layout_alg") = 0, py::arg("thread_no") = 0, py::arg("seed") = 0);
