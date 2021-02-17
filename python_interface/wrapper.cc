@@ -433,7 +433,7 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
                                      bool mutual_edges_only = true,
 				     string distance_metric="jsd",
 				     string nn_approach="k*nn",
-				     int k) {
+				     int k=1) {
   double M = 16, ef_construction = 200, ef = 50;
 
   arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);

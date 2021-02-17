@@ -7,7 +7,6 @@
 #include <exception>
 #include <string>
 #include <optional>
-
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t thread_no,
                         Function fn) {
@@ -144,6 +143,7 @@ mat computeFullSim(mat &H, int thread_no) {
 }
 
 // k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
+template<typename dist_t>
 sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
                                  int thread_no = 0, double M = 16,
                                  double ef_construction = 200, double ef = 10,
@@ -179,8 +179,7 @@ sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
   int max_elements = H_stacked.n_cols;
   
   //space to use determined by distance metric
-  template<typename dist_t>;
-  SpaceInterface <dist_t> *space;
+  hnswlib::SpaceInterface <dist_t> *space;
     if(distance_metric=="jsd")
     {    
       space = new hnswlib::JSDSpace(dim); //JSD 
@@ -306,6 +305,8 @@ sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
   return (G_sym);
 }
 
+  
+template<typename dist_t>
 sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
                                     int thread_no = 0, double M = 16,
                                     double ef_construction = 200,
@@ -343,6 +344,7 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
   int max_elements = H_stacked.n_cols;
 
   //space to use determined by distance metric
+  hnswlib::SpaceInterface <dist_t> *space; 
   if(distance_metric=="jsd")
     {    
       hnswlib::JSDSpace *space = new hnswlib::JSDSpace(dim); //JSD 
@@ -443,7 +445,8 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
   return (G_sym);
 }
 
-sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
+template<typename dist_t>
+sp_mat build_ACTIONet_JS_KNN(mat H_stacked,int k, int thread_no = 0,
                              double M = 16, double ef_construction = 200,
                              double ef = 10, bool mutual_edges_only = true,
 			     string distance_metric = "jsd") {
@@ -474,6 +477,7 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
   int dim = H_stacked.n_rows;
   int max_elements = H_stacked.n_cols;
     //space to use determined by distance metric
+  hnswlib::SpaceInterface <dist_t> *space;
   if(distance_metric=="jsd")
     {
       
