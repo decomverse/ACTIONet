@@ -5,7 +5,8 @@
 #include <thread>
 #include <algorithm>
 #include <exception>
-
+#include <string>
+#include <optional>
 
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t thread_no,
@@ -64,10 +65,10 @@ inline void ParallelFor(size_t start, size_t end, size_t thread_no,
 
 namespace ACTIONet {
   //allowed distance metrics for hnswlib
-  std::set<std::str> distance_metrics={"jsd","l2","ip"};
+  std::set<string> distance_metrics={"jsd","l2","ip"};
 
   //allowed nn approaches
-  std::set<std::str> nn_approaches={"k*nn","knn"};
+  std::set<string> nn_approaches={"k*nn","knn"};
 
   // excption to throw if invalid distance metric has been specified 
   class invalidDistanceMetric: public exception
@@ -83,7 +84,7 @@ namespace ACTIONet {
   {
     virtual const char* what() const throw()
     {
-      return "Invalid nearest neighbors approach specified;  must be one of k*nn or knn; 
+      return "Invalid nearest neighbors approach specified;  must be one of k*nn or knn"; 
     }
   } nnApproachException; 
     
@@ -115,7 +116,7 @@ double Sim(const double *pVect1, const double *pVect2, const double *log_vec,
   return (double)(1.0 - sqrt(JS));
 }
 
-mat computeFullSim(mat &H, int thread_no, ) {
+mat computeFullSim(mat &H, int thread_no) {
   double log_vec[1000001];
   for (int i = 0; i <= 1000000; i++) {
     log_vec[i] = (double)log2((double)i / 1000000.0);
@@ -147,7 +148,7 @@ sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
                                  int thread_no = 0, double M = 16,
                                  double ef_construction = 200, double ef = 10,
                                  bool mutual_edges_only = true,
-				 std::string distance_metric = "jsd") {
+				 string distance_metric = "jsd") {
   double LC = 1.0 / density;
   //verify that a support distance metric has been specified
   // the following distance metrics are supported in hnswlib: https://github.com/nmslib/hnswlib#supported-distances
@@ -176,25 +177,24 @@ sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
 
   int dim = H_stacked.n_rows;
   int max_elements = H_stacked.n_cols;
-    //space to use determined by distance metric
-  if(distance_metric=="jsd")
+  
+  //space to use determined by distance metric
+  template<typename dist_t>;
+  SpaceInterface <dist_t> *space;
+    if(distance_metric=="jsd")
     {    
-      hnswlib::JSDSpace *space = new hnswlib::JSDSpace(dim); //JSD 
+      space = new hnswlib::JSDSpace(dim); //JSD 
     }
   else if(distance_metric=="l2") //l2
     { 
-      hnswlib::L2Space *space=new hnswlib::L2Space(dim); 
+       space=new hnswlib::L2Space(dim); 
     }
   else//inner product 
-    {
-      hnswlib::InnerProductSpace *space=new nhswlib::InnerProductSpace(dim); 
+	    {
+        space=new hnswlib::InnerProductSpace(dim); 
     }
-  else{ // cosine 
-      hnswlib::InnerProductSpace *space=new nhswlib::InnerProductSpace(dim);
-  }
-  hnswlib::HierarchicalNSW<double> *appr_alg =
-      new hnswlib::HierarchicalNSW<double>(space, max_elements, M,
-                                           ef_construction);
+  hnswlib::HierarchicalNSW<double> *appr_alg = new hnswlib::HierarchicalNSW<double>(space, max_elements, M, ef_construction);
+  
   appr_alg->setEf(ef);
 
   // std::unique_ptr<hnswlib::JSDSpace> space =
@@ -311,7 +311,7 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
                                     double ef_construction = 200,
                                     double ef = 10,
                                     bool mutual_edges_only = true,
-				    std::string distance_metric = "jsd") {
+				    string distance_metric = "jsd") {
   double LC = 1.0 / density;
   //verify that a support distance metric has been specified
   // the following distance metrics are supported in hnswlib: https://github.com/nmslib/hnswlib#supported-distances
@@ -353,11 +353,8 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
     }
   else//inner product 
     {
-      hnswlib::InnerProductSpace *space=new nhswlib::InnerProductSpace(dim); 
+      hnswlib::InnerProductSpace *space=new hnswlib::InnerProductSpace(dim); 
     }
-  else{ // cosine 
-      hnswlib::InnerProductSpace *space=new nhswlib::InnerProductSpace(dim);
-  }
   //TODO, add cosine -- which is InnerProductSpace but with normalization; see here:
   // https://github.com/nmslib/hnswlib/blob/master/python_bindings/bindings.cpp#L97
   
@@ -449,7 +446,7 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
 sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
                              double M = 16, double ef_construction = 200,
                              double ef = 10, bool mutual_edges_only = true,
-			     std::string distance_metric = "jsd") {
+			     string distance_metric = "jsd") {
   //verify that a support distance metric has been specified
   // the following distance metrics are supported in hnswlib: https://github.com/nmslib/hnswlib#supported-distances
   if(distance_metrics.find(distance_metric)==distance_metrics.end()){
@@ -488,11 +485,8 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
     }
   else//inner product 
     {
-      hnswlib::InnerProductSpace *space=new nhswlib::InnerProductSpace(dim); 
+      hnswlib::InnerProductSpace *space=new hnswlib::InnerProductSpace(dim); 
     }
-  else{ // cosine 
-      hnswlib::InnerProductSpace *space=new nhswlib::InnerProductSpace(dim);
-  }
   //TODO, add cosine -- which is InnerProductSpace but with normalization; see here:
   // https://github.com/nmslib/hnswlib/blob/master/python_bindings/bindings.cpp#L97
   hnswlib::HierarchicalNSW<double> *appr_alg =
@@ -564,9 +558,9 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
 sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
                       double M = 16, double ef_construction = 200,
                       double ef = 10, bool mutual_edges_only = true,
-		      std::str distance_metric="jsd",
-		      std::str nn_approach="k*nn",
-		      std::optional<int> k) {
+		      string distance_metric="jsd",
+		      string nn_approach="k*nn",
+		      int k=1) {
   //verify that valid distance metric has been specified 
   if(distance_metrics.find(distance_metric)==distance_metrics.end()){
       //invalid distance metric was provided; exit
@@ -584,12 +578,13 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
   }
 
-  /// build ACTIONet with k*nn or fixed k knn, based on passed parameter 
+  /// build ACTIONet with k*nn or fixed k knn, based on passed parameter
+  sp_mat G;
   if(nn_approach=="k*nn"){
-    sp_mat G = build_ACTIONet_JS_KstarNN_v2(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+    G = build_ACTIONet_JS_KstarNN_v2(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
   }
   else{
-    sp_mat G =build_ACTIONet_JS_KNN(H_stacked, k ,thread_no,M,ef_construction, ef, mutual_edges_only, distance_metric);
+    G =build_ACTIONet_JS_KNN(H_stacked, k ,thread_no,M,ef_construction, ef, mutual_edges_only, distance_metric);
   }
   return (G);
 }
