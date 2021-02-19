@@ -6,8 +6,8 @@
 using std::numeric_limits;
 
 namespace hnswlib {
-
-static double JSD_metric(const void *pVect1_p, const void *pVect2_p,
+static float JSD_metric(const void *pVect1_p, const void *pVect2_p,
+  //static double JSD_metric(const void *pVect1_p, const void *pVect2_p,
                          const void *params) {
   double *log_vec = (double *)params;
   size_t N = (size_t)log_vec[0];
@@ -53,22 +53,26 @@ static double JSD_metric(const void *pVect1_p, const void *pVect2_p,
 
   return (double)sqrt(JS);
 }
-
-class JSDSpace : public SpaceInterface<double> {
-  DISTFUNC<double> fstdistfunc_;
+class JSDSpace : public SpaceInterface<float> {
+  //class JSDSpace : public SpaceInterface<double> {
+  //DISTFUNC<double> fstdistfunc_;
+  DISTFUNC<float> fstdistfunc_;
   size_t data_size_;
-  double params[2];
+  float params[2]; 
+  //double params[2];
 
  public:
   JSDSpace(size_t dim) {
     fstdistfunc_ = JSD_metric;
-    data_size_ = dim * sizeof(double);
+    //data_size_ = dim * sizeof(double);
+    data_size_ = dim * sizeof(float);
     params[0] = dim;
   }
 
   size_t get_data_size() { return data_size_; }
 
-  DISTFUNC<double> get_dist_func() { return fstdistfunc_; }
+  //DISTFUNC<double> get_dist_func() { return fstdistfunc_; }
+  DISTFUNC<float> get_dist_func() { return fstdistfunc_; }
 
   void *get_dist_func_param() { return (void *)params; }
 

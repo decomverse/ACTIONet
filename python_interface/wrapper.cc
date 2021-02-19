@@ -3,6 +3,8 @@
 #include <numpy/npy_common.h>
 #include <pybind11/stl.h>
 #include <stdint.h>
+#include <string.h>
+#include <string>
 #include <functional>
 #include <utility>
 

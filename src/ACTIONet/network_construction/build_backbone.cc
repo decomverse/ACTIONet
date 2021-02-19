@@ -1,6 +1,4 @@
 #include <ACTIONet.h>
-
-#include <hnswlib.h>
 #include <atomic>
 #include <thread>
 

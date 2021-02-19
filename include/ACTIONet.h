@@ -1,6 +1,5 @@
 #ifndef ACTIONet_H
 #define ACTIONet_H
-
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
@@ -55,6 +54,7 @@
 #define stdout_printf printf
 #define stderr_printf printf
 #define FLUSH fflush(stdout)
+
 
 // s_gd2 visualization
 void layout_unweighted(int n, double *X, int m, int *I, int *J, int t_max,
@@ -228,10 +228,12 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
 sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no,
                                  double M, double ef_construction, double ef,
                                  bool mutual_edges_only, string distance_metric);
+
 sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density,
                                     int thread_no, double M,
                                     double ef_construction, double ef,
                                     bool mutual_edges_only, string distance_metric);
+
 sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no, double M,
                              double ef_construction, double ef,
                              bool mutual_edges_only, string distance_metric);
