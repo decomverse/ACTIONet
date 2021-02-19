@@ -79,8 +79,8 @@ def run_ACTIONet(
         mutual_edges_only=mutual_edges_only,
         copy=False,
         return_raw=False,
-        distance_metric="jsd",
-        nn_approach="k*nn"
+        distance_metric=distance_metric,
+        nn_approach=nn_approach
     )
     # adata.obsp[net_name_out] = G
 
