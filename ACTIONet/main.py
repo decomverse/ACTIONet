@@ -9,6 +9,7 @@ from . import preprocessing as pp
 
 def run_ACTIONet(
         adata: AnnData,
+        k: Optional[int]=10,
         k_max: Optional[int] = 30,
         layer_name: Optional[str] = None,
         reduction_name: Optional[str] = "ACTION",
@@ -80,7 +81,8 @@ def run_ACTIONet(
         copy=False,
         return_raw=False,
         distance_metric=distance_metric,
-        nn_approach=nn_approach
+        nn_approach=nn_approach,
+        k=k
     )
     # adata.obsp[net_name_out] = G
 
