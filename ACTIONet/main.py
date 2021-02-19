@@ -30,6 +30,8 @@ def run_ACTIONet(
         thread_no: Optional[int] = 0,
         seed: Optional[int] = 0,
         copy: Optional[bool] = False,
+        distance_metric: Optional[str]="jsd",
+        nn_approach: Optional[str]="k*nn"
 ):
     adata = adata.copy() if copy else adata
 
@@ -76,7 +78,9 @@ def run_ACTIONet(
         thread_no=thread_no,
         mutual_edges_only=mutual_edges_only,
         copy=False,
-        return_raw=False
+        return_raw=False,
+        distance_metric="jsd",
+        nn_approach="k*nn"
     )
     # adata.obsp[net_name_out] = G
 
