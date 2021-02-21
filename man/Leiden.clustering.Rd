@@ -9,7 +9,11 @@ Leiden.clustering(
   resolution_parameter = 1,
   net.slot = "ACTIONet",
   init.slot = "assigned_archetype",
-  seed = 0
+  seed = 0,
+  postprocess = T,
+  PP_lambda = 0,
+  PP_iters = 3,
+  PP_sig_threshold = 3
 )
 }
 \arguments{

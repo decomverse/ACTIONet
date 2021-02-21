@@ -127,6 +127,7 @@ struct unification_results {
   mat H_unified;
   uvec assigned_archetypes;
   vec archetype_group;
+  mat arch_membership_weights;
 };
 
 // Low-level functions
