@@ -628,7 +628,7 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.99,
+List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.85,
                       double sensitivity = 0.0,
                       int thread_no = 0) {
   ACTIONet::unification_results results = ACTIONet::unify_archetypes(
@@ -645,11 +645,13 @@ List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.99,
 
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
-  out_list["assigned_archetypes"] = results.assigned_archetypes;
 
+  out_list["assigned_archetypes"] = results.assigned_archetypes;  
+  out_list["arch_membership_weights"] = results.arch_membership_weights;
+  
   out_list["ontology"] = results.dag_adj;
   out_list["ontology_node_attributes"] = results.dag_node_annotations;
-
+  
   return out_list;
 }
 

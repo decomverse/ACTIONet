@@ -298,13 +298,15 @@ field<mat> convexSVD(mat &A, int dim = 100, int max_iter = 5) {
 }
 
 
-field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_iter_inner = 30) {
+field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_iter_inner = 40) {
 	dim = std::min(dim, (int)M.n_cols);
 
 	mat W(M.n_rows, dim);
 	mat H(M.n_cols, dim);
+	vec obj(dim);
 	vec factor_weights(dim);
 	
+	double denom = sum(sum(square(M)));	
 	for(int k = 0; k < dim; k++) {
 		printf("%d\n", k);
 		field<mat> SVD_res = HalkoSVD(M, 1, max_SVD_iter, 0, 0);		
@@ -313,6 +315,9 @@ field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_ite
 		vec x = abs(U.col(0))*sqrt(s(0));
 		vec y = abs(V.col(0))*sqrt(s(0));
 		
+		//factor_weights(k) = sum(abs(V.col(0)));
+		//factor_weights(k) *= s(0)*factor_weights(k);
+		
 		W.col(k) = x;
 		H.col(k) = y;
 		
@@ -320,6 +325,7 @@ field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_ite
 		mat R = M - x*trans(y);
 		mat lambda = -R;
 		lambda.transform([](double val) { return (val < 0 ? 0 : val); });
+		
 		for(int j = 0; j < max_iter_inner; j++) {
 			mat A = M - lambda;
 			
@@ -344,21 +350,21 @@ field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_ite
 				x = W.col(k);
 				y = H.col(k);
 			}
-
 		}
 		
 		mat oldM = M;
 		M -= x*trans(y);
 		M.transform([](double val) { return (val < 0 ? 0 : val); });		
 		
-		factor_weights(k) = sum(sum(abs(oldM-M)));
-		
+		factor_weights(k) = sqrt(sum(sum(square(oldM-M))));
+		obj(k) = (sum(sum(square(M))) / denom);
 	}  
     
-    field<mat> out(3);
+    field<mat> out(4);
     out(0) = W;
     out(1) = H;
     out(2) = factor_weights;
+    out(3) = obj;
     
 	return (out);  
 }
@@ -381,12 +387,38 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
 
   unification_results output;
 
+  uvec nnz_idx = find(sum(C_stacked, 1) > 0);
+  vec vmap = -1*ones(C_stacked.n_rows);
+  vmap(nnz_idx) = regspace(0,  nnz_idx.n_elem-1);
+  
+  vec ii(G.n_nonzero);
+  vec jj(G.n_nonzero);
+  vec vv(G.n_nonzero);
+  
+  int idx = 0;
+  for (sp_mat::const_iterator it = G.begin(); it != G.end(); ++it) {
+    ii[idx] = vmap(it.row());
+    jj[idx] = vmap(it.col());
+    vv[idx] = (*it);
+    idx++;
+  }
+  
+  uvec selected_vertices = find( (ii != -1) && (jj != -1) );
+  uvec sub_ii = conv_to<uvec>::from(ii(selected_vertices));
+  uvec sub_jj = conv_to<uvec>::from(jj(selected_vertices));
+  vec sub_vv = vv(selected_vertices);
+  
+  umat locs = trans(join_rows(sub_ii, sub_jj));
+  sp_mat subG(locs, sub_vv, nnz_idx.n_elem, nnz_idx.n_elem);
+  
+  mat subC = C_stacked.rows(nnz_idx);
+  
   // Smooth archetypes using ACTIONet
   printf("Running network diffusion\n");
-  mat X0 = join_rows(ones(C_stacked.n_rows), C_stacked);
+  mat X0 = join_rows(ones(subC.n_rows), subC);
   X0 = normalise(X0, 1, 0);
   sp_mat X0_sp = sp_mat(X0);
-  mat PR = compute_network_diffusion_fast(G, X0_sp, thread_no, alpha, 3);
+  mat PR = compute_network_diffusion_fast(subG, X0_sp, thread_no, alpha, 3);
 
   mat C_imputed = PR.cols(1, PR.n_cols - 1);
 
@@ -398,29 +430,30 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   uvec zero_idx = find(C_imputed == 0);
   LOR(zero_idx).zeros();
   LOR.transform([](double val) { return (val < 0 ? 0 : val); });
-  //mat LOR_norm = normalise(LOR, 1, 0);
-
 
   int dim = min((int)LOR.n_cols, 100);
-  field<mat> NMU_out = recursiveNMU(LOR, dim, 5, 10);
+  field<mat> NMU_out = recursiveNMU(LOR, dim, 5, 100);
 
 //  mat W = NMU_out(0);
-  mat W = NMU_out(0);
   mat H = NMU_out(1);
-  vec x = NMU_out(2);  
-  uvec perm = sort_index(x, "descend");
-  W = W.cols(perm);
+  vec factor_weight = NMU_out(2);  
+  //vec obj = NMU_out(3);  
+  
+  uvec perm = sort_index(factor_weight, "descend");
+  //W = W.cols(perm);
   H = H.cols(perm);
-  x = x(perm);
-
-/*  
-  output.C_unified = W;
-  output.H_unified = H;
-  output.dag_adj = x;
+  factor_weight = factor_weight(perm);
+  //obj = obj(perm);
+  
+  /*
+  output.C_unified = H;
+  output.H_unified = factor_weight;
+  //output.dag_adj = obj;
   
   return(output);
-*/  
+  */
   
+  vec x = factor_weight;
  
 /*
   SPA_results res = run_SPA(Wpos, Wpos.n_cols);
@@ -433,9 +466,34 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   int state_no = -1;
   vec coverage = cumsum(x) / sum(x);
   if (sensitivity == 0) {
+	  /*
     double sx = sum(x);
     double sx_sq = sum(square(x));
     state_no = (int)round(sx * sx / sx_sq);
+    */
+
+    double sx = sum(square(x));
+    double sx_sq = sum(square(square(x)));
+    state_no = (int)round(sx * sx / sx_sq);
+
+  
+  /*  
+    vec beta = (max(x) - x)/ (max(x) - min(x));
+    double lambda = beta(0) + 1;
+    double sum_beta = 0, sum_beta_sq = 0;
+    state_no = 1;
+    for(; state_no < beta.n_elem-1; state_no++) {
+		sum_beta += beta(state_no);
+		sum_beta_sq += (beta(state_no)*beta(state_no));
+		lambda = (1.0/state_no) * ( sum_beta + sqrt( state_no  + sum_beta*sum_beta - state_no * sum_beta_sq ) ) ; 
+
+		printf("%d- cur beta = %f, next beta = %f, lambda = %f\n", state_no, beta(state_no), beta(state_no+1), lambda );
+
+		if(lambda < beta(state_no+1)) {
+			break;
+		}
+	}
+	*/    
   } else if (sensitivity <= 1) {
     state_no = min(find(sensitivity <= coverage));
   } else {
@@ -550,6 +608,7 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   output.C_unified = C_unified;
   output.H_unified = H_unified;
   output.assigned_archetypes = assigned_archetypes;
+  output.arch_membership_weights = weights;
   // output.selected_archetypes = selected_archetypes(idx);
 
   FLUSH;

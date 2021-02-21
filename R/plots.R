@@ -494,7 +494,7 @@ plot.ACTIONet.gene.view <- function(
 #' @examples
 #' ace = run.ACTIONet(sce)
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
-#' @import plotly
+#' @rawNamespace import(plotly, except = 'last_plot')
 #' @export
 plot.ACTIONet.interactive <- function(
   ace,

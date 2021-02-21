@@ -614,10 +614,18 @@ AnnData2ACE <- function(
       if (length(X.attr) == 0) {
           # Full matrix
           X = h5file[["X"]]$read()
+          sub.samples = unique(X[1:1000, 1])
       } else {
           X = read.HD5SpMat(h5file = h5file, gname = "X")
+          sub.samples = unique(X@x[1:1000])
       }
 
+	  if(sum(round(sub.samples) != sub.samples) == 0) {
+		  main_assay = "counts"
+	  } else {
+		  main_assay = "logcounts"
+	  }
+	  
       input_assays = list(X)
       names(input_assays) = main_assay
     } else {

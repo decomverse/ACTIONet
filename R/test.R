@@ -100,8 +100,7 @@ plot.ACTIONet.gradient.test <- function(
       stroke_contrast_fac = stroke_contrast_fac,
       palette = NULL,
       add_text_labels = FALSE,
-      coordinate_attr = coordinate_attr,
-      plot_order = idx
+      coordinate_attr = coordinate_attr
     )
 
     return(p_out)

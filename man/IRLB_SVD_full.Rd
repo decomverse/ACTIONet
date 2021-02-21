@@ -4,7 +4,7 @@
 \alias{IRLB_SVD_full}
 \title{Computes SVD decomposition}
 \usage{
-IRLB_SVD_full(A, dim, iters = 1000L, seed = 0L)
+IRLB_SVD_full(A, dim, iters = 1000L, seed = 0L, verbose = 1L)
 }
 \arguments{
 \item{A}{Input matrix ("sparseMatrix")}
