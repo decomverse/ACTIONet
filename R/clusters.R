@@ -461,8 +461,11 @@ Leiden.clustering <- function(
   resolution_parameter = 1,
   net.slot = "ACTIONet",
   init.slot = "assigned_archetype",
-  seed = 0
-) {
+  seed = 0,
+  postprocess = T,
+  PP_lambda = 0, 
+  PP_iters = 3,
+  PP_sig_threshold = 3) {
 
     initial.clusters = NULL
     if (!is.null(init.slot)) {
@@ -472,6 +475,12 @@ Leiden.clustering <- function(
     G = colNets(ace)[[net.slot]]
 
     clusters = cluster.graph(G, resolution_parameter, initial.clusters, seed)
+    if(postprocess == T) {
+		cc = table(clusters)
+		clusters[clusters %in% as.numeric(names(cc)[cc < 30])] = -1
+		#clusters = as.numeric(factor(correct.cell.annotations(ace, clusters)))
+		clusters = run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold)
+	}
     names(clusters) = paste("C", as.character(clusters), sep = "")
 
     return(clusters)
