@@ -200,7 +200,8 @@ field<mat> PCA2ACTIONred(mat &S, field<mat> PCA_results) {
 
 field<mat> reduce_kernel(sp_mat &S, int dim, int iter = 5, int seed = 0,
                          int SVD_algorithm = HALKO_ALG,
-                         bool prenormalize = false) {
+                         bool prenormalize = false,
+                         int verbose = 1) {
   int n = S.n_rows;
   if (prenormalize) S = normalise(S, 2);
 
@@ -219,20 +220,20 @@ field<mat> reduce_kernel(sp_mat &S, int dim, int iter = 5, int seed = 0,
       SVD_results(2) = V;
       break;
     case IRLB_ALG:
-      SVD_results = IRLB_SVD(S, dim, iter, seed);
+      SVD_results = IRLB_SVD(S, dim, iter, seed, verbose);
       break;
     case HALKO_ALG:
-      SVD_results = HalkoSVD(S, dim, iter, seed);
+      SVD_results = HalkoSVD(S, dim, iter, seed, verbose);
       break;
     case FENG_ALG:
-      SVD_results = FengSVD(S, dim, iter, seed);
+      SVD_results = FengSVD(S, dim, iter, seed, verbose);
       break;
     default:
       // fprintf(stderr, "Unknown SVD algorithm chosen (%d). Switching to
       // Halko.\n", SVD_algorithm);
       stderr_printf("Unknown SVD algorithm chosen (%d). Switching to Halko.\n",
                     SVD_algorithm);
-      SVD_results = HalkoSVD(S, dim, iter, seed);
+      SVD_results = HalkoSVD(S, dim, iter, seed, verbose);
       break;
   }
 
@@ -258,7 +259,8 @@ field<mat> reduce_kernel(sp_mat &S, int dim, int iter = 5, int seed = 0,
 
 field<mat> reduce_kernel(mat &S, int dim, int iter = 5, int seed = 0,
                          int SVD_algorithm = HALKO_ALG,
-                         bool prenormalize = false) {
+                         bool prenormalize = false,
+                         int verbose = 1) {
   int n = S.n_rows;
   if (prenormalize) S = normalise(S, 2);
 
@@ -277,20 +279,20 @@ field<mat> reduce_kernel(mat &S, int dim, int iter = 5, int seed = 0,
       SVD_results(2) = V;
       break;
     case IRLB_ALG:
-      SVD_results = IRLB_SVD(S, dim, iter, seed);
+      SVD_results = IRLB_SVD(S, dim, iter, seed, verbose);
       break;
     case HALKO_ALG:
-      SVD_results = HalkoSVD(S, dim, iter, seed);
+      SVD_results = HalkoSVD(S, dim, iter, seed, verbose);
       break;
     case FENG_ALG:
-      SVD_results = FengSVD(S, dim, iter, seed);
+      SVD_results = FengSVD(S, dim, iter, seed, verbose);
       break;
     default:
       // fprintf(stderr, "Unknown SVD algorithm chosen (%d). Switching to
       // Halko.\n", SVD_algorithm);
       stderr_printf("Unknown SVD algorithm chosen (%d). Switching to Halko.\n",
                     SVD_algorithm);
-      SVD_results = HalkoSVD(S, dim, iter, seed);
+      SVD_results = HalkoSVD(S, dim, iter, seed, verbose);
       break;
   }
 

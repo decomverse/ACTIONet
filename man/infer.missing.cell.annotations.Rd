@@ -7,9 +7,9 @@
 infer.missing.cell.annotations(
   ace,
   initial_labels,
-  double.stochastic = FALSE,
-  max_iter = 3,
-  adjust.levels = TRUE
+  iters = 3,
+  lambda = 0,
+  sig_threshold = 3
 )
 }
 \arguments{

@@ -141,21 +141,15 @@ sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
   int dim = H_stacked.n_rows;
   int max_elements = H_stacked.n_cols;
   hnswlib::JSDSpace *space = new hnswlib::JSDSpace(dim);
-  hnswlib::HierarchicalNSW<double> *appr_alg =
-      new hnswlib::HierarchicalNSW<double>(space, max_elements, M,
+  hnswlib::HierarchicalNSW<float> *appr_alg =
+      new hnswlib::HierarchicalNSW<float>(space, max_elements, M,
                                            ef_construction);
   appr_alg->setEf(ef);
 
-  // std::unique_ptr<hnswlib::JSDSpace> space =
-  // std::unique_ptr<hnswlib::JSDSpace>(new hnswlib::JSDSpace(dim));
-  // std::unique_ptr<hnswlib::HierarchicalNSW<double>> appr_alg =
-  // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
-  // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
-  // ef_construction));
-
   stdout_printf("\tBuilding index ... ");
+  fmat X = conv_to<fmat>::from(H_stacked);    
   ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId) {
-    appr_alg->addPoint(H_stacked.colptr(j), static_cast<size_t>(j));
+    appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j));
   });
   stdout_printf("done\n");
 
@@ -164,8 +158,8 @@ sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density = 1.0,
   mat dist = zeros(sample_no, kNN + 1);
   //		for(int i = 0; i < sample_no; i++) {
   ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
-    std::priority_queue<std::pair<double, hnswlib::labeltype>> result =
-        appr_alg->searchKnn(H_stacked.colptr(i), kNN + 1);
+    std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
+        appr_alg->searchKnn(X.colptr(i), kNN + 1);
 
     if (result.size() != (kNN + 1)) {
       stdout_printf(
@@ -283,21 +277,16 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
   int dim = H_stacked.n_rows;
   int max_elements = H_stacked.n_cols;
   hnswlib::JSDSpace *space = new hnswlib::JSDSpace(dim);
-  hnswlib::HierarchicalNSW<double> *appr_alg =
-      new hnswlib::HierarchicalNSW<double>(space, max_elements, M,
+  hnswlib::HierarchicalNSW<float> *appr_alg =
+      new hnswlib::HierarchicalNSW<float>(space, max_elements, M,
                                            ef_construction);
   appr_alg->setEf(ef);
 
-  // std::unique_ptr<hnswlib::JSDSpace> space =
-  // std::unique_ptr<hnswlib::JSDSpace>(new hnswlib::JSDSpace(dim));
-  // std::unique_ptr<hnswlib::HierarchicalNSW<double>> appr_alg =
-  // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
-  // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
-  // ef_construction));
-
   stdout_printf("\tBuilding index ... ");
+  fmat X = conv_to<fmat>::from(H_stacked); 
+   
   ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId) {
-    appr_alg->addPoint(H_stacked.colptr(j), static_cast<size_t>(j));
+    appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j));
   });
   stdout_printf("done\n");
 
@@ -305,17 +294,17 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
 
   vector<vector<int>> ii(thread_no);
   vector<vector<int>> jj(thread_no);
-  vector<vector<double>> vv(thread_no);
+  vector<vector<float>> vv(thread_no);
 
   //		for(int i = 0; i < sample_no; i++) {
   ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
-    std::priority_queue<std::pair<double, hnswlib::labeltype>> results =
-        appr_alg->searchKStarnn(H_stacked.colptr(i), LC);
+    std::priority_queue<std::pair<float, hnswlib::labeltype>> results =
+        appr_alg->searchKStarnn(X.colptr(i), LC);
 
     while (!results.empty()) {
       auto &res = results.top();
       int j = res.second;
-      double v = 1.0 - res.first;
+      float v = 1.0 - res.first;
       ii[threadId].push_back(i);
       jj[threadId].push_back(j);
       vv[threadId].push_back(v);
@@ -391,21 +380,15 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
   int dim = H_stacked.n_rows;
   int max_elements = H_stacked.n_cols;
   hnswlib::JSDSpace *space = new hnswlib::JSDSpace(dim);
-  hnswlib::HierarchicalNSW<double> *appr_alg =
-      new hnswlib::HierarchicalNSW<double>(space, max_elements, M,
+  hnswlib::HierarchicalNSW<float> *appr_alg =
+      new hnswlib::HierarchicalNSW<float>(space, max_elements, M,
                                            ef_construction);
   appr_alg->setEf(ef);
 
-  // std::unique_ptr<hnswlib::JSDSpace> space =
-  // std::unique_ptr<hnswlib::JSDSpace>(new hnswlib::JSDSpace(dim));
-  // std::unique_ptr<hnswlib::HierarchicalNSW<double>> appr_alg =
-  // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
-  // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
-  // ef_construction));
-
   stdout_printf("\tBuilding index ... ");
+  fmat X = conv_to<fmat>::from(H_stacked);    
   ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId) {
-    appr_alg->addPoint(H_stacked.colptr(j), static_cast<size_t>(j));
+    appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j));
   });
   stdout_printf("done\n");
 
@@ -416,8 +399,8 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
   mat dist = zeros(sample_no, kNN + 1);
   //		for(int i = 0; i < sample_no; i++) {
   ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
-    std::priority_queue<std::pair<double, hnswlib::labeltype>> result =
-        appr_alg->searchKnn(H_stacked.colptr(i), k);
+    std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
+        appr_alg->searchKnn(X.colptr(i), k);
 
     if (result.size() != (kNN + 1)) {
       stderr_printf(
