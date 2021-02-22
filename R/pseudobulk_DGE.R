@@ -28,7 +28,7 @@ get.pseudobulk.SE <- function(
       ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
       IDX = .get_attr_or_split_idx(ace, sample_attr)
       bad_batch_names = setdiff(old_batches, names(IDX))
-      msg = sprintf("Batches Dropped: %s.\n", paste0(bad_batch_names, collapse = ", "))
+      msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)
     }
 
@@ -104,8 +104,8 @@ get.pseudobulk.SE <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    prog_bar <- progress::progress_bar$new(total = length(counts_list))
-    prog_bar$tick(0)
+    # prog_bar <- progress::progress_bar$new(total = length(counts_list))
+    # prog_bar$tick(0)
     mr_lists = bplapply(names(counts_list), function(n) {
         S = Matrix::t(counts_list[[n]])
         bin_IDX = round(seq(1, (1 - bins^-1) * nrow(S), length.out = bins))
@@ -130,7 +130,7 @@ get.pseudobulk.SE <- function(
             V.prefix_sum = sapply(bin_IDX, function(idx) V.sorted[idx, ])
             out$Vp = V.prefix_sum
         }
-        prog_bar$tick()
+        # prog_bar$tick()
         return(out)
     }, BPPARAM = BPPARAM)
 
@@ -185,8 +185,8 @@ run.ensemble.pseudobulk.DESeq <- function(
     if (is.null(bins_use))
         bins_use = 1:bins
 
-    prog_bar <- progress::progress_bar$new(total = length(bins_use))
-    prog_bar$tick(0)
+    # prog_bar <- progress::progress_bar$new(total = length(bins_use))
+    # prog_bar$tick(0)
     dds_out = bplapply(paste0(slot_prefix, 1:bins), function(S) {
         cts = SummarizedExperiment::assays(se)[[S]]
         invisible({
@@ -199,7 +199,7 @@ run.ensemble.pseudobulk.DESeq <- function(
 
             dds = DESeq2::DESeq(dds, betaPrior = FALSE)
         })
-        prog_bar$tick()
+        # prog_bar$tick()
         return(dds)
     }, BPPARAM = BPPARAM)
 
@@ -279,8 +279,8 @@ run.ensemble.pseudobulk.Limma <- function(
     design_mat = design_list$design_mat
     variable_name = design_list$variable_name
 
-    prog_bar <- progress::progress_bar$new(total = length(bins_use))
-    prog_bar$tick(0)
+    # prog_bar <- progress::progress_bar$new(total = length(bins_use))
+    # prog_bar$tick(0)
     out = bplapply(bins_use, function(i) {
         E = SummarizedExperiment::assays(se)[[paste0("E", i)]]
         V = SummarizedExperiment::assays(se)[[paste0("V", i)]]
@@ -297,7 +297,7 @@ run.ensemble.pseudobulk.Limma <- function(
           variable_name = variable_name,
           min_covered_samples = min_covered_samples
         )
-        prog_bar$tick()
+        # prog_bar$tick()
         return(tbl)
     }, BPPARAM = BPPARAM)
 
