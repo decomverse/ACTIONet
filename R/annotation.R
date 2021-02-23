@@ -1,10 +1,10 @@
 
-.preprocess_annotations <- function(annotations, feature_set) {
+.preprocess_marker_labels <- function(annotations, feature_set) {
     if (is.matrix(markers) || is.sparseMatrix(markers)) {
 		common_features = sort(unique(intersect(feature_set, rownames(annotations))))
 		row_idx = match(common_features, rownames(annotations))
-		X = annotations[row_idx, ]	
-		rownames(X) = common_features	
+		X = annotations[row_idx, ]
+		rownames(X) = common_features
     } else if (is.list(markers)) {
 		X = do.call(cbind, lapply(annotations, function(gs) {
 			genes = unlist(strsplit(gs, "[+]|[-]"))
@@ -18,49 +18,49 @@
 			common.genes = sort(unique(intersect(genes, feature_set)))
 			idx1 = match(common.genes, genes)
 			idx2 = match(common.genes, feature_set)
-			
+
 			v = sparseMatrix(i = idx2, j = rep(1, length(idx2)), x = x[idx1], dims = c(length(feature_set), 1))
 			return(v)
 		}))
-		colnames(X) = names(annotations)		
+		colnames(X) = names(annotations)
 		rownames(X) = feature_set
 	} else if (is.data.frame(annotations) || (length(which(is(annotations) == "DFrame")) != 0)) { # marker, cell type, [weight]
 		if(ncol(annotations) == 2) {
 			annotations$weight = 1
-		} 
+		}
 		UL = sort(unique(annotations[, 2]))
 		X = do.call(cbind, lapply(UL, function(nn) {
 			idx = which(annotations[, 2]== nn)
 			genes = annotations[idx, 1]
 			x = annotations[idx, 3]
-			
+
 			common.genes = sort(unique(intersect(genes, feature_set)))
 			idx1 = match(common.genes, genes)
 			idx2 = match(common.genes, feature_set)
-			
+
 			v = sparseMatrix(i = idx2, j = rep(1, length(idx2)), x = x[idx1], dims = c(length(feature_set), 1))
 			return(v)
-			
+
 		}))
 		colnames(X) = UL
 		rownames(X) = feature_set
 	}
-	
+
 	row.mask = fast_row_sums(abs(X)) != 0
 	col.mask = fast_column_sums(abs(X)) != 0
 	X = X[row.mask, col.mask]
-	
-	
+
+
 	# cs = fast_column_sums(X)
-	# filtered_cols = which(cs < 0) 
+	# filtered_cols = which(cs < 0)
 	# if(length(filtered_cols)) {
-	# 	not 
+	# 	not
 	# }
 	# col.mask = cs != 0
 	# X.sp = as(X, 'dgTMatrix')
 	# X.sp@x = X.sp@x / cs[X.sp@j+1]
 	# X = as(X.sp, "dgCMatrix")
-    
+
     return(X)
 }
 
@@ -293,7 +293,7 @@ annotate.cells.using.markers <- function(
     G = colNets(ace)[[net_slot]]
     S = SummarizedExperiment::assays(ace)[[assay_name]]
 
-	annotations = ACTIONet:::.preprocess_annotations(markers, rownames(S))
+	annotations = ACTIONet:::.preprocess_marker_labels(markers, rownames(S))
 	row_idx = match(rownames(annotations), rownames(S))
 	subS = S[row_idx, ]
 
@@ -304,7 +304,7 @@ annotate.cells.using.markers <- function(
 	  alpha = 0.85,
 	  max_it = 5,
 	  thread_no = 6,
-	  ignore_baseline_expression = FALSE	
+	  ignore_baseline_expression = FALSE
 	)
 	colnames(marker_stats) = colnames(annotations)
 
