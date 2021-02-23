@@ -394,7 +394,7 @@ List run_SPA_rows_sparse(sp_mat &A, int k) {
 // ACTION.out$H[[8]] ' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
 List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
-                int max_it = 50, double min_delta = 1e-16) {
+                int max_it = 100, double min_delta = 1e-6) {
   ACTIONet::ACTION_results trace =
       ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
 
@@ -435,8 +435,8 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
 // values of k ' @examples ' ACTION.out = run_ACTION_plus(S_r, k_max = 10) ' H8
 // = ACTION.out$H[[8]] ' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max = 30, int max_it = 50,
-                     double min_delta = 1e-16, int max_trial = 3) {
+List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max = 30, int max_it = 100,
+                     double min_delta = 1e-6, int max_trial = 3) {
   ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_plus(
       S_r, k_min, k_max, max_it, min_delta, max_trial);
 
@@ -468,7 +468,7 @@ List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max = 30, int max_it = 50,
 // run_SPA(S_r, 10) ' W0 = S_r[, SPA.out$selected_columns] ' AA.out =
 // run_AA(S_r, W0) ' H = AA.out$H ' cell.assignments = apply(H, 2, which.max)
 // [[Rcpp::export]]
-List run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-16) {
+List run_AA(mat &A, mat &W0, int max_it = 100, double min_delta = 1e-6) {
   field<mat> res = ACTIONet::run_AA(A, W0, max_it, min_delta);
 
   List out;
@@ -2062,4 +2062,48 @@ mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat, dou
 	mat stats = ACTIONet::compute_marker_aggregate_stats(G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression);
 
 	return(stats);
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {
+
+  field<mat> res = ACTIONet::run_AA_with_batch_correction(Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta);
+    
+  List out;
+  out["C"] = res(0);
+  out["H"] = res(1);
+  out["Z_cor"] = res(2);  
+  out["W"] = res(2) * res(0);
+  
+  return(out);
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no,
+                          int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {
+
+                          
+  ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_with_batch_correction(S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta);
+
+  List res;
+
+  List C(k_max);
+  for (int i = k_min; i <= k_max; i++) {
+	mat cur_C = trace.C[i];
+	C[i-1] = cur_C;
+  }
+  res["C"] = C;
+
+  List H(k_max);
+  for (int i = k_min; i <= k_max; i++) {
+	mat cur_H = trace.H[i];
+	H[i-1] = cur_H;
+  }
+  res["H"] = H;
+
+  return res;
 }

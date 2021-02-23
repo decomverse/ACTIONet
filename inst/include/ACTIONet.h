@@ -324,6 +324,12 @@ vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
 mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat,
                                    double alpha, int max_it, int thread_no, bool ignore_baseline_expression);
 
+
+field<mat> run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it, int max_correction_rounds, double lambda, double min_delta);
+
+ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no, int max_it, int max_correction_rounds, double lambda, double min_delta);
+
+
 }  // namespace ACTIONet
 
 #endif

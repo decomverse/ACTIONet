@@ -308,7 +308,6 @@ field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_ite
 	
 	double denom = sum(sum(square(M)));	
 	for(int k = 0; k < dim; k++) {
-		printf("%d\n", k);
 		field<mat> SVD_res = HalkoSVD(M, 1, max_SVD_iter, 0, 0);		
 		mat U = SVD_res(0); vec s = SVD_res(1); mat V = SVD_res(2);
 		

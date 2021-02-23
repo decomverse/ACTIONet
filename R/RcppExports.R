@@ -644,15 +644,15 @@ run_SPA_rows_sparse <- function(A, k) {
     .Call(`_ACTIONet_run_SPA_rows_sparse`, A, k)
 }
 
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 50L, min_delta = 1e-16) {
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 100L, min_delta = 1e-6) {
     .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
 }
 
-run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 50L, min_delta = 1e-16, max_trial = 3L) {
+run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 100L, min_delta = 1e-6, max_trial = 3L) {
     .Call(`_ACTIONet_run_ACTION_plus`, S_r, k_min, k_max, max_it, min_delta, max_trial)
 }
 
-run_AA <- function(A, W0, max_it = 50L, min_delta = 1e-16) {
+run_AA <- function(A, W0, max_it = 100L, min_delta = 1e-6) {
     .Call(`_ACTIONet_run_AA`, A, W0, max_it, min_delta)
 }
 
@@ -1014,6 +1014,14 @@ run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_
 
 compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L, ignore_baseline_expression = FALSE) {
     .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
+}
+
+run_AA_with_batch_correction <- function(Z, W0, batch, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
+    .Call(`_ACTIONet_run_AA_with_batch_correction`, Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta)
+}
+
+run_ACTION_with_batch_correction <- function(S_r, batch, k_min, k_max, thread_no, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
+    .Call(`_ACTIONet_run_ACTION_with_batch_correction`, S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta)
 }
 
 roll_var <- function(X) {
