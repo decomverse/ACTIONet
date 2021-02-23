@@ -1032,6 +1032,42 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_AA_with_batch_correction
+List run_AA_with_batch_correction(mat& Z, mat& W0, vec batch, int max_it, int max_correction_rounds, double lambda, double min_delta);
+RcppExport SEXP _ACTIONet_run_AA_with_batch_correction(SEXP ZSEXP, SEXP W0SEXP, SEXP batchSEXP, SEXP max_itSEXP, SEXP max_correction_roundsSEXP, SEXP lambdaSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< mat& >::type W0(W0SEXP);
+    Rcpp::traits::input_parameter< vec >::type batch(batchSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type max_correction_rounds(max_correction_roundsSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_AA_with_batch_correction(Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_ACTION_with_batch_correction
+List run_ACTION_with_batch_correction(mat& S_r, vec batch, int k_min, int k_max, int thread_no, int max_it, int max_correction_rounds, double lambda, double min_delta);
+RcppExport SEXP _ACTIONet_run_ACTION_with_batch_correction(SEXP S_rSEXP, SEXP batchSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP max_correction_roundsSEXP, SEXP lambdaSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< vec >::type batch(batchSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type max_correction_rounds(max_correction_roundsSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_ACTION_with_batch_correction(S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -1177,6 +1213,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
     {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
     {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 7},
+    {"_ACTIONet_run_AA_with_batch_correction", (DL_FUNC) &_ACTIONet_run_AA_with_batch_correction, 7},
+    {"_ACTIONet_run_ACTION_with_batch_correction", (DL_FUNC) &_ACTIONet_run_ACTION_with_batch_correction, 9},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},

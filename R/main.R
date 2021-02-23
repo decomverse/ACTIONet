@@ -25,12 +25,14 @@
 #' @export
 run.ACTIONet <- function(
   ace,
-  k_max = 30,
+  batch = NULL,
+  k_min = 2,
+  k_max = 40,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
-  max_iter_ACTION = 50,
+  max_iter_ACTION = 100,
   min_specificity_z_thresh = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
@@ -57,15 +59,28 @@ run.ACTIONet <- function(
     S_r = Matrix::t(colMaps(ace)[[reduction_slot]])
 
     # Run ACTION
-    ACTION.out = run_ACTION(
-      S_r = S_r,
-      k_min = 2,
-      k_max = k_max,
-      thread_no = thread_no,
-      max_it = max_iter_ACTION,
-      min_delta = 1e-300
-    )
-
+    if(is.null(batch)) {
+		ACTION.out = run_ACTION(
+		  S_r = S_r,
+		  k_min = k_min,
+		  k_max = k_max,
+		  thread_no = thread_no,
+		  max_it = max_iter_ACTION,
+		  min_delta = 1e-300
+		)
+	} else {
+		ACTION.out = run_ACTION_with_batch_correction(
+		  S_r = S_r,
+		  batch = batch,
+		  k_min = k_min,
+		  k_max = k_max,
+		  thread_no = thread_no,
+		  max_it = max_iter_ACTION,
+		  min_delta = 1e-6,
+		  max_correction_rounds = 10,
+		  lambda = 1
+		)
+	}
     # Prune nonspecific and/or unreliable archetypes
     pruning.out = prune_archetypes(
       C_trace = ACTION.out$C,
