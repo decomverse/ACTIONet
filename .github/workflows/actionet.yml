@@ -1,4 +1,4 @@
-name: genomics
+name: ACTIONet_python
 'on':
   push:
     branches: python
