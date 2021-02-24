@@ -1,4 +1,4 @@
-name: ACTIONet
+name: ACTIONet_R
 'on':
   push:
     branches: R-release
