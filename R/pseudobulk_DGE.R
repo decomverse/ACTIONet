@@ -269,7 +269,7 @@ run.ensemble.pseudobulk.Limma <- function(
     if (is.null(bins_use))
         bins_use = 1:bins
 
-    if (is(design, "formula")) {
+    if (any(class(design) %in% c()"formula", "terms"))) {
         design_mat = stats::model.matrix(design, data = SummarizedExperiment::colData(se))
     } else if (is.matrix(design)) {
         design_mat = design

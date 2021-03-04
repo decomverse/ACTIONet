@@ -194,7 +194,8 @@ CPal_default = c(
   alpha_val = 0.5,
   text_size = 3,
   constrast_fac = 0.5,
-  nudge = FALSE
+  nudge = FALSE,
+  use_repel = TRUE
 ) {
 
     if(is.null(label_names)){
@@ -237,16 +238,32 @@ CPal_default = c(
       layout_data$y = layout_data$y + (1 - exp(-0.5 * abs(layout_data$y_sd - max(layout_data$y_sd))))
     }
 
-    p <- p + geom_label(
-      data = layout_data,
-      mapping = aes(
-        x = x,
-        y = y,
-        label = labels,
-        color = color
-      ),
-      fill = scales::alpha(c("white"), alpha_val),
-      size = text_size)
+    if(use_repel == TRUE){
+      p <- p + geom_label_repel(
+        data = layout_data,
+        mapping = aes(
+          x = x,
+          y = y,
+          label = labels,
+          color = color
+        ),
+        fill = scales::alpha(c("white"), alpha_val),
+        size = text_size,
+        segment.color = 'transparent'
+      )
+    } else {
+      p <- p + geom_label(
+        data = layout_data,
+        mapping = aes(
+          x = x,
+          y = y,
+          label = labels,
+          color = color
+        ),
+        fill = scales::alpha(c("white"), alpha_val),
+        size = text_size)
+    }
+
 
   return(p)
 }
