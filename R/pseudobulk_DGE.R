@@ -6,8 +6,11 @@ create_formula <- function(vars) {
 }
 
 make_design_mat <- function(design){
-  if (any(class(design) %in% c("formula", "terms"))) {
-      design_mat = stats::model.matrix(design, data = SummarizedExperiment::colData(se))
+  if (is(design, "formula")) {
+      design_mat = stats::model.matrix(
+        object = terms(design, keep.order = T),
+        data = SummarizedExperiment::colData(se)
+      )
   } else if (is.matrix(design)) {
       design_mat = design
   }
