@@ -5,12 +5,14 @@ create_formula <- function(vars) {
     return(fml)
 }
 
-make_design_mat <- function(design){
+make_design_mat <- function(design, data = NULL){
   if (is(design, "formula")) {
-      design_mat = stats::model.matrix(
-        object = terms(design, keep.order = T),
-        data = SummarizedExperiment::colData(se)
-      )
+    if(is.null(data))
+      stop("'data' is missing.")
+    design_mat = stats::model.matrix(
+      object = terms(design, keep.order = T),
+      data = data
+    )
   } else if (is.matrix(design)) {
       design_mat = design
   }
@@ -274,7 +276,7 @@ run.ensemble.pseudobulk.Limma <- function(
     if (is.null(bins_use))
         bins_use = 1:bins
 
-    design_mat = make_design_mat(design)
+    design_mat = make_design_mat(design, data = SummarizedExperiment::colData(se))
 
     design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
     design_mat = design_list$design_mat
@@ -363,7 +365,7 @@ variance.adjusted.DE.Limma <- function(
         W = 1/V
     }
 
-    design_mat = make_design_mat(design)
+    design_mat = make_design_mat(design, data = SummarizedExperiment::colData(se))
 
     design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
     design_mat = design_list$design_mat
