@@ -5,6 +5,15 @@ create_formula <- function(vars) {
     return(fml)
 }
 
+make_design_mat <- function(design){
+  if (any(class(design) %in% c("formula", "terms"))) {
+      design_mat = stats::model.matrix(design, data = SummarizedExperiment::colData(se))
+  } else if (is.matrix(design)) {
+      design_mat = design
+  }
+  return(design_mat)
+}
+
 get.pseudobulk.SE <- function(
   ace,
   sample_attr,
@@ -104,8 +113,6 @@ get.pseudobulk.SE <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    # prog_bar <- progress::progress_bar$new(total = length(counts_list))
-    # prog_bar$tick(0)
     mr_lists = bplapply(names(counts_list), function(n) {
         S = Matrix::t(counts_list[[n]])
         bin_IDX = round(seq(1, (1 - bins^-1) * nrow(S), length.out = bins))
@@ -130,7 +137,6 @@ get.pseudobulk.SE <- function(
             V.prefix_sum = sapply(bin_IDX, function(idx) V.sorted[idx, ])
             out$Vp = V.prefix_sum
         }
-        # prog_bar$tick()
         return(out)
     }, BPPARAM = BPPARAM)
 
@@ -185,8 +191,6 @@ run.ensemble.pseudobulk.DESeq <- function(
     if (is.null(bins_use))
         bins_use = 1:bins
 
-    # prog_bar <- progress::progress_bar$new(total = length(bins_use))
-    # prog_bar$tick(0)
     dds_out = bplapply(paste0(slot_prefix, 1:bins), function(S) {
         cts = SummarizedExperiment::assays(se)[[S]]
         invisible({
@@ -199,15 +203,13 @@ run.ensemble.pseudobulk.DESeq <- function(
 
             dds = DESeq2::DESeq(dds, betaPrior = FALSE)
         })
-        # prog_bar$tick()
         return(dds)
     }, BPPARAM = BPPARAM)
 
     dds_res = lapply(dds_out, function(dds) {
         dds_res = results(dds)
         out = data.frame(rowData(dds), dds_res)
-        out = out[, c("baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj",
-            "dispOutlier")]
+        out = out[, c("baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj", "dispOutlier")]
         return(out)
     })
 
@@ -269,11 +271,7 @@ run.ensemble.pseudobulk.Limma <- function(
     if (is.null(bins_use))
         bins_use = 1:bins
 
-    if (any(class(design) %in% c()"formula", "terms"))) {
-        design_mat = stats::model.matrix(design, data = SummarizedExperiment::colData(se))
-    } else if (is.matrix(design)) {
-        design_mat = design
-    }
+    design_mat = make_design_mat(design)
 
     design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
     design_mat = design_list$design_mat
@@ -362,11 +360,7 @@ variance.adjusted.DE.Limma <- function(
         W = 1/V
     }
 
-    if (is(design, "formula")) {
-        design_mat = stats::model.matrix(design, data = SummarizedExperiment::colData(se))
-    } else if (is.matrix(design)) {
-        design_mat = design
-    }
+    design_mat = make_design_mat(design)
 
     design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
     design_mat = design_list$design_mat
