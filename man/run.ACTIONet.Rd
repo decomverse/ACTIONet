@@ -6,12 +6,14 @@
 \usage{
 run.ACTIONet(
   ace,
-  k_max = 30,
+  batch = NULL,
+  k_min = 2,
+  k_max = 40,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
-  max_iter_ACTION = 50,
+  max_iter_ACTION = 100,
   min_specificity_z_thresh = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
