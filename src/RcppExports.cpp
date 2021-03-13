@@ -18,8 +18,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // IRLB_SVD
-List IRLB_SVD(sp_mat& A, int dim, int iters, int seed);
-RcppExport SEXP _ACTIONet_IRLB_SVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+List IRLB_SVD(sp_mat& A, int dim, int iters, int seed, int verbose);
+RcppExport SEXP _ACTIONet_IRLB_SVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -27,13 +27,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(IRLB_SVD(A, dim, iters, seed));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(IRLB_SVD(A, dim, iters, seed, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // IRLB_SVD_full
-List IRLB_SVD_full(mat& A, int dim, int iters, int seed);
-RcppExport SEXP _ACTIONet_IRLB_SVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+List IRLB_SVD_full(mat& A, int dim, int iters, int seed, int verbose);
+RcppExport SEXP _ACTIONet_IRLB_SVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -41,13 +42,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(IRLB_SVD_full(A, dim, iters, seed));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(IRLB_SVD_full(A, dim, iters, seed, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // FengSVD
-List FengSVD(sp_mat& A, int dim, int iters, int seed);
-RcppExport SEXP _ACTIONet_FengSVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+List FengSVD(sp_mat& A, int dim, int iters, int seed, int verbose);
+RcppExport SEXP _ACTIONet_FengSVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -55,13 +57,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(FengSVD(A, dim, iters, seed));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(FengSVD(A, dim, iters, seed, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // FengSVD_full
-List FengSVD_full(mat& A, int dim, int iters, int seed);
-RcppExport SEXP _ACTIONet_FengSVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+List FengSVD_full(mat& A, int dim, int iters, int seed, int verbose);
+RcppExport SEXP _ACTIONet_FengSVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -69,13 +72,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(FengSVD_full(A, dim, iters, seed));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(FengSVD_full(A, dim, iters, seed, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // HalkoSVD
-List HalkoSVD(sp_mat& A, int dim, int iters, int seed);
-RcppExport SEXP _ACTIONet_HalkoSVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+List HalkoSVD(sp_mat& A, int dim, int iters, int seed, int verbose);
+RcppExport SEXP _ACTIONet_HalkoSVD(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -83,13 +87,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(HalkoSVD(A, dim, iters, seed));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(HalkoSVD(A, dim, iters, seed, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // HalkoSVD_full
-List HalkoSVD_full(mat& A, int dim, int iters, int seed);
-RcppExport SEXP _ACTIONet_HalkoSVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP) {
+List HalkoSVD_full(mat& A, int dim, int iters, int seed, int verbose);
+RcppExport SEXP _ACTIONet_HalkoSVD_full(SEXP ASEXP, SEXP dimSEXP, SEXP itersSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -97,13 +102,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(HalkoSVD_full(A, dim, iters, seed));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(HalkoSVD_full(A, dim, iters, seed, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // reduce_kernel
-List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
-RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
+List reduce_kernel(sp_mat& S, int reduced_dim, int iter, int seed, int SVD_algorithm, bool prenormalize, int verbose);
+RcppExport SEXP _ACTIONet_reduce_kernel(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -113,13 +119,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
     Rcpp::traits::input_parameter< bool >::type prenormalize(prenormalizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // reduce_kernel_full
-List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int SVD_algorithm, bool prenormalize);
-RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP) {
+List reduce_kernel_full(mat& S, int reduced_dim, int iter, int seed, int SVD_algorithm, bool prenormalize, int verbose);
+RcppExport SEXP _ACTIONet_reduce_kernel_full(SEXP SSEXP, SEXP reduced_dimSEXP, SEXP iterSEXP, SEXP seedSEXP, SEXP SVD_algorithmSEXP, SEXP prenormalizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -129,7 +136,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type SVD_algorithm(SVD_algorithmSEXP);
     Rcpp::traits::input_parameter< bool >::type prenormalize(prenormalizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize));
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(reduce_kernel_full(S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -263,8 +271,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, double outlier_threshold, double sim_threshold, int thread_no);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP outlier_thresholdSEXP, SEXP sim_thresholdSEXP, SEXP thread_noSEXP) {
+List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, double sensitivity, int thread_no);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP sensitivitySEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -272,10 +280,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type outlier_threshold(outlier_thresholdSEXP);
-    Rcpp::traits::input_parameter< double >::type sim_threshold(sim_thresholdSEXP);
+    Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no));
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, sensitivity, thread_no));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1009,18 +1016,55 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_marker_aggregate_stats
-mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& annotations, double alpha, int max_it, int thread_no);
-RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats(SEXP GSEXP, SEXP SSEXP, SEXP annotationsSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP thread_noSEXP) {
+mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int thread_no, bool ignore_baseline_expression);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP thread_noSEXP, SEXP ignore_baseline_expressionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< sp_mat& >::type annotations(annotationsSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no));
+    Rcpp::traits::input_parameter< bool >::type ignore_baseline_expression(ignore_baseline_expressionSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats(G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_AA_with_batch_correction
+List run_AA_with_batch_correction(mat& Z, mat& W0, vec batch, int max_it, int max_correction_rounds, double lambda, double min_delta);
+RcppExport SEXP _ACTIONet_run_AA_with_batch_correction(SEXP ZSEXP, SEXP W0SEXP, SEXP batchSEXP, SEXP max_itSEXP, SEXP max_correction_roundsSEXP, SEXP lambdaSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< mat& >::type W0(W0SEXP);
+    Rcpp::traits::input_parameter< vec >::type batch(batchSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type max_correction_rounds(max_correction_roundsSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_AA_with_batch_correction(Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_ACTION_with_batch_correction
+List run_ACTION_with_batch_correction(mat& S_r, vec batch, int k_min, int k_max, int thread_no, int max_it, int max_correction_rounds, double lambda, double min_delta);
+RcppExport SEXP _ACTIONet_run_ACTION_with_batch_correction(SEXP S_rSEXP, SEXP batchSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP max_correction_roundsSEXP, SEXP lambdaSEXP, SEXP min_deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
+    Rcpp::traits::input_parameter< vec >::type batch(batchSEXP);
+    Rcpp::traits::input_parameter< int >::type k_min(k_minSEXP);
+    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type max_correction_rounds(max_correction_roundsSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type min_delta(min_deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_ACTION_with_batch_correction(S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1097,14 +1141,14 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
-    {"_ACTIONet_IRLB_SVD", (DL_FUNC) &_ACTIONet_IRLB_SVD, 4},
-    {"_ACTIONet_IRLB_SVD_full", (DL_FUNC) &_ACTIONet_IRLB_SVD_full, 4},
-    {"_ACTIONet_FengSVD", (DL_FUNC) &_ACTIONet_FengSVD, 4},
-    {"_ACTIONet_FengSVD_full", (DL_FUNC) &_ACTIONet_FengSVD_full, 4},
-    {"_ACTIONet_HalkoSVD", (DL_FUNC) &_ACTIONet_HalkoSVD, 4},
-    {"_ACTIONet_HalkoSVD_full", (DL_FUNC) &_ACTIONet_HalkoSVD_full, 4},
-    {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 6},
-    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 6},
+    {"_ACTIONet_IRLB_SVD", (DL_FUNC) &_ACTIONet_IRLB_SVD, 5},
+    {"_ACTIONet_IRLB_SVD_full", (DL_FUNC) &_ACTIONet_IRLB_SVD_full, 5},
+    {"_ACTIONet_FengSVD", (DL_FUNC) &_ACTIONet_FengSVD, 5},
+    {"_ACTIONet_FengSVD_full", (DL_FUNC) &_ACTIONet_FengSVD_full, 5},
+    {"_ACTIONet_HalkoSVD", (DL_FUNC) &_ACTIONet_HalkoSVD, 5},
+    {"_ACTIONet_HalkoSVD_full", (DL_FUNC) &_ACTIONet_HalkoSVD_full, 5},
+    {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 7},
+    {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 7},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 3},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_SPA_rows_sparse", (DL_FUNC) &_ACTIONet_run_SPA_rows_sparse, 2},
@@ -1114,7 +1158,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 7},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 6},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
@@ -1168,7 +1212,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
     {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
-    {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 6},
+    {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 7},
+    {"_ACTIONet_run_AA_with_batch_correction", (DL_FUNC) &_ACTIONet_run_AA_with_batch_correction, 7},
+    {"_ACTIONet_run_ACTION_with_batch_correction", (DL_FUNC) &_ACTIONet_run_ACTION_with_batch_correction, 9},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},

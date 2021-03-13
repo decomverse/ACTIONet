@@ -7,10 +7,9 @@
 correct.cell.annotations(
   ace,
   initial_labels,
-  LFR.threshold = 2,
-  double.stochastic = FALSE,
-  max_iter = 3,
-  adjust.levels = T,
+  iters = 3,
+  lambda = 0,
+  sig_threshold = 3,
   min.cell.fraction = 0.001
 )
 }
@@ -21,13 +20,13 @@ correct.cell.annotations(
 \item{initial_labels}{Annotations to correct with missing values (NA) in it.
 It can be either a named annotation (inside ace$annotations) or a label vector.}
 
+\item{min.cell.fraction}{Annotations with less that this fraction will be removed}
+
 \item{LFR.threshold}{How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)}
 
 \item{double.stochastic}{Whether to densify adjacency matrix before running label propagation (default=FALSE).}
 
 \item{max_iter}{How many iterative rounds of correction/inference should be performed (default=3)}
-
-\item{min.cell.fraction}{Annotations with less that this fraction will be removed}
 }
 \value{
 ace with updated annotations added to ace$annotations

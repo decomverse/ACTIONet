@@ -5,76 +5,121 @@ create_formula <- function(vars) {
     return(fml)
 }
 
-get.pseudobulk.SE <- function(ace, batch_attr, ensemble = FALSE, bins = 20, assay = "counts",
-    colData = NULL, pseudocount = 0, with_S = FALSE, with_E = FALSE, with_V = FALSE,
-    BPPARAM = SerialParam(), min_cells_per_batch = 3) {
+make_design_mat <- function(design, data = NULL){
+  if (is(design, "formula")) {
+    if(is.null(data))
+      stop("'data' is missing.")
+    design_mat = stats::model.matrix(
+      object = terms(design, keep.order = T),
+      data = data
+    )
+  } else if (is.matrix(design)) {
+      design_mat = design
+  }
+  return(design_mat)
+}
 
+get.pseudobulk.SE <- function(
+  ace,
+  sample_attr,
+  ensemble = FALSE,
+  bins = 20,
+  assay = "counts",
+  col_data = NULL,
+  pseudocount = 0,
+  with_S = FALSE,
+  with_E = FALSE,
+  with_V = FALSE,
+  min_cells_per_batch = 3,
+  BPPARAM = BiocParallel::SerialParam()
+) {
 
-    IDX = .get_attr_or_split_idx(ace, batch_attr)
+    IDX = .get_attr_or_split_idx(ace, sample_attr)
     good_batches = sapply(IDX, length) >= min_cells_per_batch
 
     if(!all(good_batches)){
       old_batches = names(IDX)
-      ace = ace[, ace[[batch_attr]] %in% names(good_batches[good_batches])]
-      IDX = .get_attr_or_split_idx(ace, batch_attr)
+      ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
+      IDX = .get_attr_or_split_idx(ace, sample_attr)
       bad_batch_names = setdiff(old_batches, names(IDX))
-      msg = sprintf("Batches Dropped: %s.\n", paste0(bad_batch_names, collapse = ", "))
+      msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)
     }
 
-    counts.mat = SummarizedExperiment::assays(ace)[[assay]]
+    counts_mat = SummarizedExperiment::assays(ace)[[assay]]
     sample_names = names(IDX)
-    counts.list = lapply(IDX, function(idx) counts.mat[, idx, drop = FALSE])
+    counts_list = lapply(IDX, function(idx) counts_mat[, idx, drop = FALSE])
 
-    # counts.list = lapply(counts.list, as, 'dgCMatrix')
-    se.assays = list()
+    se_assays = list()
 
-    S0 = sapply(counts.list, fastRowSums) + pseudocount
-    se.assays$counts = S0
+    S0 = sapply(counts_list, fastRowSums) + pseudocount
+    se_assays$counts = S0
 
-    E0 = sapply(counts.list, fastRowMeans)
+    E0 = sapply(counts_list, fastRowMeans)
+    se_assays$mean = E0
 
-    se.assays$mean = E0
-
-    V0 = sapply(counts.list, fastRowVars)
-    se.assays$var = V0
+    V0 = sapply(counts_list, fastRowVars)
+    se_assays$var = V0
 
     if (ensemble == TRUE) {
         if (!any(with_S, with_E, with_V)) {
             err = sprintf("No ensemble assays to make.\n")
             stop(err)
         }
-        mr.assays = make.ensemble.assays(counts.list = counts.list, bins = bins,
-            pseudocount = pseudocount, with_S = with_S, with_E = with_E, with_V = with_V,
-            BPPARAM = BPPARAM)
-        se.assays = c(se.assays, mr.assays$assays)
+
+        mr_assays = .make_ensemble_assays(
+          counts_list = counts_list,
+          bins = bins,
+          pseudocount = pseudocount,
+          with_S = with_S,
+          with_E = with_E,
+          with_V = with_V,
+          BPPARAM = BPPARAM
+        )
+        se_assays = c(se_assays, mr_assays$assays)
     }
 
-    n_cells = sapply(counts.list, NCOL)
-    nnz_feat_mean = sapply(counts.list, function(X) mean(fastColSums(X > 0)))
-    cd = data.frame(n_cells = n_cells, nnz_feat_mean = nnz_feat_mean, sample = factor(sample_names))
+    n_cells = sapply(counts_list, NCOL)
+    nnz_feat_mean = sapply(counts_list, function(X) mean(fastColSums(X > 0)))
+    cd = data.frame(
+      n_cells = n_cells,
+      nnz_feat_mean = nnz_feat_mean,
+      sample = factor(sample_names)
+    )
 
-    if (!is.null(colData)) {
-        md = colData[colData[[batch_attr]] %in% sample_names, , drop = FALSE]
-        md = md[match(sample_names, md[[batch_attr]]), , drop = FALSE]
+    if (!is.null(col_data)) {
+        md = col_data[col_data[[sample_attr]] %in% sample_names, , drop = FALSE]
+        md = md[match(sample_names, md[[sample_attr]]), , drop = FALSE]
         cd = data.frame(md, cd)
     }
     rownames(cd) = sample_names
     cd = droplevels(cd)
-    se = SummarizedExperiment(assays = se.assays, colData = cd, rowData = rowData(ace))
+    se = SummarizedExperiment::SummarizedExperiment(
+      assays = se_assays,
+      colData = cd,
+      rowData = SummarizedExperiment::rowData(ace)
+    )
 
     if (ensemble == TRUE) {
-        metadata(se)$bins = bins
+        S4Vectors::metadata(se)[["bins"]] = bins
     }
+
     invisible(gc())
     return(se)
 }
 
-make.ensemble.assays <- function(counts.list, bins, pseudocount, with_S = FALSE,
-    with_E = FALSE, with_V = FALSE, BPPARAM = SerialParam()) {
+.make_ensemble_assays <- function(
+  counts_list,
+  bins,
+  pseudocount,
+  with_S = FALSE,
+  with_E = FALSE,
+  with_V = FALSE,
+  BPPARAM = BiocParallel::SerialParam()
+) {
 
-    mr.lists = bplapply(names(counts.list), function(n) {
-        S = Matrix::t(counts.list[[n]])
+    mr_lists = bplapply(names(counts_list), function(n) {
+        S = Matrix::t(counts_list[[n]])
         bin_IDX = round(seq(1, (1 - bins^-1) * nrow(S), length.out = bins))
 
         out = list()
@@ -82,74 +127,86 @@ make.ensemble.assays <- function(counts.list, bins, pseudocount, with_S = FALSE,
         if (with_S == TRUE) {
             S.sorted = apply(S, 2, function(s) cumsum(sort(s)))
             cs = S.sorted[nrow(S.sorted), ]
-            S.prefix_sum = sapply(bin_IDX, function(idx) cs - S.sorted[idx, ])
+            S.prefix_sum = sapply(bin_IDX, function(idx) cs - S.sorted[idx, , drop = FALSE])
             out = list(Sp = S.prefix_sum)
         }
 
         if (with_E == TRUE) {
-            E.sorted = apply(S, 2, function(s) rev(cumsum(sort(s, decreasing = T))/seq.int(length(s))))
-            E.prefix_sum = sapply(bin_IDX, function(idx) E.sorted[idx, ])
+            E.sorted = apply(S, 2, function(s) rev(cumsum(sort(s, decreasing = TRUE))/seq.int(length(s))))
+            E.prefix_sum = sapply(bin_IDX, function(idx) E.sorted[idx, , drop = FALSE])
             out$Ep = E.prefix_sum
         }
         if (with_V == TRUE) {
-            V.sorted = apply(S, 2, function(s) rev(ACTIONet::roll_var(sort(s, decreasing = T))))
+            V.sorted = apply(S, 2, function(s) rev(roll_var(sort(s, decreasing = T))))
             V.sorted[is.na(V.sorted)] = 0
-            V.prefix_sum = sapply(bin_IDX, function(idx) V.sorted[idx, ])
+            V.prefix_sum = sapply(bin_IDX, function(idx) V.sorted[idx, , drop = FALSE])
             out$Vp = V.prefix_sum
         }
-
         return(out)
     }, BPPARAM = BPPARAM)
 
-    mr.assays = list()
+    mr_assays = list()
 
     if (with_S == TRUE) {
-        S.list = lapply(1:bins, function(i) {
-            sapply(mr.lists, function(L) L$Sp[, i]) + pseudocount
+        S_list = lapply(1:bins, function(i) {
+            sapply(mr_lists, function(L) L$Sp[, i, drop = FALSE]) + pseudocount
         })
-        names(S.list) = paste0("S", 1:bins)
-        mr.assays = c(mr.assays, S.list)
+        names(S_list) = paste0("S", 1:bins)
+        mr_assays = c(mr_assays, S_list)
     }
 
     if (with_E == TRUE) {
-        E.list = lapply(1:bins, function(i) {
-            sapply(mr.lists, function(L) L$Ep[, i])
+        E_list = lapply(1:bins, function(i) {
+            sapply(mr_lists, function(L) L$Ep[, i, drop = FALSE])
         })
-        names(E.list) = paste0("E", 1:bins)
-        mr.assays = c(mr.assays, E.list)
+        names(E_list) = paste0("E", 1:bins)
+        mr_assays = c(mr_assays, E_list)
     }
 
     if (with_V == TRUE) {
-        V.list = lapply(1:bins, function(i) {
-            sapply(mr.lists, function(L) L$Vp[, i])
+        V_list = lapply(1:bins, function(i) {
+            sapply(mr_lists, function(L) L$Vp[, i, drop = FALSE])
         })
-        names(V.list) = paste0("V", 1:bins)
-        mr.assays = c(mr.assays, V.list)
+        names(V_list) = paste0("V", 1:bins)
+        mr_assays = c(mr_assays, V_list)
     }
 
-    mr.out = list(assays = mr.assays)
+    mr_out = list(assays = mr_assays)
 
     invisible(gc())
-    return(mr.out)
+    return(mr_out)
 }
 
-run.ensemble.pseudobulk.DESeq <- function(se, design, bins = NULL, bins_use = NULL,
-    slot_prefix = "S", p_adj_method = "fdr", BPPARAM = SerialParam()) {
-    ACTIONet:::.check_and_load_package("DESeq2")
+run.ensemble.pseudobulk.DESeq <- function(
+  se,
+  design,
+  bins = NULL,
+  bins_use = NULL,
+  slot_prefix = "S",
+  p_adj_method = "fdr",
+  BPPARAM = BiocParallel::SerialParam()
+) {
+
+    .check_and_load_package("DESeq2")
 
     if (is.null(bins)) {
-        bins = metadata(se)$bins
+        bins = S4Vectors::metadata(se)$bins
     }
 
     if (is.null(bins_use))
         bins_use = 1:bins
 
     dds_out = bplapply(paste0(slot_prefix, 1:bins), function(S) {
-        cts = assays(se)[[S]]
+        cts = SummarizedExperiment::assays(se)[[S]]
         invisible({
-            dds = DESeqDataSetFromMatrix(cts, design = design, colData = colData(se),
-                rowData = rowData(se))
-            dds = DESeq(dds, betaPrior = F)
+            dds = DESeq2::DESeqDataSetFromMatrix(
+              cts,
+              design = design,
+              colData = SummarizedExperiment::colData(se),
+              rowData = SummarizedExperiment::rowData(se)
+              )
+
+            dds = DESeq2::DESeq(dds, betaPrior = FALSE)
         })
         return(dds)
     }, BPPARAM = BPPARAM)
@@ -157,168 +214,199 @@ run.ensemble.pseudobulk.DESeq <- function(se, design, bins = NULL, bins_use = NU
     dds_res = lapply(dds_out, function(dds) {
         dds_res = results(dds)
         out = data.frame(rowData(dds), dds_res)
-        out = out[, c("baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj",
-            "dispOutlier")]
+        out = out[, c("baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj", "dispOutlier")]
         return(out)
     })
 
-    outlier_count = ACTIONet::fast_row_sums(sapply(dds_res, function(dds) dds$dispOutlier))
+    outlier_count = fastRowSums(sapply(dds_res, function(dds) dds$dispOutlier))
 
-    mat.bm = sapply(dds_res, function(dds) dds$baseMean)
-    bm_mean = rowMeans(mat.bm, na.rm = T)
+    mat_Bstatm = sapply(dds_res, function(dds) dds$baseMean)
+    bm_mean = Matrix::rowMeans(mat_Bstatm, na.rm = TRUE)
 
-    mat.lfc = sapply(dds_res, function(dds) dds$log2FoldChange)
-    lfc_mean = apply(mat.lfc, 1, function(r) mean(r, na.rm = T, trim = 0.25))
+    mat_lfc = sapply(dds_res, function(dds) dds$log2FoldChange)
+    lfc_mean = apply(mat_lfc, 1, function(r) mean(r, na.rm = TRUE, trim = 0.25))
 
-    mat.se = sapply(dds_res, function(dds) dds$lfcSE)
-    se_mean = apply(mat.se, 1, function(r) mean(r, na.rm = T, trim = 0.25))
+    mat_se = sapply(dds_res, function(dds) dds$lfcSE)
+    se_mean = apply(mat_se, 1, function(r) mean(r, na.rm = TRUE, trim = 0.25))
 
     mat.stat = sapply(dds_res, function(dds) dds$stat)
-    stat_mean = rowMeans(mat.stat, na.rm = T)
+    stat_mean = Matrix::rowMeans(mat.stat, na.rm = TRUE)
 
-    mat.pval = sapply(dds_res, function(dds) dds$pvalue)
-    mat.pval[is.na(mat.pval)] = 1
-    mat.pval = Matrix::t(-log10(mat.pval))
-    corr.pvals = ACTIONet::combine.logPvals(mat.pval, base = 10)
-    corr.pvals = 10^-corr.pvals
+    mat_pval = sapply(dds_res, function(dds) dds$pvalue)
+    mat_pval[is.na(mat_pval)] = 1
+    mat_pval = Matrix::t(-log10(mat_pval))
+    corr_pvals = combine.logPvals(mat_pval, base = 10)
+    corr_pvals = 10^-corr_pvals
 
-    res = data.frame(rowData(se), baseMean = bm_mean, log2FCMean = lfc_mean, lfcSEMean = se_mean,
-        statMean = stat_mean, pvalue = corr.pvals, padj = p.adjust(corr.pvals, method = p_adj_method),
-        dispOutlierFrac = outlier_count/bins)
+    res = data.frame(
+      SummarizedExperiment::rowData(se),
+      baseMean = bm_mean,
+      log2FCMean = lfc_mean,
+      lfcSEMean = se_mean,
+      statMean = stat_mean,
+      pvalue = corr_pvals,
+      padj = stats::p.adjust(corr_pvals, method = p_adj_method),
+      dispOutlierFrac = outlier_count/bins
+    )
+
     invisible(gc())
     return(res)
 }
 
-run.ensemble.pseudobulk.Limma <- function(se, design, bins = NULL, bins_use = NULL,
-    phenotype.name = NULL, min.covered.samples = 2, p_adj_method = "fdr", BPPARAM = SerialParam()) {
-    ACTIONet:::.check_and_load_package(c("SummarizedExperiment", "limma", "edgeR"))
+run.ensemble.pseudobulk.Limma <- function(
+  se,
+  design,
+  bins = NULL,
+  bins_use = NULL,
+  variable_name = NULL,
+  min_covered_samples = 2,
+  p_adj_method = "fdr",
+  BPPARAM = BiocParallel::SerialParam()
+) {
+
+    .check_and_load_package(c("SummarizedExperiment", "limma"))
 
     if (class(se) != "SummarizedExperiment")
-        stop("se must be an object of type 'SummarizedExperiment'.")
+        stop("'se' must be an object of type 'SummarizedExperiment'.")
 
     if (is.null(bins)) {
-        bins = metadata(se)$bins
+        bins = S4Vectors::metadata(se)[["bins"]]
     }
 
     if (is.null(bins_use))
         bins_use = 1:bins
 
-    if (is(design, "formula")) {
-        design.mat = model.matrix(design, data = colData(se))
-    } else if (is.matrix(design)) {
-        design.mat = design
-    }
+    design_mat = make_design_mat(design, data = SummarizedExperiment::colData(se))
 
-    if (is.null(phenotype.name)) {
-        phenotype.name = colnames(design.mat)[ncol(design.mat)]
-    }
+    design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
+    design_mat = design_list$design_mat
+    variable_name = design_list$variable_name
 
     out = bplapply(bins_use, function(i) {
-        print(i)
-        E = assays(se)[[paste0("E", i)]]
-        V = assays(se)[[paste0("V", i)]]
+        E = SummarizedExperiment::assays(se)[[paste0("E", i)]]
+        V = SummarizedExperiment::assays(se)[[paste0("V", i)]]
         W = 1/V
 
         slot_E = paste0("E", i)
         slot_V = paste0("V", i)
 
-        tbl = variance.adjusted.DE.Limma(se, slot_E = slot_E, slot_V = slot_V, design = design.mat,
-            phenotype.name = phenotype.name, min.covered.samples = min.covered.samples)
-
+        tbl = variance.adjusted.DE.Limma(
+          se = se,
+          slot_E = slot_E,
+          slot_V = slot_V,
+          design = design_mat,
+          variable_name = variable_name,
+          min_covered_samples = min_covered_samples
+        )
+        return(tbl)
     }, BPPARAM = BPPARAM)
 
     common = lapply(out, function(tbl) rownames(tbl))
     common = Reduce(intersect, common)
     out = lapply(out, function(tbl) tbl[rownames(tbl) %in% common, ])
 
-    mat.bm = sapply(out, function(tbl) tbl$AveExpr)
-    bm_mean = rowMeans(mat.bm, na.rm = T)
+    mat_Bstatm = sapply(out, function(tbl) tbl$AveExpr)
+    bm_mean = Matrix::rowMeans(mat_Bstatm, na.rm = TRUE)
 
-    mat.lfc = sapply(out, function(tbl) tbl$logFC)
-    lfc_mean = apply(mat.lfc, 1, function(r) mean(r, na.rm = T, trim = 0.25))
-    # lfc_max = apply(mat.lfc, 1, function(r) r[which.max(abs(r))])
+    mat_lfc = sapply(out, function(tbl) tbl$logFC)
+    lfc_mean = apply(mat_lfc, 1, function(r) mean(r, na.rm = TRUE, trim = 0.25))
 
-    mat.t = sapply(out, function(tbl) tbl$t)
-    t_mean = rowMeans(mat.t, na.rm = T)
+    mat_tstat = sapply(out, function(tbl) tbl$t)
+    t_mean = Matrix::rowMeans(mat_tstat, na.rm = TRUE)
 
-    mat.B = sapply(out, function(tbl) tbl$B)
-    B_mean = rowMeans(mat.B, na.rm = T)
+    mat_Bstat = sapply(out, function(tbl) tbl$B)
+    B_mean = Matrix::rowMeans(mat_Bstat, na.rm = TRUE)
 
-    mat.pval = sapply(out, function(tbl) tbl$P.Value)
-    mat.pval[is.na(mat.pval)] = 1
-    mat.pval = Matrix::t(-log10(mat.pval))
-    corr.pvals = ACTIONet::combine.logPvals(mat.pval, base = 10)
-    corr.pvals = 10^-corr.pvals
+    mat_pval = sapply(out, function(tbl) tbl$P.Value)
+    mat_pval[is.na(mat_pval)] = 1
+    mat_pval = Matrix::t(-log10(mat_pval))
+    corr_pvals = combine.logPvals(mat_pval, base = 10)
+    corr_pvals = 10^-corr_pvals
 
-    rdat = rowData(se)[rownames(se) %in% common, ]
-    res = data.frame(rdat, aveExpr = bm_mean, log2FCMean = lfc_mean, tStatMean = t_mean,
-        BStatMean = B_mean, pvalue = corr.pvals, padj = p.adjust(corr.pvals, method = p_adj_method))
+    rdat = SummarizedExperiment::rowData(se)[rownames(se) %in% common, ]
+    res = data.frame(
+      rdat,
+      aveExpr = bm_mean,
+      log2FCMean = lfc_mean,
+      tStatMean = t_mean,
+      BStatMean = B_mean,
+      pvalue = corr_pvals,
+      padj = stats::p.adjust(corr_pvals, method = p_adj_method)
+    )
+
     invisible(gc())
     return(res)
 }
 
-variance.adjusted.DE.Limma <- function(se, design, slot_E = "counts", slot_V = NULL,
-    W.mat = NULL, phenotype.name = NULL, min.covered.samples = 3) {
+variance.adjusted.DE.Limma <- function(
+  se,
+  design,
+  slot_E = "counts",
+  slot_V = NULL,
+  W_mat = NULL,
+  variable_name = NULL,
+  min_covered_samples = 3
+) {
 
-    ACTIONet:::.check_and_load_package(c("SummarizedExperiment", "limma", "edgeR"))
+    .check_and_load_package(c("SummarizedExperiment", "limma"))
 
     if (class(se) != "SummarizedExperiment")
         stop("se must be an object of type 'SummarizedExperiment'.")
 
     E = SummarizedExperiment::assays(se)[[slot_E]]
 
-    if (!is.null(W.mat)) {
-        W = W.mat
+    if (!is.null(W_mat)) {
+        W = W_mat
     } else if (!is.null(slot_V)) {
         V = SummarizedExperiment::assays(se)[[slot_V]]
         W = 1/V
     }
 
-    if (is(design, "formula")) {
-        design.mat = model.matrix(design, data = colData(se))
-    } else if (is.matrix(design)) {
-        design.mat = design
-    }
+    design_mat = make_design_mat(design, data = SummarizedExperiment::colData(se))
 
-    if (is.null(phenotype.name)) {
-        phenotype.name = colnames(design.mat)[ncol(design.mat)]
-    }
+    design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
+    design_mat = design_list$design_mat
+    variable_name = design_list$variable_name
 
-    W.masked = t(apply(W, 1, function(w) {
+    W_masked = Matrix::t(apply(W, 1, function(w) {
         mask = (!is.na(w) & is.finite(w) & (w != 0))
 
-        upper = median(w[mask] + 3 * mad(w[mask]))
+        upper = stats::median(w[mask] + 3 * stats::mad(w[mask]))
         w[w > upper] = 0
 
-        lower = median(w[mask] - 3 * mad(w[mask]))
+        lower = stats::median(w[mask] - 3 * stats::mad(w[mask]))
         w[w < lower] = 0
 
         w[!mask] = 0
         return(w)
     }))
-    W.masked[W.masked == 0] = 1e-16
+    W_masked[W_masked == 0] = 1e-16
 
-    selected.vars = ACTIONet::fast_column_sums(design.mat > 0) >= min.covered.samples
+    selected_vars = fastColSums(design_mat > 0) >= min_covered_samples
 
-    selected.genes = setdiff(1:nrow(W.masked), which(ACTIONet::fast_row_sums(apply(design.mat[,
-        selected.vars], 2, function(x) {
+    selected_feats = setdiff(1:nrow(W_masked), which(fastRowSums(apply(design_mat[,
+        selected_vars], 2, function(x) {
         mm = (x > 0)
-        v = as.numeric((ACTIONet::fast_row_sums(W.masked[, mm]) == 0) > 0)
+        v = as.numeric((fastRowSums(W_masked[, mm]) == 0) > 0)
         return(v)
     })) > 0))
 
     suppressWarnings({
-        fit <- lmFit(E[selected.genes, ], design = design.mat[, selected.vars], weights = W.masked[selected.genes,
-            ])
+        fit <- limma::lmFit(
+          object = E[selected_feats, ],
+          design = design_mat[, selected_vars],
+          weights = W_masked[selected_feats,]
+        )
     })
 
     suppressWarnings({
-        contrast.mat <- makeContrasts(contrasts = phenotype.name, levels = design.mat)
+        contrast_mat <- limma::makeContrasts(contrasts = variable_name, levels = design_mat)
     })
 
-    cfit <- contrasts.fit(fit, contrast.mat[selected.vars])
-    suppressWarnings(efit <- eBayes(cfit, trend = F, robust = T))
-    tbl <- topTable(efit, number = Inf, sort.by = "none")
-    rownames(tbl) = rownames(se)[selected.genes]
+    cfit <- limma::contrasts.fit(fit, contrast_mat[selected_vars])
+    suppressWarnings(efit <- limma::eBayes(cfit, trend = FALSE, robust = TRUE))
+    tbl <- limma::topTable(efit, number = Inf, sort.by = "none")
+    rownames(tbl) = rownames(se)[selected_feats]
+
     return(tbl)
 }

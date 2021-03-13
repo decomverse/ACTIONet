@@ -14,8 +14,8 @@ annotate.archetypes.using.labels(ace, labels, archetype.slot = "H_unified")
 }
 \value{
 A named list: \itemize{
-\item Labels: Inferred archetype labels
-\item Labels.confidence: Confidence of inferred labels
+\item Label: Inferred archetype labels
+\item Confidence: Confidence of inferred labels
 \item Enrichment: Full enrichment matrix
 }
 }
