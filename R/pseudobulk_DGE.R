@@ -127,19 +127,19 @@ get.pseudobulk.SE <- function(
         if (with_S == TRUE) {
             S.sorted = apply(S, 2, function(s) cumsum(sort(s)))
             cs = S.sorted[nrow(S.sorted), ]
-            S.prefix_sum = sapply(bin_IDX, function(idx) cs - S.sorted[idx, ])
+            S.prefix_sum = sapply(bin_IDX, function(idx) cs - S.sorted[idx, , drop = FALSE])
             out = list(Sp = S.prefix_sum)
         }
 
         if (with_E == TRUE) {
             E.sorted = apply(S, 2, function(s) rev(cumsum(sort(s, decreasing = TRUE))/seq.int(length(s))))
-            E.prefix_sum = sapply(bin_IDX, function(idx) E.sorted[idx, ])
+            E.prefix_sum = sapply(bin_IDX, function(idx) E.sorted[idx, , drop = FALSE])
             out$Ep = E.prefix_sum
         }
         if (with_V == TRUE) {
             V.sorted = apply(S, 2, function(s) rev(roll_var(sort(s, decreasing = T))))
             V.sorted[is.na(V.sorted)] = 0
-            V.prefix_sum = sapply(bin_IDX, function(idx) V.sorted[idx, ])
+            V.prefix_sum = sapply(bin_IDX, function(idx) V.sorted[idx, , drop = FALSE])
             out$Vp = V.prefix_sum
         }
         return(out)
@@ -149,7 +149,7 @@ get.pseudobulk.SE <- function(
 
     if (with_S == TRUE) {
         S_list = lapply(1:bins, function(i) {
-            sapply(mr_lists, function(L) L$Sp[, i]) + pseudocount
+            sapply(mr_lists, function(L) L$Sp[, i, drop = FALSE]) + pseudocount
         })
         names(S_list) = paste0("S", 1:bins)
         mr_assays = c(mr_assays, S_list)
@@ -157,7 +157,7 @@ get.pseudobulk.SE <- function(
 
     if (with_E == TRUE) {
         E_list = lapply(1:bins, function(i) {
-            sapply(mr_lists, function(L) L$Ep[, i])
+            sapply(mr_lists, function(L) L$Ep[, i, drop = FALSE])
         })
         names(E_list) = paste0("E", 1:bins)
         mr_assays = c(mr_assays, E_list)
@@ -165,7 +165,7 @@ get.pseudobulk.SE <- function(
 
     if (with_V == TRUE) {
         V_list = lapply(1:bins, function(i) {
-            sapply(mr_lists, function(L) L$Vp[, i])
+            sapply(mr_lists, function(L) L$Vp[, i, drop = FALSE])
         })
         names(V_list) = paste0("V", 1:bins)
         mr_assays = c(mr_assays, V_list)
@@ -282,8 +282,6 @@ run.ensemble.pseudobulk.Limma <- function(
     design_mat = design_list$design_mat
     variable_name = design_list$variable_name
 
-    # prog_bar <- progress::progress_bar$new(total = length(bins_use))
-    # prog_bar$tick(0)
     out = bplapply(bins_use, function(i) {
         E = SummarizedExperiment::assays(se)[[paste0("E", i)]]
         V = SummarizedExperiment::assays(se)[[paste0("V", i)]]
@@ -300,7 +298,6 @@ run.ensemble.pseudobulk.Limma <- function(
           variable_name = variable_name,
           min_covered_samples = min_covered_samples
         )
-        # prog_bar$tick()
         return(tbl)
     }, BPPARAM = BPPARAM)
 
