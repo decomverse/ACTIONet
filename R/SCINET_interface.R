@@ -14,10 +14,18 @@
 #' network.list = run.SCINET.archetype(ace)
 #' G = network.list[[1]]
 #' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
-run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, spec.sample_no = 1000, 
-    thread_no = 4, compute.topo.specificity = T) {
-    library(SCINET)
-    
+run.SCINET.archetype <- function(
+  ace,
+  G = NULL,
+  core = TRUE,
+  min.edge.weight = 2,
+  spec.sample_no = 1000,
+  thread_no = 8,
+  compute.topo.specificity = TRUE
+) {
+
+    .check_and_load_package("SCINET")
+
     print("Preprocessing the baseline interactome")
     if (is.null(G)) {
         if (!exists("PCNet")) {
@@ -27,12 +35,12 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
     } else if (is.matrix(G) | is.sparseMatrix(G)) {
         Adj = as(G, "sparseMatrix")
         Adj@x = rep(1, length(Adj@x))
-    } else if (is.igraph(G)) {
-        Adj = as(get.adjacency(G), "sparseMatrix")
+    } else if (igraph::is.igraph(G)) {
+        Adj = as(igraph::get.adjacency(G), "sparseMatrix")
     }
-    
+
     gene.scores = rowMaps(ace)[["unified_feature_specificity"]]
-    
+
     common.genes = intersect(rownames(gene.scores), rownames(PCNet))
     if (length(common.genes) == 0) {
         print("No common genes found. Check rownames (or vertex names) for the input graph")
@@ -40,35 +48,42 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
     }
     A = gene.scores[common.genes, ]
     G = Adj[common.genes, common.genes]
-    
-    
+
+
     print("Constructing networks")
     gene.activity.scores = SCINET::compute_gene_activities_full(A = A, thread_no = thread_no)
-    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, 
-        thread_no = thread_no)
+    cellstate.nets = SCINET::construct_cell_networks(
+      net = G,
+      gene_activities = gene.activity.scores,
+      thread_no = thread_no
+    )
     cellstate.nets.list = as.list(cellstate.nets)
-    
+
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = ACTIONet::fast_column_sums(G.Adj) == 0
-        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], 
-            mode = "undirected", weighted = T)
+        filter.mask = fastColSums(G.Adj) == 0
+        G = igraph::graph_from_adjacency_matrix(
+          G.Adj[!filter.mask, !filter.mask],
+          mode = "undirected",
+          weighted = TRUE
+        )
+
         V(G)$name = common.genes[!filter.mask]
         if (compute.topo.specificity == TRUE) {
-            z.scores = topo.spec(G, spec.sample_no)
+            z.scores = SCINET::topo.spec(G, spec.sample_no)
             V(G)$specificity = 1/(1 + exp(-z.scores))
         }
-        
+
         return(G)
     })
-    
+
     if (is.null(colnames(gene.scores))) {
         names(cellstate.nets.list.igraph) = 1:ncol(gene.scores)
     } else {
         names(cellstate.nets.list.igraph) = colnames(gene.scores)
     }
-    
+
     return(cellstate.nets.list.igraph)
 }
 
@@ -92,10 +107,18 @@ run.SCINET.archetype <- function(ace, G = NULL, core = T, min.edge.weight = 2, s
 #' network.list = run.SCINET.clusters(ace, 'cluster_specificity_scores')
 #' G = network.list[[1]]
 #' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
-run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.weight = 2, 
-    spec.sample_no = 1000, thread_no = 8, compute.topo.specificity = T) {
-    library(SCINET)
-    
+run.SCINET.clusters <- function(
+  ace,
+  specificity.slot.name,
+  G = NULL,
+  min.edge.weight = 2,
+  spec.sample_no = 1000,
+  thread_no = 8,
+  compute.topo.specificity = TRUE
+) {
+
+    .check_and_load_package("SCINET")
+
     print("Preprocessing the baseline interactome")
     if (is.null(G)) {
         if (!exists("PCNet")) {
@@ -105,18 +128,17 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.w
     } else if (is.matrix(G) | is.sparseMatrix(G)) {
         Adj = as(G, "sparseMatrix")
         Adj@x = rep(1, length(Adj@x))
-    } else if (is.igraph(G)) {
-        Adj = as(get.adjacency(G), "sparseMatrix")
+    } else if (igraph::is.igraph(G)) {
+        Adj = as(igraph::get.adjacency(G), "sparseMatrix")
     }
-    
-    
+
+
     if (!(specificity.slot.name %in% names(rowMaps(ace)))) {
         message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
     }
-    
+
     gene.scores = as.matrix(log1p(rowMaps(ace)[[specificity.slot.name]]))
-    
-    
+
     common.genes = intersect(rownames(gene.scores), rownames(PCNet))
     if (length(common.genes) == 0) {
         print("No common genes found. Check rownames (or vertex names) for the input graph")
@@ -124,29 +146,37 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.w
     }
     A = gene.scores[common.genes, ]
     G = Adj[common.genes, common.genes]
-    
-    
+
+
     print("Constructing networks")
     gene.activity.scores = SCINET::compute_gene_activities_full(A = A, thread_no = thread_no)
-    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, 
-        thread_no = thread_no)
+    cellstate.nets = SCINET::construct_cell_networks(
+      net = G,
+      gene_activities = gene.activity.scores,
+      thread_no = thread_no
+    )
     cellstate.nets.list = as.list(cellstate.nets)
-    
+
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = ACTIONet::fast_column_sums(G.Adj) == 0
-        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], 
-            mode = "undirected", weighted = T)
+        filter.mask = fastColSums(G.Adj) == 0
+
+        G = igraph::graph_from_adjacency_matrix(
+          adjmatrix = G.Adj[!filter.mask, !filter.mask],
+          mode = "undirected",
+          weighted = TRUE
+        )
+
         V(G)$name = common.genes[!filter.mask]
         if (compute.topo.specificity == TRUE) {
-            z.scores = topo.spec(G, spec.sample_no)
+            z.scores = SCINET::topo.spec(G, spec.sample_no)
             V(G)$specificity = 1/(1 + exp(-z.scores))
         }
-        
+
         return(G)
     })
-    
+
     if (is.null(colnames(gene.scores))) {
         names(cellstate.nets.list.igraph) = 1:ncol(gene.scores)
     } else {
@@ -173,10 +203,17 @@ run.SCINET.clusters <- function(ace, specificity.slot.name, G = NULL, min.edge.w
 #' network.list = run.SCINET.gene.scores(gene.scores)
 #' G = network.list[[1]]
 #' V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]
-run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, spec.sample_no = 1000, 
-    thread_no = 8, compute.topo.specificity = T) {
-    require(SCINET)
-    
+run.SCINET.gene.scores <- function(
+  gene.scores,
+  G = NULL,
+  min.edge.weight = 2,
+  spec.sample_no = 1000,
+  thread_no = 8,
+  compute.topo.specificity = TRUE
+) {
+
+    .check_and_load_package("SCINET")
+
     print("Preprocessing the baseline interactome")
     if (is.null(G)) {
         if (!exists("PCNet")) {
@@ -186,48 +223,53 @@ run.SCINET.gene.scores <- function(gene.scores, G = NULL, min.edge.weight = 2, s
     } else if (is.matrix(G) | is.sparseMatrix(G)) {
         Adj = as(G, "sparseMatrix")
         Adj@x = rep(1, length(Adj@x))
-    } else if (is.igraph(G)) {
-        Adj = as(get.adjacency(G), "sparseMatrix")
+    } else if (igraph::is.igraph(G)) {
+        Adj = as(igraph::get.adjacency(G), "sparseMatrix")
     }
-    
-    
+
+
     common.genes = intersect(rownames(gene.scores), rownames(Adj))
     if (length(common.genes) == 0) {
-        print("No common genes found. Check rownames (or vertex names) for the input graph")
-        return()
+        err = sprint("No common genes found. Check rownames (or vertex names) for the input graph")
+        stop(err)
     }
-    A = gene.scores[common.genes,,drop=FALSE ]
+    A = gene.scores[common.genes,, drop=FALSE]
     G = Adj[common.genes, common.genes]
-    
-    
-    
+
     print("Constructing networks")
     gene.activity.scores = SCINET::RIN_transform(A = A, thread_no = thread_no)
-    cellstate.nets = SCINET::construct_cell_networks(net = G, gene_activities = gene.activity.scores, 
-        thread_no = thread_no)
+    cellstate.nets = SCINET::construct_cell_networks(
+      net = G,
+      gene_activities = gene.activity.scores,
+      thread_no = thread_no
+    )
     cellstate.nets.list = as.list(cellstate.nets)
-    
+
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = ACTIONet::fast_column_sums(G.Adj) == 0
-        G = igraph::graph_from_adjacency_matrix(G.Adj[!filter.mask, !filter.mask], 
-            mode = "undirected", weighted = T)
+        filter.mask = fastColSums(G.Adj) == 0
+        G = igraph::graph_from_adjacency_matrix(
+          adjmatrix = G.Adj[!filter.mask, !filter.mask],
+          mode = "undirected",
+          weighted = TRUE
+        )
+
         V(G)$name = common.genes[!filter.mask]
         if (compute.topo.specificity == TRUE) {
             z.scores = topo.spec(G, spec.sample_no)
             V(G)$specificity.z = z.scores
             V(G)$specificity = 1/(1 + exp(-z.scores))
         }
-        
+
         return(G)
     })
-    
+
     if (is.null(colnames(gene.scores))) {
         names(cellstate.nets.list.igraph) = 1:ncol(gene.scores)
     } else {
         names(cellstate.nets.list.igraph) = colnames(gene.scores)
     }
-    
+
     return(cellstate.nets.list.igraph)
 }

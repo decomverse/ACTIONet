@@ -56,7 +56,6 @@ inline auto clamp(float v, float lo, float hi) -> float {
   return t > hi ? hi : t;
 }
 
-
 static thread_local pcg32 rng;
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
@@ -74,7 +73,6 @@ struct SgdWorker {
   std::size_t head_nvert;
   std::size_t tail_nvert;
   float dist_eps;
-
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
@@ -102,36 +100,38 @@ struct SgdWorker {
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<float> dys(ndim);
-	
+
     std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
 
-	
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
-		
+
       std::size_t dj = ndim * positive_head[i];
       std::size_t dk = ndim * positive_tail[i];
 
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         float diff = head_embedding[dj + d] - tail_embedding[dk + d];
-        
+
         dys[d] = diff;
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
 
       float grad_coeff = gradient.grad_attr(dist_squared);
-      //float grad_coeff = 0.5; //gradient.grad_attr(0.5);; //gradient.grad_attr(dist_squared);
-	  
+      // float grad_coeff = 0.5; //gradient.grad_attr(0.5);;
+      // //gradient.grad_attr(dist_squared);
+
       for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
-                                     
+        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+                                     Gradient::clamp_hi);
+        ;  // alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+           // Gradient::clamp_hi);
+
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
-                        
       }
 
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -144,22 +144,26 @@ struct SgdWorker {
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
           float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
-          dys[d] =  diff;
+          dys[d] = diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
 
         float grad_coeff = gradient.grad_rep(dist_squared);
-        //float grad_coeff = 0.5; //gradient.grad_rep(0.5);; //gradient.grad_rep(dist_squared);
+        // float grad_coeff = 0.5; //gradient.grad_rep(0.5);;
+        // //gradient.grad_rep(dist_squared);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);; //alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+                                       Gradient::clamp_hi);
+          ;  // alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+             // Gradient::clamp_hi);
 
           head_embedding[dj + d] += grad_d;
         }
       }
       sampler.next_sample(i, n_neg_samples);
-    }    
+    }
   }
 
   void set_n(int n) { this->n = n; }

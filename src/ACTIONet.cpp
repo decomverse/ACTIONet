@@ -44,8 +44,8 @@ bool kv_pair_less(const std::pair<T1, T2> &x, const std::pair<T1, T2> &y) {
 //' SVD.out = IRLBA_SVD(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
-  field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed);
+List IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0, int verbose = 1) {
+  field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed, verbose);
 
   List res;
 
@@ -73,8 +73,8 @@ List IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0) {
 //' SVD.out = IRLBA_SVD_full(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List IRLB_SVD_full(mat &A, int dim, int iters = 1000, int seed = 0) {
-  field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed);
+List IRLB_SVD_full(mat &A, int dim, int iters = 1000, int seed = 0, int verbose = 1) {
+  field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed, verbose);
 
   List res;
 
@@ -104,8 +104,8 @@ List IRLB_SVD_full(mat &A, int dim, int iters = 1000, int seed = 0) {
 //' SVD.out = FengSVD(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List FengSVD(sp_mat &A, int dim, int iters = 5, int seed = 0) {
-  field<mat> SVD_out = ACTIONet::FengSVD(A, dim, iters, seed);
+List FengSVD(sp_mat &A, int dim, int iters = 5, int seed = 0, int verbose = 1) {
+  field<mat> SVD_out = ACTIONet::FengSVD(A, dim, iters, seed, verbose);
 
   List res;
 
@@ -134,8 +134,8 @@ List FengSVD(sp_mat &A, int dim, int iters = 5, int seed = 0) {
 //' SVD.out = FengSVD(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List FengSVD_full(mat &A, int dim, int iters = 5, int seed = 0) {
-  field<mat> SVD_out = ACTIONet::FengSVD(A, dim, iters, seed);
+List FengSVD_full(mat &A, int dim, int iters = 5, int seed = 0, int verbose = 1) {
+  field<mat> SVD_out = ACTIONet::FengSVD(A, dim, iters, seed, verbose);
 
   List res;
 
@@ -165,8 +165,8 @@ List FengSVD_full(mat &A, int dim, int iters = 5, int seed = 0) {
 //' SVD.out = HalkoSVD(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List HalkoSVD(sp_mat &A, int dim, int iters = 5, int seed = 0) {
-  field<mat> SVD_out = ACTIONet::HalkoSVD(A, dim, iters, seed);
+List HalkoSVD(sp_mat &A, int dim, int iters = 5, int seed = 0, int verbose = 1) {
+  field<mat> SVD_out = ACTIONet::HalkoSVD(A, dim, iters, seed, verbose);
 
   List res;
 
@@ -196,8 +196,8 @@ List HalkoSVD(sp_mat &A, int dim, int iters = 5, int seed = 0) {
 //' SVD.out = HalkoSVD(A, dim = 2)
 //' U = SVD.out$U
 // [[Rcpp::export]]
-List HalkoSVD_full(mat &A, int dim, int iters = 5, int seed = 0) {
-  field<mat> SVD_out = ACTIONet::HalkoSVD(A, dim, iters, seed);
+List HalkoSVD_full(mat &A, int dim, int iters = 5, int seed = 0, int verbose = 1) {
+  field<mat> SVD_out = ACTIONet::HalkoSVD(A, dim, iters, seed, verbose);
 
   List res;
 
@@ -230,9 +230,9 @@ List HalkoSVD_full(mat &A, int dim, int iters = 5, int seed = 0) {
 //' S_r = reduction.out$S_r
 // [[Rcpp::export]]
 List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0,
-                   int SVD_algorithm = 0, bool prenormalize = false) {
+                   int SVD_algorithm = 0, bool prenormalize = false, int verbose = 1) {
   field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed,
-                                                 SVD_algorithm, prenormalize);
+                                                 SVD_algorithm, prenormalize, verbose);
 
   List res;
   res["V"] = reduction(0);
@@ -282,18 +282,15 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0,
 // [[Rcpp::export]]
 List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5,
                         int seed = 0, int SVD_algorithm = 0,
-                        bool prenormalize = false) {
+                        bool prenormalize = false, int verbose = 1) {
   field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iter, seed,
-                                                 SVD_algorithm, prenormalize);
+                                                 SVD_algorithm, prenormalize, verbose);
 
   List res;
   res["V"] = reduction(0);
 
   vec sigma = reduction(1).col(0);
   res["sigma"] = sigma;
-
-
-
 
   mat V = reduction(2);
   // printf("%d x %d\n", V.n_rows, V.n_cols);
@@ -397,7 +394,7 @@ List run_SPA_rows_sparse(sp_mat &A, int k) {
 // ACTION.out$H[[8]] ' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
 List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
-                int max_it = 50, double min_delta = 1e-16) {
+                int max_it = 100, double min_delta = 1e-6) {
   ACTIONet::ACTION_results trace =
       ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
 
@@ -438,8 +435,8 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
 // values of k ' @examples ' ACTION.out = run_ACTION_plus(S_r, k_max = 10) ' H8
 // = ACTION.out$H[[8]] ' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
-List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max = 30, int max_it = 50,
-                     double min_delta = 1e-16, int max_trial = 3) {
+List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max = 30, int max_it = 100,
+                     double min_delta = 1e-6, int max_trial = 3) {
   ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_plus(
       S_r, k_min, k_max, max_it, min_delta, max_trial);
 
@@ -471,7 +468,7 @@ List run_ACTION_plus(mat &S_r, int k_min = 2, int k_max = 30, int max_it = 50,
 // run_SPA(S_r, 10) ' W0 = S_r[, SPA.out$selected_columns] ' AA.out =
 // run_AA(S_r, W0) ' H = AA.out$H ' cell.assignments = apply(H, 2, which.max)
 // [[Rcpp::export]]
-List run_AA(mat &A, mat &W0, int max_it = 50, double min_delta = 1e-16) {
+List run_AA(mat &A, mat &W0, int max_it = 100, double min_delta = 1e-6) {
   field<mat> res = ACTIONet::run_AA(A, W0, max_it, min_delta);
 
   List out;
@@ -631,11 +628,11 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.99,
-                      double outlier_threshold = 0, double sim_threshold = 0.0,
+List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.85,
+                      double sensitivity = 0.0,
                       int thread_no = 0) {
   ACTIONet::unification_results results = ACTIONet::unify_archetypes(
-      G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no);
+      G, S_r, C_stacked, alpha, sensitivity, thread_no);
 
   List out_list;
 
@@ -648,11 +645,13 @@ List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.99,
 
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
-  out_list["assigned_archetypes"] = results.assigned_archetypes;
 
+  out_list["assigned_archetypes"] = results.assigned_archetypes;  
+  out_list["arch_membership_weights"] = results.arch_membership_weights;
+  
   out_list["ontology"] = results.dag_adj;
   out_list["ontology_node_attributes"] = results.dag_node_annotations;
-
+  
   return out_list;
 }
 
@@ -2043,31 +2042,68 @@ mat NetEnh(mat A) {
   return (A_enh);
 }
 
-
-
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue) {
-
+  uvec fixed_labels_vec;
   if (fixed_labels_.isNotNull()) {
     NumericVector fixed_labels(fixed_labels_);
     uvec fixed_labels_vec(fixed_labels.size());
     for(int i = 0; i < fixed_labels.size(); i++) {
-		fixed_labels_vec(i) = fixed_labels(i);
-	}
-	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
-  } else {
-    uvec fixed_labels_vec;
-	return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
-  }
+		    fixed_labels_vec(i) = fixed_labels(i) - 1;
+    }
+ }
+  return(ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
 }
 
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int thread_no = 0, bool ignore_baseline_expression = false) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats(G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression);
+
+	return(stats);
+}
 
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha = 0.85, int max_it = 5, int thread_no = 0) {
-	mat stats = ACTIONet::compute_marker_aggregate_stats(G, S, annotations, alpha, max_it, thread_no);
+List run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {
 
-	return(stats);
+  field<mat> res = ACTIONet::run_AA_with_batch_correction(Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta);
+    
+  List out;
+  out["C"] = res(0);
+  out["H"] = res(1);
+  out["Z_cor"] = res(2);  
+  out["W"] = res(2) * res(0);
+  
+  return(out);
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no,
+                          int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {
+
+                          
+  ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_with_batch_correction(S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta);
+
+  List res;
+
+  List C(k_max);
+  for (int i = k_min; i <= k_max; i++) {
+	mat cur_C = trace.C[i];
+	C[i-1] = cur_C;
+  }
+  res["C"] = C;
+
+  List H(k_max);
+  for (int i = k_min; i <= k_max; i++) {
+	mat cur_H = trace.H[i];
+	H[i-1] = cur_H;
+  }
+  res["H"] = H;
+
+  return res;
 }

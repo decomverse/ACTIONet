@@ -79,6 +79,7 @@ void Hdbscan::execute(int minPoints, int minClusterSize,
 //
 //   cout << endl << endl;
 //
-//   cout << "The Clustering contains " << this->numClusters_ << " clusters with "
+//   cout << "The Clustering contains " << this->numClusters_ << " clusters with
+//   "
 //        << this->noisyPoints_ << " noise Points." << endl;
 // }
