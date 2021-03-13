@@ -2,46 +2,47 @@
 % Please edit documentation in R/annotation.R
 \name{annotate.cells.using.markers}
 \alias{annotate.cells.using.markers}
-\title{Directly inferring cell annotations from imputed gene expressions using permutation test}
+\title{Infer cell annotations from imputed gene expression for all cells.}
 \usage{
 annotate.cells.using.markers(
   ace,
   markers,
   features_use = NULL,
-  rand_sample_no = 100,
   alpha_val = 0.9,
-  thread_no = 8,
-  imputation = "PageRank",
+  thread_no = 0,
+  net_slot = "ACTIONet",
   assay_name = "logcounts",
-  diffusion_iters = 5
+  max_iter = 5
 )
 }
 \arguments{
-\item{ace}{ACTIONet output object}
+\item{ace}{ACTIONetExperiment object}
 
-\item{markers}{A list of lists (each a set of markers for a given cell type)}
+\item{markers}{A named list of marker genes.}
 
-\item{rand_sample_no}{Number of random permutations (default=1000)}
+\item{features_use}{A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'markers'.}
 
-\item{alpha_val}{Random-walk parameter for gene imputation (if imputation = 'PageRank')}
+\item{alpha_val}{Random-walk parameter for gene imputation.}
 
-\item{thread_no}{Number of parallel threads used for gene imputation (if imputation = 'PageRank')}
+\item{thread_no}{Number of parallel threads used for gene imputation.}
 
-\item{imputation}{Gene imputation method. Can be either 'PageRank' (default) or 'archImpute'}
+\item{net_slot}{Name of slot in colNets(ace) containing the network to use for gene expression imputation (default="ACTIONet").}
+
+\item{assay_name}{Name of assay for which to impute gene expression (default="logcounts").}
 }
 \value{
 A named list: \itemize{
-\item Labels: Inferred archetype labels
-\item Labels.confidence: Confidence of inferred labels
-\item Enrichment: Full enrichment matrix
+\item Label: Inferred cell type labels
+\item Confidence: Confidence of inferred labels
+\item Enrichment: Cell type score matrix.
 }
 }
 \description{
-Directly inferring cell annotations from imputed gene expressions using permutation test
+Infer cell annotations from imputed gene expression for all cells.
 }
 \examples{
 data('curatedMarkers_human') # pre-packaged in ACTIONet
 markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-arch.annot = annotate.cells.using.markers(ace, markers = markers)
-cell.labels = arch.annot$Labels
+annots = annotate.cells.using.markers(ace, markers = markers)
+plot.ACTIONet(ace, annots$Label, annots$Confidence)
 }
