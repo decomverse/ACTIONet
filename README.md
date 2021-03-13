@@ -1,6 +1,6 @@
 # Installation
 ### Setting Up the Environment (Preinstallation)
-**For Linux Users** 
+**For Linux Users**
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
 **Install library dependencies**
@@ -24,7 +24,7 @@ This is the easiest way to install the package, and it automatically installs al
 
 ```r
 install.packages("devtools")
-devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
+devtools::install_github("shmohammadi86/ACTIONet", ref = "R-release")
 
 ```
 
@@ -39,7 +39,7 @@ BiocManager::install(c("SingleCellExperiment", "ComplexHeatmap"))
 ```
 
 * **Clone `ACTIONet` repository**:
-If you don't already have git, install it first. 
+If you don't already have git, install it first.
 
 On (Debian) **Linux-based  machines**, run:
 
@@ -139,7 +139,7 @@ Here is a simple example to get you started:
 
 ```r
 # Download example dataset from the 10X Genomics website
-download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5', 'pbmc_10k_v3.h5') 
+download.file('http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5', 'pbmc_10k_v3.h5')
 
 require(ACTIONet)
 # Run ACTIONet
@@ -183,7 +183,7 @@ With Docker, no installation is required and users can directly start experiment
 
 * Download [Docker](https://store.docker.com/search?offering=community&type=edition) (if you don't already have, which in most linux distributions you do!)
 
-* Run `ACTIONet` docker: 
+* Run `ACTIONet` docker:
 
 ```bash
 $ docker run -p 8787:8787 shmohammadi86/actionet
@@ -210,4 +210,3 @@ You can access ACTIONet tutorials from:
 7. [Constructing cell-type/cell-state-specific networks using SCINET](http://compbio.mit.edu/ACTIONet/tutorials/scinet.html)
 
 You can also find a [step-by-step guide](http://compbio.mit.edu/ACTIONet/tutorials/guide.html) to learning the core functionalities of the ACTIONet framework.
-
