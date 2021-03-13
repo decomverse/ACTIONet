@@ -1,5 +1,6 @@
 
 map.clusters <- function(Labels, clusters) {
+
     N = length(Labels)
     cluster.ids = sort(unique(clusters))
     if (is.factor(Labels))
@@ -19,7 +20,7 @@ map.clusters <- function(Labels, clusters) {
 
             success = intersect(idx1, idx2)
 
-            pval = phyper(length(success) - 1, n1, N - n1, n2, lower.tail = FALSE)
+            pval = stats::phyper(length(success) - 1, n1, N - n1, n2, lower.tail = FALSE)
             return(-log10(pval))
         })
         return(log.pvals)
@@ -43,6 +44,7 @@ map.clusters <- function(Labels, clusters) {
 
 # HGT tail bound
 Kappa <- function(p, q) {
+
     kl = array(1, length(p))
 
     suppressWarnings({
@@ -59,7 +61,14 @@ Kappa <- function(p, q) {
     return(k)
 }
 
-HGT_tail <- function(population.size, success.count, sample.size, observed.success) {
+
+HGT_tail <- function(
+  population.size,
+  success.count,
+  sample.size,
+  observed.success
+) {
+
     if (sum(success.count) == 0)
         return(rep(0, length(success.count)))
 
@@ -76,13 +85,14 @@ HGT_tail <- function(population.size, success.count, sample.size, observed.succe
 
 # define utility function to adjust fill-opacity using css
 fillOpacity <- function(., alpha = 0.5) {
-    css <- sprintf("<style> .js-fill { fill-opacity: %s !important; } </style>",
-        alpha)
-    prependContent(., HTML(css))
+
+    css <- sprintf("<style> .js-fill { fill-opacity: %s !important; } </style>", alpha)
+
+    htmlwidgets::prependContent(., htmltools::HTML(css))
+
 }
 
 mycircle <- function(coords, v = NULL, params) {
-    library(igraph)
 
     vertex.color <- params("vertex", "color")
     if (length(vertex.color) != 1 && !is.null(v)) {
@@ -103,12 +113,21 @@ mycircle <- function(coords, v = NULL, params) {
 
     mapply(coords[, 1], coords[, 2], vertex.color, vertex.frame.color, vertex.size,
         vertex.frame.width, FUN = function(x, y, bg, fg, size, lwd) {
-            symbols(x = x, y = y, bg = bg, fg = fg, lwd = lwd, circles = size, add = TRUE,
-                inches = FALSE)
+            graphics::symbols(
+              x = x,
+              y = y,
+              bg = bg,
+              fg = fg,
+              lwd = lwd,
+              circles = size,
+              add = TRUE,
+              inches = FALSE
+            )
         })
 }
 
 DECODE = function(hash_str, settings) {
+
     if (hash_str == "")
         stop("decode: invalid hashid")
 
@@ -122,6 +141,7 @@ DECODE = function(hash_str, settings) {
 
     if (hashid == "")
         stop("decode: invalid hashid, cannot decode")
+
     lottery = substr(hashid, 1, 1)
     hashid = substr(hashid, 2, nchar(hashid))
 
@@ -146,6 +166,7 @@ DECODE = function(hash_str, settings) {
 }
 
 ENCODE = function(int, settings) {
+
     if (!all(c("alphabet", "salt", "guards", "separator", "min_length") %in% names(settings))) {
         stop("encode: missing some parameters in settings list")
     }
@@ -170,6 +191,7 @@ ENCODE = function(int, settings) {
     vec_hash = sum(sapply(1:length(int), function(i) {
         int[i]%%(100 + i - 1)
     }))
+
     # lottery character
     lottery = substr(alphabet, (vec_hash%%alphabet_len) + 1, (vec_hash%%alphabet_len) +
         1)
@@ -193,8 +215,12 @@ ENCODE = function(int, settings) {
     return(encoded)
 }
 
-hashid_settings = function(salt, min_length = 0, alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-    sep = "cfhistuCFHISTU") {
+hashid_settings = function(
+  salt,
+  min_length = 0,
+  alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+  sep = "cfhistuCFHISTU"
+) {
 
     alphabet_vec = unique(strsplit(alphabet, split = "")[[1]])
     sep_vec = unique(strsplit(sep, split = "")[[1]])
@@ -203,7 +229,6 @@ hashid_settings = function(salt, min_length = 0, alphabet = "abcdefghijklmnopqrs
     alphabet_ = paste(setdiff(alphabet_vec, sep_vec), collapse = "")
 
     if (nchar(separator_) + nchar(alphabet_) < 16) {
-        # if(nchar(alphabet_) < 16) {
         stop("hashid_settings: Alphabet must be at least 16 unique characters.")
     }
 
@@ -230,17 +255,27 @@ hashid_settings = function(salt, min_length = 0, alphabet = "abcdefghijklmnopqrs
         alphabet_ = substr(alphabet_, num_guards + 1, nchar(alphabet_))
     }
 
-    return(list(alphabet = alphabet_, salt = salt, guards = guards_, separator = separator_,
-        min_length = min_length))
+    out = list(
+      alphabet = alphabet_,
+      salt = salt,
+      guards = guards_,
+      separator = separator_,
+      min_length = min_length
+    )
+
+    return(out)
 }
 
 ascii_val = function(char) {
+
     if (!is.character(char))
         stop("ascii_val: must be character")
     strtoi(charToRaw(char), 16)
+
 }
 
 base16_to_dec = function(str_16) {
+
     str_vec = strsplit(tolower(str_16), split = "")[[1]]
     str_vec = sapply(str_vec, function(x) {
         if (x %in% as.character(0:9)) {
@@ -258,6 +293,7 @@ base16_to_dec = function(str_16) {
 }
 
 dec_to_base16 = function(dec) {
+
     num_vec = c()
     while (dec > 0) {
         rem = dec%%16
@@ -276,7 +312,13 @@ dec_to_base16 = function(dec) {
     paste(hex_vec, collapse = "")
 }
 
-enforce_min_length = function(encoded, min_length, alphabet, guards, values_hash) {
+enforce_min_length = function(
+  encoded,
+  min_length,
+  alphabet,
+  guards,
+  values_hash
+) {
 
     guards_len = nchar(guards)
     guards_idx = (values_hash + ascii_val(substr(encoded, 1, 1)))%%guards_len + 1
@@ -291,8 +333,7 @@ enforce_min_length = function(encoded, min_length, alphabet, guards, values_hash
     split_at = nchar(alphabet)/2 + 1
     while (nchar(encoded) < min_length) {
         alphabet = shuffle(alphabet, alphabet)
-        encoded = paste0(substr(alphabet, split_at, nchar(alphabet)), encoded, substr(alphabet,
-            1, split_at - 1))
+        encoded = paste0(substr(alphabet, split_at, nchar(alphabet)), encoded, substr(alphabet, 1, split_at - 1))
         excess = nchar(encoded) - min_length
 
         if (excess > 0) {
@@ -305,6 +346,7 @@ enforce_min_length = function(encoded, min_length, alphabet, guards, values_hash
 }
 
 hash = function(number, alphabet) {
+
     alphabet_len = nchar(alphabet)
     alphabet_vec = strsplit(alphabet, split = "")[[1]]
 
@@ -319,6 +361,7 @@ hash = function(number, alphabet) {
 }
 
 shuffle = function(string, salt) {
+
     salt_len = nchar(salt)
     str_len = nchar(string)
     if (salt_len < 1 | str_len < 2)
@@ -346,6 +389,7 @@ shuffle = function(string, salt) {
 }
 
 SPLIT = function(string, splitters) {
+
     string_vec = strsplit(string, split = "")[[1]]
     split_vec = strsplit(splitters, split = "")[[1]]
 
@@ -365,6 +409,7 @@ SPLIT = function(string, splitters) {
 }
 
 unhash = function(hashed, alphabet) {
+
     hashed_len = nchar(hashed)
     alphabet_len = nchar(alphabet)
     alphabet_vec = strsplit(alphabet, split = "")[[1]]
@@ -381,27 +426,31 @@ unhash = function(hashed, alphabet) {
 
 
 
-combine.logPvals <- function(logPvals, top.len = NULL, base = 10) {
+combine.logPvals <- function(
+  logPvals,
+  top.len = NULL,
+  base = 10
+) {
+
     if (is.null(top.len)) {
         top.len = nrow(logPvals)
     }
-    kappa = 1/log(exp(1), base = base)
-    logPvals = kappa * logPvals
+    kappa_val = 1/log(exp(1), base = base)
+    logPvals = kappa_val * logPvals
 
     combbined.log.pvals = -apply(logPvals, 2, function(lx) {
-        perm = order(lx, decreasing = T)
+        perm = order(lx, decreasing = TRUE)
 
-        return(log(top.len) - logSumExp(lx[perm[1:top.len]]))
+        return(log(top.len) - matrixStats::logSumExp(lx[perm[1:top.len]]))
     })
 
     return(combbined.log.pvals)
 }
 
 
-
 reannotate.labels <- function(ace, Labels) {
-    Labels = .preprocess_annotation_labels(Labels, ace)
 
+    Labels = .preprocess_annotation_labels(Labels, ace)
 
     Annot = sort(unique(Labels))
     idx = match(Annot, Labels)
@@ -414,48 +463,60 @@ reannotate.labels <- function(ace, Labels) {
 }
 
 gen.colors <- function(Pal, color.no, plot.cols) {
+
     color.no = min(color.no, length(Pal) - 1)
-    colors.RGB = t(col2rgb(Pal)/256)
+    colors.RGB = Matrix::t(grDevices::col2rgb(Pal)/256)
     colors.Lab = grDevices::convertColor(color = colors.RGB, from = "sRGB", to = "Lab")
 
     set.seed(0)
-    W0 = t(kmeans(colors.Lab, color.no)$centers)
-    AA.out = ACTIONet::runAA(X, W0)
+    W0 = Matrix::t(stats::kmeans(colors.Lab, color.no)$centers)
+    AA.out = run_AA(X, W0)
 
     C = AA.out$C
-    arch.colors = t(t(colors.Lab) %*% C)
+    arch.colors = Matrix::t(Matrix::t(colors.Lab) %*% C)
 
-    new.colors = rgb(grDevices::convertColor(color = arch.colors, from = "Lab", to = "sRGB"))
+    new.colors = grDevices::rgb(grDevices::convertColor(
+      color = arch.colors,
+      from = "Lab",
+      to = "sRGB"
+    ))
+
     if (plot.cols)
         scales::show_col(new.colors)
     return(new.colors)
 }
 
 
-doubleNorm <- function(Enrichment, log.transform = T, min.threshold = 0) {
-    # if(min(Enrichment) < 0) { Enrichment = exp(Enrichment) }
+doubleNorm <- function(
+  Enrichment,
+  log.transform = TRUE,
+  min.threshold = 0
+) {
+
     Enrichment[Enrichment < min.threshold] = 0
 
-    if ((max(Enrichment) > 100) & (log.transform == T)) {
+    if ((max(Enrichment) > 100) & (log.transform == TRUE)) {
         Enrichment = log1p(Enrichment)
     }
     Enrichment[is.na(Enrichment)] = 0
 
-    rs = sqrt(ACTIONet::fast_row_sums(Enrichment))
+    rs = sqrt(fastRowSums(Enrichment))
     rs[rs == 0] = 1
     D_r = Matrix::Diagonal(nrow(Enrichment), 1/rs)
 
-    cs = sqrt(ACTIONet::fast_column_sums(Enrichment))
+    cs = sqrt(fastColSums(Enrichment))
     cs[cs == 0] = 1
     D_c = Matrix::Diagonal(ncol(Enrichment), 1/cs)
 
     Enrichment.scaled = as.matrix(D_r %*% Enrichment %*% D_c)
 
     Enrichment.scaled = Enrichment.scaled/max(Enrichment.scaled)
+
     return(Enrichment.scaled)
 }
 
 assess.label.local.enrichment <- function(P, Labels) {
+
     if (is.null(names(Labels))) {
         names(Labels) = as.character(Labels)
     }
@@ -464,25 +525,33 @@ assess.label.local.enrichment <- function(P, Labels) {
     Annot = names(Labels)[match(as.numeric(names(counts)), Labels)]
 
     X = sapply(names(p), function(label) {
-        x = as.numeric(Matrix::sparseVector(x = 1, i = which(Labels == label), length = length(Labels)))
+        x = as.numeric(Matrix::sparseVector(
+          x = 1,
+          i = which(Labels == label),
+          length = length(Labels)
+        ))
     })
     colnames(X) = Annot
 
-    Exp = array(1, nrow(P)) %*% t(p)
+    Exp = array(1, nrow(P)) %*% Matrix::t(p)
     Obs = as(P %*% X, "dgTMatrix")
 
     # Need to rescale due to missing values within the neighborhood
-    rs = ACTIONet::fast_row_sums(Obs)
-    Obs = Matrix::sparseMatrix(i = Obs@i + 1, j = Obs@j + 1, x = Obs@x/rs[Obs@i +
-        1], dims = dim(Obs))
+    rs = fastRowSums(Obs)
+    Obs = Matrix::sparseMatrix(
+      i = Obs@i + 1,
+      j = Obs@j + 1,
+      x = Obs@x/rs[Obs@i + 1],
+      dims = dim(Obs)
+    )
 
     Lambda = Obs - Exp
 
 
-    w2 = ACTIONet::fast_row_sums(P^2)
-    Nu = w2 %*% t(p)
+    w2 = fastRowSums(P^2)
+    Nu = w2 %*% Matrix::t(p)
 
-    a = as.numeric(fast_row_max(P)) %*% t(array(1, length(p)))
+    a = as.numeric(fast_row_max(P)) %*% Matrix::t(array(1, length(p)))
 
 
     logPval = (Lambda^2)/(2 * (Nu + (a * Lambda)/3))
@@ -493,20 +562,23 @@ assess.label.local.enrichment <- function(P, Labels) {
 
     colnames(logPval) = Annot
 
-
     max.idx = apply(logPval, 1, which.max)
     updated.Labels = as.numeric(names(p))[max.idx]
     names(updated.Labels) = Annot[max.idx]
 
     updated.Labels.conf = apply(logPval, 1, max)
 
-    res = list(Labels = updated.Labels, Labels.confidence = updated.Labels.conf,
-        Enrichment = logPval)
+    res = list(
+      Label = updated.Labels,
+      Confidence = updated.Labels.conf,
+      Enrichment = logPval
+    )
 
     return(res)
 }
 
 make.fname <- function(str) {
+
     nn = stringr::str_replace(str, " ", "_")
     nn = stringr::str_replace(nn, fixed("."), "_")
     nn = stringr::str_replace(nn, fixed("/"), "_")
@@ -515,9 +587,10 @@ make.fname <- function(str) {
 }
 
 add.count.metadata <- function(ace) {
-    ace$n_counts = ACTIONet::fast_column_sums(counts(ace))
-    ace$n_genes = ACTIONet::fast_column_sums(counts(ace) > 0)
-    rowData(ace)$n_cells = ACTIONet::fast_row_sums(counts(ace) > 0)
+  
+    ace$n_counts = fastColSums(counts(ace))
+    ace$n_genes = fastColSums(counts(ace) > 0)
+    rowData(ace)$n_cells = fastRowSums(counts(ace) > 0)
 
     return(ace)
 }

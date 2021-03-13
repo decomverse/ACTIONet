@@ -70,8 +70,8 @@ struct SmoothKnnWorker {
   std::atomic_size_t n_search_fails;
 
   SmoothKnnWorker(const std::vector<float> &nn_dist, std::size_t n_vertices,
-                  std::size_t n_iter, float local_connectivity,
-                  float bandwidth, float tol, float min_k_dist_scale)
+                  std::size_t n_iter, float local_connectivity, float bandwidth,
+                  float tol, float min_k_dist_scale)
       : nn_dist(nn_dist),
         n_vertices(n_vertices),
         n_neighbors(nn_dist.size() / n_vertices),

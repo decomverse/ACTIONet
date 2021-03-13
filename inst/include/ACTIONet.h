@@ -127,20 +127,21 @@ struct unification_results {
   mat H_unified;
   uvec assigned_archetypes;
   vec archetype_group;
+  mat arch_membership_weights;
 };
 
 // Low-level functions
 // *********************************
 // Basic (randomized) SVD algorithms
-field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed);
-field<mat> FengSVD(mat &A, int dim, int iters, int seed);
+field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed, int verbose);
+field<mat> FengSVD(mat &A, int dim, int iters, int seed, int verbose);
 
-field<mat> HalkoSVD(mat &A, int dim, int max_it, int seed);
-field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed);
+field<mat> HalkoSVD(mat &A, int dim, int max_it, int seed, int verbose);
+field<mat> HalkoSVD(sp_mat &A, int dim, int max_it, int seed, int verbose);
 
-field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed);
+field<mat> IRLB_SVD(mat &A, int dim, int max_it, int seed, int verbose);
 // field<mat> IRLB_SVD(sp_mat &A, int dim, int max_it, int seed);
-field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed);
+field<mat> IRLB_SVD(sp_mat &A, int dim, int iters, int seed, int verbose);
 
 // Successive Projection Algorithm (SPA) to solve separable NMF
 SPA_results run_SPA(mat &M, int k);
@@ -179,9 +180,9 @@ field<mat> PCA2SVD(sp_mat &S, field<mat> PCA_results);
 field<mat> PCA2SVD(mat &S, field<mat> PCA_results);
 
 field<mat> reduce_kernel(sp_mat &S, int dim, int iter, int seed,
-                         int SVD_algorithm, bool prenormalize);
+                         int SVD_algorithm, bool prenormalize, int verbose);
 field<mat> reduce_kernel(mat &S, int dim, int iter, int seed, int SVD_algorithm,
-                         bool prenormalize);
+                         bool prenormalize, int verbose);
 
 field<mat> ACTIONred2SVD(field<mat> SVD_results);
 
@@ -221,8 +222,8 @@ multilevel_archetypal_decomposition prune_archetypes(
 // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
 // outlier_threshold, int reduced_dim);
 unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
-                                     double alpha, double outlier_threshold,
-                                     double sim_threshold, int thread_no);
+                                     double alpha, double sensitivity,
+                                     int thread_no);
 
 // Main functions to build an interaction network from multi-level archetypal
 // decompositions
@@ -246,7 +247,8 @@ mat computeFullSim(mat &H, int thread_no);
 // SGD-based force-directed layout (adopted and modified from the UMAP
 // implementation)
 field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
-                           unsigned int n_epochs, int layout_alg, int thread_no, int seed);
+                           unsigned int n_epochs, int layout_alg, int thread_no,
+                           int seed);
 
 // Methods for pseudo-bulk construction
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
@@ -284,7 +286,7 @@ vec compute_archetype_core_centrality(sp_mat &G, uvec sample_assignments);
 mat compute_network_diffusion(sp_mat &G, sp_mat &X0, int thread_no,
                               double alpha, int max_it);
 mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no,
-                              double alpha, int max_it);
+                                   double alpha, int max_it);
 mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no,
                                      double alpha);
 sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha,
@@ -316,9 +318,17 @@ mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
 
 vec sweepcut(sp_mat A, vec s);
 
-vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold, uvec fixed_labels);
+vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
+        uvec fixed_labels);
 
-mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &annotations, double alpha, int max_it, int thread_no);
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat,
+                                   double alpha, int max_it, int thread_no, bool ignore_baseline_expression);
+
+
+field<mat> run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it, int max_correction_rounds, double lambda, double min_delta);
+
+ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no, int max_it, int max_correction_rounds, double lambda, double min_delta);
+
 
 }  // namespace ACTIONet
 
