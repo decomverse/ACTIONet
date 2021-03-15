@@ -12,6 +12,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
+        if: ! -f "/home/ubuntu/.docker/cli-plugins/docker-buildx"
         id: buildx
         uses: docker/setup-buildx-action@v1
         with:
@@ -36,7 +37,7 @@ jobs:
             PARENT_DOCKER=shmohammadi86/genomics:latest
             GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
           tags: |
-            shmohammadi86/genomics:actionet          
-            ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
+            shmohammadi86/genomics:actionet
             shmohammadi86/genomics:latest
+            ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
             ${{ secrets.AWS_REGISTRY_URL }}/genomics:latest
