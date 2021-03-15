@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - 'R-release'
-      - 'python'
+      - '*python*'
 jobs:
   main:
     runs-on: self-hosted
