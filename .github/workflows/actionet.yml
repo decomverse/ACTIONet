@@ -1,7 +1,7 @@
 name: ACTIONet
 'on':
   push:
-    branches: '*release*'
+    branches: [ '*release*' ]
 jobs:
   main:
     runs-on: self-hosted
