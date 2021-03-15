@@ -33,8 +33,10 @@ jobs:
           push: true|
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           build-args: |
-            PARENT_DOCKER=shmohammadi86/genomics:singlecell
+            PARENT_DOCKER=shmohammadi86/genomics:latest
             GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
           tags: |
-            shmohammadi86/genomics:actionet          
-            ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
+            shmohammadi86/genomics:latest
+	    shmohammadi86/genomics:actionet
+            ${{ secrets.AWS_REGISTRY_URL }}/genomics:latest
+	    ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
