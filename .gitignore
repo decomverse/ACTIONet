@@ -16,3 +16,4 @@ lib
 .DS_store
 README.md
 pybind11/
+.vscode/

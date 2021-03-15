@@ -10,7 +10,7 @@
   transparency.attr = NULL,
   trans.z.threshold = -0.5,
   trans.fact = 3,
-  node.size = 0.1,
+  node_size = 0.1,
   CPal = "magma",
   title = "",
   alpha_val = 0.85,
@@ -27,7 +27,7 @@
 
 \item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
 
-\item{node.size}{Size of nodes in the ACTIONet plot}
+\item{node_size}{Size of nodes in the ACTIONet plot}
 
 \item{CPal}{Color palette (named vector or a name for a given known palette)}
 
@@ -42,7 +42,7 @@ Visualized ACTIONet with projected scores
 Projects a given continuous score on the ACTIONet plot
 }
 \examples{
-ace = run.ACTIONet(sce)
+ace = run.ACTIONet(ace)
 x = logcounts(ace)['CD14', ]
 plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
 }

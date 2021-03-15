@@ -6,24 +6,27 @@
 \usage{
 run.ACTIONet(
   ace,
-  k_max = 30,
+  batch = NULL,
+  k_min = 2,
+  k_max = 40,
+  assay_name = "logcounts",
+  reduction_slot = "ACTION",
+  net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
-  min_specificity_z_threshold = -3,
+  max_iter_ACTION = 100,
+  min_specificity_z_thresh = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
   layout_algorithm = 0,
-  unification_alpha = 0.99,
-  unification_outlier_threshold = 2,
-  unification_sim_threshold = 0,
   layout_in_parallel = TRUE,
-  thread_no = 0,
-  assay_name = "logcounts",
-  reduction_slot = "ACTION",
+  unification_alpha = 0.99,
+  unification_sensitivity = 0,
   footprint_alpha = 0.85,
-  max_iter_ACTION = 50,
-  full_trace = FALSE
+  thread_no = 0,
+  full_trace = FALSE,
+  seed = 0
 )
 }
 \arguments{
@@ -31,7 +34,11 @@ run.ACTIONet(
 
 \item{k_max}{Maximum depth of decompositions (default=30).}
 
-\item{min_specificity_z_threshold}{Defines the stringency of pruning nonspecific archetypes.
+\item{assay_name}{Name of assay to be used (default='logcounts').}
+
+\item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r').}
+
+\item{min_specificity_z_thresh}{Defines the stringency of pruning nonspecific archetypes.
 The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{network_density}{Density factor of ACTIONet graph (default=1).}
@@ -43,10 +50,6 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 \item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
 
 \item{thread_no}{Number of parallel threads (default=0).}
-
-\item{assay_name}{Name of assay to be used (default='logcounts').}
-
-\item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r').}
 }
 \value{
 A named list: \itemize{
