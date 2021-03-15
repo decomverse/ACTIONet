@@ -1,9 +1,8 @@
 name: ACTIONet
-on:
+'on':
   push:
     branches:
-      - 'R-release'
-      - '*python*'
+      - '*release'
 jobs:
   main:
     runs-on: self-hosted
@@ -14,6 +13,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
+        if: hashFiles('/home/ubuntu/.docker/cli-plugins/docker-buildx') == ''
         id: buildx
         uses: docker/setup-buildx-action@v1
         with:
