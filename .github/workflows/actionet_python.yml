@@ -39,4 +39,4 @@ jobs:
             shmohammadi86/genomics:latest
             shmohammadi86/genomics:actionet
             ${{ secrets.AWS_REGISTRY_URL }}/genomics:latest
-	    ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
+            ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
