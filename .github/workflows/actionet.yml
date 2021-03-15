@@ -2,6 +2,7 @@ name: ACTIONet
 'on':
   push:
     branches:
+      - 'master'
       - 'python'
       - 'R-release'
 jobs:
