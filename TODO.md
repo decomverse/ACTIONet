@@ -16,7 +16,7 @@
 * `sgd2_layout_weighted()` for [S_GD2 layout](https://github.com/jxz12/s_gd2) layout
 * `HDBSCAN.clustering` for clustering ACTIONet
 * `compute_AA_coreset()` for AA coreset construction + wAA for fast sketching
-
+* Harmonized action to be checked
 
 ## Extensions
 ### Tier 1
