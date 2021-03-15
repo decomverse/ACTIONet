@@ -498,8 +498,8 @@ set_seed <- function(seed) {
 #' A = randn(100, 20)
 #' SVD.out = IRLBA_SVD(A, dim = 2)
 #' U = SVD.out$U
-IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L) {
-    .Call(`_ACTIONet_IRLB_SVD`, A, dim, iters, seed)
+IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_IRLB_SVD`, A, dim, iters, seed, verbose)
 }
 
 #' Computes SVD decomposition
@@ -518,8 +518,8 @@ IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = IRLBA_SVD_full(A, dim = 2)
 #' U = SVD.out$U
-IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L) {
-    .Call(`_ACTIONet_IRLB_SVD_full`, A, dim, iters, seed)
+IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_IRLB_SVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -534,8 +534,8 @@ IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = FengSVD(A, dim = 2)
 #' U = SVD.out$U
-FengSVD <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_FengSVD`, A, dim, iters, seed)
+FengSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_FengSVD`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -550,8 +550,8 @@ FengSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = FengSVD(A, dim = 2)
 #' U = SVD.out$U
-FengSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_FengSVD_full`, A, dim, iters, seed)
+FengSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_FengSVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -566,8 +566,8 @@ FengSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = HalkoSVD(A, dim = 2)
 #' U = SVD.out$U
-HalkoSVD <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_HalkoSVD`, A, dim, iters, seed)
+HalkoSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_HalkoSVD`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -582,8 +582,8 @@ HalkoSVD <- function(A, dim, iters = 5L, seed = 0L) {
 #' A = randn(100, 20)
 #' SVD.out = HalkoSVD(A, dim = 2)
 #' U = SVD.out$U
-HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
-    .Call(`_ACTIONet_HalkoSVD_full`, A, dim, iters, seed)
+HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
+    .Call(`_ACTIONet_HalkoSVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -591,8 +591,8 @@ HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L) {
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
-reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
-    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize)
+reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE, verbose = 1L) {
+    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
 }
 
 #'
@@ -600,8 +600,8 @@ reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algori
 #' S = logcounts(sce)
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
-reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE) {
-    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize)
+reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE, verbose = 1L) {
+    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
 }
 
 #' Solves min_{X} (|| AX - B ||) s.t. simplex constraint
@@ -644,15 +644,15 @@ run_SPA_rows_sparse <- function(A, k) {
     .Call(`_ACTIONet_run_SPA_rows_sparse`, A, k)
 }
 
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 50L, min_delta = 1e-16) {
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 100L, min_delta = 1e-6) {
     .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
 }
 
-run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 50L, min_delta = 1e-16, max_trial = 3L) {
+run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 100L, min_delta = 1e-6, max_trial = 3L) {
     .Call(`_ACTIONet_run_ACTION_plus`, S_r, k_min, k_max, max_it, min_delta, max_trial)
 }
 
-run_AA <- function(A, W0, max_it = 50L, min_delta = 1e-16) {
+run_AA <- function(A, W0, max_it = 100L, min_delta = 1e-6) {
     .Call(`_ACTIONet_run_AA`, A, W0, max_it, min_delta)
 }
 
@@ -668,8 +668,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1,
     .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
-unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.99, outlier_threshold = 0, sim_threshold = 0.0, thread_no = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, outlier_threshold, sim_threshold, thread_no)
+unify_archetypes <- function(G, S_r, C_stacked, alpha = 0.85, sensitivity = 0.0, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, G, S_r, C_stacked, alpha, sensitivity, thread_no)
 }
 
 #'
@@ -1012,8 +1012,16 @@ run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_
     .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_)
 }
 
-compute_marker_aggregate_stats <- function(G, S, annotations, alpha = 0.85, max_it = 5L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, annotations, alpha, max_it, thread_no)
+compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L, ignore_baseline_expression = FALSE) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
+}
+
+run_AA_with_batch_correction <- function(Z, W0, batch, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
+    .Call(`_ACTIONet_run_AA_with_batch_correction`, Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta)
+}
+
+run_ACTION_with_batch_correction <- function(S_r, batch, k_min, k_max, thread_no, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
+    .Call(`_ACTIONet_run_ACTION_with_batch_correction`, S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta)
 }
 
 roll_var <- function(X) {
