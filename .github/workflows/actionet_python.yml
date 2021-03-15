@@ -37,6 +37,6 @@ jobs:
             GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
           tags: |
             shmohammadi86/genomics:latest
-	    shmohammadi86/genomics:actionet
+            shmohammadi86/genomics:actionet
             ${{ secrets.AWS_REGISTRY_URL }}/genomics:latest
 	    ${{ secrets.AWS_REGISTRY_URL }}/genomics:actionet
