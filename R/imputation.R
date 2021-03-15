@@ -11,13 +11,13 @@
 impute.genes.using.archetypes <- function(ace, genes) {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
-    genes = intersect(unique(genes), rownames(ace))
 
+    genes = intersect(unique(genes), rownames(ace))
 
     Z = rowMaps(ace)[["archetype_gene_profile"]][genes, ]
     H = Matrix::t(colMaps(ace)[["H_unified"]])
 
-    expression_imputed = t(Z %*% H)
+    expression_imputed = Matrix::t(Z %*% H)
     colnames(expression_imputed) = genes
 
     return(expression_imputed)
@@ -43,7 +43,7 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
     Z = log1p(rowMaps(ace)[["unified_feature_specificity"]][genes, ])
     H = Matrix::t(colMaps(ace)[["H_unified"]])
 
-    expression_imputed = t(Z %*% H)
+    expression_imputed = Matrix::t(Z %*% H)
     colnames(expression_imputed) = genes
 
     return(expression_imputed)
@@ -66,8 +66,15 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
 #' imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
 #' plot.ACTIONet.gradient(ace, imputed.genes[, 1])
 #' @export
-impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_val = 0.85,
-    thread_no = 0, diffusion_iters = 5, assay_name = "logcounts") {
+impute.genes.using.ACTIONet <- function(
+  ace,
+  genes,
+  features_use = NULL,
+  alpha_val = 0.85,
+  thread_no = 0,
+  diffusion_iters = 5,
+  assay_name = "logcounts"
+) {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
 
@@ -88,7 +95,12 @@ impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_v
         expression_raw = U = Matrix::t(as(expression_raw, "dgTMatrix"))
         U[U < 0] = 0
         cs = fastColSums(U)
-        U = Matrix::sparseMatrix(i = U@i + 1, j = U@j + 1, x = U@x/cs[U@j + 1], dims = dim(U))
+        U = Matrix::sparseMatrix(
+          i = U@i + 1,
+          j = U@j + 1,
+          x = U@x/cs[U@j + 1],
+          dims = dim(U)
+        )
     } else {
         expression_raw = U = Matrix::t(expression_raw)
         U[U < 0] = 0
@@ -98,19 +110,16 @@ impute.genes.using.ACTIONet <- function(ace, genes, features_use = NULL, alpha_v
     U = U[, cs > 0]
     gg = matched.genes[cs > 0]
 
-    # if (length(matched.idx) > 1) { expression_raw =
-    # Matrix::t(as(SummarizedExperiment::assays(ace)[[assay_name]][matched.idx, ],
-    # 'dgTMatrix')) U = expression_raw U[U < 0] = 0 cs = ACTIONet::fastColSums(U) U =
-    # Matrix::sparseMatrix(i = U@i + 1, j = U@j + 1, x = U@x/cs[U@j + 1], dims =
-    # dim(U)) U = U[, cs > 0] gg = matched.genes[cs > 0] } else { expression_raw =
-    # SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,] U =
-    # expression_raw/sum(expression_raw) gg = matched.genes }
-
     # Perform network-diffusion
     G = colNets(ace)$ACTIONet
 
-    expression_imputed = compute_network_diffusion_fast(G, as(U, "sparseMatrix"), thread_no = thread_no,
-            alpha = alpha_val, max_it = diffusion_iters)
+    expression_imputed = compute_network_diffusion_fast(
+      G = G,
+      X0 = as(U, "sparseMatrix"),
+      thread_no = thread_no,
+      alpha = alpha_val,
+      max_it = diffusion_iters
+    )
 
     expression_imputed[is.na(expression_imputed)] = 0
 
