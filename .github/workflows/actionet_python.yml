@@ -4,7 +4,7 @@ name: ACTIONet_python
     branches: python
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3000
     steps:
       - name: Checkout
