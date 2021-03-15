@@ -6,26 +6,26 @@
 \usage{
 \method{plot}{ACTIONet.gene.view}(
   ace,
-  top.genes = 5,
+  top_genes = 5,
   CPal = NULL,
-  blacklist.pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
+  blacklist_pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   title = "",
-  label.text.size = 0.8,
-  renormalize = F
+  label_size = 0.8,
+  renormalize = FALSE
 )
 }
 \arguments{
 \item{ace}{ACTIONet output}
 
-\item{top.genes}{Number of genes to return}
+\item{top_genes}{Number of genes to return}
 
 \item{CPal}{Color palette to use}
 
-\item{blacklist.pattern}{List of genes to filter-out}
+\item{blacklist_pattern}{List of genes to filter-out}
 
 \item{title}{Main title of the plot}
 
-\item{reorder.columns}{Whether to optimally re-order columns of the enrichment table}
+\item{reorder_columns}{Whether to optimally re-order columns of the enrichment table}
 }
 \value{
 Featur view

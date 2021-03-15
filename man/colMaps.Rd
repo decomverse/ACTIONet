@@ -8,7 +8,7 @@
 \usage{
 colMaps(object, ...)
 
-\S4method{colMaps}{ACTIONetExperiment}(object, all = T)
+\S4method{colMaps}{ACTIONetExperiment}(object, all = TRUE)
 
 \S4method{colMaps}{ACTIONetExperiment}(object) <- value
 }

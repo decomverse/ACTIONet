@@ -5,16 +5,16 @@
 \title{Report the top-rank features from a given enrichment table}
 \usage{
 \method{select}{top.k.features}(
-  feature.enrichment.table,
-  top.features = 3,
-  normalize = F,
-  reorder.columns = T
+  feat_scores,
+  top_features = 3,
+  normalize = FALSE,
+  reorder_columns = TRUE
 )
 }
 \arguments{
-\item{top.features}{Number of features to return}
+\item{top_features}{Number of features to return}
 
-\item{reorder.columns}{Whether to optimally re-order columns of the enrichment table}
+\item{reorder_columns}{Whether to optimally re-order columns of the enrichment table}
 }
 \value{
 Sorted table with the selected top-ranked
@@ -23,6 +23,6 @@ Sorted table with the selected top-ranked
 Report the top-rank features from a given enrichment table
 }
 \examples{
-feature.enrichment.table = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-enrichment.table.top = select.top.k.features(feature.enrichment.table, 3)
+feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+enrichment.table.top = select.top.k.features(feat_scores, 3)
 }
