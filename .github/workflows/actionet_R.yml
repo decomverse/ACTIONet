@@ -1,5 +1,5 @@
 name: ACTIONet_R
-'on':
+0;95;0c'on':
   push:
     branches: R-release
 jobs:
