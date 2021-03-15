@@ -1,11 +1,11 @@
 # TODO
 
 ## Primary
-* Test, debug, and run code on Windows
-* Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter. 1- Minimal (Alpine)
-* Write, test, and release singularity-lite and singularity-full
-* "gating" on archetypes
-* Interactive cell selection
+*  Test, debug, and run code on Windows
+*  Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter. 1- Minimal (Alpine)
+*  Write, test, and release singularity-lite and singularity-full
+*  "gating" on archetypes
+*  Interactive cell selection
 
 
 ## New features to be tested
