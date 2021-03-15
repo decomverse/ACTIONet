@@ -1,4 +1,4 @@
-name: ACTIONet_R
+name: ACTIONet
 'on':
   push:
     branches: R-release, python
