@@ -1,7 +1,9 @@
 name: ACTIONet
 'on':
   push:
-    branches: python
+    branches:
+      - "python"
+      - "R-release"
 jobs:
   main:
     runs-on: self-hosted
