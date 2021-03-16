@@ -14,9 +14,9 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Check file existence
         id: check_buildx_existence
-	uses: andstor/file-existence-action@v1
-	with:
-	  files: "/home/ubuntu/.docker/cli-plugins/docker-buildx"
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "/home/ubuntu/.docker/cli-plugins/docker-buildx"
       - name: Set up Docker Buildx
         if: steps.check_buildx_existence.outputs.file_exists == 'false'
         id: buildx
