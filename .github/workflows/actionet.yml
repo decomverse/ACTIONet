@@ -2,7 +2,7 @@ name: ACTIONet
 on:
   push:
     branches:
-      - '**release**'
+      - 'R-release'
 jobs:
   main:
     runs-on: self-hosted
