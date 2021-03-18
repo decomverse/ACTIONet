@@ -239,7 +239,7 @@ CPal_default = c(
     }
 
     if(use_repel == TRUE){
-      p <- p + geom_label_repel(
+      p <- p + ggrepel::geom_label_repel(
         data = layout_data,
         mapping = aes(
           x = x,
