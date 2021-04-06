@@ -679,6 +679,20 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
   return G;
 }
 
+
+// [[Rcpp::export]]
+sp_mat build_knn(mat H_stacked, double k = 10, int thread_no = 0,
+                      bool mutual_edges_only = true) {
+
+	double M = 16, ef_construction = 200, ef = 10;
+					  
+	sp_mat G = ACTIONet::build_ACTIONet_JS_KNN(H_stacked, k, thread_no, M, ef_construction, ef, mutual_edges_only);
+					  
+	return G;
+}
+
+
+
 //' Performs stochastic force-directed layout on the input graph (ACTIONet)
 //'
 //' @param G Adjacency matrix of the ACTIONet graph

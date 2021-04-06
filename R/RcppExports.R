@@ -682,6 +682,10 @@ build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edge
     .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only)
 }
 
+build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRUE) {
+    .Call(`_ACTIONet_build_knn`, H_stacked, k, thread_no, mutual_edges_only)
+}
+
 #'
 #' @return A named list \itemize{
 #' \item coordinates 2D coordinates of vertices.
