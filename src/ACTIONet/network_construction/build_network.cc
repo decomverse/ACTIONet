@@ -393,14 +393,13 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no = 0,
     std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
         appr_alg->searchKnn(X.colptr(i), k);
 
-/*
-    if (result.size() != (k + 1)) {
-      stderr_printf(
-          "Unable to find %d results. Probably ef (%f) or M (%f) is too "
-          "small\n",
-          k, ef, M);
+
+    if (result.size() != (k)) {
+		//X.col(i).print("X");
+		printf("%d- %d\n", i, result.size());
+		
+          
     }
-*/
 
     for (size_t j = 0; j < result.size(); j++) {
       auto &result_tuple = result.top();
