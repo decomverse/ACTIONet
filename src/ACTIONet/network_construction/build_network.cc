@@ -357,7 +357,7 @@ sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density = 1.0,
   return (G_sym);
 }
 
-sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
+sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no = 0,
                              double M = 16, double ef_construction = 200,
                              double ef = 10, bool mutual_edges_only = true) {
   stdout_printf("Building fixed-degree network (k = %d)\n", (int)k);
@@ -366,17 +366,10 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
   }
 
   H_stacked = clamp(H_stacked, 0, 1);
-  // H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each
-  // column 1
+  H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each column 1
 
-  double kappa = 5.0;
   int sample_no = H_stacked.n_cols;
-  int kNN = min(
-      sample_no - 1,
-      (int)(kappa *
-            round(sqrt(sample_no))));  // start with uniform k=sqrt(N) ["Pattern
-                                       // Classification" book by Duda et al.]
-
+  
   int dim = H_stacked.n_rows;
   int max_elements = H_stacked.n_cols;
   hnswlib::JSDSpace *space = new hnswlib::JSDSpace(dim);
@@ -395,23 +388,24 @@ sp_mat build_ACTIONet_JS_KNN(mat H_stacked, double k, int thread_no = 0,
   sp_mat G(sample_no, sample_no);
 
   stdout_printf("\tConstructing k*-NN ... ");
-  mat idx = zeros(sample_no, kNN + 1);
-  mat dist = zeros(sample_no, kNN + 1);
   //		for(int i = 0; i < sample_no; i++) {
   ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId) {
     std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
         appr_alg->searchKnn(X.colptr(i), k);
 
-    if (result.size() != (kNN + 1)) {
+/*
+    if (result.size() != (k + 1)) {
       stderr_printf(
           "Unable to find %d results. Probably ef (%f) or M (%f) is too "
           "small\n",
-          kNN, ef, M);
+          k, ef, M);
     }
+*/
 
     for (size_t j = 0; j < result.size(); j++) {
       auto &result_tuple = result.top();
-      G(i, idx(i, kNN - j)) = 1.0 - dist(i, kNN - j);
+            
+      G(i, result_tuple.second) = 1.0 - result_tuple.first;
       result.pop();
     }
   });
