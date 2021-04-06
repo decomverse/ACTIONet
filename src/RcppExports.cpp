@@ -300,6 +300,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// build_knn
+sp_mat build_knn(mat H_stacked, double k, int thread_no, bool mutual_edges_only);
+RcppExport SEXP _ACTIONet_build_knn(SEXP H_stackedSEXP, SEXP kSEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat >::type H_stacked(H_stackedSEXP);
+    Rcpp::traits::input_parameter< double >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    Rcpp::traits::input_parameter< bool >::type mutual_edges_only(mutual_edges_onlySEXP);
+    rcpp_result_gen = Rcpp::wrap(build_knn(H_stacked, k, thread_no, mutual_edges_only));
+    return rcpp_result_gen;
+END_RCPP
+}
 // layout_ACTIONet
 List layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level, unsigned int n_epochs, int layout_alg, int thread_no, int seed);
 RcppExport SEXP _ACTIONet_layout_ACTIONet(SEXP GSEXP, SEXP S_rSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP layout_algSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
@@ -1160,6 +1174,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 6},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
+    {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
