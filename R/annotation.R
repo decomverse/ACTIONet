@@ -1,5 +1,4 @@
-
-.preprocess_marker_labels <- function(annotations, feature_set) {
+.preprocess_annotation_markers <- function(annotations, feature_set) {
     if (is.matrix(markers) || is.sparseMatrix(markers)) {
 		common_features = sort(unique(intersect(feature_set, rownames(annotations))))
 		row_idx = match(common_features, rownames(annotations))
