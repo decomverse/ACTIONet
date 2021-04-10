@@ -10,7 +10,7 @@
   gene_name,
   features_use = NULL,
   assay_name = "logcounts",
-  CPal = CPal20
+  CPal = CPal_default
 )
 }
 \arguments{

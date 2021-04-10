@@ -151,7 +151,7 @@ plot.ACTIONet.3D <- function(
   trans.z.threshold = -1,
   trans.fact = 1,
   node_size = 1,
-  CPal = CPal20,
+  CPal = CPal_default,
   coordinate_slot = "ACTIONet3D"
 ) {
 
@@ -197,9 +197,9 @@ plot.ACTIONet.3D <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  CPal = CPal_default
                 } else {
-                  CPal = CPal88
+                  CPal = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -506,7 +506,7 @@ plot.ACTIONet.interactive <- function(
   trans.z.threshold = -1,
   trans.fact = 1,
   node_size = 1,
-  CPal = CPal20,
+  CPal = CPal_default,
   enrichment.table = NULL,
   top_features = 7,
   Alt_Text = NULL,
@@ -559,9 +559,9 @@ plot.ACTIONet.interactive <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  CPal = CPal_default
                 } else {
-                  CPal = CPal88
+                  CPal = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -847,7 +847,7 @@ plot.individual.gene <- function(
   gene_name,
   features_use = NULL,
   assay_name = "logcounts",
-  CPal = CPal20
+  CPal = CPal_default
 ) {
 
     clusters = .preprocess_annotation_labels(ace, labels)
@@ -861,9 +861,9 @@ plot.individual.gene <- function(
     if (length(CPal) > 1) {
         if (length(CPal) < length(Annot)) {
             if (length(Annot) <= 20) {
-                CPal = CPal20
+                CPal = CPal_default
             } else {
-                CPal = CPal88
+                CPal = CPal_default
             }
         }
 
@@ -1384,7 +1384,7 @@ plot.ACTIONet.backbone <- function(
   trans.z.threshold = -0.5,
   trans.fact = 1.5,
   node_size = 0.1,
-  CPal = CPal20,
+  CPal = CPal_default,
   title = "",
   border.contrast.factor = 0.1,
   arch.size.factor = 1,
@@ -1438,9 +1438,9 @@ plot.ACTIONet.backbone <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  CPal = CPal_default
                 } else {
-                  CPal = CPal88
+                  CPal = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -1579,7 +1579,7 @@ plot.ACTIONet.backbone.graph <- function(
   trans.z.threshold = -0.5,
   trans.fact = 1.5,
   node_size = 0.1,
-  CPal = CPal20,
+  CPal = CPal_default,
   title = "",
   border.contrast.factor = 0.1,
   arch.size.factor = 1,
@@ -1635,9 +1635,9 @@ plot.ACTIONet.backbone.graph <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  CPal = CPal_default
                 } else {
-                  CPal = CPal88
+                  CPal = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
