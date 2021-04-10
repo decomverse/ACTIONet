@@ -11,7 +11,7 @@
   trans.z.threshold = -1,
   trans.fact = 1,
   node_size = 1,
-  CPal = CPal20,
+  CPal = CPal_default,
   enrichment.table = NULL,
   top_features = 7,
   Alt_Text = NULL,
