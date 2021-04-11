@@ -164,6 +164,8 @@ mat NetEnh(mat A) {
   return (P2);
 }
 
+
+
 field<mat> nndsvd(mat &A, int dim = 100, int max_iter = 5) {
   dim = std::min(dim, (int)A.n_cols);
   field<mat> SVD_res = HalkoSVD(A, dim, max_iter, 0, 0);
