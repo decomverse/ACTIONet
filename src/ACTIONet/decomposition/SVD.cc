@@ -4,6 +4,56 @@
 
 namespace ACTIONet {
 
+field<mat> orient_SVD(field<mat> SVD_res) {
+  mat U = SVD_res(0);
+  vec s = SVD_res(1);
+  mat V = SVD_res(2);
+
+  int dim = s.n_elem;
+  uvec mask_idx;
+  
+  for (int i = 0; i < dim; i++) {
+    vec u = U.col(i);
+    vec v = V.col(i);
+
+    vec up = u;
+    mask_idx = find(u < 0);
+    if (mask_idx.n_elem > 0) up(mask_idx).zeros();
+
+    vec un = -u;
+    mask_idx = find(u > 0);
+    if (mask_idx.n_elem > 0) un(mask_idx).zeros();
+
+    vec vp = v;
+    mask_idx = find(v < 0);
+    if (mask_idx.n_elem > 0) vp(mask_idx).zeros();
+
+    vec vn = -v;
+    mask_idx = find(v > 0);
+    if (mask_idx.n_elem > 0) vn(mask_idx).zeros();
+
+    double n_up = norm(up);
+    double n_un = norm(un);
+    double n_vp = norm(vp);
+    double n_vn = norm(vn);
+
+    double termp = n_up * n_vp;
+    double termn = n_un * n_vn;
+    if (termp < termn) {
+		U.col(i) *= -1;
+		V.col(i) *= -1;
+    }
+  }
+
+  field<mat> out(3);
+  out(0) = U;
+  out(1) = s;
+  out(2) = V;
+  
+  return (out);
+}
+
+
 field<mat> IRLB_SVD(sp_mat &A, int dim, int iters = 1000, int seed = 0, int verbose = 1) {
   int m = A.n_rows;
   int n = A.n_cols;
@@ -309,7 +359,7 @@ V[i]   = normDist(gen);;
     stderr_printf("IRLB_SVD did NOT converge! Try increasing the number of iterations\n");
   }
 
-  return (out);
+  return (orient_SVD(out));
 }
 
 field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0, int verbose = 1) {
@@ -559,7 +609,7 @@ field<mat> IRLB_SVD(mat &A, int dim, int iters = 1000, int seed = 0, int verbose
     stderr_printf("IRLB_SVD did NOT converge! Try increasing the number of iterations\n");
   }
 
-  return (out);
+  return (orient_SVD(out));
 }
 
 //****************************************************************************************************************************************************************************
@@ -671,7 +721,7 @@ field<mat> FengSVD(sp_mat &A, int dim, int iters, int seed = 0, int verbose = 1)
   out(2) = V;
 
 
-  return (out);
+  return (orient_SVD(out));
 }
 
 // From: Xu Feng, Yuyang Xie, and Yaohang Li, "Fast Randomzisped SVD for Sparse
@@ -782,7 +832,7 @@ field<mat> FengSVD(mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
   out(2) = V;
 
 
-  return (out);
+  return (orient_SVD(out));
 }
 
 //**************************************************************************************************************************************************************************************************
@@ -887,7 +937,7 @@ field<mat> HalkoSVD(sp_mat &A, int dim, int iters, int seed = 0, int verbose = 1
   results(1) = s;
   results(2) = V;
 
-  return results;
+  return (orient_SVD(results));
 }
 
 field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
@@ -987,6 +1037,6 @@ field<mat> HalkoSVD(mat &A, int dim, int iters, int seed = 0, int verbose = 1) {
   results(1) = s;
   results(2) = V;
 
-  return results;
+  return (orient_SVD(results));
 }
 }  // namespace ACTIONet
