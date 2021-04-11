@@ -303,7 +303,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
                         initial_coor2D.memptr() + initial_coor2D.n_elem);
   */
   vector<float> head_vec(init_coors.n_cols * 2);
-  fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
+  fmat sub_coor = conv_to<fmat>::from(zscore(init_coors.rows(0, 1)));
   float* ptr = sub_coor.memptr();
   memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
   vector<float> tail_vec(head_vec);
@@ -377,7 +377,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   head_vec.clear();
   head_vec.resize(init_coors.n_cols * 3);
   sub_coor =
-      conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
+      conv_to<fmat>::from(zscore(join_vert(trans(coordinates), init_coors.row(2))));
   ptr = sub_coor.memptr();
   memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
   tail_vec = head_vec;
