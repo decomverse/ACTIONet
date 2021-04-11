@@ -161,7 +161,7 @@ annotate.archetypes.using.markers <- function(
   significance_slot = "unified_feature_specificity"
 ) {
 
-    marker_set = .preprocess_annotation_markers(markers)
+    marker_set = .preprocess_marker_labels(markers)
 
     specificity.panel = Matrix::t(as.matrix(log1p(rowMaps(ace)[[significance_slot]])))
     specificity.panel[is.na(specificity.panel)] = 0
@@ -293,7 +293,7 @@ annotate.cells.using.markers <- function(
     G = colNets(ace)[[net_slot]]
     S = SummarizedExperiment::assays(ace)[[assay_name]]
 
-	annotations = ACTIONet:::.preprocess_marker_labels(markers, rownames(S))
+	annotations = .preprocess_marker_labels(markers, rownames(S))
 	row_idx = match(rownames(annotations), rownames(S))
 	subS = S[row_idx, ]
 
