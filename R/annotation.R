@@ -1,11 +1,11 @@
 
 .preprocess_marker_labels <- function(annotations, feature_set) {
-    if (is.matrix(markers) || is.sparseMatrix(markers)) {
-		common_features = sort(unique(intersect(feature_set, rownames(annotations))))
-		row_idx = match(common_features, rownames(annotations))
-		X = annotations[row_idx, ]
-		rownames(X) = common_features
-    } else if (is.list(markers)) {
+    if (is.matrix(annotations) || is.sparseMatrix(annotations)) {
+  		common_features = sort(unique(intersect(feature_set, rownames(annotations))))
+  		row_idx = match(common_features, rownames(annotations))
+  		X = annotations[row_idx, ]
+  		rownames(X) = common_features
+    } else if (is.list(annotations)) {
 		X = do.call(cbind, lapply(annotations, function(gs) {
 			genes = unlist(strsplit(gs, "[+]|[-]"))
 			if(length(grep("[+|-]$", gs)) != 0) {
