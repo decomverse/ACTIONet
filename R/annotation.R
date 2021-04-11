@@ -1,21 +1,68 @@
+.preprocess_annotation_markers <- function(markers, feature_set) {
+    if (is.matrix(markers) || is.sparseMatrix(markers)) {
+		common_features = sort(unique(intersect(feature_set, rownames(markers))))
+		row_idx = match(common_features, rownames(markers))
+		X = markers[row_idx, ]
+		rownames(X) = common_features
+    } else if (is.list(markers)) {
+		if (is.null(names(markers))) {
+			names(marker_set) = sapply(1:length(marker_set), function(i){
+				msg = sprintf("Annotation %d", i)
+				print(msg)
+			})
+		}		
+		X = do.call(cbind, lapply(markers, function(gs) {
+			genes = unlist(strsplit(gs, "[+]|[-]"))
+			if(length(grep("[+|-]$", gs)) != 0) {
+				x = as.numeric(grepl("[+]", gs)) - as.numeric(grepl("[-]", gs))
+				genes = as.character(sapply(gs, function(gene) substr(gene, 1, stringr::str_length(gene)-1)))
+			} else {
+				x = rep(1, length(genes))
+				genes = gs
+			}
+			common.genes = sort(unique(intersect(genes, feature_set)))
+			idx1 = match(common.genes, genes)
+			idx2 = match(common.genes, feature_set)
 
-.preprocess_annotation_markers <- function(markers) {
-  if (is.matrix(markers) || is.sparseMatrix(markers)) {
-      marker_set = lapply(1:NCOL(markers), function(i) rownames(markers)[markers[, i] > 0])
-      names(marker_set) = colnames(markers)
-  } else if (is.data.frame(markers) || is(DataFrame(), "DFrame")) {
-      marker_set = as.list(as.data.frame(markers))
-  } else if (is.list(markers)) {
-      marker_set = markers
-  } else {
-      err = sprintf("'markers' must be a list or matrix.\n")
-      stop(err)
-  }
+			v = sparseMatrix(i = idx2, j = rep(1, length(idx2)), x = x[idx1], dims = c(length(feature_set), 1))
+			return(v)
+		}))
+		colnames(X) = names(markers)
+		rownames(X) = feature_set
+	} else if (is.data.frame(markers) || (length(which(is(markers) == "DFrame")) != 0)) { # marker, cell type, [weight]
+		if(ncol(markers) == 2) {
+			markers$weight = 1
+		}
+		UL = sort(unique(markers[, 2]))
+		X = do.call(cbind, lapply(UL, function(nn) {
+			idx = which(markers[, 2]== nn)
+			genes = markers[idx, 1]
+			x = markers[idx, 3]
 
-  if (is.null(names(marker_set))) {
-      names(marker_set) = sapply(1:length(marker_set), function(i) sprintf("Celltype %s", i))
-  }
-  return(marker_set)
+			common.genes = sort(unique(intersect(genes, feature_set)))
+			idx1 = match(common.genes, genes)
+			idx2 = match(common.genes, feature_set)
+
+			v = sparseMatrix(i = idx2, j = rep(1, length(idx2)), x = x[idx1], dims = c(length(feature_set), 1))
+			return(v)
+
+		}))
+		colnames(X) = UL
+		rownames(X) = feature_set
+	}
+
+
+	# cs = fast_column_sums(X)
+	# filtered_cols = which(cs < 0)
+	# if(length(filtered_cols)) {
+	# 	not
+	# }
+	# col.mask = cs != 0
+	# X.sp = as(X, 'dgTMatrix')
+	# X.sp@x = X.sp@x / cs[X.sp@j+1]
+	# X = as(X.sp, "dgCMatrix")
+
+    return(X)
 }
 
 
@@ -110,106 +157,28 @@ annotate.archetypes.using.labels <- function(
 #' @export
 annotate.archetypes.using.markers <- function(
   ace,
-  markers,
-  rand_sample_no = 1000,
-  significance_slot = "unified_feature_specificity"
-) {
+  markers,  
+  features_use = NULL,
+  significance_slot = "unified_feature_specificity") {
 
-    marker_set = .preprocess_annotation_markers(markers)
 
-    specificity.panel = Matrix::t(as.matrix(log1p(rowMaps(ace)[[significance_slot]])))
-    specificity.panel[is.na(specificity.panel)] = 0
+  features_use = .preprocess_annotation_features(ace, features_use)
+  marker_mat = .preprocess_annotation_markers(markers, features_use)
 
-    if (is.null(names(marker_set))) {
-        names(marker_set) = sapply(1:length(marker_set), function(i){
-            msg = sprintf("Celltype %s", i)
-            print(msg)
-        })
-    }
+  marker_stats = Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat)$logPvals)
+  colnames(marker_stats) = colnames(marker_mat)
 
-    markers.table = do.call(rbind, lapply(names(marker_set), function(celltype) {
-        genes = marker_set[[celltype]]
-        if (length(genes) == 0){
-          err = sprintf("No markers left.\n")
-          stop(err, call. = F)
-        }
+  marker_stats[!is.finite(marker_stats)] = 0
+  annots = colnames(marker_mat)[apply(marker_stats, 1, which.max)]
+  conf = apply(marker_stats, 1, max)
 
-        signed.count = sum(sapply(genes, function(gene) grepl("\\+$|-$", gene)))
-        is.signed = signed.count > 0
+  out = list(
+    Label = annots,
+    Confidence = conf,
+    Enrichment = marker_stats
+  )
 
-        if (!is.signed) {
-            df = data.frame(
-              Gene = genes,
-              Direction = +1,
-              Celltype = celltype,
-              stringsAsFactors = FALSE
-            )
-        } else {
-
-            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)],
-                function(gene) stringr::str_replace(gene, stringr::fixed("+"), ""))))
-            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)],
-                function(gene) stringr::str_replace(gene, stringr::fixed("-"), ""))))
-
-            df = data.frame(
-              Gene = c(pos.genes, neg.genes),
-              Direction = c(rep(+1, length(pos.genes)), rep(-1, length(neg.genes))),
-              Celltype = celltype,
-              stringsAsFactors = FALSE
-            )
-        }
-    }))
-    markers.table = markers.table[markers.table$Gene %in% colnames(specificity.panel),
-        ]
-
-    if (dim(markers.table)[1] == 0) {
-      err = sprintf("No markers left.\n")
-      stop(err, call. = F)
-    }
-    specificity.panel = specificity.panel[, markers.table$Gene]
-
-    IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
-
-    print("Computing significance scores")
-    set.seed(0)
-    Z = sapply(IDX, function(idx) {
-        markers = (as.character(markers.table$Gene[idx]))
-        directions = markers.table$Direction[idx]
-        mask = markers %in% colnames(specificity.panel)
-
-        A = as.matrix(specificity.panel[, markers[mask]])
-        sgn = as.numeric(directions[mask])
-        stat = A %*% sgn
-
-        rand.stats = sapply(1:rand_sample_no, function(i) {
-            rand.samples = sample.int(dim(specificity.panel)[2], sum(mask))
-            rand.A = as.matrix(specificity.panel[, rand.samples])
-            rand.stat = rand.A %*% sgn
-        })
-        # rand.stats[is.na(rand.stats)] = 0
-        cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats,
-            1, sd))
-
-        return(cell.zscores)
-    })
-
-    Z[is.na(Z)] = 0
-    Labels = colnames(Z)[apply(Z, 1, which.max)]
-
-    # L = names(marker_set) L.levels = L[L %in% Labels] Labels = match(L, L.levels)
-    # names(Labels) = L.levels Labels = factor(Labels, levels = L)
-    Labels.conf = apply(Z, 1, max)
-
-    names(Labels) = rownames(specificity.panel)
-    names(Labels.conf) = rownames(specificity.panel)
-    rownames(Z) = rownames(specificity.panel)
-
-    out = list(
-      Label = Labels,
-      Confidence = Labels.conf,
-      Enrichment = Z)
-
-    return(out)
+  return(out)
 }
 
 #' Infer cell annotations from imputed gene expression for all cells.
@@ -244,10 +213,10 @@ annotate.cells.using.markers <- function(
   max_iter = 5
 ) {
 
-  marker_set = .preprocess_annotation_markers(markers)
   features_use = .preprocess_annotation_features(ace, features_use)
+  marker_mat = .preprocess_annotation_markers(markers, features_use)
 
-  marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
+  #marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
   G = colNets(ace)[[net_slot]]
   S = SummarizedExperiment::assays(ace)[[assay_name]]
 
@@ -259,10 +228,10 @@ annotate.cells.using.markers <- function(
     max_it = max_iter,
     thread_no = thread_no
   )
-  colnames(marker_stats) = names(marker_set)
+  colnames(marker_stats) = colnames(marker_mat)
 
   marker_stats[!is.finite(marker_stats)] = 0
-  annots = names(marker_set)[apply(marker_stats, 1, which.max)]
+  annots = colnames(marker_mat)[apply(marker_stats, 1, which.max)]
   conf = apply(marker_stats, 1, max)
 
   out = list(
@@ -297,7 +266,6 @@ annotate.cells.using.markers <- function(
 annotate.cells.from.archetypes.using.markers <- function(
   ace,
   markers,
-  rand_sample_no = 1000,
   unified_suffix = "unified"
 ) {
 
@@ -306,7 +274,6 @@ annotate.cells.from.archetypes.using.markers <- function(
     arch.annot = annotate.archetypes.using.markers(
       ace = ace,
       markers = marker_set,
-      rand_sample_no = rand_sample_no,
       significance_slot = significance_slot
     )
 
