@@ -243,11 +243,7 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0,
   mat V = reduction(2);
   // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
-	  vec v = V.col(i) * sigma(i);
-	  v = round(v*1e5)/1e5;
-    double cs = sum(v);
-    if( cs < 0)
-		v = -v;
+	vec v = V.col(i) * sigma(i);
 	V.col(i) = v;
   }
   V = trans(V);
@@ -295,11 +291,7 @@ List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5,
   mat V = reduction(2);
   // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
-	  vec v = V.col(i) * sigma(i);
-	  v = round(v*1e5)/1e5;
-    double cs = sum(v);
-    if( cs < 0)
-		v = -v;
+	vec v = V.col(i) * sigma(i);
 	V.col(i) = v;
   }
   V = trans(V);
