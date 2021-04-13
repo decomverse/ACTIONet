@@ -69,7 +69,10 @@ setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
 #'
 #' @export
 as.ACTIONetExperiment <- function(object) {
-
+    if(is(object, "ACTIONetExperiment")) {
+        return(object)
+    }
+    
     if (class(object) %in% c("SummarizedExperiment", "RangedSummarizedExperiment",
         "SingleCellExperiment")) {
         ace = as(object, "ACTIONetExperiment")
