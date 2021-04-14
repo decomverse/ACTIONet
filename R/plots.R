@@ -109,8 +109,20 @@ plot.ACTIONet <- function(
          .default_ggtheme
 
     if(!is.null(plot_labels) && add_text_labels ==  TRUE){
-        p_out <- .layout_plot_labels(
-          p_out,
+        # p_out <- .layout_plot_labels(
+        #   p_out,
+        #   plot_data = plot_data,
+        #   label_names = legend_labels,
+        #   label_colors = legend_fill_colors,
+        #   darken = TRUE,
+        #   alpha_val = 0.5,
+        #   text_size = text_size,
+        #   constrast_fac = 0.5,
+        #   nudge = nudge_text_labels,
+        #   use_repel = use_repel
+        # )
+        text_layer <- .layout_plot_labels(
+          # p_out,
           plot_data = plot_data,
           label_names = legend_labels,
           label_colors = legend_fill_colors,
@@ -121,6 +133,7 @@ plot.ACTIONet <- function(
           nudge = nudge_text_labels,
           use_repel = use_repel
         )
+        p_out = p_out + text_layer
     }
 
     p_out

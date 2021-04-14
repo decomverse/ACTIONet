@@ -186,7 +186,7 @@ CPal_default = c(
 
 #' @import ggplot2
 .layout_plot_labels <- function(
-  p,
+  # p,
   plot_data = NULL,
   label_names = NULL,
   label_colors = NULL,
@@ -238,8 +238,34 @@ CPal_default = c(
       layout_data$y = layout_data$y + (1 - exp(-0.5 * abs(layout_data$y_sd - max(layout_data$y_sd))))
     }
 
+    # if(use_repel == TRUE){
+    #   p <- p + ggrepel::geom_label_repel(
+    #     data = layout_data,
+    #     mapping = aes(
+    #       x = x,
+    #       y = y,
+    #       label = labels,
+    #       color = color
+    #     ),
+    #     fill = scales::alpha(c("white"), alpha_val),
+    #     size = text_size,
+    #     segment.color = 'transparent'
+    #   )
+    # } else {
+    #   p <- p + geom_label(
+    #     data = layout_data,
+    #     mapping = aes(
+    #       x = x,
+    #       y = y,
+    #       label = labels,
+    #       color = color
+    #     ),
+    #     fill = scales::alpha(c("white"), alpha_val),
+    #     size = text_size)
+    # }
+
     if(use_repel == TRUE){
-      p <- p + ggrepel::geom_label_repel(
+      layer_out <- ggrepel::geom_label_repel(
         data = layout_data,
         mapping = aes(
           x = x,
@@ -252,7 +278,7 @@ CPal_default = c(
         segment.color = 'transparent'
       )
     } else {
-      p <- p + geom_label(
+      layer_out <- geom_label(
         data = layout_data,
         mapping = aes(
           x = x,
@@ -264,6 +290,5 @@ CPal_default = c(
         size = text_size)
     }
 
-
-  return(p)
+  return(layer_out)
 }
