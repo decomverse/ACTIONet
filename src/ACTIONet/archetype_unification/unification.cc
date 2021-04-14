@@ -419,10 +419,30 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   mat X0 = join_rows(ones(subC.n_rows), subC);
   X0 = normalise(X0, 1, 0);
   sp_mat X0_sp = sp_mat(X0);
+  
+  vec w = vec(trans(sum(subG)));
+  uvec zero_idx = find(w == 0);
+  w(zero_idx).ones();
+  //w(w ==0).ones();
+  
   mat PR = compute_network_diffusion_fast(subG, X0_sp, thread_no, alpha, 3);
-
   mat C_imputed = PR.cols(1, PR.n_cols - 1);
 
+  vec C_nnz = vec(trans(sum(spones(sp_mat(C_imputed)))));
+  zero_idx = find(C_nnz < 10);
+  C_imputed.cols(zero_idx).zeros();
+
+
+  for (int i = 0; i < C_imputed.n_cols; i++) {
+    //C_imputed.col(i) *= (C_nnz(i));
+    C_imputed.col(i) /= (w);
+  }
+  
+  C_imputed = zscore(C_imputed);
+  C_imputed.replace(datum::nan, 0);  // replace each NaN with 0
+
+  
+/*
   mat LOR = C_imputed;
   for (int i = 0; i < LOR.n_cols; i++) {
     LOR.col(i) = LOR.col(i) / PR.col(0);
@@ -431,17 +451,18 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   uvec zero_idx = find(C_imputed == 0);
   LOR(zero_idx).zeros();
   LOR.transform([](double val) { return (val < 0 ? 0 : val); });
+*/
 
-  int dim = min((int)LOR.n_cols, 100);
-  field<mat> NMU_out = recursiveNMU(LOR, dim, 5, 100);
+  int dim = min((int)C_imputed.n_cols, 100);
+  field<mat> NMU_out = recursiveNMU(C_imputed, dim, 5, 100);
 
-//  mat W = NMU_out(0);
+  mat W = NMU_out(0);
   mat H = NMU_out(1);
-  vec factor_weight = NMU_out(2);  
+  vec factor_weight = NMU_out(3);  
   //vec obj = NMU_out(3);  
   
   uvec perm = sort_index(factor_weight, "descend");
-  //W = W.cols(perm);
+  W = W.cols(perm);
   H = H.cols(perm);
   factor_weight = factor_weight(perm);
   //obj = obj(perm);
@@ -467,12 +488,11 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   int state_no = -1;
   vec coverage = cumsum(x) / sum(x);
   if (sensitivity == 0) {
-	  /*
+	/*
     double sx = sum(x);
     double sx_sq = sum(square(x));
     state_no = (int)round(sx * sx / sx_sq);
-    */
-
+*/
     double sx = sum(square(x));
     double sx_sq = sum(square(square(x)));
     state_no = (int)round(sx * sx / sx_sq);
@@ -503,7 +523,7 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   printf("%d unified states (sensitivity = %.2f)\n", state_no,
   coverage(state_no - 1));
   
-  mat weights = normalise(H.cols(0, state_no-1), 1, 0);
+  //mat weights = normalise(H.cols(0, state_no-1), 1, 0);
 
   /*
   mat subH = Hpos.cols(selected_columns(span(0, state_no-1)));
@@ -515,6 +535,10 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   mat B = normalise(Wpos.cols(selected_columns(span(0, state_no - 1))), 1, 0);
   mat weights = run_simplex_regression(A, B, false);
   */
+
+  mat A = normalise(C_imputed, 1, 0);
+  mat B = normalise(W.cols(0, state_no - 1), 1, 0);
+  mat weights = run_simplex_regression(A, B, false);
 
   // Compute unified archetypes
   mat C_norm = normalise(C_stacked, 1, 0);
