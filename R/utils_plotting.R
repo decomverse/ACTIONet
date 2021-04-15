@@ -71,6 +71,7 @@ CPal_default = c(
   }
 
   plot_labels = as.character(plot_labels)
+  plot_labels[is.na(plot_labels)] = "NA"
   return(plot_labels)
 
 }
@@ -114,8 +115,9 @@ CPal_default = c(
     }
 
   } else if(!is.null(plot_labels)) {
-    
+
     plot_labels = as.character(plot_labels)
+    plot_labels[is.na(plot_labels)] = "NA"
     label_names = sort(unique(plot_labels))
     num_unique = length(label_names)
 
