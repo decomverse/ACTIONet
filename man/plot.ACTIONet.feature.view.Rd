@@ -8,7 +8,7 @@
   ace,
   feat_scores,
   top_features = 5,
-  CPal = NULL,
+  palette = NULL,
   title = "Feature view",
   label_size = 1,
   renormalize = FALSE,
@@ -22,7 +22,7 @@
 
 \item{top_features}{Number of features to return}
 
-\item{CPal}{Color palette to use}
+\item{palette}{Color palette to use}
 
 \item{title}{Main title of the plot}
 

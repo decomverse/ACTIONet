@@ -13,7 +13,7 @@ run.ACTIONet(
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
-  max_iter_ACTION = 100,
+  max_iter_ACTION = 50,
   min_specificity_z_thresh = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
