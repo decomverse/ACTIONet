@@ -257,32 +257,6 @@ CPal_default = c(
       layout_data$y = layout_data$y + (1 - exp(-0.5 * abs(layout_data$y_sd - max(layout_data$y_sd))))
     }
 
-    # if(use_repel == TRUE){
-    #   p <- p + ggrepel::geom_label_repel(
-    #     data = layout_data,
-    #     mapping = aes(
-    #       x = x,
-    #       y = y,
-    #       label = labels,
-    #       color = color
-    #     ),
-    #     fill = scales::alpha(c("white"), alpha_val),
-    #     size = text_size,
-    #     segment.color = 'transparent'
-    #   )
-    # } else {
-    #   p <- p + geom_label(
-    #     data = layout_data,
-    #     mapping = aes(
-    #       x = x,
-    #       y = y,
-    #       label = labels,
-    #       color = color
-    #     ),
-    #     fill = scales::alpha(c("white"), alpha_val),
-    #     size = text_size)
-    # }
-
     if(use_repel == TRUE){
       layer_out <- ggrepel::geom_label_repel(
         data = layout_data,
@@ -310,4 +284,18 @@ CPal_default = c(
     }
 
   return(layer_out)
+}
+
+.plot_arrange_dim <- function(n){
+
+  s = sqrt(n)
+  sf = round(s)
+  sr = s - sf
+
+  if(sr <= 0)
+    d = c(sf, sf)
+  else
+    d = c(sf, sf + 1)
+
+  return(d)
 }
