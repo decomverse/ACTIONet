@@ -7,7 +7,7 @@
 \method{plot}{ACTIONet.gene.view}(
   ace,
   top_genes = 5,
-  CPal = NULL,
+  palette = NULL,
   blacklist_pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   title = "",
   label_size = 0.8,
@@ -19,7 +19,7 @@
 
 \item{top_genes}{Number of genes to return}
 
-\item{CPal}{Color palette to use}
+\item{palette}{Color palette to use}
 
 \item{blacklist_pattern}{List of genes to filter-out}
 

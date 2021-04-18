@@ -2,47 +2,62 @@
 % Please edit documentation in R/plots.R
 \name{plot.ACTIONet.gradient}
 \alias{plot.ACTIONet.gradient}
-\title{Projects a given continuous score on the ACTIONet plot}
+\title{Plots gradient of (imputed) values on ACTIONet scatter plot.}
 \usage{
 \method{plot}{ACTIONet.gradient}(
   ace,
   x,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 3,
-  node_size = 0.1,
-  CPal = "magma",
-  title = "",
   alpha_val = 0.85,
+  log_scale = FALSE,
   nonparameteric = FALSE,
-  coordinate_slot = "ACTIONet2D"
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 1,
+  stroke_size = point_size * 0.1,
+  stroke_contrast_fac = 0.1,
+  grad_palette = "magma",
+  net_attr = "ACTIONet",
+  coordinate_attr = "ACTIONet2D"
 )
 }
 \arguments{
-\item{ace}{ACTIONet output object}
+\item{ace}{'ACTIONetExperiment' object}
 
-\item{x}{Score vector}
+\item{x}{Numeric vector of length NCOL(ace).}
 
-\item{transparency.attr}{Additional continuous attribute to project onto the transparency of nodes}
+\item{alpha_val}{Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).}
 
-\item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
+\item{log_scale}{Logical value for whether to log-scale values of 'x' (default:'FALSE').}
 
-\item{node_size}{Size of nodes in the ACTIONet plot}
+\item{nonparameteric}{If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').}
 
-\item{CPal}{Color palette (named vector or a name for a given known palette)}
+\item{trans_attr}{Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.}
 
-\item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
+\item{trans_fac}{Transparency modifier (default:1.5).}
 
-\item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
+\item{trans_th}{Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked (default:-0.5).}
+
+\item{point_size}{Size of points in ggplot (default:1).}
+
+\item{stroke_size}{Size of points outline (stroke) in ggplot (default:point_size*0.1).}
+
+\item{stroke_contrast_fac}{Factor by which to darken point outline for contrast (default:0.1).}
+
+\item{grad_palette}{Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.}
+
+\item{net_attr}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').}
+
+\item{coordinate_attr}{Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').}
 }
 \value{
-Visualized ACTIONet with projected scores
+'ggplot' object.
 }
 \description{
-Projects a given continuous score on the ACTIONet plot
+Plots gradient of (imputed) values on ACTIONet scatter plot.
 }
 \examples{
 ace = run.ACTIONet(ace)
 x = logcounts(ace)['CD14', ]
-plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
+plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
 }
