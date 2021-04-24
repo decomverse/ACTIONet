@@ -986,7 +986,7 @@ plot.ACTIONet.gradient <- function(
         x = log1p(x)
 
     if (alpha_val > 0) {
-        x = as.numeric(compute_network_diffusion(
+        x = as.numeric(compute_network_diffusion_fast(
           G = colNets(ace)[[net_attr]],
           X0 = as(as.matrix(x), "sparseMatrix")
         ))
@@ -1055,7 +1055,6 @@ visualize.markers <- function(
   point_size = 1,
   net_attr = "ACTIONet",
   coordinate_attr = "ACTIONet2D",
-  show_plots = TRUE,
   single_plot = FALSE
 ) {
 
@@ -1122,11 +1121,11 @@ visualize.markers <- function(
       return(p_out)
     })
 
-    n = length(out)
-    if(n == 1)
+    # n = length(out)
+    if(length(out) == 1)
       out = out[[1]]
 
-    if(single_plot == TRUE && n > 1){
+    if(single_plot == TRUE && length(out) > 1){
 
       d = .plot_arrange_dim(n)
       out = ggpubr::ggarrange(plotlist = out,
@@ -1134,18 +1133,18 @@ visualize.markers <- function(
         ncol = d[2]
       )
 
-      n = 1
+      # n = 1
     }
 
-    if(show_plots == TRUE){
-      if(n == 1){
-        print(out)
-      } else {
-        for(i in 1:n){
-          print(out[[i]])
-        }
-      }
-    }
+    # if(show_plots == TRUE){
+    #   if(n == 1){
+    #     print(out)
+    #   } else {
+    #     for(i in 1:n){
+    #       print(out[[i]])
+    #     }
+    #   }
+    # }
 
     return(out)
 }
