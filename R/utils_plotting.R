@@ -16,7 +16,9 @@ CPal_default = c(
 .default_ggtheme <-  ggplot2::theme(axis.title = element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
+        panel.grid = element_blank()
         panel.background = ggplot2::element_blank(),
+        plot.background = element_rect(fill = "white", color = NA),
         legend.title = ggplot2::element_blank(),
         legend.background = ggplot2::element_blank(),
         legend.key = ggplot2::element_blank(),
@@ -205,7 +207,6 @@ CPal_default = c(
 
 #' @import ggplot2
 .layout_plot_labels <- function(
-  # p,
   plot_data = NULL,
   label_names = NULL,
   label_colors = NULL,
