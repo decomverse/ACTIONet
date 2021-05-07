@@ -974,7 +974,8 @@ plot.ACTIONet.gradient <- function(
         )
 
     } else {
-        grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
+        # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
+        grad_palette = grDevices::colorRampPalette(grad_palette)(500)
     }
 
     ## Scale/prune scores, if needed
@@ -1091,9 +1092,11 @@ visualize.markers <- function(
     if (length(markers_missing) > 0)
         print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
 
-    out = lapply(1:ncol(expression_profile), function(i){
-      feat_name = colnames(expression_profile)[i]
-      x = expression_profile[, i]
+    # out = lapply(1:ncol(expression_profile), function(i){
+    out = sapply(colnames(expression_profile), function(feat_name){
+      # feat_name = colnames(expression_profile)[i]
+      # x = expression_profile[, i]
+      x = expression_profile[, feat_name]
 
       nnz = round(sum(x^2)^2/sum(x^4))
       x.threshold = sort(x, decreasing = TRUE)[nnz]
@@ -1120,7 +1123,7 @@ visualize.markers <- function(
         theme(plot.title = element_text(hjust = 0.5))
 
       return(p_out)
-    })
+    }, simplify = FALSE)
 
     # n = length(out)
     if(length(out) == 1)
