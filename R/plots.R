@@ -109,8 +109,20 @@ plot.ACTIONet <- function(
          .default_ggtheme
 
     if(!is.null(plot_labels) && add_text_labels ==  TRUE){
-        p_out <- .layout_plot_labels(
-          p_out,
+        # p_out <- .layout_plot_labels(
+        #   p_out,
+        #   plot_data = plot_data,
+        #   label_names = legend_labels,
+        #   label_colors = legend_fill_colors,
+        #   darken = TRUE,
+        #   alpha_val = 0.5,
+        #   text_size = text_size,
+        #   constrast_fac = 0.5,
+        #   nudge = nudge_text_labels,
+        #   use_repel = use_repel
+        # )
+        text_layer <- .layout_plot_labels(
+          # p_out,
           plot_data = plot_data,
           label_names = legend_labels,
           label_colors = legend_fill_colors,
@@ -121,6 +133,7 @@ plot.ACTIONet <- function(
           nudge = nudge_text_labels,
           use_repel = use_repel
         )
+        p_out = p_out + text_layer
     }
 
     p_out
@@ -131,10 +144,10 @@ plot.ACTIONet <- function(
 #'
 #' @param ace ACTIONet output object
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-#' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
-#' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node_size Size of nodes in the ACTIONet plot
-#' @param CPal Color palette (named vector or a name for a given known palette)
+#' @param trans_attr Additional continuous attribute to project onto the transparency of nodes
+#' @param trans_th, trans_fac Control the effect of transparency mapping
+#' @param point_size Size of nodes in the ACTIONet plot
+#' @param palette Color palette (named vector or a name for a given known palette)
 #' @param title Main title of the plot
 #' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
 #'
@@ -142,22 +155,22 @@ plot.ACTIONet <- function(
 #'
 #' @examples
 #' ace = run.ACTIONet(sce)
-#' plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+#' plot.ACTIONet.3D(ace, ace$assigned_archetype, trans_attr = ace$node_centrality)
 #' @export
 plot.ACTIONet.3D <- function(
   ace,
   labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node_size = 1,
-  CPal = CPal20,
+  trans_attr = NULL,
+  trans_th = -1,
+  trans_fac = 1,
+  point_size = 1,
+  palette = CPal_default,
   coordinate_slot = "ACTIONet3D"
 ) {
 
     nV = length(ncol(ace))
 
-    node_size = node_size * 0.2
+    point_size = point_size * 0.2
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = .preprocess_annotation_labels(labels, ace)
@@ -197,9 +210,9 @@ plot.ACTIONet.3D <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  palette = CPal_default
                 } else {
-                  CPal = CPal88
+                  palette = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -215,11 +228,11 @@ plot.ACTIONet.3D <- function(
         vCol = Pal[names(labels)]
     }
 
-    if (!is.null(transparency.attr)) {
-        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
-        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
-        beta[z > trans.z.threshold] = 1
-        beta = beta^trans.fact
+    if (!is.null(trans_attr)) {
+        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
+        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
+        beta[z > trans_th] = 1
+        beta = beta^trans_fac
 
         vCol.border = scales::alpha(colorspace::darken(vCol, 0.5), beta)
         vCol = scales::alpha(vCol, beta)
@@ -232,7 +245,7 @@ plot.ACTIONet.3D <- function(
       y = coors[, 2],
       z = coors[, 3],
       axis.scales = FALSE,
-      size = node_size,
+      size = point_size,
       axis = FALSE,
       grid = FALSE,
       color = as.character(vCol),
@@ -302,7 +315,7 @@ plot.top.k.features <- function(
 #' @param feat_scores An arbitrary enrichment table with columns being archetypes and rows being specificity of features
 #' @param top_features Number of features to return
 #' @param reorder_columns Whether to optimally re-order columns of the enrichment table
-#' @param CPal Color palette to use
+#' @param palette Color palette to use
 #' @param title Main title of the plot
 #'
 #' @return Featur view
@@ -315,7 +328,7 @@ plot.ACTIONet.feature.view <- function(
   ace,
   feat_scores,
   top_features = 5,
-  CPal = NULL,
+  palette = NULL,
   title = "Feature view",
   label_size = 1,
   renormalize = FALSE,
@@ -445,7 +458,7 @@ plot.ACTIONet.feature.view <- function(
 #' @param top_genes Number of genes to return
 #' @param blacklist_pattern List of genes to filter-out
 #' @param reorder_columns Whether to optimally re-order columns of the enrichment table
-#' @param CPal Color palette to use
+#' @param palette Color palette to use
 #' @param title Main title of the plot
 #'
 #' @return Featur view
@@ -456,7 +469,7 @@ plot.ACTIONet.feature.view <- function(
 plot.ACTIONet.gene.view <- function(
   ace,
   top_genes = 5,
-  CPal = NULL,
+  palette = NULL,
   blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   title = "",
   label_size = 0.8,
@@ -482,10 +495,10 @@ plot.ACTIONet.gene.view <- function(
 #'
 #' @param ace ACTIONet output object
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-#' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
-#' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node_size Size of nodes in the ACTIONet plot
-#' @param CPal Color palette (named vector or a name for a given known palette)
+#' @param trans_attr Additional continuous attribute to project onto the transparency of nodes
+#' @param trans_th, trans_fac Control the effect of transparency mapping
+#' @param point_size Size of nodes in the ACTIONet plot
+#' @param palette Color palette (named vector or a name for a given known palette)
 #' @param enrichment.table To project the top-ranked features interactively.
 #' @param top_features Number of features to show per cell
 #' @param blacklist_pattern List of genes to filter-out
@@ -502,11 +515,11 @@ plot.ACTIONet.gene.view <- function(
 plot.ACTIONet.interactive <- function(
   ace,
   labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node_size = 1,
-  CPal = CPal20,
+  trans_attr = NULL,
+  trans_th = -1,
+  trans_fac = 1,
+  point_size = 1,
+  palette = CPal_default,
   enrichment.table = NULL,
   top_features = 7,
   Alt_Text = NULL,
@@ -517,7 +530,7 @@ plot.ACTIONet.interactive <- function(
 ) {
 
     nV = ncol(ace)
-    node_size = node_size * 3
+    point_size = point_size * 3
     if (coordinate_slot == "ACTIONet2D" & threeD == TRUE)
         coordinate_slot = "ACTIONet3D"
 
@@ -559,9 +572,9 @@ plot.ACTIONet.interactive <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  palette = CPal_default
                 } else {
-                  CPal = CPal88
+                  palette = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -577,11 +590,11 @@ plot.ACTIONet.interactive <- function(
         vCol = Pal[names(labels)]
     }
 
-    if (!is.null(transparency.attr)) {
-        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
-        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
-        beta[z > trans.z.threshold] = 1
-        beta = beta^trans.fact
+    if (!is.null(trans_attr)) {
+        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
+        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
+        beta[z > trans_th] = 1
+        beta = beta^trans_fac
 
         vCol.border = scales::alpha(colorspace::darken(vCol, 0.5), beta)
         vCol = scales::alpha(vCol, beta)
@@ -665,7 +678,7 @@ plot.ACTIONet.interactive <- function(
     edge_shapes <- list()
 
     # Adjust parameters
-    node.data$size = node_size
+    node.data$size = point_size
 
     axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
 
@@ -686,7 +699,7 @@ plot.ACTIONet.interactive <- function(
                 opacity = 1,
                 alpha = 1,
                 line = list(
-                  width = 0.1 * node_size,
+                  width = 0.1 * point_size,
                   alpha = 0.5,
                   color = ~vCol.border
                 )
@@ -725,7 +738,7 @@ plot.ACTIONet.interactive <- function(
                 opacity = 1,
                 alpha = 1,
                 line = list(
-                  width = 0.1 * node_size,
+                  width = 0.1 * point_size,
                   alpha = 0.5,
                   color = ~vCol.border
                 )
@@ -767,7 +780,7 @@ plot.ACTIONet.interactive <- function(
                 opacity = 1,
                 alpha = 1,
                 line = list(
-                  width = 0.1 * node_size,
+                  width = 0.1 * point_size,
                   alpha = 0.5,
                   color = ~vCol.border
                 )
@@ -799,7 +812,7 @@ plot.ACTIONet.interactive <- function(
               marker = list(
                 size = ~size,
                 line = list(
-                  width = 0.1 * node_size,
+                  width = 0.1 * point_size,
                   color = ~vCol.border
                 )
               ),
@@ -834,7 +847,7 @@ plot.ACTIONet.interactive <- function(
 #' @param ace ACTIONet output object
 #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
 #' @param gene_name Name of the gene to plot
-#' @param CPal Color palette (named vector or a name for a given known palette)
+#' @param palette Color palette (named vector or a name for a given known palette)
 #'
 #' @return Visualized ACTIONet
 #'
@@ -847,7 +860,7 @@ plot.individual.gene <- function(
   gene_name,
   features_use = NULL,
   assay_name = "logcounts",
-  CPal = CPal20
+  palette = CPal_default
 ) {
 
     clusters = .preprocess_annotation_labels(ace, labels)
@@ -861,9 +874,9 @@ plot.individual.gene <- function(
     if (length(CPal) > 1) {
         if (length(CPal) < length(Annot)) {
             if (length(Annot) <= 20) {
-                CPal = CPal20
+                palette = CPal_default
             } else {
-                CPal = CPal88
+                palette = CPal_default
             }
         }
 
@@ -903,72 +916,54 @@ plot.individual.gene <- function(
     print(gp)
 }
 
-
-#' Projects a given continuous score on the ACTIONet plot
+#' Plots gradient of (imputed) values on ACTIONet scatter plot.
 #'
-#' @param ace ACTIONet output object
-#' @param x Score vector
-#' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
-#' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node_size Size of nodes in the ACTIONet plot
-#' @param CPal Color palette (named vector or a name for a given known palette)
-#' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
-#' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
+#' @param ace 'ACTIONetExperiment' object
+#' @param x Numeric vector of length NCOL(ace).
+#' @param alpha_val Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).
+#' @param log_scale Logical value for whether to log-scale values of 'x' (default:'FALSE').
+#' @param nonparameteric If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').
+#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
+#' @param trans_fac Transparency modifier (default:1.5).
+#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked (default:-0.5).
+#' @param point_size Size of points in ggplot (default:1).
+#' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
+#' @param stroke_contrast_fac Factor by which to darken point outline for contrast (default:0.1).
+#' @param grad_palette Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.
+#' @param net_attr Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
+#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').
 #'
-#' @return Visualized ACTIONet with projected scores
+#' @return 'ggplot' object.
 #'
 #' @examples
 #' ace = run.ACTIONet(ace)
 #' x = logcounts(ace)['CD14', ]
-#' plot.ACTIONet.gradient(ace, x, transparency.attr = ace$node_centrality)
+#' plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
 #' @export
+
 plot.ACTIONet.gradient <- function(
   ace,
   x,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 3,
-  node_size = 0.1,
-  CPal = "magma",
-  title = "",
   alpha_val = 0.85,
+  log_scale = FALSE,
   nonparameteric = FALSE,
-  coordinate_slot = "ACTIONet2D"
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 1,
+  stroke_size = point_size * 0.1,
+  stroke_contrast_fac = 0.1,
+  grad_palette = "magma",
+  net_attr = "ACTIONet",
+  coordinate_attr = "ACTIONet2D"
 ) {
-
-    node_size = node_size * 0.3
-
-    if (class(ace) == "ACTIONetExperiment") {
-        if (is.character(coordinate_slot)) {
-            coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        } else {
-            coors = as.matrix(coordinate_slot)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        }
-    } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
-            coors = as.matrix(ace)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        } else {
-            err = sprintf("Unknown type for object 'ace'.\n")
-            stop(err)
-        }
-    }
-
 
     NA_col = "#eeeeee"
 
     ## Create color gradient generator
-    if (CPal %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+    if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
 
-        Pal_grad = switch(CPal,
+        grad_palette = switch(grad_palette,
           greys = grDevices::gray.colors(100),
           inferno = viridis::inferno(500, alpha = 0.8),
           magma = viridis::magma(500, alpha = 0.8),
@@ -977,69 +972,58 @@ plot.ACTIONet.gradient <- function(
           Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
           RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
         )
+
     } else {
-        Pal_grad = grDevices::colorRampPalette(c(NA_col, CPal))(500)
+        # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
+        grad_palette = grDevices::colorRampPalette(grad_palette)(500)
     }
 
-    ## Scale/prune scorees, if needed
-    x[x < 0] = 0
-    if (max(x) > 50)
+    ## Scale/prune scores, if needed
+    if(any(x < 0)){x = x + -1*min(x)}
+
+    x = x - min(x)
+
+    if (log_scale == TRUE)
         x = log1p(x)
 
     if (alpha_val > 0) {
-        x = as.numeric(compute_network_diffusion(
-          G = colNets(ace)$ACTIONet,
+        x = as.numeric(compute_network_diffusion_fast(
+          G = colNets(ace)[[net_attr]],
           X0 = as(as.matrix(x), "sparseMatrix")
         ))
     }
 
-    if (nonparameteric == TRUE) {
+    col_func = (scales::col_bin(
+      palette = grad_palette,
+      domain = NULL,
+      na.color = NA_col,
+      bins = 7
+    ))
 
-        vCol = (scales::col_bin(
-          palette = Pal_grad,
-          domain = NULL,
-          na.color = NA_col,
-          bins = 7
-        ))(rank(x))
-
-    } else {
-
-        vCol = (scales::col_bin(
-          palette = Pal_grad,
-          domain = NULL,
-          na.color = NA_col,
-          bins = 7
-        ))(x)
-
-    }
-
-    if (!is.null(transparency.attr)) {
-        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
-        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
-        beta[z > trans.z.threshold] = 1
-        beta = beta^trans.fact
-
-        vCol = scales::alpha(vCol, beta)
-        vCol.border = scales::alpha(colorspace::darken(vCol, 0.1), beta)
-    } else {
-        vCol.border = colorspace::darken(vCol, 0.1)
-    }
+    if (nonparameteric == TRUE)
+        plot_fill_col = col_func(rank(x))
+    else
+        plot_fill_col = col_func(x)
 
     idx = order(x, decreasing = FALSE)
 
-    graphics::plot(
-      x = coors[idx, 1],
-      y = coors[idx, 2],
-      bg = vCol[idx],
-      col = vCol.border[idx],
-      cex = node_size,
-      pch = 21,
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title
+    p_out <- plot.ACTIONet(
+      data = ace,
+      label_attr = NULL,
+      color_attr = plot_fill_col,
+      trans_attr = trans_attr,
+      trans_fac = trans_fac,
+      trans_th = trans_th,
+      point_size = point_size,
+      stroke_size = stroke_size,
+      stroke_contrast_fac = stroke_contrast_fac,
+      palette = NULL,
+      add_text_labels = FALSE,
+      point_order = idx,
+      coordinate_attr = coordinate_attr
     )
 
+    return(p_out)
 }
 
 
@@ -1048,10 +1032,10 @@ plot.ACTIONet.gradient <- function(
 #'
 #' @param ace ACTIONet output object
 #' @param markers Set of row features (e.g. genes) to visualize .
-#' @param transparency.attr Additional continuous attribute to project onto the transparency of nodes
-#' @param trans.z.threshold, trans.fact Control the effect of transparency mapping
-#' @param node_size Size of nodes in the ACTIONet plot
-#' @param CPal Color palette (named vector or a name for a given known palette)
+#' @param trans_attr Additional continuous attribute to project onto the transparency of nodes
+#' @param trans_th, trans_fac Control the effect of transparency mapping
+#' @param point_size Size of nodes in the ACTIONet plot
+#' @param grad_palette Color palette (named vector or a name for a given known palette)
 #' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
 #' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
 #'
@@ -1059,19 +1043,21 @@ plot.ACTIONet.gradient <- function(
 #'
 #' @examples
 #' ace = run.ACTIONet(sce)
-#' visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
+#' visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), trans_attr = ace$node_centrality)
 visualize.markers <- function(
   ace,
   markers,
   features_use = NULL,
-  assay_name = "logcounts",
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 3,
-  node_size = 1,
-  CPal = "magma",
   alpha_val = 0.9,
-  export_path = NA
+  assay_name = "logcounts",
+  trans_attr = NULL,
+  trans_th = -0.5,
+  trans_fac = 3,
+  grad_palette = "magma",
+  point_size = 1,
+  net_attr = "ACTIONet",
+  coordinate_attr = "ACTIONet2D",
+  single_plot = FALSE
 ) {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
@@ -1087,7 +1073,6 @@ visualize.markers <- function(
         alpha_val = 0
 
     if (alpha_val > 0) {
-
         expression_profile = impute.genes.using.ACTIONet(
           ace = ace,
           genes = marker_set,
@@ -1107,53 +1092,72 @@ visualize.markers <- function(
     if (length(markers_missing) > 0)
         print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
 
-    for (i in 1:ncol(expression_profile)) {
-        feat_name = colnames(expression_profile)[i]
-        x = expression_profile[, i]
+    # out = lapply(1:ncol(expression_profile), function(i){
+    out = sapply(colnames(expression_profile), function(feat_name){
+      # feat_name = colnames(expression_profile)[i]
+      # x = expression_profile[, i]
+      x = expression_profile[, feat_name]
 
-        nnz = round(sum(x^2)^2/sum(x^4))
-        x.threshold = sort(x, decreasing = TRUE)[nnz]
-        x[x < x.threshold] = 0
-        x = x/max(x)
+      nnz = round(sum(x^2)^2/sum(x^4))
+      x.threshold = sort(x, decreasing = TRUE)[nnz]
+      x[x < x.threshold] = 0
+      x = x/max(x)
 
-        plot.ACTIONet.gradient(
-          ace = ace,
-          x = x,
-          transparency.attr = transparency.attr,
-          trans.z.threshold = trans.z.threshold,
-          trans.fact = trans.fact,
-          node_size = node_size,
-          CPal = CPal,
-          title = feat_name,
-          alpha_val = 0
-        )
+      p_out <- plot.ACTIONet.gradient(
+        ace = ace,
+        x = x,
+        alpha_val = 0,
+        log_scale = FALSE,
+        nonparameteric = FALSE,
+        trans_attr = trans_attr,
+        trans_fac = trans_fac,
+        trans_th = trans_th,
+        point_size = point_size,
+        stroke_size = point_size * 0.1,
+        stroke_contrast_fac = 0.1,
+        grad_palette = grad_palette,
+        net_attr = net_attr,
+        coordinate_attr = coordinate_attr
+      ) +
+        ggtitle(feat_name) +
+        theme(plot.title = element_text(hjust = 0.5))
 
-        if (!is.na(export_path)) {
-            fname = sprintf("%s/%s.pdf", export_path, feat_name)
-            dir.create(dirname(fname), showWarnings = FALSE, recursive = TRUE)
-            pdf(fname)
-            par(mar = c(0, 0, 1, 0))
-            plot.ACTIONet.gradient(
-              ace = ace,
-              x = x,
-              transparency.attr = transparency.attr,
-              trans.z.threshold = trans.z.threshold,
-              trans.fact = trans.fact,
-              node_size = node_size,
-              CPal = CPal,
-              title = feat_name,
-              alpha_val = 0
-            )
-            dev.off()
-        }
+      return(p_out)
+    }, simplify = FALSE)
+
+    # n = length(out)
+    if(length(out) == 1)
+      out = out[[1]]
+
+    if(single_plot == TRUE && length(out) > 1){
+
+      d = .plot_arrange_dim(n)
+      out = ggpubr::ggarrange(plotlist = out,
+        nrow = d[1],
+        ncol = d[2]
+      )
+
+      # n = 1
     }
+
+    # if(show_plots == TRUE){
+    #   if(n == 1){
+    #     print(out)
+    #   } else {
+    #     for(i in 1:n){
+    #       print(out[[i]])
+    #     }
+    #   }
+    # }
+
+    return(out)
 }
 
 
 select.top.k.genes <- function(
   ace,
   top_genes = 5,
-  CPal = NULL,
+  palette = NULL,
   blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
   top_features = 3,
   normalize = FALSE,
@@ -1180,7 +1184,7 @@ select.top.k.genes <- function(
 plot.top.k.genes <- function(
   ace,
   top_genes = 5,
-  CPal = NULL,
+  palette = NULL,
   blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
   top_features = 3,
   normalize = FALSE,
@@ -1213,7 +1217,7 @@ plot.top.k.genes <- function(
 plot.archetype.selected.genes <- function(
   ace,
   genes,
-  CPal = NULL,
+  palette = NULL,
   blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
   top_features = 3,
   normalize = FALSE,
@@ -1247,8 +1251,8 @@ plot.archetype.selected.genes <- function(
 
 plot.ACTIONet.archetype.footprint <- function(
   ace,
-  node_size = 0.1,
-  CPal = "magma",
+  point_size = 0.1,
+  palette = "magma",
   title = "",
   arch.labels = NULL,
   coordinate_slot = "ACTIONet2D",
@@ -1266,10 +1270,10 @@ plot.ACTIONet.archetype.footprint <- function(
       alpha = alpha_val
     )
 
-    node_size = node_size * 0.3
+    point_size = point_size * 0.3
     coors = scale(colMaps(ace)[[coordinate_slot]])
 
-    if (CPal %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+    if (palette %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
 
         Pal_grad = switch(CPal,
           inferno = viridis::inferno(500, alpha = 0.8),
@@ -1314,7 +1318,7 @@ plot.ACTIONet.archetype.footprint <- function(
           y = coors[idx, 2],
           bg = vCol[idx],
           col = vCol[idx],
-          cex = node_size,
+          cex = point_size,
           pch = 21,
           axes = FALSE,
           xlab = "",
@@ -1380,11 +1384,11 @@ plot.ACTIONet.backbone <- function(
   ace,
   labels = NULL,
   arch.labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 1.5,
-  node_size = 0.1,
-  CPal = CPal20,
+  trans_attr = NULL,
+  trans_th = -0.5,
+  trans_fac = 1.5,
+  point_size = 0.1,
+  palette = CPal_default,
   title = "",
   border.contrast.factor = 0.1,
   arch.size.factor = 1,
@@ -1398,7 +1402,7 @@ plot.ACTIONet.backbone <- function(
     }
     backbone = metadata(ace)$backbone
 
-    node_size = node_size * 0.3
+    point_size = point_size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = .preprocess_annotation_labels(labels, ace)
@@ -1438,9 +1442,9 @@ plot.ACTIONet.backbone <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  palette = CPal_default
                 } else {
-                  CPal = CPal88
+                  palette = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -1466,11 +1470,11 @@ plot.ACTIONet.backbone <- function(
         arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
     }
 
-    if (!is.null(transparency.attr)) {
-        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
-        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
-        beta[z > trans.z.threshold] = 1
-        beta = beta^trans.fact
+    if (!is.null(trans_attr)) {
+        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
+        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
+        beta[z > trans_th] = 1
+        beta = beta^trans_fac
 
         vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
         vCol = scales::alpha(vCol, beta)
@@ -1496,7 +1500,7 @@ plot.ACTIONet.backbone <- function(
     graphics::plot(
       coors[rand.perm, c(1, 2)],
       pch = 21,
-      cex = node_size,
+      cex = point_size,
       bg = vCol[rand.perm],
       col = vCol.border[rand.perm],
       axes = FALSE,
@@ -1575,11 +1579,11 @@ plot.ACTIONet.backbone.graph <- function(
   ace,
   labels = NULL,
   arch.labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 1.5,
-  node_size = 0.1,
-  CPal = CPal20,
+  trans_attr = NULL,
+  trans_th = -0.5,
+  trans_fac = 1.5,
+  point_size = 0.1,
+  palette = CPal_default,
   title = "",
   border.contrast.factor = 0.1,
   arch.size.factor = 1,
@@ -1595,7 +1599,7 @@ plot.ACTIONet.backbone.graph <- function(
     }
     backbone = metadata(ace)$backbone
 
-    node_size = node_size * 0.3
+    point_size = point_size * 0.3
 
     if (class(ace) == "ACTIONetExperiment") {
         labels = .preprocess_annotation_labels(labels, ace)
@@ -1635,9 +1639,9 @@ plot.ACTIONet.backbone.graph <- function(
         if (length(CPal) > 1) {
             if (length(CPal) < length(Annot)) {
                 if (length(Annot) <= 20) {
-                  CPal = CPal20
+                  palette = CPal_default
                 } else {
-                  CPal = CPal88
+                  palette = CPal_default
                 }
             }
             if (is.null(names(CPal))) {
@@ -1663,11 +1667,11 @@ plot.ACTIONet.backbone.graph <- function(
         arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
     }
 
-    if (!is.null(transparency.attr)) {
-        z = scale(transparency.attr)  # (transparency.attr - median(transparency.attr))/mad(transparency.attr)
-        beta = 1/(1 + exp(-trans.fact * (z - trans.z.threshold)))
-        beta[z > trans.z.threshold] = 1
-        beta = beta^trans.fact
+    if (!is.null(trans_attr)) {
+        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
+        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
+        beta[z > trans_th] = 1
+        beta = beta^trans_fac
 
         vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
         vCol = scales::alpha(vCol, beta)
@@ -1694,7 +1698,7 @@ plot.ACTIONet.backbone.graph <- function(
     graphics::plot(
       coors[rand.perm, c(1, 2)],
       pch = 21,
-      cex = node_size,
+      cex = point_size,
       bg = vCol_lightend[rand.perm],
       col = vCol.border_lightend[rand.perm],
       axes = FALSE,
@@ -1785,7 +1789,7 @@ plot.backbone.graph <- function(
   ace,
   arch.labels = NULL,
   arch.colors = NULL,
-  node_size = 2,
+  point_size = 2,
   label_size = 1,
   title = "",
   stretch.factor = 2
@@ -1807,7 +1811,7 @@ plot.backbone.graph <- function(
 
     w = fastColSums(colMaps(ace)$H_unified)
     w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
-    arch.sizes = (0.25 + w) * node_size
+    arch.sizes = (0.25 + w) * point_size
 
     graphics::plot(
       arch.coors,

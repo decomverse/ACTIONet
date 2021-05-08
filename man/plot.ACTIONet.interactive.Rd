@@ -7,11 +7,11 @@
 \method{plot}{ACTIONet.interactive}(
   ace,
   labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node_size = 1,
-  CPal = CPal20,
+  trans_attr = NULL,
+  trans_th = -1,
+  trans_fac = 1,
+  point_size = 1,
+  palette = CPal_default,
   enrichment.table = NULL,
   top_features = 7,
   Alt_Text = NULL,
@@ -26,13 +26,13 @@
 
 \item{labels}{Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot}
 
-\item{transparency.attr}{Additional continuous attribute to project onto the transparency of nodes}
+\item{trans_attr}{Additional continuous attribute to project onto the transparency of nodes}
 
-\item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
+\item{trans_th, }{trans_fac Control the effect of transparency mapping}
 
-\item{node_size}{Size of nodes in the ACTIONet plot}
+\item{point_size}{Size of nodes in the ACTIONet plot}
 
-\item{CPal}{Color palette (named vector or a name for a given known palette)}
+\item{palette}{Color palette (named vector or a name for a given known palette)}
 
 \item{enrichment.table}{To project the top-ranked features interactively.}
 

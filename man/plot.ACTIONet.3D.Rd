@@ -7,11 +7,11 @@
 \method{plot}{ACTIONet.3D}(
   ace,
   labels = NULL,
-  transparency.attr = NULL,
-  trans.z.threshold = -1,
-  trans.fact = 1,
-  node_size = 1,
-  CPal = CPal20,
+  trans_attr = NULL,
+  trans_th = -1,
+  trans_fac = 1,
+  point_size = 1,
+  palette = CPal_default,
   coordinate_slot = "ACTIONet3D"
 )
 }
@@ -20,13 +20,13 @@
 
 \item{labels}{Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot}
 
-\item{transparency.attr}{Additional continuous attribute to project onto the transparency of nodes}
+\item{trans_attr}{Additional continuous attribute to project onto the transparency of nodes}
 
-\item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
+\item{trans_th, }{trans_fac Control the effect of transparency mapping}
 
-\item{node_size}{Size of nodes in the ACTIONet plot}
+\item{point_size}{Size of nodes in the ACTIONet plot}
 
-\item{CPal}{Color palette (named vector or a name for a given known palette)}
+\item{palette}{Color palette (named vector or a name for a given known palette)}
 
 \item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 
@@ -40,5 +40,5 @@ Main ACTIONet 3D plotting functions
 }
 \examples{
 ace = run.ACTIONet(sce)
-plot.ACTIONet.3D(ace, ace$assigned_archetype, transparency.attr = ace$node_centrality)
+plot.ACTIONet.3D(ace, ace$assigned_archetype, trans_attr = ace$node_centrality)
 }

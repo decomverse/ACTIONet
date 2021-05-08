@@ -1,4 +1,4 @@
-#' A wrapper function to call all main functions of the ACTIONet
+#' Run main ACTIONet pipeline
 #'
 #' @param ace Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).
 #' @param k_max Maximum depth of decompositions (default=30).
@@ -12,9 +12,9 @@
 #' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r').
 #' @param assay_name Name of assay to be used (default='logcounts').
 #'
-#' @return A named list: \itemize{
-#' \item ace: ACTIONetExperiment object (derived from SummarizedExperiment)
-#' \item ACTIONet.trace: Log of ACTIONet function calls
+#' @return \itemize{
+#' \item If full_trace='FALSE'(default): ACTIONetExperiment object.
+#' \item If full_trace='TRUE': Named list containing an ACTIONetExperiment object and a log of ACTIONet function calls.
 #'}
 #'
 #' @examples
@@ -32,7 +32,7 @@ run.ACTIONet <- function(
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
-  max_iter_ACTION = 100,
+  max_iter_ACTION = 50,
   min_specificity_z_thresh = -3,
   network_density = 1,
   mutual_edges_only = TRUE,
