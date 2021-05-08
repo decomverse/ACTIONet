@@ -16,7 +16,9 @@ CPal_default = c(
 .default_ggtheme <-  ggplot2::theme(axis.title = element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
+        panel.grid = element_blank(),
         panel.background = ggplot2::element_blank(),
+        plot.background = element_rect(fill = "white", color = NA),
         legend.title = ggplot2::element_blank(),
         legend.background = ggplot2::element_blank(),
         legend.key = ggplot2::element_blank(),
@@ -70,6 +72,8 @@ CPal_default = c(
     plot_labels = label_attr
   }
 
+  plot_labels = as.character(plot_labels)
+  plot_labels[is.na(plot_labels)] = "NA"
   return(plot_labels)
 
 }
@@ -83,6 +87,11 @@ CPal_default = c(
   palette = CPal_default
 ){
 
+  if (is(data, "ACTIONetExperiment")) {
+    n_dim = NCOL(data)
+  } else {
+    n_dim = NROW(data)
+  }
 
   if(!is.null(color_attr)) {
 
@@ -109,11 +118,13 @@ CPal_default = c(
 
   } else if(!is.null(plot_labels)) {
 
+    plot_labels = as.character(plot_labels)
+    plot_labels[is.na(plot_labels)] = "NA"
     label_names = sort(unique(plot_labels))
     num_unique = length(label_names)
 
     if (num_unique == 1) {
-      plot_colors = .default_colors(NROW(data))
+      plot_colors = .default_colors(n_dim)
     } else {
 
       if (length(palette) == 1) {
@@ -123,7 +134,17 @@ CPal_default = c(
         msg = sprintf("Not enough colors in 'palette'. Using default palette.\n")
         message(msg)
       } else {
-        plot_palette = palette[1:num_unique]
+
+        if(!is.null(names(palette))){
+          if(all(label_names %in% names(palette))){
+            plot_palette = palette[label_names]
+          } else {
+            plot_palette = palette[1:num_unique]
+          }
+        } else {
+          plot_palette = palette[1:num_unique]
+        }
+
       }
 
       names(plot_palette) = label_names
@@ -136,7 +157,7 @@ CPal_default = c(
     if (is(data, "ACTIONetExperiment")) {
       plot_colors = grDevices::rgb(colMaps(data)[[color_slot]])
     } else {
-      plot_colors = .default_colors(NROW(data))
+      plot_colors = .default_colors(n_dim)
     }
 
   }
@@ -186,7 +207,6 @@ CPal_default = c(
 
 #' @import ggplot2
 .layout_plot_labels <- function(
-  p,
   plot_data = NULL,
   label_names = NULL,
   label_colors = NULL,
@@ -239,7 +259,7 @@ CPal_default = c(
     }
 
     if(use_repel == TRUE){
-      p <- p + ggrepel::geom_label_repel(
+      layer_out <- ggrepel::geom_label_repel(
         data = layout_data,
         mapping = aes(
           x = x,
@@ -252,7 +272,7 @@ CPal_default = c(
         segment.color = 'transparent'
       )
     } else {
-      p <- p + geom_label(
+      layer_out <- geom_label(
         data = layout_data,
         mapping = aes(
           x = x,
@@ -264,6 +284,19 @@ CPal_default = c(
         size = text_size)
     }
 
+  return(layer_out)
+}
 
-  return(p)
+.plot_arrange_dim <- function(n){
+
+  s = sqrt(n)
+  sf = round(s)
+  sr = s - sf
+
+  if(sr <= 0)
+    d = c(sf, sf)
+  else
+    d = c(sf, sf + 1)
+
+  return(d)
 }
