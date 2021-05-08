@@ -10,7 +10,7 @@
   gene_name,
   features_use = NULL,
   assay_name = "logcounts",
-  CPal = CPal20
+  palette = CPal_default
 )
 }
 \arguments{
@@ -20,7 +20,7 @@
 
 \item{gene_name}{Name of the gene to plot}
 
-\item{CPal}{Color palette (named vector or a name for a given known palette)}
+\item{palette}{Color palette (named vector or a name for a given known palette)}
 }
 \value{
 Visualized ACTIONet

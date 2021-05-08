@@ -463,7 +463,7 @@ Leiden.clustering <- function(
   init.slot = "assigned_archetype",
   seed = 0,
   postprocess = T,
-  PP_lambda = 0, 
+  PP_lambda = 0,
   PP_iters = 3,
   PP_sig_threshold = 3) {
 
@@ -478,7 +478,6 @@ Leiden.clustering <- function(
     if(postprocess == T) {
 		cc = table(clusters)
 		clusters[clusters %in% as.numeric(names(cc)[cc < 30])] = -1
-		#clusters = as.numeric(factor(correct.cell.annotations(ace, clusters)))
 		clusters = run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold)
 	}
     names(clusters) = paste("C", as.character(clusters), sep = "")
@@ -507,7 +506,7 @@ HDBSCAN.clustering <- function(
 ) {
 
     X = as.matrix(colMaps(ace)[[archetype.slot]])
-    
+
     out_list = run_HDBSCAN(
       X = X,
       minPoints = minPoints,
