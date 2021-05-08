@@ -8,7 +8,7 @@
 annotate.archetypes.using.markers(
   ace,
   markers,
-  rand_sample_no = 1000,
+  features_use = NULL,
   significance_slot = "unified_feature_specificity"
 )
 }
