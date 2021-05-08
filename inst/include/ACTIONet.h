@@ -221,8 +221,9 @@ multilevel_archetypal_decomposition prune_archetypes(
 // unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes,
 // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
 // outlier_threshold, int reduced_dim);
-unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
-                                     double alpha, double sensitivity,
+unification_results unify_archetypes(mat &S_r, mat &C_stacked,
+									 mat &H_stacked,
+                                     double violation_threshold,
                                      int thread_no);
 
 // Main functions to build an interaction network from multi-level archetypal
@@ -315,8 +316,6 @@ mat NetEnh(mat Adj);
 
 mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
                            int seed);
-
-vec sweepcut(sp_mat A, vec s);
 
 vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
         uvec fixed_labels);
