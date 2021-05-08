@@ -18,7 +18,6 @@ visualize.markers(
   point_size = 1,
   net_attr = "ACTIONet",
   coordinate_attr = "ACTIONet2D",
-  show_plots = TRUE,
   single_plot = FALSE
 )
 }
