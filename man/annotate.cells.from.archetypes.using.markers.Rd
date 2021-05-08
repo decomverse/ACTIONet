@@ -7,7 +7,6 @@
 annotate.cells.from.archetypes.using.markers(
   ace,
   markers,
-  rand_sample_no = 1000,
   unified_suffix = "unified"
 )
 }

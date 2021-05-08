@@ -9,14 +9,16 @@ visualize.markers(
   ace,
   markers,
   features_use = NULL,
-  assay_name = "logcounts",
-  transparency.attr = NULL,
-  trans.z.threshold = -0.5,
-  trans.fact = 3,
-  node_size = 1,
-  CPal = "magma",
   alpha_val = 0.9,
-  export_path = NA
+  assay_name = "logcounts",
+  trans_attr = NULL,
+  trans_th = -0.5,
+  trans_fac = 3,
+  grad_palette = "magma",
+  point_size = 1,
+  net_attr = "ACTIONet",
+  coordinate_attr = "ACTIONet2D",
+  single_plot = FALSE
 )
 }
 \arguments{
@@ -24,15 +26,15 @@ visualize.markers(
 
 \item{markers}{Set of row features (e.g. genes) to visualize .}
 
-\item{transparency.attr}{Additional continuous attribute to project onto the transparency of nodes}
-
-\item{trans.z.threshold, }{trans.fact Control the effect of transparency mapping}
-
-\item{node_size}{Size of nodes in the ACTIONet plot}
-
-\item{CPal}{Color palette (named vector or a name for a given known palette)}
-
 \item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
+
+\item{trans_attr}{Additional continuous attribute to project onto the transparency of nodes}
+
+\item{trans_th, }{trans_fac Control the effect of transparency mapping}
+
+\item{grad_palette}{Color palette (named vector or a name for a given known palette)}
+
+\item{point_size}{Size of nodes in the ACTIONet plot}
 
 \item{coordinate_slot}{Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')}
 }
@@ -45,5 +47,5 @@ It also optionally imputes the markers.
 }
 \examples{
 ace = run.ACTIONet(sce)
-visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), transparency.attr = ace$node_centrality)
+visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), trans_attr = ace$node_centrality)
 }
