@@ -46,7 +46,8 @@ plot.ACTIONet <- function(
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
   point_order = NULL,
-  use_repel = TRUE
+  use_repel = TRUE,
+  repel_force = 0.05
 ) {
 
     plot_coors = .get_plot_coors(data, coordinate_attr)
@@ -131,7 +132,8 @@ plot.ACTIONet <- function(
           text_size = text_size,
           constrast_fac = 0.5,
           nudge = nudge_text_labels,
-          use_repel = use_repel
+          use_repel = use_repel,
+          repel_force = repel_force
         )
         p_out = p_out + text_layer
     }
