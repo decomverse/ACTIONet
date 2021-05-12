@@ -387,7 +387,7 @@ field<mat> recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 5, int max_iter
 
 
 
-field<mat> recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 5, int max_iter_inner = 40) {
+field<mat> recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
 	dim = std::min(dim, (int)M.n_cols);
 
 	mat W(M.n_rows, dim);
@@ -396,14 +396,21 @@ field<mat> recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 5, int max
 	
 	mat M0 = M;	
 
-	M =  normalise(M, 1, 0);
+	//M =  normalise(M, 1, 0);
 	//M = zscore(M);
 	
+	vec s;
+	mat U, V;
 	double denom = sum(sum(square(M)));		
 	for(int k = 0; k < dim; k++) {		
-		field<mat> SVD_res = HalkoSVD(M, 1, max_SVD_iter, 0, 0);		
-		mat U = SVD_res(0); vec s = SVD_res(1); mat V = SVD_res(2);
-	
+		//field<mat> SVD_res = HalkoSVD(M, 1, max_SVD_iter, 0, 0);		
+		//mat U = SVD_res(0); vec s = SVD_res(1); mat V = SVD_res(2);
+		
+		//svds( U, s, V, sp_mat(M), 1, temp，"std");
+		//svd(U, s, V, M, "std");
+		field<mat> SVD_res = IRLB_SVD(M, 1, max_SVD_iter, 0, 0);		
+		U = SVD_res(0); s = SVD_res(1); V = SVD_res(2);
+
 		//vec w = vec(cor(M0, U.col(0)));
 		vec w = trans(trans(U.col(0)) * M); 
 		int selected_columns = index_max(w);
@@ -508,13 +515,11 @@ unification_results unify_archetypes(mat &S_r, mat &C_stacked,
   sp_mat C_stacked_sp = sp_mat(C_stacked);
   C_stacked_sp = normalise(C_stacked_sp, 1, 0);
   mat H_arch = normalise(mat(H_stacked * C_stacked_sp), 1, 0);
-  
-
-
+  H_arch.replace(datum::nan, 0);  // replace each NaN with 0
 
   printf("Running NMU\n");
   int dim = min((int)H_arch.n_cols, 100);
-  field<mat> NMU_out = recursiveNMU_mine(H_arch, dim, 5, 100);
+  field<mat> NMU_out = recursiveNMU_mine(H_arch, dim, 1000, 100);
 
   
   mat W_NMU = NMU_out(0);
