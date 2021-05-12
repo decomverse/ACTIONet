@@ -215,7 +215,8 @@ CPal_default = c(
   text_size = 3,
   constrast_fac = 0.5,
   nudge = FALSE,
-  use_repel = TRUE
+  use_repel = TRUE,
+  repel_force = 0.05
 ) {
 
     if(is.null(label_names)){
@@ -269,7 +270,8 @@ CPal_default = c(
         ),
         fill = scales::alpha(c("white"), alpha_val),
         size = text_size,
-        segment.color = 'transparent'
+        segment.color = 'transparent',
+		force = repel_force        
       )
     } else {
       layer_out <- geom_label(

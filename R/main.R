@@ -27,7 +27,7 @@ run.ACTIONet <- function(
   ace,
   batch = NULL,
   k_min = 2,
-  k_max = 40,
+  k_max = 30,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
