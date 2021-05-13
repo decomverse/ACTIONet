@@ -4,7 +4,7 @@
 \alias{filter.ace.by.attr}
 \title{Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment` object by column attribute.}
 \usage{
-filter.ace.by.attr(
+\method{filter}{ace.by.attr}(
   ace,
   by,
   assay_name = "counts",
