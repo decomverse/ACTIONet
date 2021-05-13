@@ -207,21 +207,17 @@ plot.ACTIONet.3D <- function(
         Annot = NULL
     } else {
         Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(CPal) > 1) {
-            if (length(CPal) < length(Annot)) {
-                if (length(Annot) <= 20) {
-                  palette = CPal_default
-                } else {
-                  palette = CPal_default
-                }
+        if (length(palette) > 1) {
+            if (length(palette) < length(Annot)) {
+              palette = CPal_default
             }
-            if (is.null(names(CPal))) {
-                Pal = CPal[1:length(Annot)]
+            if (is.null(names(palette))) {
+                Pal = palette[1:length(Annot)]
             } else {
-                Pal = CPal[Annot]
+                Pal = palette[Annot]
             }
         } else {
-            Pal = ggpubr::get_palette(CPal, length(Annot))
+            Pal = ggpubr::get_palette(palette, length(Annot))
         }
 
         names(Pal) = Annot
@@ -361,13 +357,13 @@ plot.ACTIONet.feature.view <- function(
 
     feature.coors = Matrix::t(core.coors %*% X)
 
-    if (is.null(CPal)) {
+    if (is.null(palette)) {
         core.Pal = grDevices::rgb(S4Vectors::metadata(ace)$backbone$colors)
     } else {
-        if (length(CPal) == 1) {
-            core.Pal = ggpubr::get_palette(CPal, length(unique(ace$archetype.assignment)))
+        if (length(palette) == 1) {
+            core.Pal = ggpubr::get_palette(palette, length(unique(ace$archetype.assignment)))
         } else {
-            core.Pal = CPal[1:length(unique(ace$archetype.assignment))]
+            core.Pal = palette[1:length(unique(ace$archetype.assignment))]
         }
     }
     core.Lab = grDevices::convertColor(
@@ -569,21 +565,17 @@ plot.ACTIONet.interactive <- function(
         Annot = NULL
     } else {
         Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(CPal) > 1) {
-            if (length(CPal) < length(Annot)) {
-                if (length(Annot) <= 20) {
-                  palette = CPal_default
-                } else {
-                  palette = CPal_default
-                }
+        if (length(palette) > 1) {
+            if (length(palette) < length(Annot)) {
+              palette = CPal_default
             }
-            if (is.null(names(CPal))) {
-                Pal = CPal[1:length(Annot)]
+            if (is.null(names(palette))) {
+                Pal = palette[1:length(Annot)]
             } else {
-                Pal = CPal[Annot]
+                Pal = palette[Annot]
             }
         } else {
-            Pal = ggpubr::get_palette(CPal, length(Annot))
+            Pal = ggpubr::get_palette(palette, length(Annot))
         }
 
         names(Pal) = Annot
@@ -871,8 +863,8 @@ plot.individual.gene <- function(
     Annot = Annot[order(clusters[match(Annot, Labels)], decreasing = FALSE)]
     Labels = factor(Labels, levels = Annot)
 
-    if (length(CPal) > 1) {
-        if (length(CPal) < length(Annot)) {
+    if (length(palette) > 1) {
+        if (length(palette) < length(Annot)) {
             if (length(Annot) <= 20) {
                 palette = CPal_default
             } else {
@@ -880,13 +872,13 @@ plot.individual.gene <- function(
             }
         }
 
-        if (is.null(names(CPal))) {
-            Pal = CPal[1:length(Annot)]
+        if (is.null(names(palette))) {
+            Pal = palette[1:length(Annot)]
         } else {
-            Pal = CPal[Annot]
+            Pal = palette[Annot]
         }
     } else {
-        Pal = ggpubr::get_palette(CPal, length(Annot))
+        Pal = ggpubr::get_palette(palette, length(Annot))
     }
 
     names(Pal) = Annot
@@ -1275,7 +1267,7 @@ plot.ACTIONet.archetype.footprint <- function(
 
     if (palette %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
 
-        Pal_grad = switch(CPal,
+        Pal_grad = switch(palette,
           inferno = viridis::inferno(500, alpha = 0.8),
           magma = viridis::magma(500, alpha = 0.8),
           viridis = viridis::viridis(500, alpha = 0.8),
@@ -1285,7 +1277,7 @@ plot.ACTIONet.archetype.footprint <- function(
 
     } else {
         NA_col = "#cccccc"
-        Pal_grad = grDevices::colorRampPalette(c(NA_col, CPal))(500)
+        Pal_grad = grDevices::colorRampPalette(c(NA_col, palette))(500)
     }
 
     k1 = k2 = round(sqrt(NCOL(Ht)))
@@ -1439,21 +1431,17 @@ plot.ACTIONet.backbone <- function(
         Annot = NULL
     } else {
         Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(CPal) > 1) {
-            if (length(CPal) < length(Annot)) {
-                if (length(Annot) <= 20) {
-                  palette = CPal_default
-                } else {
-                  palette = CPal_default
-                }
+        if (length(palette) > 1) {
+            if (length(palette) < length(Annot)) {
+              palette = CPal_default
             }
-            if (is.null(names(CPal))) {
-                Pal = CPal[1:length(Annot)]
+            if (is.null(names(palette))) {
+                Pal = palette[1:length(Annot)]
             } else {
-                Pal = CPal[Annot]
+                Pal = palette[Annot]
             }
         } else {
-            Pal = ggpubr::get_palette(CPal, length(Annot))
+            Pal = ggpubr::get_palette(palette, length(Annot))
         }
 
         names(Pal) = Annot
@@ -1636,21 +1624,17 @@ plot.ACTIONet.backbone.graph <- function(
         Annot = NULL
     } else {
         Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(CPal) > 1) {
-            if (length(CPal) < length(Annot)) {
-                if (length(Annot) <= 20) {
-                  palette = CPal_default
-                } else {
-                  palette = CPal_default
-                }
+        if (length(palette) > 1) {
+            if (length(palette) < length(Annot)) {
+              palette = CPal_default
             }
-            if (is.null(names(CPal))) {
-                Pal = CPal[1:length(Annot)]
+            if (is.null(names(palette))) {
+                Pal = palette[1:length(Annot)]
             } else {
-                Pal = CPal[Annot]
+                Pal = palette[Annot]
             }
         } else {
-            Pal = ggpubr::get_palette(CPal, length(Annot))
+            Pal = ggpubr::get_palette(palette, length(Annot))
         }
 
         names(Pal) = Annot
