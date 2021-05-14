@@ -24,7 +24,7 @@ plot.ACTIONet.interactive <- function(
   labels = NULL,
   trans_attr = NULL,
   trans_th = -1,
-  trans_fac = 1,~`
+  trans_fac = 1,
   point_size = 1,
   palette = CPal_default,
   threeD = FALSE,
