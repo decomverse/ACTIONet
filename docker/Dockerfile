@@ -1,0 +1,80 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+        LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+        PATH=/opt/conda/bin:$PATH
+
+RUN apt-get update --fix-missing && \
+    apt-get install -yq wget curl screen unzip  bzip2 ca-certificates libglib2.0-0 git cmake build-essential software-properties-common libhdf5-dev libsuitesparse-dev libnss3 xvfb && \
+    add-apt-repository ppa:cran/libgit2 && \
+    apt-get update && \
+    apt-get clean && \
+    apt autoremove -y
+
+
+#download the latest anaconda 
+COPY files/python_env.yml /tmp/python_env.yml
+
+
+RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh && \
+    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
+    rm ~/anaconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+    conda config --system --set auto_update_conda false && \
+    conda config --system --set show_channel_urls true && \
+    conda update --quiet --yes conda && \
+    conda env update -f /tmp/python_env.yml -n python_env && \
+    conda create -n r_env r-essentials r-base && \
+    jupyter notebook --generate-config && \
+    conda clean --all -ftipsy && \
+    rm -rf ~/.cache/pip
+    
+
+##Copy config file
+COPY files/jupyter_notebook_config.py /home/$DOCKER_USER/.jupyter/jupyter_notebook_config.py
+COPY files/jupyter_notebook_config.py /root/.jupyter/jupyter_notebook_config.py
+
+# We aren't running a GUI, so force matplotlib to use
+# the non-interactive "Agg" backend for graphics.
+# Run matplotlib once to build the font cache.
+ENV MATPLOTLIBRC=/home/$DOCKER_USER/.config/matplotlib/matplotlibrc
+RUN mkdir -p /home/$DOCKER_USER/.config/matplotlib && \
+    echo "backend      : Agg" > /home/$DOCKER_USER/.config/matplotlib/matplotlibrc && \
+    python -c "import matplotlib.pyplot"
+
+#Enable widgetsnbextension for jupyter widgets.
+# See https://ipywidgets.readthedocs.io/en/stable/user_install.html.
+# This enables the extension in the conda environment. The conda-forge version
+# does this upon installation, but the default channel version doesn't seem to,
+# so we'll run this (again) just in case.
+RUN jupyter nbextension enable --py widgetsnbextension && jupyter labextension install @techrah/text-shortcuts
+
+# Instruct joblib to use disk for temporary files. Joblib defaults to
+# /shm when that directory is present. In the Docker container, /shm is
+# present but defaults to 64 MB.
+# https://github.com/joblib/joblib/blob/0.11/joblib/parallel.py#L328L342
+ENV JOBLIB_TEMP_FOLDER=/tmp
+ENV PATH=/opt/conda/bin:$PATH \
+    CONDARC=/opt/conda/.condarc \
+    CONDA_DIR=/opt/conda
+
+RUN conda install -c conda-forge nb_conda_kernels
+COPY files/*R /tmp/*R
+
+#install R kernel 
+RUN conda run -n r_env Rscript /tmp/install_irkernel.R
+
+#install python actionet 
+#make sure cmake version is >=3.19
+RUN conda install -c conda-forge cmake
+RUN pip install git+https://github.com/shmohammadi86/ACTIONet@python-release
+
+#install R actionet
+RUN conda run -n r_env Rscript /tmp/install_actionet.R 
+
+EXPOSE 88881 8882 8883 8884 8885 8886 8887 8888
+CMD screen -d -m bash -c "jupyter-lab --ip=0.0.0.0 --no-browser --allow-root --LabApp.token=''" 
+

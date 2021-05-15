@@ -1,0 +1,19 @@
+name: python_env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.8.5
+  - ipykernel
+  - numexpr
+  - scipy
+  - scikit-learn
+  - jupyterlab
+  - pip
+  - tini
+  - plotly
+  - nodejs
+  - matplotlib
+  - pip:
+    - widgetsnbextension
