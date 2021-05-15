@@ -11,10 +11,10 @@ RUN apt-get update --fix-missing && \
     apt-get clean && \
     apt autoremove -y
 
+RUN  ln -s /bin/tar /bin/gtar
 
 #download the latest anaconda 
 COPY files/base_environment.yml /tmp/base_environment.yml
-
 RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh && \
     /bin/bash ~/anaconda.sh -b -p /opt/conda && \
     rm ~/anaconda.sh && \
@@ -51,20 +51,33 @@ ENV PATH=/opt/conda/bin:$PATH \
     CONDARC=/opt/conda/.condarc \
     CONDA_DIR=/opt/conda
 
-RUN conda install -c conda-forge nb_conda_kernels
-
-#create an R conda environment 
-RUN conda create -n r_env r-essentials r-base 
-COPY files/*R /tmp/
-
-#install R kernel 
-RUN conda run -n r_env Rscript /tmp/install_irkernel.R
-
 #install python actionet 
-#make sure cmake version is >=3.19
-RUN conda install -c conda-forge cmake
 RUN pip install git+https://github.com/shmohammadi86/ACTIONet@python-release
 
+
+#create an R conda environment
+COPY files/r_environment.yml /tmp
+RUN conda env update -f /tmp/r_environment.yml --name r_env && \    
+    conda clean --all -f -y && \
+    rm -rf ~/.cache/pip
+
+
+ENV R_HOME=/opt/conda/envs/r_env/lib/R \
+	CRAN=https://cloud.r-project.org
+
+RUN echo "options(repos = c(CRAN = '${CRAN}'), download.file.method = 'libcurl')" >> ${R_HOME}/etc/Rprofile.site &&\
+	echo  'options(HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os)))' >> ${R_HOME}/etc/Rprofile.site && \
+	mkdir -p ${R_HOME}/site-library && \
+	chown root:staff ${R_HOME}/site-library && \
+	chmod g+ws ${R_HOME}/site-library && \
+	echo "R_LIBS=\${R_LIBS-'${R_HOME}/site-library:${R_HOME}/library'}" >> ${R_HOME}/etc/Renviron && \
+	echo "export MKL_NUM_THREADS=\`nproc\`" >> ~/.bashrc && \
+	echo "MKL_THREADING_LAYER=GNU" >> ~/.bashrc
+
+
+COPY files/*R /tmp/
+#install R kernel 
+RUN conda run -n r_env Rscript /tmp/install_irkernel.R
 #install R actionet
 RUN conda run -n r_env Rscript /tmp/install_actionet.R 
 

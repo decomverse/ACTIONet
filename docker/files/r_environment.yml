@@ -1,0 +1,9 @@
+name: r
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - conda-forge::r-essentials
+  - conda-forge::libblas=3.8.0=21_mkl
+  - conda-forge::r-rcurl
+  - conda-forge::r-biocmanager
