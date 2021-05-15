@@ -13,8 +13,7 @@ RUN apt-get update --fix-missing && \
 
 
 #download the latest anaconda 
-COPY files/python_env.yml /tmp/python_env.yml
-
+COPY files/base_environment.yml /tmp/base_environment.yml
 
 RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh && \
     /bin/bash ~/anaconda.sh -b -p /opt/conda && \
@@ -26,13 +25,11 @@ RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_6
     conda config --system --set auto_update_conda false && \
     conda config --system --set show_channel_urls true && \
     conda update --quiet --yes conda && \
-    conda env update -f /tmp/python_env.yml -n python_env && \
-    conda create -n r_env r-essentials r-base && \
+    conda env update -f /tmp/base_environment.yml -n base && \
     jupyter notebook --generate-config && \
     conda clean --all -ftipsy && \
     rm -rf ~/.cache/pip
     
-
 ##Copy config file
 COPY files/jupyter_notebook_config.py /home/$DOCKER_USER/.jupyter/jupyter_notebook_config.py
 COPY files/jupyter_notebook_config.py /root/.jupyter/jupyter_notebook_config.py
@@ -45,13 +42,6 @@ RUN mkdir -p /home/$DOCKER_USER/.config/matplotlib && \
     echo "backend      : Agg" > /home/$DOCKER_USER/.config/matplotlib/matplotlibrc && \
     python -c "import matplotlib.pyplot"
 
-#Enable widgetsnbextension for jupyter widgets.
-# See https://ipywidgets.readthedocs.io/en/stable/user_install.html.
-# This enables the extension in the conda environment. The conda-forge version
-# does this upon installation, but the default channel version doesn't seem to,
-# so we'll run this (again) just in case.
-RUN jupyter nbextension enable --py widgetsnbextension && jupyter labextension install @techrah/text-shortcuts
-
 # Instruct joblib to use disk for temporary files. Joblib defaults to
 # /shm when that directory is present. In the Docker container, /shm is
 # present but defaults to 64 MB.
@@ -62,6 +52,9 @@ ENV PATH=/opt/conda/bin:$PATH \
     CONDA_DIR=/opt/conda
 
 RUN conda install -c conda-forge nb_conda_kernels
+
+#create an R conda environment 
+RUN conda create -n r_env r-essentials r-base 
 COPY files/*R /tmp/*R
 
 #install R kernel 
