@@ -55,7 +55,7 @@ RUN conda install -c conda-forge nb_conda_kernels
 
 #create an R conda environment 
 RUN conda create -n r_env r-essentials r-base 
-COPY files/*R /tmp/*R
+COPY files/*R /tmp/
 
 #install R kernel 
 RUN conda run -n r_env Rscript /tmp/install_irkernel.R
