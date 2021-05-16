@@ -12,8 +12,6 @@
   trans_fac = 1,
   point_size = 1,
   palette = CPal_default,
-  top_features = 7,
-  blacklist_pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   threeD = FALSE,
   title = "ACTIONet",
   coordinate_slot = "ACTIONet2D"
@@ -32,15 +30,15 @@
 
 \item{palette}{Color palette (named vector or a name for a given known palette)}
 
-\item{top_features}{Number of features to show per cell}
-
-\item{blacklist_pattern}{List of genes to filter-out}
-
 \item{threeD}{Whether to show the plot in 3D}
 
 \item{title}{Main title of the plot}
 
 \item{enrichment.table}{To project the top-ranked features interactively.}
+
+\item{top_features}{Number of features to show per cell}
+
+\item{blacklist_pattern}{List of genes to filter-out}
 }
 \value{
 Visualized ACTIONet
