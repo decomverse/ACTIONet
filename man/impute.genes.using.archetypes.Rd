@@ -4,7 +4,7 @@
 \alias{impute.genes.using.archetypes}
 \title{Imputing expression of genes by interpolating over archetype profile}
 \usage{
-impute.genes.using.archetypes(ace, genes)
+impute.genes.using.archetypes(ace, genes, features_use = NULL)
 }
 \arguments{
 \item{ace}{ACTIONet output}

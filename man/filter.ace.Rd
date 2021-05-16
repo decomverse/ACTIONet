@@ -4,7 +4,7 @@
 \alias{filter.ace}
 \title{Filter columns and rows of `ACTIONetExperiment` or `SummarizedExperiment`-like object.}
 \usage{
-\method{filter}{ace}(
+filter.ace(
   ace,
   assay_name = "counts",
   min_cells_per_feat = NULL,

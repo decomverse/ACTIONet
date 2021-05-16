@@ -171,8 +171,8 @@ plot.ACTIONet.interactive <- function(
     node.data <- igraph::get.data.frame(sketch.graph, what = "vertices")
     edge.data <- igraph::get.data.frame(sketch.graph, what = "edges")
 
-    Nv <- dim(node.data)[1]
-    Ne <- dim(edge.data)[1]
+    # Nv <- dim(node.data)[1]
+    # Ne <- dim(edge.data)[1]
 
     edge_shapes <- list()
 
