@@ -1,0 +1,19 @@
+name: base
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - ipykernel
+  - numexpr
+  - scipy
+  - scikit-learn
+  - jupyterlab
+  - pip
+  - tini
+  - plotly
+  - nodejs
+  - matplotlib
+  - cmake
+  - nb_conda_kernels
+  
