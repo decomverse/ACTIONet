@@ -1,0 +1,15 @@
+name: r
+channels:
+  - conda-forge
+  - defaults
+  - intel
+dependencies:
+  - conda-forge::r-base=4.0.5
+  - conda-forge::libblas=3.9.0=9_mkl
+  - conda-forge::r-rcurl
+  - conda-forge::r-biocmanager
+  - conda-forge::r-cairo
+  - conda-forge::r-hdf5r
+  
+  
+  
