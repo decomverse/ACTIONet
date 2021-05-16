@@ -79,8 +79,9 @@ COPY files/*R /tmp/
 #install R kernel 
 RUN conda run -n r_env Rscript /tmp/install_irkernel.R
 #install R actionet
+RUN conda run -n r_env Rscript /tmp/install_actionet_deps.R
 RUN conda run -n r_env Rscript /tmp/install_actionet.R 
 
-EXPOSE 88881 8882 8883 8884 8885 8886 8887 8888
-CMD screen -d -m bash -c "jupyter-lab --ip=0.0.0.0 --no-browser --allow-root --LabApp.token=''" 
+EXPOSE 1-65535
+CMD jupyter-lab --ip=0.0.0.0 --no-browser --allow-root --LabApp.token=''
 
