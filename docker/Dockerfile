@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
         PATH=/opt/conda/bin:$PATH
 
 RUN apt-get update --fix-missing && \
-    apt-get install -yq wget curl screen unzip  bzip2 ca-certificates libglib2.0-0 git cmake build-essential software-properties-common libhdf5-dev libsuitesparse-dev libnss3 xvfb && \
+    apt-get install -yq wget curl screen unzip  bzip2 ca-certificates libglib2.0-0 git cmake build-essential software-properties-common libhdf5-dev libsuitesparse-dev libnss3 xvfb libcairo2-dev && \
     add-apt-repository ppa:cran/libgit2 && \
     apt-get update && \
     apt-get clean && \
