@@ -174,7 +174,7 @@ plot.ACTIONet.interactive <- function(
     # Nv <- dim(node.data)[1]
     # Ne <- dim(edge.data)[1]
 
-    edge_shapes <- list()
+    # edge_shapes <- list()
 
     # Adjust parameters
     node.data$size = point_size
@@ -213,7 +213,7 @@ plot.ACTIONet.interactive <- function(
             p <- plotly::layout(
               p = network,
               title = title,
-              shapes = edge_shapes,
+              # shapes = edge_shapes,
               scene = list(
                 xaxis = axis,
                 yaxis = axis,
@@ -251,7 +251,7 @@ plot.ACTIONet.interactive <- function(
             p <- plotly::layout(
               p = network,
               title = title,
-              shapes = edge_shapes,
+              # shapes = edge_shapes,
               scene = list(
                 xaxis = axis,
                 yaxis = axis,
@@ -294,7 +294,7 @@ plot.ACTIONet.interactive <- function(
             p <- plotly::layout(
               p = network,
               title = title,
-              shapes = edge_shapes,
+              # shapes = edge_shapes,
               xaxis = axis,
               yaxis = axis
             )
@@ -324,7 +324,7 @@ plot.ACTIONet.interactive <- function(
             p <- plotly::layout(
               p = network,
               title = title,
-              shapes = edge_shapes,
+              # shapes = edge_shapes,
               xaxis = axis,
               yaxis = axis,
               showlegend = TRUE,
