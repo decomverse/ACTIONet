@@ -26,6 +26,7 @@ plot.ACTIONet.interactive <- function(
   trans_th = -1,
   trans_fac = 1,
   point_size = 1,
+  Alt_Text = NULL,
   palette = CPal_default,
   threeD = FALSE,
   title = "ACTIONet",
