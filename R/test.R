@@ -138,7 +138,7 @@ plot.ACTIONet.interactive <- function(
     #         cell.scores = NULL
     #     }
     # }
-    if (!is.null(Alt_Text)) {
+    if (!is.null(Alt_Text))
       node.annotations = Alt_Text
     else
       node.annotations = as.character(labels)
