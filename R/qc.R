@@ -45,7 +45,7 @@
   return(frac.list)
 }
 
-mtRNA.dist.by.attr.violin <- function(
+plot.mtRNA.dist.by.attr <- function(
   ace,
   by,
   groups_use = NULL,
@@ -102,7 +102,7 @@ mtRNA.dist.by.attr.violin <- function(
   }
 }
 
-counts.by.attr.violin <- function(
+plot.counts.by.attr <- function(
   ace,
   attr,
   nonzero = FALSE,
