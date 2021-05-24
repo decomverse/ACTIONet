@@ -54,7 +54,7 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
     } else{
         frac = cs_mm
     }
-    return(frac.list)
+    return(frac)
 
   }
 
