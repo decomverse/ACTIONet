@@ -112,7 +112,7 @@ CPal_default = c(
       }
 
     } else {
-      err = sprint("Invalid 'color_attr'.\n")
+      err = sprintf("Invalid 'color_attr'.\n")
       stop(err)
     }
 
@@ -271,7 +271,7 @@ CPal_default = c(
         fill = scales::alpha(c("white"), alpha_val),
         size = text_size,
         segment.color = 'transparent',
-		force = repel_force        
+		force = repel_force
       )
     } else {
       layer_out <- geom_label(
