@@ -13,36 +13,51 @@
   return(MT_RNA)
 }
 
-.get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NULL, assay = "counts", species = c("mmusculus", "hsapiens"), metric = c("pct", "ratio", "counts")){
+get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NULL, assay = "counts", species = c("mmusculus", "hsapiens"), metric = c("pct", "ratio", "counts")){
 
   require(stats)
   species = match.arg(species)
   metric = match.arg(metric)
 
   features_use = ACTIONet:::.preprocess_annotation_features(ace, features_use = features_use)
-  IDX = ACTIONet:::.get_attr_or_split_idx(ace, by, groups_use)
   mask = features_use %in% .get_mtRNA_genes(species)
   mat = assays(ace)[[assay]]
   cs_mat = ACTIONet::fastColSums(mat)
   mm = mat[mask, , drop = F]
   cs_mm = ACTIONet::fastColSums(mm)
 
-  if(metric == "pct"){
-    frac.list = lapply(IDX, function(idx){
-      m = cs_mm[idx]/cs_mat[idx]
-    })
-  } else if(metric == "ratio"){
-    frac.list = lapply(IDX, function(idx){
-      m = cs_mm[idx]/(cs_mat[idx] - cs_mm[idx])
-    })
+  if(is.null(by)){
 
-  } else{
-    frac.list = lapply(IDX, function(idx){
-      m = cs_mm[idx]
-    })
+    IDX = ACTIONet:::.get_attr_or_split_idx(ace, by, groups_use)
+
+    if(metric == "pct"){
+      frac.list = lapply(IDX, function(idx){
+        m = cs_mm[idx]/cs_mat[idx]
+      })
+    } else if(metric == "ratio"){
+      frac.list = lapply(IDX, function(idx){
+        m = cs_mm[idx]/(cs_mat[idx] - cs_mm[idx])
+      })
+
+    } else{
+      frac.list = lapply(IDX, function(idx){
+        m = cs_mm[idx]
+      })
+    }
+    return(frac.list)
+  } else {
+
+    if(metric == "pct"){
+        frac = cs_mm/cs_mat
+    } else if(metric == "ratio"){
+        frac = cs_mm/(cs_mat - cs_mm)
+    } else{
+        frac = cs_mm
+    }
+    return(frac.list)
+
   }
 
-  return(frac.list)
 }
 
 plot.mtRNA.dist.by.attr <- function(
@@ -64,7 +79,7 @@ plot.mtRNA.dist.by.attr <- function(
   require(stats)
   to_return <- match.arg(to_return)
 
-  frac.list = .get_mtRNA_stats(
+  frac.list = get_mtRNA_stats(
     ace = ace,
     by = by,
     groups_use = groups_use,
