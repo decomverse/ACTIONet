@@ -26,7 +26,7 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
   mm = mat[mask, , drop = F]
   cs_mm = ACTIONet::fastColSums(mm)
 
-  if(is.null(by)){
+  if(!is.null(by)){
 
     IDX = ACTIONet:::.get_attr_or_split_idx(ace, by, groups_use)
 
