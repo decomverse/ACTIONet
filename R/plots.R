@@ -23,7 +23,6 @@
 #' @return 'ggplot' object.
 #'
 #' @examples
-#' ace = run.ACTIONet(ace)
 #' plot.ACTIONet(ace, ace$assigned_archetype)
 
 #' @import ggplot2
