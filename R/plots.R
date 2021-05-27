@@ -78,7 +78,8 @@ plot.ACTIONet <- function(
       labels = data_labels,
       fill = plot_fill_col,
       color = plot_border_col,
-      trans = plot_alpha
+      trans = plot_alpha,
+      idx = 1:NROW(plot_coors)
     )
 
     if(is.null(point_order))
@@ -86,9 +87,11 @@ plot.ACTIONet <- function(
     else
       pidx = point_order
 
+    plot_data = plot_data[pidx, ]
+
     p_out <- ggplot() +
          geom_point(
-           data = plot_data[pidx, ],
+           data = plot_data,
            mapping = aes(
              x = x,
              y = y,
@@ -110,20 +113,7 @@ plot.ACTIONet <- function(
          .default_ggtheme
 
     if(!is.null(plot_labels) && add_text_labels ==  TRUE){
-        # p_out <- .layout_plot_labels(
-        #   p_out,
-        #   plot_data = plot_data,
-        #   label_names = legend_labels,
-        #   label_colors = legend_fill_colors,
-        #   darken = TRUE,
-        #   alpha_val = 0.5,
-        #   text_size = text_size,
-        #   constrast_fac = 0.5,
-        #   nudge = nudge_text_labels,
-        #   use_repel = use_repel
-        # )
         text_layer <- .layout_plot_labels(
-          # p_out,
           plot_data = plot_data,
           label_names = legend_labels,
           label_colors = legend_fill_colors,
@@ -488,353 +478,170 @@ plot.ACTIONet.gene.view <- function(
     )
 }
 
-#
-# #' Main ACTIONet interactive plotting function
-# #'
-# #' @param ace ACTIONet output object
-# #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-# #' @param trans_attr Additional continuous attribute to project onto the transparency of nodes
-# #' @param trans_th, trans_fac Control the effect of transparency mapping
-# #' @param point_size Size of nodes in the ACTIONet plot
-# #' @param palette Color palette (named vector or a name for a given known palette)
-# #' @param enrichment.table To project the top-ranked features interactively.
-# #' @param top_features Number of features to show per cell
-# #' @param blacklist_pattern List of genes to filter-out
-# #' @param title Main title of the plot
-# #' @param threeD Whether to show the plot in 3D
-# #'
-# #' @return Visualized ACTIONet
-# #'
-# #' @examples
-# #' ace = run.ACTIONet(sce)
-# #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
-# #' @rawNamespace import(plotly, except = 'last_plot')
-# #' @export
-# plot.ACTIONet.interactive <- function(
-#   ace,
-#   labels = NULL,
-#   trans_attr = NULL,
-#   trans_th = -1,
-#   trans_fac = 1,
-#   point_size = 1,
-#   palette = CPal_default,
-#   enrichment.table = NULL,
-#   top_features = 7,
-#   Alt_Text = NULL,
-#   blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
-#   threeD = FALSE,
-#   title = "ACTIONet",
-#   coordinate_slot = "ACTIONet2D"
-# ) {
-#
-#     nV = ncol(ace)
-#     point_size = point_size * 3
-#     if (coordinate_slot == "ACTIONet2D" & threeD == TRUE)
-#         coordinate_slot = "ACTIONet3D"
-#
-#     if (class(ace) == "ACTIONetExperiment") {
-#         labels = .preprocess_annotation_labels(labels, ace)
-#         if (is.character(coordinate_slot)) {
-#             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-#             coor.mu = apply(coors, 2, mean)
-#             coor.sigma = apply(coors, 2, sd)
-#             coors = scale(coors)
-#         } else {
-#             coors = as.matrix(coordinate_slot)
-#             coor.mu = apply(coors, 2, mean)
-#             coor.sigma = apply(coors, 2, sd)
-#             coors = scale(coors)
-#         }
-#     } else {
-#         if (is.matrix(ace) | is.sparseMatrix(ace)) {
-#             coors = as.matrix(ace)
-#             coor.mu = apply(coors, 2, mean)
-#             coor.sigma = apply(coors, 2, sd)
-#             coors = scale(coors)
-#             labels = .preprocess_annotation_labels(labels)
-#         } else {
-#           err = sprintf("Unknown type for object 'ace'.\n")
-#           stop(err)
-#         }
-#     }
-#
-#     if (is.null(labels)) {
-#         if (class(ace) == "ACTIONetExperiment") {
-#             vCol = grDevices::rgb(colMaps(ace)$denovo_color)
-#         } else {
-#             vCol = rep("tomato", nrow(coors))
-#         }
-#         Annot = NULL
-#     } else {
-#         Annot = names(labels)[match(sort(unique(labels)), labels)]
-#         if (length(palette) > 1) {
-#             if (length(palette) < length(Annot)) {
-#               palette = CPal_default
-#             }
-#             if (is.null(names(palette))) {
-#                 Pal = palette[1:length(Annot)]
-#             } else {
-#                 Pal = palette[Annot]
-#             }
-#         } else {
-#             Pal = ggpubr::get_palette(palette, length(Annot))
-#         }
-#
-#         names(Pal) = Annot
-#         vCol = Pal[names(labels)]
-#     }
-#
-#     if (!is.null(trans_attr)) {
-#         z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
-#         beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
-#         beta[z > trans_th] = 1
-#         beta = beta^trans_fac
-#
-#         vCol.border = scales::alpha(colorspace::darken(vCol, 0.5), beta)
-#         vCol = scales::alpha(vCol, beta)
-#     } else {
-#         vCol.border = colorspace::darken(vCol, 0.5)
-#     }
-#
-#     if (!is.null(enrichment.table)) {
-#         if (ncol(enrichment.table) == nV) {
-#             cell.scores = Matrix::t(enrichment.table)
-#         } else if ((nrow(enrichment.table) != nV)) {
-#             H = colMaps(ace)[["H_unified"]]
-#             if ((nrow(enrichment.table) == nrow(H)) | (ncol(enrichment.table) ==
-#                 nrow(H))) {
-#                 cell.scores = map.cell.scores.from.archetype.enrichment(ace, enrichment.table)
-#             } else {
-#                 cell.scores = NULL
-#             }
-#         } else {
-#             cell.scores = enrichment.table
-#         }
-#     } else {
-#         temp.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-#         if (!is.null(row.names(temp.enrichment.table))) {
-#             filtered.rows = grep(blacklist_pattern, rownames(temp.enrichment.table))
-#             if (length(filtered.rows) > 0){
-#               enrichment.table = temp.enrichment.table[-filtered.rows, ]
-#             } else {
-#               enrichment.table = temp.enrichment.table
-#             }
-#
-#             GT = apply(enrichment.table, 2, function(x) rownames(enrichment.table)[order(x,
-#                 decreasing = TRUE)[1:min(100, nrow(enrichment.table))]])
-#             selected.features = sort(unique(as.character(GT)))
-#
-#             W = exp(scale(Matrix::t(colMaps(ace)[["H_unified"]])))
-#             cs = fastColSums(W)
-#             W = Matrix::t(scale(W, center = FALSE, scale = cs))
-#
-#             cell.scores = W %*% Matrix::t(enrichment.table[selected.features, ])
-#         } else {
-#             cell.scores = NULL
-#         }
-#     }
-#
-#     if (!is.null(Alt_Text)) {
-#         node.annotations = Alt_Text
-#     } else {
-#         if (!is.null(cell.scores)) {
-#             selected.features = colnames(cell.scores)
-#             node.annotations = apply(cell.scores, 1, function(x) paste(selected.features[order(x,
-#                 decreasing = TRUE)[1:top_features]], collapse = "\n"))
-#         } else {
-#             node.annotations = rep("", nV)
-#         }
-#     }
-#     # Setup visualization parameters
-#     sketch.graph = igraph::graph_from_adjacency_matrix(
-#       adjmatrix = colNets(ace)$ACTIONet,
-#       mode = "undirected",
-#       weighted = TRUE
-#     )
-#
-#     if (threeD == FALSE) {
-#         igraph::V(sketch.graph)$x = coors[, 1]
-#         igraph::V(sketch.graph)$y = coors[, 2]
-#     } else {
-#         igraph::V(sketch.graph)$x3D = coors[, 1]
-#         igraph::V(sketch.graph)$y3D = coors[, 2]
-#         igraph::V(sketch.graph)$z3D = coors[, 3]
-#     }
-#
-#     sketch.graph = igraph::delete_edges(sketch.graph, igraph::E(sketch.graph))
-#
-#     node.data <- igraph::get.data.frame(sketch.graph, what = "vertices")
-#     edge.data <- igraph::get.data.frame(sketch.graph, what = "edges")
-#
-#     Nv <- dim(node.data)[1]
-#     Ne <- dim(edge.data)[1]
-#
-#     edge_shapes <- list()
-#
-#     # Adjust parameters
-#     node.data$size = point_size
-#
-#     axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
-#
-#     if (threeD == TRUE) {
-#         if (is.null(Annot)) {
-#             node.data$vCol = vCol
-#             node.data$vCol.border = vCol.border
-#
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x3D,
-#               y = ~y3D,
-#               z = ~z3D,
-#               opacity = 1,
-#               marker = list(
-#                 color = ~vCol,
-#                 size = ~size,
-#                 opacity = 1,
-#                 alpha = 1,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   alpha = 0.5,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               hoverinfo = "text",
-#               type = "scatter3d",
-#               showlegend = FALSE
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               scene = list(
-#                 xaxis = axis,
-#                 yaxis = axis,
-#                 zaxis = axis)
-#               )
-#
-#         } else {
-#             node.data$vCol.border = vCol.border
-#             node.data$type = factor(names(labels), levels = Annot)
-#
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x3D,
-#               y = ~y3D,
-#               z = ~z3D,
-#               opacity = 1,
-#               color = ~type,
-#               colors = Pal,
-#               marker = list(
-#                 size = ~size,
-#                 opacity = 1,
-#                 alpha = 1,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   alpha = 0.5,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               hoverinfo = "text",
-#               type = "scatter3d"
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               scene = list(
-#                 xaxis = axis,
-#                 yaxis = axis,
-#                 zaxis = axis
-#               ),
-#               showlegend = TRUE,
-#               legend = list(
-#                 marker = list(
-#                   marker.size = 10
-#                 )
-#               )
-#             )
-#         }
-#     } else {
-#         if (is.null(Annot)) {
-#             node.data$vCol = vCol
-#             node.data$vCol.border = vCol.border
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x,
-#               y = ~y,
-#               marker = list(
-#                 color = ~vCol,
-#                 size = ~size,
-#                 opacity = 1,
-#                 alpha = 1,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   alpha = 0.5,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               type = "scattergl",
-#               hoverinfo = "text",
-#               showlegend = FALSE
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               xaxis = axis,
-#               yaxis = axis
-#             )
-#         } else {
-#             node.data$vCol.border = vCol.border
-#             node.data$type = factor(names(labels), levels = Annot)
-#
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x,
-#               y = ~y,
-#               color = ~type,
-#               colors = Pal,
-#               marker = list(
-#                 size = ~size,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               type = "scattergl",
-#               hoverinfo = "text"
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               xaxis = axis,
-#               yaxis = axis,
-#               showlegend = TRUE,
-#               legend = list(
-#                 marker = list(
-#                   marker.size = 10
-#                 )
-#               )
-#             )
-#         }
-#     }
-#
-#     p
-# }
+#' Interactive ACTIONet visualizetion with Plotly
+#'
+#' @param data 'ACTIONetExperiment' object or two-column numeric matrix of X-Y(-Z) coordinates.
+#' @param label_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, celltypes, etc.).
+#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
+#' @param trans_fac Transparency modifier (default:1.5).
+#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked  (default:-0.5).
+#' @param point_size Size of points in ggplot (default:3).
+#' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
+#' @param stroke_color Marker stroke color. Can be any (single) color value accepted by plotly.
+#' @param palette Color palette. character vector of hex colors or a palette name to pass to 'ggpubr::get_palette()').
+#' @param show_legend Show legend based on labels. Ignored if 'label_attr=NULL' (default:'TRUE').
+#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D or 3D plot coordinates if 'data' is an 'ACTIONetExperiment' object (default:'ACTIONet2D' or 'ACTIONet3D' if 'threeD=TRUE').
+#' @param point_order Integer vector specifying order in which to plot individual points (default:'NULL').
+#' @param alt_hovertext Vector of values to display on hover.  (default:'NULL').
+#' @param threeD Visualize plot in 3D using 'scatter3D'. Required 3D coordinate input (defaults to 'ACTIONet3D' if data is 'ACTIONetExperiment') (default:'FALSE').
+#' @return plotly object
+#'
+#' @examples
 
+#' plot.ACTIONet.interactive(ace, ace$assigned_archetype, threeD = TRUE)
+#' @rawNamespace import(plotly, except = 'last_plot')
+#' @export
+plot.ACTIONet.interactive <- function(
+  data,
+  label_attr = NULL,
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 3,
+  stroke_size = point_size * 0.1,
+  stroke_color = "black",
+  palette = CPal_default,
+  show_legend = TRUE,
+  coordinate_attr = "ACTIONet2D",
+  point_order = NULL,
+  alt_hovertext = NULL,
+  threeD = FALSE
+) {
+
+  plot_coors = .get_plot_coors(data, coordinate_attr)
+  plot_labels = .get_plot_labels(label_attr, data)
+  plot_fill_col = .get_plot_colors(NULL, plot_labels, data, NULL, palette)
+  plot_alpha = .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
+
+  if(threeD == TRUE){
+    if (NCOL(plot_coors) < 3 & "ACTIONet3D" %in% names(colMaps(ace))){
+      msg = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
+      message(msg)
+      plot_coors = .get_plot_coors(data, "ACTIONet3D", plot_dims = 3)
+    }
+    else{
+      err = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\n")
+      stop(err)
+    }
+  }
+
+  plot_data = data.frame(plot_coors,
+                         fill = plot_fill_col,
+                         trans = plot_alpha,
+                         idx = 1:NROW(plot_coors)
+  )
+
+  if(is.null(label_attr)){
+    show_legend = FALSE
+    plot_data$labels = "NA"
+  } else {
+    plot_data$labels = plot_labels
+  }
+
+  names(plot_fill_col) = plot_data$labels
+  unique_labels = sort(unique(plot_data$labels))
+  palette_fill = plot_fill_col[unique_labels]
+
+  if (!is.null(alt_hovertext))
+    plot_data$hover_text = alt_hovertext
+  else{
+    if(is.null(label_attr))
+      plot_data$hover_text = plot_data$idx
+    else
+      plot_data$hover_text = plot_data$labels
+  }
+
+  if(is.null(point_order))
+    pidx = sample(NROW(plot_data))
+  else
+    pidx = point_order
+
+  plot_data = plot_data[pidx, ]
+
+  if(is.null(stroke_color))
+    stroke_color = "black"
+
+  axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
+
+  if (threeD == TRUE) {
+
+      network <- plotly::plot_ly(
+        data = plot_data,
+        x = ~x,
+        y = ~y,
+        z = ~z,
+        color = ~labels,
+        colors = palette_fill,
+        marker = list(
+          size = point_size,
+          line = list(
+            width = stroke_size,
+            color = stroke_color
+          )
+        ),
+        text = ~hover_text,
+        mode = "markers",
+        hoverinfo = "text",
+        type = "scatter3d"
+      )
+
+      p <- plotly::layout(
+        p = network,
+        scene = list(
+          xaxis = axis,
+          yaxis = axis,
+          zaxis = axis
+        ),
+        showlegend = show_legend,
+        legend = list(
+          marker = list(
+            marker.size = 10
+          )
+        )
+      ) %>% hide_colorbar()
+
+  } else {
+
+      network <- plotly::plot_ly(
+        data = plot_data,
+        x = ~x,
+        y = ~y,
+        color = ~labels,
+        colors = palette_fill,
+        marker = list(
+          size = point_size,
+          opacity = ~trans,
+          line = list(
+            width = stroke_size,
+            color = stroke_color
+          )
+        ),
+        text = ~hover_text,
+        mode = "markers",
+        type = "scattergl",
+        hoverinfo = "text"
+      )
+
+      p <- plotly::layout(
+        p = network,
+        xaxis = axis,
+        yaxis = axis,
+        showlegend = show_legend
+      ) %>% hide_colorbar()
+    }
+
+  return(p)
+}
 
 #' Plot gene expression violin plot
 #'
