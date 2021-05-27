@@ -112,7 +112,7 @@ CPal_default = c(
       }
 
     } else {
-      err = sprint("Invalid 'color_attr'.\n")
+      err = sprintf("Invalid 'color_attr'.\n")
       stop(err)
     }
 
@@ -154,7 +154,9 @@ CPal_default = c(
 
   } else {
 
-    if (is(data, "ACTIONetExperiment")) {
+    if(is.null(color_slot)){
+      plot_colors = .default_colors(n_dim)
+    } else if (is(data, "ACTIONetExperiment") & color_slot %in% names(colMaps(data))) {
       plot_colors = grDevices::rgb(colMaps(data)[[color_slot]])
     } else {
       plot_colors = .default_colors(n_dim)
@@ -271,7 +273,7 @@ CPal_default = c(
         fill = scales::alpha(c("white"), alpha_val),
         size = text_size,
         segment.color = 'transparent',
-		force = repel_force        
+		force = repel_force
       )
     } else {
       layer_out <- geom_label(
