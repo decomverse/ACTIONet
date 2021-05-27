@@ -1,40 +1,43 @@
 # TODO
 
 ## Primary
-* Test, debug, and run code on Windows
-* Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter. 1- Minimal (Alpine)
-* Write, test, and release singularity-lite and singularity-full
-* "gating" on archetypes
-* Interactive cell selection
+* Update and test geneset scoring
+* Update and test marker selection (one vs all, pair-wise)
+* Test, debug, and run code on Windows - submit to Bioconductor
+* Visualization: Interactive cell selection
+* Visualization: "gating" on archetypes
+* Test batch-corrected ACTION, batch-orthogonalization, and other methods fo BC
+* Package markers as a JSON file(s)
+* Package pathways/genesets as JSON file(s)
+* Simplify and streamline installation
+* Bookdown tutorial(s)
+* Add back backbone + spanner + visualization
+* Test unification
+* Speed-up gene/cell filtering
+* Fix `correct.cell.annotations` to take character
 
-
-## New features to be tested
-* `renormalize_input_matrix` for post-ACTIONet normalization
-* `compute_sparse_network_diffusion` for  **L1-regularized PageRank** algorithm algorithm from: ["Variational perspective on local graph clustering"](https://github.com/kfoynt/LocalGraphClustering)
+## To be tested
 * `transform_layout()` for embedding datasets into ACTIONet plot
 * `compute_pseudo_bulk_per_archetype, compute_pseudo_bulk_per_cluster, compute_pseudo_bulk_per_ind` functions for pseudo-bulk.
-* `sgd2_layout_weighted()` for [S_GD2 layout](https://github.com/jxz12/s_gd2) layout
-* `HDBSCAN.clustering` for clustering ACTIONet
 * `compute_AA_coreset()` for AA coreset construction + wAA for fast sketching
-
-
-## Extensions
-### Tier 1
-* Variance-adjusted Limma + Add weighted mean/std
-* Deflated SVD with A*B being prior archetypal analysis
-* subACTIONet using weighted AA
-* Backbone (archetype) network construction algorithm using PageRank+ACTIONet
-* reACTION
-* Autocorrelation to find continuous cell-states + joint analysis with multi-resolution application of Leiden to identify clustered archetypes
-* Construct cell-state ontology graph using ([circle packing](http://jeromefroe.github.io/circlepackeR/))
+* `sgd2_layout_weighted()` for [S_GD2 layout](https://github.com/jxz12/s_gd2) layout
+* `compute_sparse_network_diffusion` for  **L1-regularized PageRank** algorithm algorithm from: ["Variational perspective on local graph clustering"](https://github.com/kfoynt/LocalGraphClustering)
+* Variance-adjusted Limma + Add weighted mean/std (first version -- Sebastian)
+* weighted AA
 * Test and debug Online AA
 
-## Tier 2
-* Implement the **cluster refinement** algorithm from: ["A simple and strongly-local flow-based method for cut improvement"](https://github.com/kfoynt/LocalGraphClustering)
-* Incorporate CellMESH (https://github.com/shunfumao/cellmesh)
-* Multi-resolution batch-correction inspired by Harmony
-* Supervized marker suggestion
 
-## Minor
-* Fix annotate with single cell type bug
-* Merge filter functions
+## Extentions
+* subACTIONet using weighted AA
+* reACTION
+* Supervized AA
+* Construct cell-state ontology graph using ([circle packing](http://jeromefroe.github.io/circlepackeR/))
+* https://github.com/astamm/fdahotelling
+
+
+## Done
+* Deflated SVD with A*B being prior archetypal analysis (done, used in batch ortho)
+* Backbone (archetype) network construction algorithm using PageRank+ACTIONet (in unification)
+* Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter (done). 
+
+

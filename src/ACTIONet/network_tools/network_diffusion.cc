@@ -260,7 +260,6 @@ mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no = 4,
   X0 *= n;
   rowvec zt = trans(z);
 
-	printf("Max it = %d\n", max_it);
   for (int it = 0; it < max_it; it++) {
     mat Y = X;
     ParallelFor(0, X.n_cols, thread_no, [&](size_t i, size_t threadId) {

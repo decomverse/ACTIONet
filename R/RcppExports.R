@@ -1028,6 +1028,38 @@ run_ACTION_with_batch_correction <- function(S_r, batch, k_min, k_max, thread_no
     .Call(`_ACTIONet_run_ACTION_with_batch_correction`, S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta)
 }
 
+compute_marker_aggregate_stats_basic_sum <- function(S, marker_mat) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum`, S, marker_mat)
+}
+
+compute_marker_aggregate_stats_basic_sum_perm <- function(S, marker_mat, perm_no = 100L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm`, S, marker_mat, perm_no, thread_no)
+}
+
+compute_marker_aggregate_stats_basic_sum_perm_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+}
+
+compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2 <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+}
+
+compute_marker_aggregate_stats_basic_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+}
+
+compute_marker_aggregate_stats_basic_sum_smoothed_normalized <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+}
+
+LSI <- function(X, size_factor = 100000) {
+    .Call(`_ACTIONet_LSI`, X, size_factor)
+}
+
+compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
