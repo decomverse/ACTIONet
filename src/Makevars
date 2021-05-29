@@ -8,14 +8,17 @@ UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
     $(info Using Linux configurations)
     NPROC=${shell nproc}
-    ifeq ($(MKLROOT),)
-        $(warning Can not find MKL)
+		ifdef $(ONEAPI_ROOT)
+			$(info Found OneAPI)
+			PKG_CPPFLAGS+=-I/usr/include/suitesparse
+			PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64 -Wl,--end-group -liomp5 -lpthread -lm -ldl
+		else ifdef $(MKLROOT)
+			$(info Found MKL)
+			PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/include/suitesparse
+			PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+		else
         PKG_CPPFLAGS+=-I/usr/include/suitesparse
         PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
-    else
-        $(info Found MKL)
-        PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/include/suitesparse
-        PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
     endif
 else ifeq ($(UNAME),Darwin)
     $(info Using Mac OS configurations)

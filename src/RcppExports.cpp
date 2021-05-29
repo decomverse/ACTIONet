@@ -271,18 +271,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // unify_archetypes
-List unify_archetypes(sp_mat& G, mat& S_r, mat& C_stacked, double alpha, double sensitivity, int thread_no);
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP GSEXP, SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP alphaSEXP, SEXP sensitivitySEXP, SEXP thread_noSEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold, int thread_no);
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP violation_thresholdSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type sensitivity(sensitivitySEXP);
+    Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
+    Rcpp::traits::input_parameter< double >::type violation_threshold(violation_thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(G, S_r, C_stacked, alpha, sensitivity, thread_no));
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, thread_no));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1082,6 +1081,129 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_marker_aggregate_stats_basic_sum
+mat compute_marker_aggregate_stats_basic_sum(sp_mat& S, sp_mat& marker_mat);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_basic_sum(SEXP SSEXP, SEXP marker_matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_basic_sum(S, marker_mat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats_basic_sum_perm
+mat compute_marker_aggregate_stats_basic_sum_perm(sp_mat& S, sp_mat& marker_mat, int perm_no, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_basic_sum_perm(SEXP SSEXP, SEXP marker_matSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_basic_sum_perm(S, marker_mat, perm_no, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats_basic_sum_perm_smoothed
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_basic_sum_perm_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(G, S, marker_mat, alpha, max_it, perm_no, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats_basic_sum_smoothed
+mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_basic_sum_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats_basic_sum_smoothed_normalized
+mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_basic_sum_smoothed_normalized(G, S, marker_mat, alpha, max_it, perm_no, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
+// LSI
+sp_mat LSI(sp_mat& X, double size_factor);
+RcppExport SEXP _ACTIONet_LSI(SEXP XSEXP, SEXP size_factorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type size_factor(size_factorSEXP);
+    rcpp_result_gen = Rcpp::wrap(LSI(X, size_factor));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_marker_aggregate_stats_TFIDF_sum_smoothed
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
+    Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -1172,7 +1294,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 6},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 5},
     {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
     {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 4},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
@@ -1230,6 +1352,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 7},
     {"_ACTIONet_run_AA_with_batch_correction", (DL_FUNC) &_ACTIONet_run_AA_with_batch_correction, 7},
     {"_ACTIONet_run_ACTION_with_batch_correction", (DL_FUNC) &_ACTIONet_run_ACTION_with_batch_correction, 9},
+    {"_ACTIONet_compute_marker_aggregate_stats_basic_sum", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum, 2},
+    {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm, 4},
+    {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed, 7},
+    {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2, 7},
+    {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed, 7},
+    {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized, 7},
+    {"_ACTIONet_LSI", (DL_FUNC) &_ACTIONet_LSI, 2},
+    {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 7},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},

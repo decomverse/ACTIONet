@@ -12,7 +12,6 @@ CPal_default = c(
   "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5"
 )
 
-
 .default_ggtheme <-  ggplot2::theme(axis.title = element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
@@ -112,7 +111,7 @@ CPal_default = c(
       }
 
     } else {
-      err = sprint("Invalid 'color_attr'.\n")
+      err = sprintf("Invalid 'color_attr'.\n")
       stop(err)
     }
 
@@ -154,7 +153,9 @@ CPal_default = c(
 
   } else {
 
-    if (is(data, "ACTIONetExperiment")) {
+    if(is.null(color_slot)){
+      plot_colors = .default_colors(n_dim)
+    } else if (is(data, "ACTIONetExperiment") & color_slot %in% names(colMaps(data))) {
       plot_colors = grDevices::rgb(colMaps(data)[[color_slot]])
     } else {
       plot_colors = .default_colors(n_dim)
@@ -215,7 +216,8 @@ CPal_default = c(
   text_size = 3,
   constrast_fac = 0.5,
   nudge = FALSE,
-  use_repel = TRUE
+  use_repel = TRUE,
+  repel_force = 0.05
 ) {
 
     if(is.null(label_names)){
@@ -269,7 +271,8 @@ CPal_default = c(
         ),
         fill = scales::alpha(c("white"), alpha_val),
         size = text_size,
-        segment.color = 'transparent'
+        segment.color = 'transparent',
+		force = repel_force
       )
     } else {
       layer_out <- geom_label(
