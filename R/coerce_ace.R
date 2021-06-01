@@ -1,7 +1,4 @@
-#' Converts a SummarizedExperiment object to an ACTIONetExperiment object.
-#'
-#' @param from SummarizedExperiment object
-#'
+## Converts a SummarizedExperiment object to an ACTIONetExperiment object.
 #' @exportMethod coerce
 setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
 
@@ -22,10 +19,7 @@ setAs("SummarizedExperiment", "ACTIONetExperiment", function(from) {
 })
 
 
-#' Converts an ACTIONetExperiment object to a SingleCellExperiment object.
-#'
-#' @param from ACTIONetExperiment object
-#'
+## Converts an ACTIONetExperiment object to a SingleCellExperiment object.
 #' @exportMethod coerce
 setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
     SE = as(from, "RangedSummarizedExperiment")
@@ -41,10 +35,7 @@ setAs("ACTIONetExperiment", "SingleCellExperiment", function(from) {
 })
 
 
-#' Converts a SingleCellExperiment object to an ACTIONetExperiment object.
-#'
-#' @param from SingleCellExperiment object
-#'
+## Converts a SingleCellExperiment object to an ACTIONetExperiment object.
 #' @exportMethod coerce
 setAs("SingleCellExperiment", "ACTIONetExperiment", function(from) {
     SE = as(from, "RangedSummarizedExperiment")
@@ -72,7 +63,7 @@ as.ACTIONetExperiment <- function(object) {
     if(is(object, "ACTIONetExperiment")) {
         return(object)
     }
-    
+
     if (class(object) %in% c("SummarizedExperiment", "RangedSummarizedExperiment",
         "SingleCellExperiment")) {
         ace = as(object, "ACTIONetExperiment")

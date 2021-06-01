@@ -1080,7 +1080,7 @@ computeSparseRowVariances <- function(j, val, rm, n) {
     .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
 }
 
-merge_sparse_mats <- function(A, B) {
-    .Call(`_ACTIONet_merge_sparse_mats`, A, B)
+rbind_sparse_mats <- function(A, B) {
+    .Call(`_ACTIONet_rbind_sparse_mats`, A, B)
 }
 

@@ -125,7 +125,7 @@ Rcpp::NumericVector computeSparseRowVariances(IntegerVector j,
 }
 
 // [[Rcpp::export]]
-sp_mat merge_sparse_mats(sp_mat &A, sp_mat &B) {
+sp_mat rbind_sparse_mats(sp_mat &A, sp_mat &B) {
   sp_mat C = join_rows(A, B);
 
   return (C);
