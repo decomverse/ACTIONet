@@ -70,6 +70,5 @@
 Plot ACTIONet scatter plot
 }
 \examples{
-ace = run.ACTIONet(ace)
 plot.ACTIONet(ace, ace$assigned_archetype)
 }
