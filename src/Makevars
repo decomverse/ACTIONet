@@ -23,15 +23,8 @@ ifeq ($(UNAME),Linux)
 else ifeq ($(UNAME),Darwin)
     $(info Using Mac OS configurations)
     NPROC=$(shell sysctl -n hw.logicalcpu)
-    ifeq ($(MKLROOT),)
-        $(warning Can not find MKL)
-        PKG_CPPFLAGS+=-I/usr/local/opt/suite-sparse/include -DACCELERATE
-        PKG_LIBS=-L/usr/local/opt/suite-sparse/lib -framework accelerate
-    else
-        $(info Found MKL)
-        PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/local/opt/suite-sparse/include
-        PKG_LIBS=${MKLROOT}/lib/libmkl_intel_ilp64.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_core.a -liomp5 -lpthread -lm -ldl -L/usr/local/opt/suite-sparse/lib
-    endif
+    PKG_CPPFLAGS+=-I/usr/local/opt/suite-sparse/include -DACCELERATE
+    PKG_LIBS=-L/usr/local/opt/suite-sparse/lib -framework accelerate
 # else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
 #     $(info Using Windows configurations)
 #     NPROC=${NUMBER_OF_PROCESSORS}

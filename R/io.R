@@ -90,15 +90,11 @@ import.ace.from.10X.generic <- function(
 
     colnames(expression.counts.mat) = colAnnot[, 1]
 
-    if (ncol(sample_metadata) > 1) {
-        ace <- ACTIONetExperiment(
-          assays = list(counts = expression.counts.mat),
-          colData = colAnnot,
-          rowData = rowAnnot
-        )
-    } else {
-        ace <- ACTIONetExperiment(assays = list(counts = expression.counts.mat))
-    }
+    ace <- ACTIONetExperiment(
+      assays = list(counts = expression.counts.mat),
+      colData = colAnnot,
+      rowData = rowAnnot
+    )
 
     # Load additional barcoded features
     for (feature.name in names(IDX)) {
