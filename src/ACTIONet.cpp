@@ -774,7 +774,7 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass) {
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
 // pbs = compute_pseudo_bulk(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk(sp_mat &S,
+mat compute_pseudo_bulk_per_cluster(sp_mat &S,
                         arma::Col<unsigned long long> sample_assignments) {
   mat pb = ACTIONet::compute_pseudo_bulk_per_cluster(S, sample_assignments);
 
@@ -796,7 +796,7 @@ mat compute_pseudo_bulk(sp_mat &S,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
 // pbs = compute_pseudo_bulk(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk_full(mat &S,
+mat compute_pseudo_bulk_per_cluster_full(mat &S,
                              arma::Col<unsigned long long> sample_assignments) {
   mat pb = ACTIONet::compute_pseudo_bulk_per_cluster(S, sample_assignments);
 
@@ -821,11 +821,11 @@ mat compute_pseudo_bulk_full(mat &S,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
 // pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_ind(
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments,
     arma::Col<unsigned long long> individuals) {
   field<mat> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
 
   return pbs_list;
 }
@@ -848,14 +848,51 @@ field<mat> compute_pseudo_bulk_per_ind(
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
 // pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_ind_full(
+field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(
     mat &S, arma::Col<unsigned long long> sample_assignments,
     arma::Col<unsigned long long> individuals) {
   field<mat> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
 
   return pbs_list;
 }
+
+// [[Rcpp::export]]
+mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H) {
+  mat pb = ACTIONet::compute_pseudo_bulk_per_archetype(S, H);
+
+  return pb;
+}
+
+// [[Rcpp::export]]
+mat compute_pseudo_bulk_per_archetype_full(mat &S,
+                             mat &H) {
+  mat pb = ACTIONet::compute_pseudo_bulk_per_archetype(S, H);
+
+  return pb;
+}
+
+// [[Rcpp::export]]
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(
+    sp_mat &S, mat &H,
+    arma::Col<unsigned long long> individuals) {
+  field<mat> pbs_list =
+      ACTIONet::compute_pseudo_bulk_per_archetype_and_ind(S, H, individuals);
+
+  return pbs_list;
+}
+
+// [[Rcpp::export]]
+field<mat> compute_pseudo_bulk_per_archetype_and_ind_full(
+    mat &S, mat &H,
+    arma::Col<unsigned long long> individuals) {
+  field<mat> pbs_list =
+      ACTIONet::compute_pseudo_bulk_per_archetype_and_ind(S, H, individuals);
+
+  return pbs_list;
+}
+
+
 
 //' Renormalized input matrix to minimize differences in means
 //'

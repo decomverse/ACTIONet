@@ -254,14 +254,17 @@ field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
 // Methods for pseudo-bulk construction
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
 mat compute_pseudo_bulk_per_archetype(mat &S, mat &H);
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(sp_mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
+
 mat compute_pseudo_bulk_per_cluster(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments);
 mat compute_pseudo_bulk_per_cluster(
     mat &S, arma::Col<unsigned long long> sample_assignments);
-field<mat> compute_pseudo_bulk_per_ind(
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments,
     arma::Col<unsigned long long> individuals);
-field<mat> compute_pseudo_bulk_per_ind(
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(
     mat &S, arma::Col<unsigned long long> sample_assignments,
     arma::Col<unsigned long long> individuals);
 
