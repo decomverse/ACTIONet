@@ -354,53 +354,103 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk
-mat compute_pseudo_bulk(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+// compute_pseudo_bulk_per_cluster
+mat compute_pseudo_bulk_per_cluster(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk(S, sample_assignments));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk_full
-mat compute_pseudo_bulk_full(mat& S, arma::Col<unsigned long long> sample_assignments);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+// compute_pseudo_bulk_per_cluster_full
+mat compute_pseudo_bulk_per_cluster_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_full(S, sample_assignments));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_full(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk_per_ind
-field<mat> compute_pseudo_bulk_per_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+// compute_pseudo_bulk_per_cluster_and_ind
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind(S, sample_assignments, individuals));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk_per_ind_full
-field<mat> compute_pseudo_bulk_per_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind_full(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+// compute_pseudo_bulk_per_cluster_and_ind_full
+field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind_full(S, sample_assignments, individuals));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_and_ind_full(S, sample_assignments, individuals));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype
+mat compute_pseudo_bulk_per_archetype(sp_mat& S, mat& H);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype(SEXP SSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype(S, H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype_full
+mat compute_pseudo_bulk_per_archetype_full(mat& S, mat& H);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_full(SEXP SSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype_full(S, H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype_and_ind
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(sp_mat& S, mat& H, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_and_ind(SEXP SSEXP, SEXP HSEXP, SEXP individualsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype_and_ind(S, H, individuals));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype_and_ind_full
+field<mat> compute_pseudo_bulk_per_archetype_and_ind_full(mat& S, mat& H, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full(SEXP SSEXP, SEXP HSEXP, SEXP individualsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype_and_ind_full(S, H, individuals));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1300,10 +1350,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
-    {"_ACTIONet_compute_pseudo_bulk", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk, 2},
-    {"_ACTIONet_compute_pseudo_bulk_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_full, 2},
-    {"_ACTIONet_compute_pseudo_bulk_per_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind, 3},
-    {"_ACTIONet_compute_pseudo_bulk_per_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind_full, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_full, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_full, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full, 3},
     {"_ACTIONet_renormalize_input_matrix", (DL_FUNC) &_ACTIONet_renormalize_input_matrix, 2},
     {"_ACTIONet_renormalize_input_matrix_full", (DL_FUNC) &_ACTIONet_renormalize_input_matrix_full, 2},
     {"_ACTIONet_compute_archetype_feature_specificity_bin", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity_bin, 2},
