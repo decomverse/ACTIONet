@@ -12,7 +12,6 @@ CPal_default = c(
   "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5"
 )
 
-
 .default_ggtheme <-  ggplot2::theme(axis.title = element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
