@@ -43,7 +43,7 @@ mat compute_pseudo_bulk_per_cluster(
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H) {
   mat H_norm = trans(H);
 
-  vec col_means = mean(H, 0);
+  vec col_means = trans(mean(H, 0));
   for (int i = 0; i < H_norm.n_cols; i++) {
     H_norm.row(i) /= col_means(i);
   }
@@ -56,7 +56,7 @@ mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H) {
 mat compute_pseudo_bulk_per_archetype(mat &S, mat &H) {
   mat H_norm = trans(H);
 
-  vec col_means = mean(H, 0);
+  vec col_means = trans(mean(H, 0));
   for (int i = 0; i < H_norm.n_cols; i++) {
     H_norm.row(i) /= col_means(i);
   }
@@ -66,7 +66,7 @@ mat compute_pseudo_bulk_per_archetype(mat &S, mat &H) {
   return (pb);
 }
 
-field<mat> compute_pseudo_bulk_per_ind(
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments,
     arma::Col<unsigned long long> individuals) {
   field<mat> pbs(max(sample_assignments));
@@ -96,7 +96,7 @@ field<mat> compute_pseudo_bulk_per_ind(
   return (pbs);
 }
 
-field<mat> compute_pseudo_bulk_per_ind(
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(
     mat &S, arma::Col<unsigned long long> sample_assignments,
     arma::Col<unsigned long long> individuals) {
   field<mat> pbs(max(sample_assignments));
@@ -115,5 +115,68 @@ field<mat> compute_pseudo_bulk_per_ind(
 
   return (pbs);
 }
+
+
+// H: archs x cells
+// individuals: 0 ... (ind-1)
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(
+    sp_mat &S, arma::mat &H,
+    arma::Col<unsigned long long> individuals) {
+  mat H_norm = trans(H); // cell x archs
+  vec col_means = trans(mean(H, 0));
+  for (int i = 0; i < H_norm.n_cols; i++) {
+    H_norm.row(i) /= col_means(i);
+  }
+
+  int arch_no = H_norm.n_cols;				
+  field<mat> pbs(arch_no);
+  for (int k = 0; k < arch_no; k++) {
+    pbs(k) = zeros(S.n_rows, max(individuals));
+  }
+
+  sp_mat::const_iterator it = S.begin();
+  sp_mat::const_iterator it_end = S.end();
+  for (; it != it_end; ++it) {
+    int i = it.row();
+    int j = individuals[it.col()] - 1;
+
+	for (int k = 0; k < arch_no; k++) {
+		pbs(k)(i, j) += (H_norm(j, k) * (*it));
+	}
+  }
+
+  return (pbs);
+}
+
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(
+    mat &S, mat &H,
+    arma::Col<unsigned long long> individuals) {
+  mat H_norm = trans(H); // cell x archs
+  vec col_means = trans(mean(H, 0));
+  for (int i = 0; i < H_norm.n_cols; i++) {
+    H_norm.row(i) /= col_means(i);
+  }
+
+  int arch_no = H_norm.n_cols;		
+  int ind_no = max(individuals);		
+  field<mat> pbs(arch_no);
+  for (int k = 0; k < arch_no; k++) {
+    pbs(k) = zeros(S.n_rows, ind_no);
+  }    
+
+  for (int j = 0; j < ind_no; j++) {
+    uvec idx = find((individuals == (j + 1)));
+    mat subS = S.cols(idx);
+    mat subH = H_norm.rows(idx);
+    
+    mat X = (subS * subH);
+	for (int k = 0; k < arch_no; k++) {
+		pbs(k).col(j) += X.col(k);
+	}
+  }
+
+  return (pbs);
+}
+
 
 }  // namespace ACTIONet
