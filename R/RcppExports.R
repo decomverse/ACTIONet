@@ -726,20 +726,36 @@ decode_ids <- function(encoded_ids, pass) {
     .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
 }
 
-compute_pseudo_bulk <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk`, S, sample_assignments)
+compute_pseudo_bulk_per_cluster <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_full <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_full`, S, sample_assignments)
+compute_pseudo_bulk_per_cluster_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_full`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_ind <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_ind`, S, sample_assignments, individuals)
+compute_pseudo_bulk_per_cluster_and_ind <- function(S, sample_assignments, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind`, S, sample_assignments, individuals)
 }
 
-compute_pseudo_bulk_per_ind_full <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_ind_full`, S, sample_assignments, individuals)
+compute_pseudo_bulk_per_cluster_and_ind_full <- function(S, sample_assignments, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full`, S, sample_assignments, individuals)
+}
+
+compute_pseudo_bulk_per_archetype <- function(S, H) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype`, S, H)
+}
+
+compute_pseudo_bulk_per_archetype_full <- function(S, H) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_full`, S, H)
+}
+
+compute_pseudo_bulk_per_archetype_and_ind <- function(S, H, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind`, S, H, individuals)
+}
+
+compute_pseudo_bulk_per_archetype_and_ind_full <- function(S, H, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full`, S, H, individuals)
 }
 
 renormalize_input_matrix <- function(S, sample_assignments) {
