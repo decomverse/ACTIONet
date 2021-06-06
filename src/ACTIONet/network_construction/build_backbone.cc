@@ -1,5 +1,4 @@
 #include <ACTIONet.h>
-
 #include <hnswlib.h>
 #include <atomic>
 #include <thread>
@@ -104,18 +103,13 @@ mat Prune_PageRank(mat &U, double density = 1.0) {
   /*
   for(int i = 0; i < U.n_cols; i++) {
           vec u = U.col(i);
-
           vec u_sorted = sort(u, "descend");
           vec beta = join_cols(-LC*log(u_sorted), datum::inf*ones(1));
-
           vec beta_cs = cumsum(beta);
           vec beta_sq_cs = cumsum(square(beta));
-
           vec kk = regspace(1, beta_cs.n_elem);
-
           vec lambda = (1.0/kk) % (beta_cs + sqrt(kk + square(beta_cs) - kk %
   beta_sq_cs)); lambda.replace(datum::nan, 0);
-
           uvec tmp = find(lambda <= beta);
           if(tmp.n_elem == 0) {
                   printf("Can't prune column %d with density = %f\n", i+1,
@@ -123,51 +117,39 @@ mat Prune_PageRank(mat &U, double density = 1.0) {
           }
           int k = tmp(0);
           double u_threshold = u_sorted(k);
-
           printf("%d- k = %d, threshold = %f\n", i+1, k+1, u_threshold);
-
           u(u < u_threshold).zeros();
-
           uvec idx = find(u >= u_threshold);
           vec x = u(idx);
           vec z = zscore(x);
           vec s = exp(z);
           vec p = s / sum(s);
           u(idx) = p;
-
           U_thresholded.col(i) = u;
   }
   */
 
   /*
-
   mat U_sorted = sort(U, "descend", 0);
-
   mat beta = trans(-LC*log(U_sorted));
   vec beta_sum = zeros(beta.n_rows);
   vec beta_sq_sum = zeros(beta.n_rows);
-
   mat lambda = zeros(size(beta));
   int k = 1;
   for(; k < beta.n_cols; k++) {
           beta_sum += beta.col(k);
           beta_sq_sum += square(beta.col(k));
-
           lambda.col(k) = (1.0/(double)k) * ( beta_sum + sqrt(k +
   square(beta_sum) - k*beta_sq_sum) );
   }
   lambda.replace(datum::nan, 0);
-
   mat Delta = trans(lambda - beta);
   Delta.shed_row(0);
-
-
   mat U_thresholded(size(U));
   for(int v = 0; v < U.n_cols; v++) {
   //ParallelFor(0, U.n_cols, 1, [&](size_t v, size_t threadId) {
           vec delta = Delta.col(v);
           vec u = U_thresholded.col(v);
-
           //uvec rows = find(delta > 0, 1, "last");
           uvec tmp = find(delta < 0, 1, "first");
           printf("%d- %d\n", v, tmp.n_elem);
@@ -175,15 +157,12 @@ mat Prune_PageRank(mat &U, double density = 1.0) {
                   printf("Can't prune column %d with density = %f\n", v+1,
   density); U_thresholded.col(v) = u; } else { int k = tmp(0); double
   u_threshold = U_sorted(k); printf("\t%f\n", u_threshold);
-
                   u(u < u_threshold).zeros();
-
                   uvec idx = find(u >= u_threshold);
                   vec x = u(idx);
                   vec s = x;//exp(x); // exp(zscore(x));
                   vec p = s / sum(s);
                   u(idx) = p;
-
                   U_thresholded.col(v) = u;
           }
   }
