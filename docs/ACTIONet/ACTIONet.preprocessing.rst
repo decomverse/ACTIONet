@@ -1,6 +1,12 @@
 ACTIONet.preprocessing package
 ==============================
 
+.. automodule:: ACTIONet.preprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
 Submodules
 ----------
 
@@ -35,15 +41,6 @@ ACTIONet.preprocessing.\_specificity module
 -------------------------------------------
 
 .. automodule:: ACTIONet.preprocessing._specificity
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
-Module contents
----------------
-
-.. automodule:: ACTIONet.preprocessing
    :members:
    :undoc-members:
    :show-inheritance:

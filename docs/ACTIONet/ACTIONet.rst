@@ -1,6 +1,12 @@
 ACTIONet package
 ================
 
+.. automodule:: ACTIONet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
 Subpackages
 -----------
 
@@ -10,12 +16,3 @@ Subpackages
    ACTIONet.network
    ACTIONet.preprocessing
    ACTIONet.tools
-
-Module contents
----------------
-
-.. automodule:: ACTIONet
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
