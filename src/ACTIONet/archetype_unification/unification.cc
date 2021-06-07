@@ -300,13 +300,14 @@ field<mat> convexSVD(mat &A, int dim = 100, int max_iter = 5) {
 }
 
 
-field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_iter_inner = 40) {
+field<mat> recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 5, int max_iter_inner = 40) {
 	dim = std::min(dim, (int)M.n_cols);
 
 	mat W(M.n_rows, dim);
 	mat H(M.n_cols, dim);
 	vec obj(dim);
 	vec factor_weights(dim);
+	vec ss(dim);
 	
 	double denom = sum(sum(square(M)));	
 	for(int k = 0; k < dim; k++) {
@@ -353,28 +354,151 @@ field<mat> recursiveNMU(mat &M, int dim = 100, int max_SVD_iter = 5, int max_ite
 			}
 		}
 		
+	
 		mat oldM = M;
 		M -= x*trans(y);
 		M.transform([](double val) { return (val < 0 ? 0 : val); });		
 		
-		factor_weights(k) = sqrt(sum(sum(square(oldM-M))));
+		//factor_weights(k) = sqrt(sum(sum(square(oldM-M))));
 		obj(k) = (sum(sum(square(M))) / denom);
+		ss(k) = s(0);
+		
+		
+		double w_norm1 = sum(abs(W.col(k))); // abs() is reducndant
+		W.col(k) /= w_norm1;
+		double h_norm1 = sum(abs(H.col(k))); // abs() is reducndant
+		H.col(k) /= h_norm1;
+		
+		factor_weights(k) = w_norm1 * h_norm1;
+
 	}  
     
-    field<mat> out(4);
+    
+    
+    field<mat> out(5);
     out(0) = W;
     out(1) = H;
     out(2) = factor_weights;
     out(3) = obj;
+    out(4) = ss;
     
 	return (out);  
 }
 
 
 
-unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
-                                     double alpha = 0.99,
-                                     double sensitivity = 0,
+field<mat> recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+	dim = std::min(dim, (int)M.n_cols);
+
+	mat W(M.n_rows, dim);
+	mat H(M.n_cols, dim);
+	vec factor_weights(dim);
+	
+	mat M0 = M;	
+
+	//M =  normalise(M, 1, 0);
+	//M = zscore(M);
+	
+	vec s;
+	mat U, V;
+	double denom = sum(sum(square(M)));		
+	for(int k = 0; k < dim; k++) {		
+		//field<mat> SVD_res = HalkoSVD(M, 1, max_SVD_iter, 0, 0);		
+		//mat U = SVD_res(0); vec s = SVD_res(1); mat V = SVD_res(2);
+		
+		//svds( U, s, V, sp_mat(M), 1, temp，"std");
+		//svd(U, s, V, M, "std");
+		field<mat> SVD_res = IRLB_SVD(M, 1, max_SVD_iter, 0, 0);		
+		U = SVD_res(0); s = SVD_res(1); V = SVD_res(2);
+
+		//vec w = vec(cor(M0, U.col(0)));
+		vec w = trans(trans(U.col(0)) * M); 
+		int selected_columns = index_max(w);
+	
+		vec u = M0.col(selected_columns);
+		W.col(k) = u;
+		H.col(k).zeros();
+		H(selected_columns, k) = 1;
+	
+	
+		//mat oldM = M;
+		vec v = M.col(selected_columns);
+		M -= v*(trans(v) * M) / dot(v, v);
+		//factor_weights(k) = sum(sum(oldM - M));
+		M.transform([](double val) { return (val < 0 ? 0 : val); });		
+
+		//factor_weights(k) = (sum(sum(square(M))) / denom);
+		factor_weights(k) = (sum(sum(abs(M))) / M.n_cols);
+		//factor_weights(k) = max(sum(abs(M)));
+		//factor_weights(k) = max(sum(square(M)));
+		//factor_weights(k) = s(0);
+		
+		//factor_weights(k) = min(max(cor(W, M)));
+		
+	}  
+    
+    
+    field<mat> out(3);
+    out(0) = W;
+    out(1) = H;
+    out(2) = factor_weights;
+    
+	return (out);  
+}
+
+
+
+	vec sweepcut(sp_mat &A, vec s) {
+		int top_ignore = 5;
+		
+		A.diag().zeros();		
+		int nV = A.n_rows;
+		
+		vec w = vec(sum(A, 1));
+		double total_vol = sum(w);
+
+		vec conductance = datum::inf*ones(w.n_elem);				
+		
+		uvec perm = sort_index( s, "descend" );
+		vec x = zeros(nV);
+		x(perm(span(0, top_ignore-1))).ones();
+		double vol = sum(w(perm(span(0, top_ignore-1))));
+
+		double cut_size = vol;
+		for(int i = 0; i < top_ignore; i++) {
+			for(int j = 0; j < top_ignore; j++) {
+				cut_size -= A(i, j);
+			}
+		}
+		
+		for(register int i = top_ignore; i < nV-top_ignore-1; i++) {
+			int u = perm(i);
+			vol += w[u];
+			
+			x(u) = 1;			
+
+			sp_mat::col_iterator it = A.begin_col( u );							
+			for(; it != A.end_col( u ); it++) {
+				int v = it.row();
+				if(x[v] == 0) { // v is in S_prime (not yet selected)
+					cut_size += (*it);
+				}	
+				else {
+					cut_size -= (*it);
+				}			
+			}
+						
+			double vol_prime = total_vol - vol;
+			conductance(i) = cut_size / min(vol, vol_prime);
+		}
+
+		
+		return(conductance);
+	}
+
+unification_results unify_archetypes(mat &S_r, mat &C_stacked,
+									 mat &H_stacked,
+                                     double violation_threshold = 0.0,
                                      int thread_no = 0) {
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
@@ -382,167 +506,68 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   stdout_printf("Unifying %d archetypes (%d threads):\n", C_stacked.n_cols,
                 thread_no);
 
-  stdout_printf("\tParameters: alpha = %0.2f, sensitivity = %0.2f\n", alpha,
-                sensitivity);
+  stdout_printf("\tParameters: sensitivity = %0.2f\n", thread_no);
   FLUSH;
 
   unification_results output;
+  
+  //mat C_stacked_norm = normalise(C_stacked, 1, 0);
+  sp_mat C_stacked_sp = sp_mat(C_stacked);
+  C_stacked_sp = normalise(C_stacked_sp, 1, 0);
+  mat H_arch = normalise(mat(H_stacked * C_stacked_sp), 1, 0);
+  H_arch.replace(datum::nan, 0);  // replace each NaN with 0
 
-  uvec nnz_idx = find(sum(C_stacked, 1) > 0);
-  vec vmap = -1*ones(C_stacked.n_rows);
-  vmap(nnz_idx) = regspace(0,  nnz_idx.n_elem-1);
-  
-  vec ii(G.n_nonzero);
-  vec jj(G.n_nonzero);
-  vec vv(G.n_nonzero);
-  
-  int idx = 0;
-  for (sp_mat::const_iterator it = G.begin(); it != G.end(); ++it) {
-    ii[idx] = vmap(it.row());
-    jj[idx] = vmap(it.col());
-    vv[idx] = (*it);
-    idx++;
-  }
-  
-  uvec selected_vertices = find( (ii != -1) && (jj != -1) );
-  uvec sub_ii = conv_to<uvec>::from(ii(selected_vertices));
-  uvec sub_jj = conv_to<uvec>::from(jj(selected_vertices));
-  vec sub_vv = vv(selected_vertices);
-  
-  umat locs = trans(join_rows(sub_ii, sub_jj));
-  sp_mat subG(locs, sub_vv, nnz_idx.n_elem, nnz_idx.n_elem);
-  
-  mat subC = C_stacked.rows(nnz_idx);
-  
-  // Smooth archetypes using ACTIONet
-  printf("Running network diffusion\n");
-  mat X0 = join_rows(ones(subC.n_rows), subC);
-  X0 = normalise(X0, 1, 0);
-  sp_mat X0_sp = sp_mat(X0);
-  
-  vec w = vec(trans(sum(subG)));
-  uvec zero_idx = find(w == 0);
-  w(zero_idx).ones();
-  //w(w ==0).ones();
-  
-  mat PR = compute_network_diffusion_fast(subG, X0_sp, thread_no, alpha, 3);
-  mat C_imputed = PR.cols(1, PR.n_cols - 1);
-
-  vec C_nnz = vec(trans(sum(spones(sp_mat(C_imputed)))));
-  zero_idx = find(C_nnz < 10);
-  C_imputed.cols(zero_idx).zeros();
-
-
-  for (int i = 0; i < C_imputed.n_cols; i++) {
-    //C_imputed.col(i) *= (C_nnz(i));
-    C_imputed.col(i) /= (w);
-  }
-  
-  C_imputed = zscore(C_imputed);
-  C_imputed.replace(datum::nan, 0);  // replace each NaN with 0
+  printf("Running NMU\n");
+  int dim = min((int)H_arch.n_cols, 100);
+  field<mat> NMU_out = recursiveNMU_mine(H_arch, dim, 1000, 100);
 
   
+  mat W_NMU = NMU_out(0);
+  mat H_NMU = NMU_out(1);
+  vec factor_weight = NMU_out(2);  
+
 /*
-  mat LOR = C_imputed;
-  for (int i = 0; i < LOR.n_cols; i++) {
-    LOR.col(i) = LOR.col(i) / PR.col(0);
-  }
-  LOR = log2(LOR);
-  uvec zero_idx = find(C_imputed == 0);
-  LOR(zero_idx).zeros();
-  LOR.transform([](double val) { return (val < 0 ? 0 : val); });
-*/
-
-  int dim = min((int)C_imputed.n_cols, 100);
-  field<mat> NMU_out = recursiveNMU(C_imputed, dim, 5, 100);
-
-  mat W = NMU_out(0);
-  mat H = NMU_out(1);
-  vec factor_weight = NMU_out(3);  
-  //vec obj = NMU_out(3);  
-  
-  uvec perm = sort_index(factor_weight, "descend");
-  W = W.cols(perm);
-  H = H.cols(perm);
-  factor_weight = factor_weight(perm);
-  //obj = obj(perm);
-  
-  /*
-  output.C_unified = H;
-  output.H_unified = factor_weight;
-  //output.dag_adj = obj;
-  
+  output.C_unified = W_NMU;
+  output.H_unified = H_NMU;
+  output.dag_adj = factor_weight;
   return(output);
-  */
-  
-  vec x = factor_weight;
- 
-/*
-  SPA_results res = run_SPA(Wpos, Wpos.n_cols);
-  uvec selected_columns = res.selected_columns;
-  vec x = res.column_norms;
-  vec x = res.column_norms;
 */
 
-  // Select number of unified archetypes
-  int state_no = -1;
-  vec coverage = cumsum(x) / sum(x);
-  if (sensitivity == 0) {
-	/*
-    double sx = sum(x);
-    double sx_sq = sum(square(x));
-    state_no = (int)round(sx * sx / sx_sq);
-*/
-    double sx = sum(square(x));
-    double sx_sq = sum(square(square(x)));
-    state_no = (int)round(sx * sx / sx_sq);
-
-  
-  /*  
-    vec beta = (max(x) - x)/ (max(x) - min(x));
-    double lambda = beta(0) + 1;
-    double sum_beta = 0, sum_beta_sq = 0;
-    state_no = 1;
-    for(; state_no < beta.n_elem-1; state_no++) {
-		sum_beta += beta(state_no);
-		sum_beta_sq += (beta(state_no)*beta(state_no));
-		lambda = (1.0/state_no) * ( sum_beta + sqrt( state_no  + sum_beta*sum_beta - state_no * sum_beta_sq ) ) ; 
-
-		printf("%d- cur beta = %f, next beta = %f, lambda = %f\n", state_no, beta(state_no), beta(state_no+1), lambda );
-
-		if(lambda < beta(state_no+1)) {
-			break;
+  double M = 16, ef_construction = 200, ef = 50, density = 1.0;
+  sp_mat backbone = ACTIONet::build_ACTIONet(H_arch, density, thread_no, M, ef_construction, ef, true);
+	output.dag_adj = backbone;
+	
+	vec visited = zeros(backbone.n_cols);
+	vec violation = zeros(H_NMU.n_cols);
+	vec selected = zeros(H_NMU.n_cols);
+	uvec selected_archs(H_NMU.n_cols);
+	for(int i = 0; i < H_NMU.n_cols; i++) {
+		int v = index_max(H_NMU.col(i));
+		selected_archs(i) = v;
+		
+		visited(v) = 1;
+		uvec N = find(vec(backbone.col(v)) > 0);
+		if(0 < N.n_elem) {
+			vec N_is_visited = vec(visited(N));
+			violation(i) = sum(N_is_visited) / (double)N.n_elem;
+			if(violation[i] <= violation_threshold) {
+				selected(i) = 1;
+			}
+			visited(N).ones();
 		}
 	}
-	*/    
-  } else if (sensitivity <= 1) {
-    state_no = min(find(sensitivity <= coverage));
-  } else {
-    state_no = min((int)x.n_elem, (int)sensitivity);
-  }
-  printf("%d unified states (sensitivity = %.2f)\n", state_no,
-  coverage(state_no - 1));
-  
-  //mat weights = normalise(H.cols(0, state_no-1), 1, 0);
-
-  /*
-  mat subH = Hpos.cols(selected_columns(span(0, state_no-1)));
-  mat weights = normalise(subH, 1, 0);
-  */
-  
-  /*
-  mat A = normalise(LOR, 1, 0);
-  mat B = normalise(Wpos.cols(selected_columns(span(0, state_no - 1))), 1, 0);
-  mat weights = run_simplex_regression(A, B, false);
-  */
-
-  mat A = normalise(C_imputed, 1, 0);
-  mat B = normalise(W.cols(0, state_no - 1), 1, 0);
-  mat weights = run_simplex_regression(A, B, false);
+	uvec selected_cols = find(selected == 1);
+	selected_archs = selected_archs(selected_cols);
+		
+	output.selected_archetypes = selected_archs;
+	
+	int state_no = selected_archs.n_elem;
+	printf("# selected archetypes = %d\n", state_no);
+ 
 
   // Compute unified archetypes
-  mat C_norm = normalise(C_stacked, 1, 0);
-  mat C_unified = C_norm * weights;
+  //mat C_norm = normalise(C_stacked, 1, 0);
+  mat C_unified = C_stacked.cols(selected_archs);
   mat W_r_unified = S_r * C_unified;
 
   mat H_unified = run_simplex_regression(W_r_unified, S_r, false);
@@ -633,7 +658,7 @@ unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
   output.C_unified = C_unified;
   output.H_unified = H_unified;
   output.assigned_archetypes = assigned_archetypes;
-  output.arch_membership_weights = weights;
+  output.arch_membership_weights = H_NMU.cols(selected_cols);
   // output.selected_archetypes = selected_archetypes(idx);
 
   FLUSH;

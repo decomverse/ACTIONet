@@ -230,7 +230,7 @@ run.SCINET.gene.scores <- function(
 
     common.genes = intersect(rownames(gene.scores), rownames(Adj))
     if (length(common.genes) == 0) {
-        err = sprint("No common genes found. Check rownames (or vertex names) for the input graph")
+        err = sprintf("No common genes found. Check rownames (or vertex names) for the input graph.\n")
         stop(err)
     }
     A = gene.scores[common.genes,, drop=FALSE]

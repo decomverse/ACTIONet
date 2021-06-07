@@ -22,7 +22,8 @@
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
   point_order = NULL,
-  use_repel = TRUE
+  use_repel = TRUE,
+  repel_force = 0.05
 )
 }
 \arguments{
@@ -69,6 +70,5 @@
 Plot ACTIONet scatter plot
 }
 \examples{
-ace = run.ACTIONet(ace)
 plot.ACTIONet(ace, ace$assigned_archetype)
 }
