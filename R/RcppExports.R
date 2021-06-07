@@ -1096,7 +1096,7 @@ computeSparseRowVariances <- function(j, val, rm, n) {
     .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
 }
 
-rbind_sparse_mats <- function(A, B) {
-    .Call(`_ACTIONet_rbind_sparse_mats`, A, B)
+bind_sparse_mats <- function(A, B, dim = 0L) {
+    .Call(`_ACTIONet_bind_sparse_mats`, A, B, dim)
 }
 
