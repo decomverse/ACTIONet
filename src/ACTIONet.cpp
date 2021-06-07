@@ -620,11 +620,10 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked, double alpha = 0.85,
-                      double sensitivity = 0.0,
+List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
+                      double violation_threshold = 0.0,
                       int thread_no = 0) {
-  ACTIONet::unification_results results = ACTIONet::unify_archetypes(
-      G, S_r, C_stacked, alpha, sensitivity, thread_no);
+  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, thread_no);
 
   List out_list;
 
@@ -2112,4 +2111,72 @@ List run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max,
   res["H"] = H;
 
   return res;
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_basic_sum(sp_mat &S, sp_mat &marker_mat) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_basic_sum(S, marker_mat);
+	
+	return(stats);
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_basic_sum_perm(sp_mat &S, sp_mat &marker_mat, int perm_no = 100, int thread_no = 0) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_basic_sum_perm(S, marker_mat, perm_no, thread_no);
+	
+	return(stats);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_basic_sum_perm_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no);
+	
+	return(stats);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_basic_sum_perm_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no);
+	
+	return(stats);
+}
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_basic_sum_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no);
+	
+	return(stats);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_basic_sum_smoothed_normalized(G, S, marker_mat, alpha, max_it, perm_no, thread_no);
+	
+	return(stats);
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+sp_mat LSI(sp_mat &X, double size_factor = 100000) {
+	sp_mat TFIDF = ACTIONet::LSI(X, size_factor);
+	
+	return(TFIDF);
+}
+
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
+	mat stats = ACTIONet::compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no);
+	
+	return(stats);
 }
