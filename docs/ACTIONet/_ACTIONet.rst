@@ -1,7 +1,7 @@
-setup module
-============
+\_ACTIONet module
+=================
 
-.. automodule:: setup
+.. automodule:: _ACTIONet
    :members:
    :undoc-members:
    :show-inheritance:
