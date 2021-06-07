@@ -534,7 +534,7 @@ unification_results unify_archetypes(mat &S_r, mat &C_stacked,
 */
 
   double M = 16, ef_construction = 200, ef = 50, density = 1.0;
-  sp_mat backbone = ACTIONet::build_ACTIONet(H_arch, density, thread_no, M, ef_construction, ef, true);
+  sp_mat backbone = ACTIONet::build_ACTIONet(H_arch, density, thread_no, M, ef_construction, ef, true, "jsd", "k*nn", 10);
 	output.dag_adj = backbone;
 	
 	vec visited = zeros(backbone.n_cols);

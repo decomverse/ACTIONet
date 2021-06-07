@@ -286,8 +286,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // build_ACTIONet
-sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, bool mutual_edges_only);
-RcppExport SEXP _ACTIONet_build_ACTIONet(SEXP H_stackedSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP) {
+sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, bool mutual_edges_only, string distance_metric, string nn_approach, int k);
+RcppExport SEXP _ACTIONet_build_ACTIONet(SEXP H_stackedSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP distance_metricSEXP, SEXP nn_approachSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -295,13 +295,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type density(densitySEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< bool >::type mutual_edges_only(mutual_edges_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(build_ACTIONet(H_stacked, density, thread_no, mutual_edges_only));
+    Rcpp::traits::input_parameter< string >::type distance_metric(distance_metricSEXP);
+    Rcpp::traits::input_parameter< string >::type nn_approach(nn_approachSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_ACTIONet(H_stacked, density, thread_no, mutual_edges_only, distance_metric, nn_approach, k));
     return rcpp_result_gen;
 END_RCPP
 }
 // build_knn
-sp_mat build_knn(mat H_stacked, double k, int thread_no, bool mutual_edges_only);
-RcppExport SEXP _ACTIONet_build_knn(SEXP H_stackedSEXP, SEXP kSEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP) {
+sp_mat build_knn(mat H_stacked, double k, int thread_no, bool mutual_edges_only, string distance_metric);
+RcppExport SEXP _ACTIONet_build_knn(SEXP H_stackedSEXP, SEXP kSEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP distance_metricSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -309,7 +312,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< bool >::type mutual_edges_only(mutual_edges_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(build_knn(H_stacked, k, thread_no, mutual_edges_only));
+    Rcpp::traits::input_parameter< string >::type distance_metric(distance_metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_knn(H_stacked, k, thread_no, mutual_edges_only, distance_metric));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1345,8 +1349,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 5},
-    {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
-    {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 4},
+    {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 7},
+    {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 5},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
