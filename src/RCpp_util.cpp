@@ -125,8 +125,14 @@ Rcpp::NumericVector computeSparseRowVariances(IntegerVector j,
 }
 
 // [[Rcpp::export]]
-sp_mat rbind_sparse_mats(sp_mat &A, sp_mat &B) {
-  sp_mat C = join_rows(A, B);
-
+sp_mat bind_sparse_mats(sp_mat &A, sp_mat &B, int dim = 0) {
+  sp_mat C;
+  if (dim == 0) {
+    sp_mat C = join_rows(A, B);
+  } else if (dim == 1) {
+    sp_mat C = join_cols(A, B);
+  } else {
+    throw "invalid dim";
+  }
   return (C);
 }

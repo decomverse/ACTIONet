@@ -1312,15 +1312,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rbind_sparse_mats
-sp_mat rbind_sparse_mats(sp_mat& A, sp_mat& B);
-RcppExport SEXP _ACTIONet_rbind_sparse_mats(SEXP ASEXP, SEXP BSEXP) {
+// bind_sparse_mats
+sp_mat bind_sparse_mats(sp_mat& A, sp_mat& B, int dim);
+RcppExport SEXP _ACTIONet_bind_sparse_mats(SEXP ASEXP, SEXP BSEXP, SEXP dimSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< sp_mat& >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(rbind_sparse_mats(A, B));
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(bind_sparse_mats(A, B, dim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1419,7 +1420,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
     {"_ACTIONet_fast_row_max", (DL_FUNC) &_ACTIONet_fast_row_max, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
-    {"_ACTIONet_rbind_sparse_mats", (DL_FUNC) &_ACTIONet_rbind_sparse_mats, 2},
+    {"_ACTIONet_bind_sparse_mats", (DL_FUNC) &_ACTIONet_bind_sparse_mats, 3},
     {NULL, NULL, 0}
 };
 
