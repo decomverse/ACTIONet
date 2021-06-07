@@ -1,0 +1,7 @@
+sphinx
+myst-parser
+recommonmark
+sphinx_rtd_theme
+ipykernel
+nbsphinx
+nbsphinx_link
