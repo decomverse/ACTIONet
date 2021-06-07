@@ -22,4 +22,4 @@ help:
 .PHONY api:
 api:
 	rm -rf docs/ACTIONet
-	sphinx-apidoc -o docs/ACTIONet ../ACTIONet
+	sphinx-apidoc --private -o docs/ACTIONet ../ACTIONet
