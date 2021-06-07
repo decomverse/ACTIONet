@@ -503,10 +503,9 @@ unification_results unify_archetypes(mat &S_r, mat &C_stacked,
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;
   }
-  stdout_printf("Unifying %d archetypes (%d threads):\n", C_stacked.n_cols,
-                thread_no);
 
-  stdout_printf("\tParameters: sensitivity = %0.2f\n", thread_no);
+  stdout_printf("Unifying %d archetypes (%d threads):\n", C_stacked.n_cols, thread_no);
+  stdout_printf("\tParameters: violation_threshold = %0.2f\n", violation_threshold);
   FLUSH;
 
   unification_results output;
@@ -517,7 +516,7 @@ unification_results unify_archetypes(mat &S_r, mat &C_stacked,
   mat H_arch = normalise(mat(H_stacked * C_stacked_sp), 1, 0);
   H_arch.replace(datum::nan, 0);  // replace each NaN with 0
 
-  printf("Running NMU\n");
+  stdout_printf("Running NMU\n");
   int dim = min((int)H_arch.n_cols, 100);
   field<mat> NMU_out = recursiveNMU_mine(H_arch, dim, 1000, 100);
 
@@ -562,7 +561,7 @@ unification_results unify_archetypes(mat &S_r, mat &C_stacked,
 	output.selected_archetypes = selected_archs;
 
 	int state_no = selected_archs.n_elem;
-	printf("# selected archetypes = %d\n", state_no);
+	stdout_printf("Selected archetypes: %d\n", state_no);
 
 
   // Compute unified archetypes
