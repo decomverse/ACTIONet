@@ -662,10 +662,11 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
 //'	G = build_ACTIONet(prune.out$H_stacked)
 // [[Rcpp::export]]
 sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
-                      bool mutual_edges_only = true) {
+                      bool mutual_edges_only = true, string distance_metric="jsd", string nn_approach="k*nn", int k=10) {
+						  
   double M = 16, ef_construction = 200, ef = 50;
   sp_mat G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M,
-                                      ef_construction, ef, mutual_edges_only);
+                                      ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);
 
   return G;
 }
@@ -673,11 +674,12 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
 
 // [[Rcpp::export]]
 sp_mat build_knn(mat H_stacked, double k = 10, int thread_no = 0,
-                      bool mutual_edges_only = true) {
+                      bool mutual_edges_only = true, string distance_metric = "jsd") {
 
 	double M = 16, ef_construction = 200, ef = 10;
 					  
-	sp_mat G = ACTIONet::build_ACTIONet_JS_KNN(H_stacked, k, thread_no, M, ef_construction, ef, mutual_edges_only);
+	sp_mat G = ACTIONet::build_ACTIONet(H_stacked, 1, thread_no, M,
+                                      ef_construction, ef, mutual_edges_only, distance_metric, "knn", k);
 					  
 	return G;
 }

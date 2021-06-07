@@ -230,18 +230,18 @@ unification_results unify_archetypes(mat &S_r, mat &C_stacked,
 // decompositions
 sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no,
                                  double M, double ef_construction, double ef,
-                                 bool mutual_edges_only);
+                                 bool mutual_edges_only, string distance_metric);
 sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density,
                                     int thread_no, double M,
                                     double ef_construction, double ef,
-                                    bool mutual_edges_only);
+                                    bool mutual_edges_only, string distance_metric);
 sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no, double M,
                              double ef_construction, double ef,
-                             bool mutual_edges_only);
+                             bool mutual_edges_only, string distance_metric);
 
 sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, double M,
                       double ef_construction, double ef,
-                      bool mutual_edges_only);
+                      bool mutual_edges_only, string distance_metric, string nn_approach, int k);
 
 mat computeFullSim(mat &H, int thread_no);
 
