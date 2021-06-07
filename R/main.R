@@ -101,7 +101,9 @@ run.ACTIONet <- function(
       H_stacked = pruning.out$H_stacked,
       density = network_density,
       thread_no = thread_no,
-      mutual_edges_only = mutual_edges_only
+      mutual_edges_only = mutual_edges_only,
+      distance_metric = "jsd",
+      nn_approach="k*nn"
     )
     colNets(ace)[[net_slot_out]] = G
 
