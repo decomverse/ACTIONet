@@ -14,7 +14,7 @@ def ACTION(
     min_delta: Optional[float] = 1e-300
 ) -> Tuple[np.ndarray, np.ndarray]:
     """\
-    Run ACTION decomposition [Mohammadi2018]_.
+    Run ACTION decomposition.
 
     Computes reduced ACTION decomposition.
 

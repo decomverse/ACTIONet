@@ -1,6 +1,12 @@
 ACTIONet.tools package
 ======================
 
+.. automodule:: ACTIONet.tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
 Submodules
 ----------
 
@@ -53,15 +59,6 @@ ACTIONet.tools.\_svd module
 ---------------------------
 
 .. automodule:: ACTIONet.tools._svd
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
-Module contents
----------------
-
-.. automodule:: ACTIONet.tools
    :members:
    :undoc-members:
    :show-inheritance:
