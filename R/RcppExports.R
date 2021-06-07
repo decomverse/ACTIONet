@@ -678,12 +678,12 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
-build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edges_only = TRUE) {
-    .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only)
+build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, distance_metric = "jsd", nn_approach = "k*nn", k = 10L) {
+    .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only, distance_metric, nn_approach, k)
 }
 
-build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRUE) {
-    .Call(`_ACTIONet_build_knn`, H_stacked, k, thread_no, mutual_edges_only)
+build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRUE, distance_metric = "jsd") {
+    .Call(`_ACTIONet_build_knn`, H_stacked, k, thread_no, mutual_edges_only, distance_metric)
 }
 
 #'
