@@ -8,7 +8,7 @@
 #' @examples
 #' expression_imputed = impute.genes.using.archetype(ace, genes)
 #' @export
-impute.genes.using.archetypes <- function(ace, genes) {
+impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
 
     features_use = .preprocess_annotation_features(ace, features_use = features_use)
 

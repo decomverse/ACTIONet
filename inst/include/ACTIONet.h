@@ -221,8 +221,9 @@ multilevel_archetypal_decomposition prune_archetypes(
 // unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes,
 // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
 // outlier_threshold, int reduced_dim);
-unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &C_stacked,
-                                     double alpha, double sensitivity,
+unification_results unify_archetypes(mat &S_r, mat &C_stacked,
+									 mat &H_stacked,
+                                     double violation_threshold,
                                      int thread_no);
 
 // Main functions to build an interaction network from multi-level archetypal
@@ -316,8 +317,6 @@ mat NetEnh(mat Adj);
 mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
                            int seed);
 
-vec sweepcut(sp_mat A, vec s);
-
 vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
         uvec fixed_labels);
 
@@ -329,7 +328,21 @@ field<mat> run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it, 
 
 ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no, int max_it, int max_correction_rounds, double lambda, double min_delta);
 
+mat compute_marker_aggregate_stats_basic_sum(sp_mat &S, sp_mat &marker_mat);
+mat compute_marker_aggregate_stats_basic_sum_perm(sp_mat &S, sp_mat &marker_mat, int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double, int max_it, int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+
+
+sp_mat LSI(sp_mat& X, double size_factor);
 
 }  // namespace ACTIONet
+
+
+
 
 #endif

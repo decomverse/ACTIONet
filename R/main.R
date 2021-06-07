@@ -27,7 +27,7 @@ run.ACTIONet <- function(
   ace,
   batch = NULL,
   k_min = 2,
-  k_max = 40,
+  k_max = 30,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
@@ -40,8 +40,7 @@ run.ACTIONet <- function(
   layout_epochs = 1000,
   layout_algorithm = 0,
   layout_in_parallel = TRUE,
-  unification_alpha = 0.99,
-  unification_sensitivity = 0,
+  unification_violation_threshold = 0,
   footprint_alpha = 0.85,
   thread_no = 0,
   full_trace = FALSE,
@@ -125,11 +124,10 @@ run.ACTIONet <- function(
 
     # Identiy equivalent classes of archetypes and group them together
     unification.out = unify_archetypes(
-      G = G,
       S_r = S_r,
       C_stacked = pruning.out$C_stacked,
-      alpha = unification_alpha,
-      sensitivity = unification_sensitivity,
+      H_stacked = pruning.out$H_stacked,
+      violation_threshold = unification_violation_threshold,
       thread_no = thread_no)
 
     Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
@@ -384,8 +382,7 @@ rerun.archetype.aggregation <- function(
   layout_compactness = 50,
   layout_epochs = 100,
   thread_no = 0,
-  unification_alpha = 0.99,
-  unification_sensitivity = 0
+  unification_violation_threshold = 0
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
@@ -395,11 +392,10 @@ rerun.archetype.aggregation <- function(
     G = colNets(ace)[["ACTIONet"]]
 
     unification.out = unify_archetypes(
-      G = G,
       S_r = S_r,
       C_stacked = C_stacked,
-      alpha = unification_alpha,
-      sensitivity = unification_sensitivity,
+      H_stacked = H_stacked,
+      violation_threshold = unification_violation_threshold,
       thread_no = thread_no
     )
 
