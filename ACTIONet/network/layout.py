@@ -5,7 +5,7 @@ from scipy import sparse
 from anndata import AnnData
 
 import _ACTIONet as _an
-from .. import _misc_utils as ut
+from .. import misc_utils as ut
 
 
 def layout_network(
