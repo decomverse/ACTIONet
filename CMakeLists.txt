@@ -25,13 +25,13 @@ else()
 endif()
 include_directories(${Python_INCLUDE_DIRS})
 
-# Check for MKL and depending on whether or not MKL is present
-# check for lapack and blas with suitesparse
-find_package(MKL)
-include_directories(${MKL_INCLUDE_DIRS})
-if(NOT ${MKL_FOUND})
-    set(SUITESPARSE_USE_LAPACK_BLAS ON)
-endif()
+# Check for BLAS/LAPACK
+find_package(BLAS REQUIRED)
+message(STATUS "BLAS_COMPILER_FLAGS: ${BLAS_COMPILER_FLAGS}")
+add_definitions("-DEIGEN_USE_BLAS") # is adding  ${BLAS_COMPILER_FLAGS} necessary?
+list(APPEND EXTERNAL_LIBS "${BLAS_LIBRARIES}")
+
+# Check for CHOLMOD
 find_package(SuiteSparse REQUIRED)
 include_directories(${SUITESPARSE_INCLUDE_DIRS})
 
@@ -44,11 +44,15 @@ include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/boost)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/clixo)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/HDBSCAN)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/nmslib)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/hnsw)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/leiden)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/leiden/igraph)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/s_gd2)
 include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/uwot)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/gcem)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/StatsLib)
+include_directories(${ACTIONet_SOURCE_DIR}/include/ACTIONet/pcg)
 
 ############ Compile
 add_subdirectory(src)

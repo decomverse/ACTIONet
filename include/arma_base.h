@@ -8,7 +8,6 @@
 //#define ARMA_BLAS_LONG_LONG
 //#define ARMA_USE_FORTRAN_HIDDEN_ARGS
 
-
 #define ARMA_DONT_USE_WRAPPER
 #undef ARMA_BLAS_CAPITALS
 #define ARMA_BLAS_UNDERSCORE
@@ -17,6 +16,5 @@
 
 using namespace arma;
 using namespace std;
-
 
 #endif
