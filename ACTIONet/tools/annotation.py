@@ -4,7 +4,7 @@ from typing_extensions import Literal
 import numpy as np
 from anndata import AnnData
 
-from . import _imputation as imputation
+from . import imputation as imputation
 from .. import misc_utils as ut
 
 
