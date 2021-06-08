@@ -3,7 +3,7 @@ import numpy as np
 from scipy import sparse
 import pandas as pd
 from anndata import AnnData
-from ._color import adjust_lightness, hex_to_rgb, rgb_to_hex
+from .color import adjust_lightness, hex_to_rgb, rgb_to_hex
 from ._palettes import palette_default
 from .. import misc_utils as ut
 
