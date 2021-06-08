@@ -2,7 +2,6 @@ ACTIONet
 ========
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 10
 
    ACTIONet
-   setup
