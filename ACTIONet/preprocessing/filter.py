@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 import scanpy as sc
 from anndata import AnnData
-from .. import _misc_utils as ut
+from .. import misc_utils as ut
 
 
 def filter_adata(

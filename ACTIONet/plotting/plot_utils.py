@@ -5,7 +5,7 @@ import pandas as pd
 from anndata import AnnData
 from ._color import adjust_lightness, hex_to_rgb, rgb_to_hex
 from ._palettes import palette_default
-from .. import _misc_utils as ut
+from .. import misc_utils as ut
 
 def get_plot_coors(
     X: Union[AnnData, np.ndarray, sparse.spmatrix],
@@ -19,7 +19,7 @@ def get_plot_coors(
     else:
         if not isinstance(X, (np.ndarray, sparse.spmatrix)):
             raise ValueError(
-                "X must be AnnData or array"
+                "X must be AnnData, numpy.ndarray, or sparse.spmatrix"
             )
 
     coors = np.asarray(coors, dtype=np.float64)
