@@ -3,8 +3,8 @@ import numpy as np
 from scipy import sparse
 import pandas as pd
 from anndata import AnnData
-from ._color import adjust_lightness, hex_to_rgb, rgb_to_hex
-from ._palettes import palette_default
+from .color import adjust_lightness, hex_to_rgb, rgb_to_hex
+from .palettes import palette_default
 from .. import misc_utils as ut
 
 def get_plot_coors(
@@ -67,31 +67,31 @@ def get_plot_colors(
                 plot_colors = [rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])]
                 plot_colors = pd.Series(plot_colors, dtype=str)
             else:
-                something error
+                raise Exception("invalid color attribute")
 
         elif isinstance(color_attr, (list, pd.Series)):
             if len(color_attr) == n_dim:
                 # Test this shit
                 plot_colors = pd.Series(color_attr, dtype=str)
             else:
-                some error
+                raise Exception("invalid color attribute")
 
         elif isinstance(color_attr, str):
             if len(color_attr) == n_dim:
                 # Test this shit
                 plot_colors = ut._get_attr_or_split_idx(X, attr=color_attr, return_vec=True)
             else:
-                some error
+                raise Exception("invalid color attribute")
 
         else:
             # err = sprintf("Invalid 'color_attr'.\n")
             # stop(err)
-            something error
+            raise Exception("Invalid color attr") 
 
     elif plot_labels is not None:
 
         if len(color_attr) != n_dim:
-            some error
+            raise Exception("len(color attribute) != ndim")
 
         plot_colors = pd.Series(color_attr, dtype=str)
         plot_colors.fillna("NA")
@@ -101,7 +101,7 @@ def get_plot_colors(
         # plot_labels[ is.na(plot_labels)] = "NA"
         label_names = sort(unique(plot_labels))
         num_unique = length(label_names)
-
+        '''
         if (num_unique == 1) {
             plot_colors =.default_colors(n_dim)
         } else {
@@ -131,7 +131,7 @@ def get_plot_colors(
         plot_colors = plot_palette[match(plot_labels, names(plot_palette))]
 
         }
-
+        '''
     else:
-
+        raise Exception("not implemented")
     return plot_colors
