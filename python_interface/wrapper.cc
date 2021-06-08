@@ -432,10 +432,11 @@ py::dict unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
 arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
                                      double density = 1.0, int thread_no = 0,
                                      double M = 16, double ef_construction = 200,
-                                     double ef = 10, bool mutual_edges_only = true) {
-
-  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
-
+                                     double ef = 10, bool mutual_edges_only = true,
+				     string distance_metric="jsd",
+				     string nn_approach="k*nn",
+				     int k=10) {
+  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked,density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);
   return G;
 }
 
@@ -1007,6 +1008,7 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def("build_ACTIONet", &build_ACTIONet,
 	"Builds an interaction network from the multi-level archetypal decompositions",
 	py::arg("H_stacked"),
+	py::arg("k") = 10,
 	py::arg("density") = 1.0,
 	py::arg("thread_no") = 0,
 	py::arg("M") = 16,
