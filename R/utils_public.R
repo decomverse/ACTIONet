@@ -36,6 +36,13 @@ fastRowVars <- function(mat) {
     return(V)
 }
 
+#' @export
+fastBindSparse <- function(A, B, d = 1){
+  d = d-1
+  sp_mat = bind_sparse_mats(A, B, d)
+  return(sp_mat)
+}
+
 orthoProject <- function(A, S) {
     A = scale(A)
     S = scale(S)

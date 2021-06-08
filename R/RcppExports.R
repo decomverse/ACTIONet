@@ -678,12 +678,12 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
-build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edges_only = TRUE) {
-    .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only)
+build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, distance_metric = "jsd", nn_approach = "k*nn", k = 10L) {
+    .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only, distance_metric, nn_approach, k)
 }
 
-build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRUE) {
-    .Call(`_ACTIONet_build_knn`, H_stacked, k, thread_no, mutual_edges_only)
+build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRUE, distance_metric = "jsd") {
+    .Call(`_ACTIONet_build_knn`, H_stacked, k, thread_no, mutual_edges_only, distance_metric)
 }
 
 #'
@@ -726,20 +726,36 @@ decode_ids <- function(encoded_ids, pass) {
     .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
 }
 
-compute_pseudo_bulk <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk`, S, sample_assignments)
+compute_pseudo_bulk_per_cluster <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_full <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_full`, S, sample_assignments)
+compute_pseudo_bulk_per_cluster_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_full`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_ind <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_ind`, S, sample_assignments, individuals)
+compute_pseudo_bulk_per_cluster_and_ind <- function(S, sample_assignments, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind`, S, sample_assignments, individuals)
 }
 
-compute_pseudo_bulk_per_ind_full <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_ind_full`, S, sample_assignments, individuals)
+compute_pseudo_bulk_per_cluster_and_ind_full <- function(S, sample_assignments, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full`, S, sample_assignments, individuals)
+}
+
+compute_pseudo_bulk_per_archetype <- function(S, H) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype`, S, H)
+}
+
+compute_pseudo_bulk_per_archetype_full <- function(S, H) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_full`, S, H)
+}
+
+compute_pseudo_bulk_per_archetype_and_ind <- function(S, H, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind`, S, H, individuals)
+}
+
+compute_pseudo_bulk_per_archetype_and_ind_full <- function(S, H, individuals) {
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full`, S, H, individuals)
 }
 
 renormalize_input_matrix <- function(S, sample_assignments) {
@@ -1058,29 +1074,5 @@ LSI <- function(X, size_factor = 100000) {
 
 compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
     .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
-}
-
-roll_var <- function(X) {
-    .Call(`_ACTIONet_roll_var`, X)
-}
-
-fast_row_sums <- function(A) {
-    .Call(`_ACTIONet_fast_row_sums`, A)
-}
-
-fast_column_sums <- function(A) {
-    .Call(`_ACTIONet_fast_column_sums`, A)
-}
-
-fast_row_max <- function(A) {
-    .Call(`_ACTIONet_fast_row_max`, A)
-}
-
-computeSparseRowVariances <- function(j, val, rm, n) {
-    .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
-}
-
-merge_sparse_mats <- function(A, B) {
-    .Call(`_ACTIONet_merge_sparse_mats`, A, B)
 }
 
