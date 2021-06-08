@@ -13,7 +13,7 @@ build
 dist
 lib
 *.back
-.DS_store
+**/.DS_Store
 README.md
 pybind11/
 .vscode/
