@@ -1258,77 +1258,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// roll_var
-vec roll_var(vec& X);
-RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< vec& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_var(X));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fast_row_sums
-Rcpp::NumericVector fast_row_sums(SEXP& A);
-RcppExport SEXP _ACTIONet_fast_row_sums(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_row_sums(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fast_column_sums
-Rcpp::NumericVector fast_column_sums(SEXP& A);
-RcppExport SEXP _ACTIONet_fast_column_sums(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_column_sums(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fast_row_max
-Rcpp::NumericVector fast_row_max(SEXP& A);
-RcppExport SEXP _ACTIONet_fast_row_max(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_row_max(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// computeSparseRowVariances
-Rcpp::NumericVector computeSparseRowVariances(IntegerVector j, NumericVector val, NumericVector rm, int n);
-RcppExport SEXP _ACTIONet_computeSparseRowVariances(SEXP jSEXP, SEXP valSEXP, SEXP rmSEXP, SEXP nSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type j(jSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type val(valSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type rm(rmSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeSparseRowVariances(j, val, rm, n));
-    return rcpp_result_gen;
-END_RCPP
-}
-// bind_sparse_mats
-sp_mat bind_sparse_mats(sp_mat& A, sp_mat& B, int dim);
-RcppExport SEXP _ACTIONet_bind_sparse_mats(SEXP ASEXP, SEXP BSEXP, SEXP dimSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< sp_mat& >::type B(BSEXP);
-    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
-    rcpp_result_gen = Rcpp::wrap(bind_sparse_mats(A, B, dim));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -1419,12 +1348,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized, 7},
     {"_ACTIONet_LSI", (DL_FUNC) &_ACTIONet_LSI, 2},
     {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 7},
-    {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
-    {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
-    {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
-    {"_ACTIONet_fast_row_max", (DL_FUNC) &_ACTIONet_fast_row_max, 1},
-    {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
-    {"_ACTIONet_bind_sparse_mats", (DL_FUNC) &_ACTIONet_bind_sparse_mats, 3},
     {NULL, NULL, 0}
 };
 
