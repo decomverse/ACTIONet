@@ -286,8 +286,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // build_ACTIONet
-sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, bool mutual_edges_only);
-RcppExport SEXP _ACTIONet_build_ACTIONet(SEXP H_stackedSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP) {
+sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, bool mutual_edges_only, string distance_metric, string nn_approach, int k);
+RcppExport SEXP _ACTIONet_build_ACTIONet(SEXP H_stackedSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP distance_metricSEXP, SEXP nn_approachSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -295,13 +295,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type density(densitySEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< bool >::type mutual_edges_only(mutual_edges_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(build_ACTIONet(H_stacked, density, thread_no, mutual_edges_only));
+    Rcpp::traits::input_parameter< string >::type distance_metric(distance_metricSEXP);
+    Rcpp::traits::input_parameter< string >::type nn_approach(nn_approachSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_ACTIONet(H_stacked, density, thread_no, mutual_edges_only, distance_metric, nn_approach, k));
     return rcpp_result_gen;
 END_RCPP
 }
 // build_knn
-sp_mat build_knn(mat H_stacked, double k, int thread_no, bool mutual_edges_only);
-RcppExport SEXP _ACTIONet_build_knn(SEXP H_stackedSEXP, SEXP kSEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP) {
+sp_mat build_knn(mat H_stacked, double k, int thread_no, bool mutual_edges_only, string distance_metric);
+RcppExport SEXP _ACTIONet_build_knn(SEXP H_stackedSEXP, SEXP kSEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP distance_metricSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -309,7 +312,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< bool >::type mutual_edges_only(mutual_edges_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(build_knn(H_stacked, k, thread_no, mutual_edges_only));
+    Rcpp::traits::input_parameter< string >::type distance_metric(distance_metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_knn(H_stacked, k, thread_no, mutual_edges_only, distance_metric));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -354,53 +358,103 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk
-mat compute_pseudo_bulk(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+// compute_pseudo_bulk_per_cluster
+mat compute_pseudo_bulk_per_cluster(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk(S, sample_assignments));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk_full
-mat compute_pseudo_bulk_full(mat& S, arma::Col<unsigned long long> sample_assignments);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+// compute_pseudo_bulk_per_cluster_full
+mat compute_pseudo_bulk_per_cluster_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_full(S, sample_assignments));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_full(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk_per_ind
-field<mat> compute_pseudo_bulk_per_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+// compute_pseudo_bulk_per_cluster_and_ind
+field<mat> compute_pseudo_bulk_per_cluster_and_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind(S, sample_assignments, individuals));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pseudo_bulk_per_ind_full
-field<mat> compute_pseudo_bulk_per_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_ind_full(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+// compute_pseudo_bulk_per_cluster_and_ind_full
+field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_ind_full(S, sample_assignments, individuals));
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_and_ind_full(S, sample_assignments, individuals));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype
+mat compute_pseudo_bulk_per_archetype(sp_mat& S, mat& H);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype(SEXP SSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype(S, H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype_full
+mat compute_pseudo_bulk_per_archetype_full(mat& S, mat& H);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_full(SEXP SSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype_full(S, H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype_and_ind
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(sp_mat& S, mat& H, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_and_ind(SEXP SSEXP, SEXP HSEXP, SEXP individualsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype_and_ind(S, H, individuals));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_pseudo_bulk_per_archetype_and_ind_full
+field<mat> compute_pseudo_bulk_per_archetype_and_ind_full(mat& S, mat& H, arma::Col<unsigned long long> individuals);
+RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full(SEXP SSEXP, SEXP HSEXP, SEXP individualsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_archetype_and_ind_full(S, H, individuals));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1204,76 +1258,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// roll_var
-vec roll_var(vec& X);
-RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< vec& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_var(X));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fast_row_sums
-Rcpp::NumericVector fast_row_sums(SEXP& A);
-RcppExport SEXP _ACTIONet_fast_row_sums(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_row_sums(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fast_column_sums
-Rcpp::NumericVector fast_column_sums(SEXP& A);
-RcppExport SEXP _ACTIONet_fast_column_sums(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_column_sums(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fast_row_max
-Rcpp::NumericVector fast_row_max(SEXP& A);
-RcppExport SEXP _ACTIONet_fast_row_max(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_row_max(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// computeSparseRowVariances
-Rcpp::NumericVector computeSparseRowVariances(IntegerVector j, NumericVector val, NumericVector rm, int n);
-RcppExport SEXP _ACTIONet_computeSparseRowVariances(SEXP jSEXP, SEXP valSEXP, SEXP rmSEXP, SEXP nSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type j(jSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type val(valSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type rm(rmSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeSparseRowVariances(j, val, rm, n));
-    return rcpp_result_gen;
-END_RCPP
-}
-// merge_sparse_mats
-sp_mat merge_sparse_mats(sp_mat& A, sp_mat& B);
-RcppExport SEXP _ACTIONet_merge_sparse_mats(SEXP ASEXP, SEXP BSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< sp_mat& >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(merge_sparse_mats(A, B));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_set_seed", (DL_FUNC) &_ACTIONet_set_seed, 1},
@@ -1295,15 +1279,19 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 5},
-    {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 4},
-    {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 4},
+    {"_ACTIONet_build_ACTIONet", (DL_FUNC) &_ACTIONet_build_ACTIONet, 7},
+    {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 5},
     {"_ACTIONet_layout_ACTIONet", (DL_FUNC) &_ACTIONet_layout_ACTIONet, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
-    {"_ACTIONet_compute_pseudo_bulk", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk, 2},
-    {"_ACTIONet_compute_pseudo_bulk_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_full, 2},
-    {"_ACTIONet_compute_pseudo_bulk_per_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind, 3},
-    {"_ACTIONet_compute_pseudo_bulk_per_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_ind_full, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_full, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_full, 2},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind, 3},
+    {"_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full, 3},
     {"_ACTIONet_renormalize_input_matrix", (DL_FUNC) &_ACTIONet_renormalize_input_matrix, 2},
     {"_ACTIONet_renormalize_input_matrix_full", (DL_FUNC) &_ACTIONet_renormalize_input_matrix_full, 2},
     {"_ACTIONet_compute_archetype_feature_specificity_bin", (DL_FUNC) &_ACTIONet_compute_archetype_feature_specificity_bin, 2},
@@ -1360,12 +1348,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized, 7},
     {"_ACTIONet_LSI", (DL_FUNC) &_ACTIONet_LSI, 2},
     {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 7},
-    {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
-    {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
-    {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
-    {"_ACTIONet_fast_row_max", (DL_FUNC) &_ACTIONet_fast_row_max, 1},
-    {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
-    {"_ACTIONet_merge_sparse_mats", (DL_FUNC) &_ACTIONet_merge_sparse_mats, 2},
     {NULL, NULL, 0}
 };
 
