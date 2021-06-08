@@ -1,0 +1,3 @@
+sudo apt  install ccache
+CC="ccache gcc"
+pipi install . OR python setup.py install --user
