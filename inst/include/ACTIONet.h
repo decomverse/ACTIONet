@@ -346,7 +346,4 @@ sp_mat LSI(sp_mat& X, double size_factor);
 
 }  // namespace ACTIONet
 
-
-
-
 #endif
