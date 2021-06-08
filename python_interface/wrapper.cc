@@ -1006,15 +1006,10 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
   // Network
   m.def("build_ACTIONet", &build_ACTIONet,
-	"Builds an interaction network from the multi-level archetypal decompositions",
-	py::arg("H_stacked"),
-	py::arg("k") = 10,
-	py::arg("density") = 1.0,
-	py::arg("thread_no") = 0,
-	py::arg("M") = 16,
-	py::arg("ef_construction") = 200,
-	py::arg("ef") = 10,
-	py::arg("mutual_edges_only") = true);
+        "Builds an interaction network from the multi-level archetypal decompositions",
+        py::arg("H_stacked"), py::arg("density") = 1.0,
+        py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true,
+        py::arg("distance_metric")="jsd",py::arg("nn_approach")="k*nn",py::arg("k"));
 
   
   m.def("layout_ACTIONet", &layout_ACTIONet,
