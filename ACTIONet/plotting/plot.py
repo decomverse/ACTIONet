@@ -10,8 +10,8 @@ from adjustText import adjust_text
 from anndata import AnnData
 from scipy import stats
 import pandas as pd
-from ._color import adjust_lightness, hex_to_rgb, rgb_to_hex
-from ._palettes import palette_default
+from .color import adjust_lightness, hex_to_rgb, rgb_to_hex
+from .palettes import palette_default
 from .. import misc_utils as ut
 
 pio.orca.config.use_xvfb = True
