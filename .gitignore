@@ -12,8 +12,11 @@ dist/
 ACTIONet.egg-info/
 build/
 data/
+!ACTIONet/data
 .vscode
 __pycache__
 .ipynb_checkpoints
-.DS_*
-._DS*
+.idea/
+.DS_Store
+.DS_store
+docker_insitro.txt

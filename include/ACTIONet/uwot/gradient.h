@@ -33,19 +33,19 @@ namespace uwot {
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
-inline auto fastPrecisePow(double a, double b) -> double {
+inline auto fastPrecisePow(float a, float b) -> float {
   // calculate approximation with fraction of the exponent
   int e = static_cast<int>(b);
   union {
-    double d;
+    float d;
     int x[2];
   } u = {a};
   u.x[1] = static_cast<int>((b - e) * (u.x[1] - 1072632447) + 1072632447);
   u.x[0] = 0;
 
   // exponentiation by squaring with the exponent's integer part
-  // double r = u.d makes everything much slower, not sure why
-  double r = 1.0;
+  // float r = u.d makes everything much slower, not sure why
+  float r = 1.0;
   while (e) {
     if (e & 1) {
       r *= a;
@@ -54,31 +54,32 @@ inline auto fastPrecisePow(double a, double b) -> double {
     e >>= 1;
   }
 
-  return static_cast<double>(r * u.d);
+  return static_cast<float>(r * u.d);
 }
 
 // Class templated on the powfun function as suggested by Aaron Lun
-template <double (*powfun)(double, double)> class base_umap_gradient {
-public:
-  base_umap_gradient(double a, double b, double gamma)
+template <float (*powfun)(float, float)>
+class base_umap_gradient {
+ public:
+  base_umap_gradient(float a, float b, float gamma)
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
-  auto grad_attr(double dist_squared) const -> double {
-    double pd2b = powfun(dist_squared, b);
+  auto grad_attr(float dist_squared) const -> float {
+    float pd2b = powfun(dist_squared, b);
     return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
   }
-  auto grad_rep(double dist_squared) const -> double {
+  auto grad_rep(float dist_squared) const -> float {
     return gamma_b_2 /
            ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
   }
 
-  static const constexpr double clamp_hi = 4.0;
-  static const constexpr double clamp_lo = -4.0;
+  static const constexpr float clamp_hi = 4.0;
+  static const constexpr float clamp_lo = -4.0;
 
-private:
-  double a;
-  double b;
-  double a_b_m2;
-  double gamma_b_2;
+ private:
+  float a;
+  float b;
+  float a_b_m2;
+  float gamma_b_2;
 };
 
 // UMAP using standard power function
@@ -93,34 +94,34 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 // default. Also gamma is absent from this, because I believe it to be
 // un-necessary in the UMAP cost function.
 class tumap_gradient {
-public:
+ public:
   tumap_gradient() = default;
-  auto grad_attr(double dist_squared) const -> double {
+  auto grad_attr(float dist_squared) const -> float {
     return -2.0 / (dist_squared + 1.0);
   }
-  auto grad_rep(double dist_squared) const -> double {
+  auto grad_rep(float dist_squared) const -> float {
     return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
   }
-  static const constexpr double clamp_hi = 4.0;
-  static const constexpr double clamp_lo = -4.0;
+  static const constexpr float clamp_hi = 4.0;
+  static const constexpr float clamp_lo = -4.0;
 };
 
 class largevis_gradient {
-public:
-  largevis_gradient(double gamma) : gamma_2(gamma * 2.0) {}
-  auto grad_attr(double dist_squared) const -> double {
+ public:
+  largevis_gradient(float gamma) : gamma_2(gamma * 2.0) {}
+  auto grad_attr(float dist_squared) const -> float {
     return -2.0 / (dist_squared + 1.0);
   }
-  auto grad_rep(double dist_squared) const -> double {
+  auto grad_rep(float dist_squared) const -> float {
     return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
   }
 
-  static const constexpr double clamp_hi = 5.0;
-  static const constexpr double clamp_lo = -5.0;
+  static const constexpr float clamp_hi = 5.0;
+  static const constexpr float clamp_lo = -5.0;
 
-private:
-  double gamma_2;
+ private:
+  float gamma_2;
 };
-} // namespace uwot
+}  // namespace uwot
 
-#endif // UWOT_GRADIENT_H
+#endif  // UWOT_GRADIENT_H
