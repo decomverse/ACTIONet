@@ -10,37 +10,55 @@ ACTIONet.preprocessing package
 Submodules
 ----------
 
-ACTIONet.preprocessing.\_action module
---------------------------------------
+ACTIONet.preprocessing.action module
+------------------------------------
 
-.. automodule:: ACTIONet.preprocessing._action
+.. automodule:: ACTIONet.preprocessing.action
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.preprocessing.\_archetypes module
-------------------------------------------
+ACTIONet.preprocessing.archetypes module
+----------------------------------------
 
-.. automodule:: ACTIONet.preprocessing._archetypes
+.. automodule:: ACTIONet.preprocessing.archetypes
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.preprocessing.\_reduction module
------------------------------------------
+ACTIONet.preprocessing.filter module
+------------------------------------
 
-.. automodule:: ACTIONet.preprocessing._reduction
+.. automodule:: ACTIONet.preprocessing.filter
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.preprocessing.\_specificity module
+ACTIONet.preprocessing.normalization module
 -------------------------------------------
 
-.. automodule:: ACTIONet.preprocessing._specificity
+.. automodule:: ACTIONet.preprocessing.normalization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+ACTIONet.preprocessing.reduction module
+---------------------------------------
+
+.. automodule:: ACTIONet.preprocessing.reduction
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+ACTIONet.preprocessing.specificity module
+-----------------------------------------
+
+.. automodule:: ACTIONet.preprocessing.specificity
    :members:
    :undoc-members:
    :show-inheritance:

@@ -10,55 +10,73 @@ ACTIONet.tools package
 Submodules
 ----------
 
-ACTIONet.tools.\_aa module
---------------------------
+ACTIONet.tools.aa module
+------------------------
 
-.. automodule:: ACTIONet.tools._aa
+.. automodule:: ACTIONet.tools.aa
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.tools.\_annotation module
+ACTIONet.tools.annotation module
+--------------------------------
+
+.. automodule:: ACTIONet.tools.annotation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+ACTIONet.tools.enrichment module
+--------------------------------
+
+.. automodule:: ACTIONet.tools.enrichment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+ACTIONet.tools.imputation module
+--------------------------------
+
+.. automodule:: ACTIONet.tools.imputation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+ACTIONet.tools.networktools module
 ----------------------------------
 
-.. automodule:: ACTIONet.tools._annotation
+.. automodule:: ACTIONet.tools.networktools
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.tools.\_imputation module
-----------------------------------
+ACTIONet.tools.regression module
+--------------------------------
 
-.. automodule:: ACTIONet.tools._imputation
+.. automodule:: ACTIONet.tools.regression
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.tools.\_regression module
-----------------------------------
+ACTIONet.tools.spa module
+-------------------------
 
-.. automodule:: ACTIONet.tools._regression
+.. automodule:: ACTIONet.tools.spa
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.tools.\_spa module
----------------------------
+ACTIONet.tools.svd module
+-------------------------
 
-.. automodule:: ACTIONet.tools._spa
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
-ACTIONet.tools.\_svd module
----------------------------
-
-.. automodule:: ACTIONet.tools._svd
+.. automodule:: ACTIONet.tools.svd
    :members:
    :undoc-members:
    :show-inheritance:
