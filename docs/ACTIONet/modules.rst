@@ -5,4 +5,3 @@ ACTIONet
    :maxdepth: 4
 
    ACTIONet
-   setup
