@@ -556,18 +556,18 @@ arma::Mat<npdouble> compute_pseudo_bulk_per_cluster(arma::SpMat<npdouble> &S,
 //
 // @return A list of pseudobulk profile, where each entry is matrix
 // corresponding to one cell type/state
-field<arma::Mat<npdouble>> compute_pseudo_bulk_per_ind_full(
+field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind_full(
     arma::Mat<npdouble> &S, uvec sample_assignments, uvec individuals) {
   field<arma::Mat<npdouble>> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
 
   return pbs_list;
 }
-field<arma::Mat<npdouble>> compute_pseudo_bulk_per_ind(arma::SpMat<npdouble> &S,
+field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind(arma::SpMat<npdouble> &S,
                                                        uvec sample_assignments,
                                                        uvec individuals) {
   field<arma::Mat<npdouble>> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
 
   return pbs_list;
 }
@@ -1038,11 +1038,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
     "Computes pseudobulk profiles",
     py::arg("S"), py::arg("sample_assignments"));
 
-  m.def("compute_pseudo_bulk_per_ind", &compute_pseudo_bulk_per_ind,
+  m.def("compute_pseudo_bulk_per_cluster_and_ind", &compute_pseudo_bulk_per_cluster_and_ind,
     "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
     py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 
-  m.def("compute_pseudo_bulk_per_ind_full", &compute_pseudo_bulk_per_ind_full,
+  m.def("compute_pseudo_bulk_per_cluster_ind_full", &compute_pseudo_bulk_per_cluster_and_ind_full,
     "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
     py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 
