@@ -10,28 +10,28 @@ ACTIONet.network package
 Submodules
 ----------
 
-ACTIONet.network.\_build module
--------------------------------
+ACTIONet.network.build module
+-----------------------------
 
-.. automodule:: ACTIONet.network._build
+.. automodule:: ACTIONet.network.build
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.network.\_layout module
---------------------------------
+ACTIONet.network.layout module
+------------------------------
 
-.. automodule:: ACTIONet.network._layout
+.. automodule:: ACTIONet.network.layout
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-ACTIONet.network.\_utils module
--------------------------------
+ACTIONet.network.utils module
+-----------------------------
 
-.. automodule:: ACTIONet.network._utils
+.. automodule:: ACTIONet.network.utils
    :members:
    :undoc-members:
    :show-inheritance:
