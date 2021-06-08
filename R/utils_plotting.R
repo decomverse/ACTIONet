@@ -28,7 +28,7 @@ CPal_default = c(
   X,
   coordinate_attr = NULL,
   scale_coors = TRUE,
-  plot_dims = 2
+  coor_dims = 2
 ){
 
   if (is(X, "ACTIONetExperiment")) {
@@ -51,8 +51,8 @@ CPal_default = c(
     coors = scale(coors)
   }
 
-  coors = data.frame(coors[, 1:plot_dims])
-  colnames(coors) = c("x", "y", "z")[1:plot_dims]
+  coors = data.frame(coors[, 1:coor_dims])
+  colnames(coors) = c("x", "y", "z")[1:coor_dims]
 
   return(coors)
 }

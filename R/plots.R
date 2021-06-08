@@ -526,7 +526,7 @@ plot.ACTIONet.interactive <- function(
     if (NCOL(plot_coors) < 3 & "ACTIONet3D" %in% names(colMaps(ace))){
       msg = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
       message(msg)
-      plot_coors = .get_plot_coors(data, "ACTIONet3D", plot_dims = 3)
+      plot_coors = .get_plot_coors(data, "ACTIONet3D", coor_dims = 3)
     }
     else{
       err = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\n")
