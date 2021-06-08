@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 from scipy import sparse
 from anndata import AnnData
-from .. import _misc_utils as ut
+from .. import misc_utils as ut
 
 
 def normalize_adata(
