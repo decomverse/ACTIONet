@@ -6,7 +6,6 @@ from scipy.sparse import issparse, spmatrix
 
 import _ACTIONet as _an
 
-
 def _irlb(X, dim, n_iters=1000, random_state=0):
     if issparse(X):
         return _an.IRLB_SVD(X, dim, n_iters, random_state)

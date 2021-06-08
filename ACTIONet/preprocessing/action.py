@@ -16,7 +16,7 @@ def ACTION(
     min_delta: Optional[float] = 1e-300,
 ) -> dict:
     """\
-    Run ACTION decomposition [Mohammadi2018]_.
+    Run ACTION decomposition [Mohammadi, 2018]
 
     Computes reduced ACTION decomposition.
 

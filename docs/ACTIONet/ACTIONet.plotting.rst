@@ -12,6 +12,14 @@ ACTIONet.plotting.color module
    :undoc-members:
    :show-inheritance:
 
+ACTIONet.plotting.palettes module
+---------------------------------
+
+.. automodule:: ACTIONet.plotting.palettes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ACTIONet.plotting.plot module
 -----------------------------
 
