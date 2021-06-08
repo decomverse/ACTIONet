@@ -1,3 +1,3 @@
 from . import _palettes
-from ._plot import *
-from ._plot_utils import *
+from .plot import *
+from .plot_utils import *
