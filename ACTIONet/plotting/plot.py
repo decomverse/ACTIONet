@@ -1,5 +1,5 @@
 from typing import Optional
-import plotly as pl 
+import plotly as pl
 import plotly.io as pio
 import plotly.graph_objs as go
 from plotly.graph_objs.scatter import Line
@@ -12,10 +12,10 @@ from scipy import stats
 import pandas as pd
 from ._color import adjust_lightness, hex_to_rgb, rgb_to_hex
 from ._palettes import palette_default
-from .. import _misc_utils as ut
+from .. import misc_utils as ut
 
 pio.orca.config.use_xvfb = True
-pio.orca.config.save() 
+pio.orca.config.save()
 
 
 def validate_plot_params(adata,coordinate_key,label_key,transparency_key):
@@ -28,9 +28,9 @@ def validate_plot_params(adata,coordinate_key,label_key,transparency_key):
         raise ValueError(f'Did not find adata.obs[\'{label_key}\'].')
     if transparency_key is not None and transparency_key not in adata.obs.columns:
         raise ValueError(f'Did not find adata.obs[\'{transparency_key}\'].')
-    if transparency_key is not None and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False: 
+    if transparency_key is not None and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False:
         raise ValueError(f'transparency_key must refer to a numeric values, which is not the case for[\'{transparency_key}\'].')
-    
+
 
 def layout_labels(
     X: np.ndarray,
@@ -70,8 +70,8 @@ def plot_ACTIONet(
     #validate supplied plot parameters
     validate_plot_params(adata,coordinate_key,label_key,transparency_key)
     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
-    
-    #get mapping of points to colors 
+
+    #get mapping of points to colors
     if label_key is None:
         v_col = [(r, g, b) for r, g, b in adata.obsm['denovo_color']]
     else:
@@ -89,20 +89,20 @@ def plot_ACTIONet(
                 palette=px.colors.qualitative.__dict__[palette]
             else:
                 palette=px.colors.sequential.__dict__[palette]
-        #make sure palette colors are rgb values in the 'rgb(r,g,b)' string format 
+        #make sure palette colors are rgb values in the 'rgb(r,g,b)' string format
         assert len(palette)>0
-        if type(palette[0])==str: 
+        if type(palette[0])==str:
             if palette[0].startswith('#'):
                 palette=[hex_to_rgb(i) for i in palette]
         else:
             palette=[pl.colors.label_rgb(i) for i in palette]
-        label_colors = {label: palette[i % len(palette)] for i, label in enumerate(unique_labels)}        
+        label_colors = {label: palette[i % len(palette)] for i, label in enumerate(unique_labels)}
         v_col = [label_colors[label] for label in labels]
     v_col_for_border=v_col
     # get darkened colors for plot marker outline
     v_col_darkened = [pl.colors.label_rgb(adjust_lightness(color, 1 - border_contrast_factor)) for color in v_col_for_border]
-    
-    #calculate transparency 
+
+    #calculate transparency
     if transparency_key is not None:
         transparency = adata.obs[transparency_key].values
         z = (transparency - np.mean(transparency)) / np.std(transparency, ddof=1)
@@ -111,8 +111,8 @@ def plot_ACTIONet(
         betas **= transparency_factor
     else:
         betas=[1]*len(v_col_darkened)
-        
-    
+
+
     x = coordinates[:,0]
     y = coordinates[:,1]
     x_min = np.min(x)
@@ -161,10 +161,10 @@ def plot_ACTIONet(
                                    size=18,
                                    color=cur_text_color),row=1,col=1)
     #save to file if requested by user
-    fig.update_layout(showlegend=False) 
+    fig.update_layout(showlegend=False)
     if not(output_file is None):
-        fig.write_image(output_file) 
-    #show the figure 
+        fig.write_image(output_file)
+    #show the figure
     # fig.show()
 
     return fig
@@ -184,7 +184,7 @@ def plot_ACTIONet_interactive(adata: AnnData,
                               coordinate_slot:Optional[str]="ACTIONet2D",
                               threeD:bool=False):
     """
-    Creates an interactive ACTIONet plot with plotly 
+    Creates an interactive ACTIONet plot with plotly
     Parameters
     ---------
     ace:
@@ -246,24 +246,23 @@ def plot_ACTIONet_gradient(adata: AnnData,
     ----------
     adata:
         ACTIONet output object
-    x: 
+    x:
         score vector
-    transparancey_key: 
-        additional continuous attribute to project onto the transparency of nodes 
-    transparency_z_threshold: 
-        controls the effect of transparency mapping 
+    transparancey_key:
+        additional continuous attribute to project onto the transparency of nodes
+    transparency_z_threshold:
+        controls the effect of transparency mapping
     transparancy_factor:
         controls the effect of transparancy mapping
-    node_size: 
-        Size of nodes in the ACTIONet plot 
-    palette: 
+    node_size:
+        Size of nodes in the ACTIONet plot
+    palette:
         Color palette (named vector or a name for a given known palette)
-    coordinate_key: 
+    coordinate_key:
        Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
-    alpha_val: 
+    alpha_val:
         alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
-    output_file: 
+    output_file:
         filename to save plot (optional)
     """
     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
-
