@@ -6,4 +6,4 @@ from . import plotting as pl
 from . import preprocessing as pp
 from . import tools as tl
 from .main import *
-from . import _misc_utils as ut
+from . import misc_utils as ut
