@@ -1,5 +1,4 @@
 # Minimal makefile for Sphinx documentation
-#
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
@@ -22,4 +21,5 @@ help:
 .PHONY api:
 api:
 	rm -rf docs/ACTIONet
-	sphinx-apidoc -o docs/ACTIONet ../ACTIONet
+	sphinx-apidoc --private --force --follow-links --module-first -o docs/ACTIONet ../ACTIONet
+
