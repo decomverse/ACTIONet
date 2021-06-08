@@ -431,11 +431,13 @@ py::dict unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
 // @return G Adjacency matrix of the ACTIONet graph.
 arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
                                      double density = 1.0, int thread_no = 0,
-                                     double M = 16, double ef_construction = 200,
-                                     double ef = 10, bool mutual_edges_only = true) {
-
-  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only);
-
+                                     bool mutual_edges_only = true,
+				     string distance_metric="jsd",
+				     string nn_approach="k*nn",
+				     int k=10) {
+  double M = 16, ef_construction = 200, ef = 50;
+						 
+  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked,density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);
   return G;
 }
 
@@ -555,18 +557,18 @@ arma::Mat<npdouble> compute_pseudo_bulk_per_cluster(arma::SpMat<npdouble> &S,
 //
 // @return A list of pseudobulk profile, where each entry is matrix
 // corresponding to one cell type/state
-field<arma::Mat<npdouble>> compute_pseudo_bulk_per_ind_full(
+field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind_full(
     arma::Mat<npdouble> &S, uvec sample_assignments, uvec individuals) {
   field<arma::Mat<npdouble>> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
 
   return pbs_list;
 }
-field<arma::Mat<npdouble>> compute_pseudo_bulk_per_ind(arma::SpMat<npdouble> &S,
+field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind(arma::SpMat<npdouble> &S,
                                                        uvec sample_assignments,
                                                        uvec individuals) {
   field<arma::Mat<npdouble>> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
 
   return pbs_list;
 }
@@ -1005,14 +1007,10 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
   // Network
   m.def("build_ACTIONet", &build_ACTIONet,
-	"Builds an interaction network from the multi-level archetypal decompositions",
-	py::arg("H_stacked"),
-	py::arg("density") = 1.0,
-	py::arg("thread_no") = 0,
-	py::arg("M") = 16,
-	py::arg("ef_construction") = 200,
-	py::arg("ef") = 10,
-	py::arg("mutual_edges_only") = true);
+        "Builds an interaction network from the multi-level archetypal decompositions",
+        py::arg("H_stacked"), py::arg("density") = 1.0,
+        py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true,
+        py::arg("distance_metric")="jsd",py::arg("nn_approach")="k*nn",py::arg("k"));
 
   
   m.def("layout_ACTIONet", &layout_ACTIONet,
@@ -1036,11 +1034,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
     "Computes pseudobulk profiles",
     py::arg("S"), py::arg("sample_assignments"));
 
-  m.def("compute_pseudo_bulk_per_ind", &compute_pseudo_bulk_per_ind,
+  m.def("compute_pseudo_bulk_per_cluster_and_ind", &compute_pseudo_bulk_per_cluster_and_ind,
     "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
     py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 
-  m.def("compute_pseudo_bulk_per_ind_full", &compute_pseudo_bulk_per_ind_full,
+  m.def("compute_pseudo_bulk_per_cluster_ind_full", &compute_pseudo_bulk_per_cluster_and_ind_full,
     "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
     py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 
