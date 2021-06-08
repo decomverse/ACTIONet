@@ -6,23 +6,23 @@ PKG_CXXFLAGS=`find ../inst/include -type d -print | sed s/^/-I/` -w -m64 -DINT_6
 
 UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
+    $(info Using Linux configurations)
     NPROC=${shell nproc}
-    $(info Using Linux configurations with $(NPROC) threads)	
-	ifneq ($(ONEAPI_ROOT),'')
-    	$(info Found OneAPI)
-		PKG_CPPFLAGS+=-I/usr/include/suitesparse
-		PKG_LIBS= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
-	else ifneq ($(MKLROOT),'')
-		$(info Found MKL)
-		PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/include/suitesparse
-		PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
-	else
-		PKG_CPPFLAGS+=-I/usr/include/suitesparse
-		PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
-	endif
+		ifdef $(ONEAPI_ROOT)
+			$(info Found OneAPI)
+			PKG_CPPFLAGS+=-I/usr/include/suitesparse
+			PKG_LIBS=-Wl,--start-group ${ONEAPI_ROOT}/lib/intel64 -Wl,--end-group -liomp5 -lpthread -lm -ldl
+		else ifdef $(MKLROOT)
+			$(info Found MKL)
+			PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/include/suitesparse
+			PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+		else
+        PKG_CPPFLAGS+=-I/usr/include/suitesparse
+        PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
+    endif
 else ifeq ($(UNAME),Darwin)
+    $(info Using Mac OS configurations)
     NPROC=$(shell sysctl -n hw.logicalcpu)
-    $(info Using Mac OS configurations with $(NPROC) threads)
     PKG_CPPFLAGS+=-I/usr/local/opt/suite-sparse/include -DACCELERATE
     PKG_LIBS=-L/usr/local/opt/suite-sparse/lib -framework accelerate
 # else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
@@ -40,4 +40,4 @@ else
     $(error Unsupported OS ${UNAME})
 endif
 PKG_LIBS+=-lcholmod
-MAKEFLAGS+="-j $(NPROC)"
+MAKEFLAGS+="-j ${NPROC}"
