@@ -195,8 +195,11 @@ sp_mat build_ACTIONet_KstarNN(mat H_stacked, double density = 1.0,
 
   stdout_printf("Building adaptive network (density = %.2f)\n", density);
 
-  H_stacked = clamp(H_stacked, 0, 1);
-
+  if(distance_metric == "jsd") {
+	H_stacked = clamp(H_stacked, 0, 1);
+	H_stacked = normalise(H_stacked, 1, 0);	
+  }
+  
   double kappa = 5.0;
   int sample_no = H_stacked.n_cols;
   int kNN = min(
@@ -345,7 +348,10 @@ sp_mat build_ACTIONet_KstarNN_v2(mat H_stacked, double density = 1.0,
                 density, mutual_edges_only ? "TRUE" : "FALSE");
   FLUSH;
 
-  H_stacked = clamp(H_stacked, 0, 1);
+  if(distance_metric == "jsd") {
+	H_stacked = clamp(H_stacked, 0, 1);
+	H_stacked = normalise(H_stacked, 1, 0);	
+  }
   
   double kappa = 5.0;
   int sample_no = H_stacked.n_cols;
@@ -456,9 +462,10 @@ sp_mat build_ACTIONet_KNN(mat H_stacked,int k, int thread_no = 0,
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
   }
 
-  H_stacked = clamp(H_stacked, 0, 1);
-  // H_stacked = normalise(H_stacked, 1, 0); // make the norm (sum) of each
-  // column 1
+  if(distance_metric == "jsd") {
+	H_stacked = clamp(H_stacked, 0, 1);
+	H_stacked = normalise(H_stacked, 1, 0);	
+  }
 
   double kappa = 5.0;
   int sample_no = H_stacked.n_cols;

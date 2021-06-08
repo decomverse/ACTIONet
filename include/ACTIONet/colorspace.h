@@ -1,11 +1,11 @@
-/** 
- * @file colorspace.h 
+/**
+ * @file colorspace.h
  * @author Pascal Getreuer 2005-2010 <getreuer@gmail.com>
  */
 #ifndef _COLORSPACE_H_
 #define _COLORSPACE_H_
 
-/** @brief Datatype to use for representing real numbers 
+/** @brief Datatype to use for representing real numbers
  * Set this typedef to either double or float depending on the application.
  */
 typedef double num;
@@ -16,15 +16,14 @@ typedef double num;
 #define WHITEPOINT_Z 1.088754
 
 /** @brief struct for representing a color transform */
-typedef struct
-    {
-    int NumStages;
-    void (*Fun[2])(num*, num*, num*, num, num, num);
+typedef struct {
+  int NumStages;
+  void (*Fun[2])(num*, num*, num*, num, num, num);
 } colortransform;
 
 int GetColorTransform(colortransform* Trans, const char* TransformString);
-void ApplyColorTransform(colortransform Trans,
-    num* D0, num* D1, num* D2, num S0, num S1, num S2);
+void ApplyColorTransform(colortransform Trans, num* D0, num* D1, num* D2,
+                         num S0, num S1, num S2);
 
 void Rgb2Yuv(num* Y, num* U, num* V, num R, num G, num B);
 void Yuv2Rgb(num* R, num* G, num* B, num Y, num U, num V);

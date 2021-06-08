@@ -1,32 +1,38 @@
-from typing import Literal, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
+from typing_extensions import Literal
 
 import numpy as np
 from scipy.sparse import issparse, spmatrix
 
 import _ACTIONet as _an
 
+
 def _irlb(X, dim, n_iters=1000, random_state=0):
     if issparse(X):
         return _an.IRLB_SVD(X, dim, n_iters, random_state)
     return _an.IRLB_SVD_full(X, dim, n_iters, random_state)
+
 
 def _feng(X, dim, n_iters=5, random_state=0):
     if issparse(X):
         return _an.FengSVD(X, dim, n_iters, random_state)
     return _an.FengSVD_full(X, dim, n_iters, random_state)
 
+
 def _halko(X, dim, n_iters=5, random_state=0):
     if issparse(X):
         return _an.HalkoSVD(X, dim, n_iters, random_state)
     return _an.HalkoSVD_full(X, dim, n_iters, random_state)
 
+
 def svd(
     X: Union[np.ndarray, spmatrix],
     dim: int,
-    solver: Literal['irlb', 'feng', 'halko'] = 'halko',
+    solver: Literal["irlb", "feng", "halko"] = "halko",
     n_iters: Optional[int] = None,
-    seed: int = 0
+    seed: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
     """
     Randomized singular value decomposition (SVD)
 
@@ -58,17 +64,18 @@ def svd(
     V:
         Matrix of right singular vectors
     """
-    if solver == 'irlb':
+
+    if solver == "irlb":
         result = _irlb(X, dim, n_iters or 1000, seed)
-    elif solver == 'feng':
+    elif solver == "feng":
         result = _feng(X, dim, n_iters or 5, seed)
-    elif solver == 'halko':
+    elif solver == "halko":
         result = _halko(X, dim, n_iters or 5, seed)
     else:
-        raise Exception(f'Unknown SVD solver: {solver}')
+        raise Exception(f"Unknown SVD solver: {solver}")
 
     return (
-        result['U'],
-        result['sigma'],
-        result['V'],
+        result["u"],
+        result["d"],
+        result["v"],
     )
