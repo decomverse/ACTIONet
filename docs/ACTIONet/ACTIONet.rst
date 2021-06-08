@@ -22,6 +22,10 @@ ACTIONet.config module
    :members:
    :undoc-members:
    :show-inheritance:
+<<<<<<< HEAD
+=======
+   :private-members:
+>>>>>>> python-release
 
 ACTIONet.main module
 --------------------
@@ -30,6 +34,10 @@ ACTIONet.main module
    :members:
    :undoc-members:
    :show-inheritance:
+<<<<<<< HEAD
+=======
+   :private-members:
+>>>>>>> python-release
 
 ACTIONet.misc\_utils module
 ---------------------------
@@ -38,6 +46,7 @@ ACTIONet.misc\_utils module
    :members:
    :undoc-members:
    :show-inheritance:
+<<<<<<< HEAD
 
 Module contents
 ---------------
@@ -46,3 +55,6 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
+=======
+   :private-members:
+>>>>>>> python-release
