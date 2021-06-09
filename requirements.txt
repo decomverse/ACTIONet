@@ -9,4 +9,3 @@ scipy>=1.5.2
 typing_extensions>=3.7.4
 plotly
 orca
-plotnine

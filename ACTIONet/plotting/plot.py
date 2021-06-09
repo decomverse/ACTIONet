@@ -10,6 +10,7 @@ from adjustText import adjust_text
 from anndata import AnnData
 from scipy import stats
 import pandas as pd
+import seaborn as sns
 from .color import adjust_lightness, hex_to_rgb, rgb_to_hex
 from .palettes import palette_default
 from .. import misc_utils as ut
@@ -240,6 +241,7 @@ def plot_ACTIONet_gradient(adata: AnnData,
                            title:Optional[str]="",
                            nonparametric:Optional[bool]=False,
                            output_file: Optional[str]=None):
+
     """
     Projects a given continuous score on the ACTIONet plot
     Parameters
@@ -266,3 +268,19 @@ def plot_ACTIONet_gradient(adata: AnnData,
         filename to save plot (optional)
     """
     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
+
+
+# def plot_ACTIONet_test(
+#     data: Union[AnnData, pd.DataFrame, np.ndarray],
+#     label_attr: Union[str, list, pd.Series, None] = None,
+#     color_attr: Union[list, pd.Series, dict, None],
+#
+#
+#     coordinate_attr: Optional[str] = "ACTIONet2D"
+#     color_key: Optional[str] = "denovo_color",
+#     palette: Union[str, list, pd.Series, np.ndarray] = palette_default
+# ) -> :
+#
+#     something
+#
+#     return something else
