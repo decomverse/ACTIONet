@@ -26,6 +26,7 @@ release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------
+install_requires=['anndata','nbsphinx','nbsphinx_link']
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -55,4 +56,3 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-install_requires=['anndata']
