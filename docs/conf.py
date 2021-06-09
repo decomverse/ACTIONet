@@ -26,12 +26,15 @@ release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------
-install_requires=['anndata','nbsphinx','nbsphinx_link']
+install_requires=['anndata']
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.napoleon","sphinx.ext.autodoc", "recommonmark","sphinx.ext.mathjax"]
+extensions = ["myst_parser",
+              "sphinx.ext.napoleon",
+              "sphinx.ext.autodoc",
+              "sphinx.ext.mathjax"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
