@@ -12,14 +12,6 @@ ACTIONet.network.build module
    :undoc-members:
    :show-inheritance:
 
-ACTIONet.network.build module
------------------------------
-
-.. automodule:: ACTIONet.network.build
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ACTIONet.network.layout module
 ------------------------------
 
