@@ -10,3 +10,5 @@ typing_extensions>=3.7.4
 plotly
 orca
 plotnine
+sphinx
+nbsphinx
