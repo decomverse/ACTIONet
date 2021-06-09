@@ -23,7 +23,8 @@ def build_network(
         
         
 ) -> Union[AnnData, sparse.spmatrix, None]:
-    """\
+    """
+
     Build ACTIIONet
 
     Computes and returns the ACTIONet graph
@@ -59,6 +60,7 @@ def build_network(
 
     G : scipy.sparse.spmatrix
         Sparse adjacency matrix encoding ACTIONet if 'return_raw=True'
+
     """
 
     data_is_AnnData = isinstance(data, AnnData)
