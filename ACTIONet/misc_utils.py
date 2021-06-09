@@ -17,7 +17,7 @@ def scale_matrix(
     center: Optional[bool] = True,
     scale: Optional[bool] = True,
 ):
-    X = X.copy()
+    X = X.astype(dtype=np.float64)
     if center:
         X -= X.mean(axis=0)
     if scale:
