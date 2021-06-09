@@ -21,5 +21,5 @@ help:
 .PHONY api:
 api:
 	rm -rf docs/ACTIONet
-	sphinx-apidoc  --force --follow-links  -o docs/ACTIONet ../ACTIONet
+	sphinx-apidoc  --force --follow-links  -o docs/ACTIONet ACTIONet
 
