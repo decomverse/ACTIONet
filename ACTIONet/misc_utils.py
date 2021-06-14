@@ -72,7 +72,7 @@ def double_normalize(
     return X_scaled
 
 
-def _get_attr_or_split_idx(
+def get_attr_or_split_idx(
     adata: AnnData,
     attr: Union[str, list],
     groups_use: Union[str, list, None] = None,
