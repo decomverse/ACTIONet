@@ -34,7 +34,7 @@ def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
 def plot_ACTIONet(
         data: Union[AnnData, pd.DataFrame, np.ndarray],
         label_attr: Union[str, list, pd.Series, None] = None,
-        color_attr: Union[list, pd.Series, dict, None] = None,
+        color_attr: Union[str, list, pd.Series, pd.DataFrame, np.ndarray, None] = None,
         trans_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
         trans_fac: Optional[float] = 1.5,
         trans_th: Optional[float] = -0.5,
@@ -53,33 +53,50 @@ def plot_ACTIONet(
     Creates an interactive ACTIONet plot with plotly
     Parameters
     ---------
-    ace:
-        ACTIONet output object
-    labels:
-        Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-    transparency_attr:
-        Additional continuous attribute to project onto the transparency of nodes
-    trans_z_threshold, trans_fact:
-        Control the effect of transparency mapping
-    node_size:
-        Size of nodes in the ACTIONet plot
+    data:
+        AnnData object with coordinates in '.obsm[coordinate_attr]' or numeric matrix of X-Y(-Z) coordinates.
+        If data is AnnData, 'coordinate_attr' defaults to 'ACTIONet3D' if 'plot_3d=True' or 'ACTIONet2D' if otherwise.
+    label_attr:
+        list-like object of length data.shape[0] or key of '.obs' containing cell labels of interest (clusters, cell types, etc.).
+    color_attr:
+        list-like object of length data.shape[0], matrix-like object of RGB values, or key of '.obs' containing point-wise color mappings.
+    trans_attr:
+        list-like object of length data.shape[0] or key of '.obs' of relative numerical values for computing point transparency.
+        Smaller values are more transparent.
+    trans_fac:
+        Transparency modifier (default:1.5)
+    trans_th:
+        Minimum transparency Z-score under which points are masked (default:-0.5).
+    point_size:
+        Size of points in plotly figure (default:3).
+    stroke_size:
+        Size of points outline (stroke) in plotly figure (default:0.3).
+    stroke_contrast_fac:
+        Factor by which to lighten (if < 1) darken (if > 1) point outline for contrast (default:1.2).
     palette:
-        Color palette (named vector or a name for a given known palette)
-    enrichment_table:
-        To project the top-ranked features interactively.
-    top_features:
-        Number of features to show per cell
-    blacklist_pattern:
-        List of genes to filter-out
-    title:
-        Main title of the plot
-    coordinate_slot:
-        coordinate_slot in anndata object where visualization should be stored
+        color palette for labeled data. One of the following:
+            list-like object of color values to assign to each plotly trace alphabetically by label.
+            dict of color values with keys corresponding to members of 'plot_labels'.
+    show_legend:
+        Show legend for labeled data. Ignored if 'label_attr=None'.
+    hover_text:
+        list-like object of length data.shape[0] pto use for plotly figure hover text.
+        If defaults to point values given by 'label_attr' or point index if 'label_attr=None'
     plot_3d:
-        Whether to show the plot in 3D
+        Visualize plot in 3D using 'scatter3D' (default:'FALSE').
+        If data is AnnData and 'coordinate_attr=None', 'coordinate_attr' defaults to 'ACTIONet3D'.
+        If data is matrix-like, it must have at least 3 columns.
+    point_order:
+        Numeric list=like object specifying order in which to plot individual points (default:None).
+        If None, points are plotted in random order.
+    coordinate_attr:
+        If 'data' is AnnData, key of '.obsm' pertaining to plot coordinates.
+    color_key:
+        If data is AnnData, key of '.obsm' containing point-wise RGB color mappings (default:'denovo_color').
+        Used only if no other color mapping parameters are given.
     Returns
     -------
-    Visualized ACTIONet
+    Plotly figure
     """
 
     if plot_3d:
