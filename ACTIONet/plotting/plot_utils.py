@@ -102,8 +102,6 @@ def get_plot_colors(
         elif isinstance(color_attr, str):
             if no_data:
                 raise Exception("'data' must not be None if 'color_attr' is str")
-            elif len(color_attr) != n_dim:
-                raise Exception("length of 'color_attr' must match 'data'")
             else:
                 plot_colors = ut.get_attr_or_split_idx(data, attr=color_attr, return_vec=True)
 
