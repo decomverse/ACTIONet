@@ -230,7 +230,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   field<mat> res(3);
 
-  mat init_coors = round(S_r.rows(0, 2) * 1e6) * 1e-6;
+  mat init_coors = S_r.rows(0, 2); //round(S_r.rows(0, 2) * 1e6) * 1e-6;
 
   sp_mat H = G;
   H.for_each([](sp_mat::elem_type& val) { val = 1.0 - val; });
@@ -302,7 +302,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   vector<float> head_vec(initial_coor2D.memptr(),
                         initial_coor2D.memptr() + initial_coor2D.n_elem);
   */
-  vector<float> head_vec(init_coors.n_cols * 2);
+  vector<float> head_vec(init_coors.n_cols * 2);  
   fmat sub_coor = conv_to<fmat>::from(zscore(init_coors.rows(0, 1)));
   float* ptr = sub_coor.memptr();
   memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
@@ -434,14 +434,6 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
   svd_econ(U, s, V, coordinates_3D);
   mat Z = zscore(U);
 
-  /*
-                  mat Ct = trans(coordinates_3D);
-                  ReducedKernel reduction = reduce_kernel(Ct, 3, 1000, 1, -1, 0,
-     false); printf("Coor3D Sr: %d x %d\n", reduction.S_r.n_rows,
-     reduction.S_r.n_cols);
-
-                  mat Z = zscore(trans(reduction.S_r));
-  */
 
   vec a = 75 * Z.col(0);
   vec b = 75 * Z.col(1);
@@ -464,7 +456,7 @@ field<mat> layout_ACTIONet(sp_mat& G, mat S_r, int compactness_level = 50,
 
   res(0) = coordinates;
   res(1) = coordinates_3D;
-  res(2) = RGB_colors;
+  res(2) = coordinates_3D; //RGB_colors;
   return res;
 }
 
@@ -552,6 +544,7 @@ field<mat> transform_layout(sp_mat& W, mat coor2D, mat coor3D, mat colRGB,
   // stdout_printf("done\n"); FLUSH; //fflush(stdout);
 
   field<mat> res(3);
+
 
   res(0) = coordinates;
   res(1) = coordinates_3D;

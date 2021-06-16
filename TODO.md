@@ -38,6 +38,4 @@
 ## Done
 * Deflated SVD with A*B being prior archetypal analysis (done, used in batch ortho)
 * Backbone (archetype) network construction algorithm using PageRank+ACTIONet (in unification)
-* Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter (done). 
-
-
+* Write, test, and release docker-lite and docker-full - also install Rstudio Servver/Jupyter (done).
