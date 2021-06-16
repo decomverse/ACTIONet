@@ -479,8 +479,8 @@ plot.ACTIONet.gene.view <- function(
 
 #' Interactive ACTIONet visualizetion with Plotly
 #'
-#' @param data 'ACTIONetExperiment' object or two-column numeric matrix of X-Y(-Z) coordinates.
-#' @param label_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, celltypes, etc.).
+#' @param data 'ACTIONetExperiment' object or numeric matrix of X-Y(-Z) coordinates.
+#' @param label_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, cell types, etc.).
 #' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
 #' @param trans_fac Transparency modifier (default:1.5).
 #' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked  (default:-0.5).
