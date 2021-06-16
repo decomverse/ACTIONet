@@ -329,6 +329,8 @@ mat zscore(mat A) {
     A.col(j) = (A.col(j) - mu(j)) / sigma(j);
   }
 
+  A.replace(datum::nan, 0);  // replace each NaN with 0
+
   return A;
 }
 
