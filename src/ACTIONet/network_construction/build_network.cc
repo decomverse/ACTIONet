@@ -73,7 +73,7 @@ namespace ACTIONet {
   //allowed nn approaches
   std::set<string> nn_approaches={"k*nn","knn"};
 
-  // excption to throw if invalid distance metric has been specified 
+  // excption to throw if invalid distance metric has been specified
   class invalidDistanceMetric: public exception
   {
     virtual const char* what() const throw()
@@ -87,11 +87,11 @@ namespace ACTIONet {
   {
     virtual const char* what() const throw()
     {
-      return "Invalid nearest neighbors approach specified;  must be one of k*nn or knn"; 
+      return "Invalid nearest neighbors approach specified;  must be one of k*nn or knn";
     }
-  } nnApproachException; 
-    
-  //Jensen-Shannon Divergence 
+  } nnApproachException;
+
+  //Jensen-Shannon Divergence
 double Sim(const double *pVect1, const double *pVect2, const double *log_vec,
            int N) {
   double half = 0.5;
@@ -120,7 +120,7 @@ double Sim(const double *pVect1, const double *pVect2, const double *log_vec,
 }
 
 
-  
+
 mat computeFullSim(mat &H, int thread_no) {
   double log_vec[1000001];
   for (int i = 0; i <= 1000000; i++) {
@@ -162,25 +162,25 @@ mat computeFullSim(mat &H, int thread_no) {
     space  = new hnswlib::JSDSpace(dim); //JSD
   }
   else if(distance_metric=="l2") //l2
-    { 
+    {
       space = new hnswlib::L2Space(dim);
-      
+
     }
   else
     {
-      space = new hnswlib::InnerProductSpace(dim); //innerproduct 
+      space = new hnswlib::InnerProductSpace(dim); //innerproduct
     }
   hnswlib::HierarchicalNSW<float> *appr_alg =new hnswlib::HierarchicalNSW<float>(space, max_elements, M, ef_construction);
   return(appr_alg);
 }
-  
+
 // k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
 sp_mat build_ACTIONet_KstarNN(mat H_stacked, double density = 1.0,
                                  int thread_no = 0, double M = 16,
                                  double ef_construction = 200, double ef = 10,
                                  bool mutual_edges_only = true,
 				 string distance_metric = "jsd") {
-  
+
   double LC = 1.0 / density;
   //verify that a support distance metric has been specified
   // the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
@@ -197,17 +197,17 @@ sp_mat build_ACTIONet_KstarNN(mat H_stacked, double density = 1.0,
 
   if(distance_metric == "jsd") {
 	H_stacked = clamp(H_stacked, 0, 1);
-	H_stacked = normalise(H_stacked, 1, 0);	
+	H_stacked = normalise(H_stacked, 1, 0);
   }
-  
+
   double kappa = 5.0;
   int sample_no = H_stacked.n_cols;
   int kNN = min(
       sample_no - 1,
       (int)(kappa *
             round(sqrt(sample_no))));  // start with uniform k=sqrt(N) ["Pattern
-                                       // Classification" book by Duda et al.]  
-  hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric,H_stacked,M,ef_construction); 
+                                       // Classification" book by Duda et al.]
+  hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric,H_stacked,M,ef_construction);
   appr_alg->setEf(ef);
 
   // std::unique_ptr<hnswlib::JSDSpace> space =
@@ -219,7 +219,7 @@ sp_mat build_ACTIONet_KstarNN(mat H_stacked, double density = 1.0,
   int max_elements = H_stacked.n_cols;
   stdout_printf("\tBuilding index ... ");
   fmat X = conv_to<fmat>::from(H_stacked);
-  
+
   ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId) {
     appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j));
   });
@@ -322,7 +322,7 @@ sp_mat build_ACTIONet_KstarNN(mat H_stacked, double density = 1.0,
   return (G_sym);
 }
 
-  
+
 sp_mat build_ACTIONet_KstarNN_v2(mat H_stacked, double density = 1.0,
                                     int thread_no = 0, double M = 16,
                                     double ef_construction = 200,
@@ -337,7 +337,7 @@ sp_mat build_ACTIONet_KstarNN_v2(mat H_stacked, double density = 1.0,
       //invalid distance metric was provided; exit
     throw distMetException;
     }
-  
+
 
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
@@ -350,9 +350,9 @@ sp_mat build_ACTIONet_KstarNN_v2(mat H_stacked, double density = 1.0,
 
   if(distance_metric == "jsd") {
 	H_stacked = clamp(H_stacked, 0, 1);
-	H_stacked = normalise(H_stacked, 1, 0);	
+	H_stacked = normalise(H_stacked, 1, 0);
   }
-  
+
   double kappa = 5.0;
   int sample_no = H_stacked.n_cols;
   // int kNN = min(sample_no-1, (int)(kappa*round(sqrt(sample_no)))); // start
@@ -371,12 +371,12 @@ sp_mat build_ACTIONet_KstarNN_v2(mat H_stacked, double density = 1.0,
   // ef_construction));
   stdout_printf("\tBuilding index ... ");
   fmat X = conv_to<fmat>::from(H_stacked);
-  int max_elements=X.n_cols; 
+  int max_elements=X.n_cols;
   ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId) {
     appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j));
   });
   stdout_printf("done\n");
-  
+
 
   stdout_printf("\tConstructing k*-NN ... ");
 
@@ -456,7 +456,7 @@ sp_mat build_ACTIONet_KNN(mat H_stacked,int k, int thread_no = 0,
       //invalid distance metric was provided; exit
     throw distMetException;
     }
-  
+
   stdout_printf("Building fixed-degree network (k = %d)\n", (int)k);
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
@@ -464,14 +464,14 @@ sp_mat build_ACTIONet_KNN(mat H_stacked,int k, int thread_no = 0,
 
   if(distance_metric == "jsd") {
 	H_stacked = clamp(H_stacked, 0, 1);
-	H_stacked = normalise(H_stacked, 1, 0);	
+	H_stacked = normalise(H_stacked, 1, 0);
   }
 
   double kappa = 5.0;
   int sample_no = H_stacked.n_cols;
-  int kNN=k; 
+  int kNN=k;
 
-  hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric,H_stacked,M,ef_construction); 
+  hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric,H_stacked,M,ef_construction);
   appr_alg->setEf(ef);
 
   // std::unique_ptr<hnswlib::JSDSpace> space =
@@ -483,7 +483,7 @@ sp_mat build_ACTIONet_KNN(mat H_stacked,int k, int thread_no = 0,
 
   stdout_printf("\tBuilding index ... ");
   int max_elements = H_stacked.n_cols;
-  fmat X = conv_to<fmat>::from(H_stacked);    
+  fmat X = conv_to<fmat>::from(H_stacked);
   ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId) {
     appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j));
   });
@@ -501,13 +501,13 @@ sp_mat build_ACTIONet_KNN(mat H_stacked,int k, int thread_no = 0,
     if (result.size() != (k)) {
 		//X.col(i).print("X");
 		printf("%d- %d\n", i, result.size());
-		
-          
+
+
     }
 
     for (size_t j = 0; j < result.size(); j++) {
       auto &result_tuple = result.top();
-            
+
       G(i, result_tuple.second) = 1.0 - result_tuple.first;
       result.pop();
     }
@@ -543,19 +543,19 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
 		      string distance_metric="jsd",
 		      string nn_approach="k*nn",
 		      int k=10) {
-  //verify that valid distance metric has been specified 
+  //verify that valid distance metric has been specified
   if(distance_metrics.find(distance_metric)==distance_metrics.end()){
       //invalid distance metric was provided; exit
     throw distMetException;
     }
-  
-  //verify that valid nn approach has been specified 
+
+  //verify that valid nn approach has been specified
     if(nn_approaches.find(nn_approach)==nn_approaches.end()){
-      //invalid nn approach was provided; exit 
+      //invalid nn approach was provided; exit
     throw nnApproachException;
     }
-  
-  
+
+
   if (thread_no <= 0) {
     thread_no = SYS_THREADS_DEF;  // std::thread::hardware_concurrency();
   }
