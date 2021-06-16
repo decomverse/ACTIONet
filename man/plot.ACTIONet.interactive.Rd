@@ -22,9 +22,9 @@
 )
 }
 \arguments{
-\item{data}{'ACTIONetExperiment' object or two-column numeric matrix of X-Y(-Z) coordinates.}
+\item{data}{'ACTIONetExperiment' object or numeric matrix of X-Y(-Z) coordinates.}
 
-\item{label_attr}{Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, celltypes, etc.).}
+\item{label_attr}{Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, cell types, etc.).}
 
 \item{trans_attr}{Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.}
 
