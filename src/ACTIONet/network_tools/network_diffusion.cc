@@ -219,8 +219,8 @@ mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no = 4,
   return (PR);
 }
 
-mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no = 4,
-                                   double alpha = 0.85, int max_it = 5) {
+mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0,
+  int thread_no = 4, double alpha = 0.85, int max_it = 5) {
   thread_no = std::min(thread_no, (int)X0.n_cols);
 
   int n = G.n_rows;
