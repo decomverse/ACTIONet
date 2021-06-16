@@ -7,12 +7,13 @@ import plotly.express as px
 import numpy as np
 from adjustText import adjust_text
 from anndata import AnnData
-from scipy import stats
+from scipy import sparse
 import pandas as pd
 from .color import *
 from .palettes import palette_default
 from .. import misc_utils as ut
 from . import plot_utils as pu
+import _ACTIONet as _an
 
 pio.orca.config.use_xvfb = True
 pio.orca.config.save()
@@ -30,6 +31,7 @@ def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
         raise ValueError(f'Did not find adata.obs[\'{transparency_key}\'].')
     if transparency_key is not None and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False:
         raise ValueError(f'transparency_key must refer to a numeric values, which is not the case for[\'{transparency_key}\'].')
+
 
 def plot_ACTIONet(
         data: Union[AnnData, pd.DataFrame, np.ndarray],
@@ -208,19 +210,21 @@ def plot_ACTIONet(
     return p
 
 
-def plot_ACTIONet_gradient(adata: AnnData,
-                           x: Optional[list] = None,
-                           coordinate_key: Optional[str] = 'ACTIONet2D',
-                           transparency_key: Optional[str] = None,
-                           transparency_z_threshold: Optional[float] = -0.5,
-                           transparancey_factor: Optional[float] = 3,
-                           alpha_val: Optional[float] = 0.85,
-                           node_size: Optional[float] = 1,
-                           add_text: Optional[bool] = True,
-                           palette: Optional[list] = "Inferno",
-                           title: Optional[str] = "",
-                           nonparametric: Optional[bool] = False,
-                           output_file: Optional[str] = None):
+def plot_ACTIONet_gradient(
+        adata: AnnData,
+        x: Optional[list] = None,
+        coordinate_key: Optional[str] = 'ACTIONet2D',
+        transparency_key: Optional[str] = None,
+        transparency_z_threshold: Optional[float] = -0.5,
+        transparancey_factor: Optional[float] = 3,
+        alpha_val: Optional[float] = 0.85,
+        node_size: Optional[float] = 1,
+        add_text: Optional[bool] = True,
+        palette: Optional[list] = "Inferno",
+        title: Optional[str] = "",
+        nonparametric: Optional[bool] = False,
+        output_file: Optional[str] = None
+) -> go.Figure:
     """
     Projects a given continuous score on the ACTIONet plot
     Parameters
@@ -246,8 +250,19 @@ def plot_ACTIONet_gradient(adata: AnnData,
     output_file:
         filename to save plot (optional)
     """
-    coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
 
+    G = G.astype(dtype=np.float64)
+
+    np.amin(x)
+
+    if log_scale:
+        x = np.log1p(x)
+
+    if alpha_val > 0:
+        x = _an.compute_network_diffusion_fast(
+            G=G,
+            X0=sparse.csc_matrix(x)
+        )
 
 # def layout_labels(
 #         X: np.ndarray,

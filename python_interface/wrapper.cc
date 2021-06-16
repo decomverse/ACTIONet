@@ -701,6 +701,7 @@ arma::vec compute_archetype_core_centrality(arma::SpMat<npdouble> &G,
   return (conn);
 }
 
+//' OBSOLETE
 //' Computes network diffusion over a given network, starting with an arbitrarty
 // set of initial scores
 //'
@@ -715,8 +716,19 @@ arma::Mat<npdouble> compute_network_diffusion(arma::SpMat<npdouble> &G,
                                               int thread_no = 0,
                                               double alpha = 0.85,
                                               int max_it = 3) {
-  mat Diff =
-      ACTIONet::compute_network_diffusion(G, X0, thread_no, alpha, max_it);
+  mat Diff = ACTIONet::compute_network_diffusion(G, X0, thread_no, alpha, max_it);
+
+  return (Diff);
+}
+
+//' Quickly computes network diffusion over a given network, starting with an arbitrarty
+//' return Matrix of diffusion scores
+arma::Mat<npdouble> compute_network_diffusion_fast(arma::SpMat<npdouble> &G,
+                                              arma::SpMat<npdouble> &X0,
+                                              int thread_no = 0,
+                                              double alpha = 0.85,
+                                              int max_it = 5) {
+  mat Diff = ACTIONet::compute_network_diffusion_fast(G, X0, thread_no, alpha, max_it);
 
   return (Diff);
 }
@@ -1083,6 +1095,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
     "Computes PageRank for a selected set of nodes",
     py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
     py::arg("alpha") = 0.85, py::arg("max_it") = 3);
+
+  m.def("compute_network_diffusion_fast", &compute_network_diffusion_fast,
+    "Computes PageRank for a selected set of nodes",
+    py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
+    py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
   m.def("compute_sparse_network_diffusion", &compute_sparse_network_diffusion,
     "Computes L1-regularized PageRank for a selected set of nodes",
