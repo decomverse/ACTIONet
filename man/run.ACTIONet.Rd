@@ -31,14 +31,22 @@ run.ACTIONet(
 \arguments{
 \item{ace}{Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).}
 
+\item{k_min}{Minimum depth of decompositions (default=2).}
+
 \item{k_max}{Maximum depth of decompositions (default=30).}
 
 \item{assay_name}{Name of assay to be used (default='logcounts').}
 
-\item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r').}
+\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel (default='ACTION').}
+
+\item{net_slot_out}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').}
+
+\item{min_cells_per_arch}{Minimum number of observations required to construct an archetype (default=2).}
+
+\item{max_iter_ACTION}{Maximum number of iterations for ACTION algorithm (default=50).}
 
 \item{min_specificity_z_thresh}{Defines the stringency of pruning nonspecific archetypes.
-The larger the value, the more archetypes will be filtered out (default=-1).}
+The larger the value, the more archetypes will be filtered out (default=-3).}
 
 \item{network_density}{Density factor of ACTIONet graph (default=1).}
 
@@ -48,7 +56,19 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 
 \item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
 
+\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).}
+
+\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).}
+
+\item{unification_violation_threshold}{Archetype unification resolution parameter (default=0).}
+
+\item{footprint_alpha}{Archetype smoothing parameter (default=0.85).}
+
 \item{thread_no}{Number of parallel threads (default=0).}
+
+\item{full_trace}{Return list of all intermediate output. Intended for debugging (default='FALSE').}
+
+\item{seed}{Seed for random initialization (default=0).}
 }
 \value{
 \itemize{
@@ -60,8 +80,6 @@ The larger the value, the more archetypes will be filtered out (default=-1).}
 Run main ACTIONet pipeline
 }
 \examples{
-ace = reduce(ace)
-ACTIONet.out = run.ACTIONet(ace)
-ace = ACTIONet.out$ace # main output
-trace = ACTIONet.out$trace # for backup
+ace = reduce.ace(ace)
+ace = run.ACTIONet(ace)
 }
