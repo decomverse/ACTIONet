@@ -15,7 +15,7 @@ mat compute_pseudo_bulk_per_cluster(
 
   for (int j = 0; j < pb.n_cols; j++) {
     uvec idx = find(sample_assignments == (j + 1));
-    pb.col(j) /= idx.n_elem;
+    pb.col(j) /= max(1, idx.n_elem);
   }
 
   return (pb);
@@ -45,7 +45,8 @@ mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H) {
 
   vec col_means = trans(mean(H, 0));
   for (int i = 0; i < H_norm.n_cols; i++) {
-    H_norm.row(i) /= col_means(i);
+		double denom = col_means(i);
+		H_norm.row(i) /= denom == 0?1:denom;
   }
 
   mat pb = mat(S * H_norm);
@@ -58,7 +59,8 @@ mat compute_pseudo_bulk_per_archetype(mat &S, mat &H) {
 
   vec col_means = trans(mean(H, 0));
   for (int i = 0; i < H_norm.n_cols; i++) {
-    H_norm.row(i) /= col_means(i);
+	  double denom = col_means(i);
+    H_norm.row(i) /= denom == 0?1:denom;
   }
 
   mat pb = mat(S * H_norm);
@@ -89,7 +91,7 @@ field<mat> compute_pseudo_bulk_per_cluster_and_ind(
       uvec idx = intersect(find((sample_assignments == (k + 1))),
                            find((individuals == (j + 1))));
 
-      pbs(k).col(j) /= idx.n_elem;
+      pbs(k).col(j) /= max(1, idx.n_elem);
     }
   }
 
@@ -125,7 +127,8 @@ field<mat> compute_pseudo_bulk_per_archetype_and_ind(
   mat H_norm = trans(H); // cell x archs
   vec col_means = trans(mean(H, 0));
   for (int i = 0; i < H_norm.n_cols; i++) {
-    H_norm.row(i) /= col_means(i);
+	  double denom = col_means(i);
+    H_norm.row(i) /= denom == 0?1:denom;
   }
 
   int arch_no = H_norm.n_cols;				
@@ -154,7 +157,8 @@ field<mat> compute_pseudo_bulk_per_archetype_and_ind(
   mat H_norm = trans(H); // cell x archs
   vec col_means = trans(mean(H, 0));
   for (int i = 0; i < H_norm.n_cols; i++) {
-    H_norm.row(i) /= col_means(i);
+	  double denom = col_means(i);
+    H_norm.row(i) /= denom == 0?1:denom;
   }
 
   int arch_no = H_norm.n_cols;		
