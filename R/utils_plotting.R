@@ -155,8 +155,13 @@ CPal_default = c(
 
     if(is.null(color_slot)){
       plot_colors = .default_colors(n_dim)
-    } else if (is(data, "ACTIONetExperiment") & color_slot %in% names(colMaps(data))) {
-      plot_colors = grDevices::rgb(colMaps(data)[[color_slot]])
+    } else if (is(data, "ACTIONetExperiment")){
+      if (color_slot %in% names(colMaps(data))) {
+        plot_colors = grDevices::rgb(colMaps(data)[[color_slot]])
+      } else {
+        err = sprintf("%s not in colMaps(ace).\n")
+        stop(err)
+      }
     } else {
       plot_colors = .default_colors(n_dim)
     }
