@@ -1,16 +1,26 @@
 #' Run main ACTIONet pipeline
 #'
 #' @param ace Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).
+#' @param k_min Minimum depth of decompositions (default=2).
 #' @param k_max Maximum depth of decompositions (default=30).
+#' @param assay_name Name of assay to be used (default='logcounts').
+#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel (default='ACTION').
+#' @param net_slot_out  Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').
+#' @param min_cells_per_arch Minimum number of observations required to construct an archetype (default=2).
+#' @param max_iter_ACTION Maximum number of iterations for ACTION algorithm (default=50).
 #' @param min_specificity_z_thresh Defines the stringency of pruning nonspecific archetypes.
-#' The larger the value, the more archetypes will be filtered out (default=-1).
+#' The larger the value, the more archetypes will be filtered out (default=-3).
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
+#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).
+#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).
+#' @param unification_violation_threshold Archetype unification resolution parameter (default=0).
+#' @param footprint_alpha Archetype smoothing parameter (default=0.85).
 #' @param thread_no Number of parallel threads (default=0).
-#' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r').
-#' @param assay_name Name of assay to be used (default='logcounts').
+#' @param full_trace Return list of all intermediate output. Intended for debugging (default='FALSE').
+#' @param seed Seed for random initialization (default=0).
 #'
 #' @return \itemize{
 #' \item If full_trace='FALSE'(default): ACTIONetExperiment object.
@@ -18,10 +28,8 @@
 #'}
 #'
 #' @examples
-#' ace = reduce(ace)
-#' ACTIONet.out = run.ACTIONet(ace)
-#' ace = ACTIONet.out$ace # main output
-#' trace = ACTIONet.out$trace # for backup
+#' ace = reduce.ace(ace)
+#' ace = run.ACTIONet(ace)
 #' @export
 run.ACTIONet <- function(
   ace,
@@ -210,13 +218,17 @@ run.ACTIONet <- function(
 
 #' Reconstructs the ACTIONet graph with the new parameters (uses prior decomposition)
 #'
-#' @param ace ACTIONetExperiment object containing the results
+#' @param ace ACTIONetExperiment object.
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
-#' @param compactness_level A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
-#' @param n_epochs Number of epochs for SGD algorithm (default=500).
-#' @param thread_no Number of parallel threads (default=0)
-#' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r')
+#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
+#' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
+#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).
+#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).
+#' @param thread_no Number of parallel threads (default=0).
+#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel (default='ACTION').
+#' @param output_slot Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').
+#' @param seed Seed for random initialization (default=0).
 #'
 #' @return ace Updated ace object
 #'
@@ -231,9 +243,9 @@ reconstruct.ACTIONet <- function(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
-  thread_no = 0,
-  layout_in_parallel = TRUE,
   layout_algorithm = 0,
+  layout_in_parallel = TRUE,
+  thread_no = 0,
   reduction_slot = "ACTION",
   output_slot = "ACTIONet",
   seed = 0
@@ -271,11 +283,16 @@ reconstruct.ACTIONet <- function(
 
 #' Rerun layout on the ACTIONet graph with new parameters
 #'
-#' @param ace ACTIONetExperiment object containing the results
-#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50)
-#' @param layout_epochs Number of epochs for SGD algorithm (default=500).
-#' @param thread_no Number of parallel threads (default=8)
-#' @param reduction_slot Slot in the colMaps(ace) that holds reduced kernel (default='S_r')
+#' @param ace ACTIONetExperiment object.
+#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
+#' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
+#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).
+#' @param network_density Density factor of ACTIONet graph (default=1).
+#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
+#' @param thread_no Number of parallel threads (default=0).
+#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel (default='ACTION').
+#' @param net_slot Slot in colMaps(ace) containing ACTIONet adjacency matrix (default='ACTIONet').
+#' @param seed Seed for random initialization (default=0).
 #'
 #' @return ace Updated ace object
 #'
@@ -289,9 +306,9 @@ rerun.layout <- function(
   layout_compactness = 50,
   layout_epochs = 1000,
   layout_algorithm = 0,
-  thread_no = 0,
   network_density = 1,
   mutual_edges_only = TRUE,
+  thread_no = 0,
   reduction_slot = "ACTION",
   net_slot = "ACTIONet",
   seed = 0
