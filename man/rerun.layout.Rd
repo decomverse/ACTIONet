@@ -9,24 +9,34 @@ rerun.layout(
   layout_compactness = 50,
   layout_epochs = 1000,
   layout_algorithm = 0,
-  thread_no = 0,
   network_density = 1,
   mutual_edges_only = TRUE,
+  thread_no = 0,
   reduction_slot = "ACTION",
   net_slot = "ACTIONet",
   seed = 0
 )
 }
 \arguments{
-\item{ace}{ACTIONetExperiment object containing the results}
+\item{ace}{ACTIONetExperiment object.}
 
-\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50)}
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
 
-\item{layout_epochs}{Number of epochs for SGD algorithm (default=500).}
+\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
 
-\item{thread_no}{Number of parallel threads (default=8)}
+\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).}
 
-\item{reduction_slot}{Slot in the colMaps(ace) that holds reduced kernel (default='S_r')}
+\item{network_density}{Density factor of ACTIONet graph (default=1).}
+
+\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
+
+\item{thread_no}{Number of parallel threads (default=0).}
+
+\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel (default='ACTION').}
+
+\item{net_slot}{Slot in colMaps(ace) containing ACTIONet adjacency matrix (default='ACTIONet').}
+
+\item{seed}{Seed for random initialization (default=0).}
 }
 \value{
 ace Updated ace object
