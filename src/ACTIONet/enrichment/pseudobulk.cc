@@ -15,7 +15,7 @@ mat compute_pseudo_bulk_per_cluster(
 
   for (int j = 0; j < pb.n_cols; j++) {
     uvec idx = find(sample_assignments == (j + 1));
-    pb.col(j) /= max(1, idx.n_elem);
+    pb.col(j) /= max(1, (int)idx.n_elem);
   }
 
   return (pb);
@@ -91,7 +91,7 @@ field<mat> compute_pseudo_bulk_per_cluster_and_ind(
       uvec idx = intersect(find((sample_assignments == (k + 1))),
                            find((individuals == (j + 1))));
 
-      pbs(k).col(j) /= max(1, idx.n_elem);
+      pbs(k).col(j) /= max(1, (int)idx.n_elem);
     }
   }
 
