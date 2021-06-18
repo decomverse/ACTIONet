@@ -467,9 +467,11 @@ Leiden.clustering <- function(
   PP_iters = 3,
   PP_sig_threshold = 3) {
 
-    initial.clusters = NULL
+
     if (!is.null(init.slot)) {
         initial.clusters = ace[[init.slot]]
+    } else {
+        initial.clusters = NULL
     }
 
     G = colNets(ace)[[net.slot]]
@@ -478,7 +480,7 @@ Leiden.clustering <- function(
     if(postprocess == T) {
 		cc = table(clusters)
 		clusters[clusters %in% as.numeric(names(cc)[cc < 30])] = -1
-		clusters = run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold)
+		clusters = c(run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold))
 	}
     names(clusters) = paste("C", as.character(clusters), sep = "")
 
