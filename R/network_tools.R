@@ -19,13 +19,29 @@ infer.missing.cell.annotations <- function(
   iters = 3,
   lambda = 0, 
   sig_threshold = 3) {
+  label_type = "numeric"
+  if(is.character(initial_labels)) {
+    label_type = "char"
+    initial_labels.factor = factor(initial_labels)
+    initial_labels = as.numeric(initial_labels.factor)
+  } else if(is.factor(initial_labels)) {
+    label_type = "factor"
+    initial_labels.factor = initial_labels		
+    initial_labels = as.numeric(initial_labels.factor)
+  }
+  
 	fixed_labels_ = which(!is.na(initial_labels))	
 	initial_labels[is.na(initial_labels)] = -1
 	
 	Labels = run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
-
-    return(Labels)
+	
+	if(label_type == "char" | label_type == "factor") {
+	  Labels = levels(initial_labels.factor)[Labels]
+	}
+	
+  return(Labels)
 }
+
 
 
 #' Uses a variant of the label propagation algorithm to correct likely noisy labels
@@ -73,7 +89,7 @@ correct.cell.annotations <- function(
 	Labels = run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
 
 	if(label_type == "char" | label_type == "factor") {
-		Labels = levels(initial_labels.factor)[initial_labels.factor]
+		Labels = levels(initial_labels.factor)[Labels]
 	}
 
     return(Labels)
