@@ -226,7 +226,7 @@ orthogonalize.ace.batch.simple <- function(
 #' @export
 reduce.and.batch.orthogonalize.ace <- function(
   ace,
-  design_mat,
+  design_mat = NULL,
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
@@ -234,12 +234,13 @@ reduce.and.batch.orthogonalize.ace <- function(
   seed = 0,
   SVD_algorithm = 0
 ) {
-
-    if (!is.matrix(design_mat)) {
-        err = sprintf("'design_mat' must be a matrix.\n")
-        stop(err)
+    if(is.null(design_matrix)) {
+      warning("Missing design matrix")
+      return(ace)
     }
-
+    if(!is.matrix(design_mat)) {
+      design_mat = model.matrix(~as.factor(design_mat))
+    }
     ace = reduce.ace(
       ace = ace,
       reduced_dim = reduced_dim,
