@@ -148,8 +148,7 @@ plot_pairwise_alignment <- function(
   normalize = FALSE
 ) {
 
-    W = alignment
-    W[W < 0] = 0
+    W = alignment - min(alignment)
     Wm = as(MWM_hungarian(W), "dgTMatrix")
 
     ii = Wm@i + 1
@@ -160,7 +159,9 @@ plot_pairwise_alignment <- function(
     colnames(subW) = query_labels[jj]
 
     library(seriation)
-    perm = seriation::get_order(seriation::seriate(stats::as.dist(1 - cor(subW)), "OLO"))
+    CC = cor(subW)
+    CC[is.na(CC)] = 0
+    perm = seriation::get_order(seriation::seriate(stats::as.dist(1 - CC), "OLO"))
     subW = subW[perm, perm]
 
     gradPal = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 9, name = "RdYlBu"))))(100)
