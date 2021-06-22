@@ -11,7 +11,8 @@ Welcome to ACTIONet's documentation!
    :caption: Contents:
 
    INTRODUCTION
-   ACTIONet/modules
+   ACTIONet/modules.rst
+   Tutorial/modules.rst
    FAQ
    CHANGELOG
    

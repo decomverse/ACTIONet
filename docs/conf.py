@@ -21,20 +21,21 @@ project = 'ACTIONet'
 copyright = '2021, Shahin Mohammadi'
 author = 'Shahin Mohammadi'
 
-# The full version, including alpha/beta/rc tags
-release = '0.1'
-
-
 # -- General configuration ---------------------------------------------------
 install_requires=['anndata']
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["myst_parser",
-              "sphinx.ext.napoleon",
-              "sphinx.ext.autodoc",
-              "sphinx.ext.mathjax"]
+
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "recommonmark",
+    "nbsphinx",
+    "sphinx.ext.mathjax",
+    "nbsphinx_link",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -58,3 +59,4 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+source_suffix = [".rst", ".md"]
