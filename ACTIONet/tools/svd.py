@@ -32,36 +32,22 @@ def svd(
     seed: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-    """
-    Randomized singular value decomposition (SVD)
-
-    Parameters
-    ----------
-    X:
-        Input matrix (dense or sparse)
-    dim:
-        Target dimensions
-    solver:
-        SVD solver to use:
-        `'irlb'`
-          randomized SVD used in IRLBA R package
-        `'feng'`
-          randomized SVD from Feng et al.
-        `'halko'` (the default)
-          randomized SVD from Halko et al.
-    n_iters:
-        Maximum number of iterations. Defaults to 1000 for `irlb` and 5 otherwise.
-    seed:
-        Random seed
-
-    Returns
-    -------
-    U:
-        Matrix of left singular vectors
-    sigma:
-        Matrix of singular values
-    V:
-        Matrix of right singular vectors
+    """ Randomized singular value decomposition (SVD)
+    :param X:Input matrix (dense or sparse)
+    :param dim: Target dimensions
+    :param solver:SVD solver to use: \
+        `'irlb'` \
+          randomized SVD used in IRLBA R package \
+        `'feng'` \
+          randomized SVD from Feng et al. \
+        `'halko'` (the default) \
+          randomized SVD from Halko et al. \
+    :param n_iters: Maximum number of iterations. Defaults to 1000 for `irlb` and 5 otherwise.
+    :param seed: Random seed
+    ...
+    :return U: Matrix of left singular vectors
+    :return sigma: Matrix of singular values
+    :return V: Matrix of right singular vectors
     """
 
     if solver == "irlb":

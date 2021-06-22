@@ -12,7 +12,7 @@ Welcome to ACTIONet's documentation!
 
    INTRODUCTION
    ACTIONet/modules.rst
-   Tutorial/modules.rst
+   Tutorials/index.rst
    FAQ
    CHANGELOG
    
