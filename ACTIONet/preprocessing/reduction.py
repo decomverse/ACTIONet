@@ -20,63 +20,40 @@ def reduce_kernel(
         use_highly_variable: Optional[bool] = False,
         copy: Optional[bool] = False
 ) -> [AnnData, np.ndarray, spmatrix, dict]:
-    """\
-    Kernel Reduction Method [Mohammadi2020].
-
-    Computes SVD-reduced form of the kernel matrix.
-
-    Parameters
-    ----------
-    data
-        The (annotated) data matrix of shape `n_obs` × `n_vars`.
-        Rows correspond to cells and columns to genes.
-    dim
-        Target dimension. Defaults to 50, or 1 - minimum
-        dimension size of selected representation.
-    max_iter
-        Maximum number of iterations
-    reduction_name
-        Prefix of key to use for reduction output
-    layer_name
-        Key of 'layers' to use as matrix for filtering
-    svd_solver
-        SVD solver to use:
-        `0` (the default)
-          randomized SVD used in IRLBA R package
-        `1`
-          randomized SVD from Halko et al.
-        `2`
+    """Kernel Reduction Method [Mohammadi2020].  Computes SVD-reduced form of the kernel matrix.
+    :param data: The (annotated) data matrix of shape `n_obs` × `n_vars`. Rows correspond to cells and columns to genes.
+    :param dim: Target dimension. Defaults to 50, or 1 - minimum dimension size of selected representation.
+    :param max_iter: Maximum number of iterations
+    :param reduction_name: Prefix of key to use for reduction output
+    :param layer_name: Key of 'layers' to use as matrix for filtering
+    :param svd_solver:SVD solver to use \
+        `0` (the default) \
+          randomized SVD used in IRLBA R package \
+        `1` \
+          randomized SVD from Halko et al. \
+        `2` \
           randomized SVD from Feng et al.
-    seed
-        Random seed
-    return_raw
-        Returns raw output of 'reduce_kernel()' as dict:
-    use_highly_variable
-        Whether to use highly variable genes only, stored in
-        `.var['highly_variable']`.
+    :param seed: Random seed
+    :param return_raw: Returns raw output of 'reduce_kernel()' as dict
+    :param use_highly_variable:Whether to use highly variable genes only, stored in \
+        `.var['highly_variable']`. \
         By default uses them if they have been determined beforehand.
-    copy
-        If an :class:`~anndata.AnnData` is passed, determines whether a copy
-        is returned. Is ignored otherwise.
-
-    Returns
-    -------
-    ACTION : :class:`~scipy.sparse.spmatrix`, :class:`~numpy.ndarray`
-        If `data` is array-like and `return_raw=False` was passed,
-        this function only returns `ACTION`…
-    adata : anndata.AnnData
-        …otherwise if `copy=True` returns None or else adds fields to `adata`:
-
-        `.obsm['ACTION']`
-             Scaled right singular vectors (reduced cell representations)
-        `.varm['ACTION_V']`
-             Left singular vectors (signifying gene modules)
-        `.uns['ACTION']['params']`
-        `.uns['ACTION']['sigma']`
-        `.varm['ACTION_A']`
-        `.obsm['ACTION_B']`
-    raw_output:
-        If 'return_raw=True' returns dict with S_r, V, sigma, A, and B matrices.
+    :param copy:If an :class:`~anndata.AnnData` is passed, determines whether a copy \
+    is returned. Is ignored otherwise.
+    ....
+    :return ACTION : :class:`~scipy.sparse.spmatrix`, :class:`~numpy.ndarray` \
+        If `data` is array-like and `return_raw=False` was passed, \
+        this function only returns `ACTION`
+    :return adata: anndata.AnnData otherwise if `copy=True` returns None or else adds fields to `adata`  \
+        `.obsm['ACTION']` \
+             Scaled right singular vectors (reduced cell representations) \
+        `.varm['ACTION_V']` \
+             Left singular vectors (signifying gene modules) \
+        `.uns['ACTION']['params']` \
+        `.uns['ACTION']['sigma']` \
+        `.varm['ACTION_A']` \
+        `.obsm['ACTION_B']` \
+    :return raw_output:If 'return_raw=True' returns dict with S_r, V, sigma, A, and B matrices.
     """
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:

@@ -51,54 +51,35 @@ def plot_ACTIONet(
         coordinate_attr: Optional[str] = None,
         color_key: Optional[str] = "denovo_color",
 ) -> go.Figure:
-    """
-    Creates an interactive ACTIONet plot with plotly
-    Parameters
-    ---------
-    data:
-        AnnData object with coordinates in '.obsm[coordinate_attr]' or numeric matrix of X-Y(-Z) coordinates.
+    """Creates an interactive ACTIONet plot with plotly
+    :param data:AnnData object with coordinates in '.obsm[coordinate_attr]' or numeric matrix of X-Y(-Z) coordinates. \
         If data is AnnData, 'coordinate_attr' defaults to 'ACTIONet3D' if 'plot_3d=True' or 'ACTIONet2D' if otherwise.
-    label_attr:
-        list-like object of length data.shape[0] or key of '.obs' containing cell labels of interest (clusters, cell types, etc.).
-    color_attr:
-        list-like object of length data.shape[0], matrix-like object of RGB values, or key of '.obs' containing point-wise color mappings.
-    trans_attr:
-        list-like object of length data.shape[0] or key of '.obs' of relative numerical values for computing point transparency.
+    :param label_attr: list-like object of length data.shape[0] or key of '.obs' containing cell labels of interest (clusters, cell types, etc.).
+    :param color_attr: list-like object of length data.shape[0], matrix-like object of RGB values, or key of '.obs' containing point-wise color mappings.
+    :param trans_attr: list-like object of length data.shape[0] or key of '.obs' of relative numerical values for computing point transparency. \
         Smaller values are more transparent.
-    trans_fac:
-        Transparency modifier (default:1.5)
-    trans_th:
-        Minimum transparency Z-score under which points are masked (default:-0.5).
-    point_size:
-        Size of points in plotly figure (default:3).
-    stroke_size:
-        Size of points outline (stroke) in plotly figure (default:0.3).
-    stroke_contrast_fac:
-        Factor by which to lighten (if < 1) darken (if > 1) point outline for contrast (default:1.2).
-    palette:
-        color palette for labeled data. One of the following:
-            list-like object of color values to assign to each plotly trace alphabetically by label.
-            dict of color values with keys corresponding to members of 'plot_labels'.
-    show_legend:
-        Show legend for labeled data. Ignored if 'label_attr=None'.
-    hover_text:
-        list-like object of length data.shape[0] pto use for plotly figure hover text.
+    :param trans_fac: Transparency modifier (default:1.5)
+    :param trans_th:Minimum transparency Z-score under which points are masked (default:-0.5).
+    :param point_size:Size of points in plotly figure (default:3).
+    :param stroke_size: Size of points outline (stroke) in plotly figure (default:0.3).
+    :param stroke_contrast_fac: Factor by which to lighten (if < 1) darken (if > 1) point outline for contrast (default:1.2).
+    :param palette: color palette for labeled data. One of the following \
+        list-like object of color values to assign to each plotly trace alphabetically by label. \
+        dict of color values with keys corresponding to members of 'plot_labels'.
+    :param show_legend: Show legend for labeled data. Ignored if 'label_attr=None'.
+    :param hover_text: list-like object of length data.shape[0] pto use for plotly figure hover text. \
         If defaults to point values given by 'label_attr' or point index if 'label_attr=None'
-    plot_3d:
-        Visualize plot in 3D using 'scatter3D' (default:'FALSE').
-        If data is AnnData and 'coordinate_attr=None', 'coordinate_attr' defaults to 'ACTIONet3D'.
+    :param plot_3d: Visualize plot in 3D using 'scatter3D' (default:'FALSE'). \
+        If data is AnnData and 'coordinate_attr=None', 'coordinate_attr' defaults to 'ACTIONet3D'. \
         If data is matrix-like, it must have at least 3 columns.
-    point_order:
-        Numeric list=like object specifying order in which to plot individual points (default:None).
+    :param point_order: Numeric list=like object specifying order in which to plot individual points (default:None). \
         If None, points are plotted in random order.
-    coordinate_attr:
-        If 'data' is AnnData, key of '.obsm' pertaining to plot coordinates.
-    color_key:
-        If data is AnnData, key of '.obsm' containing point-wise RGB color mappings (default:'denovo_color').
-        Used only if no other color mapping parameters are given.
-    Returns
-    -------
-    Plotly figure
+    :param coordinate_attr: If 'data' is AnnData, key of '.obsm' pertaining to plot coordinates.
+    :param color_key:If data is AnnData, key of '.obsm' containing point-wise RGB color mappings (default:'denovo_color'). \
+    Used only if no other color mapping parameters are given.
+    ...
+
+    :return plotly figure 
     """
 
     if plot_3d:
