@@ -1,9 +1,9 @@
 #' Imports data from a 10X experiment folder and constructs an `SingleCellExeriment` object
 #'
 #' @param input_path Folder containing input files.
-#' @param mtx_file Count file in Matrix Market format (default='matrix.mtx.gz').
-#' @param feature_metadata Table of the same size as number of rows in the count matrix (default='features.tsv.gz').
-#' @param sample_metadata Table of the same size as number of columns in the count matrix (default='barcodes.tsv.gz').
+#' @param mtx_file Count file in Matrix Market format (default='matrix.mtx').
+#' @param feature_metadata Table of the same size as number of rows in the count matrix (default='features.tsv').
+#' @param sample_metadata Table of the same size as number of columns in the count matrix (default='barcodes.tsv').
 #' @param sep Column-separator used in the row/column annotations files (default='\\t').
 #' @param prefilter Whether to prefilter rows/columns of input counts matrix. Must specify filtering parameters to pass to filter.ace().
 #'
@@ -14,9 +14,9 @@
 #' @export
 import.ace.from.10X.generic <- function(
   input_path,
-  mtx_file = "matrix.mtx.gz",
-  feature_metadata = "features.tsv.gz",
-  sample_metadata = "barcodes.tsv.gz",
+  mtx_file = "matrix.mtx",
+  feature_metadata = "features.tsv",
+  sample_metadata = "barcodes.tsv",
   sep = "\t",
   use.names = TRUE,
   prefilter = FALSE,
@@ -142,9 +142,9 @@ import.ace.from.10X <- function(
         feature_metadata = "genes.tsv"
         sample_metadata = "barcodes.tsv"
     } else if ((3 <= version) & (version < 4)) {
-        mtx_file = "matrix.mtx.gz"
-        feature_metadata = "features.tsv.gz"
-        sample_metadata = "barcodes.tsv.gz"
+        mtx_file = "matrix.mtx"
+        feature_metadata = "features.tsv"
+        sample_metadata = "barcodes.tsv"
     } else {
         message("Unknown version")
     }
