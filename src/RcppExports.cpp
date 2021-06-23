@@ -1242,8 +1242,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_marker_aggregate_stats_TFIDF_sum_smoothed
-mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no);
-RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP) {
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha, int max_it, int perm_no, int thread_no, int normalization);
+RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP alphaSEXP, SEXP max_itSEXP, SEXP perm_noSEXP, SEXP thread_noSEXP, SEXP normalizationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1254,7 +1254,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type max_it(max_itSEXP);
     Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no));
+    Rcpp::traits::input_parameter< int >::type normalization(normalizationSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1418,7 +1419,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed, 7},
     {"_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized, 7},
     {"_ACTIONet_LSI", (DL_FUNC) &_ACTIONet_LSI, 2},
-    {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 7},
+    {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 8},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
