@@ -1072,8 +1072,8 @@ LSI <- function(X, size_factor = 100000) {
     .Call(`_ACTIONet_LSI`, X, size_factor)
 }
 
-compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L, normalization = 1L) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization)
 }
 
 roll_var <- function(X) {
