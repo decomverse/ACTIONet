@@ -12,12 +12,12 @@ def build_network(
         density: Optional[float] = 1.0,
         thread_no: Optional[int] = 0,
         mutual_edges_only: Optional[bool] = True,
-        distance_metric:str = "jsd",
-        nn_approach:str = "k*nn",
+        distance_metric: Optional[str] = "jsd",
+        nn_approach: Optional[str] = "k*nn",
         k: Optional[int] = None,
         M: Optional[float] = 16,
-        ef_construction:Optional[float] = 200,
-        ef:Optional[float] = 50,
+        ef_construction: Optional[float] = 200,
+        ef: Optional[float] = 50,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False,
         
@@ -67,27 +67,30 @@ def build_network(
 
     if data_is_AnnData:
         adata = data.copy() if copy else data
-        if "H_stacked" in adata.obsm:
+        if "H_stacked" in adata.obsm.keys():
             H_stacked = adata.obsm["H_stacked"]
         else:
             raise Exception("missing H_stacked key in adata.obsm of AnnData")
     else:
-        H_stacked=data.X 
+        H_stacked = data.X
+
     H_stacked = H_stacked.T.astype(dtype=np.float64)
     if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
-        if distance_metric=="jsd":
-            H_stacked=H_stacked/np.sum(H_stacked,axis=0)
-        G = _an.build_ACTIONet(H_stacked=H_stacked,
-                               density=density,
-                               thread_no=thread_no,
-                               mutual_edges_only=mutual_edges_only,
-                               distance_metric=distance_metric,
-                               nn_approach=nn_approach,
-                               k=k,
-                               M=M,
-                               ef_construction=ef_construction,
-                               ef=ef)
+
+    if distance_metric=="jsd":
+        H_stacked=H_stacked/np.sum(H_stacked,axis=0)
+
+    G = _an.build_ACTIONet(H_stacked=H_stacked,
+                           density=density,
+                           thread_no=thread_no,
+                           mutual_edges_only=mutual_edges_only,
+                           distance_metric=distance_metric,
+                           nn_approach=nn_approach,
+                           k=k,
+                           M=M,
+                           ef_construction=ef_construction,
+                           ef=ef)
 
     if return_raw or not data_is_AnnData:
         return G
