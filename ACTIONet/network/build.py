@@ -23,44 +23,20 @@ def build_network(
         
         
 ) -> Union[AnnData, sparse.spmatrix, None]:
-    """
-
-    Build ACTIONet
-
-    Computes and returns the ACTIONet graph
-    Parameters
-    ----------
-    data
-       `n_obs` × `n_arch` Matrix or AnnData object containing output of the 'prune_archetypes()'.
-    net_name_out
-        If 'data' is AnnData, store output matrix G in '.obsp' with key 'net_name_out' (default="ACTIONet")
-    density
-        Controls the overall density of constructed network.
-        Larger values results in more retained edges.
-    thread_no
-        Number of parallel threads used for identifying nearest-neighbors.
-        Defaults to available threads on the machine.
-    mutual_edges_only
-        Whether to return only edges that there is a bi-directional/mutual relationship.
-    distance_metric 
-        one of jsd, ip, l2 (default=jsd) 
-    nn_approach
-        one of k*nn, knn (default=k*nn) 
-    copy
-        If 'data' is AnnData, return a copy instead of writing to `data`.
-    return_raw
-         If 'return_raw=True' and 'data' is AnnData, return sparse adjacency matrix directly.
-
-    Returns
-    -------
-    adata : anndata.AnnData
-        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
-
-        `.obsp[net_name_out]`
-
-    G : scipy.sparse.spmatrix
-        Sparse adjacency matrix encoding ACTIONet if 'return_raw=True'
-
+    """Computes and returns the ACTIONet graph
+   
+    :param data:`n_obs` × `n_arch` Matrix or AnnData object containing output of the 'prune_archetypes()'.
+    :param net_name_out:If 'data' is AnnData, store output matrix G in '.obsp' with key 'net_name_out' (default="ACTIONet")
+    :param density: Controls the overall density of constructed network. Larger values results in more retained edges.
+    :param thread_no: Number of parallel threads used for identifying nearest-neighbors. Defaults to available threads on the machine.
+    :param mutual_edges_only: Whether to return only edges that there is a bi-directional/mutual relationship.
+    :param distance_metric: one of jsd, ip, l2 (default=jsd) 
+    :param nn_approach: one of k*nn, knn (default=k*nn) 
+    :param copy: If 'data' is AnnData, return a copy instead of writing to `data`.
+    :param return_raw: If 'return_raw=True' and 'data' is AnnData, return sparse adjacency matrix directly.
+    ... 
+    :return adata: anndata.AnnData if 'adata' given and `copy=True` returns None or else adds fields to `adata`
+    :return G :scipy.sparse.spmatrix. Sparse adjacency matrix encoding ACTIONet if 'return_raw=True'
     """
 
     data_is_AnnData = isinstance(data, AnnData)

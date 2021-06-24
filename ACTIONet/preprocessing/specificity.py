@@ -33,40 +33,24 @@ def compute_archetype_feature_specificity(
     return_raw: Optional[bool] = False
 ) -> Union[AnnData, dict, None]:
 
-    """\
-    Computes Feature (i.e., gene) specificity of archetypes
-
-    Uses Archetype footprints to estimate markers (soft clustering)
-    Parameters
-    ----------
-    adata
-        AnnData object possibly containing '.layers["layer_name"]' and '.obsm["footprint_key"]'.
-    S:
-        `n_obs` × `n_vars` gene expression matrix.
+    """Computes Feature (i.e., gene) specificity of archetypes \
+    Uses Archetype footprints to estimate markers (soft clustering) 
+    :param adata: AnnData object possibly containing '.layers["layer_name"]' and '.obsm["footprint_key"]'.
+    :param S: `n_obs` × `n_vars` gene expression matrix. \
         Required if 'adata=None', otherwise retrieved from '.layers["layer_name"]' or '.X' if 'layer_name=None'.
-    H:
-        Matrix-like object containing archetype footprint
+    :param H: Matrix-like object containing archetype footprint \
         Required if 'adata=None', otherwise retrieved from '.obsm["footprint_key"]'
-    layer_name
-        Key of 'layers' to retrieve gene expression matrix.
-    footprint_key
-        Key in `adata.obsm` that holds the archetype footprint.
-    copy
-        If 'adata' is given, return a copy instead of writing to `adata`
-    return_raw
-        If 'adata' is given, return dict of 'compute_archetype_feature_specificity()' output instead of storing to 'adata'.
-
-    Returns
-    -------
-    adata : anndata.AnnData
-        if `copy=True` returns None or else adds fields to `adata`:
-
-        `.varm["unified_feature_profile"]`
+    :param layer_name: Key of 'layers' to retrieve gene expression matrix.
+    :param footprint_key:Key in `adata.obsm` that holds the archetype footprint.
+    :param copy: If 'adata' is given, return a copy instead of writing to `adata`
+    :param return_raw: If 'adata' is given, return dict of 'compute_archetype_feature_specificity()' output instead of storing to 'adata'.
+    ...
+    :return adata : anndata.AnnData \
+        if `copy=True` returns None or else adds fields to `adata` \
+        `.varm["unified_feature_profile"]` \
         `.varm["unified_feature_specificity"]`
-
-    specificity : dict
+    :return specificity: dict \
         If 'adata=None' or 'return_raw=True', returns dict containing 'unified_feature_profile' and 'unified_feature_specificity' matrices.
-
     """
     if adata is not None:
         if isinstance(adata, AnnData):
