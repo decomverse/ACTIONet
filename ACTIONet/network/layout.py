@@ -22,56 +22,28 @@ def layout_network(
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False
 ) -> Union[AnnData, dict, None]:
-    """\
-    Network layout
-
-    Embedded the graph into 2D/3D space
-
-    Parameters
-    ----------
-    adata:
-        AnnData object possibly containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
-    G:
-        Adjacency matrix to use for constructing layout.
-        Required if 'adata=None'.
-    S_r:
-        Reduced representation matrix to use for constructing layout.
-        Required if 'adata=None'.
-    reduction_name:
-        Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'layout_ACTIONet()' (default="ACTION").
-        Ignored if 'adata=None'.
-    net_name:
-        Key of 'adata.obmp' containing adjacency matrix to use for 'G' in 'layout_ACTIONet()' (default="ACTIONet").
-        Ignored if 'adata=None'.
-    compactness_level:
-        Between 0-100.
-        Ignored if 'layout_alg=0'.
-    layout_alg:
-        Algorithm to use for constructing layout:
-        `0` (the default)
-            t-distributed UMAP
-        `1`
-            Modified UMAP
-    n_epochs:
-        Number of SGD epochs.
-    thread_no:
-        Number of threads. Defaults to number of threads available - 2.
-    seed
-        Random seed
-    copy
-        If 'adata' is given, return a copy instead of writing to `adata`
-    return_raw
-        If 'adata' is given, return dict of raw 'layout_ACTIONet()' output instead of storing to 'adata'.
-
-    Returns
-    -------
-    adata : anndata.AnnData
-        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
-
-        `.obsp[net_name_out]`
-
-    layout : dict
-        If 'adata=None' or 'return_raw=True', returns dict with 2D/3D coordinates and color values.
+    """Network layout, Embeds the graph into 2D/3D space
+    :param adata: AnnData object possibly containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
+    :param G:Adjacency matrix to use for constructing layout. Required if 'adata=None'.
+    :param S_r: Reduced representation matrix to use for constructing layout. Required if 'adata=None'.
+    :param reduction_name:Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'layout_ACTIONet()' (default="ACTION").Ignored if 'adata=None'.
+    :param net_name: Key of 'adata.obmp' containing adjacency matrix to use for 'G' in 'layout_ACTIONet()' (default="ACTIONet").  Ignored if 'adata=None'.
+    :param compactness_level: Between 0-100. Ignored if 'layout_alg=0'.
+    :param layout_alg:Algorithm to use for constructing layout: \
+    `0` (the default) \
+    t-distributed UMAP \
+    `1` Modified UMAP
+    :param: n_epochs: Number of SGD epochs.
+    :param thread_no: Number of threads. Defaults to number of threads available - 2.
+    :param seed: Random seed
+    :param copy: If 'adata' is given, return a copy instead of writing to `adata`
+    :param return_raw: If 'adata' is given, return dict of raw 'layout_ACTIONet()' output instead of storing to 'adata'.
+    ...
+    :return adata: anndata.AnnData \
+    if 'adata' given and `copy=True` returns None or else adds fields to `adata`: \
+    `.obsp[net_name_out]`
+    :return layout : dict \
+    If 'adata=None' or 'return_raw=True', returns dict with 2D/3D coordinates and color values.
     """
 
     if adata is not None:
