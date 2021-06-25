@@ -80,14 +80,11 @@ def prune_archetypes(
 
 def unify_archetypes(
         adata: Optional[AnnData] = None,
-        G: Union[np.ndarray, sparse.spmatrix] = None,
         S_r: Union[np.ndarray, sparse.spmatrix] = None,
         C_stacked: Union[np.ndarray, sparse.spmatrix] = None,
+        H_stacked: Union[np.ndarray, sparse.spmatrix] = None,
         reduction_name: Optional[str] = "ACTION",
-        net_name: Optional[str] = "ACTIONet",
-        alpha_val: Optional[float] = 0.99,
-        outlier_threshold: Optional[float] = 2,
-        sim_threshold: Optional[float] = 0,
+        violation_threshold: Optional[float] = 0,
         thread_no: Optional[int] = 0,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False,
@@ -101,27 +98,20 @@ def unify_archetypes(
     ----------
     adata:
         AnnData object containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
-    G:
-        Adjacency matrix to use for unification.
-        Required if 'adata=None'.
     S_r:
         Reduced representation matrix to use for unification.
         Required if 'adata=None'.
     C_stacked:
         Matrix containing output 'C_stacked' of 'prune_archetypes()' to use for unification.
         Required if 'adata=None', otherwise retrieved from 'adata.obsm["C_stacked"]'
+    H_stacked:
+        Matrix containing output 'H_stacked' of 'prune_archetypes()' to use for unification.
+        Required if 'adata=None', otherwise retrieved from 'adata.obsm["H_stacked"]'
     reduction_name:
         Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'unify_archetypes()' (default="ACTION").
         Ignored if 'adata=None'.
-    net_name:
-        Key of 'adata.obmp' containing adjacency matrix to use for 'G' in 'unify_archetypes()' (default="ACTIONet").
-        Ignored if 'adata=None'.
-    alpha_val:
-        Diffusion parameter to impute archetype foorprints ([0-1), default: 0.99)
-    outlier_threshold:
-        Coreness threshold to filter noisy archetypes(<= 0, default: 2)
-    sim_threshold: 
-        Similarity threshold to group similar archetypes (default: 0)
+    violation_threshold:
+        Archetype unification resolution parameter (default=0)
     thread_no:
         Number of threads. Defaults to number of threads available - 2.
     copy
@@ -145,28 +135,31 @@ def unify_archetypes(
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
             S_r = S_r if S_r is not None else adata.obsm[reduction_name]
-            G = G if G is not None else adata.obsp[net_name]
             C_stacked = C_stacked if C_stacked is not None else adata.obsm['C_stacked']
+            H_stacked = H_stacked if H_stacked is not None else adata.obsm['H_stacked']
         else:
             raise ValueError("'adata' is not an AnnData object.")
     else:
-        if G is None or S_r is None or C_stacked is None:
+        if S_r is None or C_stacked is None or H_stacked is None:
             raise ValueError("'G' and 'S_r' cannot be NoneType if 'adata=None'.")
-        if not isinstance(G, (np.ndarray, sparse.spmatrix)):
-            raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
         if not isinstance(S_r, (np.ndarray, sparse.spmatrix)):
             raise ValueError("'S_r' must be numpy.ndarray or sparse.spmatrix.")
         if not isinstance(C_stacked, (np.ndarray, sparse.spmatrix)):
             raise ValueError("'C_stacked' must be numpy.ndarray or sparse.spmatrix.")
+        if not isinstance(H_stacked, (np.ndarray, sparse.spmatrix)):
+            raise ValueError("'H_stacked' must be numpy.ndarray or sparse.spmatrix.")
 
-    G = G.astype(dtype=np.float64)
     S_r = S_r.T.astype(dtype=np.float64)
     C_stacked = C_stacked.astype(dtype=np.float64)
+    H_stacked = H_stacked.astype(dtype=np.float64)
 
     if sparse.issparse(C_stacked):
         C_stacked = C_stacked.toarray()
 
-    unified = _an.unify_archetypes(G, S_r, C_stacked, alpha_val, outlier_threshold, sim_threshold, thread_no)
+    if sparse.issparse(C_stacked):
+        H_stacked = H_stacked.toarray()
+
+    unified = _an.unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, thread_no)
 
     unified["C_unified"] = sparse.csc_matrix(unified["C_unified"])
     unified["H_unified"] = sparse.csc_matrix(unified["H_unified"].T)
@@ -177,9 +170,6 @@ def unify_archetypes(
         adata.obsm["C_unified"] = unified["C_unified"]
         adata.obsm["H_unified"] = unified["H_unified"]
 
-        # adata.uns.setdefault("metadata", {}).update(
-        #     {"unified": {"selected_archetypes": unified["selected_archetypes"]}}
-        # )
         adata.uns.setdefault("obsm_annot", {}).update(
             {
                 "C_unified": {"type": np.array([b'internal'], dtype=object)},
@@ -193,4 +183,3 @@ def unify_archetypes(
         )
 
         return adata if copy else None
-
