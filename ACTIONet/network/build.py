@@ -15,9 +15,6 @@ def build_network(
         distance_metric: Optional[str] = "jsd",
         nn_approach: Optional[str] = "k*nn",
         k: Optional[int] = None,
-        M: Optional[float] = 16,
-        ef_construction: Optional[float] = 200,
-        ef: Optional[float] = 50,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False,
         
@@ -32,12 +29,18 @@ def build_network(
     :param mutual_edges_only: Whether to return only edges that there is a bi-directional/mutual relationship.
     :param distance_metric: one of jsd, ip, l2 (default=jsd) 
     :param nn_approach: one of k*nn, knn (default=k*nn) 
+    :param k: number of clusters to utilize for knn; not used in k*nn 
     :param copy: If 'data' is AnnData, return a copy instead of writing to `data`.
     :param return_raw: If 'return_raw=True' and 'data' is AnnData, return sparse adjacency matrix directly.
     ... 
     :return adata: anndata.AnnData if 'adata' given and `copy=True` returns None or else adds fields to `adata`
     :return G :scipy.sparse.spmatrix. Sparse adjacency matrix encoding ACTIONet if 'return_raw=True'
     """
+
+    #these are defaults, they do not change 
+    M=16
+    ef_construction=200
+    ef=50
 
     data_is_AnnData = isinstance(data, AnnData)
 
