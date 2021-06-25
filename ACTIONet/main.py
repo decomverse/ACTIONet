@@ -9,7 +9,6 @@ from . import preprocessing as pp
 
 def run_ACTIONet(
         adata: AnnData,
-        k: Optional[int] = 10,
         k_max: Optional[int] = 30,
         layer_name: Optional[str] = None,
         reduction_name: Optional[str] = "ACTION",
@@ -17,26 +16,22 @@ def run_ACTIONet(
         min_cells_per_archetype: Optional[int] = 2,
         max_iter_ACTION: Optional[int] = 50,
         min_specificity_z_threshold: Optional[int] = -3,
+        distance_metric: Optional[str] = "jsd",
+        nn_approach: Optional[str] = "k*nn",
         network_density: Optional[int] = 1,
         mutual_edges_only: Optional[bool] = True,
         layout_compactness: Optional[int] = 50,
         layout_epochs: Optional[int] = 1000,
         layout_algorithm: Optional[int] = 0,
         layout_in_parallel: Optional[bool] = True,
-        unification_alpha: Optional[float] = 0.99,
-        unification_outlier_threshold: Optional[float] = 2,
-        unification_sim_threshold: Optional[float] = 0,
+        unification_violation_threshold: Optional[float] = 0,
         footprint_key: Optional[str] = "archetype_footprint",
         footprint_alpha: Optional[float] = 0.85,
         thread_no: Optional[int] = 0,
         seed: Optional[int] = 0,
         copy: Optional[bool] = False,
-        distance_metric: Optional[str] = "jsd",
-        nn_approach: Optional[str] = "k*nn",
-        M: Optional[float]=16,
-        ef_construction: Optional[float]=200,
-        ef:Optional[float]=50
 ):
+
     adata = adata.copy() if copy else adata
 
     if layer_name is not None:
@@ -81,16 +76,11 @@ def run_ACTIONet(
         density=network_density,
         thread_no=thread_no,
         mutual_edges_only=mutual_edges_only,
-        copy=False,
-        return_raw=False,
         distance_metric=distance_metric,
         nn_approach=nn_approach,
-        k=k,
-        M=M,
-        ef_construction=ef_construction,
-        ef=ef
+        copy=False,
+        return_raw=False
     )
-    # adata.obsp[net_name_out] = G
 
     nt.layout_network(
         adata=adata,
@@ -110,12 +100,10 @@ def run_ACTIONet(
     # Identiy equivalent classes of archetypes and group them together
     pp.unify_archetypes(
         adata=adata,
-        G=None,
         S_r=None,
         C_stacked=None,
-        alpha_val=unification_alpha,
-        outlier_threshold=unification_outlier_threshold,
-        sim_threshold=unification_sim_threshold,
+        H_stacked=None,
+        violation_threshold=unification_violation_threshold,
         thread_no=thread_no,
         copy=False,
         return_raw=False
