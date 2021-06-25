@@ -566,7 +566,7 @@ sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
     G = build_ACTIONet_KstarNN_v2(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
   }
   else{
-    G =build_ACTIONet_KNN(H_stacked, k ,thread_no,M,ef_construction, ef, mutual_edges_only, distance_metric);
+    G = build_ACTIONet_KNN(H_stacked, k ,thread_no,M,ef_construction, ef, mutual_edges_only, distance_metric);
   }
   return (G);
 }

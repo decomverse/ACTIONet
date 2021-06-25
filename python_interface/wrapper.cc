@@ -434,8 +434,7 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
                                      bool mutual_edges_only = true,
 				     string distance_metric="jsd",
 				     string nn_approach="k*nn",
-				     int k=10) {
-  double M = 16, ef_construction = 200, ef = 50;
+				     int k=10, double M = 16, double ef_construction = 200, double ef = 50){
 						 
   arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked,density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);
   return G;
@@ -1022,7 +1021,9 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Builds an interaction network from the multi-level archetypal decompositions",
         py::arg("H_stacked"), py::arg("density") = 1.0,
         py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true,
-        py::arg("distance_metric")="jsd",py::arg("nn_approach")="k*nn",py::arg("k"));
+        py::arg("distance_metric") = "jsd", py::arg("nn_approach")=  "k*nn",
+        py::arg("k") = 10, py::arg("M") = 16,
+        py::arg("ef_construction") = 200, py::arg("ef") = 10);
 
   
   m.def("layout_ACTIONet", &layout_ACTIONet,
