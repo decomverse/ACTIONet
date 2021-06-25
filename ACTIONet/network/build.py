@@ -1,8 +1,8 @@
+import pdb
 from typing import Optional, Union
 from anndata import AnnData
 import numpy as np
 from scipy import sparse
-
 import _ACTIONet as _an
 
 
@@ -53,9 +53,6 @@ def build_network(
     H_stacked = H_stacked.T.astype(dtype=np.float64)
     if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
-
-    if distance_metric=="jsd":
-        H_stacked=H_stacked/np.sum(H_stacked,axis=0)
 
     G = _an.build_ACTIONet(H_stacked=H_stacked,
                            density=density,
