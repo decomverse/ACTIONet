@@ -3,7 +3,7 @@ Changelog
 *********
 v2.0.4
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -44,7 +44,7 @@ v2.0.4
 
 v2.0.5
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -85,7 +85,7 @@ v2.0.5
 
 v2.0.6b
 =======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -126,7 +126,7 @@ v2.0.6b
 
 v2.0.7
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -167,7 +167,7 @@ v2.0.7
 
 v2.0.8b
 =======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -208,7 +208,7 @@ v2.0.8b
 
 v2.0.9
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -249,7 +249,7 @@ v2.0.9
 
 v2.0.10
 =======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -290,7 +290,7 @@ v2.0.10
 
 v2.0.12
 =======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -331,7 +331,7 @@ v2.0.12
 
 v2.0.15
 =======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -372,7 +372,7 @@ v2.0.15
 
 v2.0.18
 =======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -413,7 +413,7 @@ v2.0.18
 
 v2.1.2
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -454,7 +454,7 @@ v2.1.2
 
 v2.1.5
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
@@ -495,6 +495,6 @@ v2.1.5
 
 v2.1.7
 ======
-:Date: June 22, 2021
+:Date: June 24, 2021
 
 
