@@ -80,9 +80,9 @@ def prune_archetypes(
 
 def unify_archetypes(
         adata: Optional[AnnData] = None,
-        S_r: Union[np.ndarray, sparse.spmatrix] = None,
-        C_stacked: Union[np.ndarray, sparse.spmatrix] = None,
-        H_stacked: Union[np.ndarray, sparse.spmatrix] = None,
+        S_r: Union[np.ndarray, sparse.spmatrix, None] = None,
+        C_stacked: Union[np.ndarray, sparse.spmatrix, None] = None,
+        H_stacked: Union[np.ndarray, sparse.spmatrix, None] = None,
         reduction_name: Optional[str] = "ACTION",
         violation_threshold: Optional[float] = 0,
         thread_no: Optional[int] = 0,
@@ -150,14 +150,15 @@ def unify_archetypes(
             raise ValueError("'H_stacked' must be numpy.ndarray or sparse.spmatrix.")
 
     S_r = S_r.T.astype(dtype=np.float64)
-    C_stacked = C_stacked.astype(dtype=np.float64)
-    H_stacked = H_stacked.astype(dtype=np.float64)
 
     if sparse.issparse(C_stacked):
         C_stacked = C_stacked.toarray()
 
-    if sparse.issparse(C_stacked):
+    if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
+
+    C_stacked = C_stacked.astype(dtype=np.float64)
+    H_stacked = H_stacked.T.astype(dtype=np.float64)
 
     unified = _an.unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, thread_no)
 
