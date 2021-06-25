@@ -14,12 +14,11 @@ def build_network(
         mutual_edges_only: Optional[bool] = True,
         distance_metric: Optional[str] = "jsd",
         nn_approach: Optional[str] = "k*nn",
-        k: Optional[int] = None,
+        k: Optional[int] = 10,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False,
-        
-        
 ) -> Union[AnnData, sparse.spmatrix, None]:
+
     """Computes and returns the ACTIONet graph
    
     :param data:`n_obs` × `n_arch` Matrix or AnnData object containing output of the 'prune_archetypes()'.
