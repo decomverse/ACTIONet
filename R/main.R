@@ -1,26 +1,28 @@
 #' Run main ACTIONet pipeline
 #'
-#' @param ace Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).
-#' @param k_min Minimum depth of decompositions (default=2).
-#' @param k_max Maximum depth of decompositions (default=30).
-#' @param assay_name Name of assay to be used (default='logcounts').
-#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel (default='ACTION').
-#' @param net_slot_out  Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').
-#' @param min_cells_per_arch Minimum number of observations required to construct an archetype (default=2).
-#' @param max_iter_ACTION Maximum number of iterations for ACTION algorithm (default=50).
+#' @param ace `ACTIONetExperiment` containing an appropriate reduction in 'reduction_slot'.
+#' @param k_min Minimum depth of decompositions. (default=2)
+#' @param k_max Maximum depth of decompositions. (default=30)
+#' @param assay_name Name of assay to be used. (default='logcounts')
+#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel. (default='ACTION')
+#' @param net_slot_out  Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')
+#' @param min_cells_per_arch Minimum number of observations required to construct an archetype. (default=2)
+#' @param max_iter_ACTION Maximum number of iterations for ACTION algorithm. (default=50)
 #' @param min_specificity_z_thresh Defines the stringency of pruning nonspecific archetypes.
-#' The larger the value, the more archetypes will be filtered out (default=-3).
-#' @param network_density Density factor of ACTIONet graph (default=1).
-#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
-#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
-#' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
-#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).
-#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).
-#' @param unification_violation_threshold Archetype unification resolution parameter (default=0).
-#' @param footprint_alpha Archetype smoothing parameter (default=0.85).
-#' @param thread_no Number of parallel threads (default=0).
-#' @param full_trace Return list of all intermediate output. Intended for debugging (default='FALSE').
-#' @param seed Seed for random initialization (default=0).
+#' The larger the value, the more archetypes will be filtered out. (default=-3)
+#' @param distance_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
+#' @param nn_approach Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
+#' @param network_density Density factor of ACTIONet graph. (default=1)
+#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
+#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
+#' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
+#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)
+#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
+#' @param unification_violation_threshold Archetype unification resolution parameter. (default=0)
+#' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
+#' @param thread_no Number of parallel threads. (default=0)
+#' @param full_trace Return list of all intermediate output. Intended for debugging. (default='FALSE')
+#' @param seed Seed for random initialization. (default=0)
 #'
 #' @return \itemize{
 #' \item If full_trace='FALSE'(default): ACTIONetExperiment object.
@@ -42,6 +44,8 @@ run.ACTIONet <- function(
   min_cells_per_arch = 2,
   max_iter_ACTION = 50,
   min_specificity_z_thresh = -3,
+  distance_metric = "jsd",
+  nn_approach = "k*nn",
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
@@ -110,8 +114,8 @@ run.ACTIONet <- function(
       density = network_density,
       thread_no = thread_no,
       mutual_edges_only = mutual_edges_only,
-      distance_metric = "jsd",
-      nn_approach="k*nn"
+      distance_metric = distance_metric,
+      nn_approach = nn_approach
     )
     colNets(ace)[[net_slot_out]] = G
 
@@ -138,7 +142,8 @@ run.ACTIONet <- function(
       C_stacked = pruning.out$C_stacked,
       H_stacked = pruning.out$H_stacked,
       violation_threshold = unification_violation_threshold,
-      thread_no = thread_no)
+      thread_no = thread_no
+    )
 
     Ht_unified = as(Matrix::t(unification.out$H_unified), "sparseMatrix")
     colMaps(ace)[["H_unified"]] = Ht_unified
@@ -149,17 +154,16 @@ run.ACTIONet <- function(
 
     ace$assigned_archetype = c(unification.out$assigned_archetype)
 
-    # Use graph core of global and induced subgraphs to infer centrality/quality of
-    # each cell
+    # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
     ace$node_centrality = c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
     # Smooth archetype footprints
     Ht_unified = colMaps(ace)[["H_unified"]]
-    archetype_footprint = compute_network_diffusion(
+    archetype_footprint = compute_network_diffusion_fast(
       G = G,
       X0 = Ht_unified,
-      alpha = footprint_alpha,
-      thread_no = thread_no
+      thread_no = thread_no,
+      alpha = footprint_alpha
     )
 
     colMaps(ace)$archetype_footprint = archetype_footprint
@@ -219,16 +223,18 @@ run.ACTIONet <- function(
 #' Reconstructs the ACTIONet graph with the new parameters (uses prior decomposition)
 #'
 #' @param ace ACTIONetExperiment object.
-#' @param network_density Density factor of ACTIONet graph (default=1).
-#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
+#' @param network_density Density factor of ACTIONet graph. (default=1)
+#' @param distance_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
+#' @param nn_approach Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
+#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
-#' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
-#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).
-#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).
-#' @param thread_no Number of parallel threads (default=0).
-#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel (default='ACTION').
-#' @param output_slot Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').
-#' @param seed Seed for random initialization (default=0).
+#' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
+#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)
+#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
+#' @param thread_no Number of parallel threads. (default=0)
+#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel. (default='ACTION')
+#' @param output_slot Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')
+#' @param seed Seed for random initialization. (default=0)
 #'
 #' @return ace Updated ace object
 #'
@@ -240,6 +246,8 @@ run.ACTIONet <- function(
 reconstruct.ACTIONet <- function(
   ace,
   network_density = 1,
+  distance_metric = "jsd",
+  nn_approach = "k*nn",
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
@@ -260,7 +268,9 @@ reconstruct.ACTIONet <- function(
       H_stacked = H_stacked,
       density = network_density,
       thread_no = thread_no,
-      mutual_edges_only = mutual_edges_only
+      mutual_edges_only = mutual_edges_only,
+      distance_metric = distance_metric,
+      nn_approach = nn_approach
     )
     colNets(ace)[[output_slot]] = G
 
@@ -433,7 +443,7 @@ rerun.archetype.aggregation <- function(
     ace$node_centrality = c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
     Ht_unified = colMaps(ace)[[sprintf("H_%s", unified_suffix)]]
-    archetype_footprint = compute_network_diffusion(
+    archetype_footprint = compute_network_diffusion_fast(
       G = G,
       X0 = Ht_unified,
       thread_no = thread_no,
@@ -489,13 +499,12 @@ construct.backbone <- function(
         G = colNets(ace)[[ACTIONet_slot]]
         Ht_unified = colMaps(ace)[["H_unified"]]
 
-        archetype_footprint = compute_network_diffusion(
+        archetype_footprint = compute_network_diffusion_fast(
           G = G,
           X0 = Ht_unified,
-          alpha = footprint_alpha,
-          thread_no = thread_no
+          thread_no = thread_no,
+          alpha = footprint_alpha
         )
-
         colMaps(ace)$archetype_footprint = archetype_footprint
     }
 
