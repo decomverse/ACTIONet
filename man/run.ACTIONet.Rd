@@ -15,6 +15,8 @@ run.ACTIONet(
   min_cells_per_arch = 2,
   max_iter_ACTION = 50,
   min_specificity_z_thresh = -3,
+  distance_metric = "jsd",
+  nn_approach = "k*nn",
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
@@ -29,46 +31,50 @@ run.ACTIONet(
 )
 }
 \arguments{
-\item{ace}{Reduced `ACTIONetExperiment (ace)` object (output of reduce.ace() function).}
+\item{ace}{`ACTIONetExperiment` containing an appropriate reduction in 'reduction_slot'.}
 
-\item{k_min}{Minimum depth of decompositions (default=2).}
+\item{k_min}{Minimum depth of decompositions. (default=2)}
 
-\item{k_max}{Maximum depth of decompositions (default=30).}
+\item{k_max}{Maximum depth of decompositions. (default=30)}
 
-\item{assay_name}{Name of assay to be used (default='logcounts').}
+\item{assay_name}{Name of assay to be used. (default='logcounts')}
 
-\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel (default='ACTION').}
+\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel. (default='ACTION')}
 
-\item{net_slot_out}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').}
+\item{net_slot_out}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
 
-\item{min_cells_per_arch}{Minimum number of observations required to construct an archetype (default=2).}
+\item{min_cells_per_arch}{Minimum number of observations required to construct an archetype. (default=2)}
 
-\item{max_iter_ACTION}{Maximum number of iterations for ACTION algorithm (default=50).}
+\item{max_iter_ACTION}{Maximum number of iterations for ACTION algorithm. (default=50)}
 
 \item{min_specificity_z_thresh}{Defines the stringency of pruning nonspecific archetypes.
-The larger the value, the more archetypes will be filtered out (default=-3).}
+The larger the value, the more archetypes will be filtered out. (default=-3)}
 
-\item{network_density}{Density factor of ACTIONet graph (default=1).}
+\item{distance_metric}{Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')}
 
-\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
+\item{nn_approach}{Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')}
 
-\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
+\item{network_density}{Density factor of ACTIONet graph. (default=1)}
 
-\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
+\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).}
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)}
 
-\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).}
+\item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
-\item{unification_violation_threshold}{Archetype unification resolution parameter (default=0).}
+\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)}
 
-\item{footprint_alpha}{Archetype smoothing parameter (default=0.85).}
+\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
-\item{thread_no}{Number of parallel threads (default=0).}
+\item{unification_violation_threshold}{Archetype unification resolution parameter. (default=0)}
 
-\item{full_trace}{Return list of all intermediate output. Intended for debugging (default='FALSE').}
+\item{footprint_alpha}{Archetype smoothing parameter. (default=0.85)}
 
-\item{seed}{Seed for random initialization (default=0).}
+\item{thread_no}{Number of parallel threads. (default=0)}
+
+\item{full_trace}{Return list of all intermediate output. Intended for debugging. (default='FALSE')}
+
+\item{seed}{Seed for random initialization. (default=0)}
 }
 \value{
 \itemize{
