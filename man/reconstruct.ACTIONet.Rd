@@ -7,6 +7,8 @@
 reconstruct.ACTIONet(
   ace,
   network_density = 1,
+  distance_metric = "jsd",
+  nn_approach = "k*nn",
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
@@ -21,25 +23,29 @@ reconstruct.ACTIONet(
 \arguments{
 \item{ace}{ACTIONetExperiment object.}
 
-\item{network_density}{Density factor of ACTIONet graph (default=1).}
+\item{network_density}{Density factor of ACTIONet graph. (default=1)}
 
-\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
+\item{distance_metric}{Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')}
+
+\item{nn_approach}{Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')}
+
+\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)}
 
 \item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
 
-\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
+\item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).}
+\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)}
 
-\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization (default=TRUE).}
+\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
-\item{thread_no}{Number of parallel threads (default=0).}
+\item{thread_no}{Number of parallel threads. (default=0)}
 
-\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel (default='ACTION').}
+\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel. (default='ACTION')}
 
-\item{output_slot}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix (default='ACTIONet').}
+\item{output_slot}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
 
-\item{seed}{Seed for random initialization (default=0).}
+\item{seed}{Seed for random initialization. (default=0)}
 }
 \value{
 ace Updated ace object
