@@ -71,8 +71,11 @@ CPal_default = c(
     plot_labels = label_attr
   }
 
-  plot_labels = as.character(plot_labels)
-  plot_labels[is.na(plot_labels)] = "NA"
+  if(!is.numeric(plot_labels)){
+    plot_labels = as.character(plot_labels)
+    plot_labels[is.na(plot_labels)] = "NA"
+  }
+  
   return(plot_labels)
 
 }
