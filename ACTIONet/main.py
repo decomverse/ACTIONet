@@ -9,6 +9,7 @@ from . import preprocessing as pp
 
 def run_ACTIONet(
         adata: AnnData,
+        k: Optional[int] = 10,
         k_max: Optional[int] = 30,
         layer_name: Optional[str] = None,
         reduction_name: Optional[str] = "ACTION",
@@ -78,6 +79,7 @@ def run_ACTIONet(
         mutual_edges_only=mutual_edges_only,
         distance_metric=distance_metric,
         nn_approach=nn_approach,
+        k=k,
         copy=False,
         return_raw=False
     )
