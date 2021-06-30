@@ -523,7 +523,7 @@ plot.ACTIONet.interactive <- function(
   plot_alpha = .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
 
   if(threeD == TRUE){
-    if (NCOL(plot_coors) < 3 & "ACTIONet3D" %in% names(colMaps(ace))){
+    if (NCOL(plot_coors) < 3 & "ACTIONet3D" %in% names(colMaps(data))){
       msg = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
       message(msg)
       plot_coors = .get_plot_coors(data, "ACTIONet3D", coor_dims = 3)
