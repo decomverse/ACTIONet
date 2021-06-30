@@ -3,10 +3,10 @@
 filter.ace <- function(
   ace,
   assay_name = "counts",
-  min_cells_per_feat = 0.004,
-  min_feats_per_cell = 1000,
+  min_cells_per_feat = NULL,
+  min_feats_per_cell = NULL,
   min_umis_per_cell = NULL,
-  max_umis_per_cell = 50000,
+  max_umis_per_cell = NULL,
   return_fil_ace = TRUE
 ) {
 
@@ -128,7 +128,7 @@ filter.ace.by.attr <- function(
     ace.fil = ace[keep_row, keep_col]
     colData(ace.fil) <- droplevels(colData(ace.fil))
     rowData(ace.fil) <- droplevels(rowData(ace.fil))
-    
+
     invisible(gc())
     return(ace.fil)
 }
