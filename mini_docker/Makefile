@@ -1,5 +1,5 @@
-PARENT_DOCKER=shmohammadi86/actionet:mini
-REGISTRY=shmohammadi86
+PARENT_DOCKER=actionet/actionet:mini
+REGISTRY=actionet
 IMAGE_NAME=actionet
 VERSION=mini
 all: build
