@@ -482,6 +482,7 @@ Leiden.clustering <- function(
 		clusters[clusters %in% as.numeric(names(cc)[cc < 30])] = -1
 		clusters = c(run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold))
 	}
+    clusters = as.numeric(clusters)
     names(clusters) = paste("C", as.character(clusters), sep = "")
 
     return(clusters)
