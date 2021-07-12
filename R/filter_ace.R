@@ -8,11 +8,27 @@ filter.ace <- function(
   min_umis_per_cell = NULL,
   max_umis_per_cell = NULL,
   max_mito_fraction = NULL,
+  species = "mmusculus",
+  features_use = NULL,
   return_fil_ace = TRUE
 ) {
 
     org_dim = dim(ace)
     ace.fil = ace
+
+    if (!is.null(max_mito_fraction)){
+      mt_frac = get_mtRNA_stats(
+        ace.fil,
+        by = NULL,
+        groups_use = NULL,
+        assay = assay_name,
+        species = species,
+        metric = "pct",
+        features_use = features_use
+      )
+
+      ace.fil = ace.fil[, mt_frac <= max_mito_fraction]
+    }
 
     i = 0
     repeat {
@@ -43,15 +59,7 @@ filter.ace <- function(
             cell_count_mask = fastRowSums(SummarizedExperiment::assays(ace.fil)[[assay_name]] > 0) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
-	if (!is.null(max_mito_fraction)){
-	MT.idx = grep("^MT[:.:]|^MT-", rownames(ace.fil))
-	S.ace=counts(ace.fil)
-	umis=fast_column_sums(S.ace)
-	umis.MT = fast_column_sums(S.ace[MT.idx, ])
-	umis.MT.perc = 100*umis.MT /umis
-	mito_mask=umis.MT.perc < max_mito_fraction 
-	cols_mask = cols_mask & mito_mask
-	}
+
         ace.fil <- ace.fil[rows_mask, cols_mask]
         invisible(gc())
         i = i + 1

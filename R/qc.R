@@ -13,14 +13,20 @@
   return(MT_RNA)
 }
 
-get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NULL, assay = "counts", species = c("mmusculus", "hsapiens"), metric = c("pct", "ratio", "counts")){
+get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NULL, assay = "counts", species = c("mmusculus", "hsapiens", "other"), metric = c("pct", "ratio", "counts")){
 
   require(stats)
   species = match.arg(species)
   metric = match.arg(metric)
 
   features_use = ACTIONet:::.preprocess_annotation_features(ace, features_use = features_use)
-  mask = features_use %in% .get_mtRNA_genes(species)
+
+  if(species != "other")
+    mask = features_use %in% .get_mtRNA_genes(species)
+  else {
+    mask = grepl("^MT[:.:]|^MT-", features_use, ignore.case = TRUE)
+  }
+
   mat = assays(ace)[[assay]]
   cs_mat = ACTIONet::fastColSums(mat)
   mm = mat[mask, , drop = F]
