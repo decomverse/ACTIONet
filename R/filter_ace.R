@@ -49,7 +49,7 @@ filter.ace <- function(
 	umis=fast_column_sums(S.ace)
 	umis.MT = fast_column_sums(S.ace[MT.idx, ])
 	umis.MT.perc = 100*umis.MT /umis
-	mito_mask=umis.MT.perc < 10 
+	mito_mask=umis.MT.perc < max_mito_fraction 
 	cols_mask = cols_mask & mito_mask
 	}
         ace.fil <- ace.fil[rows_mask, cols_mask]
