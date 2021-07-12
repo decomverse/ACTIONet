@@ -7,6 +7,7 @@ filter.ace <- function(
   min_feats_per_cell = NULL,
   min_umis_per_cell = NULL,
   max_umis_per_cell = NULL,
+  max_mito_fraction = NULL,
   return_fil_ace = TRUE
 ) {
 
@@ -42,6 +43,15 @@ filter.ace <- function(
             cell_count_mask = fastRowSums(SummarizedExperiment::assays(ace.fil)[[assay_name]] > 0) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
+	if (!is.null(max_mito_fraction)){
+	MT.idx = grep("^MT[:.:]|^MT-", rownames(ace.fil))
+	S.ace=counts(ace.fil)
+	umis=fast_column_sums(S.ace)
+	umis.MT = fast_column_sums(S.ace[MT.idx, ])
+	umis.MT.perc = 100*umis.MT /umis
+	mito_mask=umis.MT.perc < 10 
+	cols_mask = cols_mask & mito_mask
+	}
         ace.fil <- ace.fil[rows_mask, cols_mask]
         invisible(gc())
         i = i + 1
