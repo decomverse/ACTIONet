@@ -68,6 +68,8 @@ import.ace.from.10X.generic <- function(
         colnames(colAnnot) = sample_metadata[1, ]
     } else {
         colAnnot = S4Vectors::DataFrame(sample_metadata)
+        if(NCOL(colAnnot) == 1)
+          colnames(colAnnot) = "Barcode"
     }
 
     # Feature-barcoding
