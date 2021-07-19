@@ -5,4 +5,5 @@
 	
 [submodule "src_modular"]
 	path = src_modular
+	branch = core
 	url = https://github.com/shmohammadi86/ACTIONet
