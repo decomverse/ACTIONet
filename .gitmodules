@@ -3,3 +3,6 @@
 	url = https://github.com/shmohammadi86/ACTIONet/tree/core/src
 
 	
+[submodule "src_modular"]
+	path = src_modular
+	url = https://github.com/shmohammadi86/ACTIONet
