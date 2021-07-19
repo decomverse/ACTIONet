@@ -22,7 +22,7 @@ Imports: Rcpp, RcppArmadillo, R.utils, stringr, ggplot2, ggpubr, ggrepel, plotly
 Suggests: metap, multtest, ComplexHeatmap, limma, ineq
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
-Remotes: immunogenomics/harmony,shmohammadi86/SCINET
+Remotes: shmohammadi86/ACE,shmohammadi86/SCINET,immunogenomics/harmony
 Encoding: UTF-8
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
