@@ -1,9 +1,4 @@
-[submodule "src/ACTIONet"]
-	path = src/ACTIONet
-	url = https://github.com/shmohammadi86/ACTIONet/tree/core/src
-
-	
-[submodule "src_modular"]
-	path = src_modular
+[submodule "ACTIONet_core"]
+	path = ACTIONet_core
 	branch = core
 	url = https://github.com/shmohammadi86/ACTIONet
