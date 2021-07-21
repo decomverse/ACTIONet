@@ -1100,3 +1100,7 @@ bind_sparse_mats <- function(A, B, dim = 0L) {
     .Call(`_ACTIONet_bind_sparse_mats`, A, B, dim)
 }
 
+# Register entry points for exported C++ functions
+methods::setLoadAction(function(ns) {
+    .Call('_ACTIONet_RcppExport_registerCCallable', PACKAGE = 'ACTIONet')
+})
