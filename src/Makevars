@@ -4,8 +4,8 @@ SOURCES2+=$(shell find . -type f -name "*.cpp")
 OBJECTS=$(SOURCES:.cc=.o) $(SOURCES2:.cpp=.o) $(CSOURCES:.c=.o)
 PWD=$(shell pwd)
 INCLUDE_PATH=${PWD}/ACTIONet/include
-PKG_CPPFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O2 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
-PKG_CXXFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O2 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+PKG_CPPFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O2 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+PKG_CXXFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O2 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
 
 UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
