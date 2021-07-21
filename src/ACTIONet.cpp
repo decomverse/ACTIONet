@@ -5,6 +5,7 @@
 #include <omp.h>
 #endif
 
+// [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
