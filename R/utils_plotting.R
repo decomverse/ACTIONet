@@ -12,23 +12,53 @@ CPal_default = c(
   "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5"
 )
 
-.default_ggtheme <-  ggplot2::theme(axis.title = element_blank(),
-        axis.text = ggplot2::element_blank(),
-        axis.ticks = ggplot2::element_blank(),
-        panel.grid = element_blank(),
-        panel.background = ggplot2::element_blank(),
-        plot.background = element_rect(fill = "white", color = NA),
-        legend.title = ggplot2::element_blank(),
-        legend.background = ggplot2::element_blank(),
-        legend.key = ggplot2::element_blank(),
-        plot.margin = grid::unit(c(1,1,1,1),"lines"))
+.default_ggtheme <- ggplot2::theme(
+  axis.title = element_blank(),
+  axis.text = ggplot2::element_blank(),
+  axis.ticks = ggplot2::element_blank(),
+  panel.grid = element_blank(),
+  panel.background = ggplot2::element_blank(),
+  plot.background = element_rect(fill = "white", color = NA),
+  legend.title = ggplot2::element_blank(),
+  legend.background = ggplot2::element_blank(),
+  legend.key = ggplot2::element_blank(),
+  plot.margin = grid::unit(c(1,1,1,1),"lines")
+)
 
+.axis_params = list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
+
+.set_default_layout_plotly <- function(p, show_legend = FALSE, plot_3d = FALSE){
+
+  if(plot_3d == TRUE){
+    p <- plotly::layout(
+      p = p,
+      scene = list(
+        xaxis = .axis_params,
+        yaxis = .axis_params,
+        zaxis = .axis_params
+      ),
+      showlegend = show_legend,
+      legend = list(
+        marker = list(
+          marker.size = 10
+        )
+      )
+    )
+  } else {
+    p <- plotly::layout(
+      p = p,
+      xaxis = .axis_params,
+      yaxis = .axis_params,
+      showlegend = show_legend
+    )
+  }
+  return(p)
+}
 
 .get_plot_coors <- function(
   X,
   coordinate_attr = NULL,
-  scale_coors = TRUE,
-  coor_dims = 2
+  scale_coors = TRUE
 ){
 
   if (is(X, "ACTIONetExperiment")) {
@@ -51,8 +81,8 @@ CPal_default = c(
     coors = scale(coors)
   }
 
-  coors = data.frame(coors[, 1:coor_dims])
-  colnames(coors) = c("x", "y", "z")[1:coor_dims]
+  coors = data.frame(coors)
+  colnames(coors) = c("x", "y", "z")[1:NCOL(coors)]
 
   return(coors)
 }
@@ -75,7 +105,7 @@ CPal_default = c(
     plot_labels = as.character(plot_labels)
     plot_labels[is.na(plot_labels)] = "NA"
   }
-  
+
   return(plot_labels)
 
 }
@@ -310,4 +340,173 @@ CPal_default = c(
     d = c(sf, sf + 1)
 
   return(d)
+}
+
+#' @import plotly
+.make_plotly_scatter_single_trace <- function(
+  x,
+  y,
+  z = NULL,
+  label_attr = NULL,
+  cols_fill = NULL,
+  cols_stroke = NULL,
+  point_size = 3,
+  stroke_size = point_size * 0.1,
+  show_legend = FALSE,
+  hover_text = NULL,
+  plot_3d = FALSE
+){
+
+  if(is.null(z))
+    z = NA
+
+  plot_data = data.frame(
+    x = x,
+    y = y,
+    z = z,
+    labels = label_attr
+  )
+
+  if (is.null(hover_text))
+    plot_data$text = 1:NROW(plot_data)
+  else{
+    plot_data$text = hover_text
+  }
+
+  if(plot_3d == TRUE){
+
+    p <- plotly::plot_ly(
+      data = plot_data,
+      x = plot_data$x,
+      y = plot_data$y,
+      z = plot_data$z,
+      marker = list(
+        color = cols_fill,
+        size = point_size,
+        line = list(
+          width = stroke_size,
+          color = cols_stroke
+        )
+      ),
+      text = plot_data$text,
+      hoverinfo = "text",
+      mode = "markers",
+      type = "scatter3d"
+    )
+
+  } else {
+
+    p <- plotly::plot_ly(
+      data = plot_data,
+      x = plot_data$x,
+      y = plot_data$y,
+      marker = list(
+        color = cols_fill,
+        size = point_size,
+        line = list(
+          width = stroke_size,
+          color = cols_stroke
+        )
+      ),
+      text = plot_data$text,
+      hoverinfo = "text",
+      mode = "markers",
+      type = "scattergl"
+    )
+  }
+
+  p <- .set_default_layout_plotly(p, show_legend, plot_3d) %>% hide_colorbar()
+  return(p)
+}
+
+#' @import plotly
+.make_plotly_scatter_split_trace <- function(
+  x,
+  y,
+  z = NULL,
+  label_attr = NULL,
+  cols_fill = NULL,
+  cols_stroke = NULL,
+  point_size = 3,
+  stroke_size = point_size * 0.1,
+  show_legend = TRUE,
+  hover_text = NULL,
+  plot_3d = FALSE
+){
+
+  if(is.null(z))
+    z = NA
+
+  plot_data = data.frame(
+    x = x,
+    y = y,
+    z = z,
+    labels = label_attr
+  )
+
+  if (is.null(hover_text))
+    plot_data$text = plot_data$labels
+  else{
+    plot_data$text = hover_text
+  }
+
+  trace_names = sort(unique(plot_data$labels))
+
+  if(plot_3d == TRUE){
+
+    p <- plot_ly(type = "scatter3d", mode = "markers")
+
+    for(n in trace_names){
+      sub_data = plot_data[plot_data$labels == n, ]
+
+      p <- add_trace(
+        p = p,
+        x = sub_data$x,
+        y = sub_data$y,
+        z = sub_data$z,
+        marker = list(
+          color = cols_fill[n],
+          size = point_size,
+          line = list(
+            width = stroke_size,
+            color = cols_stroke[n]
+          )
+        ),
+        text = sub_data$text,
+        hoverinfo = "text",
+        mode = "markers",
+        name = n
+      )
+
+    }
+
+  } else {
+
+    p <- plot_ly(type = "scattergl", mode = "markers")
+
+    for(n in trace_names){
+      sub_data = plot_data[plot_data$labels == n, ]
+
+      p <- add_trace(p,
+        x = sub_data$x,
+        y = sub_data$y,
+        marker = list(
+          color = cols_fill[n],
+          size = point_size,
+          line = list(
+            width = stroke_size,
+            color = cols_stroke[n]
+          )
+        ),
+        text = sub_data$text,
+        hoverinfo = "text",
+        mode = "markers",
+        name = n
+      )
+
+    }
+  }
+
+  p <- .set_default_layout_plotly(p, show_legend, plot_3d) %>% hide_colorbar()
+  return(p)
 }
