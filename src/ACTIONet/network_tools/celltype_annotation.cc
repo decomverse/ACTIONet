@@ -238,11 +238,16 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat &G, sp_m
 }
 
 
-mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0, int normalization = 1) {
 	marker_mat = normalise(marker_mat, 1, 0);
 	mat X = trans(mat(marker_mat));
 
-	sp_mat T = LSI(S);
+	sp_mat T;
+	if(normalization == 0) {
+		T = S;
+	} else if(normalization == 1){
+		T = LSI(S);
+	}
 	
     vec base = vec(trans(T.row(0)));
     
@@ -264,7 +269,12 @@ mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 
 
 	sp_mat raw_stats = trans(sp_mat(X * T));	
-	mat stats = compute_network_diffusion_fast(G, raw_stats, thread_no, alpha, max_it) * diagmat(vec(trans(sum(raw_stats))));
+	mat stats;
+	if(alpha == 0) {
+		stats = raw_stats;
+	} else {
+		stats = compute_network_diffusion_fast(G, raw_stats, thread_no, alpha, max_it) * diagmat(vec(trans(sum(raw_stats))));
+	}
 		
 	for(int i = 0; i < stats.n_rows; i++) {
 		for(int j = 0; j < stats.n_cols; j++) {
