@@ -1,346 +1,124 @@
-#
-# #' Main ACTIONet interactive plotting function
-# #'
-# #' @param ace ACTIONet output object
-# #' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-# #' @param trans_attr Additional continuous attribute to project onto the transparency of nodes
-# #' @param trans_th, trans_fac Control the effect of transparency mapping
-# #' @param point_size Size of nodes in the ACTIONet plot
-# #' @param palette Color palette (named vector or a name for a given known palette)
-# #' @param enrichment.table To project the top-ranked features interactively.
-# #' @param top_features Number of features to show per cell
-# #' @param blacklist_pattern List of genes to filter-out
-# #' @param title Main title of the plot
-# #' @param threeD Whether to show the plot in 3D
-# #'
-# #' @return Visualized ACTIONet
-# #'
-# #' @examples
-# #' ace = run.ACTIONet(sce)
-# #' plot.ACTIONet.interactive(ace, ace$assigned_archetype)
-# #' @rawNamespace import(plotly, except = 'last_plot')
-# #' @export
-# plot.ACTIONet.interactive <- function(
-#   ace,
-#   labels = NULL,
-#   trans_attr = NULL,
-#   trans_th = -1,
-#   trans_fac = 1,
-#   point_size = 1,
-#   palette = CPal_default,
-#   enrichment.table = NULL,
-#   top_features = 7,
-#   Alt_Text = NULL,
-#   blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
-#   threeD = FALSE,
-#   title = "ACTIONet",
-#   coordinate_slot = "ACTIONet2D"
-# ) {
-#
-#     nV = ncol(ace)
-#     point_size = point_size * 3
-#     if (coordinate_slot == "ACTIONet2D" & threeD == TRUE)
-#         coordinate_slot = "ACTIONet3D"
-#
-#     if (class(ace) == "ACTIONetExperiment") {
-#         labels = .preprocess_annotation_labels(labels, ace)
-#         if (is.character(coordinate_slot)) {
-#             coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-#             coor.mu = apply(coors, 2, mean)
-#             coor.sigma = apply(coors, 2, sd)
-#             coors = scale(coors)
-#         } else {
-#             coors = as.matrix(coordinate_slot)
-#             coor.mu = apply(coors, 2, mean)
-#             coor.sigma = apply(coors, 2, sd)
-#             coors = scale(coors)
-#         }
-#     } else {
-#         if (is.matrix(ace) | is.sparseMatrix(ace)) {
-#             coors = as.matrix(ace)
-#             coor.mu = apply(coors, 2, mean)
-#             coor.sigma = apply(coors, 2, sd)
-#             coors = scale(coors)
-#             labels = .preprocess_annotation_labels(labels)
-#         } else {
-#           err = sprintf("Unknown type for object 'ace'.\n")
-#           stop(err)
-#         }
-#     }
-#
-#     if (is.null(labels)) {
-#         if (class(ace) == "ACTIONetExperiment") {
-#             vCol = grDevices::rgb(colMaps(ace)$denovo_color)
-#         } else {
-#             vCol = rep("tomato", nrow(coors))
-#         }
-#         Annot = NULL
-#     } else {
-#         Annot = names(labels)[match(sort(unique(labels)), labels)]
-#         if (length(palette) > 1) {
-#             if (length(palette) < length(Annot)) {
-#               palette = CPal_default
-#             }
-#             if (is.null(names(palette))) {
-#                 Pal = palette[1:length(Annot)]
-#             } else {
-#                 Pal = palette[Annot]
-#             }
-#         } else {
-#             Pal = ggpubr::get_palette(palette, length(Annot))
-#         }
-#
-#         names(Pal) = Annot
-#         vCol = Pal[names(labels)]
-#     }
-#
-#     if (!is.null(trans_attr)) {
-#         z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
-#         beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
-#         beta[z > trans_th] = 1
-#         beta = beta^trans_fac
-#
-#         vCol.border = scales::alpha(colorspace::darken(vCol, 0.5), beta)
-#         vCol = scales::alpha(vCol, beta)
-#     } else {
-#         vCol.border = colorspace::darken(vCol, 0.5)
-#     }
-#
-#     if (!is.null(enrichment.table)) {
-#         if (ncol(enrichment.table) == nV) {
-#             cell.scores = Matrix::t(enrichment.table)
-#         } else if ((nrow(enrichment.table) != nV)) {
-#             H = colMaps(ace)[["H_unified"]]
-#             if ((nrow(enrichment.table) == nrow(H)) | (ncol(enrichment.table) ==
-#                 nrow(H))) {
-#                 cell.scores = map.cell.scores.from.archetype.enrichment(ace, enrichment.table)
-#             } else {
-#                 cell.scores = NULL
-#             }
-#         } else {
-#             cell.scores = enrichment.table
-#         }
-#     } else {
-#         temp.enrichment.table = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-#         if (!is.null(row.names(temp.enrichment.table))) {
-#             filtered.rows = grep(blacklist_pattern, rownames(temp.enrichment.table))
-#             if (length(filtered.rows) > 0){
-#               enrichment.table = temp.enrichment.table[-filtered.rows, ]
-#             } else {
-#               enrichment.table = temp.enrichment.table
-#             }
-#
-#             GT = apply(enrichment.table, 2, function(x) rownames(enrichment.table)[order(x,
-#                 decreasing = TRUE)[1:min(100, nrow(enrichment.table))]])
-#             selected.features = sort(unique(as.character(GT)))
-#
-#             W = exp(scale(Matrix::t(colMaps(ace)[["H_unified"]])))
-#             cs = fastColSums(W)
-#             W = Matrix::t(scale(W, center = FALSE, scale = cs))
-#
-#             cell.scores = W %*% Matrix::t(enrichment.table[selected.features, ])
-#         } else {
-#             cell.scores = NULL
-#         }
-#     }
-#
-#     if (!is.null(Alt_Text)) {
-#         node.annotations = Alt_Text
-#     } else {
-#         if (!is.null(cell.scores)) {
-#             selected.features = colnames(cell.scores)
-#             node.annotations = apply(cell.scores, 1, function(x) paste(selected.features[order(x,
-#                 decreasing = TRUE)[1:top_features]], collapse = "\n"))
-#         } else {
-#             node.annotations = rep("", nV)
-#         }
-#     }
-#     # Setup visualization parameters
-#     sketch.graph = igraph::graph_from_adjacency_matrix(
-#       adjmatrix = colNets(ace)$ACTIONet,
-#       mode = "undirected",
-#       weighted = TRUE
-#     )
-#
-#     if (threeD == FALSE) {
-#         igraph::V(sketch.graph)$x = coors[, 1]
-#         igraph::V(sketch.graph)$y = coors[, 2]
-#     } else {
-#         igraph::V(sketch.graph)$x3D = coors[, 1]
-#         igraph::V(sketch.graph)$y3D = coors[, 2]
-#         igraph::V(sketch.graph)$z3D = coors[, 3]
-#     }
-#
-#     sketch.graph = igraph::delete_edges(sketch.graph, igraph::E(sketch.graph))
-#
-#     node.data <- igraph::get.data.frame(sketch.graph, what = "vertices")
-#     edge.data <- igraph::get.data.frame(sketch.graph, what = "edges")
-#
-#     Nv <- dim(node.data)[1]
-#     Ne <- dim(edge.data)[1]
-#
-#     edge_shapes <- list()
-#
-#     # Adjust parameters
-#     node.data$size = point_size
-#
-#     axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
-#
-#     if (threeD == TRUE) {
-#         if (is.null(Annot)) {
-#             node.data$vCol = vCol
-#             node.data$vCol.border = vCol.border
-#
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x3D,
-#               y = ~y3D,
-#               z = ~z3D,
-#               opacity = 1,
-#               marker = list(
-#                 color = ~vCol,
-#                 size = ~size,
-#                 opacity = 1,
-#                 alpha = 1,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   alpha = 0.5,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               hoverinfo = "text",
-#               type = "scatter3d",
-#               showlegend = FALSE
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               scene = list(
-#                 xaxis = axis,
-#                 yaxis = axis,
-#                 zaxis = axis)
-#               )
-#
-#         } else {
-#             node.data$vCol.border = vCol.border
-#             node.data$type = factor(names(labels), levels = Annot)
-#
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x3D,
-#               y = ~y3D,
-#               z = ~z3D,
-#               opacity = 1,
-#               color = ~type,
-#               colors = Pal,
-#               marker = list(
-#                 size = ~size,
-#                 opacity = 1,
-#                 alpha = 1,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   alpha = 0.5,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               hoverinfo = "text",
-#               type = "scatter3d"
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               scene = list(
-#                 xaxis = axis,
-#                 yaxis = axis,
-#                 zaxis = axis
-#               ),
-#               showlegend = TRUE,
-#               legend = list(
-#                 marker = list(
-#                   marker.size = 10
-#                 )
-#               )
-#             )
-#         }
-#     } else {
-#         if (is.null(Annot)) {
-#             node.data$vCol = vCol
-#             node.data$vCol.border = vCol.border
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x,
-#               y = ~y,
-#               marker = list(
-#                 color = ~vCol,
-#                 size = ~size,
-#                 opacity = 1,
-#                 alpha = 1,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   alpha = 0.5,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               type = "scattergl",
-#               hoverinfo = "text",
-#               showlegend = FALSE
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               xaxis = axis,
-#               yaxis = axis
-#             )
-#         } else {
-#             node.data$vCol.border = vCol.border
-#             node.data$type = factor(names(labels), levels = Annot)
-#
-#             network <- plotly::plot_ly(
-#               data = node.data,
-#               x = ~x,
-#               y = ~y,
-#               color = ~type,
-#               colors = Pal,
-#               marker = list(
-#                 size = ~size,
-#                 line = list(
-#                   width = 0.1 * point_size,
-#                   color = ~vCol.border
-#                 )
-#               ),
-#               text = node.annotations,
-#               mode = "markers",
-#               type = "scattergl",
-#               hoverinfo = "text"
-#             )
-#
-#             p <- plotly::layout(
-#               p = network,
-#               title = title,
-#               shapes = edge_shapes,
-#               xaxis = axis,
-#               yaxis = axis,
-#               showlegend = TRUE,
-#               legend = list(
-#                 marker = list(
-#                   marker.size = 10
-#                 )
-#               )
-#             )
-#         }
-#     }
-#
-#     p
-# }
+plot.ACTIONet.interactive.test <- function(
+  data,
+  label_attr = NULL,
+  color_attr = NULL,
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 3,
+  stroke_size = point_size * 0.1,
+  stroke_contrast_fac = 0.1,
+  stroke_color = NULL,
+  palette = CPal_default,
+  show_legend = NULL,
+  coordinate_attr = "ACTIONet2D",
+  color_slot = "denovo_color",
+  point_order = NULL,
+  hover_text = NULL,
+  plot_3d = FALSE
+) {
+
+  plot_coors = .get_plot_coors(data, coordinate_attr)
+  plot_labels = .get_plot_labels(label_attr, data)
+  plot_fill_col = .get_plot_colors(color_attr, plot_labels, data, color_slot, palette)
+  plot_alpha = .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
+
+  if(is.null(stroke_color))
+    plot_border_col = colorspace::darken(plot_fill_col, stroke_contrast_fac)
+  else
+    plot_border_col = stroke_color
+
+  if(plot_3d == TRUE){
+    if (NCOL(plot_coors) < 3){
+      if("ACTIONet3D" %in% names(colMaps(data))){
+        msg = sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
+        message(msg)
+        plot_coors = .get_plot_coors(data, "ACTIONet3D")
+      } else {
+        err = sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\n")
+        stop(err)
+      }
+    }
+  }
+
+  plot_data = data.frame(plot_coors,
+                         fill = plot_fill_col,
+                         color = plot_border_col,
+                         trans = plot_alpha,
+                         idx = 1:NROW(plot_coors)
+  )
+
+  if(is.null(label_attr)){
+    show_legend = FALSE
+    plot_data$labels = "NA"
+  } else {
+    plot_data$labels = plot_labels
+  }
+
+  if (!is.null(hover_text))
+    plot_data$text = hover_text
+  else{
+    if(is.null(label_attr))
+      plot_data$text = plot_data$idx
+    else
+      plot_data$text = plot_data$labels
+  }
+
+  if(is.null(point_order))
+    pidx = sample(NROW(plot_data))
+  else
+    pidx = point_order
+
+  plot_data = plot_data[pidx, ]
+
+  cont_attr = c(color_attr, trans_attr)
+  if(is.null(label_attr) | any(!sapply(cont_attr, is.null)) ){
+
+    if(is.null(show_legend))
+      show_legend = FALSE
+
+    plot_data$fill = grDevices::rgb(t(grDevices::col2rgb(plot_data$fill)/255), alpha = plot_data$trans)
+    plot_data$color = grDevices::rgb(t(grDevices::col2rgb(plot_data$color)/255), alpha = plot_data$trans)
+
+    p <- .make_plotly_scatter_single_trace(
+      x = plot_data$x,
+      y = plot_data$y,
+      z = plot_data$z,
+      label_attr = plot_data$labels,
+      cols_fill = plot_data$fill,
+      cols_stroke = plot_data$color,
+      point_size = point_size,
+      stroke_size = stroke_size,
+      show_legend = show_legend,
+      hover_text = plot_data$text,
+      plot_3d = plot_3d
+    )
+
+  } else {
+
+    if(is.null(show_legend))
+      show_legend = TRUE
+
+    col_idx = which(!duplicated(plot_data$labels))
+    palette_fill = plot_data$fill[col_idx]
+    palette_stroke = plot_data$color[col_idx]
+    names(palette_fill) = names(palette_stroke) = plot_data$labels[col_idx]
+
+    p <- .make_plotly_scatter_split_trace(
+      x = plot_data$x,
+      y = plot_data$y,
+      z = plot_data$z,
+      label_attr = plot_data$labels,
+      cols_fill = palette_fill,
+      cols_stroke = palette_stroke,
+      point_size = point_size,
+      stroke_size = stroke_size,
+      show_legend = show_legend,
+      hover_text = plot_data$text,
+      plot_3d = plot_3d
+    )
+
+  }
+
+  return(p)
+}
