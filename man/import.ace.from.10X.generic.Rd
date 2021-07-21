@@ -6,9 +6,9 @@
 \usage{
 import.ace.from.10X.generic(
   input_path,
-  mtx_file = "matrix.mtx",
-  feature_metadata = "features.tsv",
-  sample_metadata = "barcodes.tsv",
+  mtx_file = "matrix.mtx.gz",
+  feature_metadata = "features.tsv.gz",
+  sample_metadata = "barcodes.tsv.gz",
   sep = "\\t",
   use.names = TRUE,
   prefilter = FALSE,
