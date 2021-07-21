@@ -62,6 +62,8 @@
 \item{point_order}{Integer vector specifying order in which to plot individual points (default:'NULL').}
 
 \item{use_repel}{Use ggrepel to distribute cluster labels. Known to be buggy if used with RStudio (default:'TRUE').}
+
+\item{repel_force}{Numeric to pass as 'force' parameter to 'geom_label_repel()' when 'use_repel=TRUE'. (default:0.05)}
 }
 \value{
 'ggplot' object.
