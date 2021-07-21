@@ -339,7 +339,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double, int max_it, int perm_no, int thread_no);
 mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
 
-mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no, int normalization);
 
 
 sp_mat LSI(sp_mat& X, double size_factor);

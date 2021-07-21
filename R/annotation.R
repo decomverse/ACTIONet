@@ -10,7 +10,7 @@
 				msg = sprintf("Annotation %d", i)
 				print(msg)
 			})
-		}		
+		}
 		X = do.call(cbind, lapply(markers, function(gs) {
 			genes = unlist(strsplit(gs, "[+]|[-]"))
 			if(length(grep("[+|-]$", gs)) != 0) {
@@ -157,7 +157,7 @@ annotate.archetypes.using.labels <- function(
 #' @export
 annotate.archetypes.using.markers <- function(
   ace,
-  markers,  
+  markers,
   features_use = NULL,
   significance_slot = "unified_feature_specificity") {
 
@@ -218,7 +218,7 @@ annotate.cells.using.markers <- function(
 
   #marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
   G = colNets(ace)[[net_slot]]
-  S = SummarizedExperiment::assays(ace)[[assay_name]]
+  S = as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
 
   marker_stats = compute_marker_aggregate_stats(
     G = G,

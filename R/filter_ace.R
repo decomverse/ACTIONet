@@ -7,63 +7,85 @@ filter.ace <- function(
   min_feats_per_cell = NULL,
   min_umis_per_cell = NULL,
   max_umis_per_cell = NULL,
+  max_mito_fraction = NULL,
+  species = "mmusculus",
+  features_use = NULL,
   return_fil_ace = TRUE
 ) {
 
-    org_dim = dim(ace)
-    ace.fil = ace
+    init_dim = dim(ace)
+    init_rn = rownames(ace)
+    init_cn = colnames(ace)
+    # ace = ace
+
+    if (!is.null(max_mito_fraction)){
+      mt_frac = get_mtRNA_stats(
+        ace,
+        by = NULL,
+        groups_use = NULL,
+        assay = assay_name,
+        species = species,
+        metric = "pct",
+        features_use = features_use
+      )
+
+      ace = ace[, mt_frac <= max_mito_fraction]
+    }
 
     i = 0
     repeat {
-        prev_dim = dim(ace.fil)
-        rows_mask = rep(TRUE, NROW(ace.fil))
-        cols_mask = rep(TRUE, NCOL(ace.fil))
+        prev_dim = dim(ace)
+        rows_mask = rep(TRUE, NROW(ace))
+        cols_mask = rep(TRUE, NCOL(ace))
         if (!is.null(min_umis_per_cell)) {
-            umi_mask = fastColSums(SummarizedExperiment::assays(ace.fil)[[assay_name]]) >= min_umis_per_cell
+            umi_mask = fastColSums(SummarizedExperiment::assays(ace)[[assay_name]]) >= min_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(max_umis_per_cell)) {
-            umi_mask = fastColSums(SummarizedExperiment::assays(ace.fil)[[assay_name]]) <= max_umis_per_cell
+            umi_mask = fastColSums(SummarizedExperiment::assays(ace)[[assay_name]]) <= max_umis_per_cell
             cols_mask = cols_mask & umi_mask
         }
 
         if (!is.null(min_feats_per_cell)) {
-            feature_mask = fastColSums(SummarizedExperiment::assays(ace.fil)[[assay_name]] > 0) >= min_feats_per_cell
+            feature_mask = fastColSums(SummarizedExperiment::assays(ace)[[assay_name]] > 0) >= min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
 
         if (!is.null(min_cells_per_feat)) {
             if ((min_cells_per_feat < 1) & (min_cells_per_feat > 0)) {
-                min_fc = min_cells_per_feat * org_dim[2]
+                min_fc = min_cells_per_feat * init_dim[2]
             } else {
                 min_fc = min_cells_per_feat
             }
-            cell_count_mask = fastRowSums(SummarizedExperiment::assays(ace.fil)[[assay_name]] > 0) >= min_fc
+            cell_count_mask = fastRowSums(SummarizedExperiment::assays(ace)[[assay_name]] > 0) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
-        ace.fil <- ace.fil[rows_mask, cols_mask]
+
+        ace <- ace[rows_mask, cols_mask]
         invisible(gc())
         i = i + 1
-        if (all(dim(ace.fil) == prev_dim)) {
+        if (all(dim(ace) == prev_dim)) {
             break
         }
     }
     invisible(gc())
 
     if (return_fil_ace){
-      return(ace.fil)
+      return(ace)
     } else {
-      fil_cols_mask = !(colnames(ace) %in% colnames(ace.fil))
-      fil_rows_mask = !(rownames(ace) %in% rownames(ace.fil))
+      # fil_cols_mask = !(colnames(ace) %in% colnames(ace))
+      # fil_rows_mask = !(rownames(ace) %in% rownames(ace))
+      fil_cols_mask = !(init_cn %in% colnames(ace))
+      fil_rows_mask = !(init_rn %in% rownames(ace))
 
       fil_cols_list = data.frame(
-        name = colnames(ace)[fil_cols_mask],
+        name = init_cn[fil_cols_mask],
         idx = which(fil_cols_mask)
       )
 
       fil_rows_list = data.frame(
-        name = rownames(ace)[fil_rows_mask],
+        name = init_rn[fil_rows_mask],
         idx = which(fil_rows_mask)
       )
 
@@ -125,10 +147,14 @@ filter.ace.by.attr <- function(
     keep_row = which(!(rownames(ace) %in% fil_row))
     keep_col = which(!(colnames(ace) %in% fil_col))
 
-    ace.fil = ace[keep_row, keep_col]
-    colData(ace.fil) <- droplevels(colData(ace.fil))
-    rowData(ace.fil) <- droplevels(rowData(ace.fil))
-    
+    # ace.fil = ace[keep_row, keep_col]
+    # colData(ace.fil) <- droplevels(colData(ace.fil))
+    # rowData(ace.fil) <- droplevels(rowData(ace.fil))
+
+    ace = ace[keep_row, keep_col]
+    colData(ace) <- droplevels(colData(ace))
+    rowData(ace) <- droplevels(rowData(ace))
+
     invisible(gc())
-    return(ace.fil)
+    return(ace)
 }
