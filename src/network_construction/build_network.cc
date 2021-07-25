@@ -7,7 +7,7 @@
 #include <optional>
 #include <hnswlib.h>
 #include <space_js.h>
-#include <space_lp.h>
+#include <space_ip.h>
 #include <space_l2.h>
 
 template <class Function>
