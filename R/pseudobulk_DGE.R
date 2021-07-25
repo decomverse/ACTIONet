@@ -290,7 +290,7 @@ run.ensemble.pseudobulk.Limma <- function(
         slot_E = paste0("E", i)
         slot_V = paste0("V", i)
 
-        tbl = variance.adjusted.DE.Limma(
+        tbl = variance.adjusted.DE.Limma.test(
           se = se,
           slot_E = slot_E,
           slot_V = slot_V,
