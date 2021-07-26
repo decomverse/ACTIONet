@@ -54,6 +54,7 @@ include_directories(${ACTIONet_SOURCE_DIR}/src/ACTIONet/include/layout/s_gd2)
 include_directories(${ACTIONet_SOURCE_DIR}/src/ACTIONet/include/nn_search/hnsw)
 include_directories(${ACTIONet_SOURCE_DIR}/src/ACTIONet/include/nn_search/nmslib)
 include_directories(${ACTIONet_SOURCE_DIR}/src/ACTIONet/include/misc)
+include_directories(${ACTIONet_SOURCE_DIR}/lib/pybind11/include)
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 ############ Compile
