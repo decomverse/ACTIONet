@@ -23,19 +23,18 @@
 #include <vector>
 
 #include <arma_base.h>
-#include <colorspace.h>
-#include <gradient.h>
-#include <my_utils.h>
-#include <sampler.h>
-#include <tauprng.h>
-#include <cryptor.hpp>
-#include <hdbscan.hpp>
-
-#include <pcg_random.hpp>
+#include <layout/uwot/gradient.h>
+#include <layout/uwot/sampler.h>
+#include <layout/uwot/tauprng.h>
+#include <misc/colorspace.h>
+#include <misc/my_utils.h>
+#include <clustering/HDBSCAN/hdbscan.hpp>
+#include <math/cryptor.hpp>
+#include <math/pcg/pcg_random.hpp>
 
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS
-#include "stats.hpp"
+#include <math/StatsLib/stats.hpp>
 
 // SVD algorithms
 #define FULL_SVD -1
@@ -51,7 +50,6 @@
 #define ACTIONet_OR_SYM 2
 
 #define SYS_THREADS_DEF (std::thread::hardware_concurrency() - 2)
-
 
 // s_gd2 visualization
 void layout_unweighted(int n, double *X, int m, int *I, int *J, int t_max,
@@ -217,27 +215,27 @@ multilevel_archetypal_decomposition prune_archetypes(
 // unification_results unify_archetypes(sp_mat &G, mat &S_r, mat &archetypes,
 // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
 // outlier_threshold, int reduced_dim);
-unification_results unify_archetypes(mat &S_r, mat &C_stacked,
-									 mat &H_stacked,
-                                     double violation_threshold,
-                                     int thread_no);
+unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
+                                     double violation_threshold, int thread_no);
 
 // Main functions to build an interaction network from multi-level archetypal
 // decompositions
 sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no,
                                  double M, double ef_construction, double ef,
-                                 bool mutual_edges_only, string distance_metric);
+                                 bool mutual_edges_only,
+                                 string distance_metric);
 sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density,
                                     int thread_no, double M,
                                     double ef_construction, double ef,
-                                    bool mutual_edges_only, string distance_metric);
+                                    bool mutual_edges_only,
+                                    string distance_metric);
 sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no, double M,
                              double ef_construction, double ef,
                              bool mutual_edges_only, string distance_metric);
 
 sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, double M,
-                      double ef_construction, double ef,
-                      bool mutual_edges_only, string distance_metric, string nn_approach, int k);
+                      double ef_construction, double ef, bool mutual_edges_only,
+                      string distance_metric, string nn_approach, int k);
 
 mat computeFullSim(mat &H, int thread_no);
 
@@ -250,8 +248,10 @@ field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
 // Methods for pseudo-bulk construction
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
 mat compute_pseudo_bulk_per_archetype(mat &S, mat &H);
-field<mat> compute_pseudo_bulk_per_archetype_and_ind(sp_mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
-field<mat> compute_pseudo_bulk_per_archetype_and_ind(mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(
+    sp_mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
+field<mat> compute_pseudo_bulk_per_archetype_and_ind(
+    mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
 
 mat compute_pseudo_bulk_per_cluster(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments);
@@ -320,24 +320,40 @@ vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
         uvec fixed_labels);
 
 mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat,
-                                   double alpha, int max_it, int thread_no, bool ignore_baseline_expression);
+                                   double alpha, int max_it, int thread_no,
+                                   bool ignore_baseline_expression);
 
+field<mat> run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it,
+                                        int max_correction_rounds,
+                                        double lambda, double min_delta);
 
-field<mat> run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it, int max_correction_rounds, double lambda, double min_delta);
-
-ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no, int max_it, int max_correction_rounds, double lambda, double min_delta);
+ACTION_results run_ACTION_with_batch_correction(
+    mat &S_r, vec batch, int k_min, int k_max, int thread_no, int max_it,
+    int max_correction_rounds, double lambda, double min_delta);
 
 mat compute_marker_aggregate_stats_basic_sum(sp_mat &S, sp_mat &marker_mat);
-mat compute_marker_aggregate_stats_basic_sum_perm(sp_mat &S, sp_mat &marker_mat, int perm_no, int thread_no);
-mat compute_marker_aggregate_stats_basic_sum_perm_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
-mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
-mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double, int max_it, int perm_no, int thread_no);
-mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_perm(sp_mat &S, sp_mat &marker_mat,
+                                                  int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed(
+    sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it,
+    int perm_no, int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S,
+                                                      sp_mat &marker_mat,
+                                                      double alpha, int max_it,
+                                                      int perm_no,
+                                                      int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(
+    sp_mat &G, sp_mat &S, sp_mat &marker_mat, double, int max_it, int perm_no,
+    int thread_no);
+mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(
+    sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it,
+    int perm_no, int thread_no);
 
-mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it, int perm_no, int thread_no, int normalization);
+mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(
+    sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha, int max_it,
+    int perm_no, int thread_no, int normalization);
 
-
-sp_mat LSI(sp_mat& X, double size_factor);
+sp_mat LSI(sp_mat &X, double size_factor);
 
 }  // namespace ACTIONet
 

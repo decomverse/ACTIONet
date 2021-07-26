@@ -1,8 +1,8 @@
 #ifndef MY_UTILS_H
 #define MY_UTILS_H
 
-#include <pcg_random.hpp>
-#include "cholmod.h"
+#include <math/pcg/pcg_random.hpp>
+#include <cholmod.h>
 
 namespace ACTIONet {
 mat sampleUnif(int l, int m, double a, double b, int seed);
