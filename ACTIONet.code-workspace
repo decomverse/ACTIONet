@@ -3,5 +3,12 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"files.associations": {
+			"*.rmd": "markdown",
+			"exception": "cpp",
+			"optional": "cpp"
+		}
+	}
 }
