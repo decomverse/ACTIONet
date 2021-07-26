@@ -1,0 +1,8 @@
+[submodule "lib/pybind11"]
+	path = lib/pybind11
+	url = https://github.com/pybind/pybind11
+	branch = v2.5
+[submodule "lib/ACTIONet"]
+	path = lib/ACTIONet
+	url = https://github.com/shmohammadi86/ACTIONet.git
+	branch = core
