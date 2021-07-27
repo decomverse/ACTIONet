@@ -404,6 +404,8 @@ namespace ACTIONet
     mat Z = basal_state;
     gram_schmidt(Z);
 
+    printf("Z: %dx%d\n", Z.n_rows, Z.n_cols);
+
     mat A = Z;
     mat B = -mat(trans(trans(Z) * S));
 
