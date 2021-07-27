@@ -407,6 +407,8 @@ namespace ACTIONet
     mat A = Z;
     mat B = -mat(trans(trans(Z) * S));
 
+    printf("PSVD now");
+
     field<mat> perturbed_SVD = deflate_reduction(SVD_results, A, B);
     FLUSH;
     return (perturbed_SVD);
