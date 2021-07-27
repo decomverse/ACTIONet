@@ -5,7 +5,7 @@
 \title{Interactive ACTIONet visualizetion with Plotly}
 \usage{
 \method{plot}{ACTIONet.interactive}(
-  data,
+  ace,
   label_attr = NULL,
   trans_attr = NULL,
   trans_fac = 1.5,
@@ -22,8 +22,6 @@
 )
 }
 \arguments{
-\item{data}{'ACTIONetExperiment' object or numeric matrix of X-Y(-Z) coordinates.}
-
 \item{label_attr}{Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, cell types, etc.).}
 
 \item{trans_attr}{Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.}
@@ -49,6 +47,8 @@
 \item{alt_hovertext}{Vector of values to display on hover.  (default:'NULL').}
 
 \item{threeD}{Visualize plot in 3D using 'scatter3D'. Required 3D coordinate input (defaults to 'ACTIONet3D' if data is 'ACTIONetExperiment') (default:'FALSE').}
+
+\item{data}{'ACTIONetExperiment' object or numeric matrix of X-Y(-Z) coordinates.}
 }
 \value{
 plotly object
@@ -57,5 +57,6 @@ plotly object
 Interactive ACTIONet visualizetion with Plotly
 }
 \examples{
+
 plot.ACTIONet.interactive(ace, ace$assigned_archetype, threeD = TRUE)
 }

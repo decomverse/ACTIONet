@@ -1,3 +1,31 @@
+#' @export
+plot.ACTIONetExperiment <- function(ace, ...) {
+  x <- list(...)
+  args <- c(list(ace = quote(ace)), x)
+
+  if ("interactive" %in% names(x)) {
+    if (x[["interactive"]] == T) {
+      idx <- which(names(x) == "interactive")
+      x <- x[-idx]
+      args <- c(list(ace = quote(ace)), x)
+      p_out <- do.call(plot.ACTIONet.interactive, args)
+    }
+  } else {
+    if (length(x) == 0) {
+      p_out <- plot.ACTIONet(ace)
+    } else if ("gradient_attr" %in% names(x)) {
+      p_out <- do.call(plot.ACTIONet.gradient, as.list(args))
+    } else if ("labels_attr" %in% names(x)) {
+      p_out <- do.call(plot.ACTIONet, as.list(args))
+    } else if ((length(unique(x[[1]])) > 50) & (is.numeric(x[[1]]))) {
+      p_out <- do.call(plot.ACTIONet.gradient, as.list(args))
+    } else {
+      p_out <- do.call(plot.ACTIONet, args)
+    }
+  }
+
+  return(p_out)
+}
 
 #' Plot ACTIONet scatter plot
 #'
@@ -24,111 +52,108 @@
 #'
 #' @examples
 #' plot.ACTIONet(ace, ace$assigned_archetype)
-
 #' @import ggplot2
 #' @export
-plot.ACTIONet <- function(
-  data,
-  label_attr = NULL,
-  color_attr = NULL,
-  trans_attr = NULL,
-  trans_fac = 1.5,
-  trans_th = -0.5,
-  point_size = 1,
-  stroke_size = point_size * 0.1,
-  stroke_contrast_fac = 0.1,
-  palette = CPal_default,
-  add_text_labels = TRUE,
-  text_size = 3,
-  nudge_text_labels = FALSE,
-  show_legend = FALSE,
-  coordinate_attr = "ACTIONet2D",
-  color_slot = "denovo_color",
-  point_order = NULL,
-  use_repel = TRUE,
-  repel_force = 0.05
-) {
+plot.ACTIONet <- function(ace,
+                          label_attr = NULL,
+                          color_attr = NULL,
+                          trans_attr = NULL,
+                          trans_fac = 1.5,
+                          trans_th = -0.5,
+                          point_size = 1,
+                          stroke_size = point_size * 0.1,
+                          stroke_contrast_fac = 0.1,
+                          palette = CPal_default,
+                          add_text_labels = TRUE,
+                          text_size = 3,
+                          nudge_text_labels = FALSE,
+                          show_legend = FALSE,
+                          coordinate_attr = "ACTIONet2D",
+                          color_slot = "denovo_color",
+                          point_order = NULL,
+                          use_repel = TRUE,
+                          repel_force = 0.05) {
+  plot_coors <- .get_plot_coors(ace, coordinate_attr)
+  plot_labels <- .get_plot_labels(label_attr, ace)
+  plot_fill_col <- .get_plot_colors(color_attr, plot_labels, ace, color_slot, palette)
+  plot_alpha <- .get_plot_transparency(trans_attr, ace, trans_fac, trans_th, TRUE)
+  plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
 
-    plot_coors = .get_plot_coors(data, coordinate_attr)
-    plot_labels = .get_plot_labels(label_attr, data)
-    plot_fill_col = .get_plot_colors(color_attr, plot_labels, data, color_slot, palette)
-    plot_alpha = .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
-    plot_border_col = colorspace::darken(plot_fill_col, stroke_contrast_fac)
+  if (is.null(plot_labels)) {
+    data_labels <- "NA"
+    add_text_labels <- FALSE
+    show_legend <- FALSE
+    legend_labels <- NULL
+    legend_fill_colors <- NULL
+  } else {
+    data_labels <- plot_labels
+    names(plot_fill_col) <- plot_labels
+    legend_labels <- sort(unique(plot_labels))
+    legend_fill_colors <- plot_fill_col[legend_labels]
+  }
 
-    if(is.null(plot_labels)){
-      data_labels = "NA"
-      add_text_labels = FALSE
-      show_legend = FALSE
-      legend_labels = NULL
-      legend_fill_colors = NULL
-    } else {
-      data_labels = plot_labels
-      names(plot_fill_col) = plot_labels
-      legend_labels = sort(unique(plot_labels))
-      legend_fill_colors = plot_fill_col[legend_labels]
-    }
+  if (!is.null(color_attr)) {
+    show_legend <- FALSE
+    legend_fill_colors <- NULL
+  }
 
-    if(!is.null(color_attr)){
-      show_legend = FALSE
-      legend_fill_colors = NULL
-    }
+  plot_data <- data.frame(plot_coors,
+    labels = data_labels,
+    fill = plot_fill_col,
+    color = plot_border_col,
+    trans = plot_alpha,
+    idx = 1:NROW(plot_coors)
+  )
 
-    plot_data = data.frame(plot_coors,
-      labels = data_labels,
-      fill = plot_fill_col,
-      color = plot_border_col,
-      trans = plot_alpha,
-      idx = 1:NROW(plot_coors)
+  if (is.null(point_order)) {
+    pidx <- sample(NROW(plot_data))
+  } else {
+    pidx <- point_order
+  }
+
+  plot_data <- plot_data[pidx, ]
+
+  p_out <- ggplot() +
+    geom_point(
+      data = plot_data,
+      mapping = aes(
+        x = x,
+        y = y,
+        color = color,
+        fill = fill,
+        alpha = trans
+      ),
+      shape = 21,
+      size = point_size,
+      stroke = stroke_size,
+      show.legend = show_legend
+    ) +
+    scale_fill_identity(
+      guide = "legend",
+      labels = legend_labels,
+      breaks = legend_fill_colors
+    ) +
+    scale_color_identity() +
+    scale_alpha_identity() +
+    .default_ggtheme
+
+  if (!is.null(plot_labels) && add_text_labels == TRUE) {
+    text_layer <- .layout_plot_labels(
+      plot_data = plot_data,
+      label_names = legend_labels,
+      label_colors = legend_fill_colors,
+      darken = TRUE,
+      alpha_val = 0.5,
+      text_size = text_size,
+      constrast_fac = 0.5,
+      nudge = nudge_text_labels,
+      use_repel = use_repel,
+      repel_force = repel_force
     )
+    p_out <- p_out + text_layer
+  }
 
-    if(is.null(point_order))
-      pidx = sample(NROW(plot_data))
-    else
-      pidx = point_order
-
-    plot_data = plot_data[pidx, ]
-
-    p_out <- ggplot() +
-         geom_point(
-           data = plot_data,
-           mapping = aes(
-             x = x,
-             y = y,
-             color = color,
-             fill = fill,
-             alpha = trans
-           ),
-           shape = 21,
-           size = point_size,
-           stroke = stroke_size,
-           show.legend = show_legend
-         ) + scale_fill_identity(
-           guide = "legend",
-           labels = legend_labels,
-           breaks = legend_fill_colors
-         ) +
-         scale_color_identity() +
-         scale_alpha_identity() +
-         .default_ggtheme
-
-    if(!is.null(plot_labels) && add_text_labels ==  TRUE){
-        text_layer <- .layout_plot_labels(
-          plot_data = plot_data,
-          label_names = legend_labels,
-          label_colors = legend_fill_colors,
-          darken = TRUE,
-          alpha_val = 0.5,
-          text_size = text_size,
-          constrast_fac = 0.5,
-          nudge = nudge_text_labels,
-          use_repel = use_repel,
-          repel_force = repel_force
-        )
-        p_out = p_out + text_layer
-    }
-
-    p_out
-
+  p_out
 }
 
 #' Main ACTIONet 3D plotting functions
@@ -145,100 +170,97 @@ plot.ACTIONet <- function(
 #' @return Visualized ACTIONet
 #'
 #' @examples
-#' ace = run.ACTIONet(sce)
+#' ace <- run.ACTIONet(sce)
 #' plot.ACTIONet.3D(ace, ace$assigned_archetype, trans_attr = ace$node_centrality)
 #' @export
-plot.ACTIONet.3D <- function(
-  ace,
-  labels = NULL,
-  trans_attr = NULL,
-  trans_th = -1,
-  trans_fac = 1,
-  point_size = 1,
-  palette = CPal_default,
-  coordinate_slot = "ACTIONet3D"
-) {
+plot.ACTIONet.3D <- function(ace,
+                             labels = NULL,
+                             trans_attr = NULL,
+                             trans_th = -1,
+                             trans_fac = 1,
+                             point_size = 1,
+                             palette = CPal_default,
+                             coordinate_slot = "ACTIONet3D") {
+  nV <- length(ncol(ace))
 
-    nV = length(ncol(ace))
+  point_size <- point_size * 0.2
 
-    point_size = point_size * 0.2
+  if (class(ace) == "ACTIONetExperiment") {
+    labels <- .preprocess_annotation_labels(labels, ace)
+    if (is.character(coordinate_slot)) {
+      coors <- as.matrix(colMaps(ace)[[coordinate_slot]])
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+    } else {
+      coors <- as.matrix(coordinate_slot)
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+    }
+  } else {
+    if (is.matrix(ace) | is.sparseMatrix(ace)) {
+      coors <- as.matrix(ace)
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+      labels <- .preprocess_annotation_labels(labels)
+    } else {
+      err <- sprintf("Unknown type for object 'ace'.\n")
+      stop(err)
+    }
+  }
 
+  if (is.null(labels)) {
     if (class(ace) == "ACTIONetExperiment") {
-        labels = .preprocess_annotation_labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        } else {
-            coors = as.matrix(coordinate_slot)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        }
+      vCol <- grDevices::rgb(colMaps(ace)$denovo_color)
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
-            coors = as.matrix(ace)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-            labels = .preprocess_annotation_labels(labels)
-        } else {
-            err = sprintf("Unknown type for object 'ace'.\n")
-            stop(err)
-        }
+      vCol <- rep("tomato", nrow(coors))
+    }
+    Annot <- NULL
+  } else {
+    Annot <- names(labels)[match(sort(unique(labels)), labels)]
+    if (length(palette) > 1) {
+      if (length(palette) < length(Annot)) {
+        palette <- CPal_default
+      }
+      if (is.null(names(palette))) {
+        Pal <- palette[1:length(Annot)]
+      } else {
+        Pal <- palette[Annot]
+      }
+    } else {
+      Pal <- ggpubr::get_palette(palette, length(Annot))
     }
 
-    if (is.null(labels)) {
-        if (class(ace) == "ACTIONetExperiment") {
-            vCol = grDevices::rgb(colMaps(ace)$denovo_color)
-        } else {
-            vCol = rep("tomato", nrow(coors))
-        }
-        Annot = NULL
-    } else {
-        Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(palette) > 1) {
-            if (length(palette) < length(Annot)) {
-              palette = CPal_default
-            }
-            if (is.null(names(palette))) {
-                Pal = palette[1:length(Annot)]
-            } else {
-                Pal = palette[Annot]
-            }
-        } else {
-            Pal = ggpubr::get_palette(palette, length(Annot))
-        }
+    names(Pal) <- Annot
+    vCol <- Pal[names(labels)]
+  }
 
-        names(Pal) = Annot
-        vCol = Pal[names(labels)]
-    }
+  if (!is.null(trans_attr)) {
+    z <- scale(trans_attr) # (trans_attr - median(trans_attr))/mad(trans_attr)
+    beta <- 1 / (1 + exp(-trans_fac * (z - trans_th)))
+    beta[z > trans_th] <- 1
+    beta <- beta^trans_fac
 
-    if (!is.null(trans_attr)) {
-        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
-        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
-        beta[z > trans_th] = 1
-        beta = beta^trans_fac
+    vCol.border <- scales::alpha(colorspace::darken(vCol, 0.5), beta)
+    vCol <- scales::alpha(vCol, beta)
+  } else {
+    vCol.border <- colorspace::darken(vCol, 0.5)
+  }
 
-        vCol.border = scales::alpha(colorspace::darken(vCol, 0.5), beta)
-        vCol = scales::alpha(vCol, beta)
-    } else {
-        vCol.border = colorspace::darken(vCol, 0.5)
-    }
-
-    threejs::scatterplot3js(
-      x = coors[, 1],
-      y = coors[, 2],
-      z = coors[, 3],
-      axis.scales = FALSE,
-      size = point_size,
-      axis = FALSE,
-      grid = FALSE,
-      color = as.character(vCol),
-      stroke = as.character(vCol.border),
-      bg = "black"
-    )
+  threejs::scatterplot3js(
+    x = coors[, 1],
+    y = coors[, 2],
+    z = coors[, 3],
+    axis.scales = FALSE,
+    size = point_size,
+    axis = FALSE,
+    grid = FALSE,
+    color = as.character(vCol),
+    stroke = as.character(vCol.border),
+    bg = "black"
+  )
 }
 
 #' Plots heatmap of the top-ranked features of an enrichment table
@@ -250,49 +272,46 @@ plot.ACTIONet.3D <- function(
 #' @return Enrichment heatmap
 #'
 #' @examples
-#' feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+#' feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' plot.top.k.features(feat_scores, 3)
 #' @export
-plot.top.k.features <- function(
-  feat_scores,
-  top_features = 3,
-  normalize = TRUE,
-  reorder_columns = TRUE,
-  row.title = "Archetypes",
-  column.title = "Genes",
-  rowPal = "black"
-) {
+plot.top.k.features <- function(feat_scores,
+                                top_features = 3,
+                                normalize = TRUE,
+                                reorder_columns = TRUE,
+                                row.title = "Archetypes",
+                                column.title = "Genes",
+                                rowPal = "black") {
+  W <- select.top.k.features(
+    feat_scores = feat_scores,
+    top_features = top_features,
+    normalize = normalize
+  )
 
-    W = select.top.k.features(
-      feat_scores = feat_scores,
-      top_features = top_features,
-      normalize = normalize
-    )
+  gradPal <- (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
 
-    gradPal = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
+  M <- apply(W, 1, max)
 
-    M = apply(W, 1, max)
+  Z <- W
+  ht <- ComplexHeatmap::Heatmap(
+    matrix = Z,
+    name = "Expression (scaled)",
+    cluster_rows = FALSE,
+    cluster_columns = FALSE,
+    col = gradPal,
+    row_title = row.title,
+    column_title = column.title,
+    column_names_gp = grid::gpar(fontsize = 8, fontface = "bold"),
+    row_names_gp = grid::gpar(fontsize = 8, fontface = "bold", col = rowPal),
+    column_title_gp = grid::gpar(fontsize = 14, fontface = "bold"),
+    row_title_gp = grid::gpar(fontsize = 14, fontface = "bold"),
+    row_names_side = "left",
+    rect_gp = grid::gpar(col = "black"),
+    row_names_max_width = grid::unit(100, "cm"),
+    column_names_max_height = grid::unit(100, "cm")
+  )
 
-    Z = W
-    ht = ComplexHeatmap::Heatmap(
-      matrix = Z,
-      name = "Expression (scaled)",
-      cluster_rows = FALSE,
-      cluster_columns = FALSE,
-      col = gradPal,
-      row_title = row.title,
-      column_title = column.title,
-      column_names_gp = grid::gpar(fontsize = 8, fontface = "bold"),
-      row_names_gp = grid::gpar(fontsize = 8, fontface = "bold", col = rowPal),
-      column_title_gp = grid::gpar(fontsize = 14, fontface = "bold"),
-      row_title_gp = grid::gpar(fontsize = 14, fontface = "bold"),
-      row_names_side = "left",
-      rect_gp = grid::gpar(col = "black"),
-      row_names_max_width = grid::unit(100, "cm"),
-      column_names_max_height = grid::unit(100, "cm")
-    )
-
-    return(ht)
+  return(ht)
 }
 
 
@@ -308,134 +327,84 @@ plot.top.k.features <- function(
 #' @return Featur view
 #'
 #' @examples
-#' feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+#' feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' plot.ACTIONet.feature.view(ace, feat_scores, 5)
 #' @export
-plot.ACTIONet.feature.view <- function(
-  ace,
-  feat_scores,
-  top_features = 5,
-  palette = NULL,
-  title = "Feature view",
-  label_size = 1,
-  renormalize = FALSE,
-  footprint_slot = "H_unified"
-) {
+plot.ACTIONet.feature.view <- function(ace,
+                                       feat_scores,
+                                       top_features = 5,
+                                       palette = NULL,
+                                       title = "Feature view",
+                                       label_size = 1,
+                                       renormalize = FALSE,
+                                       footprint_slot = "H_unified") {
+  M <- as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
 
-    M = as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
+  if (ncol(feat_scores) != ncol(colMaps(ace)[["H_unified"]])) {
+    feat_scores <- Matrix::t(feat_scores)
+  }
 
-    if (ncol(feat_scores) != ncol(colMaps(ace)[["H_unified"]])) {
-        feat_scores = Matrix::t(feat_scores)
-    }
+  if (max(feat_scores) > 50) {
+    feat_scores <- log1p(feat_scores)
+  }
 
-    if (max(feat_scores) > 50)
-        feat_scores = log1p(feat_scores)
+  X <- t(select.top.k.features(
+    feat_scores = feat_scores,
+    top_features = top_features,
+    normalize = renormalize,
+    reorder_columns = FALSE
+  ))
+  selected.features <- colnames(X)
 
-    X = t(select.top.k.features(
-      feat_scores = feat_scores,
-      top_features = top_features,
-      normalize = renormalize,
-      reorder_columns = FALSE
-    ))
-    selected.features = colnames(X)
+  X <- exp(scale(X))
 
-    X = exp(scale(X))
+  core.coors <- Matrix::t(metadata(ace)$backbone$coordinates)
+  cs <- fastColSums(X)
+  cs[cs == 0] <- 1
+  X <- scale(X, center = FALSE, scale = cs)
 
-    core.coors = Matrix::t(metadata(ace)$backbone$coordinates)
-    cs = fastColSums(X)
-    cs[cs == 0] = 1
-    X = scale(X, center = FALSE, scale = cs)
+  feature.coors <- Matrix::t(core.coors %*% X)
 
-    feature.coors = Matrix::t(core.coors %*% X)
-
-    if (is.null(palette)) {
-        core.Pal = grDevices::rgb(S4Vectors::metadata(ace)$backbone$colors)
+  if (is.null(palette)) {
+    core.Pal <- grDevices::rgb(S4Vectors::metadata(ace)$backbone$colors)
+  } else {
+    if (length(palette) == 1) {
+      core.Pal <- ggpubr::get_palette(palette, length(unique(ace$archetype.assignment)))
     } else {
-        if (length(palette) == 1) {
-            core.Pal = ggpubr::get_palette(palette, length(unique(ace$archetype.assignment)))
-        } else {
-            core.Pal = palette[1:length(unique(ace$archetype.assignment))]
-        }
+      core.Pal <- palette[1:length(unique(ace$archetype.assignment))]
     }
-    core.Lab = grDevices::convertColor(
-      color = Matrix::t(grDevices::col2rgb(core.Pal)/256),
-      from = "sRGB",
-      to = "Lab"
-    )
+  }
+  core.Lab <- grDevices::convertColor(
+    color = Matrix::t(grDevices::col2rgb(core.Pal) / 256),
+    from = "sRGB",
+    to = "Lab"
+  )
 
-    feature.color.Lab = Matrix::t(X) %*% core.Lab
-    feature.colors = grDevices::rgb(grDevices::convertColor(
-      color = feature.color.Lab,
-      from = "Lab",
-      to = "sRGB"
-    ))
-    names(feature.colors) = selected.features
+  feature.color.Lab <- Matrix::t(X) %*% core.Lab
+  feature.colors <- grDevices::rgb(grDevices::convertColor(
+    color = feature.color.Lab,
+    from = "Lab",
+    to = "sRGB"
+  ))
+  names(feature.colors) <- selected.features
 
-    x = feature.coors[, 1]
-    y = feature.coors[, 2]
-    x.min = min(x)
-    x.max = max(x)
-    y.min = min(y)
-    y.max = max(y)
-    x.min = x.min - (x.max - x.min)/4
-    x.max = x.max + (x.max - x.min)/4
-    y.min = y.min - (y.max - y.min)/4
-    y.max = y.max + (y.max - y.min)/4
-    XL = c(x.min, x.max)
-    YL = c(y.min, y.max)
 
-    graphics::plot(
-      x = x,
-      y = y,
-      type = "n",
-      col = feature.colors,
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
-    )
+  df <- data.frame(x = feature.coors[, 1], y = feature.coors[, 2], color = feature.colors, label = selected.features)
+  p <- ggplot(
+    df,
+    aes(x, y, label = label)
+  ) +
+    geom_point(color = feature.colors) +
+    theme_void()
 
-    words = selected.features
-    lay <- wordcloud::wordlayout(x, y, words, label_size)
+  require(ggpubr)
+  p <- p + geom_text_repel(
+    color = feature.colors,
+    seed = 0,
+    max.overlaps = Inf,
+  )
 
-    for (i in 1:length(x)) {
-        xl <- lay[i, 1]
-        yl <- lay[i, 2]
-        w <- lay[i, 3]
-        h <- lay[i, 4]
-        if (x[i] < xl || x[i] > xl + w || y[i] < yl || y[i] > yl + h) {
-
-            graphics::points(
-              x = x[i],
-              y = y[i],
-              pch = 16,
-              col = colorspace::darken(feature.colors[[i]], 0.6),
-              cex = 0.75 * label_size
-            )
-
-            nx <- xl + 0.5 * w
-            ny <- yl + 0.5 * h
-
-            graphics::lines(
-              x = c(x[i], nx),
-              y = c(y[i], ny),
-              col = colorspace::darken(feature.colors[[i]], 0.5)
-            )
-        }
-    }
-
-    loc.x = lay[, 1] + 0.5 * lay[, 3]
-    loc.y = lay[, 2] + 0.5 * lay[, 4]
-
-    graphics::text(
-      x = loc.x,
-      y = loc.y,
-      labels = words,
-      col = feature.colors,
-      cex = label_size
-    )
+  return(p)
 }
 
 
@@ -453,29 +422,49 @@ plot.ACTIONet.feature.view <- function(
 #' @examples
 #' plot.ACTIONet.gene.view(ace, 5)
 #' @export
-plot.ACTIONet.gene.view <- function(
-  ace,
-  top_genes = 5,
-  palette = NULL,
-  blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
-  title = "",
-  label_size = 0.8,
-  renormalize = FALSE
-) {
+plot.ACTIONet.gene.view <- function(ace,
+                                    top_genes = 3,
+                                    palette = NULL,
+                                    blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
+                                    title = "",
+                                    label_size = 0.8,
+                                    renormalize = FALSE) {
+  feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+  filtered.rows <- grep(blacklist_pattern, rownames(feat_scores))
+  if (length(filtered.rows) > 0) {
+    feat_scores <- feat_scores[-filtered.rows, ]
+  }
 
-    feat_scores = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-    filtered.rows = grep(blacklist_pattern, rownames(feat_scores))
-    if (length(filtered.rows) > 0)
-        feat_scores = feat_scores[-filtered.rows, ]
-
-    plot.ACTIONet.feature.view(
-      ace = ace,
-      feat_scores = feat_scores,
-      title = "Gene view",
-      renormalize = renormalize,
-      top_features = top_genes
-    )
+  plot.ACTIONet.feature.view(
+    ace = ace,
+    feat_scores = feat_scores,
+    title = "Gene view",
+    renormalize = renormalize,
+    top_features = top_genes
+  )
 }
+
+
+#' @examples
+#' plot.ACTIONet.gene.view(ace, 3)
+#' @export
+plot.ACTIONet.TF.view <- function(ace,
+                                  top_TFs = 3,
+                                  palette = NULL,
+                                  title = "",
+                                  label_size = 0.8,
+                                  renormalize = FALSE) {
+  feat_scores <- assess.TF.activities.from.archetypes(ace2)
+
+  plot.ACTIONet.feature.view(
+    ace = ace,
+    feat_scores = feat_scores,
+    title = "TF view",
+    renormalize = renormalize,
+    top_features = top_TFs
+  )
+}
+
 
 #' Interactive ACTIONet visualizetion with Plotly
 #'
@@ -496,148 +485,144 @@ plot.ACTIONet.gene.view <- function(
 #' @return plotly object
 #'
 #' @examples
-
+#'
 #' plot.ACTIONet.interactive(ace, ace$assigned_archetype, threeD = TRUE)
 #' @rawNamespace import(plotly, except = 'last_plot')
 #' @export
-plot.ACTIONet.interactive <- function(
-  data,
-  label_attr = NULL,
-  trans_attr = NULL,
-  trans_fac = 1.5,
-  trans_th = -0.5,
-  point_size = 3,
-  stroke_size = point_size * 0.1,
-  stroke_color = "black",
-  palette = CPal_default,
-  show_legend = TRUE,
-  coordinate_attr = "ACTIONet2D",
-  point_order = NULL,
-  alt_hovertext = NULL,
-  threeD = FALSE
-) {
+plot.ACTIONet.interactive <- function(ace,
+                                      label_attr = NULL,
+                                      trans_attr = NULL,
+                                      trans_fac = 1.5,
+                                      trans_th = -0.5,
+                                      point_size = 3,
+                                      stroke_size = point_size * 0.1,
+                                      stroke_color = "black",
+                                      palette = CPal_default,
+                                      show_legend = TRUE,
+                                      coordinate_attr = "ACTIONet2D",
+                                      point_order = NULL,
+                                      alt_hovertext = NULL,
+                                      threeD = FALSE) {
+  plot_coors <- .get_plot_coors(ace, coordinate_attr)
+  plot_labels <- .get_plot_labels(label_attr, ace)
+  plot_fill_col <- .get_plot_colors(NULL, plot_labels, ace, NULL, palette)
+  plot_alpha <- .get_plot_transparency(trans_attr, ace, trans_fac, trans_th, TRUE)
 
-  plot_coors = .get_plot_coors(data, coordinate_attr)
-  plot_labels = .get_plot_labels(label_attr, data)
-  plot_fill_col = .get_plot_colors(NULL, plot_labels, data, NULL, palette)
-  plot_alpha = .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
-
-  if(threeD == TRUE){
-    if (NCOL(plot_coors) < 3 & "ACTIONet3D" %in% names(colMaps(data))){
-      msg = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
+  if (threeD == TRUE) {
+    if (NCOL(plot_coors) < 3 & "ACTIONet3D" %in% names(colMaps(ace))) {
+      msg <- sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
       message(msg)
-      plot_coors = .get_plot_coors(data, "ACTIONet3D", coor_dims = 3)
-    }
-    else{
-      err = sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\n")
+      plot_coors <- .get_plot_coors(ace, "ACTIONet3D", coor_dims = 3)
+    } else {
+      err <- sprintf("'threeD == TRUE' but given coordinates have < 3 columns.\n")
       stop(err)
     }
   }
 
-  plot_data = data.frame(plot_coors,
-                         fill = plot_fill_col,
-                         trans = plot_alpha,
-                         idx = 1:NROW(plot_coors)
+  plot_data <- data.frame(plot_coors,
+    fill = plot_fill_col,
+    trans = plot_alpha,
+    idx = 1:NROW(plot_coors)
   )
 
-  if(is.null(label_attr)){
-    show_legend = FALSE
-    plot_data$labels = "NA"
+  if (is.null(label_attr)) {
+    show_legend <- FALSE
+    plot_data$labels <- "NA"
   } else {
-    plot_data$labels = plot_labels
+    plot_data$labels <- plot_labels
   }
 
-  names(plot_fill_col) = plot_data$labels
-  unique_labels = sort(unique(plot_data$labels))
-  palette_fill = plot_fill_col[unique_labels]
+  names(plot_fill_col) <- plot_data$labels
+  unique_labels <- sort(unique(plot_data$labels))
+  palette_fill <- plot_fill_col[unique_labels]
 
-  if (!is.null(alt_hovertext))
-    plot_data$hover_text = alt_hovertext
-  else{
-    if(is.null(label_attr))
-      plot_data$hover_text = plot_data$idx
-    else
-      plot_data$hover_text = plot_data$labels
+  if (!is.null(alt_hovertext)) {
+    plot_data$hover_text <- alt_hovertext
+  } else {
+    if (is.null(label_attr)) {
+      plot_data$hover_text <- plot_data$idx
+    } else {
+      plot_data$hover_text <- plot_data$labels
+    }
   }
 
-  if(is.null(point_order))
-    pidx = sample(NROW(plot_data))
-  else
-    pidx = point_order
+  if (is.null(point_order)) {
+    pidx <- sample(NROW(plot_data))
+  } else {
+    pidx <- point_order
+  }
 
-  plot_data = plot_data[pidx, ]
+  plot_data <- plot_data[pidx, ]
 
-  if(is.null(stroke_color))
-    stroke_color = "black"
+  if (is.null(stroke_color)) {
+    stroke_color <- "black"
+  }
 
   axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
 
   if (threeD == TRUE) {
-
-      network <- plotly::plot_ly(
-        data = plot_data,
-        x = ~x,
-        y = ~y,
-        z = ~z,
-        color = ~labels,
-        colors = palette_fill,
-        marker = list(
-          size = point_size,
-          line = list(
-            width = stroke_size,
-            color = stroke_color
-          )
-        ),
-        text = ~hover_text,
-        mode = "markers",
-        hoverinfo = "text",
-        type = "scatter3d"
-      )
-
-      p <- plotly::layout(
-        p = network,
-        scene = list(
-          xaxis = axis,
-          yaxis = axis,
-          zaxis = axis
-        ),
-        showlegend = show_legend,
-        legend = list(
-          marker = list(
-            marker.size = 10
-          )
+    network <- plotly::plot_ly(
+      data = plot_data,
+      x = ~x,
+      y = ~y,
+      z = ~z,
+      color = ~labels,
+      colors = palette_fill,
+      marker = list(
+        size = point_size,
+        line = list(
+          width = stroke_size,
+          color = stroke_color
         )
-      ) %>% hide_colorbar()
+      ),
+      text = ~hover_text,
+      mode = "markers",
+      hoverinfo = "text",
+      type = "scatter3d"
+    )
 
-  } else {
-
-      network <- plotly::plot_ly(
-        data = plot_data,
-        x = ~x,
-        y = ~y,
-        color = ~labels,
-        colors = palette_fill,
-        marker = list(
-          size = point_size,
-          opacity = ~trans,
-          line = list(
-            width = stroke_size,
-            color = stroke_color
-          )
-        ),
-        text = ~hover_text,
-        mode = "markers",
-        type = "scattergl",
-        hoverinfo = "text"
-      )
-
-      p <- plotly::layout(
-        p = network,
+    p <- plotly::layout(
+      p = network,
+      scene = list(
         xaxis = axis,
         yaxis = axis,
-        showlegend = show_legend
-      ) %>% hide_colorbar()
-    }
+        zaxis = axis
+      ),
+      showlegend = show_legend,
+      legend = list(
+        marker = list(
+          marker.size = 10
+        )
+      )
+    ) %>% hide_colorbar()
+  } else {
+    network <- plotly::plot_ly(
+      data = plot_data,
+      x = ~x,
+      y = ~y,
+      color = ~labels,
+      colors = palette_fill,
+      marker = list(
+        size = point_size,
+        opacity = ~trans,
+        line = list(
+          width = stroke_size,
+          color = stroke_color
+        )
+      ),
+      text = ~hover_text,
+      mode = "markers",
+      type = "scattergl",
+      hoverinfo = "text"
+    )
+
+    p <- plotly::layout(
+      p = network,
+      xaxis = axis,
+      yaxis = axis,
+      showlegend = show_legend
+    ) %>% hide_colorbar()
+  }
 
   return(p)
 }
@@ -652,68 +637,65 @@ plot.ACTIONet.interactive <- function(
 #' @return Visualized ACTIONet
 #'
 #' @examples
-#' plot.individual.gene(ace, ace$assigned_archetype, 'CD14')
+#' plot.individual.gene(ace, ace$assigned_archetype, "CD14")
 #' @export
-plot.individual.gene <- function(
-  ace,
-  labels,
-  gene_name,
-  features_use = NULL,
-  assay_name = "logcounts",
-  palette = CPal_default
-) {
+plot.individual.gene <- function(ace,
+                                 labels,
+                                 gene_name,
+                                 features_use = NULL,
+                                 assay_name = "logcounts",
+                                 palette = CPal_default) {
+  clusters <- .preprocess_annotation_labels(ace, labels)
+  features_use <- .preprocess_annotation_features(ace, features_use)
 
-    clusters = .preprocess_annotation_labels(ace, labels)
-    features_use = .preprocess_annotation_features(ace, features_use)
+  Labels <- names(clusters)
+  Annot <- sort(unique(Labels))
+  Annot <- Annot[order(clusters[match(Annot, Labels)], decreasing = FALSE)]
+  Labels <- factor(Labels, levels = Annot)
 
-    Labels = names(clusters)
-    Annot = sort(unique(Labels))
-    Annot = Annot[order(clusters[match(Annot, Labels)], decreasing = FALSE)]
-    Labels = factor(Labels, levels = Annot)
+  if (length(palette) > 1) {
+    if (length(palette) < length(Annot)) {
+      if (length(Annot) <= 20) {
+        palette <- CPal_default
+      } else {
+        palette <- CPal_default
+      }
+    }
 
-    if (length(palette) > 1) {
-        if (length(palette) < length(Annot)) {
-            if (length(Annot) <= 20) {
-                palette = CPal_default
-            } else {
-                palette = CPal_default
-            }
-        }
-
-        if (is.null(names(palette))) {
-            Pal = palette[1:length(Annot)]
-        } else {
-            Pal = palette[Annot]
-        }
+    if (is.null(names(palette))) {
+      Pal <- palette[1:length(Annot)]
     } else {
-        Pal = ggpubr::get_palette(palette, length(Annot))
+      Pal <- palette[Annot]
     }
+  } else {
+    Pal <- ggpubr::get_palette(palette, length(Annot))
+  }
 
-    names(Pal) = Annot
+  names(Pal) <- Annot
 
-    if (!(gene_name %in% features_use)) {
-        err = sprintf("Gene %s not found\n", gene_name)
-        stop(err)
-    }
+  if (!(gene_name %in% features_use)) {
+    err <- sprintf("Gene %s not found\n", gene_name)
+    stop(err)
+  }
 
-    x = SummarizedExperiment::assays(ace)[[assay_name]][gene_name, ]
-    if (sum(x) == 0) {
-        err = sprintf("Gene must have non-zero expression.\n")
-        stop(err)
-    }
+  x <- SummarizedExperiment::assays(ace)[[assay_name]][gene_name, ]
+  if (sum(x) == 0) {
+    err <- sprintf("Gene must have non-zero expression.\n")
+    stop(err)
+  }
 
 
-    df = data.frame(Annotation = Labels, Expression = x)
-    gp = ggpubr::ggviolin(
-      data = df,
-      x = "Annotation",
-      y = "Expression",
-      fill = "Annotation",
-      palette = Pal,
-      add = "boxplot",
-      add.params = list(fill = "white")
-    )
-    print(gp)
+  df <- data.frame(Annotation = Labels, Expression = x)
+  gp <- ggpubr::ggviolin(
+    data = df,
+    x = "Annotation",
+    y = "Expression",
+    fill = "Annotation",
+    palette = Pal,
+    add = "boxplot",
+    add.params = list(fill = "white")
+  )
+  print(gp)
 }
 
 #' Plots gradient of (imputed) values on ACTIONet scatter plot.
@@ -736,94 +718,93 @@ plot.individual.gene <- function(
 #' @return 'ggplot' object.
 #'
 #' @examples
-#' ace = run.ACTIONet(ace)
-#' x = logcounts(ace)['CD14', ]
+#' ace <- run.ACTIONet(ace)
+#' x <- logcounts(ace)["CD14", ]
 #' plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
 #' @export
 
-plot.ACTIONet.gradient <- function(
-  ace,
-  x,
-  alpha_val = 0.85,
-  log_scale = FALSE,
-  nonparameteric = FALSE,
-  trans_attr = NULL,
-  trans_fac = 1.5,
-  trans_th = -0.5,
-  point_size = 1,
-  stroke_size = point_size * 0.1,
-  stroke_contrast_fac = 0.1,
-  grad_palette = "magma",
-  net_attr = "ACTIONet",
-  coordinate_attr = "ACTIONet2D"
-) {
+plot.ACTIONet.gradient <- function(ace,
+                                   gradient_attr,
+                                   alpha_val = 0.85,
+                                   log_scale = FALSE,
+                                   nonparameteric = FALSE,
+                                   trans_attr = NULL,
+                                   trans_fac = 1.5,
+                                   trans_th = -0.5,
+                                   point_size = 1,
+                                   stroke_size = point_size * 0.1,
+                                   stroke_contrast_fac = 0.1,
+                                   grad_palette = "magma",
+                                   net_attr = "ACTIONet",
+                                   coordinate_attr = "ACTIONet2D") {
+  NA_col <- "#eeeeee"
 
-    NA_col = "#eeeeee"
-
-    ## Create color gradient generator
-    if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
-
-        grad_palette = switch(grad_palette,
-          greys = grDevices::gray.colors(100),
-          inferno = viridis::inferno(500, alpha = 0.8),
-          magma = viridis::magma(500, alpha = 0.8),
-          viridis = viridis::viridis(500, alpha = 0.8),
-          BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
-          Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
-          RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
-        )
-
-    } else {
-        # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
-        grad_palette = grDevices::colorRampPalette(grad_palette)(500)
-    }
-
-    ## Scale/prune scores, if needed
-    if(any(x < 0)){x = x + -1*min(x)}
-
-    x = x - min(x)
-
-    if (log_scale == TRUE)
-        x = log1p(x)
-
-    if (alpha_val > 0) {
-        x = as.numeric(compute_network_diffusion_fast(
-          G = colNets(ace)[[net_attr]],
-          X0 = as(as.matrix(x), "sparseMatrix")
-        ))
-    }
-
-    col_func = (scales::col_bin(
-      palette = grad_palette,
-      domain = NULL,
-      na.color = NA_col,
-      bins = 7
-    ))
-
-    if (nonparameteric == TRUE)
-        plot_fill_col = col_func(rank(x))
-    else
-        plot_fill_col = col_func(x)
-
-    idx = order(x, decreasing = FALSE)
-
-    p_out <- plot.ACTIONet(
-      data = ace,
-      label_attr = NULL,
-      color_attr = plot_fill_col,
-      trans_attr = trans_attr,
-      trans_fac = trans_fac,
-      trans_th = trans_th,
-      point_size = point_size,
-      stroke_size = stroke_size,
-      stroke_contrast_fac = stroke_contrast_fac,
-      palette = NULL,
-      add_text_labels = FALSE,
-      point_order = idx,
-      coordinate_attr = coordinate_attr
+  ## Create color gradient generator
+  if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+    grad_palette <- switch(grad_palette,
+      greys = grDevices::gray.colors(100),
+      inferno = viridis::inferno(500, alpha = 0.8),
+      magma = viridis::magma(500, alpha = 0.8),
+      viridis = viridis::viridis(500, alpha = 0.8),
+      BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
+      Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
+      RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
     )
+  } else {
+    # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
+    grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
+  }
 
-    return(p_out)
+  ## Scale/prune scores, if needed
+  if (any(gradient_attr < 0)) {
+    gradient_attr <- gradient_attr + -1 * min(gradient_attr)
+  }
+
+  gradient_attr <- gradient_attr - min(gradient_attr)
+
+  if (log_scale == TRUE) {
+    gradient_attr <- log1p(gradient_attr)
+  }
+
+  if (alpha_val > 0) {
+    gradient_attr <- as.numeric(compute_network_diffusion_fast(
+      G = colNets(ace)[[net_attr]],
+      X0 = as(as.matrix(gradient_attr), "sparseMatrix")
+    ))
+  }
+
+  col_func <- (scales::col_bin(
+    palette = grad_palette,
+    domain = NULL,
+    na.color = NA_col,
+    bins = 7
+  ))
+
+  if (nonparameteric == TRUE) {
+    plot_fill_col <- col_func(rank(gradient_attr))
+  } else {
+    plot_fill_col <- col_func(gradient_attr)
+  }
+
+  idx <- order(gradient_attr, decreasing = FALSE)
+
+  p_out <- plot.ACTIONet(
+    ace = ace,
+    label_attr = NULL,
+    color_attr = plot_fill_col,
+    trans_attr = trans_attr,
+    trans_fac = trans_fac,
+    trans_th = trans_th,
+    point_size = point_size,
+    stroke_size = stroke_size,
+    stroke_contrast_fac = stroke_contrast_fac,
+    palette = NULL,
+    add_text_labels = FALSE,
+    point_order = idx,
+    coordinate_attr = coordinate_attr
+  )
+
+  return(p_out)
 }
 
 
@@ -842,290 +823,263 @@ plot.ACTIONet.gradient <- function(
 #' @return Visualized ACTIONet with projected scores
 #'
 #' @examples
-#' ace = run.ACTIONet(sce)
-#' visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), trans_attr = ace$node_centrality)
-visualize.markers <- function(
-  ace,
-  markers,
-  features_use = NULL,
-  alpha_val = 0.9,
-  assay_name = "logcounts",
-  trans_attr = NULL,
-  trans_th = -0.5,
-  trans_fac = 3,
-  grad_palette = "magma",
-  point_size = 1,
-  net_attr = "ACTIONet",
-  coordinate_attr = "ACTIONet2D",
-  single_plot = FALSE
-) {
+#' ace <- run.ACTIONet(sce)
+#' visualize.markers(ace, markers = c("CD14", "CD19", "CD3G"), trans_attr = ace$node_centrality)
+visualize.markers <- function(ace,
+                              markers,
+                              features_use = NULL,
+                              alpha_val = 0.9,
+                              assay_name = "logcounts",
+                              trans_attr = NULL,
+                              trans_th = -0.5,
+                              trans_fac = 3,
+                              grad_palette = "magma",
+                              point_size = 1,
+                              net_attr = "ACTIONet",
+                              coordinate_attr = "ACTIONet2D",
+                              single_plot = FALSE) {
+  features_use <- .preprocess_annotation_features(ace, features_use = features_use)
+  markers_all <- sort(unique(unlist(markers)))
+  marker_set <- intersect(markers_all, features_use)
 
-    features_use = .preprocess_annotation_features(ace, features_use = features_use)
-    markers_all = sort(unique(unlist(markers)))
-    marker_set = intersect(markers_all, features_use)
+  if (length(marker_set) == 0) {
+    err <- sprintf("No given markers found in feature set.\n")
+    stop(err, call. = FALSE)
+  }
 
-    if (length(marker_set) == 0) {
-        err = sprintf("No given markers found in feature set.\n")
-        stop(err, call. = FALSE)
-    }
+  if (length(marker_set) == 1) {
+    alpha_val <- 0
+  }
 
-    if (length(marker_set) == 1)
-        alpha_val = 0
+  if (alpha_val > 0) {
+    expression_profile <- impute.genes.using.ACTIONet(
+      ace = ace,
+      genes = marker_set,
+      features_use = features_use,
+      alpha_val = alpha_val
+    )
+  } else {
+    expression_profile <- assays(ace)[[assay_name]][match(marker_set, features_use), ,
+      drop = FALSE
+    ]
+    expression_profile <- Matrix::t(expression_profile)
+    colnames(expression_profile) <- marker_set
+  }
 
-    if (alpha_val > 0) {
-        expression_profile = impute.genes.using.ACTIONet(
-          ace = ace,
-          genes = marker_set,
-          features_use = features_use,
-          alpha_val = alpha_val
-        )
+  print(sprintf("Markers Visualized: %s", paste0(marker_set, collapse = ", ")))
+  markers_missing <- setdiff(markers_all, marker_set)
+  if (length(markers_missing) > 0) {
+    print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
+  }
 
-    } else {
-        expression_profile = assays(ace)[[assay_name]][match(marker_set, features_use),
-            , drop = FALSE]
-        expression_profile = Matrix::t(expression_profile)
-        colnames(expression_profile) = marker_set
-    }
+  # out = lapply(1:ncol(expression_profile), function(i){
+  out <- sapply(colnames(expression_profile), function(feat_name) {
+    # feat_name = colnames(expression_profile)[i]
+    # x = expression_profile[, i]
+    x <- expression_profile[, feat_name]
 
-    print(sprintf("Markers Visualized: %s", paste0(marker_set, collapse = ", ")))
-    markers_missing = setdiff(markers_all, marker_set)
-    if (length(markers_missing) > 0)
-        print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
+    nnz <- round(sum(x^2)^2 / sum(x^4))
+    x.threshold <- sort(x, decreasing = TRUE)[nnz]
+    x[x < x.threshold] <- 0
+    x <- x / max(x)
 
-    # out = lapply(1:ncol(expression_profile), function(i){
-    out = sapply(colnames(expression_profile), function(feat_name){
-      # feat_name = colnames(expression_profile)[i]
-      # x = expression_profile[, i]
-      x = expression_profile[, feat_name]
+    p_out <- plot.ACTIONet.gradient(
+      ace = ace,
+      gradient_attr = x,
+      alpha_val = 0,
+      log_scale = FALSE,
+      nonparameteric = FALSE,
+      trans_attr = trans_attr,
+      trans_fac = trans_fac,
+      trans_th = trans_th,
+      point_size = point_size,
+      stroke_size = point_size * 0.1,
+      stroke_contrast_fac = 0.1,
+      grad_palette = grad_palette,
+      net_attr = net_attr,
+      coordinate_attr = coordinate_attr
+    ) +
+      ggtitle(feat_name) +
+      theme(plot.title = element_text(hjust = 0.5))
 
-      nnz = round(sum(x^2)^2/sum(x^4))
-      x.threshold = sort(x, decreasing = TRUE)[nnz]
-      x[x < x.threshold] = 0
-      x = x/max(x)
+    return(p_out)
+  }, simplify = FALSE)
 
-      p_out <- plot.ACTIONet.gradient(
-        ace = ace,
-        x = x,
-        alpha_val = 0,
-        log_scale = FALSE,
-        nonparameteric = FALSE,
-        trans_attr = trans_attr,
-        trans_fac = trans_fac,
-        trans_th = trans_th,
-        point_size = point_size,
-        stroke_size = point_size * 0.1,
-        stroke_contrast_fac = 0.1,
-        grad_palette = grad_palette,
-        net_attr = net_attr,
-        coordinate_attr = coordinate_attr
-      ) +
-        ggtitle(feat_name) +
-        theme(plot.title = element_text(hjust = 0.5))
+  # n = length(out)
+  if (length(out) == 1) {
+    out <- out[[1]]
+  }
 
-      return(p_out)
-    }, simplify = FALSE)
+  if (single_plot == TRUE && length(out) > 1) {
+    d <- .plot_arrange_dim(n)
+    out <- ggpubr::ggarrange(
+      plotlist = out,
+      nrow = d[1],
+      ncol = d[2]
+    )
 
-    # n = length(out)
-    if(length(out) == 1)
-      out = out[[1]]
+    # n = 1
+  }
 
-    if(single_plot == TRUE && length(out) > 1){
+  # if(show_plots == TRUE){
+  #   if(n == 1){
+  #     print(out)
+  #   } else {
+  #     for(i in 1:n){
+  #       print(out[[i]])
+  #     }
+  #   }
+  # }
 
-      d = .plot_arrange_dim(n)
-      out = ggpubr::ggarrange(plotlist = out,
-        nrow = d[1],
-        ncol = d[2]
-      )
-
-      # n = 1
-    }
-
-    # if(show_plots == TRUE){
-    #   if(n == 1){
-    #     print(out)
-    #   } else {
-    #     for(i in 1:n){
-    #       print(out[[i]])
-    #     }
-    #   }
-    # }
-
-    return(out)
+  return(out)
 }
 
 
-select.top.k.genes <- function(
-  ace,
-  top_genes = 5,
-  palette = NULL,
-  blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-  top_features = 3,
-  normalize = FALSE,
-  reorder_columns = FALSE,
-  slot_name = "unified_feature_specificity"
-) {
+select.top.k.genes <- function(ace,
+                               top_genes = 5,
+                               palette = NULL,
+                               blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+                               top_features = 3,
+                               normalize = FALSE,
+                               reorder_columns = FALSE,
+                               slot_name = "unified_feature_specificity") {
+  feat_scores <- as.matrix(rowMaps(ace)[[slot_name]])
+  filtered.rows <- grep(blacklist_pattern, rownames(feat_scores))
+  if (length(filtered.rows) > 0) {
+    feat_scores <- feat_scores[-filtered.rows, ]
+  }
 
-    feat_scores = as.matrix(rowMaps(ace)[[slot_name]])
-    filtered.rows = grep(blacklist_pattern, rownames(feat_scores))
-    if (length(filtered.rows) > 0)
-        feat_scores = feat_scores[-filtered.rows, ]
+  tbl <- select.top.k.features(
+    feat_scores = feat_scores,
+    top_features = top_features,
+    normalize = normalize,
+    reorder_columns = reorder_columns
+  )
 
-    tbl = select.top.k.features(
-      feat_scores = feat_scores,
-      top_features = top_features,
-      normalize = normalize,
-      reorder_columns = reorder_columns
-    )
-
-    return(tbl)
+  return(tbl)
 }
 
 
-plot.top.k.genes <- function(
-  ace,
-  top_genes = 5,
-  palette = NULL,
-  blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-  top_features = 3,
-  normalize = FALSE,
-  reorder_columns = TRUE,
-  row.title = "Archetypes",
-  column.title = "Genes",
-  rowPal = "black",
-  slot_name = "unified_feature_specificity"
-) {
+plot.top.k.genes <- function(ace,
+                             top_genes = 5,
+                             palette = NULL,
+                             blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+                             top_features = 3,
+                             normalize = FALSE,
+                             reorder_columns = TRUE,
+                             row.title = "Archetypes",
+                             column.title = "Genes",
+                             rowPal = "black",
+                             slot_name = "unified_feature_specificity") {
+  feat_scores <- as.matrix(rowMaps(ace)[[slot_name]])
+  filtered.rows <- grep(blacklist_pattern, rownames(feat_scores))
+  if (length(filtered.rows) > 0) {
+    feat_scores <- feat_scores[-filtered.rows, ]
+  }
 
-    feat_scores = as.matrix(rowMaps(ace)[[slot_name]])
-    filtered.rows = grep(blacklist_pattern, rownames(feat_scores))
-    if (length(filtered.rows) > 0)
-        feat_scores = feat_scores[-filtered.rows, ]
+  ht <- plot.top.k.features(
+    feat_scores = feat_scores,
+    top_features = top_features,
+    normalize = normalize,
+    reorder_columns = reorder_columns,
+    row.title = row.title,
+    column.title = column.title,
+    rowPal = rowPal
+  )
 
-    ht = plot.top.k.features(
-      feat_scores = feat_scores,
-      top_features = top_features,
-      normalize = normalize,
-      reorder_columns = reorder_columns,
-      row.title = row.title,
-      column.title = column.title,
-      rowPal = rowPal
-    )
-
-    return(ht)
+  return(ht)
 }
 
 
-plot.archetype.selected.genes <- function(
-  ace,
-  genes,
-  palette = NULL,
-  blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
-  top_features = 3,
-  normalize = FALSE,
-  reorder_columns = TRUE,
-  row.title = "Archetypes",
-  column.title = "Genes",
-  rowPal = "black",
-  slot_name = "unified_feature_specificity"
-) {
+plot.archetype.selected.genes <- function(ace,
+                                          genes,
+                                          palette = NULL,
+                                          blacklist_pattern = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|^RP|MALAT1|B2M|GAPDH",
+                                          top_features = 3,
+                                          normalize = FALSE,
+                                          reorder_columns = TRUE,
+                                          row.title = "Archetypes",
+                                          column.title = "Genes",
+                                          rowPal = "black",
+                                          slot_name = "unified_feature_specificity") {
+  feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+  filtered.rows <- match(intersect(rownames(ace), genes), rownames(ace))
 
-    feat_scores = as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-    filtered.rows = match(intersect(rownames(ace), genes), rownames(ace))
+  if (length(filtered.rows) > 0) {
+    feat_scores <- feat_scores[-filtered.rows, ]
+  }
 
-    if (length(filtered.rows) > 0)
-        feat_scores = feat_scores[-filtered.rows, ]
+  ht <- plot.top.k.features(
+    feat_scores = feat_scores,
+    top_features = top_features,
+    normalize = normalize,
+    reorder_columns = reorder_columns,
+    row.title = row.title,
+    column.title = column.title,
+    rowPal = rowPal
+  )
 
-    ht = plot.top.k.features(
-      feat_scores = feat_scores,
-      top_features = top_features,
-      normalize = normalize,
-      reorder_columns = reorder_columns,
-      row.title = row.title,
-      column.title = column.title,
-      rowPal = rowPal
-    )
-
-    return(ht)
-
+  return(ht)
 }
 
 
-plot.ACTIONet.archetype.footprint <- function(
-  ace,
-  point_size = 0.1,
-  palette = "magma",
-  title = "",
-  arch.labels = NULL,
-  coordinate_slot = "ACTIONet2D",
-  alpha_val = 0.9
-) {
+plot.ACTIONet.archetype.footprint <- function(ace,
+                                              arch.labels = NULL,
+                                              alpha_val = 0.9,
+                                              trans_attr = NULL,
+                                              trans_th = -0.5,
+                                              trans_fac = 3,
+                                              grad_palette = "magma",
+                                              point_size = 1,
+                                              net_attr = "ACTIONet",
+                                              coordinate_attr = "ACTIONet2D",
+                                              arch_attr = "H_unified",
+                                              single_plot = FALSE) {
+  Ht <- colMaps(ace)[[arch_attr]]
+  cs <- fastColSums(Ht)
+  cs[cs == 0] <- 1
 
-    Ht = colMaps(ace)[["H_unified"]]
-    cs = fastColSums(Ht)
-    cs[cs == 0] = 1
+  U <- as(scale(Ht, center = FALSE, scale = cs), "dgTMatrix")
+  U.pr <- compute_network_diffusion(
+    G = colNets(ace)[[net_attr]],
+    X0 = U,
+    alpha = alpha_val
+  )
 
-    U = as(scale(Ht, center = FALSE, scale = cs), "dgTMatrix")
-    U.pr = compute_network_diffusion(
-      G = colNets(ace)$ACTIONet,
-      X0 = U,
-      alpha = alpha_val
-    )
+  if (is.null(arch.labels)) {
+    arch.labels <- sapply(1:NCOL(Ht), function(i) sprintf("Archetype %d", i))
+  }
 
-    point_size = point_size * 0.3
-    coors = scale(colMaps(ace)[[coordinate_slot]])
+  if (is.null(trans_attr)) {
+    trans_attr <- ace$node_centrality
+  }
+  # par(mfrow = c(k1, k2), mar = c(0, 0, 1, 0))
+  ggs <- lapply(1:NCOL(Ht), function(i) {
+    print(i)
+    x <- U.pr[, i]
+    p_out <- plot.ACTIONet.gradient(
+      ace = ace,
+      gradient_attr = x,
+      alpha_val = 0,
+      log_scale = FALSE,
+      nonparameteric = FALSE,
+      trans_attr = trans_attr,
+      trans_fac = trans_fac,
+      trans_th = trans_th,
+      point_size = point_size,
+      stroke_size = point_size * 0.1,
+      stroke_contrast_fac = 0.1,
+      grad_palette = grad_palette,
+      net_attr = net_attr,
+      coordinate_attr = coordinate_attr
+    ) +
+      ggtitle(arch.labels[[i]]) +
+      theme(plot.title = element_text(hjust = 0.5))
 
-    if (palette %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+    return(p_out)
+  })
 
-        Pal_grad = switch(palette,
-          inferno = viridis::inferno(500, alpha = 0.8),
-          magma = viridis::magma(500, alpha = 0.8),
-          viridis = viridis::viridis(500, alpha = 0.8),
-          BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
-          Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
-          RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100))
-
-    } else {
-        NA_col = "#cccccc"
-        Pal_grad = grDevices::colorRampPalette(c(NA_col, palette))(500)
-    }
-
-    k1 = k2 = round(sqrt(NCOL(Ht)))
-    if (k1 * k2 < NCOL(Ht)) {
-        k2 = k2 + 1
-    }
-
-    if (is.null(arch.labels))
-        arch.labels = sapply(1:NCOL(Ht), function(i) sprintf("Archetype %d", i))
-
-    # par(mfrow = c(k1, k2), mar = c(0, 0, 1, 0))
-    sapply(1:NCOL(Ht), function(i) {
-        print(i)
-        x = U.pr[, i]
-
-        xs = sort(x, decreasing = TRUE)
-        nnz = round((sum(xs)^2)/(sum(xs^2)))
-        threshold = xs[nnz]
-
-        x[x < threshold] = threshold
-        x = log(x)
-
-        vCol = (scales::col_bin(Pal_grad, domain = NULL, bins = 10))(x)
-        vCol = scales::alpha(vCol, 0.05 + 0.95 * x/max(x))
-        vCol = colorspace::lighten(vCol, 0.2)
-        idx = order(x, decreasing = FALSE)
-
-        graphics::plot(
-          x = coors[idx, 1],
-          y = coors[idx, 2],
-          bg = vCol[idx],
-          col = vCol[idx],
-          cex = point_size,
-          pch = 21,
-          axes = FALSE,
-          xlab = "",
-          ylab = "",
-          main = arch.labels[[i]]
-        )
-    })
+  return(ggs)
 }
 
 
@@ -1137,592 +1091,575 @@ plot.ACTIONet.archetype.footprint <- function(
 #' @return Sorted table with the selected top-ranked
 #'
 #' @examples
-#' feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
-#' enrichment.table.top = select.top.k.features(feat_scores, 3)
+#' feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
+#' enrichment.table.top <- select.top.k.features(feat_scores, 3)
 #' @export
-select.top.k.features <- function(
-  feat_scores,
-  top_features = 3,
-  normalize = FALSE,
-  reorder_columns = TRUE
-) {
+select.top.k.features <- function(feat_scores,
+                                  top_features = 3,
+                                  normalize = FALSE,
+                                  reorder_columns = TRUE) {
+  W0 <- (feat_scores)
+  if (normalize == TRUE) {
+    W0 <- doubleNorm(W0)
+  }
 
-    W0 = (feat_scores)
-    if (normalize == TRUE)
-        W0 = doubleNorm(W0)
+  IDX <- matrix(0, nrow = top_features, ncol = NCOL(W0))
+  VV <- matrix(0, nrow = top_features, ncol = NCOL(W0))
+  W <- (W0)
 
-    IDX = matrix(0, nrow = top_features, ncol = NCOL(W0))
-    VV = matrix(0, nrow = top_features, ncol = NCOL(W0))
-    W = (W0)
+  for (i in 1:NROW(IDX)) {
+    W.m <- as(MWM_hungarian(W), "dgTMatrix")
+    IDX[i, W.m@j + 1] <- W.m@i + 1
+    VV[i, W.m@j + 1] <- W.m@x
+    W[IDX[i, W.m@j + 1], ] <- 0
+  }
 
-    for (i in 1:NROW(IDX)) {
-        W.m = as(MWM_hungarian(W), "dgTMatrix")
-        IDX[i, W.m@j + 1] = W.m@i + 1
-        VV[i, W.m@j + 1] = W.m@x
-        W[IDX[i, W.m@j + 1], ] = 0
-    }
+  if (reorder_columns == TRUE) {
+    feat_scores_agg <- apply(IDX, 2, function(perm) as.numeric(fastColMeans(W0[perm, ])))
+    CC <- cor(feat_scores_agg)
+    D <- stats::as.dist(1 - CC)
+    cols <- seriation::get_order(seriation::seriate(D, "OLO"))
+    rows <- as.numeric(IDX[, cols])
+  } else {
+    cols <- 1:NCOL(W0)
+    rows <- unique(as.numeric(IDX))
+  }
 
-    if (reorder_columns == TRUE) {
-        feat_scores_agg = apply(IDX, 2, function(perm) as.numeric(fastColMeans(W0[perm, ])))
-        CC = cor(feat_scores_agg)
-        D = stats::as.dist(1 - CC)
-        cols = seriation::get_order(seriation::seriate(D, "OLO"))
-        rows = as.numeric(IDX[, cols])
-    } else {
-        cols = 1:NCOL(W0)
-        rows = unique(as.numeric(IDX))
-    }
+  W <- feat_scores[rows, cols]
 
-    W = feat_scores[rows, cols]
-
-    return(W)
+  return(W)
 }
 
 
 #' @export
-plot.ACTIONet.backbone <- function(
-  ace,
-  labels = NULL,
-  arch.labels = NULL,
-  trans_attr = NULL,
-  trans_th = -0.5,
-  trans_fac = 1.5,
-  point_size = 0.1,
-  palette = CPal_default,
-  title = "",
-  border.contrast.factor = 0.1,
-  arch.size.factor = 1,
-  label_size = 1,
-  coordinate_slot = "ACTIONet2D"
-) {
+plot.ACTIONet.backbone <- function(ace,
+                                   labels = NULL,
+                                   arch.labels = NULL,
+                                   trans_attr = NULL,
+                                   trans_th = -0.5,
+                                   trans_fac = 1.5,
+                                   point_size = 0.1,
+                                   palette = CPal_default,
+                                   title = "",
+                                   border.contrast.factor = 0.1,
+                                   arch.size.factor = 1,
+                                   label_size = 1,
+                                   coordinate_slot = "ACTIONet2D") {
+  if (!("backbone" %in% names(metadata(ace)))) {
+    err <- sprintf("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+    stop(err)
+  }
+  backbone <- metadata(ace)$backbone
 
-    if (!("backbone" %in% names(metadata(ace)))) {
-        err = sprintf("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
-        stop(err)
-    }
-    backbone = metadata(ace)$backbone
+  point_size <- point_size * 0.3
 
-    point_size = point_size * 0.3
-
-    if (class(ace) == "ACTIONetExperiment") {
-        labels = .preprocess_annotation_labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        } else {
-            coors = as.matrix(coordinate_slot)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        }
+  if (class(ace) == "ACTIONetExperiment") {
+    labels <- .preprocess_annotation_labels(labels, ace)
+    if (is.character(coordinate_slot)) {
+      coors <- as.matrix(colMaps(ace)[[coordinate_slot]])
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
-            coors = as.matrix(ace)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-            labels = .preprocess_annotation_labels(labels)
-        } else {
-            err = sprintf("Unknown type for object 'ace'.\n")
-            stop(err)
-        }
+      coors <- as.matrix(coordinate_slot)
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
     }
-
-    if (is.null(labels)) {
-        if (class(ace) == "ACTIONetExperiment") {
-            vCol = grDevices::rgb(colMaps(ace)$denovo_color)
-        } else {
-            vCol = rep("tomato", NROW(coors))
-        }
-        Annot = NULL
+  } else {
+    if (is.matrix(ace) | is.sparseMatrix(ace)) {
+      coors <- as.matrix(ace)
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+      labels <- .preprocess_annotation_labels(labels)
     } else {
-        Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(palette) > 1) {
-            if (length(palette) < length(Annot)) {
-              palette = CPal_default
-            }
-            if (is.null(names(palette))) {
-                Pal = palette[1:length(Annot)]
-            } else {
-                Pal = palette[Annot]
-            }
-        } else {
-            Pal = ggpubr::get_palette(palette, length(Annot))
-        }
-
-        names(Pal) = Annot
-        vCol = Pal[names(labels)]
-
-        if (is.null(arch.labels)) {
-            arch.annot = annotate.archetypes.using.labels(ace, labels)
-            arch.labels = arch.annot$Labels
-        }
-    }
-    if (is.null(arch.labels)) {
-        arch.labels = paste("A", 1:nrow(backbone$G), sep = "")
-    } else {
-        arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
-    }
-
-    if (!is.null(trans_attr)) {
-        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
-        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
-        beta[z > trans_th] = 1
-        beta = beta^trans_fac
-
-        vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
-        vCol = scales::alpha(vCol, beta)
-    } else {
-        vCol.border = colorspace::darken(vCol, border.contrast.factor)
-    }
-
-    x = coors[, 1]
-    y = coors[, 2]
-    x.min = min(x)
-    x.max = max(x)
-    y.min = min(y)
-    y.max = max(y)
-    x.min = x.min - (x.max - x.min)/20
-    x.max = x.max + (x.max - x.min)/20
-    y.min = y.min - (y.max - y.min)/20
-    y.max = y.max + (y.max - y.min)/20
-    XL = c(x.min, x.max)
-    YL = c(y.min, y.max)
-
-
-    rand.perm = sample(nrow(coors))
-    graphics::plot(
-      coors[rand.perm, c(1, 2)],
-      pch = 21,
-      cex = point_size,
-      bg = vCol[rand.perm],
-      col = vCol.border[rand.perm],
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
-    )
-
-    ## Add backbone anchors
-    cell.RGB = Matrix::t(grDevices::col2rgb(vCol))/255
-    cells.Lab = grDevices::convertColor(color = cell.RGB, from = "sRGB", to = "Lab")
-    arch.Lab = Matrix::t(ace$archetype_footprint) %*% cells.Lab
-    arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
-    aCol = grDevices::rgb(arch.RGB)
-
-    w = fastColSums(colMaps(ace)$H_unified)
-    w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
-    arch.sizes = (0.25 + arch.size.factor * w)
-
-    cell.coors = colMaps(ace)[[coordinate_slot]]
-    arch.coors = backbone$coordinates[, c(1, 2)]
-    arch.coors = sapply(1:2, function(i) (arch.coors[, i] - mean(cell.coors[, i]))/sd(cell.coors[,
-        i]))
-
-    text.halo.width = 0.1
-    label_size = label_size * 0.6
-
-
-    x = arch.coors[, 1]
-    y = arch.coors[, 2] - graphics::strheight("A")
-    theta = seq(0, 2 * pi, length.out = 50)
-    xy <- grDevices::xy.coords(x, y)
-    xo <- text.halo.width * graphics::strwidth("A")
-    yo <- text.halo.width * graphics::strheight("A")
-    for (i in theta) {
-
-        graphics::text(
-          x = xy$x + cos(i) * xo,
-          y = xy$y + sin(i) * yo,
-          labels = arch.labels,
-          col = "#dddddd",
-          cex = label_size
-        )
-
-    }
-
-    graphics::text(
-      x = xy$x,
-      y = xy$y,
-      labels = arch.labels,
-      col = colorspace::darken(aCol, 0.5),
-      cex = label_size
-    )
-
-
-    graphics::par(new = TRUE)
-    graphics::plot(
-      arch.coors,
-      pch = 25,
-      cex = arch.sizes,
-      bg = aCol,
-      col = colorspace::darken(aCol, 0.5),
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
-    )
-}
-
-#' @export
-plot.ACTIONet.backbone.graph <- function(
-  ace,
-  labels = NULL,
-  arch.labels = NULL,
-  trans_attr = NULL,
-  trans_th = -0.5,
-  trans_fac = 1.5,
-  point_size = 0.1,
-  palette = CPal_default,
-  title = "",
-  border.contrast.factor = 0.1,
-  arch.size.factor = 1,
-  label_size = 1,
-  cell_lightening = 0.5,
-  coordinate_slot = "ACTIONet2D",
-  stretch.factor = 10
-) {
-
-    if (!("backbone" %in% names(metadata(ace)))) {
-      err = sprintf("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+      err <- sprintf("Unknown type for object 'ace'.\n")
       stop(err)
     }
-    backbone = metadata(ace)$backbone
+  }
 
-    point_size = point_size * 0.3
-
+  if (is.null(labels)) {
     if (class(ace) == "ACTIONetExperiment") {
-        labels = .preprocess_annotation_labels(labels, ace)
-        if (is.character(coordinate_slot)) {
-            coors = as.matrix(colMaps(ace)[[coordinate_slot]])
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        } else {
-            coors = as.matrix(coordinate_slot)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-        }
+      vCol <- grDevices::rgb(colMaps(ace)$denovo_color)
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
-            coors = as.matrix(ace)
-            coor.mu = apply(coors, 2, mean)
-            coor.sigma = apply(coors, 2, sd)
-            coors = scale(coors)
-            labels = .preprocess_annotation_labels(labels)
-        } else {
-          err = sprintf("Unknown type for object 'ace'.\n")
-          stop(err)
-        }
+      vCol <- rep("tomato", NROW(coors))
+    }
+    Annot <- NULL
+  } else {
+    Annot <- names(labels)[match(sort(unique(labels)), labels)]
+    if (length(palette) > 1) {
+      if (length(palette) < length(Annot)) {
+        palette <- CPal_default
+      }
+      if (is.null(names(palette))) {
+        Pal <- palette[1:length(Annot)]
+      } else {
+        Pal <- palette[Annot]
+      }
+    } else {
+      Pal <- ggpubr::get_palette(palette, length(Annot))
     }
 
-    if (is.null(labels)) {
-        if (class(ace) == "ACTIONetExperiment") {
-            vCol = grDevices::rgb(colMaps(ace)$denovo_color)
-        } else {
-            vCol = rep("tomato", NROW(coors))
-        }
-        Annot = NULL
-    } else {
-        Annot = names(labels)[match(sort(unique(labels)), labels)]
-        if (length(palette) > 1) {
-            if (length(palette) < length(Annot)) {
-              palette = CPal_default
-            }
-            if (is.null(names(palette))) {
-                Pal = palette[1:length(Annot)]
-            } else {
-                Pal = palette[Annot]
-            }
-        } else {
-            Pal = ggpubr::get_palette(palette, length(Annot))
-        }
+    names(Pal) <- Annot
+    vCol <- Pal[names(labels)]
 
-        names(Pal) = Annot
-        vCol = Pal[names(labels)]
-
-        if (is.null(arch.labels)) {
-            arch.annot = annotate.archetypes.using.labels(ace, labels)
-            arch.labels = arch.annot$Labels
-        }
-    }
     if (is.null(arch.labels)) {
-        arch.labels = paste("A", 1:nrow(backbone$G), sep = "")
-    } else {
-        arch.labels = paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+      arch.annot <- annotate.archetypes.using.labels(ace, labels)
+      arch.labels <- arch.annot$Labels
     }
+  }
+  if (is.null(arch.labels)) {
+    arch.labels <- paste("A", 1:nrow(backbone$G), sep = "")
+  } else {
+    arch.labels <- paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+  }
 
-    if (!is.null(trans_attr)) {
-        z = scale(trans_attr)  # (trans_attr - median(trans_attr))/mad(trans_attr)
-        beta = 1/(1 + exp(-trans_fac * (z - trans_th)))
-        beta[z > trans_th] = 1
-        beta = beta^trans_fac
+  if (!is.null(trans_attr)) {
+    z <- scale(trans_attr) # (trans_attr - median(trans_attr))/mad(trans_attr)
+    beta <- 1 / (1 + exp(-trans_fac * (z - trans_th)))
+    beta[z > trans_th] <- 1
+    beta <- beta^trans_fac
 
-        vCol.border = scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
-        vCol = scales::alpha(vCol, beta)
-    } else {
-        vCol.border = colorspace::darken(vCol, border.contrast.factor)
-    }
+    vCol.border <- scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
+    vCol <- scales::alpha(vCol, beta)
+  } else {
+    vCol.border <- colorspace::darken(vCol, border.contrast.factor)
+  }
 
-    x = coors[, 1]
-    y = coors[, 2]
-    x.min = min(x)
-    x.max = max(x)
-    y.min = min(y)
-    y.max = max(y)
-    x.min = x.min - (x.max - x.min)/20
-    x.max = x.max + (x.max - x.min)/20
-    y.min = y.min - (y.max - y.min)/20
-    y.max = y.max + (y.max - y.min)/20
-    XL = c(x.min, x.max)
-    YL = c(y.min, y.max)
-
-    rand.perm = sample(NROW(coors))
-    vCol_lightend = colorspace::lighten(vCol, cell_lightening)
-    vCol.border_lightend = colorspace::lighten(vCol.border, cell_lightening)
-    graphics::plot(
-      coors[rand.perm, c(1, 2)],
-      pch = 21,
-      cex = point_size,
-      bg = vCol_lightend[rand.perm],
-      col = vCol.border_lightend[rand.perm],
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
-    )
-
-    ## Add backbone anchors
-    cell.RGB = Matrix::t(grDevices::col2rgb(vCol))/255
-    cells.Lab = grDevices::convertColor(color = cell.RGB, from = "sRGB", to = "Lab")
-    arch.Lab = Matrix::t(ace$archetype_footprint) %*% cells.Lab
-    arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
-    aCol = grDevices::rgb(arch.RGB)
-
-    w = fastColSums(colMaps(ace)$H_unified)
-    w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
-    arch.sizes = (0.25 + arch.size.factor * w)
-
-    # cell.coors =colMaps(ace)[[coordinate_slot]]
-    arch.coors = backbone$coordinates
-    arch.coors[, 1] = (arch.coors[, 1] - coor.mu[1])/coor.sigma[1]
-    arch.coors[, 2] = (arch.coors[, 2] - coor.mu[2])/coor.sigma[2]
-
-    graphics::par(new = TRUE)
-    graphics::plot(
-      arch.coors,
-      pch = 25,
-      cex = 0,
-      bg = aCol,
-      col = colorspace::darken(aCol, 0.5),
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
-    )
-
-    G = construct.tspanner(backbone$G, stretch.factor = stretch.factor)
-    Adj = as(G, "dgTMatrix")
-
-    kappa = 0.25 + 0.75/(1 + exp(-2 * scale(Adj@x)))
-    graphics::segments(
-      x0 = arch.coors[Adj@i + 1, 1],
-      y0 = arch.coors[Adj@i + 1, 2],
-      x1 = arch.coors[Adj@j + 1, 1],
-      y1 = arch.coors[Adj@j + 1, 2],
-      col = grDevices::rgb(0, 0, 0, 0.8 * kappa),
-      lwd = kappa * 3
-    )
-
-    text.halo.width = 0.1
-    label_size = label_size * 0.6
+  x <- coors[, 1]
+  y <- coors[, 2]
+  x.min <- min(x)
+  x.max <- max(x)
+  y.min <- min(y)
+  y.max <- max(y)
+  x.min <- x.min - (x.max - x.min) / 20
+  x.max <- x.max + (x.max - x.min) / 20
+  y.min <- y.min - (y.max - y.min) / 20
+  y.max <- y.max + (y.max - y.min) / 20
+  XL <- c(x.min, x.max)
+  YL <- c(y.min, y.max)
 
 
-    layout.labels(
-      x = arch.coors[, 1],
-      y = arch.coors[, 2] - graphics::strheight("A"),
+  rand.perm <- sample(nrow(coors))
+  graphics::plot(
+    coors[rand.perm, c(1, 2)],
+    pch = 21,
+    cex = point_size,
+    bg = vCol[rand.perm],
+    col = vCol.border[rand.perm],
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title,
+    xlim = XL,
+    ylim = YL
+  )
+
+  ## Add backbone anchors
+  cell.RGB <- Matrix::t(grDevices::col2rgb(vCol)) / 255
+  cells.Lab <- grDevices::convertColor(color = cell.RGB, from = "sRGB", to = "Lab")
+  arch.Lab <- Matrix::t(ace$archetype_footprint) %*% cells.Lab
+  arch.RGB <- grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+  aCol <- grDevices::rgb(arch.RGB)
+
+  w <- fastColSums(colMaps(ace)$H_unified)
+  w <- 0.3 + 0.7 * (w - min(w)) / (max(w) - min(w))
+  arch.sizes <- (0.25 + arch.size.factor * w)
+
+  cell.coors <- colMaps(ace)[[coordinate_slot]]
+  arch.coors <- backbone$coordinates[, c(1, 2)]
+  arch.coors <- sapply(1:2, function(i) {
+    (arch.coors[, i] - mean(cell.coors[, i])) / sd(cell.coors[
+      ,
+      i
+    ])
+  })
+
+  text.halo.width <- 0.1
+  label_size <- label_size * 0.6
+
+
+  x <- arch.coors[, 1]
+  y <- arch.coors[, 2] - graphics::strheight("A")
+  theta <- seq(0, 2 * pi, length.out = 50)
+  xy <- grDevices::xy.coords(x, y)
+  xo <- text.halo.width * graphics::strwidth("A")
+  yo <- text.halo.width * graphics::strheight("A")
+  for (i in theta) {
+    graphics::text(
+      x = xy$x + cos(i) * xo,
+      y = xy$y + sin(i) * yo,
       labels = arch.labels,
-      col = colorspace::darken(aCol, 0.5),
-      bg = "#eeeeee",
-      r = text.halo.width,
+      col = "#dddddd",
       cex = label_size
     )
+  }
 
-    graphics::par(new = TRUE)
-    graphics::plot(
-      arch.coors,
-      pch = 25,
-      cex = arch.sizes,
-      bg = aCol,
-      col = colorspace::darken(aCol, 0.5),
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title,
-      xlim = XL,
-      ylim = YL
-    )
+  graphics::text(
+    x = xy$x,
+    y = xy$y,
+    labels = arch.labels,
+    col = colorspace::darken(aCol, 0.5),
+    cex = label_size
+  )
 
+
+  graphics::par(new = TRUE)
+  graphics::plot(
+    arch.coors,
+    pch = 25,
+    cex = arch.sizes,
+    bg = aCol,
+    col = colorspace::darken(aCol, 0.5),
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title,
+    xlim = XL,
+    ylim = YL
+  )
 }
 
 #' @export
-plot.backbone.graph <- function(
-  ace,
-  arch.labels = NULL,
-  arch.colors = NULL,
-  point_size = 2,
-  label_size = 1,
-  title = "",
-  stretch.factor = 2
-) {
+plot.ACTIONet.backbone.graph <- function(ace,
+                                         labels = NULL,
+                                         arch.labels = NULL,
+                                         trans_attr = NULL,
+                                         trans_th = -0.5,
+                                         trans_fac = 1.5,
+                                         point_size = 0.1,
+                                         palette = CPal_default,
+                                         title = "",
+                                         border.contrast.factor = 0.1,
+                                         arch.size.factor = 1,
+                                         label_size = 1,
+                                         cell_lightening = 0.5,
+                                         coordinate_slot = "ACTIONet2D",
+                                         stretch.factor = 10) {
+  if (!("backbone" %in% names(metadata(ace)))) {
+    err <- sprintf("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+    stop(err)
+  }
+  backbone <- metadata(ace)$backbone
 
-    if (!("backbone" %in% names(metadata(ace)))) {
-      err = sprintf("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+  point_size <- point_size * 0.3
+
+  if (class(ace) == "ACTIONetExperiment") {
+    labels <- .preprocess_annotation_labels(labels, ace)
+    if (is.character(coordinate_slot)) {
+      coors <- as.matrix(colMaps(ace)[[coordinate_slot]])
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+    } else {
+      coors <- as.matrix(coordinate_slot)
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+    }
+  } else {
+    if (is.matrix(ace) | is.sparseMatrix(ace)) {
+      coors <- as.matrix(ace)
+      coor.mu <- apply(coors, 2, mean)
+      coor.sigma <- apply(coors, 2, sd)
+      coors <- scale(coors)
+      labels <- .preprocess_annotation_labels(labels)
+    } else {
+      err <- sprintf("Unknown type for object 'ace'.\n")
       stop(err)
     }
-    backbone = metadata(ace)$backbone
+  }
 
-    G = construct.tspanner(backbone$G, stretch.factor = stretch.factor)
-    Adj = as(G, "dgTMatrix")
-    arch.coors = sgd2_layout_weighted_convergent(G, Matrix::t(backbone$coordinates_3D))
-
-    if (is.null(arch.colors)) {
-        arch.colors = rgb(backbone$colors)
+  if (is.null(labels)) {
+    if (class(ace) == "ACTIONetExperiment") {
+      vCol <- grDevices::rgb(colMaps(ace)$denovo_color)
+    } else {
+      vCol <- rep("tomato", NROW(coors))
+    }
+    Annot <- NULL
+  } else {
+    Annot <- names(labels)[match(sort(unique(labels)), labels)]
+    if (length(palette) > 1) {
+      if (length(palette) < length(Annot)) {
+        palette <- CPal_default
+      }
+      if (is.null(names(palette))) {
+        Pal <- palette[1:length(Annot)]
+      } else {
+        Pal <- palette[Annot]
+      }
+    } else {
+      Pal <- ggpubr::get_palette(palette, length(Annot))
     }
 
-    w = fastColSums(colMaps(ace)$H_unified)
-    w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
-    arch.sizes = (0.25 + w) * point_size
-
-    graphics::plot(
-      arch.coors,
-      pch = 25,
-      cex = 0,
-      bg = arch.colors,
-      col = colorspace::darken(arch.colors, 0.5),
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = title
-    )
-
-    kappa = 0.1 + 0.9/(1 + exp(-2 * scale(Adj@x)))
-    graphics::segments(
-      x0 = arch.coors[Adj@i + 1, 1],
-      y0 = arch.coors[Adj@i + 1, 2],
-      x1 = arch.coors[Adj@j + 1, 1],
-      y1 = arch.coors[Adj@j + 1, 2],
-      col = grDevices::rgb(0, 0, 0, 0.8 * kappa),
-      lwd = kappa * 3
-    )
-
-    text.halo.width = 0.1
-    label_size = label_size * 0.6
+    names(Pal) <- Annot
+    vCol <- Pal[names(labels)]
 
     if (is.null(arch.labels)) {
-        arch.labels = paste("A", 1:nrow(arch.coors), sep = "")
-    } else {
-        arch.labels = paste("A", 1:nrow(arch.coors), "-", arch.labels, sep = "")
+      arch.annot <- annotate.archetypes.using.labels(ace, labels)
+      arch.labels <- arch.annot$Labels
     }
+  }
+  if (is.null(arch.labels)) {
+    arch.labels <- paste("A", 1:nrow(backbone$G), sep = "")
+  } else {
+    arch.labels <- paste("A", 1:nrow(backbone$G), "-", arch.labels, sep = "")
+  }
 
-    layout.labels(
-      x = arch.coors[, 1],
-      y = arch.coors[, 2] - graphics::strheight("A"),
-      labels = arch.labels,
-      col = colorspace::darken(arch.colors, 0.5),
-      bg = "#eeeeee",
-      r = text.halo.width,
-      cex = label_size
-    )
+  if (!is.null(trans_attr)) {
+    z <- scale(trans_attr) # (trans_attr - median(trans_attr))/mad(trans_attr)
+    beta <- 1 / (1 + exp(-trans_fac * (z - trans_th)))
+    beta[z > trans_th] <- 1
+    beta <- beta^trans_fac
 
-    graphics::par(new = TRUE)
-    graphics::plot(
-      arch.coors,
-      pch = 25,
-      cex = arch.sizes,
-      bg = arch.colors,
-      col = colorspace::darken(arch.colors, 0.5),
-      axes = FALSE,
-      xlab = "",
-      ylab = ""
-    )
+    vCol.border <- scales::alpha(colorspace::darken(vCol, border.contrast.factor), beta)
+    vCol <- scales::alpha(vCol, beta)
+  } else {
+    vCol.border <- colorspace::darken(vCol, border.contrast.factor)
+  }
 
+  x <- coors[, 1]
+  y <- coors[, 2]
+  x.min <- min(x)
+  x.max <- max(x)
+  y.min <- min(y)
+  y.max <- max(y)
+  x.min <- x.min - (x.max - x.min) / 20
+  x.max <- x.max + (x.max - x.min) / 20
+  y.min <- y.min - (y.max - y.min) / 20
+  y.max <- y.max + (y.max - y.min) / 20
+  XL <- c(x.min, x.max)
+  YL <- c(y.min, y.max)
+
+  rand.perm <- sample(NROW(coors))
+  vCol_lightend <- colorspace::lighten(vCol, cell_lightening)
+  vCol.border_lightend <- colorspace::lighten(vCol.border, cell_lightening)
+  graphics::plot(
+    coors[rand.perm, c(1, 2)],
+    pch = 21,
+    cex = point_size,
+    bg = vCol_lightend[rand.perm],
+    col = vCol.border_lightend[rand.perm],
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title,
+    xlim = XL,
+    ylim = YL
+  )
+
+  ## Add backbone anchors
+  cell.RGB <- Matrix::t(grDevices::col2rgb(vCol)) / 255
+  cells.Lab <- grDevices::convertColor(color = cell.RGB, from = "sRGB", to = "Lab")
+  arch.Lab <- Matrix::t(ace$archetype_footprint) %*% cells.Lab
+  arch.RGB <- grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
+  aCol <- grDevices::rgb(arch.RGB)
+
+  w <- fastColSums(colMaps(ace)$H_unified)
+  w <- 0.3 + 0.7 * (w - min(w)) / (max(w) - min(w))
+  arch.sizes <- (0.25 + arch.size.factor * w)
+
+  # cell.coors =colMaps(ace)[[coordinate_slot]]
+  arch.coors <- backbone$coordinates
+  arch.coors[, 1] <- (arch.coors[, 1] - coor.mu[1]) / coor.sigma[1]
+  arch.coors[, 2] <- (arch.coors[, 2] - coor.mu[2]) / coor.sigma[2]
+
+  graphics::par(new = TRUE)
+  graphics::plot(
+    arch.coors,
+    pch = 25,
+    cex = 0,
+    bg = aCol,
+    col = colorspace::darken(aCol, 0.5),
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title,
+    xlim = XL,
+    ylim = YL
+  )
+
+  G <- construct.tspanner(backbone$G, stretch.factor = stretch.factor)
+  Adj <- as(G, "dgTMatrix")
+
+  kappa <- 0.25 + 0.75 / (1 + exp(-2 * scale(Adj@x)))
+  graphics::segments(
+    x0 = arch.coors[Adj@i + 1, 1],
+    y0 = arch.coors[Adj@i + 1, 2],
+    x1 = arch.coors[Adj@j + 1, 1],
+    y1 = arch.coors[Adj@j + 1, 2],
+    col = grDevices::rgb(0, 0, 0, 0.8 * kappa),
+    lwd = kappa * 3
+  )
+
+  text.halo.width <- 0.1
+  label_size <- label_size * 0.6
+
+
+  layout.labels(
+    x = arch.coors[, 1],
+    y = arch.coors[, 2] - graphics::strheight("A"),
+    labels = arch.labels,
+    col = colorspace::darken(aCol, 0.5),
+    bg = "#eeeeee",
+    r = text.halo.width,
+    cex = label_size
+  )
+
+  graphics::par(new = TRUE)
+  graphics::plot(
+    arch.coors,
+    pch = 25,
+    cex = arch.sizes,
+    bg = aCol,
+    col = colorspace::darken(aCol, 0.5),
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title,
+    xlim = XL,
+    ylim = YL
+  )
 }
 
-gate.archetypes <- function(
-  ace,
-  i,
-  j,
-  H.slot = "H_unified"
-) {
+#' @export
+plot.backbone.graph <- function(ace,
+                                arch.labels = NULL,
+                                arch.colors = NULL,
+                                point_size = 2,
+                                label_size = 1,
+                                title = "",
+                                stretch.factor = 2) {
+  if (!("backbone" %in% names(metadata(ace)))) {
+    err <- sprintf("Cannot find backbone in metadata(ace). Please run construct.backbone() first.")
+    stop(err)
+  }
+  backbone <- metadata(ace)$backbone
 
-    H = colMaps(ace)[[H.slot]]
-    hx = H[i, ]
-    hy = H[j, ]
+  G <- construct.tspanner(backbone$G, stretch.factor = stretch.factor)
+  Adj <- as(G, "dgTMatrix")
+  arch.coors <- sgd2_layout_weighted_convergent(G, Matrix::t(backbone$coordinates_3D))
 
-    hx.nnz = sum(hx)^2/sum(hx^2)
-    hx.threshold = sort(hx, decreasing = T)[hx.nnz]
+  if (is.null(arch.colors)) {
+    arch.colors <- rgb(backbone$colors)
+  }
 
-    hy.nnz = sum(hy)^2/sum(hy^2)
-    hy.threshold = sort(hx, decreasing = T)[hy.nnz]
+  w <- fastColSums(colMaps(ace)$H_unified)
+  w <- 0.3 + 0.7 * (w - min(w)) / (max(w) - min(w))
+  arch.sizes <- (0.25 + w) * point_size
 
+  graphics::plot(
+    arch.coors,
+    pch = 25,
+    cex = 0,
+    bg = arch.colors,
+    col = colorspace::darken(arch.colors, 0.5),
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title
+  )
 
-    mask = (hx > hx.threshold) | (hy > hy.threshold)
-    fig <- plotly::plot_ly(x = hx[mask], y = hy[mask])
+  kappa <- 0.1 + 0.9 / (1 + exp(-2 * scale(Adj@x)))
+  graphics::segments(
+    x0 = arch.coors[Adj@i + 1, 1],
+    y0 = arch.coors[Adj@i + 1, 2],
+    x1 = arch.coors[Adj@j + 1, 1],
+    y1 = arch.coors[Adj@j + 1, 2],
+    col = grDevices::rgb(0, 0, 0, 0.8 * kappa),
+    lwd = kappa * 3
+  )
 
-    fig <- add_trace(p = fig, type = "histogram2dcontour")
+  text.halo.width <- 0.1
+  label_size <- label_size * 0.6
 
-    fig
+  if (is.null(arch.labels)) {
+    arch.labels <- paste("A", 1:nrow(arch.coors), sep = "")
+  } else {
+    arch.labels <- paste("A", 1:nrow(arch.coors), "-", arch.labels, sep = "")
+  }
+
+  layout.labels(
+    x = arch.coors[, 1],
+    y = arch.coors[, 2] - graphics::strheight("A"),
+    labels = arch.labels,
+    col = colorspace::darken(arch.colors, 0.5),
+    bg = "#eeeeee",
+    r = text.halo.width,
+    cex = label_size
+  )
+
+  graphics::par(new = TRUE)
+  graphics::plot(
+    arch.coors,
+    pch = 25,
+    cex = arch.sizes,
+    bg = arch.colors,
+    col = colorspace::darken(arch.colors, 0.5),
+    axes = FALSE,
+    xlab = "",
+    ylab = ""
+  )
 }
 
-layout.labels <- function(
-  x,
-  y,
-  labels,
-  col = "white",
-  bg = "black",
-  r = 0.1,
-  cex = 1,
-  ...
-) {
+gate.archetypes <- function(ace,
+                            i,
+                            j,
+                            H.slot = "H_unified") {
+  H <- colMaps(ace)[[H.slot]]
+  hx <- H[i, ]
+  hy <- H[j, ]
 
-    lay <- wordcloud::wordlayout(x, y, words = labels, cex = 1.25 * cex, ...)
+  hx.nnz <- sum(hx)^2 / sum(hx^2)
+  hx.threshold <- sort(hx, decreasing = T)[hx.nnz]
 
-    x = lay[, 1] + 0.5 * lay[, 3]
-    y = lay[, 2] + 0.5 * lay[, 4]
+  hy.nnz <- sum(hy)^2 / sum(hy^2)
+  hy.threshold <- sort(hx, decreasing = T)[hy.nnz]
 
-    theta = seq(0, 2 * pi, length.out = 50)
-    xy <- grDevices::xy.coords(x, y)
-    xo <- r * graphics::strwidth("A")
-    yo <- r * graphics::strheight("A")
 
-    for (i in theta) {
-        graphics::text(
-          x = xy$x + cos(i) * xo,
-          y = xy$y + sin(i) * yo,
-          labels = labels,
-          col = bg,
-          cex = cex,
-          ...
-        )
-    }
+  mask <- (hx > hx.threshold) | (hy > hy.threshold)
+  fig <- plotly::plot_ly(x = hx[mask], y = hy[mask])
+
+  fig <- add_trace(p = fig, type = "histogram2dcontour")
+
+  fig
+}
+
+layout.labels <- function(x,
+                          y,
+                          labels,
+                          col = "white",
+                          bg = "black",
+                          r = 0.1,
+                          cex = 1,
+                          ...) {
+  lay <- wordcloud::wordlayout(x, y, words = labels, cex = 1.25 * cex, ...)
+
+  x <- lay[, 1] + 0.5 * lay[, 3]
+  y <- lay[, 2] + 0.5 * lay[, 4]
+
+  theta <- seq(0, 2 * pi, length.out = 50)
+  xy <- grDevices::xy.coords(x, y)
+  xo <- r * graphics::strwidth("A")
+  yo <- r * graphics::strheight("A")
+
+  for (i in theta) {
     graphics::text(
-      x = xy$x,
-      y = xy$y,
+      x = xy$x + cos(i) * xo,
+      y = xy$y + sin(i) * yo,
       labels = labels,
-      col = col,
+      col = bg,
       cex = cex,
       ...
     )
+  }
+  graphics::text(
+    x = xy$x,
+    y = xy$y,
+    labels = labels,
+    col = col,
+    cex = cex,
+    ...
+  )
 }

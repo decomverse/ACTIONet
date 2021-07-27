@@ -46,6 +46,6 @@ Projects a set of markers on the ACTIONet
 It also optionally imputes the markers.
 }
 \examples{
-ace = run.ACTIONet(sce)
-visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), trans_attr = ace$node_centrality)
+ace <- run.ACTIONet(sce)
+visualize.markers(ace, markers = c("CD14", "CD19", "CD3G"), trans_attr = ace$node_centrality)
 }
