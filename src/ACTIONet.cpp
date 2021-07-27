@@ -2223,7 +2223,7 @@ List orthogonalize_basal(sp_mat &S, mat &old_S_r, mat &old_V, mat &old_A,
   SVD_results(4) = old_B;
 
   field<mat> orthogonalized_reduction =
-      ACTIONet::orthogonalize_batch_effect(S, SVD_results, basal);
+      ACTIONet::orthogonalize_basal(S, SVD_results, basal);
 
   List res;
   res["V"] = orthogonalized_reduction(0);
@@ -2262,7 +2262,7 @@ List orthogonalize_basal_full(mat &S, mat &old_S_r, mat &old_V,
   SVD_results(4) = old_B;
 
   field<mat> orthogonalized_reduction =
-      ACTIONet::orthogonalize_batch_effect(S, SVD_results, basal);
+      ACTIONet::orthogonalize_basal(S, SVD_results, basal);
 
   List res;
   res["V"] = orthogonalized_reduction(0);
