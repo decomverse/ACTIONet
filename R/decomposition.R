@@ -28,7 +28,7 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
         if (is.matrix(X)) {
             reduction.out <- SVD2PCA_full(S = X, u = u, d = d, v = v)
         } else {
-            reduction.out <- SVD2PCA(X = X, u = u, d = d, v = v)
+            reduction.out <- SVD2PCA(S = X, u = u, d = d, v = v)
         }
         W <- reduction.out$x
         H <- reduction.out$rotation
