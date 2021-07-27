@@ -5,7 +5,7 @@
 \title{Plot ACTIONet scatter plot}
 \usage{
 \method{plot}{ACTIONet}(
-  data,
+  ace,
   label_attr = NULL,
   color_attr = NULL,
   trans_attr = NULL,
@@ -27,8 +27,6 @@
 )
 }
 \arguments{
-\item{data}{'ACTIONetExperiment' object or two-column numeric matrix of X-Y coordinates.}
-
 \item{label_attr}{Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, celltypes, etc.).}
 
 \item{color_attr}{Character vector of length NROW(ace) or colname of 'colData(ace)' containing hex colors to use for each point, or matrix/data.frame containing RGB values to pass to grDevices::rgb().}
@@ -62,6 +60,8 @@
 \item{point_order}{Integer vector specifying order in which to plot individual points (default:'NULL').}
 
 \item{use_repel}{Use ggrepel to distribute cluster labels. Known to be buggy if used with RStudio (default:'TRUE').}
+
+\item{data}{'ACTIONetExperiment' object or two-column numeric matrix of X-Y coordinates.}
 }
 \value{
 'ggplot' object.

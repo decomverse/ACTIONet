@@ -32,6 +32,7 @@ process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
 
 findMarkers.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(ACTIONet)
+  print("Running findMarkers.ACTIONet()")
   
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -60,6 +61,7 @@ findMarkers.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blackl
 
 findMarkers.wilcox <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(presto)
+  print("Running findMarkers.wilcox()")
   
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -91,6 +93,7 @@ findMarkers.wilcox <- function(ace, f, out.name = "cond", pos.only = T, blacklis
 
 findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(scran)
+  print("Running findMarkers.scran()")
   
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -122,8 +125,9 @@ findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   return(ace)
 }
 
-findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
   require(limma)
+  print("Running findMarkers.limma()")
   
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -132,7 +136,11 @@ findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   f = droplevels(f)
 
   design = model.matrix(~0. + f)
-  fit0 = limma::lmFit(logcounts(ace), design)
+  if(is.null(weight)) {
+    fit0 = limma::lmFit(logcounts(ace), design)
+  } else {
+    fit0 = limma::lmFit(logcounts(ace), design, weights = weight)
+  }
   fit = eBayes(fit0, robust=TRUE, trend=TRUE)
   
   scores = matrix(0, nrow = nrow(ace), ncol = length(levels(f)))
@@ -171,5 +179,59 @@ findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   return(ace)
 }
 
+findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
+  print("Running findMarkers.limma.pb()")
+  
+  set.seed(0)
+  if(resolution == -1) {
+    cl = ace$assigned_archetype
+  } else {
+    cl = Leiden.clustering(ace, resolution_parameter = resolution)
+  }
+  
+  f.prod=interaction(cl,f)
+  IDX=split(1:ncol(ace),f.prod)
+  mask = sapply(IDX, length) > min.size
+  S = logcounts(ace)
+  ll = lapply(IDX[mask],function(idx){
+    return(fast_row_sums(S[,idx, drop = F])/length(idx))
+  })
+  pb=do.call(cbind,ll)
+  weight=sapply(IDX[mask],function(idx){
+    # return(sum(S[,idx]))
+    return(length(idx))
+  })
+  rownames(pb)=rownames(ace)
+  pb = as.matrix(pb)
+  
+  pb.ace = ACTIONetExperiment(assays = list(logcounts = pb))
+  pb.ace$condition = factor(sapply(colnames(pb.ace), function(str) stringr::str_split(str, stringr::fixed("."))[[1]][[2]]), levels(f))
 
+  z = (weight-median(weight))/mad(weight)
+  mask = z > -1
+  pb.ace = findMarkers.limma(pb.ace[, mask], pb.ace$condition[mask], out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, weight = weight[mask])
+  
+  metadata(ace)[[sprintf("%s_markers_limma_pb", out.name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out.name)]]
+  rowMaps(ace)[[sprintf("%s_markers_limma_pb", out.name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out.name)]]
+  rowMapTypes(ace)[[sprintf("%s_markers_limmapb", out.name)]] = "reduction"
+
+  return(ace)
+}
+
+findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
+  f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
+  if (method == "ACTIONet") {
+    ace = findMarkers.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+  } else if(method == "wilcox") {
+    ace = findMarkers.wilcox(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+  } else if(method == "scran") {
+    ace = findMarkers.scran(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+  } else if(method == "limma") {
+    ace = findMarkers.limma(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+  } else if(method == "limma_pseudobulk") {
+    ace = findMarkers.limma.pb(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, resolution = resolution, min.size = min.size)
+  }
+  
+  return(ace)
+}
 
