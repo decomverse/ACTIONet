@@ -1576,6 +1576,48 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
+    inline List orthogonalize_basal(sp_mat& S, mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& basal) {
+        typedef SEXP(*Ptr_orthogonalize_basal)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_orthogonalize_basal p_orthogonalize_basal = NULL;
+        if (p_orthogonalize_basal == NULL) {
+            validateSignature("List(*orthogonalize_basal)(sp_mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
+            p_orthogonalize_basal = (Ptr_orthogonalize_basal)R_GetCCallable("ACTIONet", "_ACTIONet_orthogonalize_basal");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_orthogonalize_basal(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(old_S_r)), Shield<SEXP>(Rcpp::wrap(old_V)), Shield<SEXP>(Rcpp::wrap(old_A)), Shield<SEXP>(Rcpp::wrap(old_B)), Shield<SEXP>(Rcpp::wrap(old_sigma)), Shield<SEXP>(Rcpp::wrap(basal)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
+    inline List orthogonalize_basal_full(mat& S, mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& basal) {
+        typedef SEXP(*Ptr_orthogonalize_basal_full)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_orthogonalize_basal_full p_orthogonalize_basal_full = NULL;
+        if (p_orthogonalize_basal_full == NULL) {
+            validateSignature("List(*orthogonalize_basal_full)(mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
+            p_orthogonalize_basal_full = (Ptr_orthogonalize_basal_full)R_GetCCallable("ACTIONet", "_ACTIONet_orthogonalize_basal_full");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_orthogonalize_basal_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(old_S_r)), Shield<SEXP>(Rcpp::wrap(old_V)), Shield<SEXP>(Rcpp::wrap(old_A)), Shield<SEXP>(Rcpp::wrap(old_B)), Shield<SEXP>(Rcpp::wrap(old_sigma)), Shield<SEXP>(Rcpp::wrap(basal)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
     inline umat MWM_rank1(vec u, vec v, double u_threshold = 0, double v_threshold = 0) {
         typedef SEXP(*Ptr_MWM_rank1)(SEXP,SEXP,SEXP,SEXP);
         static Ptr_MWM_rank1 p_MWM_rank1 = NULL;

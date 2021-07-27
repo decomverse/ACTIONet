@@ -2745,6 +2745,86 @@ RcppExport SEXP _ACTIONet_orthogonalize_batch_effect_full(SEXP SSEXP, SEXP old_S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// orthogonalize_basal
+List orthogonalize_basal(sp_mat& S, mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& basal);
+static SEXP _ACTIONet_orthogonalize_basal_try(SEXP SSEXP, SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP basalSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_S_r(old_S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_V(old_VSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_A(old_ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_B(old_BSEXP);
+    Rcpp::traits::input_parameter< vec& >::type old_sigma(old_sigmaSEXP);
+    Rcpp::traits::input_parameter< mat& >::type basal(basalSEXP);
+    rcpp_result_gen = Rcpp::wrap(orthogonalize_basal(S, old_S_r, old_V, old_A, old_B, old_sigma, basal));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_orthogonalize_basal(SEXP SSEXP, SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP basalSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_orthogonalize_basal_try(SSEXP, old_S_rSEXP, old_VSEXP, old_ASEXP, old_BSEXP, old_sigmaSEXP, basalSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// orthogonalize_basal_full
+List orthogonalize_basal_full(mat& S, mat& old_S_r, mat& old_V, mat& old_A, mat& old_B, vec& old_sigma, mat& basal);
+static SEXP _ACTIONet_orthogonalize_basal_full_try(SEXP SSEXP, SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP basalSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_S_r(old_S_rSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_V(old_VSEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_A(old_ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type old_B(old_BSEXP);
+    Rcpp::traits::input_parameter< vec& >::type old_sigma(old_sigmaSEXP);
+    Rcpp::traits::input_parameter< mat& >::type basal(basalSEXP);
+    rcpp_result_gen = Rcpp::wrap(orthogonalize_basal_full(S, old_S_r, old_V, old_A, old_B, old_sigma, basal));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_orthogonalize_basal_full(SEXP SSEXP, SEXP old_S_rSEXP, SEXP old_VSEXP, SEXP old_ASEXP, SEXP old_BSEXP, SEXP old_sigmaSEXP, SEXP basalSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_orthogonalize_basal_full_try(SSEXP, old_S_rSEXP, old_VSEXP, old_ASEXP, old_BSEXP, old_sigmaSEXP, basalSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // MWM_rank1
 umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
 static SEXP _ACTIONet_MWM_rank1_try(SEXP uSEXP, SEXP vSEXP, SEXP u_thresholdSEXP, SEXP v_thresholdSEXP) {
@@ -3435,6 +3515,8 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*deflate_reduction)(mat&,mat&,mat&,mat&,vec&,mat&,mat&)");
         signatures.insert("List(*orthogonalize_batch_effect)(sp_mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
         signatures.insert("List(*orthogonalize_batch_effect_full)(mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
+        signatures.insert("List(*orthogonalize_basal)(sp_mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
+        signatures.insert("List(*orthogonalize_basal_full)(mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
         signatures.insert("umat(*MWM_rank1)(vec,vec,double,double)");
         signatures.insert("mat(*NetEnh)(mat)");
         signatures.insert("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>)");
@@ -3529,6 +3611,8 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_deflate_reduction", (DL_FUNC)_ACTIONet_deflate_reduction_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_orthogonalize_batch_effect", (DL_FUNC)_ACTIONet_orthogonalize_batch_effect_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC)_ACTIONet_orthogonalize_batch_effect_full_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_orthogonalize_basal", (DL_FUNC)_ACTIONet_orthogonalize_basal_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_orthogonalize_basal_full", (DL_FUNC)_ACTIONet_orthogonalize_basal_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_MWM_rank1", (DL_FUNC)_ACTIONet_MWM_rank1_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_NetEnh", (DL_FUNC)_ACTIONet_NetEnh_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_LPA", (DL_FUNC)_ACTIONet_run_LPA_try);
@@ -3622,6 +3706,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_deflate_reduction", (DL_FUNC) &_ACTIONet_deflate_reduction, 7},
     {"_ACTIONet_orthogonalize_batch_effect", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect, 7},
     {"_ACTIONet_orthogonalize_batch_effect_full", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect_full, 7},
+    {"_ACTIONet_orthogonalize_basal", (DL_FUNC) &_ACTIONet_orthogonalize_basal, 7},
+    {"_ACTIONet_orthogonalize_basal_full", (DL_FUNC) &_ACTIONet_orthogonalize_basal_full, 7},
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
     {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
