@@ -399,7 +399,7 @@ namespace ACTIONet
   field<mat> orthogonalize_basal(sp_mat &S, field<mat> SVD_results,
                                  mat &basal_state)
   {
-    stdout_printf("Orthogonalizing batch effect (sparse):\n"); // fflush(stdout);
+    stdout_printf("Orthogonalizing basal (sparse):\n"); // fflush(stdout);
 
     mat Z = basal_state;
     gram_schmidt(Z);
@@ -415,13 +415,15 @@ namespace ACTIONet
   field<mat> orthogonalize_basal(mat &S, field<mat> SVD_results,
                                  mat &basal_state)
   {
-    stdout_printf("Orthogonalizing batch effect: (dense):\n"); // fflush(stdout);
+    stdout_printf("Orthogonalizing basal (dense):\n"); // fflush(stdout);
 
     mat Z = basal_state;
     gram_schmidt(Z);
 
     mat A = Z;
     mat B = -mat(trans(trans(Z) * S));
+
+    printf("PSVD now");
 
     field<mat> perturbed_SVD = deflate_reduction(SVD_results, A, B);
     FLUSH;
