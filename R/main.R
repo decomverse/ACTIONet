@@ -66,48 +66,41 @@ run.ACTIONet <- function(ace,
   S <- SummarizedExperiment::assays(ace)[[assay_name]]
   S_r <- Matrix::t(colMaps(ace)[[reduction_slot]])
 
-  # Run ACTION
-  if (is.null(batch)) {
-    ACTION.out <- run_ACTION(
-      S_r = S_r,
-      k_min = k_min,
-      k_max = k_max,
-      thread_no = thread_no,
-      max_it = max_iter_ACTION,
-      min_delta = 1e-300
-    )
-  } else {
-    ACTION.out <- run_ACTION_with_batch_correction(
-      S_r = S_r,
-      batch = batch,
-      k_min = k_min,
-      k_max = k_max,
-      thread_no = thread_no,
-      max_it = max_iter_ACTION,
-      min_delta = 1e-6,
-      max_correction_rounds = 10,
-      lambda = 1
-    )
-  }
-  # Prune nonspecific and/or unreliable archetypes
-  pruning.out <- prune_archetypes(
-    C_trace = ACTION.out$C,
-    H_trace = ACTION.out$H,
-    min_specificity_z_thresh = min_specificity_z_thresh,
-    min_cells = min_cells_per_arch
-  )
+  # Set parameters for ACTION_decomposition_MR
+  params <- list()
+  params$k_min <- k_min
+  params$k_max <- k_max
+  params$min_specificity_z_thresh <- min_specificity_z_thresh
+  params$min_cells_per_arch <- min_cells_per_arch
+  params$unification_violation_threshold <- unification_violation_threshold
+  params$max_iter <- max_iter_ACTION
+  params$thread_no <- thread_no
+  params$seed <- seed
 
-  colMaps(ace)[["H_stacked"]] <- Matrix::t(as(pruning.out$H_stacked, "sparseMatrix"))
+  # Run ACTION_decomposition_MR
+  ACTION.out <- ACTIONet::decomp(X = S_r, params = params, method = "ACTION_decomposition_MR")
+
+  # Store resulting decompositions
+  colMaps(ace)[["H_stacked"]] <- Matrix::t(as(ACTION.out$extra$H_stacked, "sparseMatrix"))
   colMapTypes(ace)[["H_stacked"]] <- "internal"
 
-  colMaps(ace)[["C_stacked"]] <- as(pruning.out$C_stacked, "sparseMatrix")
+  colMaps(ace)[["C_stacked"]] <- as(ACTION.out$extra$C_stacked, "sparseMatrix")
   colMapTypes(ace)[["C_stacked"]] <- "internal"
 
+  H_unified <- as(Matrix::t(ACTION.out$extra$H_unified), "sparseMatrix")
+  colMaps(ace)[["H_unified"]] <- H_unified
+  colMapTypes(ace)[["H_unified"]] <- "internal"
+
+  colMaps(ace)[["C_unified"]] <- as(ACTION.out$extra$C_unified, "sparseMatrix")
+  colMapTypes(ace)[["C_unified"]] <- "internal"
+
+  ace$assigned_archetype <- c(ACTION.out$extra$assigned_archetype)
 
   # Build ACTIONet
   set.seed(seed)
+  H <- as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]]))
   G <- build_ACTIONet(
-    H_stacked = pruning.out$H_stacked,
+    H_stacked = H,
     density = network_density,
     thread_no = thread_no,
     mutual_edges_only = mutual_edges_only,
@@ -134,24 +127,6 @@ run.ACTIONet <- function(ace,
     seed = seed
   )
 
-  # Identiy equivalent classes of archetypes and group them together
-  unification.out <- unify_archetypes(
-    S_r = S_r,
-    C_stacked = pruning.out$C_stacked,
-    H_stacked = pruning.out$H_stacked,
-    violation_threshold = unification_violation_threshold,
-    thread_no = thread_no
-  )
-
-  Ht_unified <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
-  colMaps(ace)[["H_unified"]] <- Ht_unified
-  colMapTypes(ace)[["H_unified"]] <- "internal"
-
-  colMaps(ace)[["C_unified"]] <- as(unification.out$C_unified, "sparseMatrix")
-  colMapTypes(ace)[["C_unified"]] <- "internal"
-
-  ace$assigned_archetype <- c(unification.out$assigned_archetype)
-
   # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
   ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
@@ -163,12 +138,11 @@ run.ACTIONet <- function(ace,
     thread_no = thread_no,
     alpha = footprint_alpha
   )
-
   colMaps(ace)$archetype_footprint <- archetype_footprint
 
-  H <- Matrix::t(archetype_footprint)
 
   # Compute gene specificity for each archetype
+  H <- Matrix::t(archetype_footprint)
   if (is.matrix(S)) {
     specificity.out <- compute_archetype_feature_specificity_full(S, H)
   } else {
@@ -196,23 +170,6 @@ run.ACTIONet <- function(ace,
     thread_no = 1,
     ACTIONet_slot = net_slot_out
   )
-
-  if (full_trace == T) {
-    trace <- list(
-      ACTION.out = ACTION.out,
-      pruning.out = pruning.out,
-      vis.out = vis.out,
-      unification.out = unification.out
-    )
-
-    trace$log <- list(
-      genes = rownames(ace),
-      cells = colnames(ace),
-      time = Sys.time()
-    )
-
-    metadata(ace)$trace <- trace
-  }
 
   return(ace)
 }

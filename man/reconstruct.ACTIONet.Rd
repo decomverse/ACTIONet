@@ -55,6 +55,6 @@ Reconstructs the ACTIONet graph with the new parameters (uses prior decompositio
 }
 \examples{
 plot.ACTIONet(ace)
-ace.updated = reconstruct.ACTIONet(ace, network_density = 0.1)
+ace.updated <- reconstruct.ACTIONet(ace, network_density = 0.1)
 plot.ACTIONet(ace.updated)
 }

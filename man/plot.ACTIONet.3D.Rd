@@ -39,6 +39,6 @@ Visualized ACTIONet
 Main ACTIONet 3D plotting functions
 }
 \examples{
-ace = run.ACTIONet(sce)
+ace <- run.ACTIONet(sce)
 plot.ACTIONet.3D(ace, ace$assigned_archetype, trans_attr = ace$node_centrality)
 }
