@@ -4,8 +4,8 @@
 #include <pybind11/stl.h>
 #include <stdint.h>
 #include <string.h>
-#include <string>
 #include <functional>
+#include <string>
 #include <utility>
 
 using aw::dcube;
@@ -31,7 +31,8 @@ using namespace py::literals;
 // @return A named dictionary with U, sigma, and V components
 py::dict IRLB_SVD(arma::SpMat<npdouble> &A, int dim, int iters = 1000,
                   int seed = 0, int verbose = 1) {
-  field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed, verbose);
+  arma::field<arma::mat> SVD_out =
+      ACTIONet::IRLB_SVD(A, dim, iters, seed, verbose);
   py::dict res;
   res["u"] = SVD_out(0);
   res["d"] = SVD_out(1);
@@ -40,7 +41,8 @@ py::dict IRLB_SVD(arma::SpMat<npdouble> &A, int dim, int iters = 1000,
 }
 py::dict IRLB_SVD_full(arma::Mat<npdouble> &A, int dim, int iters = 1000,
                        int seed = 0, int verbose = 1) {
-  field<mat> SVD_out = ACTIONet::IRLB_SVD(A, dim, iters, seed, verbose);
+  arma::field<arma::mat> SVD_out =
+      ACTIONet::IRLB_SVD(A, dim, iters, seed, verbose);
   py::dict res;
   res["u"] = SVD_out(0);
   res["d"] = SVD_out(1);
@@ -61,8 +63,8 @@ py::dict IRLB_SVD_full(arma::Mat<npdouble> &A, int dim, int iters = 1000,
 // @param seed Random seed (default=0)
 //
 // @return A named dictionary with U, sigma, and V components
-py::dict FengSVD(arma::SpMat<npdouble> &A, int dim, int iters = 5,
-                 int seed = 0, int verbose = 1) {
+py::dict FengSVD(arma::SpMat<npdouble> &A, int dim, int iters = 5, int seed = 0,
+                 int verbose = 1) {
   field<mat> SVD_out = ACTIONet::FengSVD(A, dim, iters, seed, verbose);
   py::dict res;
   res["u"] = SVD_out(0);
@@ -146,8 +148,8 @@ arma::Mat<npdouble> run_simplex_regression(arma::Mat<npdouble> &A,
 py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
                             int iters = 5, int seed = 0, int SVD_algorithm = 0,
                             bool prenormalize = false, int verbose = 1) {
-  field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iters, seed,
-                                                 SVD_algorithm, prenormalize, verbose);
+  field<mat> reduction = ACTIONet::reduce_kernel(
+      S, reduced_dim, iters, seed, SVD_algorithm, prenormalize, verbose);
 
   py::dict res;
 
@@ -159,12 +161,11 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
   mat V = reduction(2);
   // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
-	  vec v = V.col(i) * sigma(i);
-	  v = round(v*1e5)/1e5;
+    vec v = V.col(i) * sigma(i);
+    v = round(v * 1e5) / 1e5;
     double cs = sum(v);
-    if( cs < 0)
-		v = -v;
-	V.col(i) = v;
+    if (cs < 0) v = -v;
+    V.col(i) = v;
   }
   V = trans(V);
   res["S_r"] = V.eval();
@@ -177,8 +178,8 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
 py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50,
                        int iters = 5, int seed = 0, int SVD_algorithm = 0,
                        bool prenormalize = false, int verbose = 1) {
-  field<mat> reduction = ACTIONet::reduce_kernel(S, reduced_dim, iters, seed,
-                                                 SVD_algorithm, prenormalize, verbose);
+  field<mat> reduction = ACTIONet::reduce_kernel(
+      S, reduced_dim, iters, seed, SVD_algorithm, prenormalize, verbose);
 
   py::dict res;
 
@@ -190,12 +191,11 @@ py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50,
   mat V = reduction(2);
   // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++) {
-	  vec v = V.col(i) * sigma(i);
-	  v = round(v*1e5)/1e5;
+    vec v = V.col(i) * sigma(i);
+    v = round(v * 1e5) / 1e5;
     double cs = sum(v);
-    if( cs < 0)
-		v = -v;
-	V.col(i) = v;
+    if (cs < 0) v = -v;
+    V.col(i) = v;
   }
   V = trans(V);
   res["S_r"] = V.eval();
@@ -290,18 +290,18 @@ py::dict run_ACTION(arma::Mat<npdouble> &S_r, int k_min = 2, int k_max = 30,
 
   py::list C(k_max);
   for (int i = 0; i < k_max; i++) {
-	mat curr_C = trace.C[i + 1];
-    //curr_C = clamp(curr_C, 1e-5, 1);
-	//curr_C = normalise(curr_C, 1);
+    mat curr_C = trace.C[i + 1];
+    // curr_C = clamp(curr_C, 1e-5, 1);
+    // curr_C = normalise(curr_C, 1);
     C[i] = curr_C;
   }
   res["C"] = C;
 
   py::list H(k_max);
   for (int i = 0; i < k_max; i++) {
-	mat curr_H = trace.H[i + 1];
-    //curr_H = clamp(curr_H, 1e-5, 1);
-	//curr_H = normalise(curr_H, 1);
+    mat curr_H = trace.H[i + 1];
+    // curr_H = clamp(curr_H, 1e-5, 1);
+    // curr_H = normalise(curr_H, 1);
     H[i] = curr_H;
   }
   res["H"] = H;
@@ -393,9 +393,9 @@ py::dict prune_archetypes(vector<arma::Mat<npdouble>> &C_trace,
 // Identifies and aggregates redundant archetypes into equivalent classes
 // (Post-ACTIONet archetype processing)
 py::dict unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
-                                     double violation_threshold = 0.0,
-                                     int thread_no = 0) {
-  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, thread_no);
+                          double violation_threshold = 0.0, int thread_no = 0) {
+  ACTIONet::unification_results results = ACTIONet::unify_archetypes(
+      S_r, C_stacked, H_stacked, violation_threshold, thread_no);
 
   py::dict out_list;
 
@@ -426,17 +426,42 @@ py::dict unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
 // If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
 // @param distance_metric Distance metric to use: jsd, l2, ip
 // @param nn_approach Nearest neighbor alogirthm: k*nn, knn
-// @param k Optional parameter specifying k for knn algorithm 
+// @param k Optional parameter specifying k for knn algorithm
 //
 // @return G Adjacency matrix of the ACTIONet graph.
-arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
-                                     double density = 1.0, int thread_no = 0,
-                                     bool mutual_edges_only = true,
-				     string distance_metric="jsd",
-				     string nn_approach="k*nn",
-				     int k=10, double M = 16, double ef_construction = 200, double ef = 50){
-						 
-  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(H_stacked,density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric, nn_approach, k);
+arma::SpMat<npdouble> build_ACTIONet(
+    arma::Mat<npdouble> &H_stacked, double density = 1.0, int thread_no = 0,
+    bool mutual_edges_only = true, string distance_metric = "jsd",
+    string nn_approach = "k*nn", int k = 10, double M = 16,
+    double ef_construction = 200, double ef = 50) {
+  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(
+      H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only,
+      distance_metric, nn_approach, k);
+  return G;
+}
+
+// Builds a knn network from the multi-level archetypal decompositions
+//
+// @param H_stacked Output of the prune_archetypes() function.
+// @param density Overall density of constructed graph. The higher the density,
+// the more edges are retained (default = 1.0).
+// @param thread_no Number of parallel threads (default = 0).
+// @param mutual_edges_only Symmetrization strategy for nearest-neighbor edges.
+// If it is true, only mutual-nearest-neighbors are returned (default=TRUE).
+// @param distance_metric Distance metric to use: jsd, l2, ip
+// @param nn_approach Nearest neighbor alogirthm: k*nn, knn
+// @param k Optional parameter specifying k for knn algorithm
+//
+// @return G Adjacency matrix of the ACTIONet graph.
+arma::SpMat<npdouble> build_knn(arma::Mat<npdouble> &H_stacked,
+                                double density = 1.0, int thread_no = 0,
+                                bool mutual_edges_only = true,
+                                string distance_metric = "jsd", int k = 10,
+                                double M = 16, double ef_construction = 200,
+                                double ef = 50) {
+  arma::SpMat<npdouble> G = ACTIONet::build_ACTIONet(
+      H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only,
+      distance_metric, "knn", k);
   return G;
 }
 
@@ -456,9 +481,11 @@ arma::SpMat<npdouble> build_ACTIONet(arma::Mat<npdouble> &H_stacked,
 // \item colors De novo color of nodes inferred from their 3D embedding.
 // }
 py::dict layout_ACTIONet(arma::SpMat<npdouble> &G, arma::Mat<npdouble> S_r,
-                         int compactness_level = 50, unsigned int n_epochs = 500, int layout_alg = 0, int thread_no = 0, int seed = 0) {
-  field<arma::Mat<npdouble>> res =
-      ACTIONet::layout_ACTIONet(G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed);
+                         int compactness_level = 50,
+                         unsigned int n_epochs = 500, int layout_alg = 0,
+                         int thread_no = 0, int seed = 0) {
+  field<arma::Mat<npdouble>> res = ACTIONet::layout_ACTIONet(
+      G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed);
 
   py::dict out_list;
   out_list["coordinates"] = res(0);
@@ -559,15 +586,16 @@ arma::Mat<npdouble> compute_pseudo_bulk_per_cluster(arma::SpMat<npdouble> &S,
 field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind_full(
     arma::Mat<npdouble> &S, uvec sample_assignments, uvec individuals) {
   field<arma::Mat<npdouble>> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments,
+                                                        individuals);
 
   return pbs_list;
 }
-field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind(arma::SpMat<npdouble> &S,
-                                                       uvec sample_assignments,
-                                                       uvec individuals) {
+field<arma::Mat<npdouble>> compute_pseudo_bulk_per_cluster_and_ind(
+    arma::SpMat<npdouble> &S, uvec sample_assignments, uvec individuals) {
   field<arma::Mat<npdouble>> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
+      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments,
+                                                        individuals);
 
   return pbs_list;
 }
@@ -715,19 +743,21 @@ arma::Mat<npdouble> compute_network_diffusion(arma::SpMat<npdouble> &G,
                                               int thread_no = 0,
                                               double alpha = 0.85,
                                               int max_it = 3) {
-  mat Diff = ACTIONet::compute_network_diffusion(G, X0, thread_no, alpha, max_it);
+  mat Diff =
+      ACTIONet::compute_network_diffusion(G, X0, thread_no, alpha, max_it);
 
   return (Diff);
 }
 
-//' Quickly computes network diffusion over a given network, starting with an arbitrarty
-//' return Matrix of diffusion scores
+//' Quickly computes network diffusion over a given network, starting with an
+// arbitrarty ' return Matrix of diffusion scores
 arma::Mat<npdouble> compute_network_diffusion_fast(arma::SpMat<npdouble> &G,
-                                              arma::SpMat<npdouble> &X0,
-                                              int thread_no = 0,
-                                              double alpha = 0.85,
-                                              int max_it = 5) {
-  mat Diff = ACTIONet::compute_network_diffusion_fast(G, X0, thread_no, alpha, max_it);
+                                                   arma::SpMat<npdouble> &X0,
+                                                   int thread_no = 0,
+                                                   double alpha = 0.85,
+                                                   int max_it = 5) {
+  mat Diff =
+      ACTIONet::compute_network_diffusion_fast(G, X0, thread_no, alpha, max_it);
 
   return (Diff);
 }
@@ -891,7 +921,8 @@ arma::Mat<npdouble> Prune_PageRank(arma::Mat<npdouble> &U,
 py::dict transform_layout(arma::SpMat<npdouble> &W, arma::Mat<npdouble> &coor2D,
                           Mat<npdouble> &coor3D, arma::Mat<npdouble> &colRGB,
                           int compactness_level = 50,
-                          unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
+                          unsigned int n_epochs = 500, int thread_no = 0,
+                          int seed = 0) {
   field<mat> res = ACTIONet::transform_layout(
       W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no, seed);
 
@@ -910,16 +941,295 @@ arma::Mat<npdouble> compute_full_sim(arma::Mat<npdouble> &H,
   return G;
 }
 
-arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, arma::vec fixed_labels_ = arma::vec()) {
+arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3,
+                  double sig_threshold = 3,
+                  arma::vec fixed_labels_ = arma::vec()) {
   arma::uvec fixed_labels_vec;
   if (!fixed_labels_.is_empty()) {
     arma::uvec fixed_labels_vec(fixed_labels_.size());
-    for(int i = 0; i < fixed_labels_.size(); i++) {
-		    fixed_labels_vec(i) = fixed_labels_(i);
+    for (int i = 0; i < fixed_labels_.size(); i++) {
+      fixed_labels_vec(i) = fixed_labels_(i);
     }
   }
-  arma::vec new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
-  return(new_labels);
+  arma::vec new_labels =
+      ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
+  return (new_labels);
+}
+
+// ************************
+// New functions start here
+// ************************
+arma::sp_mat LSI(arma::sp_mat &X, double size_factor = 100000) {
+  arma::sp_mat TFIDF = ACTIONet::LSI(X, size_factor);
+
+  return (TFIDF);
+}
+
+arma::mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(
+    arma::sp_mat &G, arma::sp_mat &S, arma::sp_mat &marker_mat,
+    double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0,
+    int normalization = 1) {
+  arma::mat stats = ACTIONet::compute_marker_aggregate_stats_TFIDF_sum_smoothed(
+      G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization);
+
+  return (stats);
+}
+
+arma::field<mat> compute_pseudo_bulk_per_archetype_and_ind_full(
+    arma::mat &S, arma::mat &H, arma::Col<unsigned long long> individuals) {
+  arma::field<mat> pbs_list =
+      ACTIONet::compute_pseudo_bulk_per_archetype_and_ind(S, H, individuals);
+
+  return pbs_list;
+}
+
+arma::field<mat> compute_pseudo_bulk_per_archetype_and_ind(
+    arma::sp_mat &S, arma::mat &H, arma::Col<unsigned long long> individuals) {
+  arma::field<mat> pbs_list =
+      ACTIONet::compute_pseudo_bulk_per_archetype_and_ind(S, H, individuals);
+
+  return pbs_list;
+}
+
+arma::mat computeFullSim(arma::mat &H, int thread_no = 0) {
+  arma::mat G = ACTIONet::computeFullSim(H, thread_no);
+
+  return (G);
+}
+
+py::dict orthogonalize_batch_effect_full(arma::mat &S, arma::mat &old_S_r,
+                                         arma::mat &old_V, arma::mat &old_A,
+                                         mat &old_B, vec &old_sigma,
+                                         arma::mat &design) {
+  arma::field<mat> SVD_results(5);
+
+  SVD_results(0) = old_V;
+  SVD_results(1) = old_sigma;
+  SVD_results(2) = old_S_r;
+  for (int i = 0; i < old_sigma.n_elem; i++) {
+    SVD_results(2).col(i) /= old_sigma(i);
+  }
+  SVD_results(3) = old_A;
+  SVD_results(4) = old_B;
+
+  arma::field<mat> orthogonalized_reduction =
+      ACTIONet::orthogonalize_batch_effect(S, SVD_results, design);
+
+  py::dict res;
+
+  res["V"] = orthogonalized_reduction(0);
+
+  vec sigma = orthogonalized_reduction(1).col(0);
+  res["sigma"] = sigma;
+
+  mat V = orthogonalized_reduction(2);
+  for (int i = 0; i < V.n_cols; i++) {
+    V.col(i) *= sigma(i);
+  }
+  res["S_r"] = trans(V);
+
+  res["A"] = orthogonalized_reduction(3);
+  res["B"] = orthogonalized_reduction(4);
+
+  return res;
+}
+
+py::dict orthogonalize_batch_effect(arma::sp_mat &S, arma::mat &old_S_r,
+                                    arma::mat &old_V, arma::mat &old_A,
+                                    arma::mat &old_B, arma::vec &old_sigma,
+                                    arma::mat &design) {
+  arma::field<mat> SVD_results(5);
+
+  SVD_results(0) = old_V;
+  SVD_results(1) = old_sigma;
+  SVD_results(2) = old_S_r;
+  for (int i = 0; i < old_sigma.n_elem; i++) {
+    SVD_results(2).col(i) /= old_sigma(i);
+  }
+  SVD_results(3) = old_A;
+  SVD_results(4) = old_B;
+
+  arma::field<mat> orthogonalized_reduction =
+      ACTIONet::orthogonalize_batch_effect(S, SVD_results, design);
+
+  py::dict res;
+  res["V"] = orthogonalized_reduction(0);
+
+  vec sigma = orthogonalized_reduction(1).col(0);
+  res["sigma"] = sigma;
+
+  mat V = orthogonalized_reduction(2);
+  for (int i = 0; i < V.n_cols; i++) {
+    V.col(i) *= sigma(i);
+  }
+  res["S_r"] = trans(V);
+
+  res["A"] = orthogonalized_reduction(3);
+  res["B"] = orthogonalized_reduction(4);
+
+  return res;
+}
+
+py::dict perturbedSVD(arma::mat u, arma::vec d, arma::mat v, arma::mat A,
+                      arma::mat B) {
+  if (1 < d.n_cols) d = d.diag();
+
+  arma::field<mat> SVD_results(3);
+  SVD_results(0) = u;
+  SVD_results(1) = d;
+  SVD_results(2) = v;
+
+  arma::field<mat> perturbed_SVD = ACTIONet::perturbedSVD(SVD_results, A, B);
+
+  py::dict res;
+  res["u"] = perturbed_SVD(0);
+  res["d"] = perturbed_SVD(1).col(0);
+  res["v"] = perturbed_SVD(2);
+
+  return res;
+}
+
+py::dict run_AA_with_batch_correction(arma::mat &Z, arma::mat &W0,
+                                      arma::vec batch, int max_it = 100,
+                                      int max_correction_rounds = 10,
+                                      double lambda = 1,
+                                      double min_delta = 1e-6) {
+  arma::field<mat> res = ACTIONet::run_AA_with_batch_correction(
+      Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta);
+
+  py::dict out;
+  out["C"] = res(0);
+  out["H"] = res(1);
+  out["Z_cor"] = res(2);
+  out["W"] = res(2) * res(0);
+
+  return (out);
+}
+
+py::dict run_ACTION_with_batch_correction(arma::mat &S_r, arma::vec batch,
+                                          int k_min, int k_max, int thread_no,
+                                          int max_it = 100,
+                                          int max_correction_rounds = 10,
+                                          double lambda = 1,
+                                          double min_delta = 1e-6) {
+  ACTIONet::ACTION_results trace = ACTIONet::run_ACTION_with_batch_correction(
+      S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds,
+      lambda, min_delta);
+
+  py::dict res;
+
+  arma::field<arma::mat> C(k_max);
+  for (int i = k_min; i <= k_max; i++) {
+    mat cur_C = trace.C[i];
+    C[i - 1] = cur_C;
+  }
+  res["C"] = C;
+
+  arma::field<arma::mat> H(k_max);
+  for (int i = k_min; i <= k_max; i++) {
+    mat cur_H = trace.H[i];
+    H[i - 1] = cur_H;
+  }
+  res["H"] = H;
+
+  return res;
+}
+
+arma::mat sgd2_layout_weighted(arma::sp_mat &G, arma::mat S_r, int t_max = 30,
+                               double eps = .01, int seed = 0) {
+  int n = S_r.n_cols;
+  G.diag().zeros();
+
+  int m = G.n_nonzero;
+  int *I = new int[m];
+  int *J = new int[m];
+  double *V = new double[m];
+
+  arma::sp_mat::const_iterator it = G.begin();
+  arma::sp_mat::const_iterator it_end = G.end();
+  int idx = 0;
+  for (; it != it_end; ++it) {
+    I[idx] = it.row();
+    J[idx] = it.col();
+    V[idx] = (*it);
+    idx++;
+  }
+
+  arma::mat X(2, n);
+  X = S_r.rows(0, 1);
+  layout_weighted(n, X.memptr(), m, I, J, V, t_max, eps, seed);
+
+  delete[] I;
+  delete[] J;
+  delete[] V;
+
+  return (trans(X));
+}
+
+arma::mat sgd2_layout_weighted_convergent(arma::sp_mat &G, arma::mat S_r,
+                                          int t_max = 30, double eps = 0.01,
+                                          double delta = 0.03,
+                                          int t_maxmax = 200, int seed = 0) {
+  int n = S_r.n_cols;
+  G.diag().zeros();
+
+  int m = G.n_nonzero;
+  int *I = new int[m];
+  int *J = new int[m];
+  double *V = new double[m];
+
+  arma::sp_mat::const_iterator it = G.begin();
+  arma::sp_mat::const_iterator it_end = G.end();
+  int idx = 0;
+  for (; it != it_end; ++it) {
+    I[idx] = it.row();
+    J[idx] = it.col();
+    V[idx] = (*it);
+    idx++;
+  }
+
+  arma::mat X(2, n);
+  X = S_r.rows(0, 1);
+  layout_weighted_convergent(n, X.memptr(), m, I, J, V, t_max, eps, delta,
+                             t_maxmax, seed);
+
+  delete[] I;
+  delete[] J;
+  delete[] V;
+
+  return (trans(X));
+}
+
+arma::mat sgd2_layout_sparse_weighted(arma::sp_mat &G, arma::mat S_r,
+                                      int p = 200, int t_max = 30,
+                                      double eps = 0.01, int seed = 0) {
+  int n = S_r.n_cols;
+  G.diag().zeros();
+
+  int m = G.n_nonzero;
+  int *I = new int[m];
+  int *J = new int[m];
+  double *V = new double[m];
+
+  arma::sp_mat::const_iterator it = G.begin();
+  arma::sp_mat::const_iterator it_end = G.end();
+  int idx = 0;
+  for (; it != it_end; ++it) {
+    I[idx] = it.row();
+    J[idx] = it.col();
+    V[idx] = (*it);
+    idx++;
+  }
+
+  arma::mat X(2, n);
+  X = S_r.rows(0, 1);
+  layout_sparse_weighted(n, X.memptr(), m, I, J, V, p, t_max, eps, seed);
+
+  delete[] I;
+  delete[] J;
+  delete[] V;
+
+  return (trans(X));
 }
 
 PYBIND11_MODULE(_ACTIONet, m) {
@@ -934,233 +1244,321 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
     )pbdoc";
   // SVD
-  m.def("IRLB_SVD", &IRLB_SVD,
-    "Computes SVD using IRLB algorithm.",
-    py::arg("A"), py::arg("dim"), py::arg("iters") = 1000, py::arg("seed") = 0, py::arg("verbose") = 1);
+  m.def("IRLB_SVD", &IRLB_SVD, "Computes SVD using IRLB algorithm.",
+        py::arg("A"), py::arg("dim"), py::arg("iters") = 1000,
+        py::arg("seed") = 0, py::arg("verbose") = 1);
 
-  m.def("IRLB_SVD_full", &IRLB_SVD_full,
-    "Computes SVD using IRLB algorithm.",
-    py::arg("A"), py::arg("dim"), py::arg("iters") = 1000, py::arg("seed") = 0, py::arg("verbose") = 1);
+  m.def("IRLB_SVD_full", &IRLB_SVD_full, "Computes SVD using IRLB algorithm.",
+        py::arg("A"), py::arg("dim"), py::arg("iters") = 1000,
+        py::arg("seed") = 0, py::arg("verbose") = 1);
 
-  m.def("FengSVD", &FengSVD,
-    "Computes SVD using Feng et al. algorithm.",
-    py::arg("A"), py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0, py::arg("verbose") = 1);
+  m.def("FengSVD", &FengSVD, "Computes SVD using Feng et al. algorithm.",
+        py::arg("A"), py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0,
+        py::arg("verbose") = 1);
 
   m.def("FengSVD_full", &FengSVD_full,
-    "Computes SVD using Feng et al. algorithm.",
-    py::arg("A"), py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0, py::arg("verbose") = 1);
+        "Computes SVD using Feng et al. algorithm.", py::arg("A"),
+        py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0,
+        py::arg("verbose") = 1);
 
-  m.def("HalkoSVD", &HalkoSVD,
-    "Computes SVD using Halko et al. algorithm.",
-    py::arg("A"), py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0, py::arg("verbose") = 1);
+  m.def("HalkoSVD", &HalkoSVD, "Computes SVD using Halko et al. algorithm.",
+        py::arg("A"), py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0,
+        py::arg("verbose") = 1);
 
   m.def("HalkoSVD_full", &HalkoSVD_full,
-    "Computes SVD using Halko et al. algorithm.",
-    py::arg("A"), py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0, py::arg("verbose") = 1);
+        "Computes SVD using Halko et al. algorithm.", py::arg("A"),
+        py::arg("dim"), py::arg("iters") = 5, py::arg("seed") = 0,
+        py::arg("verbose") = 1);
 
   // Kernel reduction
   m.def("reduce_kernel", &reduce_kernel,
-    "Computes reduced kernel matrix for a given profile",
-    py::arg("S"), py::arg("reduced_dim") = 50, py::arg("iters") = 5,
-    py::arg("seed") = 0, py::arg("SVD_algorithm") = 1, py::arg("prenormalize") = false, py::arg("verbose") = 1);
+        "Computes reduced kernel matrix for a given profile", py::arg("S"),
+        py::arg("reduced_dim") = 50, py::arg("iters") = 5, py::arg("seed") = 0,
+        py::arg("SVD_algorithm") = 1, py::arg("prenormalize") = false,
+        py::arg("verbose") = 1);
 
   m.def("reduce_kernel_full", &reduce_kernel_full,
-    "Computes reduced kernel matrix for a given profile",
-    py::arg("S"), py::arg("reduced_dim") = 50, py::arg("iters") = 5,
-    py::arg("seed") = 0, py::arg("SVD_algorithm") = 1, py::arg("prenormalize") = false, py::arg("verbose") = 1);
+        "Computes reduced kernel matrix for a given profile", py::arg("S"),
+        py::arg("reduced_dim") = 50, py::arg("iters") = 5, py::arg("seed") = 0,
+        py::arg("SVD_algorithm") = 1, py::arg("prenormalize") = false,
+        py::arg("verbose") = 1);
 
   // Lower-level functions
   m.def("run_simplex_regression", &run_simplex_regression,
-    "Solves min_{X} (|| AX - B ||) s.t. simplex constraint",
-    py::arg("A"), py::arg("B"), py::arg("computeXtX") = false);
+        "Solves min_{X} (|| AX - B ||) s.t. simplex constraint", py::arg("A"),
+        py::arg("B"), py::arg("computeXtX") = false);
 
-  m.def("run_AA", &run_AA,
-    "Runs Archetypal Analysis (AA) Algorithm",
-    py::arg("A"), py::arg("W0"), py::arg("max_it") = 50, py::arg("min_delta") = 0.01);
+  m.def("run_AA", &run_AA, "Runs Archetypal Analysis (AA) Algorithm",
+        py::arg("A"), py::arg("W0"), py::arg("max_it") = 50,
+        py::arg("min_delta") = 0.01);
 
   m.def("run_SPA", &run_SPA,
-    "Runs Successive Projection Algorithm (SPA) to solve separable NMF",
-    py::arg("A"), py::arg("k"));
+        "Runs Successive Projection Algorithm (SPA) to solve separable NMF",
+        py::arg("A"), py::arg("k"));
 
   m.def("run_SPA_rows_sparse", &run_SPA_rows_sparse,
-    "Runs Successive Projection Algorithm (SPA) to solve separable NMF",
-    py::arg("A"), py::arg("k"));
+        "Runs Successive Projection Algorithm (SPA) to solve separable NMF",
+        py::arg("A"), py::arg("k"));
 
   m.def("renormalize_input_matrix", &renormalize_input_matrix,
-    "Renormalized input matrix to minimize differences in means",
-    py::arg("S"), py::arg("sample_assignments"));
+        "Renormalized input matrix to minimize differences in means",
+        py::arg("S"), py::arg("sample_assignments"));
 
   m.def("renormalize_input_matrix_full", &renormalize_input_matrix_full,
-    "Renormalized input matrix to minimize differences in means",
-    py::arg("S"), py::arg("sample_assignments"));
+        "Renormalized input matrix to minimize differences in means",
+        py::arg("S"), py::arg("sample_assignments"));
 
   // ACTION decomposition
   m.def("run_ACTION", &run_ACTION,
-    "Runs multi-level ACTION decomposition method",
-    py::arg("S_r"), py::arg("k_min") = 2, py::arg("k_max") = 30, py::arg("thread_no") = 0,
-    py::arg("max_it") = 50, py::arg("min_delta") = 0.01);
+        "Runs multi-level ACTION decomposition method", py::arg("S_r"),
+        py::arg("k_min") = 2, py::arg("k_max") = 30, py::arg("thread_no") = 0,
+        py::arg("max_it") = 50, py::arg("min_delta") = 0.01);
 
   m.def("run_ACTION_plus", &run_ACTION_plus,
-    "Runs multi-level ACTION decomposition method",
-    py::arg("S_r"), py::arg("k_min") = 2, py::arg("k_max") = 30,
-    py::arg("max_it") = 50, py::arg("min_delta") = 0.01, py::arg("max_trial") = 3);
+        "Runs multi-level ACTION decomposition method", py::arg("S_r"),
+        py::arg("k_min") = 2, py::arg("k_max") = 30, py::arg("max_it") = 50,
+        py::arg("min_delta") = 0.01, py::arg("max_trial") = 3);
 
   // Archetypes
   m.def("prune_archetypes", &prune_archetypes,
-    "Filters multi-level archetypes and concatenate filtered archetypes",
-    py::arg("C_trace"), py::arg("H_trace"), py::arg("min_specificity_z_threshold") = -3,
-    py::arg("min_cells") = 3);
+        "Filters multi-level archetypes and concatenate filtered archetypes",
+        py::arg("C_trace"), py::arg("H_trace"),
+        py::arg("min_specificity_z_threshold") = -3, py::arg("min_cells") = 3);
 
-  m.def("unify_archetypes", &unify_archetypes,
-    "Identifies and aggregates redundant archetypes into equivalent classes",
-    py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
-    py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
+  m.def(
+      "unify_archetypes", &unify_archetypes,
+      "Identifies and aggregates redundant archetypes into equivalent classes",
+      py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
+      py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
 
   // Network
   m.def("build_ACTIONet", &build_ACTIONet,
-        "Builds an interaction network from the multi-level archetypal decompositions",
+        "Builds an interaction network from the multi-level archetypal "
+        "decompositions",
         py::arg("H_stacked"), py::arg("density") = 1.0,
         py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true,
-        py::arg("distance_metric") = "jsd", py::arg("nn_approach")=  "k*nn",
-        py::arg("k") = 10, py::arg("M") = 16,
-        py::arg("ef_construction") = 200, py::arg("ef") = 10);
+        py::arg("distance_metric") = "jsd", py::arg("nn_approach") = "k*nn",
+        py::arg("k") = 10, py::arg("M") = 16, py::arg("ef_construction") = 200,
+        py::arg("ef") = 10);
 
-  
-  m.def("layout_ACTIONet", &layout_ACTIONet,
-    "Performs stochastic force-directed layout on the input graph (ACTIONet)",
-    py::arg("G"), py::arg("S_r"), py::arg("compactness_level") = 50, py::arg("n_epochs") = 500, py::arg("layout_alg") = 0, py::arg("thread_no") = 0, py::arg("seed") = 0);
+  // Network (knn)
+  m.def("build_knn", &build_knn,
+        "Builds an interaction network from the multi-level archetypal "
+        "decompositions",
+        py::arg("H_stacked"), py::arg("density") = 1.0,
+        py::arg("thread_no") = 0, py::arg("mutual_edges_only") = true,
+        py::arg("distance_metric") = "jsd", py::arg("k") = 10,
+        py::arg("M") = 16, py::arg("ef_construction") = 200,
+        py::arg("ef") = 10);
+
+  m.def(
+      "layout_ACTIONet", &layout_ACTIONet,
+      "Performs stochastic force-directed layout on the input graph (ACTIONet)",
+      py::arg("G"), py::arg("S_r"), py::arg("compactness_level") = 50,
+      py::arg("n_epochs") = 500, py::arg("layout_alg") = 0,
+      py::arg("thread_no") = 0, py::arg("seed") = 0);
 
   // Pseudobulk
   m.def("compute_pseudo_bulk_per_archetype", &compute_pseudo_bulk_per_archetype,
-    "Computes pseudobulk profiles",
-    py::arg("S"), py::arg("sample_assignments"));
+        "Computes pseudobulk profiles", py::arg("S"),
+        py::arg("sample_assignments"));
 
-  m.def("compute_pseudo_bulk_per_archetype_full", &compute_pseudo_bulk_per_archetype_full,
-    "Computes pseudobulk profiles",
-    py::arg("S"), py::arg("sample_assignments"));
+  m.def("compute_pseudo_bulk_per_archetype_full",
+        &compute_pseudo_bulk_per_archetype_full, "Computes pseudobulk profiles",
+        py::arg("S"), py::arg("sample_assignments"));
 
   m.def("compute_pseudo_bulk_per_cluster", &compute_pseudo_bulk_per_cluster,
-    "Computes pseudobulk profiles",
-    py::arg("S"), py::arg("sample_assignments"));
+        "Computes pseudobulk profiles", py::arg("S"),
+        py::arg("sample_assignments"));
 
-  m.def("compute_pseudo_bulk_per_cluster_full", &compute_pseudo_bulk_per_cluster_full,
-    "Computes pseudobulk profiles",
-    py::arg("S"), py::arg("sample_assignments"));
+  m.def("compute_pseudo_bulk_per_cluster_full",
+        &compute_pseudo_bulk_per_cluster_full, "Computes pseudobulk profiles",
+        py::arg("S"), py::arg("sample_assignments"));
 
-  m.def("compute_pseudo_bulk_per_cluster_and_ind", &compute_pseudo_bulk_per_cluster_and_ind,
-    "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
-    py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
+  m.def("compute_pseudo_bulk_per_cluster_and_ind",
+        &compute_pseudo_bulk_per_cluster_and_ind,
+        "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
+        py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 
-  m.def("compute_pseudo_bulk_per_cluster_ind_full", &compute_pseudo_bulk_per_cluster_and_ind_full,
-    "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
-    py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
+  m.def("compute_pseudo_bulk_per_cluster_ind_full",
+        &compute_pseudo_bulk_per_cluster_and_ind_full,
+        "Computes pseudobulk profiles (groups[k1] x individuals[k2])",
+        py::arg("S"), py::arg("sample_assignments"), py::arg("individuals"));
 
   m.def("renormalize_input_matrix", &renormalize_input_matrix,
-    "Renormalized input matrix to minimize differences in means",
-    py::arg("S"), py::arg("sample_assignments"));
+        "Renormalized input matrix to minimize differences in means",
+        py::arg("S"), py::arg("sample_assignments"));
 
   m.def("renormalize_input_matrix_full", &renormalize_input_matrix_full,
-    "Renormalized input matrix to minimize differences in means",
-    py::arg("S"), py::arg("sample_assignments"));
+        "Renormalized input matrix to minimize differences in means",
+        py::arg("S"), py::arg("sample_assignments"));
 
   // Feature specificity
-  m.def("compute_archetype_feature_specificity_bin", &compute_archetype_feature_specificity_bin,
-    "Compute feature specificity (from archetype footprints and binary input)",
-    py::arg("S"), py::arg("H"));
+  m.def("compute_archetype_feature_specificity_bin",
+        &compute_archetype_feature_specificity_bin,
+        "Compute feature specificity (from archetype footprints and binary "
+        "input)",
+        py::arg("S"), py::arg("H"));
 
-  m.def("compute_archetype_feature_specificity", &compute_archetype_feature_specificity,
-    "Compute feature specificity (discriminative scores)",
-    py::arg("S"), py::arg("sample_assignments"));
+  m.def("compute_archetype_feature_specificity",
+        &compute_archetype_feature_specificity,
+        "Compute feature specificity (discriminative scores)", py::arg("S"),
+        py::arg("sample_assignments"));
 
-  m.def("compute_archetype_feature_specificity_full", &compute_archetype_feature_specificity_full,
-    "Compute feature specificity (discriminative scores)",
-    py::arg("S"), py::arg("sample_assignments"));
+  m.def("compute_archetype_feature_specificity_full",
+        &compute_archetype_feature_specificity_full,
+        "Compute feature specificity (discriminative scores)", py::arg("S"),
+        py::arg("sample_assignments"));
 
-  m.def("compute_cluster_feature_specificity", &compute_cluster_feature_specificity,
-    "Compute feature specificity (discriminative scores)",
-    py::arg("S"), py::arg("sample_assignments"));
+  m.def("compute_cluster_feature_specificity",
+        &compute_cluster_feature_specificity,
+        "Compute feature specificity (discriminative scores)", py::arg("S"),
+        py::arg("sample_assignments"));
 
-  m.def("compute_cluster_feature_specificity_full", &compute_cluster_feature_specificity_full,
-    "Compute feature specificity (discriminative scores)",
-    py::arg("S"), py::arg("sample_assignments"));
+  m.def("compute_cluster_feature_specificity_full",
+        &compute_cluster_feature_specificity_full,
+        "Compute feature specificity (discriminative scores)", py::arg("S"),
+        py::arg("sample_assignments"));
 
   m.def("compute_core_number", &compute_core_number,
-    "Compute coreness of graph vertices",
-    py::arg("G"));
+        "Compute coreness of graph vertices", py::arg("G"));
 
   m.def("compute_archetype_core_centrality", &compute_archetype_core_centrality,
-    "Compute the overall connectivity of each node",
-    py::arg("G"), py::arg("sample_assignments"));
+        "Compute the overall connectivity of each node", py::arg("G"),
+        py::arg("sample_assignments"));
 
   m.def("compute_network_diffusion", &compute_network_diffusion,
-    "Computes PageRank for a selected set of nodes",
-    py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-    py::arg("alpha") = 0.85, py::arg("max_it") = 3);
+        "Computes PageRank for a selected set of nodes", py::arg("G"),
+        py::arg("X0"), py::arg("thread_no") = 0, py::arg("alpha") = 0.85,
+        py::arg("max_it") = 3);
 
   m.def("compute_network_diffusion_fast", &compute_network_diffusion_fast,
-    "Computes PageRank for a selected set of nodes",
-    py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-    py::arg("alpha") = 0.85, py::arg("max_it") = 5);
+        "Computes PageRank for a selected set of nodes", py::arg("G"),
+        py::arg("X0"), py::arg("thread_no") = 0, py::arg("alpha") = 0.85,
+        py::arg("max_it") = 5);
 
   m.def("compute_sparse_network_diffusion", &compute_sparse_network_diffusion,
-    "Computes L1-regularized PageRank for a selected set of nodes",
-    py::arg("G"), py::arg("X0"), py::arg("alpha") = 0.85,
-    py::arg("rho") = 1e-4, py::arg("epsilon") = 0.001,
-    py::arg("max_iter") = 20);
+        "Computes L1-regularized PageRank for a selected set of nodes",
+        py::arg("G"), py::arg("X0"), py::arg("alpha") = 0.85,
+        py::arg("rho") = 1e-4, py::arg("epsilon") = 0.001,
+        py::arg("max_iter") = 20);
 
-  m.def("assess_enrichment", &assess_enrichment,
-    "Performs enrichment analysis",
-    py::arg("scores"), py::arg("associations"), py::arg("thread_no") = 0);
+  m.def("assess_enrichment", &assess_enrichment, "Performs enrichment analysis",
+        py::arg("scores"), py::arg("associations"), py::arg("thread_no") = 0);
 
-  m.def("encode_ids", &encode_ids,
-    "Encrypts a set of given input ids",
-    py::arg("ids"), py::arg("pass"));
+  m.def("encode_ids", &encode_ids, "Encrypts a set of given input ids",
+        py::arg("ids"), py::arg("pass"));
 
-  m.def("decode_ids", &decode_ids,
-    "Decrypts a set of given encrypted ids",
-    py::arg("encoded_ids"), py::arg("pass"));
+  m.def("decode_ids", &decode_ids, "Decrypts a set of given encrypted ids",
+        py::arg("encoded_ids"), py::arg("pass"));
 
   m.def("run_HDBSCAN", &run_HDBSCAN,
-    "Clusters data points using the hierarchical DBSCAN algorithm",
-    py::arg("X"), py::arg("min_points"), py::arg("min_cluster_size"));
+        "Clusters data points using the hierarchical DBSCAN algorithm",
+        py::arg("X"), py::arg("min_points"), py::arg("min_cluster_size"));
 
   m.def("MWM_hungarian", &MWM_hungarian,
-    "Computes the maximum-weight bipartite graph matching",
-    py::arg("G"));
+        "Computes the maximum-weight bipartite graph matching", py::arg("G"));
 
   m.def("signed_cluster", &unsigned_cluster,
-    "Computes graph clustering using Leiden algorith over signed graphs",
-    py::arg("A"), py::arg("resolution_parameter") = 1.0,
-    py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
+        "Computes graph clustering using Leiden algorith over signed graphs",
+        py::arg("A"), py::arg("resolution_parameter") = 1.0,
+        py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
 
   m.def("unsigned_cluster_batch", &unsigned_cluster_batch,
-    "Computes graph clustering using Leiden algorith over signed graphs",
-    py::arg("A"), py::arg("resolution_parameter") = 1.0,
-    py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
+        "Computes graph clustering using Leiden algorith over signed graphs",
+        py::arg("A"), py::arg("resolution_parameter") = 1.0,
+        py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
 
   m.def("unsigned_cluster", &unsigned_cluster,
-    "Computes graph clustering using Leiden algorith over unsigned graphs",
-    py::arg("A"), py::arg("resolution_parameter") = 1.0,
-    py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
+        "Computes graph clustering using Leiden algorith over unsigned graphs",
+        py::arg("A"), py::arg("resolution_parameter") = 1.0,
+        py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
 
-  m.def("Prune_PageRank", &Prune_PageRank,
-    "",
-    py::arg("U"), py::arg("density"));
+  m.def("Prune_PageRank", &Prune_PageRank, "", py::arg("U"),
+        py::arg("density"));
 
   m.def("transform_layout", &transform_layout,
-    "Project a new data into current embedding",
-    py::arg("W"), py::arg("coor2D"), py::arg("coor3D"), py::arg("colRGB"),
-    py::arg("compactness_level") = 50, py::arg("n_epochs") = 500,
-    py::arg("thread_no") = 0, py::arg("seed") = 0);
+        "Project a new data into current embedding", py::arg("W"),
+        py::arg("coor2D"), py::arg("coor3D"), py::arg("colRGB"),
+        py::arg("compactness_level") = 50, py::arg("n_epochs") = 500,
+        py::arg("thread_no") = 0, py::arg("seed") = 0);
 
-  m.def("compute_full_sim", &compute_full_sim,
-    "",
-    py::arg("H"), py::arg("thread_no") = 0);
+  m.def("compute_full_sim", &compute_full_sim, "", py::arg("H"),
+        py::arg("thread_no") = 0);
 
   m.def("run_LPA", &run_LPA,
-    "Run label prepagation on a given set of known labels",
-    py::arg("G"), py::arg("labels"), py::arg("lambda") = 1, py::arg("iters") = 3,
-    py::arg("sig_threshold") = 3, py::arg("fixed_labels_") = arma::vec());
+        "Run label prepagation on a given set of known labels", py::arg("G"),
+        py::arg("labels"), py::arg("lambda") = 1, py::arg("iters") = 3,
+        py::arg("sig_threshold") = 3, py::arg("fixed_labels_") = arma::vec());
+
+  m.def("LSI", &LSI, "Compute TF/IDF trasformation of a sparse matrix",
+        py::arg("X"), py::arg("size_factor"));
+
+  m.def("compute_marker_aggregate_stats_TFIDF_sum_smoothed",
+        &compute_marker_aggregate_stats_TFIDF_sum_smoothed,
+        "Computes the aggregate score for marker sets using our new method",
+        py::arg("G"), py::arg("S"), py::arg("marker_mat"),
+        py::arg("alpha") = 0.85, py::arg("max_it") = 5,
+        py::arg("perm_no") = 100, py::arg("thread_no") = 0,
+        py::arg("normalization") = 1);
+
+  m.def(
+      "compute_pseudo_bulk_per_archetype_and_ind_full",
+      &compute_pseudo_bulk_per_archetype_and_ind_full,
+      "Computes pseudobulk profiles for archetype x individuals (dense matrix)",
+      py::arg("S"), py::arg("H"), py::arg("individuals"));
+
+  m.def("compute_pseudo_bulk_per_archetype_and_ind",
+        &compute_pseudo_bulk_per_archetype_and_ind_full,
+        "Computes pseudobulk profiles for archetype x individuals (sparse "
+        "matrix)",
+        py::arg("S"), py::arg("H"), py::arg("individuals"));
+
+  m.def("computeFullSim", &computeFullSim,
+        "Computes all pairwise similarities using JSD distance measure",
+        py::arg("H"), py::arg("thread_no") = 0);
+
+  m.def(
+      "orthogonalize_batch_effect_full", &orthogonalize_batch_effect_full,
+      "Remove batch effect using the orthogonalization approach (dense matrix)",
+      py::arg("S"), py::arg("old_S_r"), py::arg("old_V"), py::arg("old_A"),
+      py::arg("old_B"), py::arg("old_sigma"), py::arg("design"));
+
+  m.def("orthogonalize_batch_effect", &orthogonalize_batch_effect_full,
+        "Remove batch effect using the orthogonalization approach (sparse "
+        "matrix)",
+        py::arg("S"), py::arg("old_S_r"), py::arg("old_V"), py::arg("old_A"),
+        py::arg("old_B"), py::arg("old_sigma"), py::arg("design"));
+
+  m.def("perturbedSVD", &perturbedSVD, "Compute SVD of X+AB using SVD of X",
+        py::arg("u"), py::arg("d"), py::arg("v"), py::arg("A"), py::arg("B"));
+
+  m.def("run_AA_with_batch_correction", &run_AA_with_batch_correction,
+        "Run AA with batch correction (inspired by Harmony)", py::arg("Z"),
+        py::arg("W0"), py::arg("batch"), py::arg("max_it") = 100,
+        py::arg("max_correction_rounds") = 10, py::arg("lambda") = 1,
+        py::arg("min_delta") = 1e-6);
+
+  m.def("run_ACTION_with_batch_correction", &run_ACTION_with_batch_correction,
+        "Run ACTION with batch correction (inspired by Harmony)",
+        py::arg("S_r"), py::arg("batch"), py::arg("k_min"), py::arg("k_max"),
+        py::arg("thread_no") = 0, py::arg("max_it") = 100,
+        py::arg("max_correction_rounds") = 10, py::arg("lambda") = 1,
+        py::arg("min_delta") = 1e-6);
+
+  m.def("sgd2_layout_weighted", &sgd2_layout_weighted,
+        "Run force-directed layout (variant 1)", py::arg("G"), py::arg("S_r"),
+        py::arg("t_max") = 30, py::arg("eps") = 0.01, py::arg("seed") = 0);
+
+  m.def("sgd2_layout_sparse_weighted", &sgd2_layout_sparse_weighted,
+        "Run force-directed layout (variant 2)", py::arg("G"), py::arg("S_r"),
+        py::arg("p") = 200, py::arg("t_max") = 30, py::arg("eps") = 0.01,
+        py::arg("seed") = 0);
+
+  m.def("sgd2_layout_weighted_convergent", &sgd2_layout_weighted_convergent,
+        "Run force-directed layout (variant 3)", py::arg("G"), py::arg("S_r"),
+        py::arg("t_max") = 30, py::arg("eps") = 0.01, py::arg("delta") = 0.03,
+        py::arg("t_maxmax") = 200, py::arg("seed") = 0);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
