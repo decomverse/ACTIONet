@@ -4,5 +4,13 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"git.ignoreLimitWarning": true,
+		"files.associations": {
+			"*.rmd": "markdown",
+			"exception": "cpp",
+			"optional": "cpp",
+			"armadillo": "cpp"
+		}
+	}
 }
