@@ -2367,6 +2367,15 @@ List run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max,
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
+mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat, double alpha = 0.85, int max_it = 5, int thread_no = 0, bool ignore_baseline_expression = false)
+{
+  mat stats = ACTIONet::compute_marker_aggregate_stats(G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression);
+
+  return (stats);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
 sp_mat LSI(sp_mat &X, double size_factor = 100000)
 {
   sp_mat TFIDF = ACTIONet::LSI(X, size_factor);
