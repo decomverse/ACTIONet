@@ -1681,27 +1681,6 @@ namespace ACTIONet {
         return Rcpp::as<vec >(rcpp_result_gen);
     }
 
-    inline mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha = 0.85, int max_it = 5, int thread_no = 0, bool ignore_baseline_expression = false) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats p_compute_marker_aggregate_stats = NULL;
-        if (p_compute_marker_aggregate_stats == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");
-            p_compute_marker_aggregate_stats = (Ptr_compute_marker_aggregate_stats)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(ignore_baseline_expression)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
     inline List run_AA_with_batch_correction(mat& Z, mat& W0, vec batch, int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {
         typedef SEXP(*Ptr_run_AA_with_batch_correction)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_AA_with_batch_correction p_run_AA_with_batch_correction = NULL;
@@ -1744,122 +1723,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline mat compute_marker_aggregate_stats_basic_sum(sp_mat& S, sp_mat& marker_mat) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats_basic_sum)(SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats_basic_sum p_compute_marker_aggregate_stats_basic_sum = NULL;
-        if (p_compute_marker_aggregate_stats_basic_sum == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats_basic_sum)(sp_mat&,sp_mat&)");
-            p_compute_marker_aggregate_stats_basic_sum = (Ptr_compute_marker_aggregate_stats_basic_sum)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_basic_sum");
+    inline mat compute_marker_aggregate_stats(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha = 0.85, int max_it = 5, int thread_no = 0, bool ignore_baseline_expression = false) {
+        typedef SEXP(*Ptr_compute_marker_aggregate_stats)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_compute_marker_aggregate_stats p_compute_marker_aggregate_stats = NULL;
+        if (p_compute_marker_aggregate_stats == NULL) {
+            validateSignature("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");
+            p_compute_marker_aggregate_stats = (Ptr_compute_marker_aggregate_stats)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats_basic_sum(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
-    inline mat compute_marker_aggregate_stats_basic_sum_perm(sp_mat& S, sp_mat& marker_mat, int perm_no = 100, int thread_no = 0) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats_basic_sum_perm)(SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats_basic_sum_perm p_compute_marker_aggregate_stats_basic_sum_perm = NULL;
-        if (p_compute_marker_aggregate_stats_basic_sum_perm == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats_basic_sum_perm)(sp_mat&,sp_mat&,int,int)");
-            p_compute_marker_aggregate_stats_basic_sum_perm = (Ptr_compute_marker_aggregate_stats_basic_sum_perm)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats_basic_sum_perm(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(perm_no)), Shield<SEXP>(Rcpp::wrap(thread_no)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
-    inline mat compute_marker_aggregate_stats_basic_sum_perm_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats_basic_sum_perm_smoothed)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats_basic_sum_perm_smoothed p_compute_marker_aggregate_stats_basic_sum_perm_smoothed = NULL;
-        if (p_compute_marker_aggregate_stats_basic_sum_perm_smoothed == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats_basic_sum_perm_smoothed)(sp_mat&,sp_mat&,sp_mat&,double,int,int,int)");
-            p_compute_marker_aggregate_stats_basic_sum_perm_smoothed = (Ptr_compute_marker_aggregate_stats_basic_sum_perm_smoothed)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats_basic_sum_perm_smoothed(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(perm_no)), Shield<SEXP>(Rcpp::wrap(thread_no)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
-    inline mat compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2 p_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2 = NULL;
-        if (p_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2 == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2)(sp_mat&,sp_mat&,sp_mat&,double,int,int,int)");
-            p_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2 = (Ptr_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(perm_no)), Shield<SEXP>(Rcpp::wrap(thread_no)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
-    inline mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats_basic_sum_smoothed)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats_basic_sum_smoothed p_compute_marker_aggregate_stats_basic_sum_smoothed = NULL;
-        if (p_compute_marker_aggregate_stats_basic_sum_smoothed == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats_basic_sum_smoothed)(sp_mat&,sp_mat&,sp_mat&,double,int,int,int)");
-            p_compute_marker_aggregate_stats_basic_sum_smoothed = (Ptr_compute_marker_aggregate_stats_basic_sum_smoothed)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats_basic_sum_smoothed(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(perm_no)), Shield<SEXP>(Rcpp::wrap(thread_no)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
-    inline mat compute_marker_aggregate_stats_basic_sum_smoothed_normalized(sp_mat& G, sp_mat& S, sp_mat& marker_mat, double alpha = 0.85, int max_it = 5, int perm_no = 100, int thread_no = 0) {
-        typedef SEXP(*Ptr_compute_marker_aggregate_stats_basic_sum_smoothed_normalized)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_marker_aggregate_stats_basic_sum_smoothed_normalized p_compute_marker_aggregate_stats_basic_sum_smoothed_normalized = NULL;
-        if (p_compute_marker_aggregate_stats_basic_sum_smoothed_normalized == NULL) {
-            validateSignature("mat(*compute_marker_aggregate_stats_basic_sum_smoothed_normalized)(sp_mat&,sp_mat&,sp_mat&,double,int,int,int)");
-            p_compute_marker_aggregate_stats_basic_sum_smoothed_normalized = (Ptr_compute_marker_aggregate_stats_basic_sum_smoothed_normalized)R_GetCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_marker_aggregate_stats_basic_sum_smoothed_normalized(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(perm_no)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+            rcpp_result_gen = p_compute_marker_aggregate_stats(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(ignore_baseline_expression)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
