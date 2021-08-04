@@ -160,8 +160,8 @@ void sfmult_AT_XT_YN_4	// y = A'*x'	x is 4-by-m, and y is n-by-4
     const int *Ai,	// size nz = Ap[n] row indices
     const double *Ax,	// size nz values
     const double *Az,	// size nz imaginary values if A is complex (TO DO)
-    int m,		// A is m-by-n
-    int n,
+    Int m,		// A is m-by-n
+    Int n,
     const double *Xx,	// 4-by-m
     const double *Xz,	// 4-by-m if X complex (TO DO)
     int ac,		// true: use conj(A), otherwise use A (TO DO)
