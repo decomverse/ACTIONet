@@ -78,17 +78,41 @@ void sfmult_walloc(
 //==============================================================================
 //=== sfmult ===================================================================
 //==============================================================================
-
+//y = sfmult (A,x, at,ac, xt,xc, yt,yc) where A is sparse and x is full
+//y = sfmult (x,A, at,ac, xt,xc, yt,yc) where A is sparse and x is full
+//
+//Computes y = A*x, x*A, or other variants.
+//
+//at and ac control how the sparse matrix A is accessed:
+//
+//  y=A*x           at = 0, ac = 0
+//  y=A.'*x         at = 1, ac = 0
+//  y=conj(A)*x     at = 0, ac = 1
+//  y=A'*x          at = 1, ac = 1
+//
+//xt and xc modify x in the same way.
+//yt and yc modify the result y.  Thus, to compute y = (A.' *x)' use:
+//
+//  y = sfmult (A, x, 1,0, 0,0, 1,1) ;
+//
+//To compute y = (x *A.')' do the following:
+//
+//  y = sfmult (x, A, 1,0, 0,0, 1,1) ;
+//
+//The transpose of A is never computed.  Thus function requires workspace of
+//size up to 4*size(A,1) if x is a matrix.  No workspace is required if x is
+//a row or column vector.  At most 2*size(A,1) workspace is required if
+//min(size(x)) is 2.
 arma::mat &sfmult // returns y = A*x or variants
 	(
 		const arma::sp_mat &A,
 		const arma::mat &X,
-		int at, // if true: trans(A)  if false: A
-		int ac, // if true: conj(A)   if false: A. ignored if A real
-		int xt, // if true: trans(x)  if false: x
-		int xc, // if true: conj(x)   if false: x. ignored if x real
-		int yt, // if true: trans(y)  if false: y
-		int yc	// if true: conj(y)   if false: y. ignored if y real
+        int at = 0, // if true: trans(A)  if false: A
+        int ac = 0, // if true: conj(A)   if false: A. ignored if A real
+        int xt = 0, // if true: trans(x)  if false: x
+        int xc = 0, // if true: conj(x)   if false: x. ignored if x real
+        int yt = 0, // if true: trans(y)  if false: y
+        int yc = 0  // if true: conj(y)   if false: y. ignored if y real
 	)
 {
 	// (TO DO) error if A not sparse, x sparse
