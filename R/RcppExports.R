@@ -1060,6 +1060,10 @@ compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, 
     .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization)
 }
 
+dgemm_sparse <- function(A, X, at, ac, xt, xc, yt, yc) {
+    .Call(`_ACTIONet_dgemm_sparse`, A, X, at, ac, xt, xc, yt, yc)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
