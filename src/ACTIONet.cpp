@@ -2391,3 +2391,22 @@ mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 
   return (stats);
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::mat dgemm_sparse // returns y = A*x or variants
+    (
+        const arma::sp_mat &A,
+        const arma::mat &X,
+        int at = 0, // if true: trans(A)  if false: A
+        int ac = 0, // if true: conj(A)   if false: A. ignored if A real
+        int xt = 0, // if true: trans(x)  if false: x
+        int xc = 0, // if true: conj(x)   if false: x. ignored if x real
+        int yt = 0, // if true: trans(y)  if false: y
+        int yc = 0  // if true: conj(y)   if false: y. ignored if y real
+    )
+{
+  mat Y = sfmult(A, X, at, ac, xt, xc, yt, yc);
+
+  return (Y);
+}
