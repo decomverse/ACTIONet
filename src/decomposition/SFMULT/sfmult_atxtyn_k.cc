@@ -156,8 +156,8 @@ void sfmult_AT_XT_YN_4	// y = A'*x'	x is 4-by-m, and y is n-by-4
     double *Yz,		// n-by-4 if Y is complex (TO DO)
 
     // --- inputs, not modified
-    const int *Ap,	// size n+1 column pointers
-    const int *Ai,	// size nz = Ap[n] row indices
+    const Int *Ap,	// size n+1 column pointers
+    const Int *Ai,	// size nz = Ap[n] row indices
     const double *Ax,	// size nz values
     const double *Az,	// size nz imaginary values if A is complex (TO DO)
     Int m,		// A is m-by-n
