@@ -321,7 +321,11 @@ namespace ACTIONet
 
     for (int it = 0; it < max_it; it++)
     {
-      X = sfmult(P, X, 0, 0, 0, 0, 0, 0) + X0 * diag(zt * X);
+      rowvec v = zt * X;
+      mat shift = X0.each_row([v](vec &x)
+                              { x % v; });
+      X = sfmult(P, X, 0, 0, 0, 0, 0, 0);
+      X += shift;
     }
     // X = normalise(X, 1)
 
