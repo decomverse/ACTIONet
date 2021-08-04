@@ -5,10 +5,11 @@
 #ifndef _SFMULT_H
 #define _SFMULT_H
 
+#include <arma_base.h>
+
 #define stdout_printf printf
 #define stderr_printf printf
 #define FLUSH fflush(stdout)
-
 
 #define Int unsigned long long
 
