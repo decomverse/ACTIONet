@@ -3133,6 +3133,47 @@ RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed(SEXP
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// dgemm_sparse
+arma::mat dgemm_sparse(const arma::sp_mat& A, const arma::mat& X, int at, int ac, int xt, int xc, int yt, int yc);
+static SEXP _ACTIONet_dgemm_sparse_try(SEXP ASEXP, SEXP XSEXP, SEXP atSEXP, SEXP acSEXP, SEXP xtSEXP, SEXP xcSEXP, SEXP ytSEXP, SEXP ycSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type at(atSEXP);
+    Rcpp::traits::input_parameter< int >::type ac(acSEXP);
+    Rcpp::traits::input_parameter< int >::type xt(xtSEXP);
+    Rcpp::traits::input_parameter< int >::type xc(xcSEXP);
+    Rcpp::traits::input_parameter< int >::type yt(ytSEXP);
+    Rcpp::traits::input_parameter< int >::type yc(ycSEXP);
+    rcpp_result_gen = Rcpp::wrap(dgemm_sparse(A, X, at, ac, xt, xc, yt, yc));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_dgemm_sparse(SEXP ASEXP, SEXP XSEXP, SEXP atSEXP, SEXP acSEXP, SEXP xtSEXP, SEXP xcSEXP, SEXP ytSEXP, SEXP ycSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_dgemm_sparse_try(ASEXP, XSEXP, atSEXP, acSEXP, xtSEXP, xcSEXP, ytSEXP, ycSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -3293,6 +3334,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");
         signatures.insert("sp_mat(*LSI)(sp_mat&,double)");
         signatures.insert("mat(*compute_marker_aggregate_stats_TFIDF_sum_smoothed)(sp_mat&,sp_mat&,sp_mat&,double,int,int,int,int)");
+        signatures.insert("arma::mat(*dgemm_sparse)(const arma::sp_mat&,const arma::mat&,int,int,int,int,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -3383,6 +3425,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_LSI", (DL_FUNC)_ACTIONet_LSI_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_dgemm_sparse", (DL_FUNC)_ACTIONet_dgemm_sparse_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -3472,6 +3515,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 7},
     {"_ACTIONet_LSI", (DL_FUNC) &_ACTIONet_LSI, 2},
     {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 8},
+    {"_ACTIONet_dgemm_sparse", (DL_FUNC) &_ACTIONet_dgemm_sparse, 8},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
