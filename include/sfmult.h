@@ -7,12 +7,6 @@
 
 #include "arma/armadillo"
 
-using namespace arma;
-
-#define stdout_printf printf
-#define stderr_printf printf
-#define FLUSH fflush(stdout)
-
 #define Int unsigned int
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
