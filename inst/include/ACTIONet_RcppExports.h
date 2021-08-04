@@ -1786,6 +1786,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline arma::mat dgemm_sparse(const arma::sp_mat& A, const arma::mat& X, int at, int ac, int xt, int xc, int yt, int yc) {
+        typedef SEXP(*Ptr_dgemm_sparse)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_dgemm_sparse p_dgemm_sparse = NULL;
+        if (p_dgemm_sparse == NULL) {
+            validateSignature("arma::mat(*dgemm_sparse)(const arma::sp_mat&,const arma::mat&,int,int,int,int,int,int)");
+            p_dgemm_sparse = (Ptr_dgemm_sparse)R_GetCCallable("ACTIONet", "_ACTIONet_dgemm_sparse");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_dgemm_sparse(Shield<SEXP>(Rcpp::wrap(A)), Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(at)), Shield<SEXP>(Rcpp::wrap(ac)), Shield<SEXP>(Rcpp::wrap(xt)), Shield<SEXP>(Rcpp::wrap(xc)), Shield<SEXP>(Rcpp::wrap(yt)), Shield<SEXP>(Rcpp::wrap(yc)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<arma::mat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_
