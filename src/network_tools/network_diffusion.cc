@@ -321,7 +321,7 @@ namespace ACTIONet
 
     for (int it = 0; it < max_it; it++)
     {
-      X = sfmult(P, X, 0, 0, 0, 0) + X0 * (zt * X);
+      X = sfmult(P, X, 0, 0, 0, 0, 0, 0) + X0 * (zt * X);
     }
     // X = normalise(X, 1)
 
