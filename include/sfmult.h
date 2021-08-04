@@ -14,7 +14,7 @@ using namespace arma;
 #define FLUSH fflush(stdout)
 
 
-#define Int unsigned int
+#define Int unsigned long long
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
