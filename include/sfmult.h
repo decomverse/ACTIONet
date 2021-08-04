@@ -5,10 +5,6 @@
 #ifndef _SFMULT_H
 #define _SFMULT_H
 
-#include "arma/armadillo"
-
-using namespace arma;
-
 #define stdout_printf printf
 #define stderr_printf printf
 #define FLUSH fflush(stdout)

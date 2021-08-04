@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <arma_base.h>
+#include <sfmult.h>
 #include <layout/uwot/gradient.h>
 #include <layout/uwot/sampler.h>
 #include <layout/uwot/tauprng.h>
@@ -31,7 +32,6 @@
 #include <clustering/HDBSCAN/hdbscan.hpp>
 #include <math/cryptor.hpp>
 #include <math/pcg/pcg_random.hpp>
-#include <sfmult.h>
 
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS
@@ -305,6 +305,9 @@ namespace ACTIONet
     sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha,
                                             double rho, double epsilon,
                                             int max_iter);
+
+    mat compute_network_diffusion_SFMULT(sp_mat &G, sp_mat &X0, double alpha, int max_it);
+
     vec NetDBSCAN(sp_mat &G, int minPts, double eps, double alpha_val);
 
     field<vec> run_HDBSCAN(mat &X, int minPoints, int minClusterSize);
