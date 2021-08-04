@@ -97,8 +97,8 @@ void sfmult_AT_XT_YN_3	// y = A'*x'	x is 3-by-m, and y is n-by-3 (ldx = 4)
     const Int *Ai,	// size nz = Ap[n] row indices
     const double *Ax,	// size nz values
     const double *Az,	// size nz imaginary values if A is complex (TO DO)
-    int m,		// A is m-by-n
-    int n,
+    Int m,		// A is m-by-n
+    Int n,
     const double *Xx,	// 3-by-m
     const double *Xz,	// 3-by-m if X complex (TO DO)
     int ac,		// true: use conj(A), otherwise use A (TO DO)
