@@ -31,6 +31,7 @@
 #include <clustering/HDBSCAN/hdbscan.hpp>
 #include <math/cryptor.hpp>
 #include <math/pcg/pcg_random.hpp>
+#include <sfmult.h>
 
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS
