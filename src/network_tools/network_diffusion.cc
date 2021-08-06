@@ -303,6 +303,7 @@ namespace ACTIONet
     return (X);
   }
 
+/*
   mat compute_network_diffusion_SFMULT(sp_mat &G, sp_mat &X0, double alpha = 0.85, int max_it = 3)
   {
     int N = G.n_rows;
@@ -330,5 +331,6 @@ namespace ACTIONet
 
     return (X);
   }
+*/
 
 } // namespace ACTIONet
