@@ -1452,46 +1452,6 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline void csr_sort_indices_inplace(IntegerVector& Ap, IntegerVector& Aj, NumericVector& Ax) {
-        typedef SEXP(*Ptr_csr_sort_indices_inplace)(SEXP,SEXP,SEXP);
-        static Ptr_csr_sort_indices_inplace p_csr_sort_indices_inplace = NULL;
-        if (p_csr_sort_indices_inplace == NULL) {
-            validateSignature("void(*csr_sort_indices_inplace)(IntegerVector&,IntegerVector&,NumericVector&)");
-            p_csr_sort_indices_inplace = (Ptr_csr_sort_indices_inplace)R_GetCCallable("ACTIONet", "_ACTIONet_csr_sort_indices_inplace");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_csr_sort_indices_inplace(Shield<SEXP>(Rcpp::wrap(Ap)), Shield<SEXP>(Rcpp::wrap(Aj)), Shield<SEXP>(Rcpp::wrap(Ax)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-    }
-
-    inline void csc_sort_indices_inplace(IntegerVector& Ap, IntegerVector& Ai, NumericVector& Ax) {
-        typedef SEXP(*Ptr_csc_sort_indices_inplace)(SEXP,SEXP,SEXP);
-        static Ptr_csc_sort_indices_inplace p_csc_sort_indices_inplace = NULL;
-        if (p_csc_sort_indices_inplace == NULL) {
-            validateSignature("void(*csc_sort_indices_inplace)(IntegerVector&,IntegerVector&,NumericVector&)");
-            p_csc_sort_indices_inplace = (Ptr_csc_sort_indices_inplace)R_GetCCallable("ACTIONet", "_ACTIONet_csc_sort_indices_inplace");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_csc_sort_indices_inplace(Shield<SEXP>(Rcpp::wrap(Ap)), Shield<SEXP>(Rcpp::wrap(Ai)), Shield<SEXP>(Rcpp::wrap(Ax)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-    }
-
     inline List run_subACTION(mat& S_r, mat& W_parent, mat& H_parent, int kk, int k_min, int k_max, int thread_no, int max_it = 50, double min_delta = 1e-16) {
         typedef SEXP(*Ptr_run_subACTION)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_subACTION p_run_subACTION = NULL;
@@ -1784,27 +1744,6 @@ namespace ACTIONet {
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<mat >(rcpp_result_gen);
-    }
-
-    inline arma::mat dgemm_sparse(const arma::sp_mat& A, const arma::mat& X, int at, int ac, int xt, int xc, int yt, int yc) {
-        typedef SEXP(*Ptr_dgemm_sparse)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_dgemm_sparse p_dgemm_sparse = NULL;
-        if (p_dgemm_sparse == NULL) {
-            validateSignature("arma::mat(*dgemm_sparse)(const arma::sp_mat&,const arma::mat&,int,int,int,int,int,int)");
-            p_dgemm_sparse = (Ptr_dgemm_sparse)R_GetCCallable("ACTIONet", "_ACTIONet_dgemm_sparse");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_dgemm_sparse(Shield<SEXP>(Rcpp::wrap(A)), Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(at)), Shield<SEXP>(Rcpp::wrap(ac)), Shield<SEXP>(Rcpp::wrap(xt)), Shield<SEXP>(Rcpp::wrap(xc)), Shield<SEXP>(Rcpp::wrap(yt)), Shield<SEXP>(Rcpp::wrap(yc)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<arma::mat >(rcpp_result_gen);
     }
 
 }
