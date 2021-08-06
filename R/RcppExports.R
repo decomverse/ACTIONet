@@ -996,14 +996,6 @@ computeFullSim <- function(H, thread_no = 0L) {
     .Call(`_ACTIONet_computeFullSim`, H, thread_no)
 }
 
-csr_sort_indices_inplace <- function(Ap, Aj, Ax) {
-    invisible(.Call(`_ACTIONet_csr_sort_indices_inplace`, Ap, Aj, Ax))
-}
-
-csc_sort_indices_inplace <- function(Ap, Ai, Ax) {
-    invisible(.Call(`_ACTIONet_csc_sort_indices_inplace`, Ap, Ai, Ax))
-}
-
 run_subACTION <- function(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it = 50L, min_delta = 1e-16) {
     .Call(`_ACTIONet_run_subACTION`, S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta)
 }
@@ -1058,10 +1050,6 @@ LSI <- function(X, size_factor = 100000) {
 
 compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L, normalization = 1L) {
     .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization)
-}
-
-dgemm_sparse <- function(A, X, at, ac, xt, xc, yt, yc) {
-    .Call(`_ACTIONet_dgemm_sparse`, A, X, at, ac, xt, xc, yt, yc)
 }
 
 roll_var <- function(X) {
