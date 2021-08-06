@@ -24,12 +24,6 @@ void set_seed(double seed)
   set_seed_r(std::floor(std::fabs(seed)));
 }
 
-template <class T1, class T2>
-bool kv_pair_less(const std::pair<T1, T2> &x, const std::pair<T1, T2> &y)
-{
-  return x.first < y.first;
-}
-
 //' Computes SVD decomposition
 //'
 //' This is direct implementation of the randomized SVD algorithm:
@@ -1215,6 +1209,16 @@ mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no = 0,
   return (Diff);
 }
 
+/*
+mat compute_network_diffusion_SFMULT(sp_mat &G, sp_mat &X0, double alpha = 0.85, int max_it = 3)
+{
+  mat Diff =
+      ACTIONet::compute_network_diffusion_SFMULT(G, X0, alpha, max_it);
+
+  return (Diff);
+}
+*/
+
 //' Computes network diffusion over a given network, starting with an arbitrarty
 // set of initial scores (direct approach)
 //'
@@ -1992,78 +1996,6 @@ mat computeFullSim(mat &H, int thread_no = 0)
 }
 
 // [[Rcpp::export]]
-void csr_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Aj,
-                              NumericVector &Ax)
-{
-  int n_row = Ap.size() - 1;
-  std::vector<std::pair<int, double>> temp;
-
-  for (int i = 0; i < n_row; i++)
-  {
-    int row_start = (int)Ap[i];
-    int row_end = (int)Ap[i + 1];
-    int len = row_end - row_start;
-
-    temp.resize(len);
-    bool is_sorted = true;
-    for (int jj = row_start, n = 0; jj < row_end; jj++, n++)
-    {
-      temp[n].first = (int)Aj(jj);
-      temp[n].second = Ax(jj);
-      if ((jj < (row_end - 1)) && (Aj(jj + 1) < Aj(jj)))
-      {
-        is_sorted = false;
-      }
-    }
-    if (is_sorted)
-      continue;
-
-    std::sort(temp.begin(), temp.begin() + len, kv_pair_less<int, double>);
-    for (int jj = row_start, n = 0; jj < row_end; jj++, n++)
-    {
-      Aj(jj) = temp[n].first;
-      Ax(jj) = temp[n].second;
-    }
-  }
-}
-
-// [[Rcpp::export]]
-void csc_sort_indices_inplace(IntegerVector &Ap, IntegerVector &Ai,
-                              NumericVector &Ax)
-{
-  int n_col = Ap.size() - 1;
-
-  std::vector<std::pair<int, double>> temp;
-  for (int i = 0; i < n_col; i++)
-  {
-    int col_start = (int)Ap[i];
-    int col_end = (int)Ap[i + 1];
-    int len = col_end - col_start;
-
-    temp.resize(len);
-    bool is_sorted = true;
-    for (int jj = col_start, n = 0; jj < col_end; jj++, n++)
-    {
-      temp[n].first = (int)Ai(jj);
-      temp[n].second = Ax(jj);
-      if ((jj < (col_end - 1)) && (Ai(jj + 1) < Ai(jj)))
-      {
-        is_sorted = false;
-      }
-    }
-    if (is_sorted)
-      continue;
-
-    std::sort(temp.begin(), temp.begin() + len, kv_pair_less<int, double>);
-    for (int jj = col_start, n = 0; jj < col_end; jj++, n++)
-    {
-      Ai(jj) = temp[n].first;
-      Ax(jj) = temp[n].second;
-    }
-  }
-}
-
-// [[Rcpp::export]]
 List run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk, int k_min,
                    int k_max, int thread_no, int max_it = 50,
                    double min_delta = 1e-16)
@@ -2391,7 +2323,7 @@ mat compute_marker_aggregate_stats_TFIDF_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 
   return (stats);
 }
-
+/*
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 arma::mat dgemm_sparse // returns y = A*x or variants
@@ -2410,3 +2342,4 @@ arma::mat dgemm_sparse // returns y = A*x or variants
 
   return (Y);
 }
+*/
