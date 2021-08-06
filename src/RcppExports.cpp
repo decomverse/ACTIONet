@@ -9,6 +9,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // set_seed
 void set_seed(double seed);
 static SEXP _ACTIONet_set_seed_try(SEXP seedSEXP) {
@@ -2513,76 +2518,6 @@ RcppExport SEXP _ACTIONet_computeFullSim(SEXP HSEXP, SEXP thread_noSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// csr_sort_indices_inplace
-void csr_sort_indices_inplace(IntegerVector& Ap, IntegerVector& Aj, NumericVector& Ax);
-static SEXP _ACTIONet_csr_sort_indices_inplace_try(SEXP ApSEXP, SEXP AjSEXP, SEXP AxSEXP) {
-BEGIN_RCPP
-    Rcpp::traits::input_parameter< IntegerVector& >::type Ap(ApSEXP);
-    Rcpp::traits::input_parameter< IntegerVector& >::type Aj(AjSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type Ax(AxSEXP);
-    csr_sort_indices_inplace(Ap, Aj, Ax);
-    return R_NilValue;
-END_RCPP_RETURN_ERROR
-}
-RcppExport SEXP _ACTIONet_csr_sort_indices_inplace(SEXP ApSEXP, SEXP AjSEXP, SEXP AxSEXP) {
-    SEXP rcpp_result_gen;
-    {
-        Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_csr_sort_indices_inplace_try(ApSEXP, AjSEXP, AxSEXP));
-    }
-    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
-    if (rcpp_isInterrupt_gen) {
-        UNPROTECT(1);
-        Rf_onintr();
-    }
-    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
-    if (rcpp_isLongjump_gen) {
-        Rcpp::internal::resumeJump(rcpp_result_gen);
-    }
-    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
-    if (rcpp_isError_gen) {
-        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
-        UNPROTECT(1);
-        Rf_error(CHAR(rcpp_msgSEXP_gen));
-    }
-    UNPROTECT(1);
-    return rcpp_result_gen;
-}
-// csc_sort_indices_inplace
-void csc_sort_indices_inplace(IntegerVector& Ap, IntegerVector& Ai, NumericVector& Ax);
-static SEXP _ACTIONet_csc_sort_indices_inplace_try(SEXP ApSEXP, SEXP AiSEXP, SEXP AxSEXP) {
-BEGIN_RCPP
-    Rcpp::traits::input_parameter< IntegerVector& >::type Ap(ApSEXP);
-    Rcpp::traits::input_parameter< IntegerVector& >::type Ai(AiSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type Ax(AxSEXP);
-    csc_sort_indices_inplace(Ap, Ai, Ax);
-    return R_NilValue;
-END_RCPP_RETURN_ERROR
-}
-RcppExport SEXP _ACTIONet_csc_sort_indices_inplace(SEXP ApSEXP, SEXP AiSEXP, SEXP AxSEXP) {
-    SEXP rcpp_result_gen;
-    {
-        Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_csc_sort_indices_inplace_try(ApSEXP, AiSEXP, AxSEXP));
-    }
-    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
-    if (rcpp_isInterrupt_gen) {
-        UNPROTECT(1);
-        Rf_onintr();
-    }
-    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
-    if (rcpp_isLongjump_gen) {
-        Rcpp::internal::resumeJump(rcpp_result_gen);
-    }
-    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
-    if (rcpp_isError_gen) {
-        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
-        UNPROTECT(1);
-        Rf_error(CHAR(rcpp_msgSEXP_gen));
-    }
-    UNPROTECT(1);
-    return rcpp_result_gen;
-}
 // run_subACTION
 List run_subACTION(mat& S_r, mat& W_parent, mat& H_parent, int kk, int k_min, int k_max, int thread_no, int max_it, double min_delta);
 static SEXP _ACTIONet_run_subACTION_try(SEXP S_rSEXP, SEXP W_parentSEXP, SEXP H_parentSEXP, SEXP kkSEXP, SEXP k_minSEXP, SEXP k_maxSEXP, SEXP thread_noSEXP, SEXP max_itSEXP, SEXP min_deltaSEXP) {
@@ -3133,47 +3068,6 @@ RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed(SEXP
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// dgemm_sparse
-arma::mat dgemm_sparse(const arma::sp_mat& A, const arma::mat& X, int at, int ac, int xt, int xc, int yt, int yc);
-static SEXP _ACTIONet_dgemm_sparse_try(SEXP ASEXP, SEXP XSEXP, SEXP atSEXP, SEXP acSEXP, SEXP xtSEXP, SEXP xcSEXP, SEXP ytSEXP, SEXP ycSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const arma::sp_mat& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< int >::type at(atSEXP);
-    Rcpp::traits::input_parameter< int >::type ac(acSEXP);
-    Rcpp::traits::input_parameter< int >::type xt(xtSEXP);
-    Rcpp::traits::input_parameter< int >::type xc(xcSEXP);
-    Rcpp::traits::input_parameter< int >::type yt(ytSEXP);
-    Rcpp::traits::input_parameter< int >::type yc(ycSEXP);
-    rcpp_result_gen = Rcpp::wrap(dgemm_sparse(A, X, at, ac, xt, xc, yt, yc));
-    return rcpp_result_gen;
-END_RCPP_RETURN_ERROR
-}
-RcppExport SEXP _ACTIONet_dgemm_sparse(SEXP ASEXP, SEXP XSEXP, SEXP atSEXP, SEXP acSEXP, SEXP xtSEXP, SEXP xcSEXP, SEXP ytSEXP, SEXP ycSEXP) {
-    SEXP rcpp_result_gen;
-    {
-        Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_dgemm_sparse_try(ASEXP, XSEXP, atSEXP, acSEXP, xtSEXP, xcSEXP, ytSEXP, ycSEXP));
-    }
-    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
-    if (rcpp_isInterrupt_gen) {
-        UNPROTECT(1);
-        Rf_onintr();
-    }
-    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
-    if (rcpp_isLongjump_gen) {
-        Rcpp::internal::resumeJump(rcpp_result_gen);
-    }
-    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
-    if (rcpp_isError_gen) {
-        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
-        UNPROTECT(1);
-        Rf_error(CHAR(rcpp_msgSEXP_gen));
-    }
-    UNPROTECT(1);
-    return rcpp_result_gen;
-}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -3318,8 +3212,6 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*SVD2PCA_full)(mat&,mat,vec,mat)");
         signatures.insert("List(*perturbedSVD)(mat,vec,mat,mat,mat)");
         signatures.insert("mat(*computeFullSim)(mat&,int)");
-        signatures.insert("void(*csr_sort_indices_inplace)(IntegerVector&,IntegerVector&,NumericVector&)");
-        signatures.insert("void(*csc_sort_indices_inplace)(IntegerVector&,IntegerVector&,NumericVector&)");
         signatures.insert("List(*run_subACTION)(mat&,mat&,mat&,int,int,int,int,int,double)");
         signatures.insert("List(*deflate_reduction)(mat&,mat&,mat&,mat&,vec&,mat&,mat&)");
         signatures.insert("List(*orthogonalize_batch_effect)(sp_mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
@@ -3334,7 +3226,6 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");
         signatures.insert("sp_mat(*LSI)(sp_mat&,double)");
         signatures.insert("mat(*compute_marker_aggregate_stats_TFIDF_sum_smoothed)(sp_mat&,sp_mat&,sp_mat&,double,int,int,int,int)");
-        signatures.insert("arma::mat(*dgemm_sparse)(const arma::sp_mat&,const arma::mat&,int,int,int,int,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -3409,8 +3300,6 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_SVD2PCA_full", (DL_FUNC)_ACTIONet_SVD2PCA_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_perturbedSVD", (DL_FUNC)_ACTIONet_perturbedSVD_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_computeFullSim", (DL_FUNC)_ACTIONet_computeFullSim_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_csr_sort_indices_inplace", (DL_FUNC)_ACTIONet_csr_sort_indices_inplace_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_csc_sort_indices_inplace", (DL_FUNC)_ACTIONet_csc_sort_indices_inplace_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_subACTION", (DL_FUNC)_ACTIONet_run_subACTION_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_deflate_reduction", (DL_FUNC)_ACTIONet_deflate_reduction_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_orthogonalize_batch_effect", (DL_FUNC)_ACTIONet_orthogonalize_batch_effect_try);
@@ -3425,7 +3314,6 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_LSI", (DL_FUNC)_ACTIONet_LSI_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_dgemm_sparse", (DL_FUNC)_ACTIONet_dgemm_sparse_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -3499,8 +3387,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_SVD2PCA_full", (DL_FUNC) &_ACTIONet_SVD2PCA_full, 4},
     {"_ACTIONet_perturbedSVD", (DL_FUNC) &_ACTIONet_perturbedSVD, 5},
     {"_ACTIONet_computeFullSim", (DL_FUNC) &_ACTIONet_computeFullSim, 2},
-    {"_ACTIONet_csr_sort_indices_inplace", (DL_FUNC) &_ACTIONet_csr_sort_indices_inplace, 3},
-    {"_ACTIONet_csc_sort_indices_inplace", (DL_FUNC) &_ACTIONet_csc_sort_indices_inplace, 3},
     {"_ACTIONet_run_subACTION", (DL_FUNC) &_ACTIONet_run_subACTION, 9},
     {"_ACTIONet_deflate_reduction", (DL_FUNC) &_ACTIONet_deflate_reduction, 7},
     {"_ACTIONet_orthogonalize_batch_effect", (DL_FUNC) &_ACTIONet_orthogonalize_batch_effect, 7},
@@ -3515,7 +3401,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 7},
     {"_ACTIONet_LSI", (DL_FUNC) &_ACTIONet_LSI, 2},
     {"_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed, 8},
-    {"_ACTIONet_dgemm_sparse", (DL_FUNC) &_ACTIONet_dgemm_sparse, 8},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_fast_row_sums", (DL_FUNC) &_ACTIONet_fast_row_sums, 1},
     {"_ACTIONet_fast_column_sums", (DL_FUNC) &_ACTIONet_fast_column_sums, 1},
