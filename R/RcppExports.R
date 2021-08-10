@@ -996,14 +996,6 @@ computeFullSim <- function(H, thread_no = 0L) {
     .Call(`_ACTIONet_computeFullSim`, H, thread_no)
 }
 
-csr_sort_indices_inplace <- function(Ap, Aj, Ax) {
-    invisible(.Call(`_ACTIONet_csr_sort_indices_inplace`, Ap, Aj, Ax))
-}
-
-csc_sort_indices_inplace <- function(Ap, Ai, Ax) {
-    invisible(.Call(`_ACTIONet_csc_sort_indices_inplace`, Ap, Ai, Ax))
-}
-
 run_subACTION <- function(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it = 50L, min_delta = 1e-16) {
     .Call(`_ACTIONet_run_subACTION`, S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta)
 }
@@ -1020,6 +1012,14 @@ orthogonalize_batch_effect_full <- function(S, old_S_r, old_V, old_A, old_B, old
     .Call(`_ACTIONet_orthogonalize_batch_effect_full`, S, old_S_r, old_V, old_A, old_B, old_sigma, design)
 }
 
+orthogonalize_basal <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, basal) {
+    .Call(`_ACTIONet_orthogonalize_basal`, S, old_S_r, old_V, old_A, old_B, old_sigma, basal)
+}
+
+orthogonalize_basal_full <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, basal) {
+    .Call(`_ACTIONet_orthogonalize_basal_full`, S, old_S_r, old_V, old_A, old_B, old_sigma, basal)
+}
+
 MWM_rank1 <- function(u, v, u_threshold = 0, v_threshold = 0) {
     .Call(`_ACTIONet_MWM_rank1`, u, v, u_threshold, v_threshold)
 }
@@ -1032,10 +1032,6 @@ run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_
     .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_)
 }
 
-compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L, ignore_baseline_expression = FALSE) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
-}
-
 run_AA_with_batch_correction <- function(Z, W0, batch, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
     .Call(`_ACTIONet_run_AA_with_batch_correction`, Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta)
 }
@@ -1044,28 +1040,8 @@ run_ACTION_with_batch_correction <- function(S_r, batch, k_min, k_max, thread_no
     .Call(`_ACTIONet_run_ACTION_with_batch_correction`, S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta)
 }
 
-compute_marker_aggregate_stats_basic_sum <- function(S, marker_mat) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum`, S, marker_mat)
-}
-
-compute_marker_aggregate_stats_basic_sum_perm <- function(S, marker_mat, perm_no = 100L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm`, S, marker_mat, perm_no, thread_no)
-}
-
-compute_marker_aggregate_stats_basic_sum_perm_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
-}
-
-compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2 <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_perm_smoothed_v2`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
-}
-
-compute_marker_aggregate_stats_basic_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
-}
-
-compute_marker_aggregate_stats_basic_sum_smoothed_normalized <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L) {
-    .Call(`_ACTIONet_compute_marker_aggregate_stats_basic_sum_smoothed_normalized`, G, S, marker_mat, alpha, max_it, perm_no, thread_no)
+compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L, ignore_baseline_expression = FALSE) {
+    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
 }
 
 LSI <- function(X, size_factor = 100000) {
@@ -1100,3 +1076,7 @@ bind_sparse_mats <- function(A, B, dim = 0L) {
     .Call(`_ACTIONet_bind_sparse_mats`, A, B, dim)
 }
 
+# Register entry points for exported C++ functions
+methods::setLoadAction(function(ns) {
+    .Call('_ACTIONet_RcppExport_registerCCallable', PACKAGE = 'ACTIONet')
+})
