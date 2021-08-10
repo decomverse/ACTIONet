@@ -1,4 +1,0 @@
-[submodule "src_ACTIONet"]
-	path = src/ACTIONet
-	url = https://github.com/shmohammadi86/ACTIONet.git
-	branch = core
