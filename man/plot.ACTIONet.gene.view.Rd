@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{ACTIONet.gene.view}(
   ace,
-  top_genes = 5,
+  top_genes = 3,
   palette = NULL,
   blacklist_pattern = "\\\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
   title = "",

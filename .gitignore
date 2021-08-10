@@ -17,3 +17,5 @@ lib
 README.md
 pybind11/
 .vscode/
+*.code-workspace
+

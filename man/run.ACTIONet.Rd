@@ -86,6 +86,6 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 Run main ACTIONet pipeline
 }
 \examples{
-ace = reduce.ace(ace)
-ace = run.ACTIONet(ace)
+ace <- reduce.ace(ace)
+ace <- run.ACTIONet(ace)
 }
