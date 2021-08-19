@@ -288,7 +288,7 @@ namespace ACTIONet
     // printf("Computing observation statistics ... ");
     mat Obs = zeros(S.n_rows, Ht.n_cols);
     ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
-                { Obs.col(i) = S * H.t.col(i); });
+                { Obs.col(i) = S * Ht.col(i); });
     // printf("done\n");
 
     // printf("Computing expectation statistics ... ");
