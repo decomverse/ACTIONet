@@ -283,11 +283,11 @@ namespace ACTIONet
         sp_mat &S, arma::Col<unsigned long long> sample_assignments);
 
     // Methods for computing feature specificity/discriminative-scores
-    field<mat> compute_feature_specificity_bin(sp_mat &Sb, mat &H);
-    field<mat> compute_feature_specificity(sp_mat &S, mat &H);
-    field<mat> compute_feature_specificity(mat &S, mat &H);
-    field<mat> compute_feature_specificity(sp_mat &S, uvec sample_assignments);
-    field<mat> compute_feature_specificity(mat &S, uvec sample_assignments);
+    field<mat> compute_feature_specificity_bin(sp_mat &Sb, mat &H, int thread_no);
+    field<mat> compute_feature_specificity(sp_mat &S, mat &H, int thread_no);
+    field<mat> compute_feature_specificity(mat &S, mat &H, int thread_no);
+    field<mat> compute_feature_specificity(sp_mat &S, uvec sample_assignments, int thread_no);
+    field<mat> compute_feature_specificity(mat &S, uvec sample_assignments, int thread_no);
 
     // Methods for feature enrichment analysis
     field<mat> assess_enrichment(mat &scores, sp_mat &associations, int thread_no);
