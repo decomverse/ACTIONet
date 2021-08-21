@@ -117,7 +117,7 @@ namespace ACTIONet
                         vec x = scores.col(i);
                         vec Lx(L.n_rows);
 
-                        dsdmult('n', L.n_rows, L.n_cols, Ls, x.colptr(), Lx.colptr(i), &chol_c);
+                        dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.colptr(i), &chol_c);
                         double stat = dot(x, Lx);
                         double norm_fact = var(x) * total_weight;
                         Cstat(i) = 1 - (stat / norm_fact);
@@ -136,7 +136,7 @@ namespace ACTIONet
                                             vec x = score_permuted.col(i);
                                             vec Lx(L.n_rows);
 
-                                            dsdmult('n', L.n_rows, L.n_cols, Ls, x.colptr(), Lx.colptr(i), &chol_c);
+                                            dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.colptr(i), &chol_c);
                                             double stat = dot(x, Lx);
                                             double norm_fact = var(x) * total_weight;
                                             Cstat_rand(i, j) = 1 - (stat / norm_fact);
