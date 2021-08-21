@@ -370,6 +370,9 @@ namespace ACTIONet
 
     sp_mat LSI(sp_mat &X, double size_factor);
 
+    field<vec> computeAutocorrelation_Geary(sp_mat &G, mat &scores, int perm_no, int thread_no);
+    field<vec> computeAutocorrelation_Geary(mat &G, mat &scores, int perm_no, int thread_no);
+
 } // namespace ACTIONet
 
 #endif
