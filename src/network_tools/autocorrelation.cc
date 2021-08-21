@@ -74,7 +74,7 @@ namespace ACTIONet
     }
 
     // G is the cell-cell network, scores is a cell x geneset matrix
-    field<vec> computeAutocorrelation_Geary_sparse(sp_mat &G, mat &scores, int perm_no = 30, int thread_no = 0)
+    field<vec> computeAutocorrelation_Geary(sp_mat &G, mat &scores, int perm_no = 30, int thread_no = 0)
     {
         int nV = G.n_rows;
         int feature_set_no = scores.n_cols;
@@ -164,4 +164,74 @@ namespace ACTIONet
 
         return (results);
     }
+
+    // G is the cell-cell network, scores is a cell x geneset matrix
+    field<vec> computeAutocorrelation_Geary(mat &G, mat &scores, int perm_no = 30, int thread_no = 0)
+    {
+        int nV = G.n_rows;
+        int feature_set_no = scores.n_cols;
+
+        printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, feature_set_no);
+        double total_weight = sum(G);
+
+        // Compute graph Laplacian
+        vec d = vec(trans(sum(G)));
+        mat L = G;
+        L.diag() = d;
+
+        printf("Computing autocorrelations ...");
+        fflush(stdout);
+        vec Cstat = zeros(feature_set_no);
+        ParallelFor(0, feature_set_no, thread_no, [&](size_t i, size_t threadId)
+                    {
+                        vec x = scores.col(i);
+                        vec Lx(L.n_rows);
+                        Lx = L * x;
+                        double stat = dot(x, Lx);
+                        double norm_fact = var(x) * total_weight;
+                        Cstat(i) = 1 - (stat / norm_fact);
+                    });
+        // Free up matrices
+        vec mu = zeros(feature_set_no);
+        vec sigma = zeros(feature_set_no);
+        vec Cstat_Z = zeros(feature_set_no);
+        if (0 <= perm_no)
+        {
+            mat Cstat_rand = zeros(feature_set_no);
+            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+                        {
+                            uvec perm = randperm(scores.n_rows);
+                            mat score_permuted = scores.rows(perm);
+
+                            ParallelFor(0, feature_set_no, 1, [&](size_t i, size_t threadId)
+                                        {
+                                            vec x = score_permuted.col(i);
+                                            vec Lx(L.n_rows);
+
+                                            Lx = L * x;
+                                            double stat = dot(x, Lx);
+                                            double norm_fact = var(x) * total_weight;
+                                            Cstat_rand(i, j) = 1 - (stat / norm_fact);
+                                        });
+                        });
+            mu = trans(mean(Cstat_rand));
+            sigma = trans(stddev(Cstat_rand));
+            Cstat_Z = (Cstat - mu) / sigma;
+        }
+        cholmod_free_sparse(&Ls, &chol_c);
+        cholmod_finish(&chol_c);
+
+        // Summary stats
+        printf("done\n");
+        fflush(stdout);
+
+        field<vec> results(4);
+        results(0) = Cstat;
+        results(1) = mu;
+        results(2) = sigma;
+        results(3) = Cstat_Z;
+
+        return (results);
+    }
+
 } // namespace ACTIONet
