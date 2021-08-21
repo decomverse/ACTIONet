@@ -172,7 +172,7 @@ namespace ACTIONet
         int feature_set_no = scores.n_cols;
 
         printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, feature_set_no);
-        double total_weight = sum(G);
+        double total_weight = sum(sum(G));
 
         // Compute graph Laplacian
         vec d = vec(trans(sum(G)));
