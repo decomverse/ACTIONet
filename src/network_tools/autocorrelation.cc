@@ -123,9 +123,9 @@ namespace ACTIONet
                         Cstat(i) = 1 - (stat / norm_fact);
                     });
         // Free up matrices
-        mu = zeros(feature_set_no);
-        sigma = zeros(feature_set_no);
-        Cstat_Z = zeros(feature_set_no);
+        vec mu = zeros(feature_set_no);
+        vec sigma = zeros(feature_set_no);
+        vec Cstat_Z = zeros(feature_set_no);
         if (0 <= perm_no)
         {
             mat Cstat_rand = zeros(feature_set_no);
