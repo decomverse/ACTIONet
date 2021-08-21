@@ -123,12 +123,15 @@ namespace ACTIONet
                         Cstat(i) = 1 - (stat / norm_fact);
                     });
         // Free up matrices
+        mu = zeros(feature_set_no);
+        sigma = zeros(feature_set_no);
+        Cstat_Z = zeros(feature_set_no);
         if (0 <= perm_no)
         {
             mat Cstat_rand = zeros(feature_set_no);
             ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
                         {
-                            uvec perm = randperm(scores.n_row);
+                            uvec perm = randperm(scores.n_rows);
                             mat score_permuted = scores.rows(perm);
 
                             ParallelFor(0, feature_set_no, 1, [&](size_t i, size_t threadId)
@@ -145,12 +148,6 @@ namespace ACTIONet
             mu = trans(mean(Cstat_rand));
             sigma = trans(stddev(Cstat_rand));
             Cstat_Z = (Cstat - mu) / sigma;
-        }
-        else
-        {
-            mu = zeros(feature_set_no);
-            sigma = zeros(feature_set_no);
-            Cstat_Z = zeros(feature_set_no);
         }
         cholmod_free_sparse(&Ls, &chol_c);
         cholmod_finish(&chol_c);
