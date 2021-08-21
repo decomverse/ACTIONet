@@ -218,9 +218,6 @@ namespace ACTIONet
             sigma = trans(stddev(Cstat_rand));
             Cstat_Z = (Cstat - mu) / sigma;
         }
-        cholmod_free_sparse(&Ls, &chol_c);
-        cholmod_finish(&chol_c);
-
         // Summary stats
         printf("done\n");
         fflush(stdout);
