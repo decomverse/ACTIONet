@@ -157,8 +157,10 @@ namespace ACTIONet
             Cstat_Z = (Cstat - mu) / sigma;
             printf("done\n");
         }
+        /*
         cholmod_free_sparse(&Lsp, &chol_c);
         cholmod_finish(&chol_c);
+        */
 
         // Summary stats
         printf("done\n");

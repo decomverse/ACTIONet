@@ -243,21 +243,19 @@ namespace ACTIONet
   }
 
   mat compute_network_diffusion_fast(sp_mat &G, sp_mat &X0, int thread_no = 4,
-                                     double alpha = 0.85, int max_it = 5) // normalize can be symmetric
+                                     double alpha = 0.85, int max_it = 5)
   {
     thread_no = std::min(thread_no, (int)X0.n_cols);
 
     int n = G.n_rows;
 
-    sp_mat P = alpha * normalise(G, 1, 0);
-
     cholmod_common chol_c;
     cholmod_start(&chol_c);
 
-    /*
     int *Ti, *Tj;
     double *Tx;
 
+    sp_mat P = alpha * normalise(G, 1, 0);
 
     cholmod_triplet *T = cholmod_allocate_triplet(P.n_rows, P.n_cols, P.n_nonzero,
                                                   0, CHOLMOD_REAL, &chol_c);
@@ -275,10 +273,6 @@ namespace ACTIONet
     }
     cholmod_sparse *AS = cholmod_triplet_to_sparse(T, P.n_nonzero, &chol_c);
     cholmod_free_triplet(&T, &chol_c);
-    */
-
-    cholmod_sparse_struct S_chol;
-    as_cholmod_sparse(&S_chol, );
 
     vec z = ones(n);
     vec cs = vec(trans(sum(G, 0)));
