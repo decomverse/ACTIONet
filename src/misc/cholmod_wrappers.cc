@@ -11,9 +11,9 @@ namespace ACTIONet
         ans->packed = true;
 
         A.sync();
-        ans->x = A.values;
-        ans->i = A.row_indices;
-        ans->p = A.col_ptrs;
+        ans->x = (void *)A.values;
+        ans->i = (void *)A.row_indices;
+        ans->p = (void *)A.col_ptrs;
 
         /*
     std::vector<double> x(A.values, A.values + A.n_nonzero);
@@ -61,11 +61,11 @@ namespace ACTIONet
     void dsdmult(char transpose, int n_rows, int n_cols, void *A, double *x, double *out,
                  cholmod_common *chol_cp)
     {
-        int t = transpose == 't' ? 0 : 1; // 'n': computes Ax, 't': computes A'x
-        cholmod_sparse_struct *cha = (cholmod_sparse_mat *)A;
+        int t = transpose == 'n' ? 0 : 1; // 'n': computes Ax, 't': computes A'x
+        cholmod_sparse_struct *cha = (cholmod_sparse_struct *)A;
 
         cholmod_dense chb;
-        chb.nrow = transpose == 't' ? n_rows : n_cols;
+        chb.nrow = transpose == 'n' ? n_rows : n_cols;
         chb.d = chb.nrow;
         chb.ncol = 1;
         chb.nzmax = chb.nrow;
@@ -75,7 +75,7 @@ namespace ACTIONet
         chb.z = (void *)NULL;
 
         cholmod_dense chc;
-        chc.nrow = transpose == 't' ? n_cols : n_rows;
+        chc.nrow = transpose == 'n' ? n_cols : n_rows;
         chc.d = chc.nrow;
         chc.ncol = 1;
         chc.nzmax = chc.nrow;
@@ -119,7 +119,7 @@ namespace ACTIONet
         Bd.nrow = B.n_rows;
         Bd.ncol = B.n_cols;
         Bd.d = B.n_rows;
-        Bd.nzmax = B.n_row * B.n_cols;
+        Bd.nzmax = B.n_rows * B.n_cols;
         Bd.xtype = CHOLMOD_REAL;
         Bd.dtype = 0;
         Bd.x = (void *)B.memptr();
@@ -130,14 +130,14 @@ namespace ACTIONet
         out.nrow = A.n_rows;
         out.ncol = B.n_cols;
         out.d = A.n_rows;
-        out.nzmax = A.n_row * B.n_cols;
+        out.nzmax = A.n_rows * B.n_cols;
         out.xtype = CHOLMOD_REAL;
         out.dtype = 0;
         out.x = (void *)res.memptr();
         out.z = (void *)NULL;
 
         double one[] = {1, 0}, zero[] = {0, 0};
-        cholmod_sdmult(As, t, one, zero, &Bd, &res, &chol_c);
+        cholmod_sdmult(As, 0, one, zero, &Bd, &res, &chol_c);
 
         //    cholmod_free_sparse(&As, &chol_c);
         cholmod_finish(&chol_c);
@@ -157,8 +157,8 @@ namespace ACTIONet
         cholmod_sparse_struct Bs;
         as_cholmod_sparse(&Bs, B);
 
-        cholmod_sparse *ans = cholmod_l_ssmult(&As, &Bs, CHOLMOD_REAL, true,
-                                               true, chol_c);
+        cholmod_sparse *ans = cholmod_ssmult(&As, &Bs, CHOLMOD_REAL, true,
+                                             true, chol_c);
 
         // Repack results as an arma::sp_mat
         arma::sp_mat res(A.n_rows, B.n_cols);
