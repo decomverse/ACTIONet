@@ -1,6 +1,9 @@
 #include <ACTIONet.h>
 #include "cholmod.h"
 
+#include <atomic>
+#include <thread>
+
 namespace ACTIONet
 {
     template <class Function>
@@ -103,11 +106,14 @@ namespace ACTIONet
         L.diag() = d;
         L -= G;
 
+        /*
         cholmod_common chol_c;
         cholmod_start(&chol_c);
-        chol_c.final_ll = 1; /* LL' form of simplicial factorization */
-        cholmod_sparse_struct *Ls = new cholmod_sparse_struct;
-        as_cholmod_sparse(Ls, L);
+        chol_c.final_ll = 1;
+
+        cholmod_sparse_struct Lsp;
+        as_cholmod_sparse(&Lsp, L);
+        */
 
         printf("Computing autocorrelations ...");
         fflush(stdout);
@@ -115,20 +121,21 @@ namespace ACTIONet
         ParallelFor(0, feature_set_no, thread_no, [&](size_t i, size_t threadId)
                     {
                         vec x = scores.col(i);
-                        vec Lx(L.n_rows);
+                        vec Lx = zeros(L.n_rows);
 
-                        dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.colptr(i), &chol_c);
+                        //dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.memptr(), &chol_c);
                         double stat = dot(x, Lx);
                         double norm_fact = var(x) * total_weight;
                         Cstat(i) = 1 - (stat / norm_fact);
                     });
-        // Free up matrices
+        printf("done\n");
         vec mu = zeros(feature_set_no);
         vec sigma = zeros(feature_set_no);
         vec Cstat_Z = zeros(feature_set_no);
-        if (0 <= perm_no)
+        if (0 < perm_no)
         {
-            mat Cstat_rand = zeros(feature_set_no);
+            printf("Computing permutations");
+            mat Cstat_rand = zeros(feature_set_no, perm_no);
             ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
                         {
                             uvec perm = randperm(scores.n_rows);
@@ -137,19 +144,20 @@ namespace ACTIONet
                             ParallelFor(0, feature_set_no, 1, [&](size_t i, size_t threadId)
                                         {
                                             vec x = score_permuted.col(i);
-                                            vec Lx(L.n_rows);
+                                            vec Lx = zeros(L.n_rows);
 
-                                            dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.colptr(i), &chol_c);
+                                            //dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.memptr(), &chol_c);
                                             double stat = dot(x, Lx);
                                             double norm_fact = var(x) * total_weight;
                                             Cstat_rand(i, j) = 1 - (stat / norm_fact);
                                         });
                         });
-            mu = trans(mean(Cstat_rand));
-            sigma = trans(stddev(Cstat_rand));
+            mu = mean(Cstat_rand, 1);
+            sigma = stddev(Cstat_rand, 0, 1);
             Cstat_Z = (Cstat - mu) / sigma;
+            printf("done\n");
         }
-        cholmod_free_sparse(&Ls, &chol_c);
+        cholmod_free_sparse(&Lsp, &chol_c);
         cholmod_finish(&chol_c);
 
         // Summary stats
@@ -176,7 +184,7 @@ namespace ACTIONet
 
         // Compute graph Laplacian
         vec d = vec(trans(sum(G)));
-        mat L = G;
+        mat L = -G;
         L.diag() = d;
 
         printf("Computing autocorrelations ...");
@@ -195,9 +203,11 @@ namespace ACTIONet
         vec mu = zeros(feature_set_no);
         vec sigma = zeros(feature_set_no);
         vec Cstat_Z = zeros(feature_set_no);
-        if (0 <= perm_no)
+        if (0 < perm_no)
         {
-            mat Cstat_rand = zeros(feature_set_no);
+            printf("Computing permutations ... ");
+
+            mat Cstat_rand = zeros(feature_set_no, perm_no);
             ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
                         {
                             uvec perm = randperm(scores.n_rows);
@@ -214,8 +224,10 @@ namespace ACTIONet
                                             Cstat_rand(i, j) = 1 - (stat / norm_fact);
                                         });
                         });
-            mu = trans(mean(Cstat_rand));
-            sigma = trans(stddev(Cstat_rand));
+            printf("Done\n");
+
+            mu = mean(Cstat_rand, 1);
+            sigma = stddev(Cstat_rand, 0, 1);
             Cstat_Z = (Cstat - mu) / sigma;
         }
         // Summary stats

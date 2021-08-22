@@ -33,9 +33,10 @@
 /* P_high = 1 - p_low*/
 #define P_HIGH 0.97575
 
-namespace ACTIONet {
+namespace ACTIONet
+{
 
-/**
+  /**
  * @brief Generate a single random number using the capped Tausworthe RNG
  *
  * @details
@@ -59,40 +60,41 @@ namespace ACTIONet {
  *
  * @return a generated random number
  */
-uint32_t lfsr113(uint64_t **state) {
-  uint64_t z1, z2, z3, z4;
-  uint64_t b;
+  uint32_t lfsr113(uint64_t **state)
+  {
+    uint64_t z1, z2, z3, z4;
+    uint64_t b;
 
-  z1 = (*state)[0];
-  z2 = (*state)[1];
-  z3 = (*state)[2];
-  z4 = (*state)[3];
+    z1 = (*state)[0];
+    z2 = (*state)[1];
+    z3 = (*state)[2];
+    z4 = (*state)[3];
 
-  b = (((z1 << 6) ^ z1) >> 13);
-  z1 = (((z1 & 4294967294) << 18) ^ b);
+    b = (((z1 << 6) ^ z1) >> 13);
+    z1 = (((z1 & 4294967294) << 18) ^ b);
 
-  b = (((z2 << 2) ^ z2) >> 27);
-  z2 = (((z2 & 4294967288) << 2) ^ b);
+    b = (((z2 << 2) ^ z2) >> 27);
+    z2 = (((z2 & 4294967288) << 2) ^ b);
 
-  b = (((z3 << 13) ^ z3) >> 21);
-  z3 = (((z3 & 4294967280) << 7) ^ b);
+    b = (((z3 << 13) ^ z3) >> 21);
+    z3 = (((z3 & 4294967280) << 7) ^ b);
 
-  b = (((z4 << 3) ^ z4) >> 12);
-  z4 = (((z4 & 4294967168) << 13) ^ b);
+    b = (((z4 << 3) ^ z4) >> 12);
+    z4 = (((z4 & 4294967168) << 13) ^ b);
 
-  b = (z1 ^ z2 ^ z3 ^ z4);
+    b = (z1 ^ z2 ^ z3 ^ z4);
 
-  (*state)[0] = z1;
-  (*state)[1] = z2;
-  (*state)[2] = z3;
-  (*state)[3] = z4;
+    (*state)[0] = z1;
+    (*state)[1] = z2;
+    (*state)[2] = z3;
+    (*state)[3] = z4;
 
-  b = b & 0xFFFFFFFF;
+    b = b & 0xFFFFFFFF;
 
-  return ((uint32_t)b);
-}
+    return ((uint32_t)b);
+  }
 
-/**
+  /**
  * @brief Seed the Tausworthe RNG using a seed value
  *
  * @details
@@ -103,57 +105,66 @@ uint32_t lfsr113(uint64_t **state) {
  * @param[in] seed 	user supplied seed value for the RNG
  * @param[out] state  	state of the RNG
  */
-void lfsr113_seed(uint32_t seed, uint64_t **state) {
-  uint64_t z1 = 2, z2 = 8, z3 = 16, z4 = 128;
+  void lfsr113_seed(uint32_t seed, uint64_t **state)
+  {
+    uint64_t z1 = 2, z2 = 8, z3 = 16, z4 = 128;
 
-  z1 = (z1 * (seed + 1));
-  z2 = (z2 * (seed + 1));
-  z3 = (z3 * (seed + 1));
-  z4 = (z4 * (seed + 1));
+    z1 = (z1 * (seed + 1));
+    z2 = (z2 * (seed + 1));
+    z3 = (z3 * (seed + 1));
+    z4 = (z4 * (seed + 1));
 
-  z1 = (z1 > 1) ? z1 : z1 + 1;
-  z2 = (z2 > 7) ? z2 : z2 + 7;
-  z3 = (z3 > 15) ? z3 : z3 + 15;
-  z4 = (z4 > 127) ? z4 : z4 + 127;
+    z1 = (z1 > 1) ? z1 : z1 + 1;
+    z2 = (z2 > 7) ? z2 : z2 + 7;
+    z3 = (z3 > 15) ? z3 : z3 + 15;
+    z4 = (z4 > 127) ? z4 : z4 + 127;
 
-  (*state)[0] = z1;
-  (*state)[1] = z2;
-  (*state)[2] = z3;
-  (*state)[3] = z4;
-}
-
-long double normsinv(long double p) {
-  long double x;
-  long double q, r, u, e;
-  if ((0 < p) && (p < P_LOW)) {
-    q = sqrt(-2 * log(p));
-    x = (((((C1 * q + C2) * q + C3) * q + C4) * q + C5) * q + C6) /
-        ((((D1 * q + D2) * q + D3) * q + D4) * q + 1);
-  } else {
-    if ((P_LOW <= p) && (p <= P_HIGH)) {
-      q = p - 0.5;
-      r = q * q;
-      x = (((((A1 * r + A2) * r + A3) * r + A4) * r + A5) * r + A6) * q /
-          (((((B1 * r + B2) * r + B3) * r + B4) * r + B5) * r + 1);
-    } else {
-      if ((P_HIGH < p) && (p < 1)) {
-        q = sqrt(-2 * log(1 - p));
-        x = -(((((C1 * q + C2) * q + C3) * q + C4) * q + C5) * q + C6) /
-            ((((D1 * q + D2) * q + D3) * q + D4) * q + 1);
-      }
-    }
+    (*state)[0] = z1;
+    (*state)[1] = z2;
+    (*state)[2] = z3;
+    (*state)[3] = z4;
   }
 
-  /* If you are compiling this under UNIX OR LINUX, you may uncomment this block
+  long double normsinv(long double p)
+  {
+    long double x;
+    long double q, r, u, e;
+    if ((0 < p) && (p < P_LOW))
+    {
+      q = sqrt(-2 * log(p));
+      x = (((((C1 * q + C2) * q + C3) * q + C4) * q + C5) * q + C6) /
+          ((((D1 * q + D2) * q + D3) * q + D4) * q + 1);
+    }
+    else
+    {
+      if ((P_LOW <= p) && (p <= P_HIGH))
+      {
+        q = p - 0.5;
+        r = q * q;
+        x = (((((A1 * r + A2) * r + A3) * r + A4) * r + A5) * r + A6) * q /
+            (((((B1 * r + B2) * r + B3) * r + B4) * r + B5) * r + 1);
+      }
+      else
+      {
+        if ((P_HIGH < p) && (p < 1))
+        {
+          q = sqrt(-2 * log(1 - p));
+          x = -(((((C1 * q + C2) * q + C3) * q + C4) * q + C5) * q + C6) /
+              ((((D1 * q + D2) * q + D3) * q + D4) * q + 1);
+        }
+      }
+    }
+
+    /* If you are compiling this under UNIX OR LINUX, you may uncomment this block
   for better accuracy. if(( 0 < p)&&(p < 1)){ e = 0.5 * erfc(-x/sqrt(2)) - p; u
   = e * sqrt(2*M_PI) * exp(x*x/2); x = x - u/(1 + x*u/2);
   }
   */
 
-  return x;
-}
+    return x;
+  }
 
-/*
+  /*
         double randN ( ) {
                 double r1;
                 double r2;
@@ -168,280 +179,365 @@ long double normsinv(long double p) {
         }
 */
 
-void randN_normsinv(double *values, int n) {
-  for (int i = 0; i < n; i++) {
-    long double u = rand() / (double)RAND_MAX;
-    long double z = normsinv(u);
-    values[i] = (double)z;
-  }
-
-  return;
-}
-
-// Marsaglia algorithm
-void randN_Marsaglia(double *values, int n, pcg32 rng) {
-  std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
-
-  for (int i = 0; i < n; i += 2) {
-    double x, y, rsq, f;
-    do {
-      x = 2.0 * uniform_dist(rng) - 1.0;
-      y = 2.0 * uniform_dist(rng) - 1.0;
-      rsq = x * x + y * y;
-    } while (rsq >= 1. || rsq == 0.);
-    f = sqrt(-2.0 * log(rsq) / rsq);
-
-    values[i] = x * f;
-    if (i < (n - 1)) {
-      values[i + 1] = y * f;
-    }
-  }
-
-  return;
-}
-
-// Box_Muller Algorithm
-void randN_BM(double *values, int n, uint64_t **state) {
-  static const double epsilon = std::numeric_limits<double>::min();
-  static const double two_pi = 2.0 * 3.14159265358979323846;
-
-  double kk = (1.0 / 4294967288.0);
-
-  double z0, z1;
-  for (int i = 0; i < n; i += 2) {
-    double u1, u2;
-    do {
-      u1 = lfsr113(state) * kk;
-      u2 = lfsr113(state) * kk;
-
-    } while (u1 <= epsilon);
-
-    z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
-    z1 = sqrt(-2.0 * log(u1)) * sin(two_pi * u2);
-
-    values[i] = z0;
-    if (i < (n - 1)) {
-      values[i + 1] = z1;
-    }
-  }
-
-  return;
-}
-
-mat sampleUnif(int l, int m, double a, double b, int seed) {
-  std::default_random_engine gen(seed);
-  std::uniform_real_distribution<double> unifDist(a, b);
-
-  mat R(l, m);
-  for (int j = 0; j < m; j++) {
-    for (int i = 0; i < l; i++) {
-      R(i, j) = unifDist(gen);
-    }
-  }
-  return R;
-}
-
-mat randNorm(int l, int m, int seed) {
-  std::default_random_engine gen(seed);
-  std::normal_distribution<double> normDist(0.0, 1.0);
-
-  mat R(l, m);
-  for (register int j = 0; j < m; j++) {
-    for (register int i = 0; i < l; i++) {
-      R(i, j) = normDist(gen);
-    }
-  }
-  return R;
-}
-
-void randNorm_inplace(int n, double *out, int seed = 0) {
-  std::default_random_engine gen(seed);
-  std::normal_distribution<double> normDist(0.0, 1.0);
-
-  for (int i = 0; i < n; i++) {
-    out[i] = normDist(gen);
-  }
-}
-
-void gram_schmidt(mat &A) {
-  for (uword i = 0; i < A.n_cols; ++i) {
-    for (uword j = 0; j < i; ++j) {
-      double r = dot(A.col(i), A.col(j));
-      A.col(i) -= r * A.col(j);
+  void randN_normsinv(double *values, int n)
+  {
+    for (int i = 0; i < n; i++)
+    {
+      long double u = rand() / (double)RAND_MAX;
+      long double z = normsinv(u);
+      values[i] = (double)z;
     }
 
-    double col_norm = norm(A.col(i), 2);
-
-    if (col_norm < 1E-4) {
-      for (uword k = i; k < A.n_cols; ++k) A.col(k).zeros();
-
-      return;
-    }
-    A.col(i) /= col_norm;
-  }
-}
-
-field<mat> eigSVD(mat A) {
-  int n = A.n_cols;
-  mat B = trans(A) * A;
-
-  vec d;
-  mat V;
-  eig_sym(d, V, B);
-  d = sqrt(d);
-
-  // Compute U
-  sp_mat S(n, n);
-  S.diag() = 1 / d;
-  mat U = (S * trans(V)) * trans(A);
-  U = trans(U);
-
-  field<mat> out(3);
-
-  out(0) = U;
-  out(1) = d;
-  out(2) = V;
-
-  return (out);
-}
-
-mat robust_zscore(mat A) {
-  rowvec median = mean(A, 0);
-  rowvec sigma = stddev(A, 0);
-
-  for (int j = 0; j < A.n_cols; j++) {
-    vec v = A.col(j);
-    double med = arma::median(v);
-    double mad = arma::median(arma::abs(v - med));
-
-    vec z = (v - med) / mad;
-    A.col(j) = z;
-  }
-
-  return A;
-}
-
-mat zscore(mat A) {
-  rowvec mu = mean(A, 0);
-  rowvec sigma = stddev(A, 0);
-
-  for (int j = 0; j < A.n_cols; j++) {
-    A.col(j) = (A.col(j) - mu(j)) / sigma(j);
-  }
-
-  A.replace(datum::nan, 0);  // replace each NaN with 0
-
-  return A;
-}
-
-void convtests(int Bsz, int n, double tol, double svtol, double Smax,
-               double *svratio, double *residuals, int *k, int *converged,
-               double S) {
-  int j, Len_res = 0;
-  for (j = 0; j < Bsz; j++) {
-    if ((fabs(residuals[j]) < tol * Smax) && (svratio[j] < svtol)) Len_res++;
-  }
-
-  if (Len_res >= n || S == 0) {
-    *converged = 1;
     return;
   }
-  if (*k < n + Len_res) *k = n + Len_res;
 
-  if (*k > Bsz - 3) *k = Bsz - 3;
+  // Marsaglia algorithm
+  void randN_Marsaglia(double *values, int n, pcg32 rng)
+  {
+    std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
 
-  if (*k < 1) *k = 1;
+    for (int i = 0; i < n; i += 2)
+    {
+      double x, y, rsq, f;
+      do
+      {
+        x = 2.0 * uniform_dist(rng) - 1.0;
+        y = 2.0 * uniform_dist(rng) - 1.0;
+        rsq = x * x + y * y;
+      } while (rsq >= 1. || rsq == 0.);
+      f = sqrt(-2.0 * log(rsq) / rsq);
 
-  *converged = 0;
+      values[i] = x * f;
+      if (i < (n - 1))
+      {
+        values[i + 1] = y * f;
+      }
+    }
 
-  return;
-}
-
-void orthog(double *X, double *Y, double *T, int xm, int xn, int yn) {
-  double a = 1, b = 1;
-  int inc = 1;
-  memset(T, 0, xn * yn * sizeof(double));
-  // T = t(X) * Y
-  cblas_dgemv(CblasColMajor, CblasTrans, xm, xn, a, X, xm, Y, inc, b, T, inc);
-  // Y = Y - X * T
-  a = -1.0;
-  b = 1.0;
-  cblas_dgemv(CblasColMajor, CblasNoTrans, xm, xn, a, X, xm, T, inc, b, Y, inc);
-}
-
-cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans,
-                                         sp_mat &A) {
-  ans->itype = CHOLMOD_INT; /* characteristics of the system */
-  ans->dtype = CHOLMOD_DOUBLE;
-  ans->packed = true;
-
-  A.sync();
-
-  /*
-  std::vector<double> x(A.values, A.values + A.n_nonzero ) ;
-  std::vector<int> i(A.row_indices, A.row_indices + A.n_nonzero);
-  std::vector<int> p(A.col_ptrs, A.col_ptrs + A.n_cols+1 ) ;
-
-  ans->x = x.data();
-  ans->i = i.data();
-  ans->p = p.data();
-  */
-
-  ans->i = new int[A.n_nonzero];
-  ans->x = new double[A.n_nonzero];
-  double *x_ptr = (double *)ans->x;
-  int *i_ptr = (int *)ans->i;
-  for (int k = 0; k < A.n_nonzero; k++) {
-    x_ptr[k] = A.values[k];
-    i_ptr[k] = A.row_indices[k];
+    return;
   }
 
-  ans->p = new int[(A.n_cols + 1)];
-  int *ptr = (int *)ans->p;
-  for (int k = 0; k < A.n_cols + 1; k++) {
-    ptr[k] = A.col_ptrs[k];
+  // Box_Muller Algorithm
+  void randN_BM(double *values, int n, uint64_t **state)
+  {
+    static const double epsilon = std::numeric_limits<double>::min();
+    static const double two_pi = 2.0 * 3.14159265358979323846;
+
+    double kk = (1.0 / 4294967288.0);
+
+    double z0, z1;
+    for (int i = 0; i < n; i += 2)
+    {
+      double u1, u2;
+      do
+      {
+        u1 = lfsr113(state) * kk;
+        u2 = lfsr113(state) * kk;
+
+      } while (u1 <= epsilon);
+
+      z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
+      z1 = sqrt(-2.0 * log(u1)) * sin(two_pi * u2);
+
+      values[i] = z0;
+      if (i < (n - 1))
+      {
+        values[i + 1] = z1;
+      }
+    }
+
+    return;
   }
 
-  ans->nrow = A.n_rows;
-  ans->ncol = A.n_cols;
-  ans->nzmax = A.n_nonzero;
+  mat sampleUnif(int l, int m, double a, double b, int seed)
+  {
+    std::default_random_engine gen(seed);
+    std::uniform_real_distribution<double> unifDist(a, b);
 
-  ans->xtype = CHOLMOD_REAL;
-  ans->stype = 0;
-  ans->dtype = 0;
+    mat R(l, m);
+    for (int j = 0; j < m; j++)
+    {
+      for (int i = 0; i < l; i++)
+      {
+        R(i, j) = unifDist(gen);
+      }
+    }
+    return R;
+  }
 
-  ans->sorted = 1;
+  mat randNorm(int l, int m, int seed)
+  {
+    std::default_random_engine gen(seed);
+    std::normal_distribution<double> normDist(0.0, 1.0);
 
-  return ans;
-}
+    mat R(l, m);
+    for (register int j = 0; j < m; j++)
+    {
+      for (register int i = 0; i < l; i++)
+      {
+        R(i, j) = normDist(gen);
+      }
+    }
+    return R;
+  }
 
-void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
-             cholmod_common *chol_cp) {
-  int t = transpose == 't' ? 1 : 0;
-  cholmod_sparse_struct *cha = (cholmod_sparse_struct *)a;
+  void randNorm_inplace(int n, double *out, int seed = 0)
+  {
+    std::default_random_engine gen(seed);
+    std::normal_distribution<double> normDist(0.0, 1.0);
 
-  cholmod_dense chb;
-  chb.nrow = transpose == 't' ? m : n;
-  chb.d = chb.nrow;
-  chb.ncol = 1;
-  chb.nzmax = chb.nrow;
-  chb.xtype = cha->xtype;
-  chb.dtype = 0;
-  chb.x = (void *)b;
-  chb.z = (void *)NULL;
+    for (int i = 0; i < n; i++)
+    {
+      out[i] = normDist(gen);
+    }
+  }
 
-  cholmod_dense chc;
-  chc.nrow = transpose == 't' ? n : m;
-  chc.d = chc.nrow;
-  chc.ncol = 1;
-  chc.nzmax = chc.nrow;
-  chc.xtype = cha->xtype;
-  chc.dtype = 0;
-  chc.x = (void *)c;
-  chc.z = (void *)NULL;
+  void gram_schmidt(mat &A)
+  {
+    for (uword i = 0; i < A.n_cols; ++i)
+    {
+      for (uword j = 0; j < i; ++j)
+      {
+        double r = dot(A.col(i), A.col(j));
+        A.col(i) -= r * A.col(j);
+      }
 
-  double one[] = {1, 0}, zero[] = {0, 0};
-  cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);
-}
+      double col_norm = norm(A.col(i), 2);
 
-}  // namespace ACTIONet
+      if (col_norm < 1E-4)
+      {
+        for (uword k = i; k < A.n_cols; ++k)
+          A.col(k).zeros();
+
+        return;
+      }
+      A.col(i) /= col_norm;
+    }
+  }
+
+  field<mat> eigSVD(mat A)
+  {
+    int n = A.n_cols;
+    mat B = trans(A) * A;
+
+    vec d;
+    mat V;
+    eig_sym(d, V, B);
+    d = sqrt(d);
+
+    // Compute U
+    sp_mat S(n, n);
+    S.diag() = 1 / d;
+    mat U = (S * trans(V)) * trans(A);
+    U = trans(U);
+
+    field<mat> out(3);
+
+    out(0) = U;
+    out(1) = d;
+    out(2) = V;
+
+    return (out);
+  }
+
+  mat robust_zscore(mat A)
+  {
+    rowvec median = mean(A, 0);
+    rowvec sigma = stddev(A, 0);
+
+    for (int j = 0; j < A.n_cols; j++)
+    {
+      vec v = A.col(j);
+      double med = arma::median(v);
+      double mad = arma::median(arma::abs(v - med));
+
+      vec z = (v - med) / mad;
+      A.col(j) = z;
+    }
+
+    return A;
+  }
+
+  mat zscore(mat A)
+  {
+    rowvec mu = mean(A, 0);
+    rowvec sigma = stddev(A, 0);
+
+    for (int j = 0; j < A.n_cols; j++)
+    {
+      A.col(j) = (A.col(j) - mu(j)) / sigma(j);
+    }
+
+    A.replace(datum::nan, 0); // replace each NaN with 0
+
+    return A;
+  }
+
+  void convtests(int Bsz, int n, double tol, double svtol, double Smax,
+                 double *svratio, double *residuals, int *k, int *converged,
+                 double S)
+  {
+    int j, Len_res = 0;
+    for (j = 0; j < Bsz; j++)
+    {
+      if ((fabs(residuals[j]) < tol * Smax) && (svratio[j] < svtol))
+        Len_res++;
+    }
+
+    if (Len_res >= n || S == 0)
+    {
+      *converged = 1;
+      return;
+    }
+    if (*k < n + Len_res)
+      *k = n + Len_res;
+
+    if (*k > Bsz - 3)
+      *k = Bsz - 3;
+
+    if (*k < 1)
+      *k = 1;
+
+    *converged = 0;
+
+    return;
+  }
+
+  void orthog(double *X, double *Y, double *T, int xm, int xn, int yn)
+  {
+    double a = 1, b = 1;
+    int inc = 1;
+    memset(T, 0, xn * yn * sizeof(double));
+    // T = t(X) * Y
+    cblas_dgemv(CblasColMajor, CblasTrans, xm, xn, a, X, xm, Y, inc, b, T, inc);
+    // Y = Y - X * T
+    a = -1.0;
+    b = 1.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans, xm, xn, a, X, xm, T, inc, b, Y, inc);
+  }
+
+  cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans,
+                                           sp_mat &A)
+  {
+    ans->itype = CHOLMOD_INT; /* characteristics of the system */
+    ans->dtype = CHOLMOD_DOUBLE;
+    ans->packed = true;
+
+    A.sync();
+    ans->x = A.values;
+    ans->i = A.row_indices;
+    ans->p = A.col_ptrs;
+
+    /*
+    std::vector<double> x(A.values, A.values + A.n_nonzero);
+    std::vector<int> i(A.row_indices, A.row_indices + A.n_nonzero);
+    std::vector<int> p(A.col_ptrs, A.col_ptrs + A.n_cols + 1);
+
+    ans->x = x.data();
+    ans->i = i.data();
+    ans->p = p.data();
+    */
+
+    /*
+    ans->i = new int[A.n_nonzero];
+    ans->x = new double[A.n_nonzero];
+    double *x_ptr = (double *)ans->x;
+    int *i_ptr = (int *)ans->i;
+    for (int k = 0; k < A.n_nonzero; k++)
+    {
+      x_ptr[k] = A.values[k];
+      i_ptr[k] = A.row_indices[k];
+    }
+
+    ans->p = new int[(A.n_cols + 1)];
+    int *ptr = (int *)ans->p;
+    for (int k = 0; k < A.n_cols + 1; k++)
+    {
+      ptr[k] = A.col_ptrs[k];
+    }
+*/
+    ans->nrow = A.n_rows;
+    ans->ncol = A.n_cols;
+    ans->nzmax = A.n_nonzero;
+
+    ans->xtype = CHOLMOD_REAL;
+    ans->stype = 0;
+    ans->dtype = 0;
+
+    ans->sorted = 1;
+
+    return ans;
+  }
+
+  // Mat-vec product
+  //dsdmult('n', A.n_rows, A.n_cols, A_as_cholmod, x.memptr(), out.memptr(), &chol_c);
+  void dsdmult(char transpose, int n_rows, int n_cols, void *A, double *x, double *out,
+               cholmod_common *chol_cp)
+  {
+    int t = transpose == 't' ? 0 : 1; // 'n': computes Ax, 't': computes A'x
+    cholmod_sparse_struct *cha = (cholmod_sparse_mat *)A;
+
+    cholmod_dense chb;
+    chb.nrow = transpose == 't' ? n_rows : n_cols;
+    chb.d = chb.nrow;
+    chb.ncol = 1;
+    chb.nzmax = chb.nrow;
+    chb.xtype = cha->xtype;
+    chb.dtype = 0;
+    chb.x = (void *)x;
+    chb.z = (void *)NULL;
+
+    cholmod_dense chc;
+    chc.nrow = transpose == 't' ? n_cols : n_rows;
+    chc.d = chc.nrow;
+    chc.ncol = 1;
+    chc.nzmax = chc.nrow;
+    chc.xtype = cha->xtype;
+    chc.dtype = 0;
+    chc.x = (void *)out;
+    chc.z = (void *)NULL;
+
+    double one[] = {1, 0}, zero[] = {0, 0};
+    cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);
+  }
+
+  spmat_vec_product(sp_mat A, vec x)
+  {
+    cholmod_common chol_c;
+    cholmod_start(&chol_c);
+    chol_c.final_ll = 1;
+
+    cholmod_sparse_struct As;
+    as_cholmod_sparse(&A, As);
+
+    vec Ax = zeros(A.n_rows);
+    dsdmult('n', A.n_rows, A.n_cols, &As, x.memptr(), Ax.memptr(), &chol_c);
+
+    cholmod_sparse *cholmod_l_ssmult(cholmod_sparse *, cholmod_sparse *, int, int,
+                                     int, cholmod_common *);
+
+    //    cholmod_free_sparse(&As, &chol_c);
+    cholmod_finish(&chol_c);
+
+    return (Ax);
+  }
+
+  sp_mat spmat_spmat_product(sp_mat A, sp_mat B)
+  {
+    cholmod_common chol_c;
+    cholmod_start(&chol_c);
+    chol_c.final_ll = 1;
+
+    cholmod_sparse_struct As;
+    as_cholmod_sparse(&A, As);
+
+    cholmod_sparse_struct Bs;
+    as_cholmod_sparse(&B, Bs);
+
+    cholmod_sparse *out = cholmod_l_ssmult(&As, &Bs, CHOLMOD_REAL, 1,
+                                           1, chol_c);
+
+    return (Ax);
+  }
+
+} // namespace ACTIONet
