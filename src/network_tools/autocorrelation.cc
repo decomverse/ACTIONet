@@ -121,9 +121,7 @@ namespace ACTIONet
         ParallelFor(0, feature_set_no, thread_no, [&](size_t i, size_t threadId)
                     {
                         vec x = scores.col(i);
-                        vec Lx = zeros(L.n_rows);
-
-                        //dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.memptr(), &chol_c);
+                        vec Lx = spmat_vec_product(L, x);
                         double stat = dot(x, Lx);
                         double norm_fact = var(x) * total_weight;
                         Cstat(i) = 1 - (stat / norm_fact);
@@ -144,9 +142,7 @@ namespace ACTIONet
                             ParallelFor(0, feature_set_no, 1, [&](size_t i, size_t threadId)
                                         {
                                             vec x = score_permuted.col(i);
-                                            vec Lx = zeros(L.n_rows);
-
-                                            //dsdmult('n', L.n_rows, L.n_cols, Ls, x.memptr(), Lx.memptr(), &chol_c);
+                                            vec Lx = spmat_vec_product(L, x);
                                             double stat = dot(x, Lx);
                                             double norm_fact = var(x) * total_weight;
                                             Cstat_rand(i, j) = 1 - (stat / norm_fact);
