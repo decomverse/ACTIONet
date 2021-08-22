@@ -11,9 +11,9 @@ namespace ACTIONet
         ans->packed = true;
 
         A.sync();
-        ans->x = (void *)A.values;
-        ans->i = (void *)A.row_indices;
-        ans->p = (void *)A.col_ptrs;
+        ans->x = const_cast<void *>(A.values);
+        ans->i = const_cast<void *>(A.row_indices);
+        ans->p = const_cast<void *>(A.col_ptrs);
 
         /*
     std::vector<double> x(A.values, A.values + A.n_nonzero);
