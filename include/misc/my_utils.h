@@ -11,8 +11,9 @@ namespace ACTIONet
     field<mat> eigSVD(mat A);
     mat randNorm(int l, int m, int seed);
 
-    mat zscore(mat A);
-    mat robust_zscore(mat A);
+    mat zscore(mat A, int thread_no = 0);
+    mat robust_zscore(mat A, int thread_no = 0);
+    mat RIN_transform(mat A, int thread_no = 0);
 
     // Used in IRLB
     void randNorm_inplace(int n, double *out, int seed);
@@ -31,11 +32,11 @@ namespace ACTIONet
     void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
                  cholmod_common *chol_cp);
 
-    cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans, sp_mat &A);
+    cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans, sp_mat A);
 
-    vec spmat_vec_product(sp_mat &A, vec &x);
-    mat spmat_mat_product(sp_mat &A, mat &B);
-    sp_mat spmat_spmat_product(sp_mat &A, sp_mat &B);
+    vec spmat_vec_product(sp_mat A, vec x);
+    mat spmat_mat_product(sp_mat A, mat B);
+    sp_mat spmat_spmat_product(sp_mat A, sp_mat B);
 
 } // namespace ACTIONet
 

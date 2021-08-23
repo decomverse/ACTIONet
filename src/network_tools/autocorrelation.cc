@@ -76,167 +76,280 @@ namespace ACTIONet
         }
     }
 
+    mat normalize_scores(mat scores, int method = 1, int thread_no = 0)
+    {
+        mat normalized_scores(size(scores));
+        switch (method)
+        {
+        case 0: //"none"
+        {
+            normalized_scores = scores;
+            break;
+        }
+        case 1: //"zscore"
+        {
+            normalized_scores = zscore(scores, thread_no);
+            break;
+        }
+        case 2: //"RINT" (nonparametric)
+        {
+            normalized_scores = RIN_transform(scores, thread_no);
+            break;
+        }
+        case 3: //"robust_zscore" (kinda hack!)
+        {
+            normalized_scores = robust_zscore(scores, thread_no);
+            break;
+        }
+        default:
+            fprintf(stderr, "Unknown normalization method\n");
+            normalized_scores = scores;
+        }
+        return (normalized_scores);
+    }
+
     // G is the cell-cell network, scores is a cell x geneset matrix
-    field<vec> computeAutocorrelation_Geary(sp_mat &G, mat &scores, int perm_no = 30, int thread_no = 0)
+    field<vec> autocorrelation_Moran(mat G, mat scores, int normalization_method, int perm_no, int thread_no)
     {
         int nV = G.n_rows;
-        int feature_set_no = scores.n_cols;
+        int scores_no = scores.n_cols;
+        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
+        mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
+        stdout_printf("done\n");
 
-        printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, feature_set_no);
-        int nnz = G.n_nonzero;
-        int idx = 0;
+        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        double W = sum(sum(G));
+        vec norm_sq = vec(trans(sum(square(normalized_scores))));
+        vec norm_factors = nV / (W * norm_sq);
 
-        vec vals(nnz);
-        umat subs(2, nnz);
-        for (sp_mat::iterator it = G.begin(); it != G.end(); ++it)
-        {
-            vals(idx) = *it;
-            subs(0, idx) = it.row();
-            subs(1, idx) = it.col();
-            idx++;
-        }
-
-        //double scale_factor = sum(sum(G)) / (sample_no-1); // 2W / (N-1)
-        double total_weight = sum(vals);
-
-        // Compute graph Laplacian
-        vec d = vec(trans(sum(G)));
-
-        sp_mat L(nV, nV);
-        L.diag() = d;
-        L -= G;
-
-        /*
-        cholmod_common chol_c;
-        cholmod_start(&chol_c);
-        chol_c.final_ll = 1;
-
-        cholmod_sparse_struct Lsp;
-        as_cholmod_sparse(&Lsp, L);
-        */
-
-        printf("Computing autocorrelations ...");
-        fflush(stdout);
-        vec Cstat = zeros(feature_set_no);
-        ParallelFor(0, feature_set_no, thread_no, [&](size_t i, size_t threadId)
+        vec stat = zeros(scores_no);
+        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
                     {
-                        vec x = scores.col(i);
-                        vec Lx = spmat_vec_product(L, x);
-                        double stat = dot(x, Lx);
-                        double norm_fact = var(x) * total_weight;
-                        Cstat(i) = 1 - (stat / norm_fact);
+                        vec x = normalized_scores.col(i);
+                        stat(i) = dot(x, G * x);
                     });
-        printf("done\n");
-        vec mu = zeros(feature_set_no);
-        vec sigma = zeros(feature_set_no);
-        vec Cstat_Z = zeros(feature_set_no);
+
+        vec mu = zeros(scores_no);
+        vec sigma = zeros(scores_no);
+        vec z = zeros(scores_no);
         if (0 < perm_no)
         {
-            printf("Computing permutations");
-            mat Cstat_rand = zeros(feature_set_no, perm_no);
+            stdout_printf("Computing permutations ... ");
+
+            mat rand_stats = zeros(scores_no, perm_no);
             ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
                         {
-                            uvec perm = randperm(scores.n_rows);
-                            mat score_permuted = scores.rows(perm);
+                            uvec perm = randperm(nV);
+                            mat score_permuted = normalized_scores.rows(perm);
 
-                            ParallelFor(0, feature_set_no, 1, [&](size_t i, size_t threadId)
+                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
                                         {
-                                            vec x = score_permuted.col(i);
-                                            vec Lx = spmat_vec_product(L, x);
-                                            double stat = dot(x, Lx);
-                                            double norm_fact = var(x) * total_weight;
-                                            Cstat_rand(i, j) = 1 - (stat / norm_fact);
+                                            vec rand_x = score_permuted.col(i);
+                                            rand_stats(i, j) = dot(rand_x, G * rand_x);
                                         });
                         });
-            mu = mean(Cstat_rand, 1);
-            sigma = stddev(Cstat_rand, 0, 1);
-            Cstat_Z = (Cstat - mu) / sigma;
-            printf("done\n");
-        }
-        /*
-        cholmod_free_sparse(&Lsp, &chol_c);
-        cholmod_finish(&chol_c);
-        */
+            stdout_printf("Done\n");
 
+            mu = mean(rand_stats, 1);
+            sigma = stddev(rand_stats, 0, 1);
+            z = (stat - mu) / sigma;
+            z.replace(datum::nan, 0);
+        }
         // Summary stats
-        printf("done\n");
-        fflush(stdout);
+        stdout_printf("done\n");
 
         field<vec> results(4);
-        results(0) = Cstat;
-        results(1) = mu;
-        results(2) = sigma;
-        results(3) = Cstat_Z;
+        results(0) = stat % norm_factors;
+        results(1) = z;
+        results(2) = mu;
+        results(3) = sigma;
+        return (results);
+    }
+
+    // G is the cell-cell network, scores is a cell x geneset matrix
+    field<vec> autocorrelation_Moran(sp_mat G, mat scores, int normalization_method, int perm_no, int thread_no)
+    {
+        int nV = G.n_rows;
+        int scores_no = scores.n_cols;
+
+        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
+        mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
+        stdout_printf("done\n");
+
+        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        double W = sum(sum(G));
+        vec norm_sq = vec(trans(sum(square(normalized_scores))));
+        vec norm_factors = nV / (W * norm_sq);
+
+        vec stat = zeros(scores_no);
+        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
+                    {
+                        vec x = normalized_scores.col(i);
+                        stat(i) = dot(x, spmat_vec_product(G, x));
+                    });
+
+        vec mu = zeros(scores_no);
+        vec sigma = zeros(scores_no);
+        vec z = zeros(scores_no);
+        if (0 < perm_no)
+        {
+            stdout_printf("Computing permutations ... ");
+
+            mat rand_stats = zeros(scores_no, perm_no);
+            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+                        {
+                            uvec perm = randperm(nV);
+                            mat score_permuted = normalized_scores.rows(perm);
+
+                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
+                                        {
+                                            vec rand_x = score_permuted.col(i);
+                                            rand_stats(i, j) = dot(rand_x, spmat_vec_product(G, rand_x));
+                                        });
+                        });
+            stdout_printf("Done\n");
+
+            mu = mean(rand_stats, 1);
+            sigma = stddev(rand_stats, 0, 1);
+            z = (stat - mu) / sigma;
+            z.replace(datum::nan, 0);
+        }
+        // Summary stats
+        stdout_printf("done\n");
+
+        field<vec> results(4);
+        results(0) = stat % norm_factors;
+        results(1) = z;
+        results(2) = mu;
+        results(3) = sigma;
 
         return (results);
     }
 
     // G is the cell-cell network, scores is a cell x geneset matrix
-    field<vec> computeAutocorrelation_Geary(mat &G, mat &scores, int perm_no = 30, int thread_no = 0)
+    field<vec> autocorrelation_Geary(mat G, mat scores, int normalization_method, int perm_no, int thread_no)
     {
         int nV = G.n_rows;
-        int feature_set_no = scores.n_cols;
+        int scores_no = scores.n_cols;
+        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
+        mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
+        stdout_printf("done\n");
 
-        printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, feature_set_no);
-        double total_weight = sum(sum(G));
+        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        double W = sum(sum(G));
+        vec norm_sq = vec(trans(sum(square(normalized_scores))));
+        vec norm_factors = (nV - 1) / ((2 * W) * norm_sq);
 
         // Compute graph Laplacian
         vec d = vec(trans(sum(G)));
-        mat L = -G;
+        mat L(-G);
         L.diag() = d;
 
-        printf("Computing autocorrelations ...");
-        fflush(stdout);
-        vec Cstat = zeros(feature_set_no);
-        ParallelFor(0, feature_set_no, thread_no, [&](size_t i, size_t threadId)
+        vec stat = zeros(scores_no);
+        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
                     {
-                        vec x = scores.col(i);
-                        vec Lx(L.n_rows);
-                        Lx = L * x;
-                        double stat = dot(x, Lx);
-                        double norm_fact = var(x) * total_weight;
-                        Cstat(i) = 1 - (stat / norm_fact);
+                        vec x = normalized_scores.col(i);
+                        stat(i) = dot(x, L * x);
                     });
-        // Free up matrices
-        vec mu = zeros(feature_set_no);
-        vec sigma = zeros(feature_set_no);
-        vec Cstat_Z = zeros(feature_set_no);
+
+        vec mu = zeros(scores_no);
+        vec sigma = zeros(scores_no);
+        vec z = zeros(scores_no);
         if (0 < perm_no)
         {
-            printf("Computing permutations ... ");
+            stdout_printf("Computing permutations ... ");
 
-            mat Cstat_rand = zeros(feature_set_no, perm_no);
+            mat rand_stats = zeros(scores_no, perm_no);
             ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
                         {
-                            uvec perm = randperm(scores.n_rows);
-                            mat score_permuted = scores.rows(perm);
+                            uvec perm = randperm(nV);
+                            mat score_permuted = normalized_scores.rows(perm);
 
-                            ParallelFor(0, feature_set_no, 1, [&](size_t i, size_t threadId)
+                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
                                         {
-                                            vec x = score_permuted.col(i);
-                                            vec Lx(L.n_rows);
-
-                                            Lx = L * x;
-                                            double stat = dot(x, Lx);
-                                            double norm_fact = var(x) * total_weight;
-                                            Cstat_rand(i, j) = 1 - (stat / norm_fact);
+                                            vec rand_x = score_permuted.col(i);
+                                            rand_stats(i, j) = dot(rand_x, L * rand_x);
                                         });
                         });
-            printf("Done\n");
+            stdout_printf("Done\n");
 
-            mu = mean(Cstat_rand, 1);
-            sigma = stddev(Cstat_rand, 0, 1);
-            Cstat_Z = (Cstat - mu) / sigma;
+            mu = mean(rand_stats, 1);
+            sigma = stddev(rand_stats, 0, 1);
+            z = (stat - mu) / sigma;
+            z.replace(datum::nan, 0);
         }
         // Summary stats
-        printf("done\n");
-        fflush(stdout);
+        stdout_printf("done\n");
 
         field<vec> results(4);
-        results(0) = Cstat;
-        results(1) = mu;
-        results(2) = sigma;
-        results(3) = Cstat_Z;
+        results(0) = stat % norm_factors;
+        results(1) = -z;
+        results(2) = mu;
+        results(3) = sigma;
+        return (results);
+    }
+
+    // G is the cell-cell network, scores is a cell x geneset matrix
+    field<vec> autocorrelation_Geary(sp_mat G, mat scores, int normalization_method, int perm_no, int thread_no)
+    {
+        int nV = G.n_rows;
+        int scores_no = scores.n_cols;
+
+        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
+        mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
+        stdout_printf("done\n");
+
+        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        double W = sum(sum(G));
+        vec norm_sq = vec(trans(sum(square(normalized_scores))));
+        vec norm_factors = (nV - 1) / ((2 * W) * norm_sq);
+
+        // Compute graph Laplacian
+        vec d = vec(trans(sum(G)));
+        sp_mat L(-G);
+        L.diag() = d;
+
+        vec stat = zeros(scores_no);
+        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
+                    {
+                        vec x = normalized_scores.col(i);
+                        stat(i) = dot(x, spmat_vec_product(L, x));
+                    });
+
+        vec mu = zeros(scores_no);
+        vec sigma = zeros(scores_no);
+        vec z = zeros(scores_no);
+        if (0 < perm_no)
+        {
+            stdout_printf("Computing permutations ... ");
+
+            mat rand_stats = zeros(scores_no, perm_no);
+            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+                        {
+                            uvec perm = randperm(nV);
+                            mat score_permuted = normalized_scores.rows(perm);
+
+                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
+                                        {
+                                            vec rand_x = score_permuted.col(i);
+                                            rand_stats(i, j) = dot(rand_x, spmat_vec_product(L, rand_x));
+                                        });
+                        });
+            stdout_printf("Done\n");
+
+            mu = mean(rand_stats, 1);
+            sigma = stddev(rand_stats, 0, 1);
+            z = (stat - mu) / sigma;
+            z.replace(datum::nan, 0);
+        }
+        // Summary stats
+        stdout_printf("done\n");
+
+        field<vec> results(4);
+        results(0) = stat % norm_factors;
+        results(1) = -z;
+        results(2) = mu;
+        results(3) = sigma;
 
         return (results);
     }

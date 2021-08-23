@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <limits>
 
+double r8_normal_01_cdf_inverse(double p);
+
 #define A1 (-3.969683028665376e+01)
 #define A2 2.209460984245205e+02
 #define A3 (-2.759285104469687e+02)
@@ -35,6 +37,75 @@
 
 namespace ACTIONet
 {
+  template <class Function>
+  inline void ParallelFor(size_t start, size_t end, size_t thread_no,
+                          Function fn)
+  {
+    if (thread_no <= 0)
+    {
+      thread_no = std::thread::hardware_concurrency();
+    }
+
+    if (thread_no == 1)
+    {
+      for (size_t id = start; id < end; id++)
+      {
+        fn(id, 0);
+      }
+    }
+    else
+    {
+      std::vector<std::thread> threads;
+      std::atomic<size_t> current(start);
+
+      // keep track of exceptions in threads
+      // https://stackoverflow.com/a/32428427/1713196
+      std::exception_ptr lastException = nullptr;
+      std::mutex lastExceptMutex;
+
+      for (size_t threadId = 0; threadId < thread_no; ++threadId)
+      {
+        threads.push_back(std::thread([&, threadId]
+                                      {
+                                        while (true)
+                                        {
+                                          size_t id = current.fetch_add(1);
+
+                                          if ((id >= end))
+                                          {
+                                            break;
+                                          }
+
+                                          try
+                                          {
+                                            fn(id, threadId);
+                                          }
+                                          catch (...)
+                                          {
+                                            std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
+                                            lastException = std::current_exception();
+                                            /*
+             * This will work even when current is the largest value that
+             * size_t can fit, because fetch_add returns the previous value
+             * before the increment (what will result in overflow
+             * and produce 0 instead of current + 1).
+             */
+                                            current = end;
+                                            break;
+                                          }
+                                        }
+                                      }));
+      }
+      for (auto &thread : threads)
+      {
+        thread.join();
+      }
+      if (lastException)
+      {
+        std::rethrow_exception(lastException);
+      }
+    }
+  }
 
   /**
  * @brief Generate a single random number using the capped Tausworthe RNG
@@ -340,37 +411,109 @@ namespace ACTIONet
     return (out);
   }
 
-  mat robust_zscore(mat A)
+  mat robust_zscore(mat A, int thread_no)
   {
     rowvec median = mean(A, 0);
     rowvec sigma = stddev(A, 0);
+    int N = A.n_cols;
 
-    for (int j = 0; j < A.n_cols; j++)
-    {
-      vec v = A.col(j);
-      double med = arma::median(v);
-      double mad = arma::median(arma::abs(v - med));
+    ParallelFor(0, N, thread_no, [&](size_t j, size_t threadId)
+                {
+                  vec v = A.col(j);
+                  double med = arma::median(v);
+                  double mad = arma::median(arma::abs(v - med));
 
-      vec z = (v - med) / mad;
-      A.col(j) = z;
-    }
+                  vec z = (v - med) / mad;
+                  A.col(j) = z;
+                });
+    A.replace(datum::nan, 0); // replace each NaN with 0
 
     return A;
   }
 
-  mat zscore(mat A)
+  mat zscore(mat A, int thread_no)
   {
     rowvec mu = mean(A, 0);
     rowvec sigma = stddev(A, 0);
+    int N = A.n_cols;
 
-    for (int j = 0; j < A.n_cols; j++)
-    {
-      A.col(j) = (A.col(j) - mu(j)) / sigma(j);
-    }
+    ParallelFor(0, N, thread_no, [&](size_t j, size_t threadId)
+                { A.col(j) = (A.col(j) - mu(j)) / sigma(j); });
 
     A.replace(datum::nan, 0); // replace each NaN with 0
 
     return A;
+  }
+
+  /* Rank a numeric vector giving ties their average rank */
+  vec rank_vec(vec x)
+  {
+    int n = x.n_elem;
+    vec ranks(n);
+    uvec indx = sort_index(x, "ascend");
+
+    int ib = 0, i;
+    double b = x[indx[0]];
+    for (i = 1; i < n; ++i)
+    {
+      if (x[indx[i]] != b)
+      { /* consecutive numbers differ */
+        if (ib < i - 1)
+        { /* average of sum of ranks */
+          double rnk = (i - 1 + ib + 2) / 2.0;
+          for (int j = ib; j <= i - 1; ++j)
+            ranks[indx[j]] = rnk;
+        }
+        else
+        {
+          ranks[indx[ib]] = (double)(ib + 1);
+        }
+        b = x[indx[i]];
+        ib = i;
+      }
+    }
+    /* now check leftovers */
+    if (ib == i - 1) /* last two were unique */
+      ranks[indx[ib]] = (double)i;
+    else
+    { /* ended with ties */
+      double rnk = (i - 1 + ib + 2) / 2.0;
+      for (int j = ib; j <= i - 1; ++j)
+        ranks[indx[j]] = rnk;
+    }
+
+    return ranks;
+  }
+
+  mat RIN_transform(mat A, int thread_no)
+  {
+    int M = A.n_rows;
+    int N = A.n_cols;
+
+    mat Zr = zeros(M, N);
+    ParallelFor(0, N, thread_no, [&](size_t i, size_t threadId)
+                {
+                  vec v = A.col(i);
+                  vec p = rank_vec(v) / (v.n_elem + 1);
+
+                  /*
+                  uvec row_perm_forward = stable_sort_index(v);
+                  uvec row_perm = stable_sort_index(row_perm_forward);
+
+                  vec p = (row_perm + ones(size(row_perm))) / (row_perm.n_elem + 1);
+                  */
+                  vec v_RINT = zeros(size(p));
+                  for (int j = 0; j < p.n_elem; j++)
+                  {
+                    double norm_inv = r8_normal_01_cdf_inverse(p(j));
+                    v_RINT(j) = norm_inv;
+                  }
+
+                  Zr.col(i) = v_RINT;
+                });
+    Zr.replace(datum::nan, 0); // replace each NaN with 0
+
+    return (Zr);
   }
 
   void convtests(int Bsz, int n, double tol, double svtol, double Smax,

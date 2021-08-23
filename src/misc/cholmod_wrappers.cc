@@ -4,7 +4,7 @@
 namespace ACTIONet
 {
     cholmod_sparse *as_cholmod_sparse(cholmod_sparse *ans,
-                                      sp_mat &A)
+                                      sp_mat A)
     {
         ans->itype = CHOLMOD_INT; /* characteristics of the system */
         ans->dtype = CHOLMOD_DOUBLE;
@@ -60,16 +60,17 @@ namespace ACTIONet
         return ans;
     }
 
-    // Mat-vec product
+    // Mat-vec product (Ax)
     //dsdmult('n', A.n_rows, A.n_cols, A_as_cholmod, x.memptr(), out.memptr(), &chol_c);
     void dsdmult(char transpose, int n_rows, int n_cols, void *A, double *x, double *out,
                  cholmod_common *chol_cp)
     {
-        int t = transpose == 'n' ? 0 : 1; // 'n': computes Ax, 't': computes A'x
+        int t = transpose == 't' ? 1 : 0; // 'n': computes Ax, 't': computes A'x
         cholmod_sparse *cha = (cholmod_sparse *)A;
 
+        // x
         cholmod_dense chb;
-        chb.nrow = transpose == 'n' ? n_rows : n_cols;
+        chb.nrow = t ? n_rows : n_cols;
         chb.d = chb.nrow;
         chb.ncol = 1;
         chb.nzmax = chb.nrow;
@@ -78,8 +79,9 @@ namespace ACTIONet
         chb.x = (void *)x;
         chb.z = (void *)NULL;
 
+        // out
         cholmod_dense chc;
-        chc.nrow = transpose == 'n' ? n_cols : n_rows;
+        chc.nrow = t ? n_cols : n_rows;
         chc.d = chc.nrow;
         chc.ncol = 1;
         chc.nzmax = chc.nrow;
@@ -89,28 +91,28 @@ namespace ACTIONet
         chc.z = (void *)NULL;
 
         double one[] = {1, 0}, zero[] = {0, 0};
+
         cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);
     }
 
-    vec spmat_vec_product(sp_mat &A, vec &x)
+    vec spmat_vec_product(sp_mat A, vec x)
     {
         cholmod_common chol_c;
         cholmod_start(&chol_c);
         chol_c.final_ll = 1;
 
-        cholmod_sparse *As = new cholmod_sparse[1];
-        as_cholmod_sparse(As, A);
-
+        cholmod_sparse As; // = new cholmod_sparse[1];
+        as_cholmod_sparse(&As, A);
         vec Ax = zeros(A.n_rows);
-        dsdmult('n', A.n_rows, A.n_cols, As, x.memptr(), Ax.memptr(), &chol_c);
+        dsdmult('n', A.n_rows, A.n_cols, &As, x.memptr(), Ax.memptr(), &chol_c);
 
-        cholmod_free_sparse(&As, &chol_c);
+        //cholmod_free_sparse(&As, &chol_c);
         cholmod_finish(&chol_c);
 
         return (Ax);
     }
 
-    mat spmat_mat_product(sp_mat &A, mat &B)
+    mat spmat_mat_product(sp_mat A, mat B)
     {
         cholmod_common chol_c;
         cholmod_start(&chol_c);
@@ -150,7 +152,7 @@ namespace ACTIONet
         return (res);
     }
 
-    sp_mat spmat_spmat_product(sp_mat &A, sp_mat &B)
+    sp_mat spmat_spmat_product(sp_mat A, sp_mat B)
     {
         cholmod_common chol_c;
         cholmod_start(&chol_c);

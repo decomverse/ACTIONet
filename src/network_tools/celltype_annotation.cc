@@ -1,7 +1,5 @@
 #include <ACTIONet.h>
 
-double r8_normal_01_cdf_inverse(double p);
-
 namespace ACTIONet
 {
   template <class Function>
@@ -72,33 +70,6 @@ namespace ACTIONet
         std::rethrow_exception(lastException);
       }
     }
-  }
-
-  mat RIN_transform(mat A, int thread_no = 4)
-  {
-    int M = A.n_rows;
-    int N = A.n_cols;
-
-    mat Zr = zeros(M, N);
-    ParallelFor(0, N, thread_no, [&](size_t i, size_t threadId)
-                {
-                  vec v = A.col(i);
-
-                  uvec row_perm_forward = stable_sort_index(v);
-                  uvec row_perm = stable_sort_index(row_perm_forward);
-                  vec p = (row_perm + ones(size(row_perm))) / (row_perm.n_elem + 1);
-
-                  vec v_RINT = zeros(size(p));
-                  for (int j = 0; j < p.n_elem; j++)
-                  {
-                    double norm_inv = r8_normal_01_cdf_inverse(p(j));
-                    v_RINT(j) = norm_inv;
-                  }
-
-                  Zr.col(i) = v_RINT;
-                });
-
-    return (Zr);
   }
 
   sp_mat scale_expression(sp_mat &S)

@@ -370,8 +370,11 @@ namespace ACTIONet
 
     sp_mat LSI(sp_mat &X, double size_factor);
 
-    field<vec> computeAutocorrelation_Geary(sp_mat &G, mat &scores, int perm_no, int thread_no);
-    field<vec> computeAutocorrelation_Geary(mat &G, mat &scores, int perm_no, int thread_no);
+    field<vec> autocorrelation_Moran(mat G, mat scores, int normalization_method = 1, int perm_no = 30, int thread_no = 0);
+    field<vec> autocorrelation_Moran(sp_mat G, mat scores, int normalization_method = 1, int perm_no = 30, int thread_no = 0);
+
+    field<vec> autocorrelation_Geary(mat G, mat scores, int normalization_method = 1, int perm_no = 30, int thread_no = 0);
+    field<vec> autocorrelation_Geary(sp_mat G, mat scores, int normalization_method = 1, int perm_no = 30, int thread_no = 0);
 
 } // namespace ACTIONet
 
