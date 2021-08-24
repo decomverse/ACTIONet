@@ -205,6 +205,7 @@ def make_plotly_scatter_single_trace(
         cols_stroke: Union[str, list, np.ndarray, pd.Series, None] = None,
         point_size: Optional[float] = 3,
         stroke_size: Optional[float] = 0.3,
+        show_legend: Optional[bool] = False,
         hover_text: Union[list, pd.Series, np.ndarray] = None,
         plot_3d: Optional[bool] = False,
 ) -> go.Figure:
@@ -245,7 +246,7 @@ def make_plotly_scatter_single_trace(
                     yaxis=axis_params,
                     zaxis=axis_params
                 ),
-                showlegend=False
+                showlegend=show_legend
             )
         )
     else:
@@ -268,7 +269,7 @@ def make_plotly_scatter_single_trace(
             layout=dict(
                 xaxis=axis_params,
                 yaxis=axis_params,
-                showlegend=False,
+                showlegend=show_legend,
                 paper_bgcolor='white',
                 plot_bgcolor='white'
             )
