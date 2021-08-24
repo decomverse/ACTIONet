@@ -9,6 +9,7 @@ from adjustText import adjust_text
 from anndata import AnnData
 from scipy import sparse
 import pandas as pd
+from random import sample
 from .color import *
 from .palettes import palette_default
 from .. import misc_utils as ut
@@ -44,7 +45,7 @@ def plot_ACTIONet(
         stroke_size: Optional[float] = 0.3,
         stroke_contrast_fac: Optional[float] = 1.2,
         palette: Union[str, list, pd.Series, dict] = palette_default,
-        show_legend: Optional[bool] = True,
+        show_legend: Optional[bool] = None,
         hover_text: Union[list, pd.Series, np.ndarray] = None,
         plot_3d: Optional[bool] = False,
         point_order: Union[list, pd.Series, np.ndarray] = None,
@@ -107,11 +108,24 @@ def plot_ACTIONet(
     plot_data = pd.concat([plot_coors, plot_labels], axis=1)
     plot_data["idx"] = range(plot_data.shape[0])
 
-    if label_attr is None or any(elem is not None for elem in [color_attr, trans_attr]):
-        if hover_text is None:
+    if hover_text is not None:
+        plot_data["text"] = pd.Series(hover_text, dtype=str)
+    else:
+        if label_attr is None:
             plot_data["text"] = plot_data["idx"]
         else:
-            plot_data["text"] = pd.Series(hover_text, dtype=str)
+            plot_data["text"] = plot_data["labels"]
+
+    if point_order is None:
+        plot_data["pidx"] = sample(range(plot_data.shape[0]), plot_data.shape[0])
+    else:
+        plot_data["pidx"] = point_order
+
+    if label_attr is None or any(elem is not None for elem in [color_attr, trans_attr]):
+        # if hover_text is None:
+        #     plot_data["text"] = plot_data["idx"]
+        # else:
+        #     plot_data["text"] = pd.Series(hover_text, dtype=str)
 
         plot_data["fill"] = pu.get_plot_colors(
             color_attr=color_attr,
@@ -134,11 +148,16 @@ def plot_ACTIONet(
         plot_data["fill"] = append_alpha_to_rgb(plot_data["fill"], plot_data["trans"], unzip_colors=True)
         plot_data["color"] = append_alpha_to_rgb(plot_data["color"], plot_data["trans"], unzip_colors=True)
 
-        if point_order is None:
-            plot_data = plot_data.sample(frac=1).reset_index(drop=True)
-        else:
-            plot_data["pidx"] = point_order
-            plot_data = plot_data.sort_values(by="pidx").reset_index(drop=True)
+        # if point_order is None:
+        #     plot_data = plot_data.sample(frac=1).reset_index(drop=True)
+        # else:
+        #     plot_data["pidx"] = point_order
+        #     plot_data = plot_data.sort_values(by="pidx").reset_index(drop=True)
+
+        plot_data = plot_data.sort_values(by="pidx").reset_index(drop=True)
+
+        if show_legend is None:
+            show_legend = False
 
         p = pu.make_plotly_scatter_single_trace(
             x=plot_data["x"],
@@ -149,15 +168,16 @@ def plot_ACTIONet(
             cols_stroke=plot_data["color"],
             point_size=point_size,
             stroke_size=stroke_size,
+            show_legend=show_legend,
             hover_text=plot_data["text"],
             plot_3d=plot_3d
         )
 
     else:
-        if hover_text is None:
-            plot_data["text"] = plot_data["labels"]
-        else:
-            plot_data["text"] = pd.Series(hover_text, dtype=str)
+        # if hover_text is None:
+        #     plot_data["text"] = plot_data["labels"]
+        # else:
+        #     plot_data["text"] = pd.Series(hover_text, dtype=str)
 
         fill_dict = pu.get_plot_colors(
             color_attr=color_attr,
@@ -170,11 +190,16 @@ def plot_ACTIONet(
 
         stroke_dict = {k: lighten_color(v, stroke_contrast_fac) for (k, v) in fill_dict.items()}
 
-        if point_order is None:
-            plot_data = plot_data.sample(frac=1).reset_index(drop=True)
-        else:
-            plot_data["pidx"] = point_order
-            plot_data = plot_data.sort_values(by="pidx").reset_index(drop=True)
+        # if point_order is None:
+        #     plot_data = plot_data.sample(frac=1).reset_index(drop=True)
+        # else:
+        #     plot_data["pidx"] = point_order
+        #     plot_data = plot_data.sort_values(by="pidx").reset_index(drop=True)
+
+        plot_data = plot_data.sort_values(by="pidx").reset_index(drop=True)
+
+        if show_legend is None:
+            show_legend = True
 
         p = pu.make_plotly_scatter_split_trace(
             x=plot_data["x"],
