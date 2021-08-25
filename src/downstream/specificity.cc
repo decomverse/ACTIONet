@@ -116,7 +116,8 @@ namespace ACTIONet
     ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
                 {
                   //dsdmult('n', Sb.n_rows, Sb.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
-                  Obs.colptr(i) = spmat_vec_product(Sb, Ht.colptr(i));
+                  vec v = Ht.col(i);
+                  Obs.colptr(i) = spmat_vec_product(Sb, v);
                 });
     // Free up matrices
     //cholmod_finish(&chol_c);
@@ -215,7 +216,8 @@ namespace ACTIONet
     ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
                 {
                   //dsdmult('n', S.n_rows, S.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
-                  Obs.colptr(i) = spmat_vec_product(S, Ht.colptr(i));
+                  vec v = Ht.col(i);
+                  Obs.colptr(i) = spmat_vec_product(S, v);
                 });
     // Free up matrices
     //cholmod_finish(&chol_c);
