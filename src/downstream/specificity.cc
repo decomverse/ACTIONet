@@ -117,7 +117,7 @@ namespace ACTIONet
                 {
                   //dsdmult('n', Sb.n_rows, Sb.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
                   vec v = Ht.col(i);
-                  Obs.colptr(i) = spmat_vec_product(Sb, v);
+                  Obs.col(i) = spmat_vec_product(Sb, v);
                 });
     // Free up matrices
     //cholmod_finish(&chol_c);
@@ -217,7 +217,7 @@ namespace ACTIONet
                 {
                   //dsdmult('n', S.n_rows, S.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
                   vec v = Ht.col(i);
-                  Obs.colptr(i) = spmat_vec_product(S, v);
+                  Obs.col(i) = spmat_vec_product(S, v);
                 });
     // Free up matrices
     //cholmod_finish(&chol_c);
