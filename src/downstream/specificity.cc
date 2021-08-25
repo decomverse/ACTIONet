@@ -110,14 +110,16 @@ namespace ACTIONet
     cholmod_common chol_c;
     cholmod_start(&chol_c);
     chol_c.final_ll = 1; /* LL' form of simplicial factorization */
-    cholmod_sparse_struct *Schol = new cholmod_sparse_struct;
-    as_cholmod_sparse(Schol, Sb);
+    //cholmod_sparse_struct Schol;
+    //as_cholmod_sparse(Schol, Sb);
     mat Obs = zeros(Sb.n_rows, Ht.n_cols);
     ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
-                { dsdmult('n', Sb.n_rows, Sb.n_cols, Schol, Ht.colptr(i), Obs.colptr(i), &chol_c); });
+                {
+                  //dsdmult('n', Sb.n_rows, Sb.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
+                  Obs.colptr(i) = spmat_vec_product(Sb, Ht.colptr(i));
+                });
     // Free up matrices
-    cholmod_free_sparse(&Schol, &chol_c);
-    cholmod_finish(&chol_c);
+    //cholmod_finish(&chol_c);
     // printf("done\n");
 
     // printf("Computing expectation statistics ... ");
@@ -207,15 +209,17 @@ namespace ACTIONet
     cholmod_common chol_c;
     cholmod_start(&chol_c);
     chol_c.final_ll = 1; /* LL' form of simplicial factorization */
-    cholmod_sparse_struct *Schol = new cholmod_sparse_struct;
-    as_cholmod_sparse(Schol, S);
+    //cholmod_sparse_struct Schol;
+    //as_cholmod_sparse(Schol, Sb);
     mat Obs = zeros(S.n_rows, Ht.n_cols);
     ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
-                { dsdmult('n', S.n_rows, S.n_cols, Schol, Ht.colptr(i), Obs.colptr(i), &chol_c); });
+                {
+                  //dsdmult('n', S.n_rows, S.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
+                  Obs.colptr(i) = spmat_vec_product(S, Ht.colptr(i));
+                });
     // Free up matrices
-    cholmod_free_sparse(&Schol, &chol_c);
-    cholmod_finish(&chol_c);
-    //stdout_printf("done\n");
+    //cholmod_finish(&chol_c);
+    // printf("done\n");
 
     //stdout_printf("Computing expectation statistics ... ");
     double rho = mean(col_p);
