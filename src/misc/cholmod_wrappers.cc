@@ -79,7 +79,7 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads,
 namespace ACTIONet
 {
     cholmod_sparse *as_cholmod_sparse(cholmod_sparse *ans,
-                                      sp_mat A)
+                                      sp_mat &A)
     {
         ans->itype = CHOLMOD_INT; /* characteristics of the system */
         ans->dtype = CHOLMOD_DOUBLE;
@@ -161,12 +161,11 @@ namespace ACTIONet
         cholmod_start(&chol_c);
         chol_c.final_ll = 1;
 
-        cholmod_sparse As; // = new cholmod_sparse[1];
+        cholmod_sparse As;
         as_cholmod_sparse(&As, A);
         vec Ax = zeros(A.n_rows);
         dsdmult('n', A.n_rows, A.n_cols, &As, x.memptr(), Ax.memptr(), &chol_c);
 
-        //cholmod_free_sparse(&As, &chol_c);
         cholmod_finish(&chol_c);
 
         return (Ax);
@@ -178,18 +177,18 @@ namespace ACTIONet
         cholmod_start(&chol_c);
         chol_c.final_ll = 1;
 
-        cholmod_sparse *As = new cholmod_sparse[1];
-        as_cholmod_sparse(As, A);
+        cholmod_sparse As;
+        as_cholmod_sparse(&As, A);
 
-        cholmod_dense *Bd = new cholmod_dense[1];
-        Bd->nrow = B.n_rows;
-        Bd->ncol = B.n_cols;
-        Bd->d = B.n_rows;
-        Bd->nzmax = B.n_rows * B.n_cols;
-        Bd->xtype = CHOLMOD_REAL;
-        Bd->dtype = 0;
-        Bd->x = (void *)B.memptr();
-        Bd->z = (void *)NULL;
+        cholmod_dense Bd;
+        Bd.nrow = B.n_rows;
+        Bd.ncol = B.n_cols;
+        Bd.d = B.n_rows;
+        Bd.nzmax = B.n_rows * B.n_cols;
+        Bd.xtype = CHOLMOD_REAL;
+        Bd.dtype = 0;
+        Bd.x = (void *)B.memptr();
+        Bd.z = (void *)NULL;
 
         mat res = zeros(A.n_rows, B.n_cols);
         cholmod_dense out;
@@ -203,36 +202,33 @@ namespace ACTIONet
         out.z = (void *)NULL;
 
         double one[] = {1, 0}, zero[] = {0, 0};
-        cholmod_sdmult(As, 0, one, zero, Bd, &out, &chol_c);
+        cholmod_sdmult(&As, 0, one, zero, &Bd, &out, &chol_c);
 
-        cholmod_free_sparse(&As, &chol_c);
-        //cholmod_free_dense(&Bd, &chol_c);
         cholmod_finish(&chol_c);
-
         return (res);
     }
 
     sp_mat spmat_spmat_product(sp_mat &A, sp_mat &B)
     {
+
         cholmod_common chol_c;
         cholmod_start(&chol_c);
         chol_c.final_ll = 1;
 
-        cholmod_sparse *As = new cholmod_sparse[1];
-        as_cholmod_sparse(As, A);
-
-        cholmod_sparse *Bs = new cholmod_sparse[1];
-        as_cholmod_sparse(Bs, B);
+        cholmod_sparse As, Bs;
+        as_cholmod_sparse(&As, A);
+        as_cholmod_sparse(&Bs, B);
 
         int nrow = A.n_rows, ncol = B.n_cols;
-        arma::sp_mat res(A.n_rows, B.n_cols);
 
-        cholmod_sparse *ans = cholmod_ssmult(As, Bs, 0, true,
+        cholmod_sparse *ans = cholmod_ssmult(&As, &Bs, 0, true,
                                              true, &chol_c);
 
+        arma::sp_mat res(A.n_rows, B.n_cols);
         res.mem_resize(static_cast<unsigned>(ans->nzmax));
-        res.sync();
 
+        mtx.lock();
+        res.sync();
         double *res_x_ptr = (double *)ans->x;
         int *res_i_ptr = (int *)ans->i;
         double *out_x_ptr = (double *)arma::access::rwp(res.values);
@@ -255,9 +251,7 @@ namespace ACTIONet
 
         // set the number of non-zero elements
         arma::access::rw(res.n_nonzero) = ans->nzmax;
-
-        cholmod_free_sparse(&As, &chol_c);
-        cholmod_free_sparse(&Bs, &chol_c);
+        mtx.unlock();
 
         cholmod_finish(&chol_c);
 
@@ -291,15 +285,18 @@ namespace ACTIONet
             ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
                         {
                             int i = k * slice_size;
-                            int j = (k + 1) * slice_size - 1;
-                            if (j > (N - 1))
-                                j = N - 1;
+                            if (i <= (N - 1))
+                            {
+                                int j = (k + 1) * slice_size - 1;
+                                if (j > (N - 1))
+                                    j = N - 1;
 
-                            mat subB = B.cols(i, j);
-                            mat subC = spmat_mat_product(A, subB);
-                            mtx.lock();
-                            res.cols(i, j) = subC;
-                            mtx.unlock();
+                                mat subB = B.cols(i, j);
+                                mat subC = spmat_mat_product(A, subB);
+                                mtx.lock();
+                                res.cols(i, j) = subC;
+                                mtx.unlock();
+                            }
                         });
         }
 
@@ -333,15 +330,18 @@ namespace ACTIONet
             ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
                         {
                             int i = k * slice_size;
-                            int j = (k + 1) * slice_size - 1;
-                            if (j > (N - 1))
-                                j = N - 1;
+                            if (i <= (N - 1))
+                            {
+                                int j = (k + 1) * slice_size - 1;
+                                if (j > (N - 1))
+                                    j = N - 1;
 
-                            mat subB = B.cols(i, j);
-                            mat subC = A * subB;
-                            mtx.lock();
-                            res.cols(i, j) = subC;
-                            mtx.unlock();
+                                mat subB = B.cols(i, j);
+                                mat subC = A * subB;
+                                mtx.lock();
+                                res.cols(i, j) = subC;
+                                mtx.unlock();
+                            }
                         });
         }
 

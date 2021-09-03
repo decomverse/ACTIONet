@@ -32,7 +32,7 @@ namespace ACTIONet
     void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
                  cholmod_common *chol_cp);
 
-    cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans, sp_mat A);
+    cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans, sp_mat &A);
 
     vec spmat_vec_product(sp_mat &A, vec &x);
     mat spmat_mat_product(sp_mat &A, mat &B);
