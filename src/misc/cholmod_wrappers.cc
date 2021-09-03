@@ -311,7 +311,7 @@ namespace ACTIONet
                                 j = N - 1;
 
                             mat subB = B.cols(i, j);
-                            mat subC = spmat_vec_product(A, subB);
+                            mat subC = spmat_mat_product(A, subB);
                             mtx.lock();
                             res.cols(i, j) = subC;
                             mtx.unlock();
