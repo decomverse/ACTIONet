@@ -260,7 +260,10 @@ namespace ACTIONet
 
     mat spmat_mat_product_parallel(sp_mat &A, mat &B, int thread_no)
     {
-
+        if (numThreads <= 0)
+        {
+            numThreads = SYS_THREADS_DEF;
+        }
         int M = A.n_rows;
         int N = B.n_cols;
         mat res = zeros(M, N);
@@ -305,6 +308,10 @@ namespace ACTIONet
 
     mat mat_mat_product_parallel(mat &A, mat &B, int thread_no)
     {
+        if (numThreads <= 0)
+        {
+            numThreads = SYS_THREADS_DEF;
+        }
 
         int M = A.n_rows;
         int N = B.n_cols;
