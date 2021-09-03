@@ -85,42 +85,27 @@ namespace ACTIONet
         ans->dtype = CHOLMOD_DOUBLE;
         ans->packed = true;
 
-        A.sync();
-        /* DOES NOT WORK!!! arma uses (arma::uword *) whereas CHOLMOD uses (int *)
-        void *x_ptr0 = (void *)const_cast<double *>(reinterpret_cast<const double *>(A.values));
-        void *i_ptr0 = (void *)const_cast<arma::uword *>(reinterpret_cast<const arma::uword *>(A.row_indices));
-        void *p_ptr0 = (void *)const_cast<arma::uword *>(reinterpret_cast<const arma::uword *>(A.col_ptrs));
-
-        ans->x = x_ptr0;
-        ans->i = i_ptr0;
-        ans->p = p_ptr0;
-    
-        // DOES NOT WORK! Same as above
-        std::vector<double> x(A.values, A.values + A.n_nonzero);
-        std::vector<int> i(A.row_indices, A.row_indices + A.n_nonzero);
-        std::vector<int> p(A.col_ptrs, A.col_ptrs + A.n_cols + 1);
-
-        ans->x = x.data();
-        ans->i = i.data();
-        ans->p = p.data();
-        */
-
         ans->i = new int[A.n_nonzero];
         ans->x = new double[A.n_nonzero];
+        ans->p = new int[(A.n_cols + 2)];
+        int *ptr = (int *)ans->p;
         double *x_ptr = (double *)ans->x;
         int *i_ptr = (int *)ans->i;
-        for (int k = 0; k < A.n_nonzero; k++)
-        {
-            x_ptr[k] = (A.values)[k];
-            i_ptr[k] = (A.row_indices)[k];
-        }
 
-        ans->p = new int[(A.n_cols + 1)];
-        int *ptr = (int *)ans->p;
-        for (int k = 0; k < A.n_cols + 1; k++)
+        mtx.lock();
+        A.sync();
         {
-            ptr[k] = A.col_ptrs[k];
+            for (int k = 0; k < A.n_nonzero; k++)
+            {
+                x_ptr[k] = (A.values)[k];
+                i_ptr[k] = (A.row_indices)[k];
+            }
+            for (int k = 0; k < A.n_cols + 1; k++)
+            {
+                ptr[k] = A.col_ptrs[k];
+            }
         }
+        mtx.unlock();
 
         ans->nrow = A.n_rows;
         ans->ncol = A.n_cols;
