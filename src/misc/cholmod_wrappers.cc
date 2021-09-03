@@ -268,10 +268,11 @@ namespace ACTIONet
         int N = B.n_cols;
         mat res = zeros(M, N);
 
+        printf("spmat_mat_product_parallel (%d threads)", thread_no);
         if (thread_no > N)
         {
             thread_no = N;
-            ParallelFor(0, B.n_cols, thread_no, [&](size_t k, size_t threadId)
+            ParallelFor(0, B.n_cols, thread_no, [&](unsigned int k, size_t threadId)
                         {
                             vec u = B.col(k);
                             vec v = spmat_vec_product(A, u);
@@ -283,9 +284,8 @@ namespace ACTIONet
         else
         {
             int slice_size = ceil((double)N / thread_no);
-            double *out = (double *)malloc(M * N * sizeof(double));
 
-            ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
+            ParallelFor(0, thread_no, thread_no, [&](unsigned int k, size_t threadId)
                         {
                             int i = k * slice_size;
                             if (i <= (N - 1))
@@ -317,6 +317,7 @@ namespace ACTIONet
         int N = B.n_cols;
         mat res = zeros(M, N);
 
+        printf("mat_mat_product_parallel (%d threads)", thread_no);
         if (thread_no > N)
         {
             thread_no = N;
@@ -332,7 +333,6 @@ namespace ACTIONet
         else
         {
             int slice_size = ceil((double)N / thread_no);
-            double *out = (double *)malloc(M * N * sizeof(double));
 
             ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
                         {
