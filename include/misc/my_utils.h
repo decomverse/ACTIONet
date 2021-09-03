@@ -34,9 +34,12 @@ namespace ACTIONet
 
     cholmod_sparse_struct *as_cholmod_sparse(cholmod_sparse_struct *ans, sp_mat A);
 
-    vec spmat_vec_product(sp_mat A, vec x);
-    mat spmat_mat_product(sp_mat A, mat B);
-    sp_mat spmat_spmat_product(sp_mat A, sp_mat B);
+    vec spmat_vec_product(sp_mat &A, vec &x);
+    mat spmat_mat_product(sp_mat &A, mat &B);
+    sp_mat spmat_spmat_product(sp_mat &A, sp_mat &B);
+
+    mat spmat_mat_product_parallel(sp_mat &A, mat &B, int thread_no);
+    mat mat_mat_product_parallel(mat &A, mat &B, int thread_no);
 
 } // namespace ACTIONet
 

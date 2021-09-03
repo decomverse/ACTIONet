@@ -107,21 +107,7 @@ namespace ACTIONet
     // printf("done\n");
 
     // printf("Computing observation statistics ... ");
-    cholmod_common chol_c;
-    cholmod_start(&chol_c);
-    chol_c.final_ll = 1; /* LL' form of simplicial factorization */
-    //cholmod_sparse_struct Schol;
-    //as_cholmod_sparse(Schol, Sb);
-    mat Obs = zeros(Sb.n_rows, Ht.n_cols);
-    ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
-                {
-                  //dsdmult('n', Sb.n_rows, Sb.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
-                  vec v = Ht.col(i);
-                  Obs.col(i) = spmat_vec_product(Sb, v);
-                });
-    // Free up matrices
-    //cholmod_finish(&chol_c);
-    // printf("done\n");
+    mat Obs = spmat_mat_product_parallel(Sb, Ht, thread_no);
 
     // printf("Computing expectation statistics ... ");
     double rho = mean(col_p);
@@ -179,15 +165,18 @@ namespace ACTIONet
                   h /= (mu == 0) ? 1 : mu;
                 }); // For numerical stability
 
+    /*
     // make sure all values are positive
     double min_val = S.min();
     S.for_each([min_val](mat::elem_type &val)
                { val -= min_val; });
+    */
 
     //stdout_printf("Compute stats ... ");
-    // sp_mat Sb = spones(S);
 
     // Heuristic optimization! Shall add parallel for later on
+    printf("Computing stats ...");
+    fflush(stdout);
     vec row_p = zeros(S.n_rows);
     vec col_p = zeros(S.n_cols);
     vec row_factor = zeros(S.n_rows);
@@ -203,25 +192,14 @@ namespace ACTIONet
     row_factor /= row_p;
     row_p /= S.n_cols;
     col_p /= S.n_rows;
+    printf("Done!\n");
+    fflush(stdout);
 
     //stdout_printf("done\n");
 
-    //stdout_printf("Computing observation statistics ... ");
-    cholmod_common chol_c;
-    cholmod_start(&chol_c);
-    chol_c.final_ll = 1; /* LL' form of simplicial factorization */
-    //cholmod_sparse_struct Schol;
-    //as_cholmod_sparse(Schol, Sb);
-    mat Obs = zeros(S.n_rows, Ht.n_cols);
-    ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
-                {
-                  //dsdmult('n', S.n_rows, S.n_cols, &Schol, Ht.colptr(i), Obs.colptr(i), &chol_c);
-                  vec v = Ht.col(i);
-                  Obs.col(i) = spmat_vec_product(S, v);
-                });
-    // Free up matrices
-    //cholmod_finish(&chol_c);
-    // printf("done\n");
+    stdout_printf("Computing observation statistics ... ");
+    mat Obs = spmat_mat_product_parallel(S, Ht, thread_no);
+    printf("done\n");
 
     //stdout_printf("Computing expectation statistics ... ");
     double rho = mean(col_p);
@@ -268,10 +246,12 @@ namespace ACTIONet
     stdout_printf("Computing feature specificity ... ");
     field<mat> res(3);
 
+    /*
     // make sure all values are positive
     double min_val = S.min();
     S.for_each([min_val](mat::elem_type &val)
                { val -= min_val; });
+    */
 
     mat Sb = S;
     uvec nnz_idx = find(Sb > 0);
@@ -284,18 +264,12 @@ namespace ACTIONet
                   h /= (mu == 0) ? 1 : mu;
                 }); // For numerical stability
 
-    // printf("Compute stats ... ");
     vec row_p = vec(sum(Sb, 1));
     vec row_factor = vec(sum(S, 1)) / row_p; // mean of nonzero elements
     row_p /= Sb.n_cols;
     vec col_p = vec(trans(mean(Sb, 0)));
-    // printf("done\n");
 
-    // printf("Computing observation statistics ... ");
-    mat Obs = zeros(S.n_rows, Ht.n_cols);
-    ParallelFor(0, Ht.n_cols, thread_no, [&](size_t i, size_t threadId)
-                { Obs.col(i) = S * Ht.col(i); });
-    // printf("done\n");
+    mat Obs = mat_mat_product_parallel(S, Ht, thread_no);
 
     // printf("Computing expectation statistics ... ");
     double rho = mean(col_p);

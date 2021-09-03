@@ -1,6 +1,81 @@
 #include "ACTIONet.h"
 #include <cholmod.h>
 
+#include <atomic>
+#include <thread>
+
+std::mutex mtx; // mutex for critical section
+
+template <class Function>
+inline void ParallelFor(size_t start, size_t end, size_t numThreads,
+                        Function fn)
+{
+    if (numThreads <= 0)
+    {
+        numThreads = SYS_THREADS_DEF;
+    }
+
+    if (numThreads == 1)
+    {
+        for (size_t id = start; id < end; id++)
+        {
+            fn(id, 0);
+        }
+    }
+    else
+    {
+        std::vector<std::thread> threads;
+        std::atomic<size_t> current(start);
+
+        // keep track of exceptions in threads
+        // https://stackoverflow.com/a/32428427/1713196
+        std::exception_ptr lastException = nullptr;
+        std::mutex lastExceptMutex;
+
+        for (size_t threadId = 0; threadId < numThreads; ++threadId)
+        {
+            threads.push_back(std::thread([&, threadId]
+                                          {
+                                              while (true)
+                                              {
+                                                  size_t id = current.fetch_add(1);
+
+                                                  if ((id >= end))
+                                                  {
+                                                      break;
+                                                  }
+
+                                                  try
+                                                  {
+                                                      fn(id, threadId);
+                                                  }
+                                                  catch (...)
+                                                  {
+                                                      std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
+                                                      lastException = std::current_exception();
+                                                      /*
+             * This will work even when current is the largest value that
+             * size_t can fit, because fetch_add returns the previous value
+             * before the increment (what will result in overflow
+             * and produce 0 instead of current + 1).
+             */
+                                                      current = end;
+                                                      break;
+                                                  }
+                                              }
+                                          }));
+        }
+        for (auto &thread : threads)
+        {
+            thread.join();
+        }
+        if (lastException)
+        {
+            std::rethrow_exception(lastException);
+        }
+    }
+}
+
 namespace ACTIONet
 {
     cholmod_sparse *as_cholmod_sparse(cholmod_sparse *ans,
@@ -95,7 +170,7 @@ namespace ACTIONet
         cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);
     }
 
-    vec spmat_vec_product(sp_mat A, vec x)
+    vec spmat_vec_product(sp_mat &A, vec &x)
     {
         cholmod_common chol_c;
         cholmod_start(&chol_c);
@@ -112,7 +187,7 @@ namespace ACTIONet
         return (Ax);
     }
 
-    mat spmat_mat_product(sp_mat A, mat B)
+    mat spmat_mat_product(sp_mat &A, mat &B)
     {
         cholmod_common chol_c;
         cholmod_start(&chol_c);
@@ -152,7 +227,7 @@ namespace ACTIONet
         return (res);
     }
 
-    sp_mat spmat_spmat_product(sp_mat A, sp_mat B)
+    sp_mat spmat_spmat_product(sp_mat &A, sp_mat &B)
     {
         cholmod_common chol_c;
         cholmod_start(&chol_c);
@@ -203,4 +278,89 @@ namespace ACTIONet
 
         return (res);
     }
+
+    mat spmat_mat_product_parallel(sp_mat &A, mat &B, int thread_no)
+    {
+
+        int M = A.n_rows;
+        int N = B.n_cols;
+        mat res = zeros(M, N);
+
+        if (thread_no > N)
+        {
+            thread_no = N;
+            ParallelFor(0, B.n_cols, thread_no, [&](size_t k, size_t threadId)
+                        {
+                            vec u = B.col(k);
+                            vec v = spmat_vec_product(A, u);
+                            mtx.lock();
+                            res.col(k) = v;
+                            mtx.unlock();
+                        });
+        }
+        else
+        {
+            int slice_size = ceil((double)N / thread_no);
+            double *out = (double *)malloc(M * N * sizeof(double));
+
+            ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
+                        {
+                            int i = k * slice_size;
+                            int j = (k + 1) * slice_size - 1;
+                            if (j > (N - 1))
+                                j = N - 1;
+
+                            mat subB = B.cols(i, j);
+                            mat subC = spmat_vec_product(A, subB);
+                            mtx.lock();
+                            res.cols(i, j) = subC;
+                            mtx.unlock();
+                        });
+        }
+
+        return (res);
+    }
+
+    mat mat_mat_product_parallel(mat &A, mat &B, int thread_no)
+    {
+
+        int M = A.n_rows;
+        int N = B.n_cols;
+        mat res = zeros(M, N);
+
+        if (thread_no > N)
+        {
+            thread_no = N;
+            ParallelFor(0, B.n_cols, thread_no, [&](size_t k, size_t threadId)
+                        {
+                            vec u = B.col(k);
+                            vec v = A * u;
+                            mtx.lock();
+                            res.col(k) = v;
+                            mtx.unlock();
+                        });
+        }
+        else
+        {
+            int slice_size = ceil((double)N / thread_no);
+            double *out = (double *)malloc(M * N * sizeof(double));
+
+            ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
+                        {
+                            int i = k * slice_size;
+                            int j = (k + 1) * slice_size - 1;
+                            if (j > (N - 1))
+                                j = N - 1;
+
+                            mat subB = B.cols(i, j);
+                            mat subC = A * subB;
+                            mtx.lock();
+                            res.cols(i, j) = subC;
+                            mtx.unlock();
+                        });
+        }
+
+        return (res);
+    }
+
 }

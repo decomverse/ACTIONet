@@ -201,11 +201,11 @@ namespace ACTIONet
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
 
-                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
-                                        {
-                                            vec rand_x = score_permuted.col(i);
-                                            rand_stats(i, j) = dot(rand_x, spmat_vec_product(G, rand_x));
-                                        });
+                            for (int i = 0; i < scores_no; i++)
+                            {
+                                vec rand_x = score_permuted.col(i);
+                                rand_stats(i, j) = dot(rand_x, spmat_vec_product(G, rand_x));
+                            };
                         });
             stdout_printf("Done\n");
 
