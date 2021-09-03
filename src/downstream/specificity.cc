@@ -165,12 +165,10 @@ namespace ACTIONet
                   h /= (mu == 0) ? 1 : mu;
                 }); // For numerical stability
 
-    /*
     // make sure all values are positive
     double min_val = S.min();
     S.for_each([min_val](mat::elem_type &val)
                { val -= min_val; });
-    */
 
     //stdout_printf("Compute stats ... ");
 
