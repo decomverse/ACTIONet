@@ -34,7 +34,7 @@ namespace ACTIONet
 
     cholmod_sparse *as_cholmod_sparse(sp_mat &A, cholmod_sparse *chol_A,
                                       cholmod_common *chol_c);
-    sp_mat &as_arma_sparse(cholmod_sparse *chol_A, cholmod_common *chol_c);
+    sp_mat &as_arma_sparse(cholmod_sparse *chol_A, sp_mat &A, cholmod_common *chol_c);
 
     vec spmat_vec_product(sp_mat &A, vec &x);
     mat spmat_mat_product(sp_mat &A, mat &B);

@@ -175,11 +175,8 @@ namespace ACTIONet
     cholmod_start(&chol_c);
     chol_c.final_ll = 1; /* LL' form of simplicial factorization */
 
-    cholmod_sparse *AS;
-    as_cholmod_sparse(A, AS, &chol_c);
-
-    cholmod_sparse *AS_sq;
-    as_cholmod_sparse(A_sq, AS_sq, &chol_c);
+    cholmod_sparse *AS = as_cholmod_sparse(A, AS, &chol_c);
+    cholmod_sparse *AS_sq = as_cholmod_sparse(A_sq, AS_sq, &chol_c);
 
     SPA_results res;
 
@@ -246,16 +243,8 @@ namespace ACTIONet
     res.selected_columns = K;
     res.column_norms = norm_trace;
 
-    delete[] AS->x;
-    delete[] AS->i;
-    delete[] AS->p;
-    delete AS;
-
-    delete[] AS_sq->x;
-    delete[] AS_sq->i;
-    delete[] AS_sq->p;
-    delete AS_sq;
-
+    cholmod_free_sparse(&AS, &chol_c);
+    cholmod_free_sparse(&AS_sq, &chol_c);
     cholmod_finish(&chol_c);
 
     return res;
