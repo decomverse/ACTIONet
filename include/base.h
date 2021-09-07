@@ -320,7 +320,7 @@ namespace ACTIONet
                                 unsigned int n_epochs = 500, int thread_no = 0,
                                 int seed = 0);
 
-    mat project_to_coordinate_2D(mat coor2D, mat W,
+    mat project_to_coordinate_2D(sp_mat &W, mat coor2D, 
                                  int compactness_level = 50,
                                  unsigned int n_epochs = 500, int thread_no = 0,
                                  int seed = 0);

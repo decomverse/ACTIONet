@@ -502,9 +502,9 @@ namespace ACTIONet
   // Wb: cells x new_cells/archs: e.g., archetype_footprint
   // coor2D, coor3D, colRGB: {2, 3, 3} x cells
   field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB,
-                              int compactness_level = 50,
-                              unsigned int n_epochs = 500, int thread_no = 8,
-                              int seed = 0)
+                              int compactness_level,
+                              unsigned int n_epochs, int thread_no,
+                              int seed)
   {
     int nV = W.n_cols;
 
@@ -596,7 +596,7 @@ namespace ACTIONet
     return res;
   }
 
-  mat project_to_coordinate_2D(mat coor2D, mat W,
+  mat project_to_coordinate_2D(sp_mat &W, mat coor2D,
                                int compactness_level,
                                unsigned int n_epochs, int thread_no,
                                int seed)
