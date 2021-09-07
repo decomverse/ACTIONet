@@ -175,11 +175,11 @@ namespace ACTIONet
     cholmod_start(&chol_c);
     chol_c.final_ll = 1; /* LL' form of simplicial factorization */
 
-    cholmod_sparse_struct *AS = new cholmod_sparse_struct;
-    as_cholmod_sparse(AS, A);
+    cholmod_sparse *AS;
+    as_cholmod_sparse(A, AS, &chol_c);
 
-    cholmod_sparse_struct *AS_sq = new cholmod_sparse_struct;
-    as_cholmod_sparse(AS_sq, A_sq);
+    cholmod_sparse *AS_sq;
+    as_cholmod_sparse(A_sq, AS_sq, &chol_c);
 
     SPA_results res;
 
