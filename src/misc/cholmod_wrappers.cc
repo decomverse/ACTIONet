@@ -220,7 +220,7 @@ namespace ACTIONet
         cholmod_common chol_c;
         cholmod_start(&chol_c);
 
-        cholmod_sparse chol_A, chol_B;
+        cholmod_sparse *chol_A, *chol_B;
         as_cholmod_sparse(A, chol_A, &chol_c);
         as_cholmod_sparse(B, col_B, &chol_c);
 
