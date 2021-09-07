@@ -316,8 +316,14 @@ namespace ACTIONet
 
     mat Prune_PageRank(mat &U, double density);
     field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB,
-                                int compactness_level, unsigned int n_epochs,
-                                int thread_no, int seed);
+                                int compactness_level = 50,
+                                unsigned int n_epochs = 500, int thread_no = 0,
+                                int seed = 0);
+
+    mat project_to_coordinate_2D(mat coor2D, mat W,
+                                 int compactness_level = 50,
+                                 unsigned int n_epochs = 500, int thread_no = 0,
+                                 int seed = 0);
 
     vec unsigned_cluster(sp_mat A, double resolution_parameter,
                          uvec initial_clusters, int seed);
