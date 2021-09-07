@@ -188,6 +188,12 @@ namespace ACTIONet
 
     mat spmat_mat_product(sp_mat &A, mat &B)
     {
+        if (A.n_cols != B.n_rows)
+        {
+            fprintf(stderr, "spmat_spmat_product:: Inner dimension of matrices should match\n.");
+            return (mat());
+        }
+
         cholmod_common chol_c;
         cholmod_start(&chol_c);
 
