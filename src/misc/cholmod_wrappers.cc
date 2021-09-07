@@ -114,12 +114,12 @@ namespace ACTIONet
         cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);
     }
 
-    cholmod_sparse *as_cholmod_sparse(sp_mat &A, cholmod_sparse *chol_A,
+    cholmod_sparse *as_cholmod_sparse(arma::sp_mat &A, cholmod_sparse *chol_A,
                                       cholmod_common *chol_c)
     {
         int nrow = A.n_rows, ncol = A.n_cols, nz = A.n_nonzero;
         cholmod_allocate_work(0, max(nrow, ncol), 0, chol_c);
-        chol_A = cholmod_allocate_sparse(ncol, nrow, nz, 1 /*sorted*/, 1 /*packed*/, 0 /*NOT symmetric*/, CHOLMOD_REAL, chol_c);
+        chol_A = cholmod_allocate_sparse(nrow, ncol, nz, 1 /*sorted*/, 1 /*packed*/, 0 /*NOT symmetric*/, CHOLMOD_REAL, chol_c);
 
         int *ptr = (int *)chol_A->p;
         double *x_ptr = (double *)chol_A->x;
@@ -143,15 +143,14 @@ namespace ACTIONet
         return chol_A;
     }
 
-    sp_mat &as_arma_sparse(cholmod_sparse *chol_A, cholmod_common *chol_c)
+    sp_mat &as_arma_sparse(cholmod_sparse *chol_A, arma::sp_mat &A, cholmod_common *chol_c)
     {
         // Allocate space
-        arma::sp_mat A(chol_A->nrow, chol_A->ncol);
+        A = arma::sp_mat(chol_A->nrow, chol_A->ncol);
         A.mem_resize(static_cast<unsigned>(chol_A->nzmax));
 
         mtx.lock();
         A.sync();
-
         double *in_x_ptr = (double *)chol_A->x;
         int *in_i_ptr = (int *)chol_A->i;
         double *out_x_ptr = (double *)arma::access::rwp(A.values);
@@ -192,8 +191,7 @@ namespace ACTIONet
         cholmod_common chol_c;
         cholmod_start(&chol_c);
 
-        cholmod_sparse *chol_A;
-        as_cholmod_sparse(A, chol_A, &chol_c);
+        cholmod_sparse *chol_A = as_cholmod_sparse(A, chol_A, &chol_c);
 
         cholmod_dense *chol_B = cholmod_allocate_dense(B.n_rows, B.n_cols, B.n_rows, CHOLMOD_REAL, &chol_c);
         chol_B->x = (void *)B.memptr();
@@ -201,39 +199,39 @@ namespace ACTIONet
 
         mat res = zeros(A.n_rows, B.n_cols);
         cholmod_dense *out = cholmod_allocate_dense(A.n_rows, B.n_cols, A.n_rows, CHOLMOD_REAL, &chol_c);
-        chol_B->x = (void *)res.memptr();
-        chol_B->z = (void *)NULL;
+        out->x = (void *)res.memptr();
+        out->z = (void *)NULL;
 
         double one[] = {1, 0}, zero[] = {0, 0};
         cholmod_sdmult(chol_A, 0, one, zero, chol_B, out, &chol_c);
 
         cholmod_free_sparse(&chol_A, &chol_c);
-        cholmod_free_dense(&chol_B, &chol_c);
-        cholmod_free_dense(&out, &chol_c);
         cholmod_finish(&chol_c);
         return (res);
     }
 
     sp_mat spmat_spmat_product(sp_mat &A, sp_mat &B)
     {
+        arma::sp_mat res;
 
+        if (A.n_cols != B.n_rows)
+        {
+            fprintf(stderr, "spmat_spmat_product:: Inner dimension of matrices should match\n.");
+            return (res);
+        }
         cholmod_common chol_c;
         cholmod_start(&chol_c);
 
-        cholmod_sparse *chol_A, *chol_B;
-        as_cholmod_sparse(A, chol_A, &chol_c);
-        as_cholmod_sparse(B, chol_B, &chol_c);
-
-        int nrow = A.n_rows, ncol = B.n_cols;
+        cholmod_sparse *chol_A = as_cholmod_sparse(A, chol_A, &chol_c);
+        cholmod_sparse *chol_B = as_cholmod_sparse(B, chol_B, &chol_c);
 
         cholmod_sparse *chol_res = cholmod_ssmult(chol_A, chol_B, 0, true,
                                                   true, &chol_c);
 
-        arma::sp_mat res = as_arma_sparse(chol_res, &chol_c);
+        res = as_arma_sparse(chol_res, res, &chol_c);
 
         cholmod_free_sparse(&chol_A, &chol_c);
         cholmod_free_sparse(&chol_B, &chol_c);
-        cholmod_free_sparse(&chol_res, &chol_c);
         cholmod_finish(&chol_c);
 
         return (res);
@@ -249,7 +247,6 @@ namespace ACTIONet
         int N = B.n_cols;
         mat res = zeros(M, N);
 
-        printf("spmat_mat_product_parallel (%d threads)", thread_no);
         if (thread_no > N)
         {
             thread_no = N;
@@ -298,7 +295,6 @@ namespace ACTIONet
         int N = B.n_cols;
         mat res = zeros(M, N);
 
-        printf("mat_mat_product_parallel (%d threads)", thread_no);
         if (thread_no > N)
         {
             thread_no = N;

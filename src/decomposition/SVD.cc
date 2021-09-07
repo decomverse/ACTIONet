@@ -77,8 +77,7 @@ namespace ACTIONet
     chol_c.final_ll = 1; /* LL' form of simplicial factorization */
     // chol_c.error_handler = irlba_R_cholmod_error;
 
-    cholmod_sparse *AS;
-    as_cholmod_sparse(A, AS, &chol_c);
+    cholmod_sparse *AS = as_cholmod_sparse(A, AS, &chol_c);
 
     double eps = 3e-13;
     // double eps = 2.22e-16;
@@ -377,13 +376,6 @@ V[i]   = normDist(gen);;
     delete[] res;
     delete[] T;
     delete[] svratio;
-
-    /*
-    delete[] AS->x;
-    delete[] AS->i;
-    delete[] AS->p;
-    delete AS;
-    */
 
     cholmod_free_sparse(&AS, &chol_c);
     cholmod_finish(&chol_c);
