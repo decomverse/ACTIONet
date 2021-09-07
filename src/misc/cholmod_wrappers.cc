@@ -119,7 +119,7 @@ namespace ACTIONet
     {
         int nrow = A.n_rows, ncol = A.n_cols, nz = A.n_nonzero;
         cholmod_allocate_work(0, max(nrow, ncol), 0, chol_c);
-        chol_A = cholmod_allocate_sparse(ncol, nrow, nz, TRUE /*sorted*/, TRUE /*packed*/, 0 /*NOT symmetric*/, CHOLMOD_REAL, chol_c);
+        chol_A = cholmod_allocate_sparse(ncol, nrow, nz, 1 /*sorted*/, 1 /*packed*/, 0 /*NOT symmetric*/, CHOLMOD_REAL, chol_c);
 
         int *ptr = (int *)chol_A->p;
         double *x_ptr = (double *)chol_A->x;
@@ -146,7 +146,7 @@ namespace ACTIONet
     sp_mat &as_arma_sparse(cholmod_sparse *chol_A, cholmod_common *chol_c)
     {
         // Allocate space
-        arma::sp_mat A(chol_A.nrow, chol_A.ncol);
+        arma::sp_mat A(chol_A->nrow, chol_A->ncol);
         A.mem_resize(static_cast<unsigned>(chol_A->nzmax));
 
         mtx.lock();
@@ -164,13 +164,13 @@ namespace ACTIONet
 
         int *in_p_ptr = (int *)chol_A->p;
         arma::uword *out_p_ptr = arma::access::rwp(A.col_ptrs);
-        for (int k = 0; k < B.n_cols; k++)
+        for (int k = 0; k < chol_A->ncol; k++)
         {
-            out_p_ptr[k] = res_p_ptr[k];
+            out_p_ptr[k] = in_p_ptr[k];
         }
 
         // important: set the sentinel as well
-        arma::access::rwp(A.col_ptrs)[A.n_cols] = chol_A->nzmax;
+        arma::access::rwp(A.col_ptrs)[chol_A->ncol] = chol_A->nzmax;
 
         // set the number of non-zero elements
         arma::access::rw(A.n_nonzero) = chol_A->nzmax;
@@ -195,12 +195,12 @@ namespace ACTIONet
         cholmod_sparse *chol_A;
         as_cholmod_sparse(A, chol_A, &chol_c);
 
-        cholmod_dense chol_B = cholmod_allocate_dense(B.n_rows, B.n_cols, B.n_rows, CHOLMOD_REAL, &chol_c);
+        cholmod_dense *chol_B = cholmod_allocate_dense(B.n_rows, B.n_cols, B.n_rows, CHOLMOD_REAL, &chol_c);
         chol_B->x = (void *)B.memptr();
         chol_B->z = (void *)NULL;
 
         mat res = zeros(A.n_rows, B.n_cols);
-        cholmod_dense out = cholmod_allocate_dense(A.n_rows, B.n_cols, A.n_rows, CHOLMOD_REAL, &chol_c);
+        cholmod_dense *out = cholmod_allocate_dense(A.n_rows, B.n_cols, A.n_rows, CHOLMOD_REAL, &chol_c);
         chol_B->x = (void *)res.memptr();
         chol_B->z = (void *)NULL;
 
