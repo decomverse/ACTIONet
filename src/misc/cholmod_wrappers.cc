@@ -222,11 +222,11 @@ namespace ACTIONet
 
         cholmod_sparse *chol_A, *chol_B;
         as_cholmod_sparse(A, chol_A, &chol_c);
-        as_cholmod_sparse(B, col_B, &chol_c);
+        as_cholmod_sparse(B, chol_B, &chol_c);
 
         int nrow = A.n_rows, ncol = B.n_cols;
 
-        cholmod_sparse *chol_res = cholmod_ssmult(&chol_A, &Bs, 0, true,
+        cholmod_sparse *chol_res = cholmod_ssmult(chol_A, chol_B, 0, true,
                                                   true, &chol_c);
 
         arma::sp_mat res = as_arma_sparse(chol_res, &chol_c);
