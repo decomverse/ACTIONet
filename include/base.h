@@ -253,9 +253,15 @@ namespace ACTIONet
 
     // SGD-based force-directed layout (adopted and modified from the UMAP
     // implementation)
-    field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
-                               unsigned int n_epochs, int layout_alg, int thread_no,
-                               int seed);
+    field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level = 50,
+                               unsigned int n_epochs = 500,
+                               int layout_alg = TUMAP_LAYOUT, int thread_no = 0,
+                               int seed = 0);
+
+    field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level = 50,
+                                unsigned int n_epochs = 500,
+                                int layout_alg = TUMAP_LAYOUT, int thread_no = 0,
+                                int seed = 0);
 
     // Methods for pseudo-bulk construction
     mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
@@ -315,15 +321,6 @@ namespace ACTIONet
     umat MWM_rank1(vec u, vec v, double u_threshold, double v_threshold);
 
     mat Prune_PageRank(mat &U, double density);
-    field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB,
-                                int compactness_level = 50,
-                                unsigned int n_epochs = 500, int thread_no = 0,
-                                int seed = 0);
-
-    mat project_to_coordinate_2D(sp_mat &W, mat coor2D, 
-                                 int compactness_level = 50,
-                                 unsigned int n_epochs = 500, int thread_no = 0,
-                                 int seed = 0);
 
     vec unsigned_cluster(sp_mat A, double resolution_parameter,
                          uvec initial_clusters, int seed);

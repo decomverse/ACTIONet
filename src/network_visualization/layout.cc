@@ -248,10 +248,10 @@ namespace ACTIONet
     return (G);
   }
 
-  field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level = 50,
-                             unsigned int n_epochs = 500,
-                             int layout_alg = TUMAP_LAYOUT, int thread_no = 0,
-                             int seed = 0)
+  field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
+                             unsigned int n_epochs,
+                             int layout_alg = TUMAP_LAYOUT, int thread_no,
+                             int seed)
   {
     if (thread_no <= 0)
     {
@@ -499,171 +499,194 @@ namespace ACTIONet
     return res;
   }
 
-  // Wb: cells x new_cells/archs: e.g., archetype_footprint
-  // coor2D, coor3D, colRGB: {2, 3, 3} x cells
-  field<mat> transform_layout(sp_mat &W, mat coor2D, mat coor3D, mat colRGB,
-                              int compactness_level,
-                              unsigned int n_epochs, int thread_no,
+  //G: MxM, inter_graph: MxN, reference_coordinates: DxN
+  field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level,
+                              unsigned int n_epochs,
+                              int layout_alg = TUMAP_LAYOUT, int thread_no,
                               int seed)
   {
-    int nV = W.n_cols;
-
-    if (compactness_level < 0 || compactness_level > 100)
-      compactness_level = 50;
-
-    double a_param = UMAP_A[compactness_level];
-    double b_param = UMAP_B[compactness_level];
-
-    // 1) Smooth similarity scores
-    sp_mat G = W;
-    G.for_each([](sp_mat::elem_type &val)
-               { val = 1 / val; });
-    W = smoothKNN(G, thread_no);
-
-    // 2) Use prior embedding to initialize new points (after smoothing -- might
-    // need further thresholding prior to averaging)
-    sp_mat Wn = normalise(W, 1, 0); // soft-max
-    mat arch_coor2D = mat(coor2D * Wn);
-    mat arch_coor3D = mat(coor3D * Wn);
-    mat arch_colRGB = mat(colRGB * Wn);
-    arch_colRGB = clamp(arch_colRGB, 0, 1);
-
-    // 3) Store old (ACTIONet) and new (initial) coordinates
-    vector<float> head_vec(arch_coor2D.memptr(),
-                           arch_coor2D.memptr() + arch_coor2D.n_elem);
-    vector<float> tail_vec(coor2D.memptr(), coor2D.memptr() + coor2D.n_elem);
-
-    // 4) Linearize edges and estimate epochs
-    double global_max = arma::max(arma::max(W));
-    double min_threshold = global_max / n_epochs;
-    vector<unsigned int> positive_head;
-    positive_head.reserve(W.n_nonzero);
-    vector<unsigned int> positive_tail;
-    positive_tail.reserve(W.n_nonzero);
-    vector<float> epochs_per_sample;
-    epochs_per_sample.reserve(W.n_nonzero);
-
-    sp_mat::const_iterator it = W.begin();
-    sp_mat::const_iterator it_end = W.end();
-    for (; it != it_end; ++it)
+    if (thread_no <= 0)
     {
-      double w = (*it);
-      if (w < min_threshold)
-      {
-        continue;
-      }
-
-      epochs_per_sample.push_back((double)(global_max / w));
-      positive_tail.push_back(it.row());
-      positive_head.push_back(it.col());
+      thread_no = SYS_THREADS_DEF;
     }
-    // positive_tail.resize(idx); positive_head.resize(idx);
-    // epochs_per_sample.resize(idx);
 
-    vector<float> result;
-
-    result = optimize_layout_umap(
-        head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-        epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-        NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
-
-    fmat coordinates_float(result.data(), 2, nV);
-    mat coordinates = conv_to<mat>::from(coordinates_float);
-    // stdout_printf("done\n"); FLUSH;//fflush(stdout);
-
-    vector<float> head_vec3D(coor3D.memptr(), coor3D.memptr() + coor3D.n_elem);
-    vector<float> tail_vec3D(arch_coor3D.memptr(),
-                             arch_coor3D.memptr() + arch_coor3D.n_elem);
-
-    // stdout_printf("Computing 3D layout ... "); //fflush(stdout);
-    result.clear();
-
-    result = optimize_layout_umap(
-        head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-        epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-        NEGATIVE_SAMPLE_RATE, true, thread_no, 1, false, seed);
-
-    fmat coordinates_3D_float(result.data(), 3, nV);
-    mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
-    // stdout_printf("done\n"); FLUSH; //fflush(stdout);
+    int M = G.n_rows, N = inter_graph.n_cols, D = reference_coordinates.n_rows;
+    stdout_printf("Transforming graph G with %d vertices, using a reference of %d vertices, in a %dD dimensions (%d threads)\n", M, N, D, thread_no);
 
     field<mat> res(3);
 
-    res(0) = coordinates;
-    res(1) = coordinates_3D;
-    res(2) = arch_colRGB;
+    mat interpolated_coordinates = reference_coordinates * trans(inter_graph);
 
-    return res;
-  }
+    sp_mat H = G;
+    H.for_each([](sp_mat::elem_type &val)
+               { val = 1.0 - val; });
+    H = smoothKNN(H, thread_no);
 
-  mat project_to_coordinate_2D(sp_mat &W, mat coor2D,
-                               int compactness_level,
-                               unsigned int n_epochs, int thread_no,
-                               int seed)
-  {
-    int nV = W.n_cols;
+    unsigned int nV = H.n_rows;
 
-    if (compactness_level < 0 || compactness_level > 100)
-      compactness_level = 50;
+    if (layout_alg == UMAP_LAYOUT)
+    {
+      compactness_level = (compactness_level < 0) ? 0 : compactness_level;
+      compactness_level = (compactness_level > 100) ? 100 : compactness_level;
+      stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
+                    compactness_level, n_epochs);
+      FLUSH;
+    }
+    else
+    {
+      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs);
+      FLUSH;
+    }
 
     double a_param = UMAP_A[compactness_level];
     double b_param = UMAP_B[compactness_level];
 
-    // 1) Smooth similarity scores
-    sp_mat G = W;
-    G.for_each([](sp_mat::elem_type &val)
-               { val = 1 / val; });
-    W = smoothKNN(G, thread_no);
+    // linearized list of edges (1-simplices)
+    unsigned int nE = H.n_nonzero;
+    vector<unsigned int> positive_head(nE);
+    vector<unsigned int> positive_tail(nE);
+    vector<float> epochs_per_sample(nE);
 
-    // 2) Use prior embedding to initialize new points (after smoothing -- might
-    // need further thresholding prior to averaging)
-    sp_mat Wn = normalise(W, 1, 0); // soft-max
-    mat inital_coors = mat(coor2D * Wn);
-
-    // 3) Store old (ACTIONet) and new (initial) coordinates
-    vector<float> head_vec(inital_coors.memptr(),
-                           inital_coors.memptr() + inital_coors.n_elem);
-    vector<float> tail_vec(inital_coors.memptr(), inital_coors.memptr() + inital_coors.n_elem);
-
-    // 4) Linearize edges and estimate epochs
-    double global_max = arma::max(arma::max(W));
-    double min_threshold = global_max / n_epochs;
-    vector<unsigned int> positive_head;
-    positive_head.reserve(W.n_nonzero);
-    vector<unsigned int> positive_tail;
-    positive_tail.reserve(W.n_nonzero);
-    vector<float> epochs_per_sample;
-    epochs_per_sample.reserve(W.n_nonzero);
-
-    sp_mat::const_iterator it = W.begin();
-    sp_mat::const_iterator it_end = W.end();
-    for (; it != it_end; ++it)
+    int i = 0;
+    double w_max = max(max(H));
+    for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
     {
-      double w = (*it);
-      if (w < min_threshold)
-      {
-        continue;
-      }
-
-      epochs_per_sample.push_back((double)(global_max / w));
-      positive_tail.push_back(it.row());
-      positive_head.push_back(it.col());
+      epochs_per_sample[i] = w_max / (*it);
+      positive_head[i] = it.row();
+      positive_tail[i] = it.col();
+      i++;
     }
-    // positive_tail.resize(idx); positive_head.resize(idx);
-    // epochs_per_sample.resize(idx);
 
+    vector<float> head_vec(interpolated_coordinates.n_cols * 2);
+    fmat sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 1));
+    float *ptr = sub_coor.memptr();
+    memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
+
+    vector<float> tail_vec(reference_coordinates.n_cols * 2);
+    fmat sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 1));
+    float *ptr = sub_coor.memptr();
+    memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
+
+    stdout_printf("\tComputing 2D layout ... "); // fflush(stdout);
+    // Stores linearized coordinates [x1, y1, x2, y2, ...]
     vector<float> result;
 
-    result = optimize_layout_umap(
-        head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-        epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE / 4.0,
-        NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
+    switch (layout_alg)
+    {
+    case TUMAP_LAYOUT:
+      result = optimize_layout_tumap(
+          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
+          false, seed);
+      break;
+    case UMAP_LAYOUT:
+      result = optimize_layout_umap(
+          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
+          NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
+      break;
+    default:
+      stderr_printf(
+          "Unknown layout algorithm chosen (%d). Switching to TUMAP.\n",
+          layout_alg);
+      result = optimize_layout_tumap(
+          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
+          true, seed);
+      break;
+    }
 
     fmat coordinates_float(result.data(), 2, nV);
     mat coordinates = conv_to<mat>::from(coordinates_float);
+    coordinates = trans(coordinates);
+    res(0) = coordinates;
 
-    // stdout_printf("done\n"); FLUSH;//fflush(stdout);
-    return coordinates;
+    stdout_printf("done\n");
+    FLUSH; // fflush(stdout);
+
+    if (D == 3)
+    {
+      /****************************
+     *  Compute 3D Embedding	*
+     ***************************/
+      stdout_printf("\tComputing 3D layout ... "); // fflush(stdout);
+      result.clear();
+
+      head_vec.clear();
+      head_vec.resize(interpolated_coordinates.n_cols * 3);
+      fmat sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 2));
+      float *ptr = sub_coor.memptr();
+      memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
+
+      tail_vec.clear();
+      tail_vec.resize(reference_coordinates.n_cols * 3);
+      fmat sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 2));
+      float *ptr = sub_coor.memptr();
+      memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
+
+      switch (layout_alg)
+      {
+      case TUMAP_LAYOUT:
+        result = optimize_layout_tumap(
+            head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+            epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
+            true, seed);
+        break;
+      case UMAP_LAYOUT:
+        result = optimize_layout_umap(
+            head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+            epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
+            NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
+        break;
+      default:
+        result = optimize_layout_tumap(
+            head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+            epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
+            false, seed);
+        break;
+      }
+
+      fmat coordinates_3D_float(result.data(), 3, nV);
+      mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
+      coordinates_3D = trans(coordinates_3D);
+
+      stdout_printf("done\n");
+      FLUSH; // fflush(stdout);
+
+      /****************************
+     *  Now compute node colors *
+     ***************************/
+      stdout_printf("\tComputing node colors ... "); // fflush(stdout);
+
+      mat U;
+      vec s;
+      mat V;
+      svd_econ(U, s, V, coordinates_3D);
+      mat Z = zscore(U);
+
+      vec a = 75 * Z.col(0);
+      vec b = 75 * Z.col(1);
+
+      vec L = Z.col(2);
+      L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
+
+      double r_channel, g_channel, b_channel;
+      mat RGB_colors = zeros(nV, 3);
+      for (int i = 0; i < nV; i++)
+      {
+        Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
+
+        RGB_colors(i, 0) = min(1.0, max(0.0, r_channel));
+        RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
+        RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
+      }
+
+      stdout_printf("done\n");
+      FLUSH;
+      res(1) = coordinates_3D;
+      res(2) = RGB_colors; //RGB_colors;
+    }
+    return res;
   }
 
 } // namespace ACTIONet
