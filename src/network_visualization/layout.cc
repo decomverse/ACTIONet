@@ -4,11 +4,6 @@
 #include <cfloat>
 #include <thread>
 
-// Visualization associated parameter settings
-#define TUMAP_LAYOUT 0
-#define UMAP_LAYOUT 1
-#define GRAPHVIS_LAYOUT 2
-
 const double UMAP_A[101] = {
     1.93280839781719, 1.89560586588002, 1.85873666431227, 1.82221007490834,
     1.78603612060048, 1.75022496320214, 1.71478579945151, 1.67972997626197,
@@ -250,7 +245,7 @@ namespace ACTIONet
 
   field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
                              unsigned int n_epochs,
-                             int layout_alg = TUMAP_LAYOUT, int thread_no,
+                             int layout_alg, int thread_no,
                              int seed)
   {
     if (thread_no <= 0)
@@ -502,7 +497,7 @@ namespace ACTIONet
   //G: MxM, inter_graph: MxN, reference_coordinates: DxN
   field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level,
                               unsigned int n_epochs,
-                              int layout_alg = TUMAP_LAYOUT, int thread_no,
+                              int layout_alg, int thread_no,
                               int seed)
   {
     if (thread_no <= 0)
@@ -563,8 +558,8 @@ namespace ACTIONet
     memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
 
     vector<float> tail_vec(reference_coordinates.n_cols * 2);
-    fmat sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 1));
-    float *ptr = sub_coor.memptr();
+    sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 1));
+    ptr = sub_coor.memptr();
     memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
 
     stdout_printf("\tComputing 2D layout ... "); // fflush(stdout);
@@ -614,14 +609,14 @@ namespace ACTIONet
 
       head_vec.clear();
       head_vec.resize(interpolated_coordinates.n_cols * 3);
-      fmat sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 2));
-      float *ptr = sub_coor.memptr();
+      sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 2));
+      ptr = sub_coor.memptr();
       memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
 
       tail_vec.clear();
       tail_vec.resize(reference_coordinates.n_cols * 3);
-      fmat sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 2));
-      float *ptr = sub_coor.memptr();
+      sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 2));
+      ptr = sub_coor.memptr();
       memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
 
       switch (layout_alg)
