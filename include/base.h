@@ -51,6 +51,11 @@
 
 #define SYS_THREADS_DEF (std::thread::hardware_concurrency() - 2)
 
+// Visualization associated parameter settings
+#define TUMAP_LAYOUT 0
+#define UMAP_LAYOUT 1
+#define GRAPHVIS_LAYOUT 2
+
 // s_gd2 visualization
 void layout_unweighted(int n, double *X, int m, int *I, int *J, int t_max,
                        double eps, int seed);
