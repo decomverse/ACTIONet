@@ -81,18 +81,14 @@ struct SgdWorker {
             uint64_t seed = std::mt19937_64::default_seed)
       :
 
-        n(0),
-        alpha(0.0),
-        gradient(gradient),
-        positive_head(positive_head),
-        positive_tail(positive_tail),
+        n(0), alpha(0.0), gradient(gradient),
+        positive_head(std::move(positive_head)),
+        positive_tail(std::move(positive_tail)),
 
         sampler(sampler),
 
-        head_embedding(head_embedding),
-        tail_embedding(tail_embedding),
-        ndim(ndim),
-        head_nvert(head_embedding.size() / ndim),
+        head_embedding(head_embedding), tail_embedding(tail_embedding),
+        ndim(ndim), head_nvert(head_embedding.size() / ndim),
         tail_nvert(tail_embedding.size() / ndim),
         dist_eps(std::numeric_limits<float>::epsilon()) {
     rng.seed(seed);
