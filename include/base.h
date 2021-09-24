@@ -78,6 +78,14 @@ void mds_direct(int n, int kd, double *X, double *d, double *w, int t_max,
 
 namespace ACTIONet
 {
+    struct PCHAkernel_ret
+    {
+        arma::mat S;
+        arma::mat C;
+        float SSE;
+        arma::mat alphaC;
+    };
+
     // Main structures
     // To store the output of compute_AA_coreset()
     struct Coreset
