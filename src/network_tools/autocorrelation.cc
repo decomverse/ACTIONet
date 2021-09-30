@@ -4,6 +4,8 @@
 #include <atomic>
 #include <thread>
 
+extern std::mutex mtx; // mutex for critical section
+
 namespace ACTIONet
 {
     template <class Function>
@@ -126,7 +128,10 @@ namespace ACTIONet
         ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
                     {
                         vec x = normalized_scores.col(i);
-                        stat(i) = dot(x, G * x);
+                        double y = dot(x, G * x);
+                        mtx.lock();
+                        stat(i) = y;
+                        mtx.unlock();
                     });
 
         vec mu = zeros(scores_no);
@@ -142,11 +147,15 @@ namespace ACTIONet
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
 
-                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
-                                        {
-                                            vec rand_x = score_permuted.col(i);
-                                            rand_stats(i, j) = dot(rand_x, G * rand_x);
-                                        });
+                            vec v = zeros(scores_no);
+                            for (int i = 0; i < scores_no; i++)
+                            {
+                                vec rand_x = score_permuted.col(i);
+                                v(i) = dot(rand_x, G * rand_x);
+                            }
+                            mtx.lock();
+                            rand_stats.col(j) = v;
+                            mtx.unlock();
                         });
             stdout_printf("Done\n");
 
@@ -185,7 +194,10 @@ namespace ACTIONet
         ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
                     {
                         vec x = normalized_scores.col(i);
-                        stat(i) = dot(x, spmat_vec_product(G, x));
+                        double y = dot(x, spmat_vec_product(G, x));
+                        mtx.lock();
+                        stat(i) = y;
+                        mtx.unlock();
                     });
 
         vec mu = zeros(scores_no);
@@ -201,11 +213,15 @@ namespace ACTIONet
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
 
+                            vec v = zeros(scores_no);
                             for (int i = 0; i < scores_no; i++)
                             {
                                 vec rand_x = score_permuted.col(i);
-                                rand_stats(i, j) = dot(rand_x, spmat_vec_product(G, rand_x));
-                            };
+                                v(i) = dot(rand_x, spmat_vec_product(G, rand_x));
+                            }
+                            mtx.lock();
+                            rand_stats.col(j) = v;
+                            mtx.unlock();
                         });
             stdout_printf("Done\n");
 
@@ -249,7 +265,10 @@ namespace ACTIONet
         ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
                     {
                         vec x = normalized_scores.col(i);
-                        stat(i) = dot(x, L * x);
+                        double y = dot(x, L * x);
+                        mtx.lock();
+                        stat(i) = y;
+                        mtx.unlock();
                     });
 
         vec mu = zeros(scores_no);
@@ -265,11 +284,15 @@ namespace ACTIONet
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
 
-                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
-                                        {
-                                            vec rand_x = score_permuted.col(i);
-                                            rand_stats(i, j) = dot(rand_x, L * rand_x);
-                                        });
+                            vec v = zeros(scores_no);
+                            for (int i = 0; i < scores_no; i++)
+                            {
+                                vec rand_x = score_permuted.col(i);
+                                v(i) = dot(rand_x, L * rand_x);
+                            }
+                            mtx.lock();
+                            rand_stats.col(j) = v;
+                            mtx.unlock();
                         });
             stdout_printf("Done\n");
 
@@ -313,7 +336,10 @@ namespace ACTIONet
         ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
                     {
                         vec x = normalized_scores.col(i);
-                        stat(i) = dot(x, spmat_vec_product(L, x));
+                        double y = dot(x, spmat_vec_product(L, x));
+                        mtx.lock();
+                        stat(i) = y;
+                        mtx.unlock();
                     });
 
         vec mu = zeros(scores_no);
@@ -329,12 +355,17 @@ namespace ACTIONet
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
 
-                            ParallelFor(0, scores_no, 1, [&](size_t i, size_t threadId)
-                                        {
-                                            vec rand_x = score_permuted.col(i);
-                                            rand_stats(i, j) = dot(rand_x, spmat_vec_product(L, rand_x));
-                                        });
+                            vec v = zeros(scores_no);
+                            for (int i = 0; i < scores_no; i++)
+                            {
+                                vec rand_x = score_permuted.col(i);
+                                v(i) = dot(rand_x, spmat_vec_product(L, rand_x));
+                            }
+                            mtx.lock();
+                            rand_stats.col(j) = v;
+                            mtx.unlock();
                         });
+
             stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
