@@ -392,6 +392,9 @@ namespace ACTIONet
     field<vec> autocorrelation_Geary(mat G, mat scores, int normalization_method = 1, int perm_no = 30, int thread_no = 0);
     field<vec> autocorrelation_Geary(sp_mat G, mat scores, int normalization_method = 1, int perm_no = 30, int thread_no = 0);
 
+    sp_mat normalize_adj(sp_mat &G, int norm_type = 1);
+    mat compute_network_diffusion_Chebyshev(sp_mat &P, mat &X, int thread_no = 0, double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8);
+
 } // namespace ACTIONet
 
 #endif
