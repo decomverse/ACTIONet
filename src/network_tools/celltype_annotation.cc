@@ -416,4 +416,22 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     return (stats);
   }
 
+  mat compute_marker_aggregate_stats_nonparametric(mat &S, sp_mat &marker_mat, int thread_no)
+  {
+    mat St = trans(S);
+    mat Z = RIN_transform(St, thread_no); // cell x gene
+
+    mat stats = zeros(Z.n_rows, marker_mat.n_cols);
+    for (int i = 0; i < marker_mat.n_cols; i++)
+    {
+      vec v = vec(marker_mat.col(i));
+      uvec idx = find(v != 0);
+      vec w = v(idx);
+      double sigma = sqrt(sum(square(w)));
+      stats.col(i) = sum(Z.cols(idx), 1) / sigma;
+    }
+
+    return (stats);
+  }
+
 } // namespace ACTIONet
