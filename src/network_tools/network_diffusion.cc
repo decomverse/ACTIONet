@@ -303,6 +303,108 @@ namespace ACTIONet
     return (X);
   }
 
+  sp_mat normalize_adj(sp_mat &G, int norm_type)
+  {
+    vec row_sums = zeros(G.n_rows);
+    vec col_sums = zeros(G.n_cols);
+
+    sp_mat::iterator it = G.begin();
+    sp_mat::iterator it_end = G.end();
+    for (; it != it_end; ++it)
+    {
+      col_sums[it.col()] += (*it);
+      row_sums[it.row()] += (*it);
+    }
+    uvec idxr = find(row_sums == 0);
+    uvec idxc = find(col_sums == 0);
+
+    //row_sums(row_sums == 0).ones();
+    //col_sums(col_sums == 0).ones();
+    row_sums.transform([](double val)
+                       { return (val == 0 ? 1 : val); });
+    col_sums.transform([](double val)
+                       { return (val == 0 ? 1 : val); });
+
+    // Update
+    sp_mat P = G;
+    if (norm_type == 0) // Row-normalize
+    {
+      for (it = P.begin(); it != P.end(); ++it)
+      {
+        double w = col_sums[it.col()];
+        (*it) /= w;
+      }
+      for (int k = 0; k < idxc.n_elem; k++)
+      {
+        int j = idxc(k);
+        P(j, j) = 1.0;
+      }
+    }
+    else if (norm_type == 1) // Column-normalize
+    {
+      for (it = P.begin(); it != P.end(); ++it)
+      {
+        double w = row_sums[it.row()];
+        (*it) /= w;
+      }
+      for (int k = 0; k < idxr.n_elem; k++)
+      {
+        int i = idxr(k);
+        P(i, i) = 1.0;
+      }
+    }
+    else if (norm_type == 2)
+    {
+      for (it = P.begin(); it != P.end(); ++it)
+      {
+        double w = sqrt(row_sums[it.row()] * col_sums[it.col()]);
+        (*it) /= w;
+      }
+    }
+
+    return (P);
+  }
+  // P is already an stochastic matrix
+  mat compute_network_diffusion_Chebyshev(sp_mat &P, mat &X0, int thread_no,
+                                          double alpha, int max_it, double res_threshold)
+  {
+    alpha = 1 - alpha; // Traditional defitition is to have alpha as weight of prior. Here, alpha is depth of difffusion
+
+    mat mPPreviousScore = X0; //zeros(size(X0));
+    mat mPreviousScore = (1 - alpha) * spmat_mat_product_parallel(P, mPPreviousScore, thread_no) + alpha * X0;
+    double mu = 0.0, muPPrevious = 1.0, muPrevious = 1 / (1 - alpha);
+
+    if (max_it <= 0)
+      return (mPreviousScore);
+
+    mat mScore;
+    for (int i = 0; i < max_it; i++)
+    {
+      double mu = 2.0 / (1.0 - alpha) * muPrevious - muPPrevious;
+
+      mat PY = spmat_mat_product_parallel(P, mPreviousScore, thread_no);
+      double w1 = (2.0 * muPrevious) / ((1 - alpha) * mu);
+      double w2 = -(muPPrevious / mu);
+
+      mScore = w1 * ((1 - alpha) * spmat_mat_product_parallel(P, mPreviousScore, thread_no) + alpha * X0) +
+               w2 * mPPreviousScore;
+
+      double res = norm(mScore - mPreviousScore);
+      if (res < res_threshold)
+      {
+        break;
+      }
+
+      // Change variables
+      muPPrevious = muPrevious;
+      muPrevious = mu;
+      mPPreviousScore = mPreviousScore;
+      mPreviousScore = mScore;
+    }
+
+    return (mScore);
+  }
+
   /*
   mat compute_network_diffusion_SFMULT(sp_mat &G, sp_mat &X0, double alpha = 0.85, int max_it = 3)
   {
