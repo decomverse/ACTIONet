@@ -56,6 +56,25 @@
 #define UMAP_LAYOUT 1
 #define GRAPHVIS_LAYOUT 2
 
+struct mvtrace_obj
+{
+    vector<uvec> selected_cols;
+
+    vector<mat> H_primary;
+    vector<mat> C_primary;
+
+    vector<mat> H_secondary;
+    vector<mat> C_secondary;
+
+    vector<mat> C_consensus;
+};
+
+struct full_trace
+{
+    vector<mvtrace_obj> indiv_trace;
+    vector<mat> H_consensus;
+};
+
 // s_gd2 visualization
 void layout_unweighted(int n, double *X, int m, int *I, int *J, int t_max,
                        double eps, int seed);
@@ -395,6 +414,8 @@ namespace ACTIONet
     sp_mat normalize_adj(sp_mat &G, int norm_type = 1);
     mat compute_network_diffusion_Chebyshev(sp_mat &P, mat &X, int thread_no = 0, double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8);
     mat compute_marker_aggregate_stats_nonparametric(mat &S, sp_mat &marker_mat, int thread_no = 0);
+
+    full_trace runACTION_muV(vector<mat> cell_signatures, int k_min, int k_max, vec alpha, double lambda = 1, int AA_iters = 50, int Opt_iters = 0, int thread_no = 0);
 
 } // namespace ACTIONet
 
