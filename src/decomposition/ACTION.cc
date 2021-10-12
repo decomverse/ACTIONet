@@ -609,4 +609,251 @@ namespace ACTIONet
     return trace;
   }
 
+  /* alpha: sums to one and indicates relative importance of each view
+ * 
+ */
+  void findConsensus(vector<mat> S, full_trace &run_trace, int arch_no, vec alpha, double lambda, int max_it, int)
+  {
+    //printf("Find shared subspace\n");
+
+    register int i;
+    int ds_no = run_trace.indiv_trace[arch_no].H_primary.size(); // number of datasets ( ~ 2)
+    int cell_no = S[0].n_cols;
+    vec c(cell_no);
+
+    // make sure it's a convex vector
+    alpha.transform([](double val)
+                    { return (max(0.0, val)); });
+    alpha = normalise(alpha, 1);
+
+    //printf("Permute archetypes")
+    run_trace.indiv_trace[arch_no].C_secondary[0] = run_trace.indiv_trace[arch_no].C_primary[0];
+    run_trace.indiv_trace[arch_no].H_secondary[0] = run_trace.indiv_trace[arch_no].H_primary[0];
+    for (int ds = 1; ds < ds_no; ds++)
+    {
+      mat G = 1 + cor(trans(run_trace.indiv_trace[arch_no].H_primary[0]), trans(run_trace.indiv_trace[arch_no].H_primary[ds]));
+      mat G_matched = MWM_hungarian(G);
+      uvec perm = index_max(G_matched, 1);
+
+      run_trace.indiv_trace[arch_no].C_secondary[ds] = run_trace.indiv_trace[arch_no].C_primary[ds].cols(perm);
+      run_trace.indiv_trace[arch_no].H_secondary[ds] = run_trace.indiv_trace[arch_no].H_primary[ds].rows(perm);
+    }
+
+    // Compute initial H_consensus
+    run_trace.H_consensus[arch_no] = zeros(size(run_trace.indiv_trace[arch_no].H_primary[0]));
+    for (int ds = 0; ds < ds_no; ds++)
+    {
+      run_trace.H_consensus[arch_no] += alpha(ds) * run_trace.indiv_trace[arch_no].H_secondary[ds];
+    }
+
+    // Estimate relative ratio of error terms
+    mat H_hat = run_trace.H_consensus[arch_no];
+    double a = 0.0, b = 0.0, x, y;
+    for (int ds = 0; ds < ds_no; ds++)
+    {
+      mat W = run_trace.indiv_trace[arch_no].C_secondary[ds];
+      mat H = run_trace.indiv_trace[arch_no].H_secondary[ds];
+
+      x = norm(S[ds] - S[ds] * W * H, "fro");
+      y = norm(H - H_hat, "fro");
+      a += (x * x);
+      b += (alpha(ds) * y * y);
+    }
+    double ratio = a / b;
+    lambda *= ratio;
+
+    // Main loop
+    for (int it = 0; it < max_it; it++)
+    {
+
+      // Permute rows
+      for (int ds = 1; ds < ds_no; ds++)
+      {
+        mat G = 1 + cor(trans(run_trace.indiv_trace[arch_no].H_secondary[0]), trans(run_trace.indiv_trace[arch_no].H_secondary[ds]));
+        mat G_matched = MWM_hungarian(G);
+        uvec perm = index_max(G_matched, 1);
+
+        run_trace.indiv_trace[arch_no].C_secondary[ds] = run_trace.indiv_trace[arch_no].C_secondary[ds].cols(perm);
+        run_trace.indiv_trace[arch_no].H_secondary[ds] = run_trace.indiv_trace[arch_no].H_secondary[ds].rows(perm);
+      }
+
+      // Compute shared subspace
+      run_trace.H_consensus[arch_no] = zeros(size(run_trace.indiv_trace[arch_no].H_primary[0]));
+      for (int ds = 0; ds < ds_no; ds++)
+      {
+        run_trace.H_consensus[arch_no] += alpha(ds) * run_trace.indiv_trace[arch_no].H_secondary[ds];
+      }
+
+      // Recompute H_i
+      for (int ds = 0; ds < ds_no; ds++)
+      {
+        mat I = eye(arch_no, arch_no);
+        mat Z = S[ds] * run_trace.indiv_trace[arch_no].C_secondary[ds]; // Archetype matrix
+        double weight = lambda * alpha[ds];
+
+        mat A = join_vert(trans(Z) * Z, weight * I);
+        mat B = join_vert(trans(Z) * S[ds], weight * run_trace.H_consensus[arch_no]);
+
+        run_trace.indiv_trace[arch_no].H_secondary[ds] = run_simplex_regression(A, B, false);
+      }
+
+      // Recompute C_i
+      for (int ds = 0; ds < ds_no; ds++)
+      {
+        mat W = S[ds] * run_trace.indiv_trace[arch_no].C_secondary[ds];
+        mat H = run_trace.indiv_trace[arch_no].H_secondary[ds];
+        mat R = S[ds] - W * H;
+        for (int j = 0; j < arch_no; j++)
+        {
+          double norm_sq = sum(square(H.row(j)));
+          vec h = trans(H.row(j)) / norm_sq;
+          vec b = R * h + W.col(j);
+
+          c = run_simplex_regression(S[ds], b, false);
+
+          R += (W.col(j) - S[ds] * c) * H.row(j);
+          W.col(j) = S[ds] * c;
+          run_trace.indiv_trace[arch_no].C_secondary[ds].col(j) = c;
+        }
+      }
+    }
+  }
+
+  full_trace runACTION_muV(vector<mat> S_r, int k_min, int k_max, vec alpha, double lambda, int AA_iters, int Opt_iters, int thread_no)
+  {
+    printf("Running ACTION\n");
+
+    double lambda2 = 1e-5, epsilon = 1e-5;
+
+    k_min = std::max(k_min, 2);
+    k_max = std::min(k_max, (int)(S_r[0].n_cols));
+
+    int cell_no = S_r[0].n_cols;
+    vec c(cell_no);
+
+    full_trace run_trace;
+    run_trace.H_consensus.resize(k_max + 1);
+    run_trace.indiv_trace.resize(k_max + 1);
+    for (int kk = 0; kk <= k_max; kk++)
+    {
+      run_trace.indiv_trace[kk].selected_cols.resize(S_r.size());
+      run_trace.indiv_trace[kk].H_primary.resize(S_r.size());
+      run_trace.indiv_trace[kk].C_primary.resize(S_r.size());
+      run_trace.indiv_trace[kk].H_secondary.resize(S_r.size());
+      run_trace.indiv_trace[kk].C_secondary.resize(S_r.size());
+      run_trace.indiv_trace[kk].C_consensus.resize(S_r.size());
+    }
+
+    // Normalize signature profiles
+    for (int i = 0; i < S_r.size(); i++)
+    {
+      S_r[i] = normalise(S_r[i], 1, 0); // norm-1 normalize across columns -- particularly important for SPA
+    }
+
+    field<mat> AA_res(2, 1);
+    int current_k = 0;
+    char status_msg[50];
+    sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+
+    ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId)
+                {
+                  //for(int kk = k_min; kk <= k_max; kk++) {
+                  //printf("K = %d\n", kk);
+
+                  // Solve ACTION for a fixed-k to "jump-start" the joint optimization problem.
+                  for (int i = 0; i < S_r.size(); i++)
+                  {
+                    //printf("\tRun ACTION for dataset %d/%d\n", i+1, S_r.size());
+
+                    SPA_results SPA_res = run_SPA(S_r[i], kk);
+                    run_trace.indiv_trace[kk].selected_cols[i] = SPA_res.selected_columns;
+
+                    //run_trace.indiv_trace[kk].selected_cols[i] = SPA(S_r[i], kk);
+
+                    mat W = S_r[i].cols(run_trace.indiv_trace[kk].selected_cols[i]);
+
+                    //AA_res = AA(X_r, W);
+                    AA_res = run_AA(S_r[i], W, AA_iters);
+
+                    mat C0 = AA_res(0);
+                    C0.transform([](double val)
+                                 { return (min(1.0, max(0.0, val))); });
+                    C0 = normalise(C0, 1);
+                    run_trace.indiv_trace[kk].C_primary[i] = C0;
+
+                    mat H0 = AA_res(1);
+                    H0.transform([](double val)
+                                 { return (min(1.0, max(0.0, val))); });
+                    H0 = normalise(H0, 1);
+                    run_trace.indiv_trace[kk].H_primary[i] = H0;
+                  }
+                  current_k++;
+
+                  printf("\r\t%s %d/%d finished", status_msg, current_k,
+                         (k_max - k_min + 1));
+                  fflush(stdout);
+
+                  if (threadId == 0)
+                  {
+                    printf("\nComputing consensus\n");
+                    fflush(stdout);
+                  }
+
+                  // Compute consensus latent subspace, H^*
+                  findConsensus(S_r, run_trace, kk, alpha, lambda, Opt_iters, thread_no); // sets secondary and consensus objects
+
+                  // decouple to find individual consensus C matrices
+                  for (int i = 0; i < S_r.size(); i++)
+                  {
+                    mat S = S_r[i];
+                    mat C = run_trace.indiv_trace[kk].C_secondary[i];
+                    mat H = run_trace.indiv_trace[kk].H_secondary[i];
+                    mat W = S * C;
+
+                    mat R = S - W * H;
+
+                    run_trace.indiv_trace[kk].C_consensus[i] = zeros(cell_no, kk);
+                    for (int j = 0; j < kk; j++)
+                    {
+                      vec w = W.col(j);
+                      vec h = trans(H.row(j));
+
+                      double norm_sq = arma::dot(h, h);
+                      if (norm_sq < double(10e-8))
+                      {
+                        // singular
+                        int max_res_idx = index_max(rowvec(sum(square(R), 0)));
+                        W.col(j) = S.col(max_res_idx);
+                        c.zeros();
+                        c(max_res_idx) = 1;
+                        C.col(j) = c;
+                      }
+                      else
+                      {
+                        // b = (1.0 / norm_sq) *R*ht + w;
+                        vec b = w;
+                        cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols,
+                                    (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1,
+                                    b.memptr(), 1);
+
+                        C.col(j) = run_simplex_regression(S, b, false);
+
+                        vec w_new = S * C.col(j);
+                        vec delta = (w - w_new);
+
+                        // Rank-1 update: R += delta*h
+                        cblas_dger(CblasColMajor, R.n_rows, R.n_cols, 1.0, delta.memptr(), 1,
+                                   h.memptr(), 1, R.memptr(), R.n_rows);
+
+                        W.col(j) = w_new;
+                      }
+
+                      run_trace.indiv_trace[kk].C_consensus[i].col(j) = C.col(j);
+                    }
+                  }
+                });
+
+    return run_trace;
+  }
+
 } // namespace ACTIONet
