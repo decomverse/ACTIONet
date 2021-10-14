@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ACTIONet.tools package &mdash; ACTIONet  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorials" href="../Tutorials/index.html" />
+    <link rel="prev" title="ACTIONet.preprocessing package" href="ACTIONet.preprocessing.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> ACTIONet
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../INTRODUCTION.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ACTIONet</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ACTIONet.html">ACTIONet package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="ACTIONet.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ACTIONet.network.html">ACTIONet.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ACTIONet.plotting.html">ACTIONet.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ACTIONet.preprocessing.html">ACTIONet.preprocessing package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ACTIONet.tools package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet.config">ACTIONet.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet.main">ACTIONet.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet.misc_utils">ACTIONet.misc_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/modules.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CHANGELOG.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACTIONet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">ACTIONet</a> &raquo;</li>
+        
+          <li><a href="ACTIONet.html">ACTIONet package</a> &raquo;</li>
+        
+      <li>ACTIONet.tools package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/ACTIONet/ACTIONet.tools.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="actionet-tools-package">
+<h1>ACTIONet.tools package<a class="headerlink" href="#actionet-tools-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ACTIONet.tools.aa">
+<span id="actionet-tools-aa-module"></span><h2>ACTIONet.tools.aa module<a class="headerlink" href="#module-ACTIONet.tools.aa" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.aa.aa">
+<code class="sig-prename descclassname">ACTIONet.tools.aa.</code><code class="sig-name descname">aa</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">k</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">max_iter</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">min_delta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1e-16</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.aa.aa" title="Permalink to this definition">¶</a></dt>
+<dd><p>Archetypal Analysis (AA)</p>
+<p>Runs SPA algorithm to solve separable NMF problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – Input matrix</p></li>
+<li><p><strong>k</strong> – Number of archetypes to consider</p></li>
+<li><p><strong>max_it</strong> – Define stopping conditions</p></li>
+<li><p><strong>min_delta</strong> – Define stopping conditions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>C</em> – Convex matrix of archetype coefficients (# observations x # archetypes)</p></li>
+<li><p><em>H</em> – Convex matrix of observation coefficients (# archetypes x # observations)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.annotation">
+<span id="actionet-tools-annotation-module"></span><h2>ACTIONet.tools.annotation module<a class="headerlink" href="#module-ACTIONet.tools.annotation" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.annotation.annotate_archetypes_using_labels">
+<code class="sig-prename descclassname">ACTIONet.tools.annotation.</code><code class="sig-name descname">annotate_archetypes_using_labels</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">label_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'cell_types'</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>list<span class="p">, </span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.annotation.annotate_archetypes_using_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.annotation.annotate_archetypes_using_markers">
+<code class="sig-prename descclassname">ACTIONet.tools.annotation.</code><code class="sig-name descname">annotate_archetypes_using_markers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">marker_genes</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">directions</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">names</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>list<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em>, <em class="sig-param"><span class="n">significance</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Literal<span class="p">[</span>upper<span class="p">, </span>lower<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'upper'</span></em>, <em class="sig-param"><span class="n">n_iters</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1000</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>list<span class="p">, </span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.annotation.annotate_archetypes_using_markers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.annotation.annotate_cells_from_archetypes_using_markers">
+<code class="sig-prename descclassname">ACTIONet.tools.annotation.</code><code class="sig-name descname">annotate_cells_from_archetypes_using_markers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">marker_genes</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">directions</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">names</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>list<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em>, <em class="sig-param"><span class="n">significance</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Literal<span class="p">[</span>upper<span class="p">, </span>lower<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'upper'</span></em>, <em class="sig-param"><span class="n">n_iters</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1000</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>list<span class="p">, </span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.annotation.annotate_cells_from_archetypes_using_markers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.annotation.annotate_cells_using_markers">
+<code class="sig-prename descclassname">ACTIONet.tools.annotation.</code><code class="sig-name descname">annotate_cells_using_markers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">marker_genes</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">directions</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">names</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>list<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">method</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Literal<span class="p">[</span>diffusion<span class="p">, </span>archetype<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'diffusion'</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.85</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em>, <em class="sig-param"><span class="n">significance</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Literal<span class="p">[</span>upper<span class="p">, </span>lower<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'upper'</span></em>, <em class="sig-param"><span class="n">thread_no</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">n_iters</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">n_iters_diffusion</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">5</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>list<span class="p">, </span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.annotation.annotate_cells_using_markers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.annotation.map_cell_scores_from_archetype_enrichment">
+<code class="sig-prename descclassname">ACTIONet.tools.annotation.</code><code class="sig-name descname">map_cell_scores_from_archetype_enrichment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">enrichment</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#ACTIONet.tools.annotation.map_cell_scores_from_archetype_enrichment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.enrichment">
+<span id="actionet-tools-enrichment-module"></span><h2>ACTIONet.tools.enrichment module<a class="headerlink" href="#module-ACTIONet.tools.enrichment" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.enrichment.assess_categorical_autocorrelation">
+<code class="sig-prename descclassname">ACTIONet.tools.enrichment.</code><code class="sig-name descname">assess_categorical_autocorrelation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">labels</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">perm_no</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ACTIONet.tools.enrichment.assess_categorical_autocorrelation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.enrichment.compute_phi">
+<code class="sig-prename descclassname">ACTIONet.tools.enrichment.</code><code class="sig-name descname">compute_phi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">labels</span></em>, <em class="sig-param"><span class="n">s0</span></em>, <em class="sig-param"><span class="n">s1</span></em>, <em class="sig-param"><span class="n">s2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ACTIONet.tools.enrichment.compute_phi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.enrichment.string_list_to_int_list">
+<code class="sig-prename descclassname">ACTIONet.tools.enrichment.</code><code class="sig-name descname">string_list_to_int_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ACTIONet.tools.enrichment.string_list_to_int_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>maps strings to ints
+i.e. [‘a’,’b’,’c’,’b’,’a’]–&gt; [1,2,3,2,1]</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.imputation">
+<span id="actionet-tools-imputation-module"></span><h2>ACTIONet.tools.imputation module<a class="headerlink" href="#module-ACTIONet.tools.imputation" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.imputation.impute_genes_using_archetypes">
+<code class="sig-prename descclassname">ACTIONet.tools.imputation.</code><code class="sig-name descname">impute_genes_using_archetypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">genes</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em><span class="sig-paren">)</span> &#x2192; anndata._core.anndata.AnnData<a class="headerlink" href="#ACTIONet.tools.imputation.impute_genes_using_archetypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Impute expression of genes by interpolating over archetype profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – AnnData object storing the ACTIONet results</p></li>
+<li><p><strong>genes</strong> – List of genes to impute</p></li>
+<li><p><strong>archetypes_key</strong> – Key in <cite>adata.obsm</cite> that holds the archetype footprints</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>cells x genes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.imputation.impute_genes_using_network">
+<code class="sig-prename descclassname">ACTIONet.tools.imputation.</code><code class="sig-name descname">impute_genes_using_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">genes</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.85</span></em>, <em class="sig-param"><span class="n">thread_no</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">n_iters</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">5</span></em><span class="sig-paren">)</span> &#x2192; anndata._core.anndata.AnnData<a class="headerlink" href="#ACTIONet.tools.imputation.impute_genes_using_network" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.tools.imputation.impute_specific_genes_using_archetypes">
+<code class="sig-prename descclassname">ACTIONet.tools.imputation.</code><code class="sig-name descname">impute_specific_genes_using_archetypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">genes</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">archetypes_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'H_unified'</span></em>, <em class="sig-param"><span class="n">significance</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Literal<span class="p">[</span>upper<span class="p">, </span>lower<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'upper'</span></em><span class="sig-paren">)</span> &#x2192; anndata._core.anndata.AnnData<a class="headerlink" href="#ACTIONet.tools.imputation.impute_specific_genes_using_archetypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Impute expression of genes by interpolating over archetype profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – AnnData object storing the ACTIONet results</p></li>
+<li><p><strong>genes</strong> – List of genes to impute</p></li>
+<li><p><strong>archetypes_key</strong> – Key in <cite>adata.obsm</cite> that holds the archetype footprints</p></li>
+<li><p><strong>significance</strong> – Whether to use upper or lower significant genes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>cells x genes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.networktools">
+<span id="actionet-tools-networktools-module"></span><h2>ACTIONet.tools.networktools module<a class="headerlink" href="#module-ACTIONet.tools.networktools" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.networktools.run_LPA">
+<code class="sig-prename descclassname">ACTIONet.tools.networktools.</code><code class="sig-name descname">run_LPA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">labels</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">lambda_val</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">max_iter</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">3</span></em>, <em class="sig-param"><span class="n">sig_threshold</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">3</span></em>, <em class="sig-param"><span class="n">fixed_labels</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>list<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">array([], dtype=float64)</span></em><span class="sig-paren">)</span> &#x2192; [&lt;class ‘numpy.ndarray’&gt;]<a class="headerlink" href="#ACTIONet.tools.networktools.run_LPA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.regression">
+<span id="actionet-tools-regression-module"></span><h2>ACTIONet.tools.regression module<a class="headerlink" href="#module-ACTIONet.tools.regression" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.regression.run_simplex_regression">
+<code class="sig-prename descclassname">ACTIONet.tools.regression.</code><code class="sig-name descname">run_simplex_regression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">B</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">computeXtX</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#ACTIONet.tools.regression.run_simplex_regression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplex-Constrained Regression (AX-B).</p>
+<p>Solves the linear regression problem, subject to coefficients being positive and sum to one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – Matrix of independent variables (design matrix)</p></li>
+<li><p><strong>B</strong> – Matrix of dependent variables (response variable)</p></li>
+<li><p><strong>computeXtX</strong> – Parameter to simplex regression</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coefficient matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>X</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.spa">
+<span id="actionet-tools-spa-module"></span><h2>ACTIONet.tools.spa module<a class="headerlink" href="#module-ACTIONet.tools.spa" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.spa.spa">
+<code class="sig-prename descclassname">ACTIONet.tools.spa.</code><code class="sig-name descname">spa</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">k</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.spa.spa" title="Permalink to this definition">¶</a></dt>
+<dd><p>Successive Projection Algorithm (SPA).</p>
+<p>Runs SPA algorithm to solve separable NMF problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – Matrix matrix</p></li>
+<li><p><strong>k</strong> – Number of columns to select</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>selected_columns</em> – Index of k selected columns</p></li>
+<li><p><em>norms</em> – Residual norm of selected columns</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools.svd">
+<span id="actionet-tools-svd-module"></span><h2>ACTIONet.tools.svd module<a class="headerlink" href="#module-ACTIONet.tools.svd" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.tools.svd.svd">
+<code class="sig-prename descclassname">ACTIONet.tools.svd.</code><code class="sig-name descname">svd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">solver</span><span class="p">:</span> <span class="n">Literal<span class="p">[</span>irlb<span class="p">, </span>feng<span class="p">, </span>halko<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'halko'</span></em>, <em class="sig-param"><span class="n">n_iters</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">seed</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="headerlink" href="#ACTIONet.tools.svd.svd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomized singular value decomposition (SVD)
+:param X:Input matrix (dense or sparse)
+:param dim: Target dimensions
+:param solver:SVD solver to use:         <cite>‘irlb’</cite>           randomized SVD used in IRLBA R package         <cite>‘feng’</cite>           randomized SVD from Feng et al.         <cite>‘halko’</cite> (the default)           randomized SVD from Halko et al.     :param n_iters: Maximum number of iterations. Defaults to 1000 for <cite>irlb</cite> and 5 otherwise.
+:param seed: Random seed
+…
+:return U: Matrix of left singular vectors
+:return sigma: Matrix of singular values
+:return V: Matrix of right singular vectors</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ACTIONet.tools" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../Tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ACTIONet.preprocessing.html" class="btn btn-neutral float-left" title="ACTIONet.preprocessing package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Shahin Mohammadi.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
