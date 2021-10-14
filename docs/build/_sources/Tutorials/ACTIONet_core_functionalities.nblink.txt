@@ -1,3 +1,0 @@
-{
-    "path": "../../Tutorials/ACTIONet_core_functionalities_python.ipynb"
-}
