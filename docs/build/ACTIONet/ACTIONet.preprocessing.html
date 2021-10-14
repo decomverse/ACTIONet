@@ -1,0 +1,474 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ACTIONet.preprocessing package &mdash; ACTIONet  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ACTIONet.tools package" href="ACTIONet.tools.html" />
+    <link rel="prev" title="ACTIONet.plotting package" href="ACTIONet.plotting.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> ACTIONet
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../INTRODUCTION.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ACTIONet</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ACTIONet.html">ACTIONet package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="ACTIONet.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ACTIONet.network.html">ACTIONet.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ACTIONet.plotting.html">ACTIONet.plotting package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ACTIONet.preprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ACTIONet.tools.html">ACTIONet.tools package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet.config">ACTIONet.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet.main">ACTIONet.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet.misc_utils">ACTIONet.misc_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTIONet.html#module-ACTIONet">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/modules.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CHANGELOG.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACTIONet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">ACTIONet</a> &raquo;</li>
+        
+          <li><a href="ACTIONet.html">ACTIONet package</a> &raquo;</li>
+        
+      <li>ACTIONet.preprocessing package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/ACTIONet/ACTIONet.preprocessing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="actionet-preprocessing-package">
+<h1>ACTIONet.preprocessing package<a class="headerlink" href="#actionet-preprocessing-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ACTIONet.preprocessing.action">
+<span id="actionet-preprocessing-action-module"></span><h2>ACTIONet.preprocessing.action module<a class="headerlink" href="#module-ACTIONet.preprocessing.action" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.action.ACTION">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.action.</code><code class="sig-name descname">ACTION</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">, </span>numpy.ndarray<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">reduction_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'ACTION'</span></em>, <em class="sig-param"><span class="n">k_min</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">2</span></em>, <em class="sig-param"><span class="n">k_max</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">thread_no</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">max_it</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">min_delta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1e-300</span></em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#ACTIONet.preprocessing.action.ACTION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run ACTION decomposition [Mohammadi, 2018]</p>
+<p>Computes reduced ACTION decomposition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – The (annotated) data matrix of shape <cite>n_obs</cite> × <cite>n_vars</cite>.
+Rows correspond to cells and columns to genes.</p></li>
+<li><p><strong>reduction_name</strong> – Key of ‘.obms’ to use as input for ACTION (default=”ACTION”)
+Ignored if ‘data’ is not an ‘AnnData’ object.</p></li>
+<li><p><strong>k_min</strong> – Min. and max. # of archetypes to consider.</p></li>
+<li><p><strong>k_max</strong> – Min. and max. # of archetypes to consider.</p></li>
+<li><p><strong>thread_no</strong> – Number of threads. Defaults to number of threads available - 2.</p></li>
+<li><p><strong>max_it</strong> – Define stopping conditions of inner AA loop</p></li>
+<li><p><strong>min_delta</strong> – Define stopping conditions of inner AA loop</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary with traces of C and H matrices</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ACTION_out</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.preprocessing.archetypes">
+<span id="actionet-preprocessing-archetypes-module"></span><h2>ACTIONet.preprocessing.archetypes module<a class="headerlink" href="#module-ACTIONet.preprocessing.archetypes" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.archetypes.prune_archetypes">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.archetypes.</code><code class="sig-name descname">prune_archetypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">C_trace</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">H_trace</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">min_specificity_z_threshold</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">- 3</span></em>, <em class="sig-param"><span class="n">min_cells</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">2</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">return_raw</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>Union<span class="p">[</span>dict<span class="p">, </span>anndata._core.anndata.AnnData<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ACTIONet.preprocessing.archetypes.prune_archetypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Archetype pruning</p>
+<p>Initial pruning of archetypes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>C_trace</strong> – Output of pp.ACTION()</p></li>
+<li><p><strong>H_trace</strong> – Output of pp.ACTION()</p></li>
+<li><p><strong>adata</strong> – Optional AnnData object in which to store output of ‘prune_archetypes()’</p></li>
+<li><p><strong>min_specificity_z_threshold</strong> – Controls level of prunning for non-specific archetypes
+(larger values remove more archetypes)</p></li>
+<li><p><strong>min_cells</strong> – Minimum number of influential cells for each archetype
+to be considered nontrivial</p></li>
+<li><p><strong>copy</strong> – If ‘adata’ is given, return a copy instead of writing to <cite>adata</cite></p></li>
+<li><p><strong>return_raw</strong> – If ‘return_raw=True’ and ‘data’ is AnnData, return raw output of ‘prune_archetypes()’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul>
+<li><p><strong>pruned</strong> (<em>dict</em>) – dict containing ‘C_stacked’ and ‘H_stacked’ matrices</p></li>
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – if ‘adata’ given and <cite>copy=True</cite> returns None or else adds fields to <cite>adata</cite>:</p>
+<p><cite>.obsm[‘C_stacked’]</cite>
+<cite>.obsm[‘H_stacked’]</cite>
+<cite>.uns[‘obsm_annot’][‘C_stacked’][‘type’]</cite>
+<cite>.uns[‘obsm_annot’][‘H_stacked’][‘type’]</cite></p>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.archetypes.unify_archetypes">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.archetypes.</code><code class="sig-name descname">unify_archetypes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">S_r</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">C_stacked</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">H_stacked</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reduction_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'ACTION'</span></em>, <em class="sig-param"><span class="n">violation_threshold</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">thread_no</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">return_raw</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; anndata._core.anndata.AnnData<a class="headerlink" href="#ACTIONet.preprocessing.archetypes.unify_archetypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Archetype unification</p>
+<p>Aggregates redundant archetypes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – AnnData object containing ‘reduction_name’ in ‘.obsm’ and ‘net_name’ in ‘.obsp’.</p></li>
+<li><p><strong>S_r</strong> – Reduced representation matrix to use for unification.
+Required if ‘adata=None’.</p></li>
+<li><p><strong>C_stacked</strong> – Matrix containing output ‘C_stacked’ of ‘prune_archetypes()’ to use for unification.
+Required if ‘adata=None’, otherwise retrieved from ‘adata.obsm[“C_stacked”]’</p></li>
+<li><p><strong>H_stacked</strong> – Matrix containing output ‘H_stacked’ of ‘prune_archetypes()’ to use for unification.
+Required if ‘adata=None’, otherwise retrieved from ‘adata.obsm[“H_stacked”]’</p></li>
+<li><p><strong>reduction_name</strong> – Key of ‘adata.obms’ containing reduced matrix to use for ‘S_r’ in ‘unify_archetypes()’ (default=”ACTION”).
+Ignored if ‘adata=None’.</p></li>
+<li><p><strong>violation_threshold</strong> – Archetype unification resolution parameter (default=0)</p></li>
+<li><p><strong>thread_no</strong> – Number of threads. Defaults to number of threads available - 2.</p></li>
+<li><p><strong>copy</strong> – If ‘adata’ is given, return a copy instead of writing to <cite>adata</cite></p></li>
+<li><p><strong>return_raw</strong> – If ‘adata’ is given, return dict of raw ‘unify_archetypes()’ output instead of storing to ‘adata’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul>
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – if <cite>copy=True</cite> returns None or else adds fields to <cite>adata</cite>:</p>
+<p><cite>.obsm[‘C_unified’]</cite>
+<cite>.obsm[‘H_unified’]</cite>
+<cite>.uns[‘ACTION’][‘archetypes’][‘unified’]</cite></p>
+</li>
+<li><p><strong>unified</strong> (<em>dict</em>) – If ‘adata=None’ or ‘return_raw=True’, a dict containing ‘C_unified’ and ‘H_unified’ matrices</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.preprocessing.filter">
+<span id="actionet-preprocessing-filter-module"></span><h2>ACTIONet.preprocessing.filter module<a class="headerlink" href="#module-ACTIONet.preprocessing.filter" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.filter.filter_adata">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.filter.</code><code class="sig-name descname">filter_adata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">layer_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">min_cells_per_feature</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">min_features_per_cell</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">min_umis_per_cell</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_umis_per_cell</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">]</span><a class="headerlink" href="#ACTIONet.preprocessing.filter.filter_adata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter AnnData by cells or genes.</p>
+<p>Filtering is done iteratively until convergence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – Annotated data matrix</p></li>
+<li><p><strong>layer_name</strong> – Key of ‘layers’ to use as matrix for filtering</p></li>
+<li><p><strong>min_cells_per_feature</strong> – Minimum number of cells per feature</p></li>
+<li><p><strong>min_features_per_cell</strong> – Minimum number of (non-zero) features per cell</p></li>
+<li><p><strong>min_umis_per_cell</strong> – Minimum number of UMIs per cell</p></li>
+<li><p><strong>max_umis_per_cell</strong> – Maximum number of UMIs per cell</p></li>
+<li><p><strong>copy</strong> – Return a copy instead of writing to <cite>adata</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>adata</strong> – if <cite>copy=True</cite> returns None or else filtered <cite>adata</cite>:</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.preprocessing.normalization">
+<span id="actionet-preprocessing-normalization-module"></span><h2>ACTIONet.preprocessing.normalization module<a class="headerlink" href="#module-ACTIONet.preprocessing.normalization" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.normalization.normalize_adata">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.normalization.</code><code class="sig-name descname">normalize_adata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">layer_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">layer_name_out</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">log_scale</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">]</span><a class="headerlink" href="#ACTIONet.preprocessing.normalization.normalize_adata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.preprocessing.reduction">
+<span id="actionet-preprocessing-reduction-module"></span><h2>ACTIONet.preprocessing.reduction module<a class="headerlink" href="#module-ACTIONet.preprocessing.reduction" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.reduction.reduce_kernel">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.reduction.</code><code class="sig-name descname">reduce_kernel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">, </span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_iter</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">layer_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reduction_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'ACTION'</span></em>, <em class="sig-param"><span class="n">svd_solver</span><span class="p">:</span> <span class="n">Literal<span class="p">[</span>0<span class="p">, </span>1<span class="p">, </span>2<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">seed</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">return_raw</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_highly_variable</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; [&lt;class ‘anndata._core.anndata.AnnData’&gt;, &lt;class ‘numpy.ndarray’&gt;, &lt;class ‘scipy.sparse.base.spmatrix’&gt;, &lt;class ‘dict’&gt;]<a class="headerlink" href="#ACTIONet.preprocessing.reduction.reduce_kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kernel Reduction Method [Mohammadi2020].  Computes SVD-reduced form of the kernel matrix.
+:param data: The (annotated) data matrix of shape <cite>n_obs</cite> × <cite>n_vars</cite>. Rows correspond to cells and columns to genes.
+:param dim: Target dimension. Defaults to 50, or 1 - minimum dimension size of selected representation.
+:param max_iter: Maximum number of iterations
+:param reduction_name: Prefix of key to use for reduction output
+:param layer_name: Key of ‘layers’ to use as matrix for filtering
+:param svd_solver:SVD solver to use         <cite>0</cite> (the default)           randomized SVD used in IRLBA R package         <cite>1</cite>           randomized SVD from Halko et al.         <cite>2</cite>           randomized SVD from Feng et al.
+:param seed: Random seed
+:param return_raw: Returns raw output of ‘reduce_kernel()’ as dict
+:param use_highly_variable:Whether to use highly variable genes only, stored in         <cite>.var[‘highly_variable’]</cite>.         By default uses them if they have been determined beforehand.
+:param copy:If an <code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code> is passed, determines whether a copy     is returned. Is ignored otherwise.
+….
+:return ACTION : <code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>         If <cite>data</cite> is array-like and <cite>return_raw=False</cite> was passed,         this function only returns <cite>ACTION</cite>
+:return adata: anndata.AnnData otherwise if <cite>copy=True</cite> returns None or else adds fields to <cite>adata</cite>          <cite>.obsm[‘ACTION’]</cite>              Scaled right singular vectors (reduced cell representations)         <cite>.varm[‘ACTION_V’]</cite>              Left singular vectors (signifying gene modules)         <cite>.uns[‘ACTION’][‘params’]</cite>         <cite>.uns[‘ACTION’][‘sigma’]</cite>         <cite>.varm[‘ACTION_A’]</cite>         <cite>.obsm[‘ACTION_B’]</cite>     :return raw_output:If ‘return_raw=True’ returns dict with S_r, V, sigma, A, and B matrices.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.preprocessing.specificity">
+<span id="actionet-preprocessing-specificity-module"></span><h2>ACTIONet.preprocessing.specificity module<a class="headerlink" href="#module-ACTIONet.preprocessing.specificity" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.specificity.compute_archetype_feature_specificity">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.specificity.</code><code class="sig-name descname">compute_archetype_feature_specificity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">S</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">H</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>scipy.sparse.base.spmatrix<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">layer_name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">footprint_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'archetype_footprint'</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">return_raw</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>Union<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">, </span>dict<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ACTIONet.preprocessing.specificity.compute_archetype_feature_specificity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes Feature (i.e., gene) specificity of archetypes     Uses Archetype footprints to estimate markers (soft clustering)
+:param adata: AnnData object possibly containing ‘.layers[“layer_name”]’ and ‘.obsm[“footprint_key”]’.
+:param S: <cite>n_obs</cite> × <cite>n_vars</cite> gene expression matrix.         Required if ‘adata=None’, otherwise retrieved from ‘.layers[“layer_name”]’ or ‘.X’ if ‘layer_name=None’.
+:param H: Matrix-like object containing archetype footprint         Required if ‘adata=None’, otherwise retrieved from ‘.obsm[“footprint_key”]’
+:param layer_name: Key of ‘layers’ to retrieve gene expression matrix.
+:param footprint_key:Key in <cite>adata.obsm</cite> that holds the archetype footprint.
+:param copy: If ‘adata’ is given, return a copy instead of writing to <cite>adata</cite>
+:param return_raw: If ‘adata’ is given, return dict of ‘compute_archetype_feature_specificity()’ output instead of storing to ‘adata’.
+…
+:return adata : anndata.AnnData         if <cite>copy=True</cite> returns None or else adds fields to <cite>adata</cite>         <cite>.varm[“unified_feature_profile”]</cite>         <cite>.varm[“unified_feature_specificity”]</cite>
+:return specificity: dict         If ‘adata=None’ or ‘return_raw=True’, returns dict containing ‘unified_feature_profile’ and ‘unified_feature_specificity’ matrices.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ACTIONet.preprocessing.specificity.compute_cluster_feature_specificity">
+<code class="sig-prename descclassname">ACTIONet.preprocessing.specificity.</code><code class="sig-name descname">compute_cluster_feature_specificity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span><span class="p">:</span> <span class="n">anndata._core.anndata.AnnData</span></em>, <em class="sig-param"><span class="n">cluster_key</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'leiden'</span></em>, <em class="sig-param"><span class="n">copy</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>anndata._core.anndata.AnnData<span class="p">]</span><a class="headerlink" href="#ACTIONet.preprocessing.specificity.compute_cluster_feature_specificity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes Feature (i.e., gene) specificity of clusters</p>
+<p>Uses cluster membership vector to estimate markers (disjoint clustering)
+:param adata: Current AnnData object storing the ACTIONet results
+:param cluster_key: Key in <cite>adata.obs</cite> that holds the clustering variable
+:param copy: Return a copy instead of writing to adata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>)</p></li>
+<li><p>if <cite>copy=True</cite> returns None or else adds fields to <cite>adata</cite></p></li>
+<li><p><cite>.varm[f’{cluster_key}_profile’]</cite></p></li>
+<li><p><cite>.varm[f’{cluster_key}_upper_significance’]</cite></p></li>
+<li><p><cite>.varm[f’{cluster_key}_lower_significance’]</cite></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ACTIONet.preprocessing">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ACTIONet.preprocessing" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="ACTIONet.tools.html" class="btn btn-neutral float-right" title="ACTIONet.tools package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ACTIONet.plotting.html" class="btn btn-neutral float-left" title="ACTIONet.plotting package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Shahin Mohammadi.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
