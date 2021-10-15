@@ -583,7 +583,7 @@ namespace ACTIONet
 */
 
     double M = 16, ef_construction = 200, ef = 50, density = 1.0;
-    sp_mat backbone = ACTIONet::build_ACTIONet(H_arch, density, thread_no, M, ef_construction, ef, true, "jsd", "k*nn", 10);
+    sp_mat backbone = ACTIONet::buildNetwork(H_arch, "k*nn", "jsd", density, thread_no, M, ef_construction, ef, true, 10);
     output.dag_adj = backbone;
 
     vec visited = zeros(backbone.n_cols);

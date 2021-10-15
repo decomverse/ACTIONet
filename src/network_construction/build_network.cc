@@ -169,12 +169,12 @@ namespace ACTIONet
 
   //obtain approximation algorithm
   hnswlib::HierarchicalNSW<float> *getApproximationAlgo(string distance_metric,
-                                                        mat H_stacked,
+                                                        mat H,
                                                         double M,
                                                         double ef_construction)
   {
-    int max_elements = H_stacked.n_cols;
-    int dim = H_stacked.n_rows;
+    int max_elements = H.n_cols;
+    int dim = H.n_rows;
     //space to use determined by distance metric
     hnswlib::SpaceInterface<float> *space;
     if (distance_metric == "jsd")
@@ -194,11 +194,11 @@ namespace ACTIONet
   }
 
   // k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
-  sp_mat build_ACTIONet_KstarNN(mat H_stacked, double density = 1.0,
-                                int thread_no = 0, double M = 16,
-                                double ef_construction = 200, double ef = 10,
-                                bool mutual_edges_only = true,
-                                string distance_metric = "jsd")
+  sp_mat buildNetwork_KstarNN(mat H, double density = 1.0,
+                              int thread_no = 0, double M = 16,
+                              double ef_construction = 200, double ef = 10,
+                              bool mutual_edges_only = true,
+                              string distance_metric = "jsd")
   {
 
     double LC = 1.0 / density;
@@ -219,18 +219,18 @@ namespace ACTIONet
 
     if (distance_metric == "jsd")
     {
-      H_stacked = clamp(H_stacked, 0, 1);
-      H_stacked = normalise(H_stacked, 1, 0);
+      H = clamp(H, 0, 1);
+      H = normalise(H, 1, 0);
     }
 
     double kappa = 5.0;
-    int sample_no = H_stacked.n_cols;
+    int sample_no = H.n_cols;
     int kNN = min(
         sample_no - 1,
         (int)(kappa *
               round(sqrt(sample_no)))); // start with uniform k=sqrt(N) ["Pattern
                                         // Classification" book by Duda et al.]
-    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H_stacked, M, ef_construction);
+    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
     // std::unique_ptr<hnswlib::JSDSpace> space =
@@ -239,9 +239,9 @@ namespace ACTIONet
     // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
     // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
     // ef_construction));
-    int max_elements = H_stacked.n_cols;
+    int max_elements = H.n_cols;
     stdout_printf("\tBuilding index ... ");
-    fmat X = conv_to<fmat>::from(H_stacked);
+    fmat X = conv_to<fmat>::from(H);
 
     ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId)
                 { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); });
@@ -354,12 +354,12 @@ namespace ACTIONet
     return (G_sym);
   }
 
-  sp_mat build_ACTIONet_KstarNN_v2(mat H_stacked, double density = 1.0,
-                                   int thread_no = 0, double M = 16,
-                                   double ef_construction = 200,
-                                   double ef = 10,
-                                   bool mutual_edges_only = true,
-                                   string distance_metric = "jsd")
+  sp_mat buildNetwork_KstarNN_v2(mat H, double density = 1.0,
+                                 int thread_no = 0, double M = 16,
+                                 double ef_construction = 200,
+                                 double ef = 10,
+                                 bool mutual_edges_only = true,
+                                 string distance_metric = "jsd")
   {
 
     double LC = 1.0 / density;
@@ -383,18 +383,18 @@ namespace ACTIONet
 
     if (distance_metric == "jsd")
     {
-      H_stacked = clamp(H_stacked, 0, 1);
-      H_stacked = normalise(H_stacked, 1, 0);
+      H = clamp(H, 0, 1);
+      H = normalise(H, 1, 0);
     }
 
     double kappa = 5.0;
-    int sample_no = H_stacked.n_cols;
+    int sample_no = H.n_cols;
     // int kNN = min(sample_no-1, (int)(kappa*round(sqrt(sample_no)))); // start
     // with uniform k=sqrt(N) ["Pattern Classification" book by Duda et al.]
 
     //TODO, add cosine -- which is InnerProductSpace but with normalization; see here:
     // https://github.com/hnswlib/hnswlib/blob/master/python_bindings/bindings.cpp#L97
-    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H_stacked, M, ef_construction);
+    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
     // std::unique_ptr<hnswlib::JSDSpace> space =
@@ -404,7 +404,7 @@ namespace ACTIONet
     // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
     // ef_construction));
     stdout_printf("\tBuilding index ... ");
-    fmat X = conv_to<fmat>::from(H_stacked);
+    fmat X = conv_to<fmat>::from(H);
     int max_elements = X.n_cols;
     ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId)
                 { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); });
@@ -487,10 +487,10 @@ namespace ACTIONet
     return (G_sym);
   }
 
-  sp_mat build_ACTIONet_KNN(mat H_stacked, int k, int thread_no = 0,
-                            double M = 16, double ef_construction = 200,
-                            double ef = 10, bool mutual_edges_only = true,
-                            string distance_metric = "jsd")
+  sp_mat buildNetwork_KNN(mat H, int k, int thread_no = 0,
+                          double M = 16, double ef_construction = 200,
+                          double ef = 10, bool mutual_edges_only = true,
+                          string distance_metric = "jsd")
   {
     //verify that a support distance metric has been specified
     // the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
@@ -508,15 +508,15 @@ namespace ACTIONet
 
     if (distance_metric == "jsd")
     {
-      H_stacked = clamp(H_stacked, 0, 1);
-      H_stacked = normalise(H_stacked, 1, 0);
+      H = clamp(H, 0, 1);
+      H = normalise(H, 1, 0);
     }
 
     double kappa = 5.0;
-    int sample_no = H_stacked.n_cols;
+    int sample_no = H.n_cols;
     int kNN = k;
 
-    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H_stacked, M, ef_construction);
+    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
     // std::unique_ptr<hnswlib::JSDSpace> space =
@@ -527,8 +527,8 @@ namespace ACTIONet
     // ef_construction));
 
     stdout_printf("\tBuilding index ... ");
-    int max_elements = H_stacked.n_cols;
-    fmat X = conv_to<fmat>::from(H_stacked);
+    int max_elements = H.n_cols;
+    fmat X = conv_to<fmat>::from(H);
     ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId)
                 { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); });
     stdout_printf("done\n");
@@ -585,12 +585,13 @@ namespace ACTIONet
     return (G_sym);
   }
 
-  sp_mat build_ACTIONet(mat H_stacked, double density = 1.0, int thread_no = 0,
-                        double M = 16, double ef_construction = 200,
-                        double ef = 10, bool mutual_edges_only = true,
-                        string distance_metric = "jsd",
-                        string nn_approach = "k*nn",
-                        int k = 10)
+  sp_mat buildNetwork(mat H,
+                      string algorithm,
+                      string distance_metric,
+                      double density, int thread_no,
+                      double M, double ef_construction,
+                      double ef, bool mutual_edges_only,
+                      int k)
   {
     //verify that valid distance metric has been specified
     if (distance_metrics.find(distance_metric) == distance_metrics.end())
@@ -600,7 +601,7 @@ namespace ACTIONet
     }
 
     //verify that valid nn approach has been specified
-    if (nn_approaches.find(nn_approach) == nn_approaches.end())
+    if (nn_approaches.find(algorithm) == nn_approaches.end())
     {
       //invalid nn approach was provided; exit
       throw nnApproachException;
@@ -613,13 +614,13 @@ namespace ACTIONet
 
     /// build ACTIONet with k*nn or fixed k knn, based on passed parameter
     sp_mat G;
-    if (nn_approach == "k*nn")
+    if (algorithm == "k*nn")
     {
-      G = build_ACTIONet_KstarNN_v2(H_stacked, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+      G = buildNetwork_KstarNN_v2(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
     }
     else
     {
-      G = build_ACTIONet_KNN(H_stacked, k, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+      G = buildNetwork_KNN(H, k, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
     }
     return (G);
   }

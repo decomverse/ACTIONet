@@ -243,10 +243,10 @@ namespace ACTIONet
     return (G);
   }
 
-  field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level,
-                             unsigned int n_epochs,
-                             int layout_alg, int thread_no,
-                             int seed)
+  field<mat> layoutNetwork_umap(sp_mat &G, mat initial_position, int compactness_level,
+                                unsigned int n_epochs,
+                                int layout_alg, int thread_no,
+                                int seed)
   {
     if (thread_no <= 0)
     {
@@ -257,7 +257,7 @@ namespace ACTIONet
 
     field<mat> res(3);
 
-    mat init_coors = S_r.rows(0, 2); //round(S_r.rows(0, 2) * 1e6) * 1e-6;
+    mat init_coors = initial_position.rows(0, 2); //round(initial_position.rows(0, 2) * 1e6) * 1e-6;
 
     sp_mat H = G;
     H.for_each([](sp_mat::elem_type &val)
@@ -494,6 +494,101 @@ namespace ACTIONet
     return res;
   }
 
+  field<mat> layoutNetwork_forced_atlas(sp_mat &G, mat initial_position, int compactness_level,
+                                        unsigned int n_epochs, int thread_no,
+                                        int seed)
+  {
+    if (thread_no <= 0)
+    {
+      thread_no = SYS_THREADS_DEF;
+    }
+
+    stdout_printf("Computing layout (%d threads):\n", thread_no);
+    field<mat> res(3);
+
+    int D = initial_position.n_rows;
+    mat init_coors = initial_position.rows(0, min(2, D)); //round(initial_position.rows(0, 2) * 1e6) * 1e-6;
+
+    /*
+    fmat coordinates_float(result.data(), 2, nV);
+    mat coordinates = conv_to<mat>::from(coordinates_float);
+    coordinates = trans(coordinates);
+    stdout_printf("done\n");
+    FLUSH; // fflush(stdout);
+  */
+
+    /****************************
+   *  Compute 3D Embedding	*
+   ***************************/
+    if (2 < D)
+    {
+      /*
+    fmat coordinates_3D_float(result.data(), 3, nV);
+    mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
+    // coordinates_3D = robust_zscore(trans(coordinates_3D));
+    coordinates_3D = trans(coordinates_3D);
+
+    stdout_printf("done\n");
+    FLUSH; // fflush(stdout);
+*/
+    }
+    else
+    {
+      /*
+      coordinates_3D.col(0) = coordinates.col(0);
+      coordinates_3D.col(1) = coordinates.col(1);
+      coordinates_3D.col(2) = ;
+      */
+    }
+    /****************************
+   *  Now compute node colors *
+   ***************************/
+
+    /*
+    stdout_printf("\tComputing node colors ... "); // fflush(stdout);
+
+    mat U;
+    vec s;
+    mat V;
+    svd_econ(U, s, V, coordinates_3D);
+    mat Z = zscore(U);
+
+    vec a = 75 * Z.col(0);
+    vec b = 75 * Z.col(1);
+
+    vec L;
+    if (D == 2)
+    {
+      L = ones(Z.n_rows) * 50;
+    }
+    else
+    {
+      L = Z.col(2);
+      L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
+    }
+
+    double r_channel, g_channel, b_channel;
+    mat RGB_colors = zeros(nV, 3);
+    for (int i = 0; i < nV; i++)
+    {
+      Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
+
+      RGB_colors(i, 0) = min(1.0, max(0.0, r_channel));
+      RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
+      RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
+    }
+
+    stdout_printf("done\n");
+    FLUSH;
+
+    res(0) = coordinates;
+    res(1) = coordinates_3D;
+    res(2) = RGB_colors; //RGB_colors;
+    */
+
+    return res;
+  }
+
   //G: MxM, inter_graph: MxN, reference_coordinates: DxN
   field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level,
                               unsigned int n_epochs,
@@ -682,6 +777,31 @@ namespace ACTIONet
       res(2) = RGB_colors; //RGB_colors;
     }
     return res;
+  }
+
+  field<mat> layoutNetwork(sp_mat &G, mat initial_position, string algorithm, int compactness_level,
+                           unsigned int n_epochs, int thread_no,
+                           int seed)
+  {
+    field<mat> res;
+    if (algorithm == "TUMAP")
+    {
+      res = layoutNetwork_umap(G, initial_position, compactness_level, n_epochs, TUMAP_LAYOUT, thread_no, seed);
+    }
+    else if (algorithm == "UMAP")
+    {
+      res = layoutNetwork_umap(G, initial_position, compactness_level, n_epochs, UMAP_LAYOUT, thread_no, seed);
+    }
+    else if (algorithm == "forced_atlas")
+    {
+      res = layoutNetwork_forced_atlas(G, initial_position, compactness_level, n_epochs, thread_no, seed);
+    }
+    else
+    { // Default to TUMAP
+      res = layoutNetwork_umap(G, initial_position, compactness_level, n_epochs, UMAP_LAYOUT, thread_no, seed);
+    }
+
+    return (res);
   }
 
 } // namespace ACTIONet
