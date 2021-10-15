@@ -264,31 +264,34 @@ namespace ACTIONet
 
     // Main functions to build an interaction network from multi-level archetypal
     // decompositions
-    sp_mat build_ACTIONet_JS_KstarNN(mat H_stacked, double density, int thread_no,
-                                     double M, double ef_construction, double ef,
-                                     bool mutual_edges_only,
-                                     string distance_metric);
-    sp_mat build_ACTIONet_JS_KstarNN_v2(mat H_stacked, double density,
-                                        int thread_no, double M,
-                                        double ef_construction, double ef,
-                                        bool mutual_edges_only,
-                                        string distance_metric);
-    sp_mat build_ACTIONet_JS_KNN(mat H_stacked, int k, int thread_no, double M,
-                                 double ef_construction, double ef,
-                                 bool mutual_edges_only, string distance_metric);
+    sp_mat buildNetwork_KstarNN(mat H_stacked, double density, int thread_no,
+                                double M, double ef_construction, double ef,
+                                bool mutual_edges_only,
+                                string distance_metric);
+    sp_mat buildNetwork_KstarNN_v2(mat H_stacked, double density,
+                                   int thread_no, double M,
+                                   double ef_construction, double ef,
+                                   bool mutual_edges_only,
+                                   string distance_metric);
+    sp_mat buildNetwork_KNN(mat H_stacked, int k, int thread_no, double M,
+                            double ef_construction, double ef,
+                            bool mutual_edges_only, string distance_metric);
 
-    sp_mat build_ACTIONet(mat H_stacked, double density, int thread_no, double M,
-                          double ef_construction, double ef, bool mutual_edges_only,
-                          string distance_metric, string nn_approach, int k);
+    sp_mat buildNetwork(mat H,
+                        string algorithm = "k*nn",
+                        string distance_metric = "jsd",
+                        double density = 1.0, int thread_no = 0,
+                        double M = 16, double ef_construction = 200,
+                        double ef = 10, bool mutual_edges_only = true,
+                        int k = 10);
 
     mat computeFullSim(mat &H, int thread_no);
 
     // SGD-based force-directed layout (adopted and modified from the UMAP
     // implementation)
-    field<mat> layout_ACTIONet(sp_mat &G, mat S_r, int compactness_level = 50,
-                               unsigned int n_epochs = 500,
-                               int layout_alg = TUMAP_LAYOUT, int thread_no = 0,
-                               int seed = 0);
+    field<mat> layoutNetwork(sp_mat &G, mat initial_position, string algorithm = "TUMAP", int compactness_level = 50,
+                             unsigned int n_epochs = 500, int thread_no = 0,
+                             int seed = 0);
 
     field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level = 50,
                                 unsigned int n_epochs = 500,
