@@ -10,7 +10,8 @@
 			"*.rmd": "markdown",
 			"exception": "cpp",
 			"optional": "cpp",
-			"armadillo": "cpp"
+			"armadillo": "cpp",
+			"complex": "cpp"
 		}
 	}
 }
