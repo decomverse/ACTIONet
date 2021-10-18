@@ -8,7 +8,7 @@ For the optimal performance on Intel-based architectures, installing [Intel Math
 To install the `ACTIONet` dependencies on debian-based linux machines, run:
 
 ```bash
-sudo apt install libhdf5-dev libsuitesparse-dev
+sudo apt install libhdf5-dev libsuitesparse-dev libcurl4-openssl-dev libssl-dev libxml2-dev
 ```
 
 For Mac-based systems use [brew](https://brew.sh/):
