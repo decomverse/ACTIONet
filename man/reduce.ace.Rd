@@ -32,6 +32,6 @@ ACTIONetExperiment object with reduction in colMaps(ace).
 Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix
 }
 \examples{
-ace <- import.ace.from.10X(input_path)
-ace <- reduce.ace(ace)
+ace = import.ace.from.10X(input_path)
+ace = reduce.ace(ace)
 }

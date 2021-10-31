@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{ACTIONet.gradient}(
   ace,
-  gradient_attr,
+  x,
   alpha_val = 0.85,
   log_scale = FALSE,
   nonparameteric = FALSE,
@@ -23,6 +23,8 @@
 }
 \arguments{
 \item{ace}{'ACTIONetExperiment' object}
+
+\item{x}{Numeric vector of length NCOL(ace).}
 
 \item{alpha_val}{Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).}
 
@@ -47,8 +49,6 @@
 \item{net_attr}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').}
 
 \item{coordinate_attr}{Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').}
-
-\item{x}{Numeric vector of length NCOL(ace).}
 }
 \value{
 'ggplot' object.
@@ -57,7 +57,7 @@
 Plots gradient of (imputed) values on ACTIONet scatter plot.
 }
 \examples{
-ace <- run.ACTIONet(ace)
-x <- logcounts(ace)["CD14", ]
+ace = run.ACTIONet(ace)
+x = logcounts(ace)['CD14', ]
 plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
 }

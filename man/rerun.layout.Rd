@@ -46,6 +46,6 @@ Rerun layout on the ACTIONet graph with new parameters
 }
 \examples{
 plot.ACTIONet(ace)
-ace.updated <- rerun.layout(ace, layout_compactness = 20)
+ace.updated = rerun.layout(ace, layout_compactness = 20)
 plot.ACTIONet(ace.updated)
 }
