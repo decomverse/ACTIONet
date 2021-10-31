@@ -91,10 +91,10 @@ impute.genes.using.ACTIONet <- function(
 
     expression_raw = SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,
         , drop = FALSE]
-    if (is.sparseMatrix(expression_raw)) {
+    if (ACTIONetExperiment:::is.sparseMatrix(expression_raw)) {
         expression_raw = U = Matrix::t(as(expression_raw, "dgTMatrix"))
         U[U < 0] = 0
-        cs = fastColSums(U)
+        cs = Matrix::colSums(U)
         U = Matrix::sparseMatrix(
           i = U@i + 1,
           j = U@j + 1,
@@ -104,8 +104,8 @@ impute.genes.using.ACTIONet <- function(
     } else {
         expression_raw = U = Matrix::t(expression_raw)
         U[U < 0] = 0
-        cs = fastColSums(U)
-        U = expression_raw/fastColSums(expression_raw)
+        cs = Matrix::colSums(U)
+        U = expression_raw/Matrix::colSums(expression_raw)
     }
     U = U[, cs > 0]
     gg = matched.genes[cs > 0]

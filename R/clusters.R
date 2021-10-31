@@ -151,7 +151,7 @@ annotate.clusters.using.markers <- function(
         message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
     }
 
-    if (is.matrix(marker.genes) | is.sparseMatrix(marker.genes)) {
+    if (is.matrix(marker.genes) | ACTIONetExperiment:::is.sparseMatrix(marker.genes)) {
         marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x >
             0])
     }
@@ -274,7 +274,7 @@ annotate.profile.using.markers <- function(
   rand.sample.no = 1000
 ) {
 
-    if (is.matrix(marker.genes) | is.sparseMatrix(marker.genes)) {
+    if (is.matrix(marker.genes) | ACTIONetExperiment:::is.sparseMatrix(marker.genes)) {
         marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
     }
 

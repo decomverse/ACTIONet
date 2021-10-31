@@ -6,8 +6,8 @@ normalize.scran <- function(
   BPPARAM = SerialParam()
 ) {
 
-    .check_and_load_package(c("scran", "scater"))
-    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    ACTIONetExperiment:::.check_and_load_package(c("scran", "scater"))
+    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
     ace = scran::computeSumFactors(
       ace,
@@ -29,8 +29,8 @@ normalize.multiBatchNorm <- function(
   BPPARAM = SerialParam()
 ) {
 
-    .check_and_load_package(c("scran", "batchelor"))
-    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    ACTIONetExperiment:::.check_and_load_package(c("scran", "batchelor"))
+    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
     sce_temp = as.SingleCellExperiment(ace)
 
     sce_temp = batchelor::multiBatchNorm(
@@ -51,7 +51,7 @@ normalize.Linnorm <- function(
   assay_name = "counts"
 ) {
 
-    .check_and_load_package("Linnorm")
+    ACTIONetExperiment:::.check_and_load_package("Linnorm")
     SummarizedExperiment::assays(ace)[["logcounts"]] = Linnorm(SummarizedExperiment::assays(ace)[[assay_name]])
     return(ace)
 }
@@ -60,46 +60,16 @@ normalize.Linnorm <- function(
 normalize.default <- function(
   ace,
   assay_name = "counts",
-  log_scale = TRUE
+  log_scale = TRUE,
+  median_scale = TRUE
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
-    B = rescale.matrix(S, log_scale)
+    B = rescale.matrix(S, log_scale, median_scale)
     rownames(B) = rownames(ace)
     colnames(B) = colnames(ace)
     SummarizedExperiment::assays(ace)[["logcounts"]] = B
     return(ace)
-}
-
-rescale.matrix <- function(
-  S,
-  log_scale = FALSE
-) {
-
-    if (is.matrix(S)) {
-        cs = fastColSums(S)
-        cs[cs == 0] = 1
-        B = median(cs) * Matrix::t(Matrix::t(S) / cs)
-        if (log_scale == TRUE) {
-            B = log1p(B)
-        }
-    } else {
-        A = as(S, "dgTMatrix")
-        cs = fastColSums(S)
-        cs[cs == 0] = 1
-        x = median(cs) * (A@x/cs[A@j + 1])
-        if (log_scale == TRUE) {
-            x = log1p(x)
-        }
-        B = Matrix::sparseMatrix(
-          i = A@i + 1,
-          j = A@j + 1,
-          x = x,
-          dims = dim(A)
-        )
-    }
-
-    return(B)
 }
 
 #' @export
@@ -141,12 +111,13 @@ normalize.ace <- function(
         ace = normalize.default(
           ace = ace,
           assay_name = assay_name,
-          log_scale = TRUE
+          log_scale = TRUE,
+          median_scale = TRUE
         )
         norm_method = "default"
     }
 
     metadata(ace)$normalization.method = norm_method
-    
+
     return(ace)
 }

@@ -34,13 +34,13 @@ get.pseudobulk.SE <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    IDX = .get_attr_or_split_idx(ace, sample_attr)
+    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, sample_attr)
     good_batches = sapply(IDX, length) >= min_cells_per_batch
 
     if(!all(good_batches)){
       old_batches = names(IDX)
       ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
-      IDX = .get_attr_or_split_idx(ace, sample_attr)
+      IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, sample_attr)
       bad_batch_names = setdiff(old_batches, names(IDX))
       msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)
@@ -52,13 +52,13 @@ get.pseudobulk.SE <- function(
 
     se_assays = list()
 
-    S0 = sapply(counts_list, fastRowSums) + pseudocount
+    S0 = sapply(counts_list, ACTIONetExperiment:::fastRowSums) + pseudocount
     se_assays$counts = S0
 
-    E0 = sapply(counts_list, fastRowMeans)
+    E0 = sapply(counts_list, ACTIONetExperiment:::fastRowMeans)
     se_assays$mean = E0
 
-    V0 = sapply(counts_list, fastRowVars)
+    V0 = sapply(counts_list, ACTIONetExperiment:::fastRowVars)
     se_assays$var = V0
 
     if (ensemble == TRUE) {
@@ -80,7 +80,7 @@ get.pseudobulk.SE <- function(
     }
 
     n_cells = sapply(counts_list, NCOL)
-    nnz_feat_mean = sapply(counts_list, function(X) mean(fastColSums(X > 0)))
+    nnz_feat_mean = sapply(counts_list, function(X) mean(Matrix::colSums(X > 0)))
     cd = data.frame(
       n_cells = n_cells,
       nnz_feat_mean = nnz_feat_mean,
@@ -187,7 +187,7 @@ run.ensemble.pseudobulk.DESeq <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    .check_and_load_package("DESeq2")
+    ACTIONetExperiment:::.check_and_load_package("DESeq2")
 
     if (is.null(bins)) {
         bins = S4Vectors::metadata(se)$bins
@@ -218,7 +218,7 @@ run.ensemble.pseudobulk.DESeq <- function(
         return(out)
     })
 
-    outlier_count = fastRowSums(sapply(dds_res, function(dds) dds$dispOutlier))
+    outlier_count = ACTIONetExperiment:::fastRowSums(sapply(dds_res, function(dds) dds$dispOutlier))
 
     mat_Bstatm = sapply(dds_res, function(dds) dds$baseMean)
     bm_mean = Matrix::rowMeans(mat_Bstatm, na.rm = TRUE)
@@ -264,7 +264,7 @@ run.ensemble.pseudobulk.Limma <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    .check_and_load_package(c("SummarizedExperiment", "limma"))
+    ACTIONetExperiment:::.check_and_load_package(c("SummarizedExperiment", "limma"))
 
     if (class(se) != "SummarizedExperiment")
         stop("'se' must be an object of type 'SummarizedExperiment'.")
@@ -349,7 +349,7 @@ variance.adjusted.limma <- function(
   min_covered_samples = 3
 ) {
 
-  .check_and_load_package(c("SummarizedExperiment", "limma"))
+  ACTIONetExperiment:::.check_and_load_package(c("SummarizedExperiment", "limma"))
 
   if (class(se) != "SummarizedExperiment")
     stop("se must be an object of type 'SummarizedExperiment'.")
@@ -359,7 +359,7 @@ variance.adjusted.limma <- function(
   design_list = .preprocess_design_matrix_and_var_names(design_mat, variable_name)
   design_mat = design_list$design_mat
   variable_name = design_list$variable_name
-  selected_vars = fastColSums(design_mat > 0) >= min_covered_samples
+  selected_vars = Matrix::colSums(design_mat > 0) >= min_covered_samples
 
   E = SummarizedExperiment::assays(se)[[slot_E]]
 
@@ -389,11 +389,11 @@ variance.adjusted.limma <- function(
 
     fil_dm = apply(design_mat[, selected_vars, drop = FALSE], 2, function(x) {
       mm = (x > 0)
-      v = as.numeric((fastRowSums(W_masked[, mm, drop = FALSE]) == 0) > 0)
+      v = as.numeric((ACTIONetExperiment:::fastRowSums(W_masked[, mm, drop = FALSE]) == 0) > 0)
       return(v)
     })
 
-    fil_idx = which(fastRowSums(fil_dm) > 0)
+    fil_idx = which(ACTIONetExperiment:::fastRowSums(fil_dm) > 0)
 
     selected_feats = setdiff(1:NROW(W_masked), fil_idx)
     lm_weights = W_masked[selected_feats, ]

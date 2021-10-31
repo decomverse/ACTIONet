@@ -69,7 +69,7 @@ CPal_default = c(
           stop(err)
       }
   } else {
-      if (is.matrix(X) | is.sparseMatrix(X)) {
+      if (is.matrix(X) | ACTIONetExperiment:::is.sparseMatrix(X)) {
           coors = as.matrix(X)
       } else {
           err = sprintf("'X' must be 'ACTIONetExperiment' or matrix.\n")
@@ -96,7 +96,7 @@ CPal_default = c(
   }
 
   if (is(data, "ACTIONetExperiment")) {
-    plot_labels = .get_attr_or_split_idx(data, attr = label_attr, return_vec = TRUE)
+    plot_labels = ACTIONetExperiment:::.get_attr_or_split_idx(data, attr = label_attr, return_vec = TRUE)
   } else {
     plot_labels = label_attr
   }
@@ -138,7 +138,7 @@ CPal_default = c(
     } else if (is.character(color_attr)) {
 
       if (length(color_attr) == 1) {
-        plot_colors = .get_attr_or_split_idx(data, attr = color_attr, return_vec = TRUE)
+        plot_colors = ACTIONetExperiment:::.get_attr_or_split_idx(data, attr = color_attr, return_vec = TRUE)
       } else {
         plot_colors = color_attr
       }
@@ -219,7 +219,7 @@ CPal_default = c(
   } else {
 
     if (length(trans_attr) == 1) {
-      alpha_fac = .get_attr_or_split_idx(ace, attr = trans_attr, return_vec = TRUE)
+      alpha_fac = ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = trans_attr, return_vec = TRUE)
     } else {
       alpha_fac = trans_attr
     }

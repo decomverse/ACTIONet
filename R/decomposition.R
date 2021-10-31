@@ -1,5 +1,5 @@
 #' @export
-decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
+decomp <- function(X, k, method, W0 = NULL, params) {
     if (method == "simplex_regression") {
         W <- as.matrix(W0)
         B <- as.matrix(X)
