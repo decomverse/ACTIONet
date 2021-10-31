@@ -1,5 +1,5 @@
 .preprocess_annotation_markers <- function(markers, feature_set) {
-    if (is.matrix(markers) || is.sparseMatrix(markers)) {
+    if (is.matrix(markers) || ACTIONetExperiment:::is.sparseMatrix(markers)) {
 		common_features = sort(unique(intersect(feature_set, rownames(markers))))
 		row_idx = match(common_features, rownames(markers))
 		X = markers[row_idx, ]
@@ -78,7 +78,7 @@ annotate.archetypes.using.labels <- function(
 
     Labels = .preprocess_annotation_labels(labels, ace)
 
-    if (is.matrix(ace) | is.sparseMatrix(ace)) {
+    if (is.matrix(ace) | ACTIONetExperiment:::is.sparseMatrix(ace)) {
         profile = as.matrix(ace)
     } else {
         profile = Matrix::t(colMaps(ace)[[archetype.slot]])
@@ -98,8 +98,8 @@ annotate.archetypes.using.labels <- function(
             return(rep(0, nrow(profile)))
         }
 
-        mu.class = fastRowMeans(class.profile)
-        mu.null = fastRowMeans(null.profile)
+        mu.class = ACTIONetExperiment:::fastRowMeans(class.profile)
+        mu.null = ACTIONetExperiment:::fastRowMeans(null.profile)
 
         sigma_sq.class = apply(class.profile, 1, var)
         sigma_sq.null = apply(null.profile, 1, var)

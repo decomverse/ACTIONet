@@ -15,11 +15,6 @@ using namespace arma;
 #define ARMA_USE_CXX11_RNG
 #define DYNSCHED
 
-template <typename T>
-Rcpp::NumericVector arma2vec(const T &x) {
-  return Rcpp::NumericVector(x.begin(), x.end());
-}
-
 // [[Rcpp::export]]
 vec roll_var(vec &X) {
   const uword n_max = X.n_elem;
@@ -37,66 +32,6 @@ vec roll_var(vec &X) {
   if (n_max > 0) out[0] = std::numeric_limits<double>::quiet_NaN();
 
   return out;
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector fast_row_sums(SEXP &A) {
-  vec sum_vec;
-  if (Rf_isS4(A)) {
-    sp_mat X = as<arma::sp_mat>(A);
-    sum_vec = zeros(X.n_rows);
-
-    sp_mat::const_iterator it = X.begin();
-    sp_mat::const_iterator it_end = X.end();
-    for (; it != it_end; ++it) {
-      sum_vec[it.row()] += (*it);
-    }
-  } else {
-    mat X = as<arma::mat>(A);
-    sum_vec = sum(X, 1);
-  }
-
-  return (arma2vec(sum_vec));
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector fast_column_sums(SEXP &A) {
-  vec sum_vec;
-  if (Rf_isS4(A)) {
-    sp_mat X = as<arma::sp_mat>(A);
-    sum_vec = zeros(X.n_cols);
-
-    sp_mat::const_iterator it = X.begin();
-    sp_mat::const_iterator it_end = X.end();
-    for (; it != it_end; ++it) {
-      sum_vec[it.col()] += (*it);
-    }
-  } else {
-    mat X = as<arma::mat>(A);
-    sum_vec = trans(sum(X, 0));
-  }
-
-  return (arma2vec(sum_vec));
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector fast_row_max(SEXP &A) {
-  vec sum_vec;
-  if (Rf_isS4(A)) {
-    sp_mat X = as<arma::sp_mat>(A);
-    sum_vec = zeros(X.n_rows);
-
-    sp_mat::const_iterator it = X.begin();
-    sp_mat::const_iterator it_end = X.end();
-    for (; it != it_end; ++it) {
-      sum_vec[it.row()] = std::max(sum_vec[it.row()], (*it));
-    }
-  } else {
-    mat X = as<arma::mat>(A);
-    sum_vec = max(X, 1);
-  }
-
-  return (arma2vec(sum_vec));
 }
 
 // Adapted from
@@ -122,17 +57,4 @@ Rcpp::NumericVector computeSparseRowVariances(IntegerVector j,
   }
   rv = rv / (n - 1);
   return (rv);
-}
-
-// [[Rcpp::export]]
-sp_mat bind_sparse_mats(sp_mat &A, sp_mat &B, int dim = 0) {
-  sp_mat C;
-  if (dim == 0) {
-    C = join_cols(A, B);
-  } else if (dim == 1) {
-    C = join_rows(A, B);
-  } else {
-    stderr_stop("Invalid dim");
-  }
-  return (C);
 }

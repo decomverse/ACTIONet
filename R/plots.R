@@ -178,7 +178,7 @@ plot.ACTIONet.3D <- function(
             coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | ACTIONetExperiment:::is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
@@ -343,7 +343,7 @@ plot.ACTIONet.feature.view <- function(
     X = exp(scale(X))
 
     core.coors = Matrix::t(metadata(ace)$backbone$coordinates)
-    cs = fastColSums(X)
+    cs = Matrix::colSums(X)
     cs[cs == 0] = 1
     X = scale(X, center = FALSE, scale = cs)
 
@@ -1039,7 +1039,7 @@ plot.ACTIONet.archetype.footprint <- function(
 ) {
 
     Ht = colMaps(ace)[["H_unified"]]
-    cs = fastColSums(Ht)
+    cs = Matrix::colSums(Ht)
     cs[cs == 0] = 1
 
     U = as(scale(Ht, center = FALSE, scale = cs), "dgTMatrix")
@@ -1142,7 +1142,7 @@ select.top.k.features <- function(
     }
 
     if (reorder_columns == TRUE) {
-        feat_scores_agg = apply(IDX, 2, function(perm) as.numeric(fastColMeans(W0[perm, ])))
+        feat_scores_agg = apply(IDX, 2, function(perm) as.numeric(ACTIONetExperiment:::fastColMeans(W0[perm, ])))
         CC = cor(feat_scores_agg)
         D = stats::as.dist(1 - CC)
         cols = seriation::get_order(seriation::seriate(D, "OLO"))
@@ -1197,7 +1197,7 @@ plot.ACTIONet.backbone <- function(
             coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | ACTIONetExperiment:::is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
@@ -1293,7 +1293,7 @@ plot.ACTIONet.backbone <- function(
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
     aCol = grDevices::rgb(arch.RGB)
 
-    w = fastColSums(colMaps(ace)$H_unified)
+    w = Matrix::colSums(colMaps(ace)$H_unified)
     w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
     arch.sizes = (0.25 + arch.size.factor * w)
 
@@ -1390,7 +1390,7 @@ plot.ACTIONet.backbone.graph <- function(
             coors = scale(coors)
         }
     } else {
-        if (is.matrix(ace) | is.sparseMatrix(ace)) {
+        if (is.matrix(ace) | ACTIONetExperiment:::is.sparseMatrix(ace)) {
             coors = as.matrix(ace)
             coor.mu = apply(coors, 2, mean)
             coor.sigma = apply(coors, 2, sd)
@@ -1487,7 +1487,7 @@ plot.ACTIONet.backbone.graph <- function(
     arch.RGB = grDevices::convertColor(color = arch.Lab, from = "Lab", to = "sRGB")
     aCol = grDevices::rgb(arch.RGB)
 
-    w = fastColSums(colMaps(ace)$H_unified)
+    w = Matrix::colSums(colMaps(ace)$H_unified)
     w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
     arch.sizes = (0.25 + arch.size.factor * w)
 
@@ -1580,7 +1580,7 @@ plot.backbone.graph <- function(
         arch.colors = rgb(backbone$colors)
     }
 
-    w = fastColSums(colMaps(ace)$H_unified)
+    w = Matrix::colSums(colMaps(ace)$H_unified)
     w = 0.3 + 0.7 * (w - min(w))/(max(w) - min(w))
     arch.sizes = (0.25 + w) * point_size
 

@@ -12,7 +12,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(
   BPPARAM = SerialParam()
 ) {
 
-    .check_and_load_package(c("scran", "SingleCellExperiment", "batchelor", "BiocParallel"))
+    ACTIONetExperiment:::.check_and_load_package(c("scran", "SingleCellExperiment", "batchelor", "BiocParallel"))
 
     if (is.null(batch_attr)) {
         warning("'batch_attr' must be provided")
@@ -23,8 +23,8 @@ reduce.and.batch.correct.ace.fastMNN <- function(
     m_data = metadata(ace)
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
-    mnn_batch = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
-    IDX = .get_attr_or_split_idx(ace, batch_attr)
+    mnn_batch = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr)
     merge_order = order(sapply(IDX, function(idx) length(idx)), decreasing = TRUE)
 
     set.seed(0)
@@ -97,7 +97,7 @@ reduce.and.batch.correct.ace.Harmony <- function(
 
     ace = as.ACTIONetExperiment(ace)
 
-    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
     ace = reduce.ace(
       ace = ace,
@@ -136,7 +136,7 @@ batch.correct.ace.Harmony <- function(
     }
 
     ace = as.ACTIONetExperiment(ace)
-    batch_attr = .get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
     colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(
       data_mat = colMaps(ace)[[reduction_slot]],
@@ -210,7 +210,7 @@ orthogonalize.ace.batch.simple <- function(
   reduction_slot = "ACTION"
 ) {
 
-    batch_attr = .get_attr_or_split_idx(ace, attr = batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = batch_attr, return_vec = TRUE)
     batch_attr = as.factor(batch_attr)
     design_mat = stats::model.matrix(~batch_attr)
 
