@@ -31,7 +31,7 @@ Annotate clusters using known marker genes
 (It uses permutation test on cluster specificity scores)
 }
 \examples{
-data("curatedMarkers_human") # pre-packaged in ACTIONet
-markers <- curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-arch.annot <- annotate.archetypes.using.markers(ace, markers = markers)
+data('curatedMarkers_human') # pre-packaged in ACTIONet
+markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+arch.annot = annotate.archetypes.using.markers(ace, markers = markers)
 }
