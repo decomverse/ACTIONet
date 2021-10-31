@@ -1,8 +1,8 @@
 Package: ACTIONet
 Type: Package
 Title: Robust multi-resolution analysis of single-cell datasets
-Version: 2.1.9
-Date: 2021-07-26
+Version: 3.0.0
+Date: 2021-10-30
 Authors@R: c(
     person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com",
         role = c("cre", "aut"), comment = c(ORCID = "0000-0001-8734-2326")),
@@ -18,8 +18,8 @@ Description:
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
 Depends: R (>= 4.0.0), ACTIONetExperiment, Matrix, S4Vectors, BiocGenerics, SummarizedExperiment, scran, scater, batchelor, BiocParallel, hdf5r
-Imports: Rcpp, RcppArmadillo, ACTIONetExperiment,R.utils, stringr, ggplot2, ggpubr, ggrepel, plotly, RColorBrewer, rmdformats, pals, seriation, networkD3, dplyr, grid, htmlwidgets, htmltools, matrixStats, gplots, ComplexHeatmap
-Suggests: metap, multtest, ComplexHeatmap, limma, ineq
+Imports: Rcpp, RcppArmadillo, ACTIONetExperiment, R.utils, stringr, ggplot2, ggpubr, ggrepel, plotly, RColorBrewer, rmdformats, pals, seriation, dplyr, grid, htmlwidgets, htmltools, matrixStats, gplots
+Suggests: metap, multtest, ComplexHeatmap, limma, ineq, networkD3
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
 Remotes: shmohammadi86/ACTIONetExperiment,shmohammadi86/SCINET,immunogenomics/harmony

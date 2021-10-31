@@ -174,7 +174,7 @@ assess.peakset.enrichment.from.archetypes <- function(
     associations = as(associations[common.genes, ], "sparseMatrix")
 
 
-    col.mask = (fastColSums(associations) > min.counts)  #& (Matrix::colSums(associations) < nrow(associations)*0.1)
+    col.mask = (Matrix::colSums(associations) > min.counts)  #& (Matrix::colSums(associations) < nrow(associations)*0.1)
     associations = associations[, col.mask]
     associations = associations[, -1]
     enrichment.out = assess_enrichment(scores, associations)
@@ -209,7 +209,7 @@ assess.geneset.enrichment.gProfiler <- function(
   col = "tomato"
 ) {
 
-    .check_and_load_package(c("gprofiler2", "ggpubr"))
+    ACTIONetExperiment:::.check_and_load_package(c("gprofiler2", "ggpubr"))
 
     gp.out = gprofiler2::gost(
       genes,
@@ -314,7 +314,7 @@ geneset.enrichment.gProfiler <- function(
   category = c("GO:BP", "REAC", "KEGG")
 ) {
 
-    .check_and_load_package(c("gprofiler2", "ggpubr"))
+    ACTIONetExperiment:::.check_and_load_package(c("gprofiler2", "ggpubr"))
 
     gp.out = gprofiler2::gost(
       genes,
@@ -383,7 +383,7 @@ assess.continuous.autocorrelation <- function(
     set.seed(0)
 
     A = ace$ACTIONet
-    degs = fastColSums(A)
+    degs = Matrix::colSums(A)
     L = -A
     diag(L) = degs
     W = sum(A@x)
@@ -498,7 +498,7 @@ assess.categorical.autocorrelation <- function(
     w = A@x
     s0 = sum(w)
     s1 = sum(4 * w^2)/2
-    s2 = sum((fastColSums(A) + fastRowSums(A))^2)
+    s2 = sum((Matrix::colSums(A) + ACTIONetExperiment:::fastRowSums(A))^2)
 
     A = as(A, "dgTMatrix")
 
@@ -512,58 +512,4 @@ assess.categorical.autocorrelation <- function(
     z = (phi - mean(rand.phis))/sd(rand.phis)
 
     return(z)
-}
-
-
-#' @export
-get.top.marker.genes <- function(
-  ace,
-  clusters,
-  top_genes = 10,
-  most_specific = FALSE,
-  features_use = NULL,
-  feat_subset = NULL,
-  assay_name = "logcounts",
-  return_type = c("data.frame", "df", "list")
-){
-
-  return_type = match.arg(return_type)
-
-  cluster_vec = .get_attr_or_split_idx(ace, clusters, return_vec = TRUE)
-  features_use = .preprocess_annotation_features(ace, features_use = features_use)
-
-  ace  = compute.cluster.feature.specificity(
-    ace = ace,
-    clusters = cluster_vec,
-    output_slot = "temp_slot",
-    assay_name = assay_name
-  )
-
-  feat_spec = rowMaps(ace)[["temp_slot_feature_specificity"]]
-  rownames(feat_spec) = features_use
-
-  if(!is.null(feat_subset))
-    feat_spec = feat_spec[rownames(feat_spec) %in% feat_subset, ]
-
-  if(most_specific == TRUE){
-    W = select.top.k.features(
-      feat_spec,
-      top_features = top_genes,
-      normalize = FALSE,
-      reorder_columns = FALSE
-    )
-    feat_spec_top = apply(W, 2, function(v) rownames(W)[order(v, decreasing = TRUE)][1:top_genes])
-  } else {
-    feat_spec_top = sapply(colnames(feat_spec), function(type){
-      c = feat_spec[, type]
-      names(head(sort(c, decreasing = TRUE), top_genes))
-    })
-  }
-
-  df = data.frame(feat_spec_top)
-
-  if(return_type == "list")
-    return(as.list(df))
-  else
-    return(df)
 }

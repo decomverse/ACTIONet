@@ -2,10 +2,18 @@ CSOURCES+=$(shell find ACTIONet/src -type f -name "*.c")
 SOURCES+=$(shell find ACTIONet/src -type f -name "*.cc")
 SOURCES2+=$(shell find . -type f -name "*.cpp")
 OBJECTS=$(SOURCES:.cc=.o) $(SOURCES2:.cpp=.o) $(CSOURCES:.c=.o)
-PWD=$(shell pwd)
-INCLUDE_PATH=${PWD}/ACTIONet/include
-PKG_CPPFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
-PKG_CXXFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+# PWD=$(shell pwd)
+
+INCLUDE_BASE+=$(shell find ACTIONet/include -type f -name "*.h" | sed s/^/-I/)
+INCLUDE_COMMON+=$(shell find ACTIONet/include/common -type d -print | sed s/^/-I/)
+INCLUDE_R+=$(shell find ACTIONet/include/R -type d -print | sed s/^/-I/)
+INCLUDE_PATHS=$(INCLUDE_BASE) $(INCLUDE_COMMON) $(INCLUDE_R)
+
+# PKG_CPPFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+
+PKG_CPPFLAGS=`find ${INCLUDE_PATHS} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+
+PKG_CXXFLAGS=`find ${INCLUDE_PATHS} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
 
 UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
