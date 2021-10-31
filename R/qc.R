@@ -1,4 +1,4 @@
-.get_mtRNA_genes = function(species = c("mmusculus", "hsapiens")){
+.get_mtRNA_genes = function(species = c("hsapiens", "mmusculus")){
   MT_RNA = c('mt-Nd1', 'mt-Nd2', 'mt-Nd3', 'mt-Nd4','mt-Nd4l', 'mt-Nd5', 'mt-Nd6', 'mt-Co1', 'mt-Co2', 'mt-Co3', 'mt-Atp6', 'mt-Atp8')
 
   species = match.arg(species)
@@ -13,7 +13,7 @@
   return(MT_RNA)
 }
 
-get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NULL, assay = "counts", species = c("mmusculus", "hsapiens", "other"), metric = c("pct", "ratio", "counts")){
+get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NULL, assay = "counts", species = c("hsapiens", "mmusculus", "other"), metric = c("pct", "ratio", "counts")){
 
   require(stats)
   species = match.arg(species)
@@ -28,13 +28,13 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
   }
 
   mat = assays(ace)[[assay]]
-  cs_mat = ACTIONet::fastColSums(mat)
+  cs_mat = Matrix::colSums(mat)
   mm = mat[mask, , drop = F]
-  cs_mm = ACTIONet::fastColSums(mm)
+  cs_mm = Matrix::colSums(mm)
 
   if(!is.null(by)){
 
-    IDX = ACTIONet:::.get_attr_or_split_idx(ace, by, groups_use)
+    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, by, groups_use)
 
     if(metric == "pct"){
       frac.list = lapply(IDX, function(idx){
@@ -73,7 +73,7 @@ plot.mtRNA.dist.by.attr <- function(
   features_use = NULL,
   assay = "counts",
   log_scale = FALSE,
-  species = c("mmusculus", "hsapiens"),
+  species = c("hsapiens", "mmusculus"),
   metric = c("pct", "ratio", "counts"),
   to_return = c("plot", "data"),
   palette = NULL,
@@ -140,13 +140,13 @@ plot.counts.by.attr <- function(
 
   require(ggplot2)
 
-  IDX = ACTIONet:::.get_attr_or_split_idx(ace, attr)
+  IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr)
   mat = assays(ace)[[assay]]
 
   if(nonzero == TRUE)
     mat = mat > 0
 
-  cs_mat = ACTIONet::fastColSums(mat)
+  cs_mat = Matrix::colSums(mat)
   sums.list = lapply(IDX, function(idx){
       cs_mat[idx]
   })
