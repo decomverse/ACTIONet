@@ -996,9 +996,9 @@ mat renormalize_input_matrix_full(
 // unification.out$H_unified) ' specificity.scores =
 // logPvals.list$upper_significance
 // [[Rcpp::export]]
-List compute_archetype_feature_specificity_bin(sp_mat &S, mat &H)
+List compute_archetype_feature_specificity_bin(sp_mat &S, mat &H, int thread_no = 0)
 {
-  field<mat> res = ACTIONet::compute_feature_specificity_bin(S, H);
+  field<mat> res = ACTIONet::compute_feature_specificity_bin(S, H, thread_no);
 
   List out_list;
   out_list["archetypes"] = res(0);
@@ -1025,9 +1025,9 @@ List compute_archetype_feature_specificity_bin(sp_mat &S, mat &H)
 // compute_archetype_feature_specificity(S.norm, unification.out$H_unified) '
 // specificity.scores = logPvals.list$upper_significance
 // [[Rcpp::export]]
-List compute_archetype_feature_specificity(sp_mat &S, mat &H)
+List compute_archetype_feature_specificity(sp_mat &S, mat &H, int thread_no = 0)
 {
-  field<mat> res = ACTIONet::compute_feature_specificity(S, H);
+  field<mat> res = ACTIONet::compute_feature_specificity(S, H, thread_no);
 
   List out_list;
   out_list["archetypes"] = res(0);
@@ -1054,9 +1054,9 @@ List compute_archetype_feature_specificity(sp_mat &S, mat &H)
 // compute_archetype_feature_specificity(S.norm, unification.out$H_unified) '
 // specificity.scores = logPvals.list$upper_significance
 // [[Rcpp::export]]
-List compute_archetype_feature_specificity_full(mat &S, mat &H)
+List compute_archetype_feature_specificity_full(mat &S, mat &H, int thread_no = 0)
 {
-  field<mat> res = ACTIONet::compute_feature_specificity(S, H);
+  field<mat> res = ACTIONet::compute_feature_specificity(S, H, thread_no);
 
   List out_list;
   out_list["archetypes"] = res(0);
@@ -1082,9 +1082,9 @@ List compute_archetype_feature_specificity_full(mat &S, mat &H)
 // compute_cluster_feature_specificity(S.norm, cell.clusters) '
 // specificity.scores = logPvals.list$upper_significance
 // [[Rcpp::export]]
-List compute_cluster_feature_specificity(sp_mat &S, uvec sample_assignments)
+List compute_cluster_feature_specificity(sp_mat &S, uvec sample_assignments, int thread_no = 0)
 {
-  field<mat> res = ACTIONet::compute_feature_specificity(S, sample_assignments);
+  field<mat> res = ACTIONet::compute_feature_specificity(S, sample_assignments, thread_no);
 
   List out_list;
   out_list["average_profile"] = res(0);
@@ -1110,9 +1110,9 @@ List compute_cluster_feature_specificity(sp_mat &S, uvec sample_assignments)
 // compute_cluster_feature_specificity(S.norm, cell.clusters) '
 // specificity.scores = logPvals.list$upper_significance
 // [[Rcpp::export]]
-List compute_cluster_feature_specificity_full(mat &S, uvec sample_assignments)
+List compute_cluster_feature_specificity_full(mat &S, uvec sample_assignments, int thread_no = 0)
 {
-  field<mat> res = ACTIONet::compute_feature_specificity(S, sample_assignments);
+  field<mat> res = ACTIONet::compute_feature_specificity(S, sample_assignments, thread_no);
 
   List out_list;
   out_list["average_profile"] = res(0);

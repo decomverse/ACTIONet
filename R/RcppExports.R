@@ -766,24 +766,24 @@ renormalize_input_matrix_full <- function(S, sample_assignments) {
     .Call(`_ACTIONet_renormalize_input_matrix_full`, S, sample_assignments)
 }
 
-compute_archetype_feature_specificity_bin <- function(S, H) {
-    .Call(`_ACTIONet_compute_archetype_feature_specificity_bin`, S, H)
+compute_archetype_feature_specificity_bin <- function(S, H, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_archetype_feature_specificity_bin`, S, H, thread_no)
 }
 
-compute_archetype_feature_specificity <- function(S, H) {
-    .Call(`_ACTIONet_compute_archetype_feature_specificity`, S, H)
+compute_archetype_feature_specificity <- function(S, H, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_archetype_feature_specificity`, S, H, thread_no)
 }
 
-compute_archetype_feature_specificity_full <- function(S, H) {
-    .Call(`_ACTIONet_compute_archetype_feature_specificity_full`, S, H)
+compute_archetype_feature_specificity_full <- function(S, H, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_archetype_feature_specificity_full`, S, H, thread_no)
 }
 
-compute_cluster_feature_specificity <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_cluster_feature_specificity`, S, sample_assignments)
+compute_cluster_feature_specificity <- function(S, sample_assignments, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_cluster_feature_specificity`, S, sample_assignments, thread_no)
 }
 
-compute_cluster_feature_specificity_full <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_cluster_feature_specificity_full`, S, sample_assignments)
+compute_cluster_feature_specificity_full <- function(S, sample_assignments, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_cluster_feature_specificity_full`, S, sample_assignments, thread_no)
 }
 
 #' Compute coreness of graph vertices

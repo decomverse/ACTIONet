@@ -738,17 +738,17 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline List compute_archetype_feature_specificity_bin(sp_mat& S, mat& H) {
-        typedef SEXP(*Ptr_compute_archetype_feature_specificity_bin)(SEXP,SEXP);
+    inline List compute_archetype_feature_specificity_bin(sp_mat& S, mat& H, int thread_no = 0) {
+        typedef SEXP(*Ptr_compute_archetype_feature_specificity_bin)(SEXP,SEXP,SEXP);
         static Ptr_compute_archetype_feature_specificity_bin p_compute_archetype_feature_specificity_bin = NULL;
         if (p_compute_archetype_feature_specificity_bin == NULL) {
-            validateSignature("List(*compute_archetype_feature_specificity_bin)(sp_mat&,mat&)");
+            validateSignature("List(*compute_archetype_feature_specificity_bin)(sp_mat&,mat&,int)");
             p_compute_archetype_feature_specificity_bin = (Ptr_compute_archetype_feature_specificity_bin)R_GetCCallable("ACTIONet", "_ACTIONet_compute_archetype_feature_specificity_bin");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_archetype_feature_specificity_bin(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(H)));
+            rcpp_result_gen = p_compute_archetype_feature_specificity_bin(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -759,17 +759,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List compute_archetype_feature_specificity(sp_mat& S, mat& H) {
-        typedef SEXP(*Ptr_compute_archetype_feature_specificity)(SEXP,SEXP);
+    inline List compute_archetype_feature_specificity(sp_mat& S, mat& H, int thread_no = 0) {
+        typedef SEXP(*Ptr_compute_archetype_feature_specificity)(SEXP,SEXP,SEXP);
         static Ptr_compute_archetype_feature_specificity p_compute_archetype_feature_specificity = NULL;
         if (p_compute_archetype_feature_specificity == NULL) {
-            validateSignature("List(*compute_archetype_feature_specificity)(sp_mat&,mat&)");
+            validateSignature("List(*compute_archetype_feature_specificity)(sp_mat&,mat&,int)");
             p_compute_archetype_feature_specificity = (Ptr_compute_archetype_feature_specificity)R_GetCCallable("ACTIONet", "_ACTIONet_compute_archetype_feature_specificity");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_archetype_feature_specificity(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(H)));
+            rcpp_result_gen = p_compute_archetype_feature_specificity(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -780,17 +780,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List compute_archetype_feature_specificity_full(mat& S, mat& H) {
-        typedef SEXP(*Ptr_compute_archetype_feature_specificity_full)(SEXP,SEXP);
+    inline List compute_archetype_feature_specificity_full(mat& S, mat& H, int thread_no = 0) {
+        typedef SEXP(*Ptr_compute_archetype_feature_specificity_full)(SEXP,SEXP,SEXP);
         static Ptr_compute_archetype_feature_specificity_full p_compute_archetype_feature_specificity_full = NULL;
         if (p_compute_archetype_feature_specificity_full == NULL) {
-            validateSignature("List(*compute_archetype_feature_specificity_full)(mat&,mat&)");
+            validateSignature("List(*compute_archetype_feature_specificity_full)(mat&,mat&,int)");
             p_compute_archetype_feature_specificity_full = (Ptr_compute_archetype_feature_specificity_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_archetype_feature_specificity_full");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_archetype_feature_specificity_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(H)));
+            rcpp_result_gen = p_compute_archetype_feature_specificity_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -801,17 +801,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List compute_cluster_feature_specificity(sp_mat& S, uvec sample_assignments) {
-        typedef SEXP(*Ptr_compute_cluster_feature_specificity)(SEXP,SEXP);
+    inline List compute_cluster_feature_specificity(sp_mat& S, uvec sample_assignments, int thread_no = 0) {
+        typedef SEXP(*Ptr_compute_cluster_feature_specificity)(SEXP,SEXP,SEXP);
         static Ptr_compute_cluster_feature_specificity p_compute_cluster_feature_specificity = NULL;
         if (p_compute_cluster_feature_specificity == NULL) {
-            validateSignature("List(*compute_cluster_feature_specificity)(sp_mat&,uvec)");
+            validateSignature("List(*compute_cluster_feature_specificity)(sp_mat&,uvec,int)");
             p_compute_cluster_feature_specificity = (Ptr_compute_cluster_feature_specificity)R_GetCCallable("ACTIONet", "_ACTIONet_compute_cluster_feature_specificity");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_cluster_feature_specificity(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+            rcpp_result_gen = p_compute_cluster_feature_specificity(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -822,17 +822,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List compute_cluster_feature_specificity_full(mat& S, uvec sample_assignments) {
-        typedef SEXP(*Ptr_compute_cluster_feature_specificity_full)(SEXP,SEXP);
+    inline List compute_cluster_feature_specificity_full(mat& S, uvec sample_assignments, int thread_no = 0) {
+        typedef SEXP(*Ptr_compute_cluster_feature_specificity_full)(SEXP,SEXP,SEXP);
         static Ptr_compute_cluster_feature_specificity_full p_compute_cluster_feature_specificity_full = NULL;
         if (p_compute_cluster_feature_specificity_full == NULL) {
-            validateSignature("List(*compute_cluster_feature_specificity_full)(mat&,uvec)");
+            validateSignature("List(*compute_cluster_feature_specificity_full)(mat&,uvec,int)");
             p_compute_cluster_feature_specificity_full = (Ptr_compute_cluster_feature_specificity_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_cluster_feature_specificity_full");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_cluster_feature_specificity_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+            rcpp_result_gen = p_compute_cluster_feature_specificity_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
