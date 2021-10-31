@@ -25,4 +25,4 @@ biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleC
 Remotes: shmohammadi86/ACTIONetExperiment,shmohammadi86/SCINET,immunogenomics/harmony
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

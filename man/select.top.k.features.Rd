@@ -4,7 +4,7 @@
 \alias{select.top.k.features}
 \title{Report the top-rank features from a given enrichment table}
 \usage{
-select.top.k.features(
+\method{select}{top.k.features}(
   feat_scores,
   top_features = 3,
   normalize = FALSE,
@@ -23,6 +23,6 @@ Sorted table with the selected top-ranked
 Report the top-rank features from a given enrichment table
 }
 \examples{
-feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
-enrichment.table.top <- select.top.k.features(feat_scores, 3)
+feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+enrichment.table.top = select.top.k.features(feat_scores, 3)
 }
