@@ -479,7 +479,7 @@ NULL
 NULL
 
 set_seed <- function(seed) {
-    invisible(.Call('_ACTIONet_set_seed', PACKAGE = 'ACTIONet', seed))
+    invisible(.Call(`_ACTIONet_set_seed`, seed))
 }
 
 #' Computes SVD decomposition
@@ -499,7 +499,7 @@ set_seed <- function(seed) {
 #' SVD.out = IRLBA_SVD(A, dim = 2)
 #' U = SVD.out$U
 IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
-    .Call('_ACTIONet_IRLB_SVD', PACKAGE = 'ACTIONet', A, dim, iters, seed, verbose)
+    .Call(`_ACTIONet_IRLB_SVD`, A, dim, iters, seed, verbose)
 }
 
 #' Computes SVD decomposition
@@ -519,7 +519,7 @@ IRLB_SVD <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
 #' SVD.out = IRLBA_SVD_full(A, dim = 2)
 #' U = SVD.out$U
 IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
-    .Call('_ACTIONet_IRLB_SVD_full', PACKAGE = 'ACTIONet', A, dim, iters, seed, verbose)
+    .Call(`_ACTIONet_IRLB_SVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -535,7 +535,7 @@ IRLB_SVD_full <- function(A, dim, iters = 1000L, seed = 0L, verbose = 1L) {
 #' SVD.out = FengSVD(A, dim = 2)
 #' U = SVD.out$U
 FengSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
-    .Call('_ACTIONet_FengSVD', PACKAGE = 'ACTIONet', A, dim, iters, seed, verbose)
+    .Call(`_ACTIONet_FengSVD`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -551,7 +551,7 @@ FengSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
 #' SVD.out = FengSVD(A, dim = 2)
 #' U = SVD.out$U
 FengSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
-    .Call('_ACTIONet_FengSVD_full', PACKAGE = 'ACTIONet', A, dim, iters, seed, verbose)
+    .Call(`_ACTIONet_FengSVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -567,7 +567,7 @@ FengSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
 #' SVD.out = HalkoSVD(A, dim = 2)
 #' U = SVD.out$U
 HalkoSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
-    .Call('_ACTIONet_HalkoSVD', PACKAGE = 'ACTIONet', A, dim, iters, seed, verbose)
+    .Call(`_ACTIONet_HalkoSVD`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -583,7 +583,7 @@ HalkoSVD <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
 #' SVD.out = HalkoSVD(A, dim = 2)
 #' U = SVD.out$U
 HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
-    .Call('_ACTIONet_HalkoSVD_full', PACKAGE = 'ACTIONet', A, dim, iters, seed, verbose)
+    .Call(`_ACTIONet_HalkoSVD_full`, A, dim, iters, seed, verbose)
 }
 
 #'
@@ -592,7 +592,7 @@ HalkoSVD_full <- function(A, dim, iters = 5L, seed = 0L, verbose = 1L) {
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
 reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE, verbose = 1L) {
-    .Call('_ACTIONet_reduce_kernel', PACKAGE = 'ACTIONet', S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
+    .Call(`_ACTIONet_reduce_kernel`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
 }
 
 #'
@@ -601,7 +601,7 @@ reduce_kernel <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algori
 #' reduction.out = reduce(S, reduced_dim = 50)
 #' S_r = reduction.out$S_r
 reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_algorithm = 0L, prenormalize = FALSE, verbose = 1L) {
-    .Call('_ACTIONet_reduce_kernel_full', PACKAGE = 'ACTIONet', S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
+    .Call(`_ACTIONet_reduce_kernel_full`, S, reduced_dim, iter, seed, SVD_algorithm, prenormalize, verbose)
 }
 
 #' Solves min_{X} (|| AX - B ||) s.t. simplex constraint
@@ -617,7 +617,7 @@ reduce_kernel_full <- function(S, reduced_dim = 50L, iter = 5L, seed = 0L, SVD_a
 #' B = S_r
 #' H = run_simplex_regression(A, B)
 run_simplex_regression <- function(A, B, computeXtX = FALSE) {
-    .Call('_ACTIONet_run_simplex_regression', PACKAGE = 'ACTIONet', A, B, computeXtX)
+    .Call(`_ACTIONet_run_simplex_regression`, A, B, computeXtX)
 }
 
 #' Runs Successive Projection Algorithm (SPA) to solve separable NMF
@@ -629,7 +629,7 @@ run_simplex_regression <- function(A, B, computeXtX = FALSE) {
 #' @examples
 #' H = run_SPA(S_r, 10)
 run_SPA <- function(A, k) {
-    .Call('_ACTIONet_run_SPA', PACKAGE = 'ACTIONet', A, k)
+    .Call(`_ACTIONet_run_SPA`, A, k)
 }
 
 #' Runs Successive Projection Algorithm (SPA) to solve separable NMF
@@ -641,35 +641,35 @@ run_SPA <- function(A, k) {
 #' @examples
 #' H = run_SPA(S_r, 10)
 run_SPA_rows_sparse <- function(A, k) {
-    .Call('_ACTIONet_run_SPA_rows_sparse', PACKAGE = 'ACTIONet', A, k)
+    .Call(`_ACTIONet_run_SPA_rows_sparse`, A, k)
 }
 
 run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 100L, min_delta = 1e-6) {
-    .Call('_ACTIONet_run_ACTION', PACKAGE = 'ACTIONet', S_r, k_min, k_max, thread_no, max_it, min_delta)
+    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
 }
 
 run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 100L, min_delta = 1e-6, max_trial = 3L) {
-    .Call('_ACTIONet_run_ACTION_plus', PACKAGE = 'ACTIONet', S_r, k_min, k_max, max_it, min_delta, max_trial)
+    .Call(`_ACTIONet_run_ACTION_plus`, S_r, k_min, k_max, max_it, min_delta, max_trial)
 }
 
 run_AA <- function(A, W0, max_it = 100L, min_delta = 1e-6) {
-    .Call('_ACTIONet_run_AA', PACKAGE = 'ACTIONet', A, W0, max_it, min_delta)
+    .Call(`_ACTIONet_run_AA`, A, W0, max_it, min_delta)
 }
 
 run_online_ACTION <- function(S_r, samples, k_min = 2L, k_max = 30L, thread_no = 0L) {
-    .Call('_ACTIONet_run_online_ACTION', PACKAGE = 'ACTIONet', S_r, samples, k_min, k_max, thread_no)
+    .Call(`_ACTIONet_run_online_ACTION`, S_r, samples, k_min, k_max, thread_no)
 }
 
 run_weighted_ACTION <- function(S_r, w, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 50L, min_delta = 1e-16) {
-    .Call('_ACTIONet_run_weighted_ACTION', PACKAGE = 'ACTIONet', S_r, w, k_min, k_max, thread_no, max_it, min_delta)
+    .Call(`_ACTIONet_run_weighted_ACTION`, S_r, w, k_min, k_max, thread_no, max_it, min_delta)
 }
 
 prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -1, min_cells = 3L) {
-    .Call('_ACTIONet_prune_archetypes', PACKAGE = 'ACTIONet', C_trace, H_trace, min_specificity_z_threshold, min_cells)
+    .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
 unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, thread_no = 0L) {
-    .Call('_ACTIONet_unify_archetypes', PACKAGE = 'ACTIONet', S_r, C_stacked, H_stacked, violation_threshold, thread_no)
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, thread_no)
 }
 
 #'
@@ -679,11 +679,11 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = build_ACTIONet(prune.out$H_stacked)
 build_ACTIONet <- function(H_stacked, density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, distance_metric = "jsd", nn_approach = "k*nn", k = 10L) {
-    .Call('_ACTIONet_build_ACTIONet', PACKAGE = 'ACTIONet', H_stacked, density, thread_no, mutual_edges_only, distance_metric, nn_approach, k)
+    .Call(`_ACTIONet_build_ACTIONet`, H_stacked, density, thread_no, mutual_edges_only, distance_metric, nn_approach, k)
 }
 
 build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRUE, distance_metric = "jsd") {
-    .Call('_ACTIONet_build_knn', PACKAGE = 'ACTIONet', H_stacked, k, thread_no, mutual_edges_only, distance_metric)
+    .Call(`_ACTIONet_build_knn`, H_stacked, k, thread_no, mutual_edges_only, distance_metric)
 }
 
 #'
@@ -697,7 +697,7 @@ build_knn <- function(H_stacked, k = 10, thread_no = 0L, mutual_edges_only = TRU
 #'	G = build_ACTIONet(prune.out$H_stacked)
 #'	vis.out = layout_ACTIONet(G, S_r)
 layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, layout_alg = 0L, thread_no = 0L, seed = 0L) {
-    .Call('_ACTIONet_layout_ACTIONet', PACKAGE = 'ACTIONet', G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed)
+    .Call(`_ACTIONet_layout_ACTIONet`, G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed)
 }
 
 #' Encrypts a set of given input ids
@@ -710,7 +710,7 @@ layout_ACTIONet <- function(G, S_r, compactness_level = 50L, n_epochs = 500L, la
 #' @examples
 #'	encoded.ids = encode_ids(colnames(sce))
 encode_ids <- function(ids, pass) {
-    .Call('_ACTIONet_encode_ids', PACKAGE = 'ACTIONet', ids, pass)
+    .Call(`_ACTIONet_encode_ids`, ids, pass)
 }
 
 #' Decrypts a set of given encrypted ids
@@ -723,67 +723,67 @@ encode_ids <- function(ids, pass) {
 #' @examples
 #'	ids = decode_ids(encoded.ids)
 decode_ids <- function(encoded_ids, pass) {
-    .Call('_ACTIONet_decode_ids', PACKAGE = 'ACTIONet', encoded_ids, pass)
+    .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
 }
 
 compute_pseudo_bulk_per_cluster <- function(S, sample_assignments) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_cluster', PACKAGE = 'ACTIONet', S, sample_assignments)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster`, S, sample_assignments)
 }
 
 compute_pseudo_bulk_per_cluster_full <- function(S, sample_assignments) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_cluster_full', PACKAGE = 'ACTIONet', S, sample_assignments)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_full`, S, sample_assignments)
 }
 
 compute_pseudo_bulk_per_cluster_and_ind <- function(S, sample_assignments, individuals) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind', PACKAGE = 'ACTIONet', S, sample_assignments, individuals)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind`, S, sample_assignments, individuals)
 }
 
 compute_pseudo_bulk_per_cluster_and_ind_full <- function(S, sample_assignments, individuals) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full', PACKAGE = 'ACTIONet', S, sample_assignments, individuals)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full`, S, sample_assignments, individuals)
 }
 
 compute_pseudo_bulk_per_archetype <- function(S, H) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_archetype', PACKAGE = 'ACTIONet', S, H)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype`, S, H)
 }
 
 compute_pseudo_bulk_per_archetype_full <- function(S, H) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_archetype_full', PACKAGE = 'ACTIONet', S, H)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_full`, S, H)
 }
 
 compute_pseudo_bulk_per_archetype_and_ind <- function(S, H, individuals) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind', PACKAGE = 'ACTIONet', S, H, individuals)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind`, S, H, individuals)
 }
 
 compute_pseudo_bulk_per_archetype_and_ind_full <- function(S, H, individuals) {
-    .Call('_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full', PACKAGE = 'ACTIONet', S, H, individuals)
+    .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_full`, S, H, individuals)
 }
 
 renormalize_input_matrix <- function(S, sample_assignments) {
-    .Call('_ACTIONet_renormalize_input_matrix', PACKAGE = 'ACTIONet', S, sample_assignments)
+    .Call(`_ACTIONet_renormalize_input_matrix`, S, sample_assignments)
 }
 
 renormalize_input_matrix_full <- function(S, sample_assignments) {
-    .Call('_ACTIONet_renormalize_input_matrix_full', PACKAGE = 'ACTIONet', S, sample_assignments)
+    .Call(`_ACTIONet_renormalize_input_matrix_full`, S, sample_assignments)
 }
 
 compute_archetype_feature_specificity_bin <- function(S, H, thread_no = 0L) {
-    .Call('_ACTIONet_compute_archetype_feature_specificity_bin', PACKAGE = 'ACTIONet', S, H, thread_no)
+    .Call(`_ACTIONet_compute_archetype_feature_specificity_bin`, S, H, thread_no)
 }
 
 compute_archetype_feature_specificity <- function(S, H, thread_no = 0L) {
-    .Call('_ACTIONet_compute_archetype_feature_specificity', PACKAGE = 'ACTIONet', S, H, thread_no)
+    .Call(`_ACTIONet_compute_archetype_feature_specificity`, S, H, thread_no)
 }
 
 compute_archetype_feature_specificity_full <- function(S, H, thread_no = 0L) {
-    .Call('_ACTIONet_compute_archetype_feature_specificity_full', PACKAGE = 'ACTIONet', S, H, thread_no)
+    .Call(`_ACTIONet_compute_archetype_feature_specificity_full`, S, H, thread_no)
 }
 
 compute_cluster_feature_specificity <- function(S, sample_assignments, thread_no = 0L) {
-    .Call('_ACTIONet_compute_cluster_feature_specificity', PACKAGE = 'ACTIONet', S, sample_assignments, thread_no)
+    .Call(`_ACTIONet_compute_cluster_feature_specificity`, S, sample_assignments, thread_no)
 }
 
 compute_cluster_feature_specificity_full <- function(S, sample_assignments, thread_no = 0L) {
-    .Call('_ACTIONet_compute_cluster_feature_specificity_full', PACKAGE = 'ACTIONet', S, sample_assignments, thread_no)
+    .Call(`_ACTIONet_compute_cluster_feature_specificity_full`, S, sample_assignments, thread_no)
 }
 
 #' Compute coreness of graph vertices
@@ -796,7 +796,7 @@ compute_cluster_feature_specificity_full <- function(S, sample_assignments, thre
 #' G = colNets(ace)$ACTIONet
 #' cn = compute_core_number(G)
 compute_core_number <- function(G) {
-    .Call('_ACTIONet_compute_core_number', PACKAGE = 'ACTIONet', G)
+    .Call(`_ACTIONet_compute_core_number`, G)
 }
 
 #'
@@ -807,7 +807,7 @@ compute_core_number <- function(G) {
 #' assignments = ace$archetype.assignment
 #' connectivity = compute_core_number(G, assignments)
 compute_archetype_core_centrality <- function(G, sample_assignments) {
-    .Call('_ACTIONet_compute_archetype_core_centrality', PACKAGE = 'ACTIONet', G, sample_assignments)
+    .Call(`_ACTIONet_compute_archetype_core_centrality`, G, sample_assignments)
 }
 
 #'
@@ -818,7 +818,7 @@ compute_archetype_core_centrality <- function(G, sample_assignments) {
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
 #' smoothed.expression = compute_network_diffusion(G, gene.expression)
 compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 3L) {
-    .Call('_ACTIONet_compute_network_diffusion', PACKAGE = 'ACTIONet', G, X0, thread_no, alpha, max_it)
+    .Call(`_ACTIONet_compute_network_diffusion`, G, X0, thread_no, alpha, max_it)
 }
 
 #'
@@ -829,7 +829,7 @@ compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_i
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
 #' smoothed.expression = compute_network_diffusion(G, gene.expression)
 compute_network_diffusion_fast <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 3L) {
-    .Call('_ACTIONet_compute_network_diffusion_fast', PACKAGE = 'ACTIONet', G, X0, thread_no, alpha, max_it)
+    .Call(`_ACTIONet_compute_network_diffusion_fast`, G, X0, thread_no, alpha, max_it)
 }
 
 #'
@@ -840,7 +840,7 @@ compute_network_diffusion_fast <- function(G, X0, thread_no = 0L, alpha = 0.85, 
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
 #' smoothed.expression = compute_network_diffusion_direct(G, gene.expression)
 compute_network_diffusion_direct <- function(G, X0, thread_no = 0L, alpha = 0.85) {
-    .Call('_ACTIONet_compute_network_diffusion_direct', PACKAGE = 'ACTIONet', G, X0, thread_no, alpha)
+    .Call(`_ACTIONet_compute_network_diffusion_direct`, G, X0, thread_no, alpha)
 }
 
 #'
@@ -851,11 +851,11 @@ compute_network_diffusion_direct <- function(G, X0, thread_no = 0L, alpha = 0.85
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
 #' smoothed.expression = compute_sparse_network_diffusion(G, gene.expression)
 compute_sparse_network_diffusion <- function(G, X0, alpha = 0.85, rho = 1e-4, epsilon = 0.001, max_iter = 20L) {
-    .Call('_ACTIONet_compute_sparse_network_diffusion', PACKAGE = 'ACTIONet', G, X0, alpha, rho, epsilon, max_iter)
+    .Call(`_ACTIONet_compute_sparse_network_diffusion`, G, X0, alpha, rho, epsilon, max_iter)
 }
 
 assess_enrichment <- function(scores, associations, thread_no = 0L) {
-    .Call('_ACTIONet_assess_enrichment', PACKAGE = 'ACTIONet', scores, associations, thread_no)
+    .Call(`_ACTIONet_assess_enrichment`, scores, associations, thread_no)
 }
 
 #' Computes disjoint clusters for vertices of G.
@@ -871,7 +871,7 @@ assess_enrichment <- function(scores, associations, thread_no = 0L) {
 #' G = colNets(ace)$ACTIONet
 #' clusters = NetDBSCAN(G)
 NetDBSCAN <- function(G, minPts = 10L, eps = 0.5, alpha = 0.85) {
-    .Call('_ACTIONet_NetDBSCAN', PACKAGE = 'ACTIONet', G, minPts, eps, alpha)
+    .Call(`_ACTIONet_NetDBSCAN`, G, minPts, eps, alpha)
 }
 
 #' Clusters data points using the hierarchical DBSCAN algorithm.
@@ -891,14 +891,14 @@ NetDBSCAN <- function(G, minPts = 10L, eps = 0.5, alpha = 0.85) {
 #' HDBSCAN.out = run_HDBSCAN(X)
 #' clusters = HDBSCAN.out$labels
 run_HDBSCAN <- function(X, minPoints = 5L, minClusterSize = 5L) {
-    .Call('_ACTIONet_run_HDBSCAN', PACKAGE = 'ACTIONet', X, minPoints, minClusterSize)
+    .Call(`_ACTIONet_run_HDBSCAN`, X, minPoints, minClusterSize)
 }
 
 #'
 #' @examples
 #' G_matched = MWM_hungarian(G)
 MWM_hungarian <- function(G) {
-    .Call('_ACTIONet_MWM_hungarian', PACKAGE = 'ACTIONet', G)
+    .Call(`_ACTIONet_MWM_hungarian`, G)
 }
 
 #'
@@ -907,11 +907,11 @@ MWM_hungarian <- function(G) {
 #' @examples
 #' clusters = signed_cluster(G_signed)
 signed_cluster <- function(A, resolution_parameter = 1.0, initial_clusters_ = NULL, seed = 0L) {
-    .Call('_ACTIONet_signed_cluster', PACKAGE = 'ACTIONet', A, resolution_parameter, initial_clusters_, seed)
+    .Call(`_ACTIONet_signed_cluster`, A, resolution_parameter, initial_clusters_, seed)
 }
 
 unsigned_cluster_batch <- function(A, resolutions, initial_clusters_ = NULL, seed = 0L) {
-    .Call('_ACTIONet_unsigned_cluster_batch', PACKAGE = 'ACTIONet', A, resolutions, initial_clusters_, seed)
+    .Call(`_ACTIONet_unsigned_cluster_batch`, A, resolutions, initial_clusters_, seed)
 }
 
 #'
@@ -920,27 +920,27 @@ unsigned_cluster_batch <- function(A, resolutions, initial_clusters_ = NULL, see
 #' @examples
 #' clusters = unsigned_cluster(G)
 unsigned_cluster <- function(A, resolution_parameter = 1.0, initial_clusters_ = NULL, seed = 0L) {
-    .Call('_ACTIONet_unsigned_cluster', PACKAGE = 'ACTIONet', A, resolution_parameter, initial_clusters_, seed)
+    .Call(`_ACTIONet_unsigned_cluster`, A, resolution_parameter, initial_clusters_, seed)
 }
 
 Prune_PageRank <- function(U, density = 1.0) {
-    .Call('_ACTIONet_Prune_PageRank', PACKAGE = 'ACTIONet', U, density)
+    .Call(`_ACTIONet_Prune_PageRank`, U, density)
 }
 
 transform_layout <- function(W, coor2D, coor3D, colRGB, compactness_level = 50L, n_epochs = 500L, thread_no = 0L, seed = 0L) {
-    .Call('_ACTIONet_transform_layout', PACKAGE = 'ACTIONet', W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no, seed)
+    .Call(`_ACTIONet_transform_layout`, W, coor2D, coor3D, colRGB, compactness_level, n_epochs, thread_no, seed)
 }
 
 sgd2_layout_weighted <- function(G, S_r, t_max = 30L, eps = .01, seed = 0L) {
-    .Call('_ACTIONet_sgd2_layout_weighted', PACKAGE = 'ACTIONet', G, S_r, t_max, eps, seed)
+    .Call(`_ACTIONet_sgd2_layout_weighted`, G, S_r, t_max, eps, seed)
 }
 
 sgd2_layout_weighted_convergent <- function(G, S_r, t_max = 30L, eps = 0.01, delta = 0.03, t_maxmax = 200L, seed = 0L) {
-    .Call('_ACTIONet_sgd2_layout_weighted_convergent', PACKAGE = 'ACTIONet', G, S_r, t_max, eps, delta, t_maxmax, seed)
+    .Call(`_ACTIONet_sgd2_layout_weighted_convergent`, G, S_r, t_max, eps, delta, t_maxmax, seed)
 }
 
 sgd2_layout_sparse_weighted <- function(G, S_r, p = 200L, t_max = 30L, eps = 0.01, seed = 0L) {
-    .Call('_ACTIONet_sgd2_layout_sparse_weighted', PACKAGE = 'ACTIONet', G, S_r, p, t_max, eps, seed)
+    .Call(`_ACTIONet_sgd2_layout_sparse_weighted`, G, S_r, p, t_max, eps, seed)
 }
 
 #'
@@ -953,111 +953,111 @@ sgd2_layout_sparse_weighted <- function(G, S_r, p = 200L, t_max = 30L, eps = 0.0
 #' @examples
 #' coreset = compute_AA_coreset(S, 1000)
 compute_AA_coreset <- function(S, m = 0L) {
-    .Call('_ACTIONet_compute_AA_coreset', PACKAGE = 'ACTIONet', S, m)
+    .Call(`_ACTIONet_compute_AA_coreset`, S, m)
 }
 
 SVD2ACTIONred <- function(S, u, d, v) {
-    .Call('_ACTIONet_SVD2ACTIONred', PACKAGE = 'ACTIONet', S, u, d, v)
+    .Call(`_ACTIONet_SVD2ACTIONred`, S, u, d, v)
 }
 
 SVD2ACTIONred_full <- function(S, u, d, v) {
-    .Call('_ACTIONet_SVD2ACTIONred_full', PACKAGE = 'ACTIONet', S, u, d, v)
+    .Call(`_ACTIONet_SVD2ACTIONred_full`, S, u, d, v)
 }
 
 PCA2ACTIONred <- function(S, x, sdev, rotation) {
-    .Call('_ACTIONet_PCA2ACTIONred', PACKAGE = 'ACTIONet', S, x, sdev, rotation)
+    .Call(`_ACTIONet_PCA2ACTIONred`, S, x, sdev, rotation)
 }
 
 PCA2ACTIONred_full <- function(S, x, sdev, rotation) {
-    .Call('_ACTIONet_PCA2ACTIONred_full', PACKAGE = 'ACTIONet', S, x, sdev, rotation)
+    .Call(`_ACTIONet_PCA2ACTIONred_full`, S, x, sdev, rotation)
 }
 
 PCA2SVD <- function(S, x, sdev, rotation) {
-    .Call('_ACTIONet_PCA2SVD', PACKAGE = 'ACTIONet', S, x, sdev, rotation)
+    .Call(`_ACTIONet_PCA2SVD`, S, x, sdev, rotation)
 }
 
 PCA2SVD_full <- function(S, x, sdev, rotation) {
-    .Call('_ACTIONet_PCA2SVD_full', PACKAGE = 'ACTIONet', S, x, sdev, rotation)
+    .Call(`_ACTIONet_PCA2SVD_full`, S, x, sdev, rotation)
 }
 
 SVD2PCA <- function(S, u, d, v) {
-    .Call('_ACTIONet_SVD2PCA', PACKAGE = 'ACTIONet', S, u, d, v)
+    .Call(`_ACTIONet_SVD2PCA`, S, u, d, v)
 }
 
 SVD2PCA_full <- function(S, u, d, v) {
-    .Call('_ACTIONet_SVD2PCA_full', PACKAGE = 'ACTIONet', S, u, d, v)
+    .Call(`_ACTIONet_SVD2PCA_full`, S, u, d, v)
 }
 
 perturbedSVD <- function(u, d, v, A, B) {
-    .Call('_ACTIONet_perturbedSVD', PACKAGE = 'ACTIONet', u, d, v, A, B)
+    .Call(`_ACTIONet_perturbedSVD`, u, d, v, A, B)
 }
 
 computeFullSim <- function(H, thread_no = 0L) {
-    .Call('_ACTIONet_computeFullSim', PACKAGE = 'ACTIONet', H, thread_no)
+    .Call(`_ACTIONet_computeFullSim`, H, thread_no)
 }
 
 run_subACTION <- function(S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it = 50L, min_delta = 1e-16) {
-    .Call('_ACTIONet_run_subACTION', PACKAGE = 'ACTIONet', S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta)
+    .Call(`_ACTIONet_run_subACTION`, S_r, W_parent, H_parent, kk, k_min, k_max, thread_no, max_it, min_delta)
 }
 
 deflate_reduction <- function(old_S_r, old_V, old_A, old_B, old_sigma, A, B) {
-    .Call('_ACTIONet_deflate_reduction', PACKAGE = 'ACTIONet', old_S_r, old_V, old_A, old_B, old_sigma, A, B)
+    .Call(`_ACTIONet_deflate_reduction`, old_S_r, old_V, old_A, old_B, old_sigma, A, B)
 }
 
 orthogonalize_batch_effect <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, design) {
-    .Call('_ACTIONet_orthogonalize_batch_effect', PACKAGE = 'ACTIONet', S, old_S_r, old_V, old_A, old_B, old_sigma, design)
+    .Call(`_ACTIONet_orthogonalize_batch_effect`, S, old_S_r, old_V, old_A, old_B, old_sigma, design)
 }
 
 orthogonalize_batch_effect_full <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, design) {
-    .Call('_ACTIONet_orthogonalize_batch_effect_full', PACKAGE = 'ACTIONet', S, old_S_r, old_V, old_A, old_B, old_sigma, design)
+    .Call(`_ACTIONet_orthogonalize_batch_effect_full`, S, old_S_r, old_V, old_A, old_B, old_sigma, design)
 }
 
 orthogonalize_basal <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, basal) {
-    .Call('_ACTIONet_orthogonalize_basal', PACKAGE = 'ACTIONet', S, old_S_r, old_V, old_A, old_B, old_sigma, basal)
+    .Call(`_ACTIONet_orthogonalize_basal`, S, old_S_r, old_V, old_A, old_B, old_sigma, basal)
 }
 
 orthogonalize_basal_full <- function(S, old_S_r, old_V, old_A, old_B, old_sigma, basal) {
-    .Call('_ACTIONet_orthogonalize_basal_full', PACKAGE = 'ACTIONet', S, old_S_r, old_V, old_A, old_B, old_sigma, basal)
+    .Call(`_ACTIONet_orthogonalize_basal_full`, S, old_S_r, old_V, old_A, old_B, old_sigma, basal)
 }
 
 MWM_rank1 <- function(u, v, u_threshold = 0, v_threshold = 0) {
-    .Call('_ACTIONet_MWM_rank1', PACKAGE = 'ACTIONet', u, v, u_threshold, v_threshold)
+    .Call(`_ACTIONet_MWM_rank1`, u, v, u_threshold, v_threshold)
 }
 
 NetEnh <- function(A) {
-    .Call('_ACTIONet_NetEnh', PACKAGE = 'ACTIONet', A)
+    .Call(`_ACTIONet_NetEnh`, A)
 }
 
 run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_labels_ = NULL) {
-    .Call('_ACTIONet_run_LPA', PACKAGE = 'ACTIONet', G, labels, lambda, iters, sig_threshold, fixed_labels_)
+    .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_)
 }
 
 run_AA_with_batch_correction <- function(Z, W0, batch, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
-    .Call('_ACTIONet_run_AA_with_batch_correction', PACKAGE = 'ACTIONet', Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta)
+    .Call(`_ACTIONet_run_AA_with_batch_correction`, Z, W0, batch, max_it, max_correction_rounds, lambda, min_delta)
 }
 
 run_ACTION_with_batch_correction <- function(S_r, batch, k_min, k_max, thread_no, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {
-    .Call('_ACTIONet_run_ACTION_with_batch_correction', PACKAGE = 'ACTIONet', S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta)
+    .Call(`_ACTIONet_run_ACTION_with_batch_correction`, S_r, batch, k_min, k_max, thread_no, max_it, max_correction_rounds, lambda, min_delta)
 }
 
 compute_marker_aggregate_stats <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, thread_no = 0L, ignore_baseline_expression = FALSE) {
-    .Call('_ACTIONet_compute_marker_aggregate_stats', PACKAGE = 'ACTIONet', G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
+    .Call(`_ACTIONet_compute_marker_aggregate_stats`, G, S, marker_mat, alpha, max_it, thread_no, ignore_baseline_expression)
 }
 
 LSI <- function(X, size_factor = 100000) {
-    .Call('_ACTIONet_LSI', PACKAGE = 'ACTIONet', X, size_factor)
+    .Call(`_ACTIONet_LSI`, X, size_factor)
 }
 
 compute_marker_aggregate_stats_TFIDF_sum_smoothed <- function(G, S, marker_mat, alpha = 0.85, max_it = 5L, perm_no = 100L, thread_no = 0L, normalization = 1L) {
-    .Call('_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed', PACKAGE = 'ACTIONet', G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization)
+    .Call(`_ACTIONet_compute_marker_aggregate_stats_TFIDF_sum_smoothed`, G, S, marker_mat, alpha, max_it, perm_no, thread_no, normalization)
 }
 
 roll_var <- function(X) {
-    .Call('_ACTIONet_roll_var', PACKAGE = 'ACTIONet', X)
+    .Call(`_ACTIONet_roll_var`, X)
 }
 
 computeSparseRowVariances <- function(j, val, rm, n) {
-    .Call('_ACTIONet_computeSparseRowVariances', PACKAGE = 'ACTIONet', j, val, rm, n)
+    .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
 }
 
 # Register entry points for exported C++ functions
