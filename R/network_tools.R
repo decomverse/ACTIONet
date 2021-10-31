@@ -103,7 +103,7 @@ EnhAdj <- function(Adj) {
     A = as(Adj, "dgTMatrix")
     diag(A) = 0
     eps = 1e-16
-    rs = fastRowSums(A)
+    rs = ACTIONetExperiment:::fastRowSums(A)
     rs[rs == 0] = 1
     P = Matrix::sparseMatrix(
       i = A@i + 1,
@@ -112,7 +112,7 @@ EnhAdj <- function(Adj) {
       dims = dim(A)
     )
 
-    w = sqrt(fastColSums(P) + eps)
+    w = sqrt(Matrix::colSums(P) + eps)
     W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
     P = W %*% Matrix::t(W)
     P = as.matrix(P)

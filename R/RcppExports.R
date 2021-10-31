@@ -1056,24 +1056,8 @@ roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
 
-fast_row_sums <- function(A) {
-    .Call(`_ACTIONet_fast_row_sums`, A)
-}
-
-fast_column_sums <- function(A) {
-    .Call(`_ACTIONet_fast_column_sums`, A)
-}
-
-fast_row_max <- function(A) {
-    .Call(`_ACTIONet_fast_row_max`, A)
-}
-
 computeSparseRowVariances <- function(j, val, rm, n) {
     .Call(`_ACTIONet_computeSparseRowVariances`, j, val, rm, n)
-}
-
-bind_sparse_mats <- function(A, B, dim = 0L) {
-    .Call(`_ACTIONet_bind_sparse_mats`, A, B, dim)
 }
 
 # Register entry points for exported C++ functions

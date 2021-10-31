@@ -500,11 +500,11 @@ doubleNorm <- function(
     }
     Enrichment[is.na(Enrichment)] = 0
 
-    rs = sqrt(fastRowSums(Enrichment))
+    rs = sqrt(ACTIONetExperiment:::fastRowSums(Enrichment))
     rs[rs == 0] = 1
     D_r = Matrix::Diagonal(nrow(Enrichment), 1/rs)
 
-    cs = sqrt(fastColSums(Enrichment))
+    cs = sqrt(Matrix::colSums(Enrichment))
     cs[cs == 0] = 1
     D_c = Matrix::Diagonal(ncol(Enrichment), 1/cs)
 
@@ -537,7 +537,7 @@ assess.label.local.enrichment <- function(P, Labels) {
     Obs = as(P %*% X, "dgTMatrix")
 
     # Need to rescale due to missing values within the neighborhood
-    rs = fastRowSums(Obs)
+    rs = ACTIONetExperiment:::fastRowSums(Obs)
     Obs = Matrix::sparseMatrix(
       i = Obs@i + 1,
       j = Obs@j + 1,
@@ -548,7 +548,7 @@ assess.label.local.enrichment <- function(P, Labels) {
     Lambda = Obs - Exp
 
 
-    w2 = fastRowSums(P^2)
+    w2 = ACTIONetExperiment:::fastRowSums(P^2)
     Nu = w2 %*% Matrix::t(p)
 
     a = as.numeric(fast_row_max(P)) %*% Matrix::t(array(1, length(p)))
@@ -588,9 +588,9 @@ make.fname <- function(str) {
 
 add.count.metadata <- function(ace) {
   
-    ace$n_counts = fastColSums(counts(ace))
-    ace$n_genes = fastColSums(counts(ace) > 0)
-    rowData(ace)$n_cells = fastRowSums(counts(ace) > 0)
+    ace$n_counts = Matrix::colSums(counts(ace))
+    ace$n_genes = Matrix::colSums(counts(ace) > 0)
+    rowData(ace)$n_cells = ACTIONetExperiment:::fastRowSums(counts(ace) > 0)
 
     return(ace)
 }

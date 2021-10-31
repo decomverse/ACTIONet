@@ -24,7 +24,7 @@ run.SCINET.archetype <- function(
   compute.topo.specificity = TRUE
 ) {
 
-    .check_and_load_package("SCINET")
+    ACTIONetExperiment:::.check_and_load_package("SCINET")
 
     print("Preprocessing the baseline interactome")
     if (is.null(G)) {
@@ -32,7 +32,7 @@ run.SCINET.archetype <- function(
             data("PCNet")
         }
         Adj = PCNet
-    } else if (is.matrix(G) | is.sparseMatrix(G)) {
+    } else if (is.matrix(G) | ACTIONetExperiment:::is.sparseMatrix(G)) {
         Adj = as(G, "sparseMatrix")
         Adj@x = rep(1, length(Adj@x))
     } else if (igraph::is.igraph(G)) {
@@ -62,7 +62,7 @@ run.SCINET.archetype <- function(
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = fastColSums(G.Adj) == 0
+        filter.mask = Matrix::colSums(G.Adj) == 0
         G = igraph::graph_from_adjacency_matrix(
           G.Adj[!filter.mask, !filter.mask],
           mode = "undirected",
@@ -117,7 +117,7 @@ run.SCINET.clusters <- function(
   compute.topo.specificity = TRUE
 ) {
 
-    .check_and_load_package("SCINET")
+    ACTIONetExperiment:::.check_and_load_package("SCINET")
 
     print("Preprocessing the baseline interactome")
     if (is.null(G)) {
@@ -125,7 +125,7 @@ run.SCINET.clusters <- function(
             data("PCNet")
         }
         Adj = PCNet
-    } else if (is.matrix(G) | is.sparseMatrix(G)) {
+    } else if (is.matrix(G) | ACTIONetExperiment:::is.sparseMatrix(G)) {
         Adj = as(G, "sparseMatrix")
         Adj@x = rep(1, length(Adj@x))
     } else if (igraph::is.igraph(G)) {
@@ -160,7 +160,7 @@ run.SCINET.clusters <- function(
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = fastColSums(G.Adj) == 0
+        filter.mask = Matrix::colSums(G.Adj) == 0
 
         G = igraph::graph_from_adjacency_matrix(
           adjmatrix = G.Adj[!filter.mask, !filter.mask],
@@ -212,7 +212,7 @@ run.SCINET.gene.scores <- function(
   compute.topo.specificity = TRUE
 ) {
 
-    .check_and_load_package("SCINET")
+    ACTIONetExperiment:::.check_and_load_package("SCINET")
 
     print("Preprocessing the baseline interactome")
     if (is.null(G)) {
@@ -220,7 +220,7 @@ run.SCINET.gene.scores <- function(
             data("PCNet")
         }
         Adj = PCNet
-    } else if (is.matrix(G) | is.sparseMatrix(G)) {
+    } else if (is.matrix(G) | ACTIONetExperiment:::is.sparseMatrix(G)) {
         Adj = as(G, "sparseMatrix")
         Adj@x = rep(1, length(Adj@x))
     } else if (igraph::is.igraph(G)) {
@@ -248,7 +248,7 @@ run.SCINET.gene.scores <- function(
     print("Post-processing networks\n")
     cellstate.nets.list.igraph = lapply(cellstate.nets.list, function(G.Adj) {
         G.Adj@x[G.Adj@x < min.edge.weight] = 0
-        filter.mask = fastColSums(G.Adj) == 0
+        filter.mask = Matrix::colSums(G.Adj) == 0
         G = igraph::graph_from_adjacency_matrix(
           adjmatrix = G.Adj[!filter.mask, !filter.mask],
           mode = "undirected",
