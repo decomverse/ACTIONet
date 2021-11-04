@@ -2,7 +2,7 @@
 #' @export
 filter.ace <- function(
   ace,
-  assay_name = "counts",
+  assay_name = NULL,
   min_cells_per_feat = NULL,
   min_feats_per_cell = NULL,
   min_umis_per_cell = NULL,
@@ -16,7 +16,11 @@ filter.ace <- function(
     init_dim = dim(ace)
     init_dnames = dimnames(ace)
 
-    X = SummarizedExperiment::assays(ace)[[assay_name]]
+    if(is.null(assay_name)){
+      X = SummarizedExperiment::assays(ace)[[1]]
+    } else {
+      X = SummarizedExperiment::assays(ace)[[assay_name]]
+    }
     X = as(X, "dgCMatrix")
     dimnames(X) = list(1:NROW(X), 1:NCOL(X))
 
