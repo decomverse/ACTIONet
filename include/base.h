@@ -22,7 +22,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <arma_base.h>
 #include <layout/uwot/gradient.h>
 #include <layout/uwot/sampler.h>
 #include <layout/uwot/tauprng.h>
