@@ -187,7 +187,7 @@ With Docker, no installation is required and users can directly start experiment
 * Run `ACTIONet` docker:
 
 ```bash
-$ docker run -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mro
+$ docker run -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mini
 ```
 Replace `<USER>` and `<PASSWORD>` with a username and password of your choice.
 
