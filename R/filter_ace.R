@@ -13,6 +13,7 @@ filter.ace <- function(
   return_fil_ace = TRUE
 ) {
 
+    ## TODO: Dense matrix compatibility
     init_dim = dim(ace)
     init_dnames = dimnames(ace)
 

@@ -481,43 +481,44 @@ construct.backbone <- function(
   ACTIONet_slot = "ACTIONet"
 ) {
 
-    if (!("archetype_footprint" %in% names(colMaps(ace)))) {
-        G = colNets(ace)[[ACTIONet_slot]]
-        Ht_unified = colMaps(ace)[["H_unified"]]
-
-        archetype_footprint = compute_network_diffusion_fast(
-          G = G,
-          X0 = Ht_unified,
-          thread_no = thread_no,
-          alpha = footprint_alpha
-        )
-        colMaps(ace)$archetype_footprint = archetype_footprint
-    }
-
-    W = exp(scale(ace$archetype_footprint))
-    W = as(W, "sparseMatrix")
-
-    arch.vis.out = transform_layout(
-      W = W,
-      coor2D = Matrix::t(ace$ACTIONet2D),
-      coor3D = Matrix::t(ace$ACTIONet3D),
-      colRGB = Matrix::t(ace$denovo_color),
-      n_epochs = layout_epochs,
-      compactness_level = layout_compactness,
-      thread_no = thread_no
-    )
-
-    arch.G = computeFullSim(colMaps(ace)$archetype_footprint)
-    diag(arch.G) = 0
-
-    backbone = list(
-      G = arch.G,
-      coordinates = Matrix::t(arch.vis.out$coordinates),
-      coordinates_3D = Matrix::t(arch.vis.out$coordinates_3D),
-      colors = Matrix::t(arch.vis.out$colors)
-    )
-
-    metadata(ace)$backbone = backbone
+    # if (!("archetype_footprint" %in% names(colMaps(ace)))) {
+    #     G = colNets(ace)[[ACTIONet_slot]]
+    #     Ht_unified = colMaps(ace)[["H_unified"]]
+    #
+    #     archetype_footprint = compute_network_diffusion_fast(
+    #       G = G,
+    #       X0 = Ht_unified,
+    #       thread_no = thread_no,
+    #       alpha = footprint_alpha
+    #     )
+    #     colMaps(ace)$archetype_footprint = archetype_footprint
+    # }
+    #
+    # W = exp(scale(ace$archetype_footprint))
+    # W = as(W, "sparseMatrix")
+    #
+    # arch.vis.out = transform_layout(
+    #   W = W,
+    #   coor2D = Matrix::t(ace$ACTIONet2D),
+    #   coor3D = Matrix::t(ace$ACTIONet3D),
+    #   colRGB = Matrix::t(ace$denovo_color),
+    #   n_epochs = layout_epochs,
+    #   compactness_level = layout_compactness,
+    #   thread_no = thread_no
+    # )
+    #
+    # arch.G = computeFullSim(colMaps(ace)$archetype_footprint)
+    # diag(arch.G) = 0
+    #
+    # backbone = list(
+    #   G = arch.G,
+    #   coordinates = Matrix::t(arch.vis.out$coordinates),
+    #   coordinates_3D = Matrix::t(arch.vis.out$coordinates_3D),
+    #   colors = Matrix::t(arch.vis.out$colors)
+    # )
+    #
+    # metadata(ace)$backbone = backbone
+    metadata(ace)$backbone = list()
 
     return(ace)
 }
