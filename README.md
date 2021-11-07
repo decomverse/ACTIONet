@@ -187,14 +187,14 @@ With Docker, no installation is required and users can directly start experiment
 * Run `ACTIONet` docker:
 
 ```bash
-$ docker run -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mro
+$ docker run -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mini
 ```
 Replace `<USER>` and `<PASSWORD>` with a username and password of your choice.
 
 If you wish to access your local data inside the docker, modify the command as:
 
 ```bash
-$ docker run -v /your/data/file/path/:/data -w /data -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mro
+$ docker run -v /your/data/file/path/:/data -w /data -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mini
 ```
 
 * Connect to the `RStudio Server` through your desktops browser on `http://127.0.0.1:8787`, and then enter "rstudio" as the username and password when prompted. `ACTIONet` and all of its dependencies, as well as a few other packages for single-cell analysis,  are already installed in this environment for you.
