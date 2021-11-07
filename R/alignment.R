@@ -85,60 +85,60 @@ compute.pairwise.alignment <- function(
 }
 
 
-compute_merged_ace_from_cell_alignment <- function(
-  reference_ace,
-  query_ace,
-  cell_to_cell_alignment,
-  reference_cell_labels = NULL,
-  query_cell_labels = NULL,
-  n_epochs = 500
-) {
-
-    if (is.null(colnames(reference_ace)))
-        colnames(reference_ace) = paste("refCell", 1:ncol(reference_ace))
-
-    if (is.null(colnames(query_ace)))
-        colnames(query_ace) = paste("refCell", 1:ncol(query_ace))
-
-    proj.out = transform_layout(
-      W = cell_to_cell_alignment,
-      coor2D = Matrix::t(reference_ace$ACTIONet2D),
-      coor3D = Matrix::t(reference_ace$ACTIONet3D),
-      colRGB = Matrix::t(reference_ace$denovo_color),
-      n_epochs = n_epochs
-    )
-
-    combined.ace = ACTIONetExperiment(
-      rowData = DataFrame(Id = c(rownames(reference_ace), rownames(query_ace))),
-      colData = DataFrame(Id = c(colnames(reference_ace), colnames(query_ace)),
-      dataset = c(rep("reference", ncol(reference_ace)), rep("query", ncol(query_ace))))
-    )
-
-    if (!is.null(reference_cell_labels) & !is.null(query_cell_labels)) {
-        combined.ace$Labels = c(as.character(reference_cell_labels), as.character(query_cell_labels))
-    }
-
-
-    X = rbind(reference_ace$ACTIONet2D, Matrix::t(proj.out$coordinates))
-    colnames(X) = c("x", "y")
-    rownames(X) = colnames(combined.ace)
-    colMaps(combined.ace)$ACTIONet2D = X
-    colMapTypes(combined.ace)[["ACTIONet2D"]] = "embedding"
-
-    X = rbind(reference_ace$ACTIONet3D, Matrix::t(proj.out$coordinates_3D))
-    colnames(X) = c("x", "y", "z")
-    rownames(X) = colnames(combined.ace)
-    colMaps(combined.ace)$ACTIONet3D = X
-    colMapTypes(combined.ace)[["ACTIONet3D"]] = "embedding"
-
-    X = rbind(reference_ace$denovo_color, Matrix::t(proj.out$colors))
-    colnames(X) = c("r", "g", "b")
-    rownames(X) = colnames(combined.ace)
-    colMaps(combined.ace)$denovo_color = X
-    colMapTypes(combined.ace)[["denovo_color"]] = "embedding"
-
-    return(combined.ace)
-}
+# compute_merged_ace_from_cell_alignment <- function(
+#   reference_ace,
+#   query_ace,
+#   cell_to_cell_alignment,
+#   reference_cell_labels = NULL,
+#   query_cell_labels = NULL,
+#   n_epochs = 500
+# ) {
+#
+#     if (is.null(colnames(reference_ace)))
+#         colnames(reference_ace) = paste("refCell", 1:ncol(reference_ace))
+#
+#     if (is.null(colnames(query_ace)))
+#         colnames(query_ace) = paste("refCell", 1:ncol(query_ace))
+#
+#     proj.out = transform_layout(
+#       W = cell_to_cell_alignment,
+#       coor2D = Matrix::t(reference_ace$ACTIONet2D),
+#       coor3D = Matrix::t(reference_ace$ACTIONet3D),
+#       colRGB = Matrix::t(reference_ace$denovo_color),
+#       n_epochs = n_epochs
+#     )
+#
+#     combined.ace = ACTIONetExperiment(
+#       rowData = DataFrame(Id = c(rownames(reference_ace), rownames(query_ace))),
+#       colData = DataFrame(Id = c(colnames(reference_ace), colnames(query_ace)),
+#       dataset = c(rep("reference", ncol(reference_ace)), rep("query", ncol(query_ace))))
+#     )
+#
+#     if (!is.null(reference_cell_labels) & !is.null(query_cell_labels)) {
+#         combined.ace$Labels = c(as.character(reference_cell_labels), as.character(query_cell_labels))
+#     }
+#
+#
+#     X = rbind(reference_ace$ACTIONet2D, Matrix::t(proj.out$coordinates))
+#     colnames(X) = c("x", "y")
+#     rownames(X) = colnames(combined.ace)
+#     colMaps(combined.ace)$ACTIONet2D = X
+#     colMapTypes(combined.ace)[["ACTIONet2D"]] = "embedding"
+#
+#     X = rbind(reference_ace$ACTIONet3D, Matrix::t(proj.out$coordinates_3D))
+#     colnames(X) = c("x", "y", "z")
+#     rownames(X) = colnames(combined.ace)
+#     colMaps(combined.ace)$ACTIONet3D = X
+#     colMapTypes(combined.ace)[["ACTIONet3D"]] = "embedding"
+#
+#     X = rbind(reference_ace$denovo_color, Matrix::t(proj.out$colors))
+#     colnames(X) = c("r", "g", "b")
+#     rownames(X) = colnames(combined.ace)
+#     colMaps(combined.ace)$denovo_color = X
+#     colMapTypes(combined.ace)[["denovo_color"]] = "embedding"
+#
+#     return(combined.ace)
+# }
 
 
 plot_pairwise_alignment <- function(

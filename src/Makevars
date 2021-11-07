@@ -2,15 +2,10 @@ CSOURCES+=$(shell find ACTIONet/src -type f -name "*.c")
 SOURCES+=$(shell find ACTIONet/src -type f -name "*.cc")
 SOURCES2+=$(shell find . -type f -name "*.cpp")
 OBJECTS=$(SOURCES:.cc=.o) $(SOURCES2:.cpp=.o) $(CSOURCES:.c=.o)
-
 PWD=$(shell pwd)
-INCLUDE_BASE=$(PWD)/ACTIONet/include/base
-INCLUDE_COMMON=$(shell find $(PWD)/ACTIONet/include/common -type d -print | sed s/^/-I/)
-INCLUDE_R=$(PWD)/ACTIONet/include/R
-INCLUDE_PATHS=-I$(INCLUDE_BASE) -I$(INCLUDE_COMMON) -I$(INCLUDE_R)
-
-PKG_CPPFLAGS=$(INCLUDE_PATHS) -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
-PKG_CXXFLAGS=$(INCLUDE_PATHS) -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+INCLUDE_PATH=${PWD}/ACTIONet/include
+PKG_CPPFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
+PKG_CXXFLAGS=`find ${INCLUDE_PATH} -type d -print | sed s/^/-I/` -I../inst/include -w -m64 -DINT_64BITS -DARMA_64BIT_WORD -O3 -march=native -mtune=native -w -std=c++14 -m64 -fno-strict-aliasing -fomit-frame-pointer -funroll-loops -fexpensive-optimizations
 
 UNAME=$(shell uname -s)
 ifeq ($(UNAME),Linux)
@@ -19,11 +14,11 @@ ifeq ($(UNAME),Linux)
 		ifdef $(ONEAPI_ROOT)
 			$(info Found OneAPI)
 			PKG_CPPFLAGS+=-I/usr/include/suitesparse
-			PKG_LIBS=-Wl,--start-group $(ONEAPI_ROOT)/lib/intel64 -Wl,--end-group -liomp5 -lpthread -lm -ldl
+			PKG_LIBS=-Wl,--start-group ${ONEAPI_ROOT}/lib/intel64 -Wl,--end-group -liomp5 -lpthread -lm -ldl
 		else ifdef $(MKLROOT)
 			$(info Found MKL)
-			PKG_CPPFLAGS+=-I$(MKLROOT)/include -I/usr/include/suitesparse
-			PKG_LIBS=-Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+			PKG_CPPFLAGS+=-I${MKLROOT}/include -I/usr/include/suitesparse
+			PKG_LIBS=-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
 		else
         PKG_CPPFLAGS+=-I/usr/include/suitesparse
         PKG_LIBS=$(BLAS_LIBS) $(LAPACK_LIBS) $(FLIBS)
@@ -45,7 +40,7 @@ else ifeq ($(UNAME),Darwin)
 #         PKG_LIBS=mkl_intel_lp64.lib mkl_tbb_thread.lib mkl_core.lib tbb.lib
 #     endif
 else
-    $(error Unsupported OS $(UNAME))
+    $(error Unsupported OS ${UNAME})
 endif
 PKG_LIBS+=-lcholmod
-MAKEFLAGS+="-j $(NPROC)"
+MAKEFLAGS+="-j ${NPROC}"
