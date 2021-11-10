@@ -163,16 +163,27 @@ orthogonalize.ace.batch <- function(
     B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
     sigma = S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
 
-    reduction.out = orthogonalize_batch_effect(
-      S = S,
-      old_S_r = S_r,
-      old_V = V,
-      old_A = A,
-      old_B = B,
-      old_sigma = sigma,
-      design = design_mat
-    )
-
+    if(is.matrix(S)) {
+        reduction.out = orthogonalize_batch_effect_full(
+        S = S,
+        old_S_r = S_r,
+        old_V = V,
+        old_A = A,
+        old_B = B,
+        old_sigma = sigma,
+        design = design_mat
+      )
+    } else {
+      reduction.out = orthogonalize_batch_effect(
+        S = S,
+        old_S_r = S_r,
+        old_V = V,
+        old_A = A,
+        old_B = B,
+        old_sigma = sigma,
+        design = design_mat
+      )
+    }
     S_r = reduction.out$S_r
     colnames(S_r) = colnames(ace)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
@@ -202,6 +213,7 @@ orthogonalize.ace.batch <- function(
 
     return(ace)
 }
+
 
 #' @export
 orthogonalize.ace.batch.simple <- function(

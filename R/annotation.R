@@ -233,6 +233,37 @@ annotate.cells.using.markers <- function(
 }
 
 
+#' @export
+annotate.cells.using.markers.updated <- function(ace,
+                                                 markers,
+                                                 features_use = NULL,
+                                                 alpha_val = 0.9,
+                                                 normlization = 1,
+                                                 thread_no = 0,
+                                                 net_slot = "ACTIONet",
+                                                 assay_name = "logcounts") {
+  features_use <- .preprocess_annotation_features(ace, features_use)
+  marker_mat <- .preprocess_annotation_markers(markers, features_use)
+
+  # marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
+  G <- colNets(ace)[[net_slot]]
+  S <- as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
+
+  cell.scores <- compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat, alpha = alpha_val, thread_no = thread_no, normalization = normlization)
+  Labels <- factor(colnames(marker_mat)[apply(cell.scores, 1, which.max)], colnames(marker_mat))
+  colnames(cell.scores) <- colnames(marker_mat)
+  conf <- apply(cell.scores, 1, max)
+
+  out <- list(
+    Label = Labels,
+    Confidence = conf,
+    Enrichment = cell.scores
+  )
+
+  return(out)
+}
+
+
 #' Annotates cells by interpolating marker-based archetype annotations
 #'
 #' @param ace ACTIONet output object
@@ -336,4 +367,130 @@ map.cell.scores.from.archetype.enrichment <- function(
     rownames(cell.enrichment.mat) = colnames(ace)
 
     return(cell.enrichment.mat)
+}
+
+
+#' @export
+annotateCells <- function(ace, markers, pre_alpha = 0.9, post_alpha = 0.9, diffusion_iters = 5, thread_no = 0, features_use = NULL, net_attr = "ACTIONet", force_reimpute = FALSE, mask_threshold = 1) {
+  features_use <- ACTIONet:::.preprocess_annotation_features(ace, features_use)
+  marker_mat <- ACTIONet:::.preprocess_annotation_markers(markers, features_use)
+  mask <- fastRowSums(abs(marker_mat)) != 0
+  marker_mat <- marker_mat[mask, ]
+
+  subS <- imputeGenes(ace, rownames(marker_mat), thread_no = thread_no, alpha_val = pre_alpha, diffusion_iters = diffusion_iters, net_attr = net_attr)
+
+  marker_stats <- compute_marker_aggregate_stats_nonparametric(subS, marker_mat, thread_no = thread_no)
+
+  if (post_alpha != 0) {
+    G <- colNets(ace)[[net_attr]]
+    P <- normalize_adj(G, 0)
+    marker_stats <- compute_network_diffusion_Chebyshev(P, marker_stats, alpha = post_alpha, max_it = diffusion_iters, thread_no = thread_no)
+  }
+
+  colnames(marker_stats) <- colnames(marker_mat)
+  marker_stats[!is.finite(marker_stats)] <- 0
+  annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
+  conf <- apply(marker_stats, 1, max)
+  conf <- -log10(p.adjust(pnorm(conf, lower.tail = F), method = "fdr"))
+  annots.masked <- annots
+  annots.masked[conf < mask_threshold] <- "?"
+
+  out <- list(Label = annots, Confidence = conf, Enrichment = marker_stats, Label.masked = annots.masked)
+
+  return(out)
+}
+
+annotateArchs <- function(ace, annotation_source, archetype_slot = "H_unified") {
+  if (!is.list(annotation_source)) {
+    f <- factor(.preprocess_annotation_labels(annotation_source, ace))
+    associations <- as(model.matrix(~ 0. + f), "sparseMatrix")
+    colnames(associations) <- levels(f)
+
+    scores <- as.matrix(colMaps(ace)[[archetype_slot]])
+    arch_enrichment <- Matrix::t(assess_enrichment(scores, associations)$logPvals)
+    colnames(arch_enrichment) <- levels(f)
+  } else {
+    features_use <- .preprocess_annotation_features(ace, NULL)
+    marker_mat <- .preprocess_annotation_markers(annotation_source, features_use)
+    arch_enrichment <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat)$logPvals)
+    colnames(arch_enrichment) <- colnames(marker_mat)
+  }
+  arch_enrichment <- apply(arch_enrichment, 2, function(x) x / sd(x))
+
+  arch_enrichment[!is.finite(arch_enrichment)] <- 0
+  annots <- colnames(arch_enrichment)[apply(arch_enrichment, 1, which.max)]
+  conf <- apply(arch_enrichment, 1, max)
+
+  out <- list(
+    Label = annots,
+    Confidence = conf,
+    Enrichment = arch_enrichment
+  )
+
+  return(out)
+}
+
+
+annotateClusters <- function(ace, annotation_source, cluster_name = "Leiden") {
+  cluster_slot <- sprintf("%s_markers_ACTIONet", cluster_name)
+
+  if (!is.list(annotation_source)) {
+    f <- factor(.preprocess_annotation_labels(annotation_source, ace))
+    associations <- as(model.matrix(~ 0. + f), "sparseMatrix")
+    colnames(associations) <- levels(f)
+
+    f2 <- factor(colData(ace)[[cluster_name]])
+    scores <- as.matrix(model.matrix(~ 0. + f2))
+    colnames(scores) <- levels(f2)
+
+    cluster_enrichment <- Matrix::t(assess_enrichment(scores, associations)$logPvals)
+    colnames(cluster_enrichment) <- levels(f)
+    rownames(cluster_enrichment) <- levels(f2)
+  } else {
+    features_use <- .preprocess_annotation_features(ace, NULL)
+    marker_mat <- as(.preprocess_annotation_markers(annotation_source, features_use), "sparseMatrix")
+
+    scores <- as.matrix(rowMaps(ace)[[cluster_slot]])
+    cluster_enrichment <- Matrix::t(assess_enrichment(scores, marker_mat)$logPvals)
+    colnames(cluster_enrichment) <- colnames(marker_mat)
+    rownames(cluster_enrichment) <- colnames(scores)
+  }
+  cluster_enrichment <- apply(cluster_enrichment, 2, function(x) x / sd(x))
+
+  cluster_enrichment[!is.finite(cluster_enrichment)] <- 0
+  annots <- colnames(cluster_enrichment)[apply(cluster_enrichment, 1, which.max)]
+  conf <- apply(cluster_enrichment, 1, max)
+
+  out <- list(
+    Label = annots,
+    Confidence = conf,
+    Enrichment = cluster_enrichment
+  )
+
+  return(out)
+}
+
+
+projectArchs <- function(ace, archtype_scores, archetype_slot = "H_unified", normalize = FALSE) {
+  cell.enrichment.mat <- map.cell.scores.from.archetype.enrichment(
+    ace = ace,
+    enrichment_mat = enrichment.mat,
+    normalize = TRUE,
+    H.slot = archetype_slot
+  )
+  cell.annotations <- colnames(cell.enrichment.mat)[apply(
+    cell.enrichment.mat, 1,
+    which.max
+  )]
+
+  Labels <- colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
+  Labels.confidence <- apply(cell.enrichment.mat, 1, max)
+
+  res <- list(
+    Label = Labels,
+    Confidence = Labels.confidence,
+    Enrichment = cell.enrichment.mat
+  )
+
+  return(res)
 }

@@ -288,3 +288,14 @@ findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name 
 
   return(ace)
 }
+
+
+clusterMarkers <- function(ace, clusters) {
+  ace <- findMarkers.ace(ace, cl, out.name = "Leiden")
+  df <- ace$Leiden_markers_ACTIONet
+
+  markers <- apply(df, 2, function(x) rownames(df)[scale(x) > 10])
+
+  out <- list(markers = markers, gene_spec = df)
+  return(out)
+}
