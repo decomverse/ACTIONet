@@ -11,34 +11,33 @@
 #' @return ace with updated annotations added to ace$annotations
 #'
 #' @examples
-#' ace = infer.missing.cell.annotations(ace, sce$assigned_archetypes, 'updated_archetype_annotations')
+#' ace <- infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
 #' @export
-infer.missing.cell.annotations <- function(
-  ace,
-  initial_labels,
-  iters = 3,
-  lambda = 0, 
-  sig_threshold = 3) {
-  label_type = "numeric"
-  if(is.character(initial_labels)) {
-    label_type = "char"
-    initial_labels.factor = factor(initial_labels)
-    initial_labels = as.numeric(initial_labels.factor)
-  } else if(is.factor(initial_labels)) {
-    label_type = "factor"
-    initial_labels.factor = initial_labels		
-    initial_labels = as.numeric(initial_labels.factor)
+infer.missing.cell.annotations <- function(ace,
+                                           initial_labels,
+                                           iters = 3,
+                                           lambda = 0,
+                                           sig_threshold = 3) {
+  label_type <- "numeric"
+  if (is.character(initial_labels)) {
+    label_type <- "char"
+    initial_labels.factor <- factor(initial_labels)
+    initial_labels <- as.numeric(initial_labels.factor)
+  } else if (is.factor(initial_labels)) {
+    label_type <- "factor"
+    initial_labels.factor <- initial_labels
+    initial_labels <- as.numeric(initial_labels.factor)
   }
-  
-	fixed_labels_ = which(!is.na(initial_labels))	
-	initial_labels[is.na(initial_labels)] = -1
-	
-	Labels = run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
-	
-	if(label_type == "char" | label_type == "factor") {
-	  Labels = levels(initial_labels.factor)[Labels]
-	}
-	
+
+  fixed_labels_ <- which(!is.na(initial_labels))
+  initial_labels[is.na(initial_labels)] <- -1
+
+  Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
+
+  if (label_type == "char" | label_type == "factor") {
+    Labels <- levels(initial_labels.factor)[Labels]
+  }
+
   return(Labels)
 }
 
@@ -58,111 +57,162 @@ infer.missing.cell.annotations <- function(
 #' @return ace with updated annotations added to ace$annotations
 #'
 #' @examples
-#' ace = add.cell.annotations(ace, cell.labels, 'input_annotations')
-#' ace = correct.cell.annotations(ace, 'input_annotations', 'updated_annotations')
+#' ace <- add.cell.annotations(ace, cell.labels, "input_annotations")
+#' ace <- correct.cell.annotations(ace, "input_annotations", "updated_annotations")
 #' @export
-correct.cell.annotations <- function(
-  ace,
-  initial_labels,
-  iters = 3,
-  lambda = 0, 
-  sig_threshold = 3,
-  min.cell.fraction = 0.001
-) {
-	min_cells = round(ncol(ace)*min.cell.fraction)
-	
-	label_type = "numeric"
-	if(is.character(initial_labels)) {
-		label_type = "char"
-		initial_labels.factor = factor(initial_labels)
-		initial_labels = as.numeric(initial_labels.factor)
-	} else if(is.factor(initial_labels)) {
-		label_type = "factor"
-		initial_labels.factor = initial_labels		
-		initial_labels = as.numeric(initial_labels.factor)
-	}
-	
-	cc = table(initial_labels)
-	initial_labels[initial_labels %in% as.numeric(names(cc)[cc < min_cells])] = -1
-	initial_labels[is.na(initial_labels)] = -1
-	
-	Labels = run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
+correct.cell.annotations <- function(ace,
+                                     initial_labels,
+                                     iters = 3,
+                                     lambda = 0,
+                                     sig_threshold = 3,
+                                     min.cell.fraction = 0.001) {
+  min_cells <- round(ncol(ace) * min.cell.fraction)
 
-	if(label_type == "char" | label_type == "factor") {
-		Labels = levels(initial_labels.factor)[Labels]
-	}
+  label_type <- "numeric"
+  if (is.character(initial_labels)) {
+    label_type <- "char"
+    initial_labels.factor <- factor(initial_labels)
+    initial_labels <- as.numeric(initial_labels.factor)
+  } else if (is.factor(initial_labels)) {
+    label_type <- "factor"
+    initial_labels.factor <- initial_labels
+    initial_labels <- as.numeric(initial_labels.factor)
+  }
 
-    return(Labels)
+  cc <- table(initial_labels)
+  initial_labels[initial_labels %in% as.numeric(names(cc)[cc < min_cells])] <- -1
+  initial_labels[is.na(initial_labels)] <- -1
+
+  Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
+
+  if (label_type == "char" | label_type == "factor") {
+    Labels <- levels(initial_labels.factor)[Labels]
+  }
+
+  return(Labels)
 }
 
 EnhAdj <- function(Adj) {
+  Adj[is.na(Adj)] <- 0
+  Adj[Adj < 0] <- 0
 
-    Adj[is.na(Adj)] = 0
-    Adj[Adj < 0] = 0
+  A <- as(Adj, "dgTMatrix")
+  diag(A) <- 0
+  eps <- 1e-16
+  rs <- fastRowSums(A)
+  rs[rs == 0] <- 1
+  P <- Matrix::sparseMatrix(
+    i = A@i + 1,
+    j = A@j + 1,
+    x = A@x / rs[A@i + 1],
+    dims = dim(A)
+  )
 
-    A = as(Adj, "dgTMatrix")
-    diag(A) = 0
-    eps = 1e-16
-    rs = ACTIONetExperiment:::fastRowSums(A)
-    rs[rs == 0] = 1
-    P = Matrix::sparseMatrix(
-      i = A@i + 1,
-      j = A@j + 1,
-      x = A@x/rs[A@i + 1],
-      dims = dim(A)
-    )
+  w <- sqrt(Matrix::colSums(P) + eps)
+  W <- P %*% Matrix::Diagonal(x = 1 / w, n = length(w))
+  P <- W %*% Matrix::t(W)
+  P <- as.matrix(P)
+  diag(P) <- 0
 
-    w = sqrt(Matrix::colSums(P) + eps)
-    W = P %*% Matrix::Diagonal(x = 1/w, n = length(w))
-    P = W %*% Matrix::t(W)
-    P = as.matrix(P)
-    diag(P) = 0
-
-    return(P)
+  return(P)
 }
 
 
-construct.tspanner <- function(
-  backbone,
-  stretch.factor = 10
-) {
+construct.tspanner <- function(backbone,
+                               stretch.factor = 10) {
+  backbone[backbone < 0] <- 0
+  diag(backbone) <- 0
 
-    backbone[backbone < 0] = 0
-    diag(backbone) = 0
+  backbone.graph <- igraph::graph_from_adjacency_matrix(
+    adjmatrix = backbone,
+    mode = "undirected",
+    weighted = TRUE
+  )
 
-    backbone.graph = igraph::graph_from_adjacency_matrix(
-      adjmatrix = backbone,
-      mode = "undirected",
-      weighted = TRUE
-    )
+  # Construct t-spanner
+  t <- (2 * stretch.factor - 1)
 
-    # Construct t-spanner
-    t = (2 * stretch.factor - 1)
+  d <- 1 - igraph::E(backbone.graph)$weight
+  EL <- igraph::get.edgelist(backbone.graph, names = FALSE)
+  perm <- order(d, decreasing = FALSE)
 
-    d = 1 - igraph::E(backbone.graph)$weight
-    EL = igraph::get.edgelist(backbone.graph, names = FALSE)
-    perm = order(d, decreasing = FALSE)
+  backbone.graph.sparse <- igraph::delete_edges(
+    graph = backbone.graph,
+    edges = igraph::E(backbone.graph)
+  )
 
-    backbone.graph.sparse = igraph::delete_edges(
-      graph = backbone.graph,
-      edges = igraph::E(backbone.graph)
-    )
+  for (i in 1:length(d)) {
+    u <- EL[perm[i], 1]
+    v <- EL[perm[i], 2]
+    sp <- igraph::distances(backbone.graph.sparse, v = u, to = v)[1, 1]
 
-    for (i in 1:length(d)) {
-        u = EL[perm[i], 1]
-        v = EL[perm[i], 2]
-        sp = igraph::distances(backbone.graph.sparse, v = u, to = v)[1, 1]
+    if (sp > t * d[perm[i]]) {
+      backbone.graph.sparse <- igraph::add_edges(
+        graph = backbone.graph.sparse,
+        edges = EL[perm[i], ],
+        attr = list(weight = 1 - d[perm[i]])
+      )
+    }
+  }
 
-        if (sp > t * d[perm[i]]) {
-            backbone.graph.sparse = igraph::add_edges(
-              graph = backbone.graph.sparse,
-              edges = EL[perm[i], ],
-              attr = list(weight = 1 - d[perm[i]])
-            )
-        }
+  G <- as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
+
+  return(G)
+}
+
+propNetworkScores <- function(G, scores, algorithm = "Chebyshev", alpha = 0.9, norm_type = 0, thread_no = 0, max_it = 5, res_threshold = 1e-8, network_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
+
+  if (is(G, "ACTIONetExperiment")) {
+    G <- colNets(G)[[network_slot]]
+  }
+
+  if (algorithm == "chebyshev") {
+    x <- compute_network_diffusion(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = norm_type)
+  }
+
+  return(x)
+}
+
+propNetworkLabels <- function(G, initial_labels, algorithm = "LPA", lambda = 0, iters = 3, sig_threshold = 3, network_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
+
+  if (algorithm == "lpa") {
+    label_type <- "numeric"
+    if (is.character(initial_labels)) {
+      label_type <- "char"
+      initial_labels.factor <- factor(initial_labels)
+      initial_labels <- as.numeric(initial_labels.factor)
+    } else if (is.factor(initial_labels)) {
+      label_type <- "factor"
+      initial_labels.factor <- initial_labels
+      initial_labels <- as.numeric(initial_labels.factor)
     }
 
-    G = as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
+    if (is(G, "ACTIONetExperiment")) {
+      G <- colNets(G)[[network_slot]]
+    }
+    updated_labels <- run_LPA(G, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
 
-    return(G)
+    if (label_type == "char" | label_type == "factor") {
+      updated_labels <- levels(initial_labels.factor)[updated_labels]
+    }
+  }
+
+  return(updated_labels)
+}
+
+maskCellsCentrality <- function(ace, z_threshold = 1.65, global = TRUE, network_slot = "ACTIONet") {
+  if (global == TRUE) {
+    G <- colNets(ace)[[network_slot]]
+    cn <- compute_core_number(G)
+    z <- exp(-scale(cn))
+  } else {
+    x <- ace$node_centrality
+    z <- scale(x)
+  }
+  mask <- z_threshold < z
+
+  out <- list(is_filtered = mask, z = z)
+  return(out)
 }

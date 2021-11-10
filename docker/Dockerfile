@@ -1,17 +1,18 @@
-ARG PARENT_DOCKER
-FROM "$PARENT_DOCKER"
-ENV R_REMOTES_NO_ERRORS_FROM_WARNINGS="true"
-ENV GITHUB_PAT=
+FROM rocker/tidyverse
 
-#install R version 
+LABEL name="actionet/tidyverse" \
+	version=1.0.0 \
+	vendor="ACTIONet" \
+	maintainer="shahin.mohammadi@gmail.com" \
+	description="ACTIONet single-cell framework." \
+	license="GPLv2"
+
+
+ENV DEBIAN_FRONTEND=noninteractive \
+	APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
+	R_VERSION=$R_VERSION
+
 COPY files/* /tmp/
-RUN Rscript /tmp/install_actionet.R
+RUN /tmp/install_actionet.sh
 
-#install python version
-RUN apt-get install -y libhdf5-dev libsuitesparse-dev libnss3 xvfb
-
-#make sure cmake version is >=3.19
-RUN conda install -c conda-forge cmake
-RUN pip install git+https://github.com/shmohammadi86/ACTIONet@python-release
-EXPOSE 8787 8888
-CMD screen -d -m bash -c "jupyter-lab --ip=0.0.0.0 --no-browser --allow-root --LabApp.token=''" && /init
+CMD ["/init"]

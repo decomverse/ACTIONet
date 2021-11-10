@@ -65,7 +65,7 @@ run.ACTIONet.simple <- function(ace,
   # Build ACTIONet
   set.seed(seed)
   H <- as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]]))
-  G <- build_ACTIONet(
+  G <- buildNetwork(
     H_stacked = H,
     density = network_density,
     thread_no = thread_no,
@@ -81,7 +81,7 @@ run.ACTIONet.simple <- function(ace,
   colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
   colMapTypes(ace)[["ACTIONred"]] <- "embedding"
 
-  ace <- .run.layout_ACTIONet(ace,
+  ace <- .run.layoutNetwork(ace,
     G = G,
     S_r = initial_coordinates,
     compactness_level = layout_compactness,

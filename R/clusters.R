@@ -249,13 +249,11 @@ annotate.clusters.using.markers <- function(
 }
 
 
-
 #' Annotate arbitary feature score matrix using known marker genes
 #' (It uses permutation test on cluster specificity scores)
 #'
-#' @param feature.scores An arbitrary matrix with rows corresponding to features and columns to any given annotation/grouping of cells
-#' @param marker.genes A list of lists (each a set of markers for a given cell type)
-#' @param rand.sample.no Number of random permutations (default=1000)
+#' @param profile An arbitrary matrix with rows corresponding to features and columns to any given annotation/grouping of cells
+#' @param markers A list of lists (each a set of markers for a given cell type)
 #'
 #' @return A named list: \itemize{
 #' \item Labels: Inferred archetype labels
@@ -263,111 +261,18 @@ annotate.clusters.using.markers <- function(
 #' \item Enrichment: Full enrichment matrix
 #'}
 #'
-#' @examples
-#' data('curatedMarkers_human') # pre-packaged in ACTIONet
-#' marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-#' arch.annot = annotate.profile.using.markers(my.gene.scores.profile, marker.genes = marker.genes)
 #' @export
-annotate.profile.using.markers <- function(
-  feature.scores,
-  marker.genes,
-  rand.sample.no = 1000
-) {
+annotate.profile.using.markers <- function (profile, markers)
+{
+    marker_mat <- ACTIONet:::.preprocess_annotation_markers(markers, rownames(profile))
 
-    if (is.matrix(marker.genes) | ACTIONetExperiment:::is.sparseMatrix(marker.genes)) {
-        marker.genes = apply(marker.genes, 2, function(x) rownames(marker.genes)[x > 0])
-    }
+    enrichment.out = assess_enrichment(profile, marker_mat)
 
-    specificity.panel = feature.scores
+    X = enrichment.out$logPvals
+    rownames(X) = colnames(marker_mat)
+    colnames(X) = colnames(profile)
 
-    GS.names = names(marker.genes)
-    if (is.null(GS.names)) {
-        GS.names = sapply(1:length(GS.names), function(i) sprintf("Celltype %s", i))
-    }
-
-    markers.table = do.call(rbind, lapply(names(marker.genes), function(celltype) {
-        genes = marker.genes[[celltype]]
-
-        if (length(genes) == 0) {
-          err = sprintf("No markers left.\n")
-          stop(err, call. = FALSE)
-        }
-
-        signed.count = sum(sapply(genes, function(gene) grepl("\\+$|-$", gene)))
-        is.signed = signed.count > 0
-
-        if (!is.signed) {
-            df = data.frame(
-              Gene = genes,
-              Direction = +1,
-              Celltype = celltype,
-              stringsAsFactors = FALSE
-            )
-        } else {
-
-            pos.genes = (as.character(sapply(genes[grepl("+", genes, fixed = TRUE)],
-                function(gene) stringr::str_replace(gene, stringr::fixed("+"), ""))))
-            neg.genes = (as.character(sapply(genes[grepl("-", genes, fixed = TRUE)],
-                function(gene) stringr::str_replace(gene, stringr::fixed("-"), ""))))
-
-            df = data.frame(
-              Gene = c(pos.genes, neg.genes),
-              Direction = c(rep(+1, length(pos.genes)), rep(-1, length(neg.genes))),
-              Celltype = celltype,
-              stringsAsFactors = FALSE
-            )
-        }
-    }))
-
-    markers.table = markers.table[markers.table$Gene %in% colnames(specificity.panel),]
-
-    if (dim(markers.table)[1] == 0) {
-      err = sprintf("No markers left.\n")
-      stop(err, call. = FALSE)
-    }
-
-    specificity.panel = specificity.panel[, markers.table$Gene]
-
-    IDX = split(1:dim(markers.table)[1], markers.table$Celltype)
-
-    print("Computing significance scores")
-    set.seed(0)
-    Z = sapply(IDX, function(idx) {
-        markers = (as.character(markers.table$Gene[idx]))
-        directions = markers.table$Direction[idx]
-        mask = markers %in% colnames(specificity.panel)
-
-        A = as.matrix(specificity.panel[, markers[mask]])
-        sgn = as.numeric(directions[mask])
-        stat = A %*% sgn
-
-        rand.stats = sapply(1:rand.sample.no, function(i) {
-            rand.samples = sample.int(dim(specificity.panel)[2], sum(mask))
-            rand.A = as.matrix(specificity.panel[, rand.samples])
-            rand.stat = rand.A %*% sgn
-        })
-
-        cell.zscores = as.numeric((stat - apply(rand.stats, 1, mean))/apply(rand.stats, 1, sd))
-
-        return(cell.zscores)
-    })
-
-    Z[is.na(Z)] = 0
-    Labels = colnames(Z)[apply(Z, 1, which.max)]
-
-    Labels.conf = apply(Z, 1, max)
-
-    names(Labels) = rownames(specificity.panel)
-    names(Labels.conf) = rownames(specificity.panel)
-    rownames(Z) = rownames(specificity.panel)
-
-    out = list(
-      Label = Labels,
-      Confidence = Labels.conf,
-      Enrichment = Z
-    )
-
-    return(out)
+    return(X)
 }
 
 #' A wrapper function For Leiden algorithm
@@ -437,7 +342,7 @@ cluster.graph <- function(
             ))
         }
     }
-
+    return(clusters)
 }
 
 
@@ -516,4 +421,94 @@ HDBSCAN.clustering <- function(
       minClusterSize = minClusterSize)
 
     return(out_list)
+}
+
+
+#' @export
+clusterNetwork <- function(G, algorithm = "Leiden",
+                           resolution_parameter = 1.0,
+                           initial_clustering = NULL,
+                           seed = 0,
+                           network_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
+
+  if (is(G, "ACTIONetExperiment")) {
+    G <- colNets(G)[[network_slot]]
+  }
+  if (algorithm == "leiden") {
+    if (is.matrix(G)) {
+      G <- as(G, "sparseMatrix")
+    }
+
+    is.signed <- FALSE
+    if (min(G) < 0) {
+      is.signed <- TRUE
+      print("Graph is signed. Switching to signed graph clustering mode.")
+    }
+
+    if (!is.null(initial_clustering)) {
+      print("Perform graph clustering with *prior* initialization")
+
+      if (is.signed) {
+        clusters <- as.numeric(signed_cluster(
+          A = G,
+          resolution_parameter = resolution_parameter,
+          initial_clusters_ = initial_clustering,
+          seed = seed
+        ))
+      } else {
+        clusters <- as.numeric(unsigned_cluster(
+          A = G,
+          resolution_parameter = resolution_parameter,
+          initial_clusters_ = initial_clustering,
+          seed = seed
+        ))
+      }
+    } else {
+      print("Perform graph clustering with *uniform* initialization")
+
+      if (is.signed) {
+        clusters <- as.numeric(signed_cluster(
+          A = G,
+          resolution_parameter = resolution_parameter,
+          initial_clusters_ = NULL,
+          seed = seed
+        ))
+      } else {
+        clusters <- as.numeric(unsigned_cluster(
+          A = G,
+          resolution_parameter = resolution_parameter,
+          initial_clusters_ = NULL,
+          seed = seed
+        ))
+      }
+    }
+  }
+  return(clusters)
+}
+
+
+#' @export
+clusterCells <- function(ace, algorithm = "Leiden",
+                         cluster_name = "Leiden",
+                         resolution_parameter = 1.0,
+                         initial_clustering = NULL,
+                         seed = 0,
+                         network_slot = "ACTIONet") {
+  if (algorithm == "fix") {
+    cl <- initial_clustering
+  } else {
+    cl <- clusterNetwork(ace,
+      algorithm = algorithm,
+      resolution_parameter = resolution_parameter,
+      initial_clustering = initial_clustering,
+      seed = seed,
+      network_slot = network_slot
+    )
+  }
+
+  colData(ace)[[cluster_name]] <- cl
+  ace <- findMarkers.ace(ace, cl, out.name = cluster_name)
+
+  return(ace)
 }
