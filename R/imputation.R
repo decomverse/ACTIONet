@@ -146,3 +146,70 @@ impute.genes.using.ACTIONet <- function(
 
     return(expression_imputed)
 }
+
+#' @export
+imputeGenes <- function(ace,
+                        genes,
+                        algorithm = "ACTION",
+                        alpha_val = 0.9,
+                        thread_no = 0,
+                        diffusion_iters = 5,
+                        force_reimpute = FALSE,
+                        net_attr = "ACTIONet", assay_name = "logcounts") {
+    genes <- intersect(genes, rownames(ace))
+
+    algorithm <- toupper(algorithm)
+    S <- assays(ace)[[assay_name]]
+    subS <- S[genes, ]
+
+    if (algorithm == "PCA") {
+        if (!("ACTION_V" %in% names(rowMaps(ace)))) {
+            warning(sprintf("ACTION_V does not exist in rowMaps(ace)."))
+            return()
+        } else {
+            V <- rowMaps(ace)$ACTION_V
+            genes <- intersect(genes, rownames(V))
+            W <- V[genes, ]
+        }
+
+        if (!("ACTIONnorm" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
+            S_r <- Matrix::t(colMaps(ace)$ACTION)
+            G <- colNets(ace)[[net_attr]]
+            P <- normalize_adj(G, 0)
+            H <- compute_network_diffusion_Chebyshev(P, Matrix::t(S_r), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no)
+        } else {
+            H <- colMaps(ace)[["ACTIONnorm"]]
+        }
+        imputed.expression <- W %*% t(H)
+    } else if (algorithm == "ACTION") { # Default to ACTION
+        if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
+            Ht_unified <- colMaps(ace)[["H_unified"]]
+            H <- propNetworkScores(
+                G = G,
+                scores = as.matrix(Ht_unified),
+                thread_no = thread_no,
+                alpha = alpha_val
+            )
+        } else {
+            H <- ace$archetype_footprint
+        }
+        C <- colMaps(ace)$C_unified
+        W <- as.matrix(subS %*% C)
+        imputed.expression <- W %*% t(H)
+    } else if (algorithm == "ACTIONET") {
+        G <- colNets(ace)[[net_attr]]
+        P <- normalize_adj(G, 0)
+        imputed.expression <- compute_network_diffusion_Chebyshev(P, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no)
+    }
+
+    # Re-scaling expresion of genes
+    m1 <- apply(subS, 1, max)
+    m2 <- apply(imputed.expression, 1, max)
+    ratio <- m1 / m2
+    ratio[m2 == 0] <- 1
+    D <- Diagonal(nrow(imputed.expression), ratio)
+    imputed.expression <- as.matrix(D %*% imputed.expression)
+
+
+    return(imputed.expression)
+}
