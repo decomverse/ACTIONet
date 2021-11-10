@@ -95,25 +95,29 @@ run.ACTIONet <- function(
 
     # Build ACTIONet
     set.seed(seed)
-    G = build_ACTIONet(
-      H_stacked = pruning.out$H_stacked,
+    G = buildNetwork(
+      H = pruning.out$H_stacked,
+      algorithm = nn_approach,
+      distance_metric = distance_metric,
       density = network_density,
       thread_no = thread_no,
-      mutual_edges_only = mutual_edges_only,
-      distance_metric = distance_metric,
-      nn_approach = nn_approach
+      mutual_edges_only = mutual_edges_only
     )
     colNets(ace)[[net_slot_out]] = G
 
+    # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
+    S_r_norm <- propNetworkScores(G, scores = Matrix::t(S_r), alpha = imputation_alpha, max_it = 5, thread_no = thread_no)
+    colMaps(ace)[["ACTIONnorm"]] <- S_r_norm
+    colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
 
     # Layout ACTIONet
     initial_coordinates = ACTIONetExperiment:::.tscalet(S_r)
     colMaps(ace)[["ACTIONred"]] = Matrix::t(initial_coordinates[1:3, ])
     colMapTypes(ace)[["ACTIONred"]] = "embedding"
 
-    ace = .run.layout_ACTIONet(ace,
+    ace = .run.layoutNetwork(ace,
       G = G,
-      S_r = initial_coordinates,
+      initial_coordinates = initial_coordinates,
       compactness_level = layout_compactness,
       n_epochs = layout_epochs,
       layout_alg = layout_algorithm,
@@ -144,19 +148,17 @@ run.ACTIONet <- function(
     ace$node_centrality = c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
     # Smooth archetype footprints
-    Ht_unified = colMaps(ace)[["H_unified"]]
-    archetype_footprint = compute_network_diffusion_fast(
+    Ht_unified <- colMaps(ace)[["H_unified"]]
+    archetype_footprint <- propNetworkScores(
       G = G,
-      X0 = Ht_unified,
+      scores = as.matrix(Ht_unified),
       thread_no = thread_no,
       alpha = footprint_alpha
     )
-
-    colMaps(ace)$archetype_footprint = archetype_footprint
-
-    H = Matrix::t(archetype_footprint)
+    colMaps(ace)$archetype_footprint <- archetype_footprint
 
     # Compute gene specificity for each archetype
+    H = Matrix::t(archetype_footprint)
     if (is.matrix(S)) {
         specificity.out = compute_archetype_feature_specificity_full(S, H)
     } else {
@@ -175,15 +177,15 @@ run.ACTIONet <- function(
     rowMaps(ace)[["unified_feature_specificity"]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[["unified_feature_specificity"]] = "reduction"
 
-    ace = construct.backbone(
-      ace = ace,
-      network_density = network_density,
-      mutual_edges_only = mutual_edges_only,
-      layout_compactness = layout_compactness,
-      layout_epochs = layout_epochs/5,
-      thread_no = 1,
-      ACTIONet_slot = net_slot_out
-    )
+    # ace = construct.backbone(
+    #   ace = ace,
+    #   network_density = network_density,
+    #   mutual_edges_only = mutual_edges_only,
+    #   layout_compactness = layout_compactness,
+    #   layout_epochs = layout_epochs/5,
+    #   thread_no = 1,
+    #   ACTIONet_slot = net_slot_out
+    # )
 
     if (full_trace == T) {
         trace = list(
@@ -226,10 +228,10 @@ run.ACTIONet <- function(
 #'
 #' @examples
 #' plot.ACTIONet(ace)
-#' ace.updated = reconstruct.ACTIONet(ace, network_density = 0.1)
+#' ace.updated = reconstructACTIONet(ace, network_density = 0.1)
 #' plot.ACTIONet(ace.updated)
 #' @export
-reconstruct.ACTIONet <- function(
+reconstructACTIONet <- function(
   ace,
   network_density = 1,
   distance_metric = "jsd",
@@ -250,18 +252,19 @@ reconstruct.ACTIONet <- function(
     # re-Build ACTIONet
     H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
 
-    G = build_ACTIONet(
-      H_stacked = H_stacked,
+    G = buildNetwork(
+      H = H_stacked,
+      algorithm = nn_approach,
+      distance_metric = distance_metric,
       density = network_density,
       thread_no = thread_no,
-      mutual_edges_only = mutual_edges_only,
-      distance_metric = distance_metric,
-      nn_approach = nn_approach
+      mutual_edges_only = mutual_edges_only
     )
+
     colNets(ace)[[output_slot]] = G
 
     # Layout ACTIONet
-    ace <- rerun.layout(
+    ace <- rerunLayout(
       ace = ace,
       layout_compactness = layout_compactness,
       layout_epochs = layout_epochs,
@@ -294,10 +297,10 @@ reconstruct.ACTIONet <- function(
 #'
 #' @examples
 #' plot.ACTIONet(ace)
-#' ace.updated = rerun.layout(ace, layout_compactness = 20)
+#' ace.updated = rerunLayout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
 #' @export
-rerun.layout <- function(
+rerunLayout <- function(
   ace,
   layout_compactness = 50,
   layout_epochs = 1000,
@@ -310,10 +313,10 @@ rerun.layout <- function(
   seed = 0
 ) {
 
-    ace = .run.layout_ACTIONet(
+    ace = .run.layoutNetwork(
       ace = ace,
       G = NULL,
-      S_r = NULL,
+      initial_coordinates = NULL,
       compactness_level = layout_compactness,
       n_epochs = layout_epochs,
       layout_alg = layout_algorithm,
@@ -322,22 +325,22 @@ rerun.layout <- function(
       net_slot = net_slot,
       seed = seed)
 
-    ace = construct.backbone(
-      ace = ace,
-      network_density = network_density,
-      mutual_edges_only = mutual_edges_only,
-      layout_compactness = layout_compactness,
-      layout_epochs = layout_epochs/5,
-      thread_no = 1)
+    # ace = construct.backbone(
+    #   ace = ace,
+    #   network_density = network_density,
+    #   mutual_edges_only = mutual_edges_only,
+    #   layout_compactness = layout_compactness,
+    #   layout_epochs = layout_epochs/5,
+    #   thread_no = 1)
 
     return(ace)
 }
 
 
-.run.layout_ACTIONet <- function(
+.run.layoutNetwork <- function(
   ace,
   G = NULL,
-  S_r = NULL,
+  initial_coordinates = NULL,
   compactness_level = 50,
   n_epochs = 1000,
   layout_alg = 0,
@@ -349,16 +352,16 @@ rerun.layout <- function(
   if(is.null(G)){
     G = colNets(ace)[[net_slot]]
   }
-  if(is.null(S_r)){
-    S_r = Matrix::t(scale(colMaps(ace)[[reduction_slot]]))
+  if(is.null(initial_coordinates)){
+    initial_coordinates = Matrix::t(scale(colMaps(ace)[[reduction_slot]]))
   }
 
-  vis.out = layout_ACTIONet(
+  vis.out <- layoutNetwork(
     G = G,
-    S_r = S_r,
+    initial_position = initial_coordinates,
+    algorithm = layout_alg,
     compactness_level = compactness_level,
     n_epochs = n_epochs,
-    layout_alg = layout_alg,
     thread_no = thread_no,
     seed = seed
   )
@@ -386,7 +389,7 @@ rerun.layout <- function(
 
 
 #' @export
-rerun.archetype.aggregation <- function(
+rerunArchAggr <- function(
   ace,
   assay_name = "logcounts",
   reduction_slot = "ACTION",
@@ -458,67 +461,66 @@ rerun.archetype.aggregation <- function(
     rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = specificity.out[["upper_significance"]]
     rowMapTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] = "reduction"
 
-    ace = construct.backbone(
-      ace = ace,
-      network_density = network_density,
-      mutual_edges_only = mutual_edges_only,
-      layout_compactness = layout_compactness,
-      layout_epochs = layout_epochs/5,
-      thread_no = 1
-    )
+    # ace = construct.backbone(
+    #   ace = ace,
+    #   network_density = network_density,
+    #   mutual_edges_only = mutual_edges_only,
+    #   layout_compactness = layout_compactness,
+    #   layout_epochs = layout_epochs/5,
+    #   thread_no = 1
+    # )
 
     return(ace)
 }
 
-construct.backbone <- function(
-  ace,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 100,
-  thread_no = 1,
-  footprint_alpha = 0.85,
-  ACTIONet_slot = "ACTIONet"
-) {
-
-    # if (!("archetype_footprint" %in% names(colMaps(ace)))) {
-    #     G = colNets(ace)[[ACTIONet_slot]]
-    #     Ht_unified = colMaps(ace)[["H_unified"]]
-    #
-    #     archetype_footprint = compute_network_diffusion_fast(
-    #       G = G,
-    #       X0 = Ht_unified,
-    #       thread_no = thread_no,
-    #       alpha = footprint_alpha
-    #     )
-    #     colMaps(ace)$archetype_footprint = archetype_footprint
-    # }
-    #
-    # W = exp(scale(ace$archetype_footprint))
-    # W = as(W, "sparseMatrix")
-    #
-    # arch.vis.out = transform_layout(
-    #   W = W,
-    #   coor2D = Matrix::t(ace$ACTIONet2D),
-    #   coor3D = Matrix::t(ace$ACTIONet3D),
-    #   colRGB = Matrix::t(ace$denovo_color),
-    #   n_epochs = layout_epochs,
-    #   compactness_level = layout_compactness,
-    #   thread_no = thread_no
-    # )
-    #
-    # arch.G = computeFullSim(colMaps(ace)$archetype_footprint)
-    # diag(arch.G) = 0
-    #
-    # backbone = list(
-    #   G = arch.G,
-    #   coordinates = Matrix::t(arch.vis.out$coordinates),
-    #   coordinates_3D = Matrix::t(arch.vis.out$coordinates_3D),
-    #   colors = Matrix::t(arch.vis.out$colors)
-    # )
-    #
-    # metadata(ace)$backbone = backbone
-    metadata(ace)$backbone = list()
-
-    return(ace)
-}
+# construct.backbone <- function(
+#   ace,
+#   network_density = 1,
+#   mutual_edges_only = TRUE,
+#   layout_compactness = 50,
+#   layout_epochs = 100,
+#   thread_no = 1,
+#   footprint_alpha = 0.85,
+#   ACTIONet_slot = "ACTIONet"
+# ) {
+#
+#     if (!("archetype_footprint" %in% names(colMaps(ace)))) {
+#         G = colNets(ace)[[ACTIONet_slot]]
+#         Ht_unified = colMaps(ace)[["H_unified"]]
+#
+#         archetype_footprint = compute_network_diffusion_fast(
+#           G = G,
+#           X0 = Ht_unified,
+#           thread_no = thread_no,
+#           alpha = footprint_alpha
+#         )
+#         colMaps(ace)$archetype_footprint = archetype_footprint
+#     }
+#
+#     W = exp(scale(ace$archetype_footprint))
+#     W = as(W, "sparseMatrix")
+#
+#     arch.vis.out = transform_layout(
+#       W = W,
+#       coor2D = Matrix::t(ace$ACTIONet2D),
+#       coor3D = Matrix::t(ace$ACTIONet3D),
+#       colRGB = Matrix::t(ace$denovo_color),
+#       n_epochs = layout_epochs,
+#       compactness_level = layout_compactness,
+#       thread_no = thread_no
+#     )
+#
+#     arch.G = computeFullSim(colMaps(ace)$archetype_footprint)
+#     diag(arch.G) = 0
+#
+#     backbone = list(
+#       G = arch.G,
+#       coordinates = Matrix::t(arch.vis.out$coordinates),
+#       coordinates_3D = Matrix::t(arch.vis.out$coordinates_3D),
+#       colors = Matrix::t(arch.vis.out$colors)
+#     )
+#
+#     metadata(ace)$backbone = backbone
+#
+#     return(ace)
+# }
