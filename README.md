@@ -99,18 +99,6 @@ R CMD INSTALL .
 
 ### Install optional packages
 #### Batch correction
-* [batchelor](https://bioconductor.org/packages/release/bioc/html/batchelor.html): This Implements a variety of methods for batch correction of single-cell (RNA sequencing) data, including mutually-nearest neighbor (MNN) method. You can install it using bioconductor:
-
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("batchelor")
-```
-
-ACTIONet includes interface to run MNN: `reduce.and.batch.correct.sce.fastMNN()`.
-
-
 * [Harmony](https://github.com/immunogenomics/harmony): Harmony is another popular batch-correction method that has direct interface implemented in the ACTIONet framework:
 
 ```r
@@ -119,32 +107,6 @@ devtools::install_github("immunogenomics/harmony")
 ```
 
 ACTIONet includes interface to run harmony: `reduce.and.batch.correct.sce.Harmony()`.
-
-
-#### Normalization & QC
-* [scater](http://bioconductor.org/packages/release/bioc/html/scater.html)/[scran](https://bioconductor.org/packages/release/bioc/html/scran.html) packages provide great set of tools for normalization and quality-control of single-cell datasets stored as a `SingleCellExperiment` format. You can instal them using:
-
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("scater", "scran")
-```
-ACTIONet interfaces to scran normalization via `normalize.scran()` function.
-
-* [Linnorm](https://bioconductor.riken.jp/packages/3.4/bioc/html/Linnorm.html) is another commonly used normalization technique. You can install it via:
-
-```r
-## try http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-
-biocLite("Linnorm")
-
-```
-
-
-ACTIONet interfaces to scran normalization via `normalize.Linnorm()` function.
-
 
 
 # Running ACTIONet
