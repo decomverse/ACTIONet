@@ -106,7 +106,7 @@ install.packages("devtools")
 devtools::install_github("immunogenomics/harmony")
 ```
 
-ACTIONet includes interface to run harmony: `reduce.and.batch.correct.sce.Harmony()`.
+ACTIONet includes interface to run harmony: `reduce.and.batch.correct.ace.Harmony()`.
 
 
 # Running ACTIONet
