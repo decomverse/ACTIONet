@@ -4,11 +4,18 @@
 **For Linux Users**
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
+
 **Install library dependencies**
 To install the `ACTIONet` dependencies on debian-based linux machines, run:
 
 ```bash
-sudo apt install libhdf5-dev libsuitesparse-dev libcurl4-openssl-dev libssl-dev libxml2-dev
+sudo apt install libhdf5-dev libsuitesparse-dev
+```
+
+Additionally, to install all R package dependencies (if they are not already installed), you need:
+
+```bash
+sudo apt install  libcurl4-openssl-dev libssl-dev libxml2-dev
 ```
 
 For Mac-based systems use [brew](https://brew.sh/):
@@ -17,6 +24,7 @@ For Mac-based systems use [brew](https://brew.sh/):
 brew install hdf5 suite-sparse
 ```
 Some of the dependent R packages also require [XQuartz](https://www.xquartz.org) to be installed.
+
 
 ### Installing ACTIONet R Package
 
@@ -29,7 +37,7 @@ devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
 
 ```
 
-#### Directly from the clone
+#### Directly from the cloned repository
 This is the more flexible approach and allows for easily pulling the latest updates/changes. This can be done as follows:
 
 * **Instaling dependencies**: Unlike devtools, `R` script does not automatically install dependencies. To install all dependencies, run:
@@ -74,6 +82,11 @@ If you want to install the latest updates, switch to the `R-devel` branch:
 ```bash
 cd ACTIONet
 git checkout R-devel
+```
+
+Fetch all C/C++ codes:
+```bash
+git submodule update --init
 ```
 
 and now you can install ACTIONet using the following command in the `ACTIONet` directory:
