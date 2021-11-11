@@ -1,5 +1,6 @@
 #Installation
 
+
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users**
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
@@ -42,9 +43,10 @@ This is the more flexible approach and allows for easily pulling the latest upda
 
 * **Instaling dependencies**: Unlike devtools, `R` script does not automatically install dependencies. To install all dependencies, run:
 
+
 ```r
-install.packages(c('Matrix', 'Rcpp', 'RcppArmadillo', 'R.utils', 'hdf5r', 'plotly', 'ggpubr', 'corrplot', 'wordcloud', 'threejs', 'RColorBrewer'))
-BiocManager::install(c("SingleCellExperiment", "ComplexHeatmap"))
+devtools::install_github("shmohammadi86/ACTIONetExperiment")
+BiocManager::install(c("Rcpp", "RcppArmadillo", "ACTIONetExperiment", "Matrix", "SingleCellExperiment", "hdf5r", "ggplot2", "ComplexHeatmap", "ggpubr", "ggrepel", "RColorBrewer", "pals", "seriation", "dplyr", "grid", "matrixStats", "gplots", "batchelor", "BiocParallel", "plotly", "scran", "scatter"))
 ```
 
 * **Clone `ACTIONet` repository**:
