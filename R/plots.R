@@ -285,7 +285,8 @@ plot.top.k.features <- function(feat_scores,
                                 reorder_columns = TRUE,
                                 row.title = "Archetypes",
                                 column.title = "Genes",
-                                rowPal = "black") {
+                                rowPal = "black",
+                                title = "Enrichment") {
   W <- select.top.k.features(
     feat_scores = feat_scores,
     top_features = top_features,
@@ -299,7 +300,7 @@ plot.top.k.features <- function(feat_scores,
   Z <- W
   ht <- ComplexHeatmap::Heatmap(
     matrix = Z,
-    name = "Expression (scaled)",
+    name = title,
     cluster_rows = FALSE,
     cluster_columns = FALSE,
     col = gradPal,
@@ -757,6 +758,10 @@ plot.ACTIONet.gradient <- function(ace,
                                    coordinate_attr = "ACTIONet2D") {
   NA_col <- "#eeeeee"
 
+  if (length(x) != ncol(ace)) {
+    warning("Length of input vector doesn't match the number of cells.")
+    return()
+  }
   ## Create color gradient generator
   if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
     grad_palette <- switch(grad_palette,
@@ -807,7 +812,7 @@ plot.ACTIONet.gradient <- function(ace,
   idx <- order(x, decreasing = FALSE)
 
   p_out <- plot.ACTIONet(
-    data = ace,
+    ace = ace,
     label_attr = NULL,
     color_attr = plot_fill_col,
     trans_attr = trans_attr,
@@ -1034,79 +1039,81 @@ plot.archetype.selected.genes <- function(ace,
 
 
 plot.ACTIONet.archetype.footprint <- function(ace,
-                                              point_size = 0.1,
-                                              palette = "magma",
-                                              title = "",
-                                              arch.labels = NULL,
-                                              coordinate_slot = "ACTIONet2D",
-                                              alpha_val = 0.9) {
-  Ht <- colMaps(ace)[["H_unified"]]
-  cs <- Matrix::colSums(Ht)
-  cs[cs == 0] <- 1
-
-  U <- as(scale(Ht, center = FALSE, scale = cs), "dgTMatrix")
-  U.pr <- compute_network_diffusion(
-    G = colNets(ace)$ACTIONet,
-    X0 = U,
-    alpha = alpha_val
-  )
-
-  point_size <- point_size * 0.3
-  coors <- scale(colMaps(ace)[[coordinate_slot]])
-
-  if (palette %in% c("inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
-    Pal_grad <- switch(palette,
-      inferno = viridis::inferno(500, alpha = 0.8),
-      magma = viridis::magma(500, alpha = 0.8),
-      viridis = viridis::viridis(500, alpha = 0.8),
-      BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
-      Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
-      RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
-    )
-  } else {
-    NA_col <- "#cccccc"
-    Pal_grad <- grDevices::colorRampPalette(c(NA_col, palette))(500)
-  }
-
-  k1 <- k2 <- round(sqrt(NCOL(Ht)))
-  if (k1 * k2 < NCOL(Ht)) {
-    k2 <- k2 + 1
-  }
-
+                                              markers,
+                                              features_use = NULL,
+                                              alpha_val = 0.9,
+                                              assay_name = "logcounts",
+                                              trans_attr = NULL,
+                                              trans_th = 0,
+                                              trans_fac = 2,
+                                              grad_palette = "magma",
+                                              point_size = 0.5,
+                                              net_attr = "ACTIONet",
+                                              coordinate_attr = "ACTIONet2D",
+                                              single_plot = FALSE,
+                                              arch.labels = NULL) {
+  archetype_footprint <- ace$archetype_footprint
   if (is.null(arch.labels)) {
-    arch.labels <- sapply(1:NCOL(Ht), function(i) sprintf("Archetype %d", i))
+    arch.labels <- sapply(1:NCOL(archetype_footprint), function(i) sprintf("Archetype %d", i))
+  }
+  colnames(archetype_footprint) <- arch.labels
+
+  if (single_plot == TRUE && NCOL(archetype_footprint) > 1) {
+    n <- length(marker_set)
+    d <- .plot_arrange_dim(n)
+    point_size <- point_size / d[1]
   }
 
-  # par(mfrow = c(k1, k2), mar = c(0, 0, 1, 0))
-  sapply(1:NCOL(Ht), function(i) {
-    print(i)
-    x <- U.pr[, i]
+  out <- sapply(colnames(archetype_footprint), function(arch) {
+    x <- archetype_footprint[, arch]
 
-    xs <- sort(x, decreasing = TRUE)
-    nnz <- round((sum(xs)^2) / (sum(xs^2)))
-    threshold <- xs[nnz]
+    nnz <- round(sum(x^2)^2 / sum(x^4))
+    x.threshold <- sort(x, decreasing = TRUE)[nnz]
+    x[x < x.threshold] <- 0
+    x <- x / max(x)
 
-    x[x < threshold] <- threshold
-    x <- log(x)
+    if (is.null(trans_attr)) {
+      trans_attr <- x
+    }
+    p_out <- plot.ACTIONet.gradient(
+      ace = ace,
+      x = x,
+      alpha_val = 0,
+      log_scale = FALSE,
+      nonparameteric = FALSE,
+      trans_attr = trans_attr,
+      trans_fac = trans_fac,
+      trans_th = trans_th,
+      point_size = point_size,
+      stroke_size = point_size * 0.1,
+      stroke_contrast_fac = 0.1,
+      grad_palette = grad_palette,
+      net_attr = net_attr,
+      coordinate_attr = coordinate_attr
+    ) +
+      ggtitle(arch) +
+      theme(plot.title = element_text(hjust = 0.5))
 
-    vCol <- (scales::col_bin(Pal_grad, domain = NULL, bins = 10))(x)
-    vCol <- scales::alpha(vCol, 0.05 + 0.95 * x / max(x))
-    vCol <- colorspace::lighten(vCol, 0.2)
-    idx <- order(x, decreasing = FALSE)
+    return(p_out)
+  }, simplify = FALSE)
 
-    graphics::plot(
-      x = coors[idx, 1],
-      y = coors[idx, 2],
-      bg = vCol[idx],
-      col = vCol[idx],
-      cex = point_size,
-      pch = 21,
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      main = arch.labels[[i]]
+  # n = length(out)
+  if (length(out) == 1) {
+    out <- out[[1]]
+  }
+
+  if (single_plot == TRUE && length(out) > 1) {
+    # n = length(marker_set)
+    # d = .plot_arrange_dim(n)
+
+    out <- ggpubr::ggarrange(
+      plotlist = out,
+      nrow = d[1],
+      ncol = d[2]
     )
-  })
+  }
+
+  return(out)
 }
 
 

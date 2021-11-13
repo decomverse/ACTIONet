@@ -202,17 +202,18 @@ propNetworkLabels <- function(G, initial_labels, algorithm = "LPA", lambda = 0, 
   return(updated_labels)
 }
 
-filterCells <- function(ace, z_threshold = 1.65, global = TRUE, network_slot = "ACTIONet") {
+filterCells <- function(ace, z_threshold = 1, global = FALSE, network_slot = "ACTIONet") {
+  G <- colNets(ace)[[network_slot]]
   if (global == TRUE) {
-    G <- colNets(ace)[[network_slot]]
     cn <- compute_core_number(G)
-    z <- exp(-scale(cn))
   } else {
-    x <- ace$node_centrality
-    z <- scale(x)
+    cn <- ace$node_centrality
   }
+  x <- propNetworkScores(G, as.matrix(cn))
+  z <- -(x - median(x)) / mad(x)
+
   mask <- z_threshold < z
 
-  out <- list(is_filtered = mask, z = z)
+  out <- list(score = exp(z), is_filtered = mask, z.score = z)
   return(out)
 }
