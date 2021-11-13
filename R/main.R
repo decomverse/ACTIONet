@@ -3,7 +3,7 @@
                                initial_coordinates = NULL,
                                compactness_level = 50,
                                n_epochs = 1000,
-                               layout_alg = 0,
+                               layout_algorithm = "TUMAP",
                                thread_no = 0,
                                reduction_slot = "ACTION",
                                net_slot = "ACTIONet",
@@ -18,7 +18,7 @@
   vis.out <- layoutNetwork(
     G = G,
     initial_position = initial_coordinates,
-    algorithm = layout_alg,
+    algorithm = layout_algorithm,
     compactness_level = compactness_level,
     n_epochs = n_epochs,
     thread_no = thread_no,
@@ -97,12 +97,13 @@ run.ACTIONet <- function(ace,
                          mutual_edges_only = TRUE,
                          layout_compactness = 50,
                          layout_epochs = 1000,
-                         layout_algorithm = 0,
+                         layout_algorithm = "TUMAP",
                          layout_in_parallel = TRUE,
                          unification_violation_threshold = 0,
                          footprint_alpha = 0.85,
                          thread_no = 0,
                          full_trace = FALSE,
+                         imputation_alpha = 0.9,
                          seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
@@ -418,7 +419,7 @@ runACTIONet <- function(ace,
   colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
 
   # Layout ACTIONet. Now it uses the smoothed S_r
-  initial_coordinates <- .tscalet(S_r)
+  initial_coordinates <- ACTIONetExperiment:::.tscalet(S_r)
   colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
   colMapTypes(ace)[["ACTIONred"]] <- "embedding"
 
