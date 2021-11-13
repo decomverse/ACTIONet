@@ -2019,6 +2019,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline mat compute_markers_eigengene(mat& S, sp_mat& marker_mat, int normalization = 0, int thread_no = 0) {
+        typedef SEXP(*Ptr_compute_markers_eigengene)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_compute_markers_eigengene p_compute_markers_eigengene = NULL;
+        if (p_compute_markers_eigengene == NULL) {
+            validateSignature("mat(*compute_markers_eigengene)(mat&,sp_mat&,int,int)");
+            p_compute_markers_eigengene = (Ptr_compute_markers_eigengene)R_GetCCallable("ACTIONet", "_ACTIONet_compute_markers_eigengene");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_compute_markers_eigengene(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(normalization)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_

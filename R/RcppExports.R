@@ -1104,6 +1104,10 @@ compute_marker_aggregate_stats_nonparametric <- function(S, marker_mat, thread_n
     .Call(`_ACTIONet_compute_marker_aggregate_stats_nonparametric`, S, marker_mat, thread_no)
 }
 
+compute_markers_eigengene <- function(S, marker_mat, normalization = 0L, thread_no = 0L) {
+    .Call(`_ACTIONet_compute_markers_eigengene`, S, marker_mat, normalization, thread_no)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
