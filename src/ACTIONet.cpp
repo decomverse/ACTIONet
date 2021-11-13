@@ -2537,6 +2537,14 @@ mat compute_marker_aggregate_stats_nonparametric(mat &S, sp_mat &marker_mat, int
   return (X);
 }
 
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat compute_markers_eigengene(mat &S, sp_mat &marker_mat, int normalization = 0, int thread_no = 0)
+{
+  mat X = ACTIONet::compute_markers_eigengene(S, marker_mat, normalization, thread_no);
+  return (X);
+}
+
 /*
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
