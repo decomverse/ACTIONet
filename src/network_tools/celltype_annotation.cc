@@ -434,4 +434,48 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     return (stats);
   }
 
+  mat compute_markers_eigengene(mat &S, sp_mat &marker_mat, int normalization, int thread_no)
+  {
+    mat St = trans(S); // cell x gene
+
+    mat Z;
+    if (normalization == 0)
+    {
+      Z = zscore(St, thread_no);
+    }
+    else if (normalization == 1)
+    {
+      Z = RIN_transform(St, thread_no);
+    }
+    else // default to z-score
+    {
+      Z = zscore(St, thread_no);
+    }
+
+    mat stats = zeros(Z.n_rows, marker_mat.n_cols);
+    ParallelFor(0, marker_mat.n_cols, thread_no, [&](size_t i, size_t threadId)
+                {
+                  vec v = vec(marker_mat.col(i));
+                  uvec idx = find(v != 0);
+                  vec w = v(idx);
+                  mat subZ = Z.cols(idx);
+                  subZ.each_row() %= trans(w);
+                  double denom = sqrt(sum(sum(cov(subZ))));
+                  vec z = sum(subZ, 1) / denom;
+
+                  field<mat> SVD_results = HalkoSVD(subZ, 1, 5, 0, 0);
+                  vec u = SVD_results(0);
+                  if (dot(u, z) < 0) // orient
+                  {
+                    u = -u;
+                  }
+
+                  u = u * stddev(z) / stddev(u);
+
+                  stats.col(i) = u;
+                });
+
+    return (stats);
+  }
+
 } // namespace ACTIONet
