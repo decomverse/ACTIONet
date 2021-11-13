@@ -438,9 +438,6 @@ annotateClusters <- function(ace, annotation_source, cluster_name = "Leiden") {
     features_use <- .preprocess_annotation_features(ace, NULL)
     marker_mat <- as(.preprocess_annotation_markers(annotation_source, features_use), "sparseMatrix")
 
-    features_use <- .preprocess_annotation_features(ace, features_use)
-    marker_mat <- .preprocess_annotation_markers(markers, features_use)
-
     scores <- as.matrix(rowMaps(ace)[[cluster_slot]])
     cluster_enrichment <- Matrix::t(assess_enrichment(scores, marker_mat)$logPvals)
     colnames(cluster_enrichment) <- colnames(marker_mat)
