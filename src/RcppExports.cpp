@@ -3555,6 +3555,43 @@ RcppExport SEXP _ACTIONet_compute_marker_aggregate_stats_nonparametric(SEXP SSEX
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// compute_markers_eigengene
+mat compute_markers_eigengene(mat& S, sp_mat& marker_mat, int normalization, int thread_no);
+static SEXP _ACTIONet_compute_markers_eigengene_try(SEXP SSEXP, SEXP marker_matSEXP, SEXP normalizationSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
+    Rcpp::traits::input_parameter< int >::type normalization(normalizationSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_markers_eigengene(S, marker_mat, normalization, thread_no));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_compute_markers_eigengene(SEXP SSEXP, SEXP marker_matSEXP, SEXP normalizationSEXP, SEXP thread_noSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_markers_eigengene_try(SSEXP, marker_matSEXP, normalizationSEXP, thread_noSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -3680,6 +3717,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*compute_network_diffusion_Chebyshev)(sp_mat&,mat&,int,double,int,double)");
         signatures.insert("mat(*compute_network_diffusion)(sp_mat&,mat&,int,double,int,double,int)");
         signatures.insert("mat(*compute_marker_aggregate_stats_nonparametric)(mat&,sp_mat&,int)");
+        signatures.insert("mat(*compute_markers_eigengene)(mat&,sp_mat&,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -3781,6 +3819,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_network_diffusion_Chebyshev", (DL_FUNC)_ACTIONet_compute_network_diffusion_Chebyshev_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_network_diffusion", (DL_FUNC)_ACTIONet_compute_network_diffusion_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_nonparametric", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_nonparametric_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_markers_eigengene", (DL_FUNC)_ACTIONet_compute_markers_eigengene_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -3881,6 +3920,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_network_diffusion_Chebyshev", (DL_FUNC) &_ACTIONet_compute_network_diffusion_Chebyshev, 6},
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 7},
     {"_ACTIONet_compute_marker_aggregate_stats_nonparametric", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_nonparametric, 3},
+    {"_ACTIONet_compute_markers_eigengene", (DL_FUNC) &_ACTIONet_compute_markers_eigengene, 4},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},
