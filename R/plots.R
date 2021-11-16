@@ -778,21 +778,14 @@ plot.ACTIONet.gradient <- function(ace,
     grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
   }
 
-  ## Scale/prune scores, if needed
-  if (any(x < 0)) {
-    x <- x + -1 * min(x)
-  }
-
-  x <- x - min(x)
-
   if (log_scale == TRUE) {
     x <- log1p(x)
   }
 
   if (alpha_val > 0) {
-    x <- as.numeric(compute_network_diffusion_fast(
+    x <- as.numeric(propNetworkScores(
       G = colNets(ace)[[net_attr]],
-      X0 = as(as.matrix(x), "sparseMatrix")
+      scores = as.matrix(x)
     ))
   }
 
@@ -1059,7 +1052,7 @@ plot.ACTIONet.archetype.footprint <- function(ace,
   colnames(archetype_footprint) <- arch.labels
 
   if (single_plot == TRUE && NCOL(archetype_footprint) > 1) {
-    n <- length(marker_set)
+    n <- NCOL(archetype_footprint)
     d <- .plot_arrange_dim(n)
     point_size <- point_size / d[1]
   }
