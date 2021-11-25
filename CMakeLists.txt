@@ -13,7 +13,8 @@ add_compile_options(-w)
 add_compile_options(-O3)
 
 ############ Third-party dependencies
-find_package(PythonLibs REQUIRED)
+#find_package(PythonLibs REQUIRED)
+find_package(PythonPyEnv REQUIRED)
 
 # Check for CHOLMOD
 find_package(SuiteSparse REQUIRED)
