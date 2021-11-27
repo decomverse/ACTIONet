@@ -16,7 +16,7 @@
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
-#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)
+#' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
 #' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_violation_threshold Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
@@ -49,7 +49,7 @@ run.ACTIONet <- function(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = 0,
+  layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
   unification_violation_threshold = 0,
   footprint_alpha = 0.85,
@@ -62,7 +62,7 @@ run.ACTIONet <- function(
         err = sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
         stop(err)
     }
-
+    layout_algorithm <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
     ace = as(ace, "ACTIONetExperiment")
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
@@ -217,7 +217,7 @@ run.ACTIONet <- function(
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
-#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)
+#' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
 #' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param reduction_slot Slot in colMaps(ace) containing reduced kernel. (default='ACTION')
@@ -239,18 +239,20 @@ reconstructACTIONet <- function(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = 0,
+  layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
   output_slot = "ACTIONet",
+  H_slot = "H_stacked",
   seed = 0
 ) {
 
     set.seed(seed)
+    layout_algorithm <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
 
     # re-Build ACTIONet
-    H_stacked = Matrix::t(as.matrix(colMaps(ace)[["H_stacked"]]))
+    H_stacked = Matrix::t(as.matrix(colMaps(ace)[[H_slot]]))
 
     G = buildNetwork(
       H = H_stacked,
@@ -285,7 +287,7 @@ reconstructACTIONet <- function(
 #' @param ace ACTIONetExperiment object.
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
-#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).
+#' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
 #' @param thread_no Number of parallel threads (default=0).
@@ -304,7 +306,7 @@ rerunLayout <- function(
   ace,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = 0,
+  layout_algorithm = c("tumap", "umap"),
   network_density = 1,
   mutual_edges_only = TRUE,
   thread_no = 0,
@@ -313,13 +315,15 @@ rerunLayout <- function(
   seed = 0
 ) {
 
+    layout_alg <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
+
     ace = .run.layoutNetwork(
       ace = ace,
       G = NULL,
       initial_coordinates = NULL,
       compactness_level = layout_compactness,
       n_epochs = layout_epochs,
-      layout_alg = layout_algorithm,
+      layout_alg = layout_alg,
       thread_no = thread_no,
       reduction_slot = reduction_slot,
       net_slot = net_slot,
@@ -343,11 +347,13 @@ rerunLayout <- function(
   initial_coordinates = NULL,
   compactness_level = 50,
   n_epochs = 1000,
-  layout_alg = 0,
+  layout_alg = c("tumap", "umap"),
   thread_no = 0,
   reduction_slot = "ACTION",
   net_slot = "ACTIONet",
   seed = 0) {
+
+  layout_alg <- match.arg(toupper(layout_alg), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
 
   if(is.null(G)){
     G = colNets(ace)[[net_slot]]
