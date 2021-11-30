@@ -202,7 +202,7 @@ propNetworkLabels <- function(G, initial_labels, algorithm = "LPA", lambda = 0, 
   return(updated_labels)
 }
 
-maskCellsByNetScore <- function(ace, z_threshold = 1, global = FALSE, network_slot = "ACTIONet") {
+filterCells <- function(ace, z_threshold = 1, global = FALSE, network_slot = "ACTIONet") {
   G <- colNets(ace)[[network_slot]]
   if (global == TRUE) {
     cn <- compute_core_number(G)
