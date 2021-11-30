@@ -731,7 +731,7 @@ plot.individual.gene <- function(ace,
 #' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
 #' @param stroke_contrast_fac Factor by which to darken point outline for contrast (default:0.1).
 #' @param grad_palette Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.
-#' @param net_attr Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
+#' @param net_slot Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
 #' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').
 #'
 #' @return 'ggplot' object.
@@ -754,7 +754,7 @@ plot.ACTIONet.gradient <- function(ace,
                                    stroke_size = point_size * 0.1,
                                    stroke_contrast_fac = 0.1,
                                    grad_palette = "magma",
-                                   net_attr = "ACTIONet",
+                                   net_slot = "ACTIONet",
                                    coordinate_attr = "ACTIONet2D") {
   NA_col <- "#eeeeee"
 
@@ -784,7 +784,7 @@ plot.ACTIONet.gradient <- function(ace,
 
   if (alpha_val > 0) {
     x <- as.numeric(propNetworkScores(
-      G = colNets(ace)[[net_attr]],
+      G = colNets(ace)[[net_slot]],
       scores = as.matrix(x)
     ))
   }
@@ -851,7 +851,7 @@ visualize.markers <- function(ace,
                               trans_fac = 3,
                               grad_palette = "magma",
                               point_size = 1,
-                              net_attr = "ACTIONet",
+                              net_slot = "ACTIONet",
                               coordinate_attr = "ACTIONet2D",
                               single_plot = FALSE) {
   features_use <- .preprocess_annotation_features(ace, features_use = features_use)
@@ -915,7 +915,7 @@ visualize.markers <- function(ace,
       stroke_size = point_size * 0.1,
       stroke_contrast_fac = 0.1,
       grad_palette = grad_palette,
-      net_attr = net_attr,
+      net_slot = net_slot,
       coordinate_attr = coordinate_attr
     ) +
       ggtitle(feat_name) +
@@ -1041,7 +1041,7 @@ plot.ACTIONet.archetype.footprint <- function(ace,
                                               trans_fac = 2,
                                               grad_palette = "magma",
                                               point_size = 0.5,
-                                              net_attr = "ACTIONet",
+                                              net_slot = "ACTIONet",
                                               coordinate_attr = "ACTIONet2D",
                                               single_plot = FALSE,
                                               arch.labels = NULL) {
@@ -1081,7 +1081,7 @@ plot.ACTIONet.archetype.footprint <- function(ace,
       stroke_size = point_size * 0.1,
       stroke_contrast_fac = 0.1,
       grad_palette = grad_palette,
-      net_attr = net_attr,
+      net_slot = net_slot,
       coordinate_attr = coordinate_attr
     ) +
       ggtitle(arch) +

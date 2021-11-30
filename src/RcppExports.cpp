@@ -3592,6 +3592,43 @@ RcppExport SEXP _ACTIONet_compute_markers_eigengene(SEXP SSEXP, SEXP marker_matS
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// sweepcut
+vec sweepcut(sp_mat& A, vec s, int min_size, int max_size);
+static SEXP _ACTIONet_sweepcut_try(SEXP ASEXP, SEXP sSEXP, SEXP min_sizeSEXP, SEXP max_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< vec >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type min_size(min_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type max_size(max_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(sweepcut(A, s, min_size, max_size));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_sweepcut(SEXP ASEXP, SEXP sSEXP, SEXP min_sizeSEXP, SEXP max_sizeSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_sweepcut_try(ASEXP, sSEXP, min_sizeSEXP, max_sizeSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -3718,6 +3755,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*compute_network_diffusion)(sp_mat&,mat&,int,double,int,double,int)");
         signatures.insert("mat(*compute_marker_aggregate_stats_nonparametric)(mat&,sp_mat&,int)");
         signatures.insert("mat(*compute_markers_eigengene)(mat&,sp_mat&,int,int)");
+        signatures.insert("vec(*sweepcut)(sp_mat&,vec,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -3820,6 +3858,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_network_diffusion", (DL_FUNC)_ACTIONet_compute_network_diffusion_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_nonparametric", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_nonparametric_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_markers_eigengene", (DL_FUNC)_ACTIONet_compute_markers_eigengene_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_sweepcut", (DL_FUNC)_ACTIONet_sweepcut_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -3921,6 +3960,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_network_diffusion", (DL_FUNC) &_ACTIONet_compute_network_diffusion, 7},
     {"_ACTIONet_compute_marker_aggregate_stats_nonparametric", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_nonparametric, 3},
     {"_ACTIONet_compute_markers_eigengene", (DL_FUNC) &_ACTIONet_compute_markers_eigengene, 4},
+    {"_ACTIONet_sweepcut", (DL_FUNC) &_ACTIONet_sweepcut, 4},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},

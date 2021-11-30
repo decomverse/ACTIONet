@@ -26,5 +26,5 @@ Annotate clusters using prior cell annotations
 (It uses Fisher's exact test for computing overlaps -- approximate HGT is used)
 }
 \examples{
-arch.annot = annotate.clusters.using.labels(ace, ace$clusters, sce$celltypes)
+arch.annot <- annotate.clusters.using.labels(ace, ace$clusters, sce$celltypes)
 }

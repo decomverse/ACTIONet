@@ -35,6 +35,6 @@ Featur view
 Plots projection of features onto the ACTIONet plot
 }
 \examples{
-feat_scores = as.matrix(rowMaps(ace)[['unified_feature_specificity']])
+feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 plot.ACTIONet.feature.view(ace, feat_scores, 5)
 }
