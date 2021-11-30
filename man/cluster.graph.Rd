@@ -28,5 +28,5 @@ ace with added annotation
 A wrapper function For Leiden algorithm
 }
 \examples{
-clusters = cluster.graph(G, 1.0)
+clusters <- cluster.graph(G, 1.0)
 }

@@ -33,6 +33,6 @@ clusters
 A wrapper function For Leiden algorithm applied to an ACE object
 }
 \examples{
-clusters = Leiden.clustering(ace)
+clusters <- Leiden.clustering(ace)
 plot.ACTIONet(ace, clusters)
 }

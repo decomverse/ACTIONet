@@ -41,8 +41,8 @@ A named list: \itemize{
 Infer cell annotations from imputed gene expression for all cells.
 }
 \examples{
-data('curatedMarkers_human') # pre-packaged in ACTIONet
-markers = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-annots = annotate.cells.using.markers(ace, markers = markers)
+data("curatedMarkers_human") # pre-packaged in ACTIONet
+markers <- curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
+annots <- annotate.cells.using.markers(ace, markers = markers)
 plot.ACTIONet(ace, annots$Label, annots$Confidence)
 }

@@ -16,7 +16,7 @@ visualize.markers(
   trans_fac = 3,
   grad_palette = "magma",
   point_size = 1,
-  net_attr = "ACTIONet",
+  net_slot = "ACTIONet",
   coordinate_attr = "ACTIONet2D",
   single_plot = FALSE
 )
@@ -46,6 +46,6 @@ Projects a set of markers on the ACTIONet
 It also optionally imputes the markers.
 }
 \examples{
-ace = run.ACTIONet(sce)
-visualize.markers(ace, markers = c('CD14', 'CD19', 'CD3G'), trans_attr = ace$node_centrality)
+ace <- run.ACTIONet(sce)
+visualize.markers(ace, markers = c("CD14", "CD19", "CD3G"), trans_attr = ace$node_centrality)
 }

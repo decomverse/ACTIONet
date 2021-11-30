@@ -83,178 +83,64 @@
 #' ace <- run.ACTIONet(ace)
 #' @export
 run.ACTIONet <- function(ace,
-                         k_min = 2,
-                         k_max = 30,
-                         assay_name = "logcounts",
-                         reduction_slot = "ACTION",
-                         net_slot_out = "ACTIONet",
-                         min_cells_per_arch = 2,
-                         max_iter_ACTION = 50,
-                         min_specificity_z_thresh = -3,
-                         distance_metric = "jsd",
-                         nn_approach = "k*nn",
-                         network_density = 1,
-                         mutual_edges_only = TRUE,
-                         layout_compactness = 50,
-                         layout_epochs = 1000,
-                         layout_algorithm = "TUMAP",
-                         layout_in_parallel = TRUE,
-                         unification_violation_threshold = 0,
-                         footprint_alpha = 0.85,
-                         thread_no = 0,
-                         full_trace = FALSE,
-                         imputation_alpha = 0.9,
-                         seed = 0) {
-  if (!(assay_name %in% names(assays(ace)))) {
-    err <- sprintf("Attribute %s is not an assay of the input ace\n", assay_name)
-    stop(err)
-  }
+                        batch = NULL,
+                        k_min = 2,
+                        k_max = 30,
+                        assay_name = "logcounts",
+                        batch_attr = NULL,
+                        batch_correction_method = "Harmony",
+                        rerun_reduction = FALSE,
+                        reduced_dim = 50,
+                        reduction_slot = "ACTION",
+                        net_slot_out = "ACTIONet",
+                        min_cells_per_arch = 2,
+                        max_iter_ACTION = 50,
+                        min_specificity_z_thresh = -3,
+                        distance_metric = "jsd",
+                        nn_approach = "k*nn",
+                        network_density = 1,
+                        mutual_edges_only = TRUE,
+                        imputation_alpha = 0.9,
+                        layout_compactness = 50,
+                        layout_epochs = 1000,
+                        layout_algorithm = "TUMAP",
+                        layout_in_parallel = TRUE,
+                        unification_violation_threshold = 0,
+                        footprint_alpha = 0.15,
+                        thread_no = 0,
+                        full_trace = FALSE,
+                        seed = 0) {
 
-  ace <- as(ace, "ACTIONetExperiment")
+    ace = runACTIONet(ace,
+                        batch,
+                        k_min,
+                        k_max,
+                        assay_name,
+                        batch_attr,
+                        batch_correction_method,
+                        rerun_reduction,
+                        reduced_dim,
+                        reduction_slot,
+                        net_slot_out,
+                        min_cells_per_arch,
+                        max_iter_ACTION,
+                        min_specificity_z_thresh,
+                        distance_metric,
+                        nn_approach,
+                        network_density,
+                        mutual_edges_only,
+                        imputation_alpha,
+                        layout_compactness,
+                        layout_epochs,
+                        layout_algorithm,
+                        layout_in_parallel,
+                        unification_violation_threshold,
+                        footprint_alpha,
+                        thread_no,
+                        full_trace, seed)
 
-  S <- SummarizedExperiment::assays(ace)[[assay_name]]
-  S_r <- Matrix::t(colMaps(ace)[[reduction_slot]])
-
-  # Run ACTION
-  ACTION.out <- run_ACTION(
-    S_r = S_r,
-    k_min = k_min,
-    k_max = k_max,
-    thread_no = thread_no,
-    max_it = max_iter_ACTION,
-    min_delta = 1e-300
-  )
-
-  # Prune nonspecific and/or unreliable archetypes
-  pruning.out <- prune_archetypes(
-    C_trace = ACTION.out$C,
-    H_trace = ACTION.out$H,
-    min_specificity_z_thresh = min_specificity_z_thresh,
-    min_cells = min_cells_per_arch
-  )
-
-  colMaps(ace)[["H_stacked"]] <- Matrix::t(as(pruning.out$H_stacked, "sparseMatrix"))
-  colMapTypes(ace)[["H_stacked"]] <- "internal"
-
-  colMaps(ace)[["C_stacked"]] <- as(pruning.out$C_stacked, "sparseMatrix")
-  colMapTypes(ace)[["C_stacked"]] <- "internal"
-
-
-  # Build ACTIONet
-  set.seed(seed)
-  G <- buildNetwork(
-    H = pruning.out$H_stacked,
-    algorithm = nn_approach,
-    distance_metric = distance_metric,
-    density = network_density,
-    thread_no = thread_no,
-    mutual_edges_only = mutual_edges_only
-  )
-  colNets(ace)[[net_slot_out]] <- G
-
-  # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  S_r_norm <- propNetworkScores(G, scores = Matrix::t(S_r), alpha = imputation_alpha, max_it = 5, thread_no = thread_no)
-  colMaps(ace)[["ACTIONnorm"]] <- S_r_norm
-  colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
-
-  # Layout ACTIONet
-  initial_coordinates <- ACTIONetExperiment:::.tscalet(S_r)
-  colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
-  colMapTypes(ace)[["ACTIONred"]] <- "embedding"
-
-  ace <- .run.layoutNetwork(ace,
-    G = G,
-    initial_coordinates = initial_coordinates,
-    compactness_level = layout_compactness,
-    n_epochs = layout_epochs,
-    layout_alg = layout_algorithm,
-    thread_no = ifelse(layout_in_parallel, thread_no, 1),
-    reduction_slot = NULL,
-    net_slot = NULL,
-    seed = seed
-  )
-
-  # Identiy equivalent classes of archetypes and group them together
-  unification.out <- unify_archetypes(
-    S_r = S_r,
-    C_stacked = pruning.out$C_stacked,
-    H_stacked = pruning.out$H_stacked,
-    violation_threshold = unification_violation_threshold,
-    thread_no = thread_no
-  )
-
-  Ht_unified <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
-  colMaps(ace)[["H_unified"]] <- Ht_unified
-  colMapTypes(ace)[["H_unified"]] <- "internal"
-
-  colMaps(ace)[["C_unified"]] <- as(unification.out$C_unified, "sparseMatrix")
-  colMapTypes(ace)[["C_unified"]] <- "internal"
-
-  ace$assigned_archetype <- c(unification.out$assigned_archetype)
-
-  # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-  ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
-
-  # Smooth archetype footprints
-  Ht_unified <- colMaps(ace)[["H_unified"]]
-  archetype_footprint <- propNetworkScores(
-    G = G,
-    scores = as.matrix(Ht_unified),
-    thread_no = thread_no,
-    alpha = footprint_alpha
-  )
-  colMaps(ace)$archetype_footprint <- archetype_footprint
-
-  # Compute gene specificity for each archetype
-  H <- Matrix::t(archetype_footprint)
-  if (is.matrix(S)) {
-    specificity.out <- compute_archetype_feature_specificity_full(S, H)
-  } else {
-    specificity.out <- compute_archetype_feature_specificity(S, H)
-  }
-
-  specificity.out <- lapply(specificity.out, function(specificity.scores) {
-    rownames(specificity.scores) <- rownames(ace)
-    colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores), sep = "")
-    return(specificity.scores)
-  })
-
-  rowMaps(ace)[["unified_feature_profile"]] <- specificity.out[["archetypes"]]
-  rowMapTypes(ace)[["unified_feature_profile"]] <- "internal"
-
-  rowMaps(ace)[["unified_feature_specificity"]] <- specificity.out[["upper_significance"]]
-  rowMapTypes(ace)[["unified_feature_specificity"]] <- "reduction"
-
-  # ace = construct.backbone(
-  #   ace = ace,
-  #   network_density = network_density,
-  #   mutual_edges_only = mutual_edges_only,
-  #   layout_compactness = layout_compactness,
-  #   layout_epochs = layout_epochs/5,
-  #   thread_no = 1,
-  #   ACTIONet_slot = net_slot_out
-  # )
-
-  if (full_trace == T) {
-    trace <- list(
-      ACTION.out = ACTION.out,
-      pruning.out = pruning.out,
-      vis.out = vis.out,
-      unification.out = unification.out
-    )
-
-    trace$log <- list(
-      genes = rownames(ace),
-      cells = colnames(ace),
-      time = Sys.time()
-    )
-
-    metadata(ace)$trace <- trace
-  }
-
-  return(ace)
+                        return(ace)
 }
-
 #' Run main ACTIONet pipeline
 #'
 #' @param ace `ACTIONetExperiment` containing an appropriate reduction in 'reduction_slot'.
@@ -414,9 +300,22 @@ runACTIONet <- function(ace,
   colNets(ace)[[net_slot_out]] <- G
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  S_r_norm <- propNetworkScores(G, scores = Matrix::t(S_r), alpha = imputation_alpha, max_it = 5, thread_no = thread_no)
-  colMaps(ace)[["ACTIONnorm"]] <- S_r_norm
-  colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
+  V = rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
+  A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
+  B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
+  sigma = S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
+  U = as.matrix( Matrix::t(S_r) %*% Diagonal(length(sigma), 1 / sigma) )
+  SVD.out = ACTIONet::perturbedSVD(V, sigma, U, -A, B)
+  V_svd = SVD.out$v
+  V.smooth = propNetworkScores(ace$ACTIONet, V_svd)  
+  
+  H <- V.smooth %*% diag(SVD.out$d)
+  W = SVD.out$u
+  rownames(W) = rownames(ace)
+  rowMaps(ace)[["SVD_U"]] = W 
+  colMaps(ace)[["SVD_V_smooth"]] = H
+  rowMapTypes(ace)[["SVD_U"]] = colMapTypes(ace)[["SVD_V_smooth"]] =  "internal"
+
 
   # Layout ACTIONet. Now it uses the smoothed S_r
   initial_coordinates <- ACTIONetExperiment:::.tscalet(S_r)
