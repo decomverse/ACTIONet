@@ -2545,6 +2545,15 @@ mat compute_markers_eigengene(mat &S, sp_mat &marker_mat, int normalization = 0,
   return (X);
 }
 
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+vec sweepcut(sp_mat &A, vec s, int min_size = 5, int max_size = -1)
+{
+  vec cond = ACTIONet::sweepcut(A, s, min_size, max_size);
+
+  return (cond);
+}
+
 /*
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]

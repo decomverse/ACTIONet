@@ -6,9 +6,14 @@
 \usage{
 run.ACTIONet(
   ace,
+  batch = NULL,
   k_min = 2,
   k_max = 30,
   assay_name = "logcounts",
+  batch_attr = NULL,
+  batch_correction_method = "Harmony",
+  rerun_reduction = FALSE,
+  reduced_dim = 50,
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
@@ -18,15 +23,15 @@ run.ACTIONet(
   nn_approach = "k*nn",
   network_density = 1,
   mutual_edges_only = TRUE,
+  imputation_alpha = 0.9,
   layout_compactness = 50,
   layout_epochs = 1000,
   layout_algorithm = "TUMAP",
   layout_in_parallel = TRUE,
   unification_violation_threshold = 0,
-  footprint_alpha = 0.85,
+  footprint_alpha = 0.15,
   thread_no = 0,
   full_trace = FALSE,
-  imputation_alpha = 0.9,
   seed = 0
 )
 }

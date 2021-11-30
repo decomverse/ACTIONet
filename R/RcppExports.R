@@ -1108,6 +1108,10 @@ compute_markers_eigengene <- function(S, marker_mat, normalization = 0L, thread_
     .Call(`_ACTIONet_compute_markers_eigengene`, S, marker_mat, normalization, thread_no)
 }
 
+sweepcut <- function(A, s, min_size = 5L, max_size = -1L) {
+    .Call(`_ACTIONet_sweepcut`, A, s, min_size, max_size)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }

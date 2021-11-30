@@ -359,18 +359,45 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, imputation_algorithm = "PCA", pre_alpha = 0.9, post_alpha = 0.9, diffusion_iters = 5, thread_no = 0, features_use = NULL, net_attr = "ACTIONet", force_reimpute = FALSE, mask_threshold = 1) {
+annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algorithm = "PCA", pre_alpha = 0.9, post_alpha = 0.9, diffusion_iters = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, mask_threshold = 1, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   features_use <- ACTIONet:::.preprocess_annotation_features(ace, features_use)
-  marker_mat <- ACTIONet:::.preprocess_annotation_markers(markers, features_use)
-  mask <- fastRowSums(abs(marker_mat)) != 0
-  marker_mat <- marker_mat[mask, ]
+  marker_mat_full <- ACTIONet:::.preprocess_annotation_markers(markers, features_use)
+  mask <- fastRowSums(abs(marker_mat_full)) != 0
+  marker_mat <- marker_mat_full[mask, ]
 
-  subS <- imputeGenes(ace, rownames(marker_mat), thread_no = thread_no, alpha_val = pre_alpha, diffusion_iters = diffusion_iters, net_attr = net_attr, algorithm = imputation_algorithm)
+  if (algorithm == "eigengene") {
+    subS <- imputeGenes(ace, rownames(marker_mat), thread_no = thread_no, alpha_val = pre_alpha, diffusion_iters = diffusion_iters, net_slot = net_slot, algorithm = imputation_algorithm)
+    marker_stats <- compute_markers_eigengene(subS, marker_mat, normalization = 0, thread_no = thread_no)
+  } else if (algorithm == "pagerank") {
+    G <- colNets(ace)[[net_slot]]
+    S <- as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
 
-  marker_stats <- compute_markers_eigengene(subS, marker_mat, normalization = 0, thread_no = thread_no)
+    marker_stats <- compute_marker_aggregate_stats(
+      G = G,
+      S = S,
+      marker_mat = marker_mat_full,
+      alpha = pre_alpha,
+      thread_no = thread_no
+    )
+  } else if (algorithm == "TFIDF") {
+    G <- colNets(ace)[[net_slot]]
+    S <- as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
+
+    marker_stats <- compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat_full, alpha = pre_alpha, thread_no = thread_no, normalization = TFIDF_prenorm)
+  } else if (algorithm == "archetypes") {
+    arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
+    arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
+
+    marker_stats <- as.matrix(map.cell.scores.from.archetype.enrichment(
+      ace = ace,
+      enrichment_mat = arch_enrichment_mat,
+      normalize = TRUE,
+      H.slot = H_slot
+    ))
+  }
 
   if (post_alpha != 0) {
-    G <- colNets(ace)[[net_attr]]
+    G <- colNets(ace)[[net_slot]]
     P <- normalize_adj(G, 0)
     marker_stats <- compute_network_diffusion_Chebyshev(P, marker_stats, alpha = post_alpha, max_it = diffusion_iters, thread_no = thread_no)
   }

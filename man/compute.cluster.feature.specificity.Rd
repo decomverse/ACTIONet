@@ -28,5 +28,5 @@ Typically it is either 'logcounts' or 'logcounts'}
 Computes feature (i.e. gene) specificity scores for each cluster
 }
 \examples{
-ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+ace <- compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
 }

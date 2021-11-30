@@ -2040,6 +2040,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline vec sweepcut(sp_mat& A, vec s, int min_size = 5, int max_size = -1) {
+        typedef SEXP(*Ptr_sweepcut)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_sweepcut p_sweepcut = NULL;
+        if (p_sweepcut == NULL) {
+            validateSignature("vec(*sweepcut)(sp_mat&,vec,int,int)");
+            p_sweepcut = (Ptr_sweepcut)R_GetCCallable("ACTIONet", "_ACTIONet_sweepcut");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_sweepcut(Shield<SEXP>(Rcpp::wrap(A)), Shield<SEXP>(Rcpp::wrap(s)), Shield<SEXP>(Rcpp::wrap(min_size)), Shield<SEXP>(Rcpp::wrap(max_size)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<vec >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_
