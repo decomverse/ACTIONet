@@ -474,7 +474,11 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 
                   stats.col(i) = u;
                 });
-
+    /*
+    mat Zt = normalise(trans(Z), 1, 0);
+    mat basis = normalise(Zt * stats, 1, 0);
+    mat weights = trans(run_simplex_regression(basis, Zt, false));
+*/
     return (stats);
   }
 

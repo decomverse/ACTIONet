@@ -491,33 +491,35 @@ namespace ACTIONet
     return (out);
   }
 
-  vec sweepcut(sp_mat &A, vec s)
+  vec sweepcut(sp_mat &A, vec s, int min_size, int max_size)
   {
-    int top_ignore = 5;
-
     A.diag().zeros();
     int nV = A.n_rows;
+    if (max_size == -1)
+    {
+      max_size = nV;
+    }
 
     vec w = vec(sum(A, 1));
     double total_vol = sum(w);
 
-    vec conductance = datum::inf * ones(w.n_elem);
+    vec conductance = datum::inf * ones(max_size);
 
     uvec perm = sort_index(s, "descend");
     vec x = zeros(nV);
-    x(perm(span(0, top_ignore - 1))).ones();
-    double vol = sum(w(perm(span(0, top_ignore - 1))));
+    x(perm(span(0, min_size - 1))).ones();
+    double vol = sum(w(perm(span(0, min_size - 1))));
 
     double cut_size = vol;
-    for (int i = 0; i < top_ignore; i++)
+    for (int i = 0; i < min_size; i++)
     {
-      for (int j = 0; j < top_ignore; j++)
+      for (int j = 0; j < min_size; j++)
       {
         cut_size -= A(i, j);
       }
     }
 
-    for (register int i = top_ignore; i < nV - top_ignore - 1; i++)
+    for (register int i = min_size; i <= max_size - 1; i++)
     {
       int u = perm(i);
       vol += w[u];

@@ -420,6 +420,8 @@ namespace ACTIONet
     full_trace runACTION_muV(vector<mat> cell_signatures, int k_min, int k_max, vec alpha, double lambda = 1, int AA_iters = 50, int Opt_iters = 0, int thread_no = 0);
     mat compute_markers_eigengene(mat &S, sp_mat &marker_mat, int normalization = 0, int thread_no = 0);
 
+    vec sweepcut(sp_mat &A, vec s, int min_size = 5, int max_size = -1);
+
 } // namespace ACTIONet
 
 #endif
