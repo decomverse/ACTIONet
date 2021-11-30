@@ -17,7 +17,7 @@
   stroke_size = point_size * 0.1,
   stroke_contrast_fac = 0.1,
   grad_palette = "magma",
-  net_attr = "ACTIONet",
+  net_slot = "ACTIONet",
   coordinate_attr = "ACTIONet2D"
 )
 }
@@ -46,7 +46,7 @@
 
 \item{grad_palette}{Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.}
 
-\item{net_attr}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').}
+\item{net_slot}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').}
 
 \item{coordinate_attr}{Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').}
 }
@@ -57,7 +57,7 @@
 Plots gradient of (imputed) values on ACTIONet scatter plot.
 }
 \examples{
-ace = run.ACTIONet(ace)
-x = logcounts(ace)['CD14', ]
+ace <- run.ACTIONet(ace)
+x <- logcounts(ace)["CD14", ]
 plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
 }

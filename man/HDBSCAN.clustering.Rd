@@ -23,6 +23,6 @@ clusters
 A wrapper function For HDBSCAN algorithm applied to an ACE object
 }
 \examples{
-clusters = HDBSCAN.clustering(ace)
+clusters <- HDBSCAN.clustering(ace)
 plot.ACTIONet(ace, clusters)
 }

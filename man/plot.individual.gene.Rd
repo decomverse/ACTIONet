@@ -29,5 +29,5 @@ Visualized ACTIONet
 Plot gene expression violin plot
 }
 \examples{
-plot.individual.gene(ace, ace$assigned_archetype, 'CD14')
+plot.individual.gene(ace, ace$assigned_archetype, "CD14")
 }

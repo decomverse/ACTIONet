@@ -24,5 +24,5 @@ Annotate archetypes using prior cell annotations
 (It uses t-test on the archetype footprint matrix (H))
 }
 \examples{
-arch.annot = annotate.archetypes.using.labels(ace, sce$celltypes)
+arch.annot <- annotate.archetypes.using.labels(ace, sce$celltypes)
 }

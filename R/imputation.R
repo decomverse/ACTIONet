@@ -6,19 +6,18 @@
 #' @return A matrix of imputed expression values
 #'
 #' @examples
-#' expression_imputed = impute.genes.using.archetype(ace, genes)
+#' expression_imputed <- impute.genes.using.archetype(ace, genes)
 #' @export
 impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
+    features_use <- .preprocess_annotation_features(ace, features_use = features_use)
 
-    features_use = .preprocess_annotation_features(ace, features_use = features_use)
+    genes <- intersect(unique(genes), rownames(ace))
 
-    genes = intersect(unique(genes), rownames(ace))
+    Z <- rowMaps(ace)[["archetype_gene_profile"]][genes, ]
+    H <- Matrix::t(colMaps(ace)[["H_unified"]])
 
-    Z = rowMaps(ace)[["archetype_gene_profile"]][genes, ]
-    H = Matrix::t(colMaps(ace)[["H_unified"]])
-
-    expression_imputed = Matrix::t(Z %*% H)
-    colnames(expression_imputed) = genes
+    expression_imputed <- Matrix::t(Z %*% H)
+    colnames(expression_imputed) <- genes
 
     return(expression_imputed)
 }
@@ -32,19 +31,18 @@ impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
 #' @return A matrix of imputed expression values
 #'
 #' @examples
-#' expression_imputed = impute.genes.using.archetype(ace, genes)
+#' expression_imputed <- impute.genes.using.archetype(ace, genes)
 #' @export
 impute.specific.genes.using.archetypes <- function(ace, genes) {
+    features_use <- .preprocess_annotation_features(ace, features_use = features_use)
+    genes <- intersect(unique(genes), rownames(ace))
 
-    features_use = .preprocess_annotation_features(ace, features_use = features_use)
-    genes = intersect(unique(genes), rownames(ace))
 
+    Z <- log1p(rowMaps(ace)[["unified_feature_specificity"]][genes, ])
+    H <- Matrix::t(colMaps(ace)[["H_unified"]])
 
-    Z = log1p(rowMaps(ace)[["unified_feature_specificity"]][genes, ])
-    H = Matrix::t(colMaps(ace)[["H_unified"]])
-
-    expression_imputed = Matrix::t(Z %*% H)
-    colnames(expression_imputed) = genes
+    expression_imputed <- Matrix::t(Z %*% H)
+    colnames(expression_imputed) <- genes
 
     return(expression_imputed)
 }
@@ -63,86 +61,84 @@ impute.specific.genes.using.archetypes <- function(ace, genes) {
 #' @return Imputed gene expression matrix. Column names are set with imputed genes names and rows are cells.
 #'
 #' @examples
-#' imputed.genes = impute.genes.using.ACTIONet(ace, c('CD14', 'CD19', 'CD3G'))
+#' imputed.genes <- impute.genes.using.ACTIONet(ace, c("CD14", "CD19", "CD3G"))
 #' plot.ACTIONet.gradient(ace, imputed.genes[, 1])
 #' @export
-impute.genes.using.ACTIONet <- function(
-  ace,
-  genes,
-  features_use = NULL,
-  alpha_val = 0.85,
-  thread_no = 0,
-  diffusion_iters = 5,
-  assay_name = "logcounts"
-) {
+impute.genes.using.ACTIONet <- function(ace,
+                                        genes,
+                                        features_use = NULL,
+                                        alpha_val = 0.85,
+                                        thread_no = 0,
+                                        diffusion_iters = 5,
+                                        assay_name = "logcounts") {
+    features_use <- .preprocess_annotation_features(ace, features_use = features_use)
 
-    features_use = .preprocess_annotation_features(ace, features_use = features_use)
+    genes <- unique(genes)
 
-    genes = unique(genes)
-
-    matched.genes = intersect(genes, features_use)
-    matched.idx = match(matched.genes, features_use)
+    matched.genes <- intersect(genes, features_use)
+    matched.idx <- match(matched.genes, features_use)
 
     # Smooth/impute gene expressions
     if (!(assay_name %in% names(SummarizedExperiment::assays(ace)))) {
-        err = sprintf("%s is not in assays of ace\n", assay_name)
+        err <- sprintf("%s is not in assays of ace\n", assay_name)
         stop(err)
     }
 
-    expression_raw = SummarizedExperiment::assays(ace)[[assay_name]][matched.idx,
-        , drop = FALSE]
+    expression_raw <- SummarizedExperiment::assays(ace)[[assay_name]][matched.idx, ,
+        drop = FALSE
+    ]
     if (ACTIONetExperiment:::is.sparseMatrix(expression_raw)) {
-        expression_raw = U = Matrix::t(as(expression_raw, "dgTMatrix"))
-        U[U < 0] = 0
-        cs = Matrix::colSums(U)
-        U = Matrix::sparseMatrix(
-          i = U@i + 1,
-          j = U@j + 1,
-          x = U@x/cs[U@j + 1],
-          dims = dim(U)
+        expression_raw <- U <- Matrix::t(as(expression_raw, "dgTMatrix"))
+        U[U < 0] <- 0
+        cs <- Matrix::colSums(U)
+        U <- Matrix::sparseMatrix(
+            i = U@i + 1,
+            j = U@j + 1,
+            x = U@x / cs[U@j + 1],
+            dims = dim(U)
         )
     } else {
-        expression_raw = U = Matrix::t(expression_raw)
-        U[U < 0] = 0
-        cs = Matrix::colSums(U)
-        U = expression_raw/Matrix::colSums(expression_raw)
+        expression_raw <- U <- Matrix::t(expression_raw)
+        U[U < 0] <- 0
+        cs <- Matrix::colSums(U)
+        U <- expression_raw / Matrix::colSums(expression_raw)
     }
-    U = U[, cs > 0]
-    gg = matched.genes[cs > 0]
+    U <- U[, cs > 0]
+    gg <- matched.genes[cs > 0]
 
     # Perform network-diffusion
-    G = colNets(ace)$ACTIONet
+    G <- colNets(ace)$ACTIONet
 
-    expression_imputed = compute_network_diffusion_fast(
-      G = G,
-      X0 = as(U, "sparseMatrix"),
-      thread_no = thread_no,
-      alpha = alpha_val,
-      max_it = diffusion_iters
+    expression_imputed <- compute_network_diffusion_fast(
+        G = G,
+        X0 = as(U, "sparseMatrix"),
+        thread_no = thread_no,
+        alpha = alpha_val,
+        max_it = diffusion_iters
     )
 
-    expression_imputed[is.na(expression_imputed)] = 0
+    expression_imputed[is.na(expression_imputed)] <- 0
 
 
     # Rescale the baseline expression of each gene
-    expression_imputed = sapply(1:dim(expression_imputed)[2], function(col) {
-        x = expression_raw[, col]
-        y = expression_imputed[, col]
+    expression_imputed <- sapply(1:dim(expression_imputed)[2], function(col) {
+        x <- expression_raw[, col]
+        y <- expression_imputed[, col]
 
-        x.Q = quantile(x, 1)
-        y.Q = quantile(y, 1)
+        x.Q <- quantile(x, 1)
+        y.Q <- quantile(y, 1)
 
         if (y.Q == 0) {
             return(array(0, length(x)))
         }
 
-        y = y * x.Q/y.Q
-        y[y > max(x)] = max(x)
+        y <- y * x.Q / y.Q
+        y[y > max(x)] <- max(x)
 
         return(y)
     })
 
-    colnames(expression_imputed) = gg
+    colnames(expression_imputed) <- gg
 
     return(expression_imputed)
 }
@@ -150,38 +146,44 @@ impute.genes.using.ACTIONet <- function(
 #' @export
 imputeGenes <- function(ace,
                         genes,
-                        algorithm = "ACTION",
+                        algorithm = "PCA",
                         alpha_val = 0.9,
                         thread_no = 0,
                         diffusion_iters = 5,
                         force_reimpute = FALSE,
-                        net_attr = "ACTIONet", assay_name = "logcounts") {
+                        net_slot = "ACTIONet", assay_name = "logcounts", reduction_slot = "ACTION") {
     genes <- intersect(genes, rownames(ace))
 
     algorithm <- toupper(algorithm)
     S <- assays(ace)[[assay_name]]
     subS <- S[genes, ]
-
     if (algorithm == "PCA") {
-        if (!("ACTION_V" %in% names(rowMaps(ace)))) {
+        V_slot <- sprintf("%s_V", reduction_slot)
+        if (!(V_slot %in% names(rowMaps(ace)))) {
             warning(sprintf("ACTION_V does not exist in rowMaps(ace)."))
             return()
         } else {
-            V <- rowMaps(ace)$ACTION_V
-            genes <- intersect(genes, rownames(V))
-            W <- V[genes, ]
-        }
-
-        if (!("ACTIONnorm" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
-            S_r <- Matrix::t(colMaps(ace)$ACTION)
-            G <- colNets(ace)[[net_attr]]
-            P <- normalize_adj(G, 0)
-            H <- compute_network_diffusion_Chebyshev(P, Matrix::t(S_r), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no)
-        } else {
-            H <- colMaps(ace)[["ACTIONnorm"]]
+            if (!("SVD_V_smooth" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
+                S_r <- colMaps(ace)[[reduction_slot]]
+                A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
+                B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
+                sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
+                U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
+                SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
+                V_svd <- SVD.out$v
+                V.smooth <- propNetworkScores(colNets(ace)[[net_slot]], V_svd, alpha = alpha_val) # This can also be done with network-regularized SVD directly
+                H <- V.smooth %*% diag(SVD.out$d)
+                U <- SVD.out$u
+                rownames(U) <- rownames(ace)
+                W <- U[genes, ]
+            } else {
+                W <- rowMaps(ace)[["SVD_U"]][genes, ]
+                H <- colMaps(ace)[["SVD_V_smooth"]]
+            }
         }
         imputed.expression <- W %*% t(H)
-    } else if (algorithm == "ACTION") { # Default to ACTION
+        imputed.expression[imputed.expression < 0] <- 0
+    } else if (algorithm == "ACTION") { # TODO: Fix this!! We need to also impute C. What alpha values?
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
             Ht_unified <- colMaps(ace)[["H_unified"]]
             H <- propNetworkScores(
@@ -197,9 +199,8 @@ imputeGenes <- function(ace,
         W <- as.matrix(subS %*% C)
         imputed.expression <- W %*% t(H)
     } else if (algorithm == "ACTIONET") {
-        G <- colNets(ace)[[net_attr]]
-        P <- normalize_adj(G, 0)
-        imputed.expression <- compute_network_diffusion_Chebyshev(P, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no)
+        G <- colNets(ace)[[net_slot]]
+        imputed.expression <- t(propNetworkScores(G, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no))
     }
 
     # Re-scaling expresion of genes

@@ -18,5 +18,5 @@ A matrix of imputed expression values
 Imputing expression of genes by interpolating over archetype profile
 }
 \examples{
-expression_imputed = impute.genes.using.archetype(ace, genes)
+expression_imputed <- impute.genes.using.archetype(ace, genes)
 }
