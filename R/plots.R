@@ -723,7 +723,7 @@ plot.individual.gene <- function(ace,
 #' @param x Numeric vector of length NCOL(ace).
 #' @param alpha_val Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).
 #' @param log_scale Logical value for whether to log-scale values of 'x' (default:'FALSE').
-#' @param nonparameteric If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').
+#' @param use_rank If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').
 #' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
 #' @param trans_fac Transparency modifier (default:1.5).
 #' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked (default:-0.5).
@@ -744,9 +744,9 @@ plot.individual.gene <- function(ace,
 
 plot.ACTIONet.gradient <- function(ace,
                                    x,
-                                   alpha_val = 0.85,
+                                   alpha_val = 0,
                                    log_scale = FALSE,
-                                   nonparameteric = FALSE,
+                                   use_rank = FALSE,
                                    trans_attr = NULL,
                                    trans_fac = 1.5,
                                    trans_th = -0.5,
@@ -796,7 +796,7 @@ plot.ACTIONet.gradient <- function(ace,
     bins = 7
   ))
 
-  if (nonparameteric == TRUE) {
+  if (use_rank == TRUE) {
     plot_fill_col <- col_func(rank(x))
   } else {
     plot_fill_col <- col_func(x)
@@ -907,7 +907,7 @@ visualize.markers <- function(ace,
       x = x,
       alpha_val = 0,
       log_scale = FALSE,
-      nonparameteric = FALSE,
+      use_rank = FALSE,
       trans_attr = trans_attr,
       trans_fac = trans_fac,
       trans_th = trans_th,
@@ -1073,7 +1073,7 @@ plot.ACTIONet.archetype.footprint <- function(ace,
       x = x,
       alpha_val = 0,
       log_scale = FALSE,
-      nonparameteric = FALSE,
+      use_rank = FALSE,
       trans_attr = trans_attr,
       trans_fac = trans_fac,
       trans_th = trans_th,
