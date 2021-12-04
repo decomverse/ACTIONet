@@ -2272,7 +2272,7 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
   if (fixed_labels_.isNotNull())
   {
     NumericVector fixed_labels(fixed_labels_);
-    uvec fixed_labels_vec(fixed_labels.size());
+    fixed_labels_vec.set_size(fixed_labels.size());
     for (int i = 0; i < fixed_labels.size(); i++)
     {
       fixed_labels_vec(i) = fixed_labels(i) - 1;

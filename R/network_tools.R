@@ -34,6 +34,7 @@ infer.missing.cell.annotations <- function(ace,
 
   Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
 
+  Labels[Labels == -1] = NA
   if (label_type == "char" | label_type == "factor") {
     Labels <- levels(initial_labels.factor)[Labels]
   }
@@ -84,6 +85,7 @@ correct.cell.annotations <- function(ace,
   initial_labels[is.na(initial_labels)] <- -1
 
   Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
+  Labels[Labels == -1] = NA
 
   if (label_type == "char" | label_type == "factor") {
     Labels <- levels(initial_labels.factor)[Labels]
@@ -193,6 +195,7 @@ propNetworkLabels <- function(G, initial_labels, algorithm = "LPA", lambda = 0, 
       G <- colNets(G)[[network_slot]]
     }
     updated_labels <- run_LPA(G, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
+    updated_labels[updated_labels == -1] = NA
 
     if (label_type == "char" | label_type == "factor") {
       updated_labels <- levels(initial_labels.factor)[updated_labels]
