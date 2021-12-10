@@ -12,11 +12,12 @@ reconstructACTIONet(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = 0,
+  layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
   output_slot = "ACTIONet",
+  H_slot = "H_stacked",
   seed = 0
 )
 }
@@ -35,7 +36,7 @@ reconstructACTIONet(
 
 \item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)}
+\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
 
 \item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
@@ -55,6 +56,6 @@ Reconstructs the ACTIONet graph with the new parameters (uses prior decompositio
 }
 \examples{
 plot.ACTIONet(ace)
-ace.updated <- reconstruct.ACTIONet(ace, network_density = 0.1)
+ace.updated = reconstructACTIONet(ace, network_density = 0.1)
 plot.ACTIONet(ace.updated)
 }

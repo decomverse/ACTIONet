@@ -51,7 +51,6 @@ get.top.marker.genes <- function(
     return(df)
 }
 
-##### Experimental #####
 process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
   if(length(var_of_interest) == 1) {
     if(is.character(var_of_interest)) {
