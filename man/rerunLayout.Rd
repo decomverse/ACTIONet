@@ -8,7 +8,7 @@ rerunLayout(
   ace,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = 0,
+  layout_algorithm = c("tumap", "umap"),
   network_density = 1,
   mutual_edges_only = TRUE,
   thread_no = 0,
@@ -24,7 +24,7 @@ rerunLayout(
 
 \item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP (default=0).}
+\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
 
 \item{network_density}{Density factor of ACTIONet graph (default=1).}
 
@@ -46,6 +46,6 @@ Rerun layout on the ACTIONet graph with new parameters
 }
 \examples{
 plot.ACTIONet(ace)
-ace.updated <- rerun.layout(ace, layout_compactness = 20)
+ace.updated = rerunLayout(ace, layout_compactness = 20)
 plot.ACTIONet(ace.updated)
 }
