@@ -7,9 +7,9 @@
 \method{plot}{ACTIONet.gradient}(
   ace,
   x,
-  alpha_val = 0.85,
+  alpha_val = 0,
   log_scale = FALSE,
-  nonparameteric = FALSE,
+  use_rank = FALSE,
   trans_attr = NULL,
   trans_fac = 1.5,
   trans_th = -0.5,
@@ -30,7 +30,7 @@
 
 \item{log_scale}{Logical value for whether to log-scale values of 'x' (default:'FALSE').}
 
-\item{nonparameteric}{If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').}
+\item{use_rank}{If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').}
 
 \item{trans_attr}{Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.}
 

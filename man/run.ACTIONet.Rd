@@ -6,14 +6,9 @@
 \usage{
 run.ACTIONet(
   ace,
-  batch = NULL,
   k_min = 2,
   k_max = 30,
   assay_name = "logcounts",
-  batch_attr = NULL,
-  batch_correction_method = "Harmony",
-  rerun_reduction = FALSE,
-  reduced_dim = 50,
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
@@ -23,13 +18,12 @@ run.ACTIONet(
   nn_approach = "k*nn",
   network_density = 1,
   mutual_edges_only = TRUE,
-  imputation_alpha = 0.9,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = "TUMAP",
+  layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
   unification_violation_threshold = 0,
-  footprint_alpha = 0.15,
+  footprint_alpha = 0.85,
   thread_no = 0,
   full_trace = FALSE,
   seed = 0
@@ -67,7 +61,7 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)}
+\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
 
 \item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
@@ -91,6 +85,6 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 Run main ACTIONet pipeline
 }
 \examples{
-ace <- reduce.ace(ace)
-ace <- run.ACTIONet(ace)
+ace = reduce.ace(ace)
+ace = run.ACTIONet(ace)
 }
