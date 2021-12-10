@@ -83,63 +83,63 @@
 #' ace <- run.ACTIONet(ace)
 #' @export
 run.ACTIONet <- function(ace,
-                        batch = NULL,
-                        k_min = 2,
-                        k_max = 30,
-                        assay_name = "logcounts",
-                        batch_attr = NULL,
-                        batch_correction_method = "Harmony",
-                        rerun_reduction = FALSE,
-                        reduced_dim = 50,
-                        reduction_slot = "ACTION",
-                        net_slot_out = "ACTIONet",
-                        min_cells_per_arch = 2,
-                        max_iter_ACTION = 50,
-                        min_specificity_z_thresh = -3,
-                        distance_metric = "jsd",
-                        nn_approach = "k*nn",
-                        network_density = 1,
-                        mutual_edges_only = TRUE,
-                        imputation_alpha = 0.9,
-                        layout_compactness = 50,
-                        layout_epochs = 1000,
-                        layout_algorithm = "TUMAP",
-                        layout_in_parallel = TRUE,
-                        unification_violation_threshold = 0,
-                        footprint_alpha = 0.15,
-                        thread_no = 0,
-                        full_trace = FALSE,
-                        seed = 0) {
+                         batch = NULL,
+                         k_min = 2,
+                         k_max = 30,
+                         assay_name = "logcounts",
+                         batch_attr = NULL,
+                         batch_correction_method = "Harmony",
+                         rerun_reduction = FALSE,
+                         reduced_dim = 50,
+                         reduction_slot = "ACTION",
+                         net_slot_out = "ACTIONet",
+                         min_cells_per_arch = 2,
+                         max_iter_ACTION = 50,
+                         min_specificity_z_thresh = -3,
+                         distance_metric = "jsd",
+                         nn_approach = "k*nn",
+                         network_density = 1,
+                         mutual_edges_only = TRUE,
+                         imputation_alpha = 0.9,
+                         layout_compactness = 50,
+                         layout_epochs = 1000,
+                         layout_algorithm = "TUMAP",
+                         layout_in_parallel = TRUE,
+                         unification_violation_threshold = 0,
+                         footprint_alpha = 0.15,
+                         thread_no = 0,
+                         seed = 0) {
+  ace <- runACTIONet(
+    ace = ace,
+    batch = batch,
+    k_min = k_min,
+    k_max = k_max,
+    assay_name = assay_name,
+    batch_attr = batch_attr,
+    batch_correction_method = batch_correction_method,
+    rerun_reduction = rerun_reduction,
+    reduced_dim = reduced_dim,
+    reduction_slot = reduction_slot,
+    net_slot_out = net_slot_out,
+    min_cells_per_arch = min_cells_per_arch,
+    max_iter_ACTION = max_iter_ACTION,
+    min_specificity_z_thresh = min_specificity_z_thresh,
+    distance_metric = distance_metric,
+    nn_approach = nn_approach,
+    network_density = network_density,
+    mutual_edges_only = mutual_edges_only,
+    imputation_alpha = imputation_alpha,
+    layout_compactness = layout_compactness,
+    layout_epochs = layout_epochs,
+    layout_algorithm = layout_algorithm,
+    layout_in_parallel = layout_in_parallel,
+    unification_violation_threshold = unification_violation_threshold,
+    footprint_alpha = footprint_alpha,
+    thread_no = thread_no,
+    seed = seed
+  )
 
-    ace = runACTIONet(ace,
-                        batch,
-                        k_min,
-                        k_max,
-                        assay_name,
-                        batch_attr,
-                        batch_correction_method,
-                        rerun_reduction,
-                        reduced_dim,
-                        reduction_slot,
-                        net_slot_out,
-                        min_cells_per_arch,
-                        max_iter_ACTION,
-                        min_specificity_z_thresh,
-                        distance_metric,
-                        nn_approach,
-                        network_density,
-                        mutual_edges_only,
-                        imputation_alpha,
-                        layout_compactness,
-                        layout_epochs,
-                        layout_algorithm,
-                        layout_in_parallel,
-                        unification_violation_threshold,
-                        footprint_alpha,
-                        thread_no,
-                        full_trace, seed)
-
-                        return(ace)
+  return(ace)
 }
 #' Run main ACTIONet pipeline
 #'
@@ -206,7 +206,6 @@ runACTIONet <- function(ace,
                         unification_violation_threshold = 0,
                         footprint_alpha = 0.15,
                         thread_no = 0,
-                        full_trace = FALSE,
                         seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     msg <- sprintf("%s is not an assay of the input ACE (SCE) object. Trying to re-normalize and use logcounts\n", assay_name)
@@ -300,21 +299,21 @@ runACTIONet <- function(ace,
   colNets(ace)[[net_slot_out]] <- G
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  V = rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
-  A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-  B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-  sigma = S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
-  U = as.matrix( Matrix::t(S_r) %*% Diagonal(length(sigma), 1 / sigma) )
-  SVD.out = ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-  V_svd = SVD.out$v
-  V.smooth = propNetworkScores(ace$ACTIONet, V_svd)  
-  
+  V <- rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
+  A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
+  B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
+  sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
+  U <- as.matrix(Matrix::t(S_r) %*% Diagonal(length(sigma), 1 / sigma))
+  SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
+  V_svd <- SVD.out$v
+  V.smooth <- propNetworkScores(ace$ACTIONet, V_svd)
+
   H <- V.smooth %*% diag(SVD.out$d)
-  W = SVD.out$u
-  rownames(W) = rownames(ace)
-  rowMaps(ace)[["SVD_U"]] = W 
-  colMaps(ace)[["SVD_V_smooth"]] = H
-  rowMapTypes(ace)[["SVD_U"]] = colMapTypes(ace)[["SVD_V_smooth"]] =  "internal"
+  W <- SVD.out$u
+  rownames(W) <- rownames(ace)
+  rowMaps(ace)[["SVD_U"]] <- W
+  colMaps(ace)[["SVD_V_smooth"]] <- H
+  rowMapTypes(ace)[["SVD_U"]] <- colMapTypes(ace)[["SVD_V_smooth"]] <- "internal"
 
 
   # Layout ACTIONet. Now it uses the smoothed S_r
