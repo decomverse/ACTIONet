@@ -1074,7 +1074,6 @@ runACTIONet <- function(ace,
     layout_compactness = backbone_layout_compactness,
     layout_algorithm = layout_algorithm,
     layout_epochs = layout_epochs / 5,
-    thread_no = 1,
     ACTIONet_slot = net_slot_out
   )
 
