@@ -898,7 +898,9 @@ runACTIONet <- function(ace,
                         unification_violation_threshold = 0,
                         footprint_alpha = 0.15,
                         thread_no = 0,
-                        full_trace = FALSE,
+                        backbone_network_density = 1,
+                        backbone_mutual_edges_only = TRUE,
+                        backbone_layout_compactness = 50,
                         seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     msg <- sprintf("%s is not an assay of the input ACE (SCE) object. Trying to re-normalize and use logcounts\n", assay_name)
@@ -1067,9 +1069,10 @@ runACTIONet <- function(ace,
 
   ace <- constructBackbone(
     ace = ace,
-    network_density = network_density,
-    mutual_edges_only = mutual_edges_only,
-    layout_compactness = layout_compactness,
+    network_density = backbone_network_density,
+    mutual_edges_only = backbone_mutual_edges_only,
+    layout_compactness = backbone_layout_compactness,
+    layout_algorithm = layout_algorithm,
     layout_epochs = layout_epochs / 5,
     thread_no = 1,
     ACTIONet_slot = net_slot_out
@@ -1079,12 +1082,11 @@ runACTIONet <- function(ace,
 }
 
 constructBackbone <- function(ace,
-                              backbone_density = 1,
+                              network_density = 1,
                               mutual_edges_only = TRUE,
                               layout_algorithm = c("tumap", "umap"),
-                              layout_epochs = 100,
                               layout_compactness = 50,
-                              footprint_alpha = 0.85,
+                              layout_epochs = 100,
                               ACTIONet_slot = "ACTIONet") {
   # if (!("archetype_footprint" %in% names(colMaps(ace)))) {
   #     G <- colNets(ace)[[ACTIONet_slot]]
