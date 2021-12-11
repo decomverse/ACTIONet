@@ -366,7 +366,7 @@ annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algor
   marker_mat <- marker_mat_full[mask, ]
 
   if (algorithm == "eigengene") {
-    subS <- imputeGenes(ace, rownames(marker_mat), thread_no = thread_no, alpha_val = pre_alpha, diffusion_iters = diffusion_iters, net_slot = net_slot, algorithm = imputation_algorithm)
+    subS <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha_val = pre_alpha, diffusion_iters = diffusion_iters, net_slot = net_slot, algorithm = imputation_algorithm)
     marker_stats <- compute_markers_eigengene(subS, marker_mat, normalization = 0, thread_no = thread_no)
   } else if (algorithm == "pagerank") {
     G <- colNets(ace)[[net_slot]]
