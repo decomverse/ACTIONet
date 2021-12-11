@@ -167,6 +167,7 @@ imputeGenes <- function(ace,
                 S_r <- colMaps(ace)[[reduction_slot]]
                 A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
                 B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
+                V <- rowMaps(ace)[[V_slot]]
                 sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
                 U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
                 SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
