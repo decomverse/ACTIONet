@@ -485,6 +485,11 @@ clusterCells <- function(ace, algorithm = "Leiden",
                          initial_clustering = NULL,
                          seed = 0,
                          network_slot = "ACTIONet") {
+  if (!is.null(initial_clustering)) {
+    if (is.character(initial_clustering)) {
+      initial_clustering <- as.factor(initial_clustering)
+    }
+  }
   if (algorithm == "fix") {
     cl <- initial_clustering
   } else {
