@@ -382,12 +382,13 @@ namespace ACTIONet
     {
       double mu = 2.0 / (1.0 - alpha) * muPrevious - muPPrevious;
 
-      mat PY = spmat_mat_product_parallel(P, mPreviousScore, thread_no);
-      double w1 = (2.0 * muPrevious) / ((1 - alpha) * mu);
-      double w2 = -(muPPrevious / mu);
+      //mat PY = spmat_mat_product_parallel(P, mPreviousScore, thread_no);
+      //double w1 = (2.0 * muPrevious) / ((1 - alpha) * mu);
+      //double w2 = -(muPPrevious / mu);
 
-      mScore = w1 * ((1 - alpha) * spmat_mat_product_parallel(P, mPreviousScore, thread_no) + alpha * X0) +
-               w2 * mPPreviousScore;
+      //mScore = w1 * ((1 - alpha) * spmat_mat_product_parallel(P, mPreviousScore, thread_no) + alpha * X0) +
+      //       w2 * mPPreviousScore;
+      mScore = 2 * (muPrevious / mu) * spmat_mat_product_parallel(P, mPreviousScore, thread_no) - (muPPrevious / mu) * mPPreviousScore + (2 * muPrevious) / ((1 - alpha) * mu) * alpha * X0;
 
       double res = norm(mScore - mPreviousScore);
       if (res < res_threshold)
