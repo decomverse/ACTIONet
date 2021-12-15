@@ -203,6 +203,7 @@ imputeGenes <- function(ace,
         G <- colNets(ace)[[net_slot]]
         imputed.expression <- t(propNetworkScores(G, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no))
     }
+    rownames(imputed.expression) <- genes
 
     # Re-scaling expresion of genes
     m1 <- apply(subS, 1, max)
