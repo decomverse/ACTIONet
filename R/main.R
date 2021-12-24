@@ -46,101 +46,66 @@
   return(ace)
 }
 
+# run.ACTIONet <- function(ace,
+#                          batch = NULL,
+#                          k_min = 2,
+#                          k_max = 30,
+#                          assay_name = "logcounts",
+#                          batch_attr = NULL,
+#                          batch_correction_method = "Harmony",
+#                          rerun_reduction = FALSE,
+#                          reduced_dim = 50,
+#                          reduction_slot = "ACTION",
+#                          net_slot_out = "ACTIONet",
+#                          min_cells_per_arch = 2,
+#                          max_iter_ACTION = 50,
+#                          min_specificity_z_thresh = -3,
+#                          distance_metric = "jsd",
+#                          nn_approach = "k*nn",
+#                          network_density = 1,
+#                          mutual_edges_only = TRUE,
+#                          imputation_alpha = 0.9,
+#                          layout_compactness = 50,
+#                          layout_epochs = 1000,
+#                          layout_algorithm = "TUMAP",
+#                          layout_in_parallel = TRUE,
+#                          unification_violation_threshold = 0,
+#                          footprint_alpha = 0.15,
+#                          thread_no = 0,
+#                          seed = 0) {
+#   ace <- runACTIONet(
+#     ace = ace,
+#     batch = batch,
+#     k_min = k_min,
+#     k_max = k_max,
+#     assay_name = assay_name,
+#     batch_attr = batch_attr,
+#     batch_correction_method = batch_correction_method,
+#     rerun_reduction = rerun_reduction,
+#     reduced_dim = reduced_dim,
+#     reduction_slot = reduction_slot,
+#     net_slot_out = net_slot_out,
+#     min_cells_per_arch = min_cells_per_arch,
+#     max_iter_ACTION = max_iter_ACTION,
+#     min_specificity_z_thresh = min_specificity_z_thresh,
+#     distance_metric = distance_metric,
+#     nn_approach = nn_approach,
+#     network_density = network_density,
+#     mutual_edges_only = mutual_edges_only,
+#     imputation_alpha = imputation_alpha,
+#     layout_compactness = layout_compactness,
+#     layout_epochs = layout_epochs,
+#     layout_algorithm = layout_algorithm,
+#     layout_in_parallel = layout_in_parallel,
+#     unification_violation_threshold = unification_violation_threshold,
+#     footprint_alpha = footprint_alpha,
+#     thread_no = thread_no,
+#     seed = seed
+#   )
+# 
+#   return(ace)
+# }
 
-#' Run main ACTIONet pipeline
-#'
-#' @param ace `ACTIONetExperiment` containing an appropriate reduction in 'reduction_slot'.
-#' @param k_min Minimum depth of decompositions. (default=2)
-#' @param k_max Maximum depth of decompositions. (default=30)
-#' @param assay_name Name of assay to be used. (default='logcounts')
-#' @param reduction_slot Slot in colMaps(ace) containing reduced kernel. (default='ACTION')
-#' @param net_slot_out  Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')
-#' @param min_cells_per_arch Minimum number of observations required to construct an archetype. (default=2)
-#' @param max_iter_ACTION Maximum number of iterations for ACTION algorithm. (default=50)
-#' @param min_specificity_z_thresh Defines the stringency of pruning nonspecific archetypes.
-#' The larger the value, the more archetypes will be filtered out. (default=-3)
-#' @param distance_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
-#' @param nn_approach Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
-#' @param network_density Density factor of ACTIONet graph. (default=1)
-#' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
-#' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
-#' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
-#' @param layout_algorithm Algorithm for computing plot layout. Set to 0 for TUMAP, or 1 for UMAP. (default=0)
-#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
-#' @param unification_violation_threshold Archetype unification resolution parameter. (default=0)
-#' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
-#' @param thread_no Number of parallel threads. (default=0)
-#' @param full_trace Return list of all intermediate output. Intended for debugging. (default='FALSE')
-#' @param seed Seed for random initialization. (default=0)
-#'
-#' @return \itemize{
-#' \item If full_trace='FALSE'(default): ACTIONetExperiment object.
-#' \item If full_trace='TRUE': Named list containing an ACTIONetExperiment object and a log of ACTIONet function calls.
-#' }
-#'
-#' @examples
-#' ace <- reduce.ace(ace)
-#' ace <- run.ACTIONet(ace)
-#' @export
-run.ACTIONet <- function(ace,
-                         batch = NULL,
-                         k_min = 2,
-                         k_max = 30,
-                         assay_name = "logcounts",
-                         batch_attr = NULL,
-                         batch_correction_method = "Harmony",
-                         rerun_reduction = FALSE,
-                         reduced_dim = 50,
-                         reduction_slot = "ACTION",
-                         net_slot_out = "ACTIONet",
-                         min_cells_per_arch = 2,
-                         max_iter_ACTION = 50,
-                         min_specificity_z_thresh = -3,
-                         distance_metric = "jsd",
-                         nn_approach = "k*nn",
-                         network_density = 1,
-                         mutual_edges_only = TRUE,
-                         imputation_alpha = 0.9,
-                         layout_compactness = 50,
-                         layout_epochs = 1000,
-                         layout_algorithm = "TUMAP",
-                         layout_in_parallel = TRUE,
-                         unification_violation_threshold = 0,
-                         footprint_alpha = 0.15,
-                         thread_no = 0,
-                         seed = 0) {
-  ace <- runACTIONet(
-    ace = ace,
-    batch = batch,
-    k_min = k_min,
-    k_max = k_max,
-    assay_name = assay_name,
-    batch_attr = batch_attr,
-    batch_correction_method = batch_correction_method,
-    rerun_reduction = rerun_reduction,
-    reduced_dim = reduced_dim,
-    reduction_slot = reduction_slot,
-    net_slot_out = net_slot_out,
-    min_cells_per_arch = min_cells_per_arch,
-    max_iter_ACTION = max_iter_ACTION,
-    min_specificity_z_thresh = min_specificity_z_thresh,
-    distance_metric = distance_metric,
-    nn_approach = nn_approach,
-    network_density = network_density,
-    mutual_edges_only = mutual_edges_only,
-    imputation_alpha = imputation_alpha,
-    layout_compactness = layout_compactness,
-    layout_epochs = layout_epochs,
-    layout_algorithm = layout_algorithm,
-    layout_in_parallel = layout_in_parallel,
-    unification_violation_threshold = unification_violation_threshold,
-    footprint_alpha = footprint_alpha,
-    thread_no = thread_no,
-    seed = seed
-  )
-
-  return(ace)
-}
 #' Run main ACTIONet pipeline
 #'
 #' @param ace `ACTIONetExperiment` containing an appropriate reduction in 'reduction_slot'.
@@ -451,6 +416,7 @@ run.ACTIONet <- function(ace,
                          unification_violation_threshold = 0,
                          footprint_alpha = 0.85,
                          thread_no = 0,
+                         imputation_alpha = 0.85,
                          full_trace = FALSE,
                          seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
