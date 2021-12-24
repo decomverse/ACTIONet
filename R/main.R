@@ -416,7 +416,7 @@ run.ACTIONet <- function(ace,
                          unification_violation_threshold = 0,
                          footprint_alpha = 0.85,
                          thread_no = 0,
-                         imputation_alpha = 0.85,
+                         imputation_alpha = 0.9,
                          full_trace = FALSE,
                          seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
