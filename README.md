@@ -67,39 +67,12 @@ brew install git
 Now clone a fresh copy of the repository:
 
 ```bash
-git clone https://github.com/shmohammadi86/ACTIONet.git
+git clone --recursive --branch R-devel --single-branch https://github.com/shmohammadi86/ACTIONet.git ACTIONet_repo
 ```
-
 
 * **Install `ACTIONet`**:
-ACTIONet contains many different branchs. For installing the stable version, switch to the `R-release` branch:
-
 ```bash
-cd ACTIONet
-git checkout R-release
-```
-
-If you want to install the latest updates, switch to the `R-devel` branch:
-
-```bash
-cd ACTIONet
-git checkout R-devel
-```
-
-Fetch all C/C++ codes:
-```bash
-git submodule update --init
-```
-
-OR, you can directly run:
-
-```bash
-'/usr/bin/git' clone --depth 1 --no-hardlinks --recurse-submodules --branch core https://github.com/shmohammadi86/ACTIONet.git ACTIONet
-```
-
-and now you can install ACTIONet using the following command in the `ACTIONet` directory:
-
-```bash
+cd ACTIONet_repo
 R CMD INSTALL .
 ```
 
