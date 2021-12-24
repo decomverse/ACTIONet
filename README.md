@@ -67,6 +67,7 @@ brew install git
 Now clone a fresh copy of the repository:
 
 ```bash
+<<<<<<< HEAD
 git clone https://github.com/shmohammadi86/ACTIONet.git
 ```
 
@@ -100,6 +101,13 @@ OR, you can directly run:
 and now you can install ACTIONet using the following command in the `ACTIONet` directory:
 
 ```bash
+=======
+git clone --recursive --branch R-devel --single-branch https://github.com/shmohammadi86/ACTIONet.git ACTIONet_repo
+```
+
+* **Install `ACTIONet`**:
+```bash
+cd ACTIONet_repo
 R CMD INSTALL .
 ```
 
