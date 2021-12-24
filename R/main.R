@@ -553,7 +553,6 @@ run.ACTIONet <- function(ace,
     trace <- list(
       ACTION.out = ACTION.out,
       pruning.out = pruning.out,
-      vis.out = vis.out,
       unification.out = unification.out
     )
 
