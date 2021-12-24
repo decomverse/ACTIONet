@@ -91,6 +91,12 @@ Fetch all C/C++ codes:
 git submodule update --init
 ```
 
+OR, you can directly run:
+
+```bash
+'/usr/bin/git' clone --depth 1 --no-hardlinks --recurse-submodules --branch core https://github.com/shmohammadi86/ACTIONet.git ACTIONet
+```
+
 and now you can install ACTIONet using the following command in the `ACTIONet` directory:
 
 ```bash
