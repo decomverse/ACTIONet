@@ -1,5 +1,2 @@
 [submodule "src/ACTIONet"]
-	path = src/ACTIONet
-	url = https://github.com/shmohammadi86/ACTIONet.git
-	branch = core
 	shallow = true
