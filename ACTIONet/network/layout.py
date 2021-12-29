@@ -11,37 +11,38 @@ from .. import misc_utils as ut
 def layout_network(
         adata: Optional[AnnData] = None,
         G: Union[np.ndarray, sparse.spmatrix] = None,
-        S_r: Union[np.ndarray, sparse.spmatrix] = None,
-        reduction_name: Optional[str] = "ACTION",
-        net_name: Optional[str] = "ACTIONet",
+        initial_coordinates: Union[np.ndarray, sparse.spmatrix] = None,
+        reduction_key: Optional[str] = "ACTION",
+        net_key: Optional[str] = "ACTIONet",
         compactness_level: Optional[int] = 50,
         n_epochs: Optional[int] = 1000,
-        layout_alg: Optional[int] = 0,
+        layout_algorithm: Optional[str] = "tumap",
         thread_no: Optional[int] = 8,
         seed: Optional[int] = 0,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False
 ) -> Union[AnnData, dict, None]:
+
     """Network layout, Embeds the graph into 2D/3D space
-    :param adata: AnnData object possibly containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
+    :param adata: AnnData object possibly containing 'reduction_key' in '.obsm' and 'net_key' in '.obsp'.
     :param G:Adjacency matrix to use for constructing layout. Required if 'adata=None'.
-    :param S_r: Reduced representation matrix to use for constructing layout. Required if 'adata=None'.
-    :param reduction_name:Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'layout_ACTIONet()' (default="ACTION").Ignored if 'adata=None'.
-    :param net_name: Key of 'adata.obmp' containing adjacency matrix to use for 'G' in 'layout_ACTIONet()' (default="ACTIONet").  Ignored if 'adata=None'.
-    :param compactness_level: Between 0-100. Ignored if 'layout_alg=0'.
-    :param layout_alg:Algorithm to use for constructing layout: \
-    `0` (the default) \
+    :param initial_coordinates: Reduced representation matrix to use for constructing layout. Required if 'adata=None'.
+    :param reduction_key:Key of 'adata.obms' containing reduced matrix to use for 'initial_coordinates' in 'layoutNetwork()' (default="ACTION").Ignored if 'adata=None'.
+    :param net_key: Key of 'adata.obmp' containing adjacency matrix to use for 'G' in 'layoutNetwork()' (default="ACTIONet").  Ignored if 'adata=None'.
+    :param compactness_level: Between 0-100. Ignored if 'layout_algorithm="tumap"'.
+    :param layout_algorithm: Algorithm to use for constructing layout: \
+    `tumap` (default) \
     t-distributed UMAP \
-    `1` Modified UMAP
+    `umap` Modified UMAP
     :param: n_epochs: Number of SGD epochs.
     :param thread_no: Number of threads. Defaults to number of threads available - 2.
     :param seed: Random seed
     :param copy: If 'adata' is given, return a copy instead of writing to `adata`
-    :param return_raw: If 'adata' is given, return dict of raw 'layout_ACTIONet()' output instead of storing to 'adata'.
+    :param return_raw: If 'adata' is given, return dict of raw 'layoutNetwork()' output instead of storing to 'adata'.
     ...
     :return adata: anndata.AnnData \
     if 'adata' given and `copy=True` returns None or else adds fields to `adata`: \
-    `.obsp[net_name_out]`
+    `.obsp[net_key_out]`
     :return layout : dict \
     If 'adata=None' or 'return_raw=True', returns dict with 2D/3D coordinates and color values.
     """
@@ -49,26 +50,35 @@ def layout_network(
     if adata is not None:
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
-            S_r = S_r if S_r is not None else adata.obsm[reduction_name]
-            G = G if G is not None else adata.obsp[net_name]
+            initial_coordinates = initial_coordinates if initial_coordinates is not None else adata.obsm[reduction_key]
+            G = G if G is not None else adata.obsp[net_key]
         else:
             raise ValueError("'adata' is not an AnnData object.")
     else:
-        if G is None or S_r is None:
-            raise ValueError("'G' and 'S_r' cannot be NoneType if 'adata=None'.")
+        if G is None or initial_coordinates is None:
+            raise ValueError("'G' and 'initial_coordinates' cannot be NoneType if 'adata=None'.")
         if not isinstance(G, (np.ndarray, sparse.spmatrix)):
             raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
-        if not isinstance(S_r, (np.ndarray, sparse.spmatrix)):
-            raise ValueError("'S_r' must be numpy.ndarray or sparse.spmatrix.")
+        if not isinstance(initial_coordinates, (np.ndarray, sparse.spmatrix)):
+            raise ValueError("'initial_coordinates' must be numpy.ndarray or sparse.spmatrix.")
 
     G = G.astype(dtype=np.float64)
-    S_r = ut.scale_matrix(S_r).T.astype(dtype=np.float64)
-    layout = _an.layout_ACTIONet(G, S_r, compactness_level, n_epochs, layout_alg, thread_no, seed)
+    initial_coordinates = ut.scale_matrix(initial_coordinates).T.astype(dtype=np.float64)
+
+    layout = _an.layoutNetwork(
+        G=G,
+        initial_position=initial_coordinates,
+        algorithm=layout_algorithm,
+        compactness_level=compactness_level,
+        n_epochs=n_epochs,
+        thread_no=thread_no,
+        seed=seed
+    )
 
     if return_raw or adata is None:
         return layout
     else:
-        adata.obsm["ACTIONred"] = S_r[0:3, :].T
+        adata.obsm["ACTIONred"] = initial_coordinates[0:3, :].T
         adata.obsm["ACTIONet2D"] = layout["coordinates"]
         adata.obsm["ACTIONet3D"] = layout["coordinates_3D"]
         adata.obsm["denovo_color"] = layout["colors"]

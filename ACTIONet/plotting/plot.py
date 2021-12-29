@@ -24,7 +24,7 @@ def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
     if coordinate_key not in adata.obsm.keys():
         raise ValueError(
             f'Did not find adata.obsm[\'{coordinate_key}\']. '
-            'Please run nt.layout_ACTIONet() first.'
+            'Please run nt.layoutNetwork() first.'
         )
     if label_key is not None and label_key not in adata.obs.columns:
         raise ValueError(f'Did not find adata.obs[\'{label_key}\'].')
@@ -49,12 +49,12 @@ def plot_ACTIONet(
         hover_text: Union[list, pd.Series, np.ndarray] = None,
         plot_3d: Optional[bool] = False,
         point_order: Union[list, pd.Series, np.ndarray] = None,
-        coordinate_attr: Optional[str] = None,
+        coordinate_key: Optional[str] = None,
         color_key: Optional[str] = "denovo_color",
 ) -> go.Figure:
     """Creates an interactive ACTIONet plot with plotly
-    :param data:AnnData object with coordinates in '.obsm[coordinate_attr]' or numeric matrix of X-Y(-Z) coordinates. \
-        If data is AnnData, 'coordinate_attr' defaults to 'ACTIONet3D' if 'plot_3d=True' or 'ACTIONet2D' if otherwise.
+    :param data:AnnData object with coordinates in '.obsm[coordinate_key]' or numeric matrix of X-Y(-Z) coordinates. \
+        If data is AnnData, 'coordinate_key' defaults to 'ACTIONet3D' if 'plot_3d=True' or 'ACTIONet2D' if otherwise.
     :param label_attr: list-like object of length data.shape[0] or key of '.obs' containing cell labels of interest (clusters, cell types, etc.).
     :param color_attr: list-like object of length data.shape[0], matrix-like object of RGB values, or key of '.obs' containing point-wise color mappings.
     :param trans_attr: list-like object of length data.shape[0] or key of '.obs' of relative numerical values for computing point transparency. \
@@ -71,11 +71,11 @@ def plot_ACTIONet(
     :param hover_text: list-like object of length data.shape[0] pto use for plotly figure hover text. \
         If defaults to point values given by 'label_attr' or point index if 'label_attr=None'
     :param plot_3d: Visualize plot in 3D using 'scatter3D' (default:'FALSE'). \
-        If data is AnnData and 'coordinate_attr=None', 'coordinate_attr' defaults to 'ACTIONet3D'. \
+        If data is AnnData and 'coordinate_key=None', 'coordinate_key' defaults to 'ACTIONet3D'. \
         If data is matrix-like, it must have at least 3 columns.
     :param point_order: Numeric list=like object specifying order in which to plot individual points (default:None). \
         If None, points are plotted in random order.
-    :param coordinate_attr: If 'data' is AnnData, key of '.obsm' pertaining to plot coordinates.
+    :param coordinate_key: If 'data' is AnnData, key of '.obsm' pertaining to plot coordinates.
     :param color_key:If data is AnnData, key of '.obsm' containing point-wise RGB color mappings (default:'denovo_color'). \
     Used only if no other color mapping parameters are given.
     ...
@@ -85,16 +85,16 @@ def plot_ACTIONet(
 
     if plot_3d:
         coor_dims = 3
-        if isinstance(data, AnnData) and coordinate_attr is None:
-            coordinate_attr = "ACTIONet3D"
+        if isinstance(data, AnnData) and coordinate_key is None:
+            coordinate_key = "ACTIONet3D"
     else:
         coor_dims = 2
-        if isinstance(data, AnnData) and coordinate_attr is None:
-            coordinate_attr = "ACTIONet2D"
+        if isinstance(data, AnnData) and coordinate_key is None:
+            coordinate_key = "ACTIONet2D"
 
     plot_coors = pu.get_plot_coors(
         data=data,
-        coordinate_attr=coordinate_attr,
+        coordinate_key=coordinate_key,
         scale_coors=True,
         coor_dims=coor_dims
     )
@@ -218,18 +218,19 @@ def plot_ACTIONet(
 
 def plot_ACTIONet_gradient(
         adata: AnnData,
-        x: Optional[list] = None,
-        coordinate_key: Optional[str] = 'ACTIONet2D',
-        transparency_key: Optional[str] = None,
-        transparency_z_threshold: Optional[float] = -0.5,
-        transparancey_factor: Optional[float] = 3,
-        alpha_val: Optional[float] = 0.85,
-        node_size: Optional[float] = 1,
-        add_text: Optional[bool] = True,
-        palette: Optional[list] = "Inferno",
-        title: Optional[str] = "",
-        nonparametric: Optional[bool] = False,
-        output_file: Optional[str] = None
+        x: Union[list, pd.Series, np.ndarray],
+        alpha_val: Optional[float] = 0,
+        log_scale: Optional[bool] = False,
+        use_rank: Optional[bool] = False,
+        trans_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
+        trans_fac: Optional[float] = 1.5,
+        trans_th: Optional[float] = -0.5,
+        point_size: Optional[float] = 3,
+        stroke_size: Optional[float] = 0.3,
+        stroke_contrast_fac: Optional[float] = 1.2,
+        grad_palette: Optional[str] = "magma",
+        net_key: Optional[str] = "ACTIONet",
+        coordinate_key: Optional[str] = 'ACTIONet2D'
 ) -> go.Figure:
     """
     Projects a given continuous score on the ACTIONet plot
@@ -270,194 +271,84 @@ def plot_ACTIONet_gradient(
             X0=sparse.csc_matrix(x)
         )
 
-# def layout_labels(
-#         X: np.ndarray,
-#         Y: np.ndarray,
-#         fig: go.Figure,
-#         labels: list,
-#         fontsize: Optional[int] = 18,
-#         color: Optional[str] = "#0000FF",
-#         background: Optional[str] = "#FFFFFF") -> None:
-#     texts = []
-#     if isinstance(color, tuple):
-#         color = [color] * len(labels)
-#     for x, y, label, c in zip(X, Y, labels, color):
-#         fig.add_annotation(
-#             x=x,
-#             y=y,
-#             text=str(label),
-#             bgcolor=background,
-#             font=dict(
-#                 family="sans serif",
-#                 size=fontsize,
-#                 color=color))
 
+plot.ACTIONet.gradient <- function(ace,
+                                   x,
+                                   alpha_val = 0.85,
+                                   log_scale = FALSE,
+                                   nonparameteric = FALSE,
+                                   trans_attr = NULL,
+                                   trans_fac = 1.5,
+                                   trans_th = -0.5,
+                                   point_size = 1,
+                                   stroke_size = point_size * 0.1,
+                                   stroke_contrast_fac = 0.1,
+                                   grad_palette = "magma",
+                                   net_attr = "ACTIONet",
+                                   coordinate_key = "ACTIONet2D") {
+  NA_col <- "#eeeeee"
 
-# def plot_ACTIONet(
-#         adata: AnnData,
-#         label_key: Optional[str] = None,
-#         coordinate_key: Optional[str] = 'ACTIONet2D',
-#         transparency_key: Optional[str] = None,
-#         transparency_z_threshold: Optional[float] = -0.5,
-#         transparency_factor: Optional[float] = 1.5,
-#         border_contrast_factor: Optional[float] = 0.1,
-#         node_size: Optional[float] = None,
-#         add_text: Optional[bool] = True,
-#         palette: Optional[list] = None,
-#         output_file: Optional[str] = None):
-#     # validate supplied plot parameters
-#     validate_plot_params(adata, coordinate_key, label_key, transparency_key)
-#     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
-#
-#     # get mapping of points to colors
-#     if label_key is None:
-#         v_col = [(r, g, b) for r, g, b in adata.obsm['denovo_color']]
-#     else:
-#         labels = adata.obs[label_key]
-#         unique_labels = sorted(np.unique(labels))
-#         if palette is None:
-#             if len(unique_labels) <= len(palette_default):
-#                 palette = [hex_to_rgb(color) for color in palette_default]
-#             else:
-#                 palette = [hex_to_rgb(color) for color in palette_default]
-#         elif isinstance(palette, str):
-#             # get plotly color palette from string specification
-#             assert palette.lower() in px.colors.named_colorscales()
-#             if palette in px.colors.qualitative.__dict__.keys():
-#                 palette = px.colors.qualitative.__dict__[palette]
-#             else:
-#                 palette = px.colors.sequential.__dict__[palette]
-#         # make sure palette colors are rgb values in the 'rgb(r,g,b)' string format
-#         assert len(palette) > 0
-#         if type(palette[0]) == str:
-#             if palette[0].startswith('#'):
-#                 palette = [hex_to_rgb(i) for i in palette]
-#         else:
-#             palette = [pl.colors.label_rgb(i) for i in palette]
-#         label_colors = {label: palette[i % len(palette)] for i, label in enumerate(unique_labels)}
-#         v_col = [label_colors[label] for label in labels]
-#     v_col_for_border = v_col
-#     # get darkened colors for plot marker outline
-#     v_col_darkened = [pl.colors.label_rgb(adjust_lightness(color, 1 - border_contrast_factor)) for color in v_col_for_border]
-#
-#     # calculate transparency
-#     if transparency_key is not None:
-#         transparency = adata.obs[transparency_key].values
-#         z = (transparency - np.mean(transparency)) / np.std(transparency, ddof=1)
-#         betas = 1 / (1 + np.exp(- transparency_factor * (z - transparency_z_threshold)))
-#         betas[z > transparency_z_threshold] = 1
-#         betas **= transparency_factor
-#     else:
-#         betas = [1] * len(v_col_darkened)
-#
-#     x = coordinates[:, 0]
-#     y = coordinates[:, 1]
-#     x_min = np.min(x)
-#     x_max = np.max(x)
-#     y_min = np.min(y)
-#     y_max = np.max(y)
-#
-#     x_min = x_min - (x_max - x_min) / 20
-#     x_max = x_max + (x_max - x_min) / 20
-#     y_min = y_min - (y_max - y_min) / 20
-#     y_max = y_max + (y_max - y_min) / 20
-#
-#     # plotly scatterplot
-#     if node_size is None:
-#         node_size = [1] * coordinates.shape[0]
-#
-#     fig = make_subplots(rows=1, cols=1)
-#     fig.append_trace(go.Scatter(x=coordinates[:, 0],
-#                                 y=coordinates[:, 1],
-#                                 mode='markers',
-#                                 marker=dict(opacity=betas,
-#                                             color=v_col,
-#                                             line=dict(width=1,
-#                                                       color=v_col_darkened))), row=1, col=1)
-#     fig.update_layout(yaxis_range=[y_min, y_max])
-#     fig.update_layout(xaxis_range=[x_min, x_max])
-#     # add cluster labels, if specified
-#     if add_text and label_key is not None:
-#         labels = adata.obs[label_key]
-#         unique_labels = sorted(np.unique(labels))
-#
-#         colors = []
-#         centroids = np.zeros((len(unique_labels), coordinates.shape[1]))
-#         for i, label in enumerate(unique_labels):
-#             label_coordinates = coordinates[labels == label]
-#             centroids[i] = stats.trim_mean(label_coordinates, 0.2, axis=0)
-#             cur_text_color = pl.colors.label_rgb(adjust_lightness(palette[i % len(palette)], 0.5))
-#             colors.append(cur_text_color)
-#             fig.add_annotation(x=centroids[i, 0],
-#                                y=centroids[i, 1],
-#                                text=str(label),
-#                                bgcolor='#FFFFFF',
-#                                font=dict(
-#                                    family="sans serif",
-#                                    size=18,
-#                                    color=cur_text_color), row=1, col=1)
-#     # save to file if requested by user
-#     fig.update_layout(showlegend=False)
-#     if not (output_file is None):
-#         fig.write_image(output_file)
-#     # show the figure
-#     # fig.show()
-#
-#     return fig
-#
-#
-# def plot_ACTIONet_interactive(adata: AnnData,
-#                               label_key: Optional[str] = None,
-#                               transparency_attribute: Optional[str] = None,
-#                               transparancy_z_threshold: Optional[float] = -1,
-#                               transparancey_factor=1,
-#                               node_size: Optional[float] = 1,
-#                               palette: Optional[str] = "CPal20",
-#                               enrichment_table: Optional[bool] = False,
-#                               top_features: Optional[int] = 7,
-#                               blacklist_pattern: Optional[str] = "\\.|^RPL|^RPS|^MRP|^MT-|^MT|MALAT1|B2M|GAPDH",
-#                               title: Optional[str] = "ACTIONet",
-#                               coordinate_slot: Optional[str] = "ACTIONet2D",
-#                               plot_3d: bool = False):
-#     """
-#     Creates an interactive ACTIONet plot with plotly
-#     Parameters
-#     ---------
-#     ace:
-#         ACTIONet output object
-#     labels:
-#         Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-#     transparency_attr:
-#         Additional continuous attribute to project onto the transparency of nodes
-#     trans_z_threshold, trans_fact:
-#         Control the effect of transparency mapping
-#     node_size:
-#         Size of nodes in the ACTIONet plot
-#     palette:
-#         Color palette (named vector or a name for a given known palette)
-#     enrichment_table:
-#         To project the top-ranked features interactively.
-#     top_features:
-#         Number of features to show per cell
-#     blacklist_pattern:
-#         List of genes to filter-out
-#     title:
-#         Main title of the plot
-#     coordinate_slot:
-#         coordinate_slot in anndata object where visualization should be stored
-#     plot_3d:
-#         Whether to show the plot in 3D
-#     Returns
-#     -------
-#     Visualized ACTIONet
-#     """
-#     # validate supplied plot parameters
-#     validate_plot_params(adata, coordinate_key, label_key, transparency_key)
-#
-#     # get the number of variables stored in obs matrix
-#     nV = adata.obs.columns.shape[0]
-#
-#     # determine whether a 3D plot should be generated
-#     if ((coordinate_slot == "ACTIONet2D") and (plot_3d is True)):
-#         coordinate_slot = "ACTIONet3D"
-#     coordinates = ut.scale_matrix(adata.obsm[coordinate_key])
+  if (length(x) != ncol(ace)) {
+    warning("Length of input vector doesn't match the number of cells.")
+    return()
+  }
+  ## Create color gradient generator
+  if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+    grad_palette <- switch(grad_palette,
+      greys = grDevices::gray.colors(100),
+      inferno = viridis::inferno(500, alpha = 0.8),
+      magma = viridis::magma(500, alpha = 0.8),
+      viridis = viridis::viridis(500, alpha = 0.8),
+      BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
+      Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
+      RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
+    )
+  } else {
+    # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
+    grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
+  }
+
+  if (log_scale == TRUE) {
+    x <- log1p(x)
+  }
+
+  if (alpha_val > 0) {
+    x <- as.numeric(propNetworkScores(
+      G = colNets(ace)[[net_attr]],
+      scores = as.matrix(x)
+    ))
+  }
+
+  col_func <- (scales::col_bin(
+    palette = grad_palette,
+    domain = NULL,
+    na.color = NA_col,
+    bins = 7
+  ))
+
+  if (nonparameteric == TRUE) {
+    plot_fill_col <- col_func(rank(x))
+  } else {
+    plot_fill_col <- col_func(x)
+  }
+
+  idx <- order(x, decreasing = FALSE)
+
+  p_out <- plot.ACTIONet(
+    ace = ace,
+    label_attr = NULL,
+    color_attr = plot_fill_col,
+    trans_attr = trans_attr,
+    trans_fac = trans_fac,
+    trans_th = trans_th,
+    point_size = point_size,
+    stroke_size = stroke_size,
+    stroke_contrast_fac = stroke_contrast_fac,
+    palette = NULL,
+    add_text_labels = FALSE,
+    point_order = idx,
+    coordinate_key = coordinate_key
+  )
+
+  return(p_out)
+}

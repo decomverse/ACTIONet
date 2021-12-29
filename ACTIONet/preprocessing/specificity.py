@@ -27,7 +27,7 @@ def compute_archetype_feature_specificity(
     adata: Optional[AnnData] = None,
     S: Union[np.ndarray, sparse.spmatrix] = None,
     H: Union[np.ndarray, sparse.spmatrix] = None,
-    layer_name: Optional[str] = None,
+    layer_key: Optional[str] = None,
     footprint_key: Optional[str] = "archetype_footprint",
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False
@@ -35,12 +35,12 @@ def compute_archetype_feature_specificity(
 
     """Computes Feature (i.e., gene) specificity of archetypes \
     Uses Archetype footprints to estimate markers (soft clustering) 
-    :param adata: AnnData object possibly containing '.layers["layer_name"]' and '.obsm["footprint_key"]'.
+    :param adata: AnnData object possibly containing '.layers["layer_key"]' and '.obsm["footprint_key"]'.
     :param S: `n_obs` × `n_vars` gene expression matrix. \
-        Required if 'adata=None', otherwise retrieved from '.layers["layer_name"]' or '.X' if 'layer_name=None'.
+        Required if 'adata=None', otherwise retrieved from '.layers["layer_key"]' or '.X' if 'layer_key=None'.
     :param H: Matrix-like object containing archetype footprint \
         Required if 'adata=None', otherwise retrieved from '.obsm["footprint_key"]'
-    :param layer_name: Key of 'layers' to retrieve gene expression matrix.
+    :param layer_key: Key of 'layers' to retrieve gene expression matrix.
     :param footprint_key:Key in `adata.obsm` that holds the archetype footprint.
     :param copy: If 'adata' is given, return a copy instead of writing to `adata`
     :param return_raw: If 'adata' is given, return dict of 'compute_archetype_feature_specificity()' output instead of storing to 'adata'.
@@ -55,8 +55,8 @@ def compute_archetype_feature_specificity(
     if adata is not None:
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
-            if layer_name is not None:
-                S = S.T if S is not None else adata.layers[layer_name].T
+            if layer_key is not None:
+                S = S.T if S is not None else adata.layers[layer_key].T
             else:
                 S = S.T if S is not None else adata.X.T
             H = H.T if H is not None else adata.obsm[footprint_key].T

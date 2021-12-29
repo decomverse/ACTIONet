@@ -8,7 +8,7 @@ from .. import misc_utils as ut
 
 def filter_adata(
     adata: AnnData,
-    layer_name: Optional[str] = None,
+    layer_key: Optional[str] = None,
     min_cells_per_feature: Optional[int] = None,
     min_features_per_cell: Optional[int] = None,
     min_umis_per_cell: Optional[int] = None,
@@ -23,7 +23,7 @@ def filter_adata(
     ----------
     adata
         Annotated data matrix
-    layer_name
+    layer_key
         Key of 'layers' to use as matrix for filtering
     min_cells_per_feature
         Minimum number of cells per feature
@@ -45,10 +45,10 @@ def filter_adata(
     original_dims = adata.shape
     previous_dims = None
 
-    if layer_name is not None:
+    if layer_key is not None:
         temp_layer = "X_fil_temp_" + ut.rand_suffix(10)
         adata.layers[temp_layer] = adata.X
-        adata.X = adata.layers[layer_name].astype(dtype=np.float64)
+        adata.X = adata.layers[layer_key].astype(dtype=np.float64)
     else:
         adata.X = adata.X.astype(dtype=np.float64)
 
@@ -68,7 +68,7 @@ def filter_adata(
                 min_cells=min_cells_per_feature * original_dims[0] if min_cells_per_feature > 0 and min_cells_per_feature < 1 else min_cells_per_feature
             )
 
-    if layer_name is not None:
+    if layer_key is not None:
         adata.X = adata.layers[temp_layer]
         del adata.layers[temp_layer]
 

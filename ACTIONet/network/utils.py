@@ -12,8 +12,8 @@ def compute_archetype_core_centrality(
     adata: Optional[AnnData] = None,
     G: Union[np.ndarray, sparse.spmatrix] = None,
     assignments: Union[np.ndarray, list, pd.Series] = None,
-    net_name: Optional[str] = "ACTIONet",
-    assignment_name: Optional[str] = "assigned_archetype",
+    net_key: Optional[str] = "ACTIONet",
+    assignment_key: Optional[str] = "assigned_archetype",
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False
 ) -> Union[AnnData, np.ndarray, None]:
@@ -25,17 +25,17 @@ def compute_archetype_core_centrality(
     Parameters
     ----------
     adata
-        AnnData object possibly containing 'assignment_name' in '.obs' and 'net_name' in '.obsp'.
+        AnnData object possibly containing 'assignment_key' in '.obs' and 'net_key' in '.obsp'.
     G:
         Adjacency matrix to use for computing centrality.
         Required if 'adata=None'.
     assignments:
         list-like object containing archetype assignments of each observation.
         Required if 'adata=None'.
-    assignment_name:
+    assignment_key:
         Key of 'adata.obs' containing list-like object of archetype assignments (default="assigned_archetype").
         Ignored if 'adata=None'.
-    net_name:
+    net_key:
         Key of 'adata.obsp' containing adjacency matrix to use for 'G' in 'compute_archetype_core_centrality()' (default="ACTIONet").
         Ignored if 'adata=None'.
     copy
@@ -57,8 +57,8 @@ def compute_archetype_core_centrality(
     if adata is not None:
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
-            G = G if G is not None else adata.obsp[net_name]
-            assignments = assignments if assignments is not None else adata.obs[assignment_name]
+            G = G if G is not None else adata.obsp[net_key]
+            assignments = assignments if assignments is not None else adata.obs[assignment_key]
         else:
             raise ValueError("'adata' is not an AnnData object.")
     else:
@@ -82,10 +82,11 @@ def compute_network_diffusion(
     adata: Optional[AnnData] = None,
     G: Union[np.ndarray, sparse.spmatrix] = None,
     H_unified: Union[np.ndarray, sparse.spmatrix] = None,
-    net_name: Optional[str] = "ACTIONet",
+    net_key: Optional[str] = "ACTIONet",
     footprint_key: Optional[str] = "archetype_footprint",
     alpha_val: Optional[float] = 0.85,
     thread_no: Optional[int] = 0,
+    max_it: Optional[int] = 5,
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False
 ) -> Union[AnnData, np.ndarray, None]:
@@ -96,23 +97,25 @@ def compute_network_diffusion(
     Parameters
     ----------
     adata
-        AnnData object possibly containing '.obsm["H_unified]' and 'net_name' in '.obsp'.
+        AnnData object possibly containing '.obsm["H_unified]' and 'net_key' in '.obsp'.
     G:
         Adjacency matrix to use for computing diffusion.
         Required if 'adata=None'.
     H_unified:
         Matrix containing output 'H_unified' of 'unify_archetypes()' to use for computing diffusion.
         Required if 'adata=None', otherwise retrieved from '.obsm["H_unified"]'
-    net_name:
-        Key of 'adata.obsp' containing adjacency matrix to use for 'G' in 'compute_archetype_core_centrality()' (default="ACTIONet").
+    net_key:
+        Key of 'adata.obsp' containing adjacency matrix to use for 'G' in 'compute_archetype_core_centrality()'. (default="ACTIONet")
         Ignored if 'adata=None'.
     footprint_key:
-        Key of 'adata.obsp' to store archetype footprint (default="archetype_footprint").
+        Key of 'adata.obsp' to store archetype footprint. (default="archetype_footprint")
         Ignored if 'adata=None'.
     alpha_val:
         Diffusion parameter between 0-1.
     thread_no:
         Number of threads. Defaults to number of threads available - 2.
+    max_it:
+        Maximum number of iterations for network diffusion. (default:5)
     copy
         If 'adata' is given, return a copy instead of writing to `adata`
     return_raw
@@ -132,7 +135,7 @@ def compute_network_diffusion(
     if adata is not None:
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
-            G = G if G is not None else adata.obsp[net_name]
+            G = G if G is not None else adata.obsp[net_key]
             H_unified = H_unified if H_unified is not None else adata.obsm["H_unified"]
         else:
             raise ValueError("'adata' is not an AnnData object.")
@@ -150,7 +153,7 @@ def compute_network_diffusion(
     if not sparse.issparse(H_unified):
         H_unified = sparse.csc_matrix(H_unified)
 
-    archetype_footprint = _an.compute_network_diffusion(G, H_unified, alpha=alpha_val, thread_no=thread_no)
+    archetype_footprint = _an.compute_network_diffusion_fast(G=G, X0=H_unified, alpha=alpha_val, thread_no=thread_no, max_it=max_it)
     archetype_footprint = np.array(archetype_footprint, dtype=np.float64)
 
     if return_raw or adata is None:
@@ -163,13 +166,14 @@ def compute_network_diffusion(
 def construct_backbone(
     adata: Optional[AnnData] = None,
     footprint: Union[np.ndarray, sparse.spmatrix] = None,
-    net_name: Optional[str] = "ACTIONet",
+    net_key: Optional[str] = "ACTIONet",
     footprint_key: Optional[str] = "archetype_footprint",
     scale: Optional[bool] = True,
     layout_compactness: Optional[int] = 50,
     layout_epochs: Optional[int] = 100,
     alpha_val: Optional[float] = 0.85,
     thread_no: Optional[int] = 0,
+    max_it: Optional[int] = 5,
     seed: Optional[int] = 0,
     copy: Optional[bool] = False,
 ) -> Optional[AnnData]:
@@ -185,10 +189,11 @@ def construct_backbone(
             adata=adata,
             G=None,
             H_unified=None,
-            net_name=net_name,
+            net_key=net_key,
             footprint_key=footprint_key,
             alpha_val=alpha_val,
             thread_no=thread_no,
+            max_it=max_it,
             copy=False,
             return_raw=False
         )

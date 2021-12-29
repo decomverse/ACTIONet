@@ -1628,7 +1628,7 @@ colFactors(0): </code></pre>
 <div id="building-actionet-graph" class="section level2">
 <h2>Building ACTIONet graph</h2>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">set.seed</span>(<span class="dv">0</span>)</span>
-<span id="cb11-2"><a href="#cb11-2"></a>G =<span class="st"> </span><span class="kw">build_ACTIONet</span>(<span class="dt">H_stacked =</span> H_stacked, <span class="dt">thread_no =</span> <span class="dv">8</span>)</span></code></pre></div>
+<span id="cb11-2"><a href="#cb11-2"></a>G =<span class="st"> </span><span class="kw">buildNetwork</span>(<span class="dt">H_stacked =</span> H_stacked, <span class="dt">thread_no =</span> <span class="dv">8</span>)</span></code></pre></div>
 <p>To store computed graph as a network associated with cells (columns) in the <code>ACE</code> object, we can use:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">colNets</span>(ace)<span class="op">$</span>ACTIONet =<span class="st"> </span>G</span></code></pre></div>
 </div>
@@ -1636,7 +1636,7 @@ colFactors(0): </code></pre>
 <h2>Layout ACTIONet</h2>
 <p>We have adopted and modified the SGD-based layout algorithm utilized in the <em>UMAP</em> for our visualization. We use <code>S_r</code> for our initialization:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>initial.coordinates =<span class="st"> </span><span class="kw">t</span>(<span class="kw">scale</span>(<span class="kw">reducedDims</span>(sce)[[<span class="st">&quot;S_r&quot;</span>]]))</span>
-<span id="cb13-2"><a href="#cb13-2"></a>vis.out =<span class="st"> </span><span class="kw">layout_ACTIONet</span>(G, <span class="dt">S_r =</span> initial.coordinates, <span class="dt">n_epochs =</span> <span class="dv">500</span>)</span></code></pre></div>
+<span id="cb13-2"><a href="#cb13-2"></a>vis.out =<span class="st"> </span><span class="kw">layoutNetwork</span>(G, <span class="dt">S_r =</span> initial.coordinates, <span class="dt">n_epochs =</span> <span class="dv">500</span>)</span></code></pre></div>
 <p>And then we can store the coordinates as <code>reducedDims()</code> and computed <em>de novo</em> colors as attributes in the <code>colData()</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">reducedDims</span>(ace)<span class="op">$</span>ACTIONet2D =<span class="st"> </span>vis.out<span class="op">$</span>coordinates</span>
 <span id="cb14-2"><a href="#cb14-2"></a><span class="kw">reducedDims</span>(ace)<span class="op">$</span>ACTIONet3D =<span class="st"> </span>vis.out<span class="op">$</span>coordinates_3D</span>

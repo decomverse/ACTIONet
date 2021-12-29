@@ -11,9 +11,9 @@ def run_ACTIONet(
         adata: AnnData,
         k: Optional[int] = 10,
         k_max: Optional[int] = 30,
-        layer_name: Optional[str] = None,
-        reduction_name: Optional[str] = "ACTION",
-        net_name_out: Optional[str] = "ACTIONet",
+        layer_key: Optional[str] = None,
+        reduction_key: Optional[str] = "ACTION",
+        net_key_out: Optional[str] = "ACTIONet",
         min_cells_per_archetype: Optional[int] = 2,
         max_iter_ACTION: Optional[int] = 50,
         min_specificity_z_threshold: Optional[int] = -3,
@@ -35,24 +35,24 @@ def run_ACTIONet(
 
     adata = adata.copy() if copy else adata
 
-    if layer_name is not None:
-        if layer_name not in adata.layers.keys():
-            raise ValueError("Did not find adata.layers['" + layer_name + "']. ")
-        S = adata.layers[layer_name]
+    if layer_key is not None:
+        if layer_key not in adata.layers.keys():
+            raise ValueError("Did not find adata.layers['" + layer_key + "']. ")
+        S = adata.layers[layer_key]
     else:
         S = adata.X
 
     S = S.astype(dtype=np.float64)
 
-    if reduction_name not in adata.obsm.keys():
-        raise ValueError("Did not find adata.obsm['" + reduction_name + "']. ")
+    if reduction_key not in adata.obsm.keys():
+        raise ValueError("Did not find adata.obsm['" + reduction_key + "']. ")
     else:
-        S_r = adata.obsm[reduction_name].astype(dtype=np.float64)
+        S_r = adata.obsm[reduction_key].astype(dtype=np.float64)
 
     # Run ACTION
     ACTION_out = pp.ACTION(
         data=S_r,  # data must be `n_obs` × `n_vars/red_dim`
-        reduction_name=None,
+        reduction_key=None,
         k_min=2,
         k_max=k_max,
         thread_no=thread_no,
@@ -73,7 +73,7 @@ def run_ACTIONet(
     # Build ACTIONet
     nt.build_network(
         adata,
-        net_name_out=net_name_out,
+        net_key_out=net_key_out,
         density=network_density,
         thread_no=thread_no,
         mutual_edges_only=mutual_edges_only,
@@ -87,12 +87,12 @@ def run_ACTIONet(
     nt.layout_network(
         adata=adata,
         G=None,
-        S_r=None,
-        reduction_name=reduction_name,
-        net_name=net_name_out,
+        initial_coordinates=None,
+        reduction_key=reduction_key,
+        net_key=net_key_out,
         compactness_level=layout_compactness,
         n_epochs=layout_epochs,
-        layout_alg=layout_algorithm,
+        layout_algorithm=layout_algorithm,
         thread_no=thread_no if layout_in_parallel else 1,
         seed=seed,
         copy=False,
@@ -117,8 +117,8 @@ def run_ACTIONet(
         adata=adata,
         G=None,
         assignments=None,
-        net_name=net_name_out,
-        assignment_name="assigned_archetype",
+        net_key=net_key_out,
+        assignment_key="assigned_archetype",
         copy=False,
         return_raw=False
     )
@@ -128,7 +128,7 @@ def run_ACTIONet(
         adata=adata,
         G=None,
         H_unified=None,
-        net_name=net_name_out,
+        net_key=net_key_out,
         footprint_key=footprint_key,
         alpha_val=footprint_alpha,
         thread_no=thread_no,
@@ -141,24 +141,24 @@ def run_ACTIONet(
         adata=adata,
         S=S,
         H=None,
-        layer_name=None,
+        layer_key=None,
         footprint_key=footprint_key,
         copy=False,
         return_raw=False
     )
 
-    nt.construct_backbone(
-        adata=adata,
-        footprint=None,
-        net_name=net_name_out,
-        footprint_key=footprint_key,
-        scale=True,
-        layout_compactness=layout_compactness,
-        layout_epochs=round(layout_epochs / 5),
-        alpha_val=footprint_alpha,
-        thread_no=1,
-        seed=seed,
-        copy=False
-    )
+    # nt.construct_backbone(
+    #     adata=adata,
+    #     footprint=None,
+    #     net_key=net_key_out,
+    #     footprint_key=footprint_key,
+    #     scale=True,
+    #     layout_compactness=layout_compactness,
+    #     layout_epochs=round(layout_epochs / 5),
+    #     alpha_val=footprint_alpha,
+    #     thread_no=1,
+    #     seed=seed,
+    #     copy=False
+    # )
 
     return adata if copy else None

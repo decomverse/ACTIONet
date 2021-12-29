@@ -83,7 +83,7 @@ def unify_archetypes(
         S_r: Union[np.ndarray, sparse.spmatrix, None] = None,
         C_stacked: Union[np.ndarray, sparse.spmatrix, None] = None,
         H_stacked: Union[np.ndarray, sparse.spmatrix, None] = None,
-        reduction_name: Optional[str] = "ACTION",
+        reduction_key: Optional[str] = "ACTION",
         violation_threshold: Optional[float] = 0,
         thread_no: Optional[int] = 0,
         copy: Optional[bool] = False,
@@ -97,7 +97,7 @@ def unify_archetypes(
     Parameters
     ----------
     adata:
-        AnnData object containing 'reduction_name' in '.obsm' and 'net_name' in '.obsp'.
+        AnnData object containing 'reduction_key' in '.obsm' and 'net_key' in '.obsp'.
     S_r:
         Reduced representation matrix to use for unification.
         Required if 'adata=None'.
@@ -107,7 +107,7 @@ def unify_archetypes(
     H_stacked:
         Matrix containing output 'H_stacked' of 'prune_archetypes()' to use for unification.
         Required if 'adata=None', otherwise retrieved from 'adata.obsm["H_stacked"]'
-    reduction_name:
+    reduction_key:
         Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'unify_archetypes()' (default="ACTION").
         Ignored if 'adata=None'.
     violation_threshold:
@@ -134,7 +134,7 @@ def unify_archetypes(
     if adata is not None:
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
-            S_r = S_r if S_r is not None else adata.obsm[reduction_name]
+            S_r = S_r if S_r is not None else adata.obsm[reduction_key]
             C_stacked = C_stacked if C_stacked is not None else adata.obsm['C_stacked']
             H_stacked = H_stacked if H_stacked is not None else adata.obsm['H_stacked']
         else:

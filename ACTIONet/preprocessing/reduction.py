@@ -12,8 +12,8 @@ def reduce_kernel(
         data: Union[AnnData, np.ndarray, spmatrix],
         dim: Optional[int] = 50,
         max_iter: Optional[int] = 10,
-        layer_name: Optional[str] = None,
-        reduction_name: Optional[str] = "ACTION",
+        layer_key: Optional[str] = None,
+        reduction_key: Optional[str] = "ACTION",
         svd_solver: Literal[0, 1, 2] = 0,
         seed: Optional[int] = 0,
         return_raw: Optional[bool] = False,
@@ -24,8 +24,8 @@ def reduce_kernel(
     :param data: The (annotated) data matrix of shape `n_obs` × `n_vars`. Rows correspond to cells and columns to genes.
     :param dim: Target dimension. Defaults to 50, or 1 - minimum dimension size of selected representation.
     :param max_iter: Maximum number of iterations
-    :param reduction_name: Prefix of key to use for reduction output
-    :param layer_name: Key of 'layers' to use as matrix for filtering
+    :param reduction_key: Prefix of key to use for reduction output
+    :param layer_key: Key of 'layers' to use as matrix for filtering
     :param svd_solver:SVD solver to use \
         `0` (the default) \
           randomized SVD used in IRLBA R package \
@@ -74,8 +74,8 @@ def reduce_kernel(
         adata_temp = adata
 
     # ACTIONet C++ library takes cells as columns
-    if layer_name is not None:
-        X = adata_temp.layers[layer_name].T
+    if layer_key is not None:
+        X = adata_temp.layers[layer_key].T
     else:
         X = adata_temp.X.T
 
@@ -100,20 +100,20 @@ def reduce_kernel(
         reduced["V"] = reduced["V"].T
         return reduced
     elif data_is_AnnData:
-        adata.obsm[reduction_name] = reduced["S_r"]
-        adata.uns[reduction_name] = {}
-        adata.uns[reduction_name]["params"] = {"use_highly_variable": use_highly_variable}
-        adata.uns[reduction_name]["sigma"] = reduced["sigma"]
-        adata.obsm[reduction_name + "_B"] = reduced["B"]
+        adata.obsm[reduction_key] = reduced["S_r"]
+        adata.uns[reduction_key] = {}
+        adata.uns[reduction_key]["params"] = {"use_highly_variable": use_highly_variable}
+        adata.uns[reduction_key]["sigma"] = reduced["sigma"]
+        adata.obsm[reduction_key + "_B"] = reduced["B"]
 
         if use_highly_variable:
-            adata.varm[reduction_name + "_V"] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm[reduction_name + "_V"][adata.var["highly_variable"]] = reduced["V"]
-            adata.varm[reduction_name + "_A"] = np.zeros(shape=(adata.n_vars, dim))
-            adata.varm[reduction_name + "_A"][adata.var["highly_variable"]] = reduced["A"]
+            adata.varm[reduction_key + "_V"] = np.zeros(shape=(adata.n_vars, dim))
+            adata.varm[reduction_key + "_V"][adata.var["highly_variable"]] = reduced["V"]
+            adata.varm[reduction_key + "_A"] = np.zeros(shape=(adata.n_vars, dim))
+            adata.varm[reduction_key + "_A"][adata.var["highly_variable"]] = reduced["A"]
         else:
-            adata.varm[reduction_name + "_V"] = reduced["V"]
-            adata.varm[reduction_name + "_A"] = reduced["A"]
+            adata.varm[reduction_key + "_V"] = reduced["V"]
+            adata.varm[reduction_key + "_A"] = reduced["A"]
 
         adata.uns.setdefault("obsm_annot", {}).update(
             {

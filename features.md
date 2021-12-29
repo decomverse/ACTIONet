@@ -14,11 +14,11 @@ decomposition
 	unify_archetypes -- gives clusters
 	
 graph
-	build_ACTIONet
+	buildNetwork
 	
 graphtools.*
 	embedding/visualization
-		UMAP/LargeVis: layout_ACTIONet -- Add LargeVis interface, potentially update denovo colors
+		UMAP/LargeVis: layoutNetwork -- Add LargeVis interface, potentially update denovo colors
 	diffusion/imputation:
 		PR: compute_network_diffusion
 		L1-reg PR: compute_sparse_network_diffusion

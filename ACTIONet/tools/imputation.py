@@ -121,7 +121,7 @@ def impute_genes_using_network(
 
     # Network diffusion
     G = adata.obsp["ACTIONet"]
-    imputed = _an.compute_network_diffusion(G, csc_matrix(U), thread_no, alpha, n_iters)
+    imputed = _an.compute_network_diffusion_fast(G, sparse.csc_matrix(U), thread_no, alpha, n_iters)
     np.nan_to_num(imputed, copy=False, nan=0.0)
 
     # Rescale the baseline expression of each gene

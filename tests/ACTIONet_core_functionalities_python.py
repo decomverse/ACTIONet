@@ -16,10 +16,10 @@ C, H = run_ACTION(ACE)
 prune_archetypes(ACE, C, H)
 
 # Uses k*-NN together with JS metric on archetypes to construct cell-cell network (ACTIONet graph)
-build_ACTIONet(ACE, mutual_edges_only = True)
+buildNetwork(ACE, mutual_edges_only = True)
 
 # Computes 2D/3D embedding of cells, as well as their de novo coloring
-layout_ACTIONet(ACE)
+layoutNetwork(ACE)
 
 # Identifies and unifies redundant archetypes into equivalent classes and assigns cells to each class
 unify_archetypes(ACE)

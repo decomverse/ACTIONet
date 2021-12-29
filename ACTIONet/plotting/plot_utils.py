@@ -18,14 +18,14 @@ def _default_colors(n) -> pd.Series:
 
 def get_plot_coors(
         data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        coordinate_attr: Optional[str],
+        coordinate_key: Optional[str],
         scale_coors: Optional[bool] = True,
         coor_dims: Optional[int] = 2
 ) -> pd.DataFrame:
     if isinstance(data, AnnData):
-        coors = data.obsm[coordinate_attr]
+        coors = data.obsm[coordinate_key]
         if coors.shape[1] < coor_dims:
-            err = "data in 'coordinate_attr' has < {dims} dimensions".format(keys=coor_dims)
+            err = "data in 'coordinate_key' has < {dims} dimensions".format(keys=coor_dims)
             raise Exception(err)
     else:
         if not isinstance(data, (np.ndarray, sparse.spmatrix)):
