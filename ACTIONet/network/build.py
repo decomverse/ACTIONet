@@ -8,13 +8,12 @@ import _ACTIONet as _an
 
 def build_network(
         data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        net_name_out: Optional[str] = "ACTIONet",
+        net_key_out: Optional[str] = "ACTIONet",
         density: Optional[float] = 1.0,
         thread_no: Optional[int] = 0,
         mutual_edges_only: Optional[bool] = True,
         distance_metric: Optional[str] = "jsd",
         nn_approach: Optional[str] = "k*nn",
-        k: Optional[int] = 10,
         copy: Optional[bool] = False,
         return_raw: Optional[bool] = False,
 ) -> Union[AnnData, sparse.spmatrix, None]:
@@ -22,24 +21,18 @@ def build_network(
     """Computes and returns the ACTIONet graph
    
     :param data:`n_obs` × `n_arch` Matrix or AnnData object containing output of the 'prune_archetypes()'.
-    :param net_name_out:If 'data' is AnnData, store output matrix G in '.obsp' with key 'net_name_out' (default="ACTIONet")
+    :param net_key_out:If 'data' is AnnData, store output matrix G in '.obsp' with key 'net_key_out' (default="ACTIONet")
     :param density: Controls the overall density of constructed network. Larger values results in more retained edges.
     :param thread_no: Number of parallel threads used for identifying nearest-neighbors. Defaults to available threads on the machine.
     :param mutual_edges_only: Whether to return only edges that there is a bi-directional/mutual relationship.
     :param distance_metric: one of jsd, ip, l2 (default=jsd) 
     :param nn_approach: one of k*nn, knn (default=k*nn) 
-    :param k: number of clusters to utilize for knn; not used in k*nn 
     :param copy: If 'data' is AnnData, return a copy instead of writing to `data`.
     :param return_raw: If 'return_raw=True' and 'data' is AnnData, return sparse adjacency matrix directly.
     ... 
     :return adata: anndata.AnnData if 'adata' given and `copy=True` returns None or else adds fields to `adata`
     :return G :scipy.sparse.spmatrix. Sparse adjacency matrix encoding ACTIONet if 'return_raw=True'
     """
-
-    #these are defaults, they do not change 
-    M=16
-    ef_construction=200
-    ef=50
 
     data_is_AnnData = isinstance(data, AnnData)
 
@@ -56,20 +49,18 @@ def build_network(
     if sparse.issparse(H_stacked):
         H_stacked = H_stacked.toarray()
 
-    G = _an.build_ACTIONet(H_stacked=H_stacked,
-                           density=density,
-                           thread_no=thread_no,
-                           mutual_edges_only=mutual_edges_only,
-                           distance_metric=distance_metric,
-                           nn_approach=nn_approach,
-                           k=k,
-                           M=M,
-                           ef_construction=ef_construction,
-                           ef=ef)
+    G = _an.buildNetwork(
+        H=H_stacked,
+        algorithm=nn_approach,
+        distance_metric=distance_metric,
+        density=density,
+        thread_no=thread_no,
+        mutual_edges_only=mutual_edges_only
+    )
 
     if return_raw or not data_is_AnnData:
         return G
     elif data_is_AnnData:
-        adata.obsp[net_name_out] = G
+        adata.obsp[net_key_out] = G
         return adata if copy else None
 

@@ -8,7 +8,7 @@ import _ACTIONet as _an
 
 def ACTION(
     data: Union[AnnData, np.ndarray],
-    reduction_name: Optional[str] = "ACTION",
+    reduction_key: Optional[str] = "ACTION",
     k_min: Optional[int] = 2,
     k_max: Optional[int] = 30,
     thread_no: Optional[int] = 0,
@@ -25,7 +25,7 @@ def ACTION(
     data
         The (annotated) data matrix of shape `n_obs` × `n_vars`.
         Rows correspond to cells and columns to genes.
-    reduction_name:
+    reduction_key:
         Key of '.obms' to use as input for ACTION (default="ACTION")
         Ignored if 'data' is not an 'AnnData' object.
     k_min, k_max
@@ -43,10 +43,10 @@ def ACTION(
     data_is_AnnData = isinstance(data, AnnData)
 
     if data_is_AnnData:
-        if reduction_name not in data.obsm.keys():
-            raise ValueError("Did not find adata.obsm['" + reduction_name + "'].")
+        if reduction_key not in data.obsm.keys():
+            raise ValueError("Did not find adata.obsm['" + reduction_key + "'].")
         else:
-            X = data.obsm[reduction_name]
+            X = data.obsm[reduction_key]
     else:
         X = data
 
