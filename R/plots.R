@@ -733,7 +733,7 @@ plot.individual.gene <- function(ace,
 #' @param grad_palette Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.
 #' @param net_slot Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
 #' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').
-#'
+#' @param show_legend
 #' @return 'ggplot' object.
 #'
 #' @examples
@@ -755,7 +755,8 @@ plot.ACTIONet.gradient <- function(ace,
                                    stroke_contrast_fac = 0.1,
                                    grad_palette = "magma",
                                    net_slot = "ACTIONet",
-                                   coordinate_attr = "ACTIONet2D") {
+                                   coordinate_attr = "ACTIONet2D",
+				   show_legend=FALSE) {
   NA_col <- "#eeeeee"
 
   if (length(x) != ncol(ace)) {
@@ -817,7 +818,8 @@ plot.ACTIONet.gradient <- function(ace,
     palette = NULL,
     add_text_labels = FALSE,
     point_order = idx,
-    coordinate_attr = coordinate_attr
+    coordinate_attr = coordinate_attr,
+    show_legend=show_legend
   )
 
   return(p_out)
