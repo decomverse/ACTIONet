@@ -5,7 +5,6 @@
 
 #define stdout_printf Rprintf
 #define stderr_printf REprintf
-#define stderr_stop stop
 #define FLUSH R_FlushConsole()
 
 namespace ACTIONet
