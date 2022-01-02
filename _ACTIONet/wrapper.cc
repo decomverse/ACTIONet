@@ -644,16 +644,14 @@ PYBIND11_MODULE(_ACTIONet, m) {
         py::arg("C_trace"), py::arg("H_trace"),
         py::arg("min_specificity_z_threshold") = -3, py::arg("min_cells") = 3);
 
-  m.def(
-      "unify_archetypes", &unify_archetypes,
-      "Identifies and aggregates redundant archetypes into equivalent classes",
-      py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
-      py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
+  m.def("unify_archetypes", &unify_archetypes,
+        "Identifies and aggregates redundant archetypes into equivalent classes",
+        py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
+        py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
 
-  m.def(
-      "compute_archetype_core_centrality", &compute_archetype_core_centrality,
-      "Computes node centrality scores",
-      py::arg("G"), py::arg("sample_assignments");
+  m.def("compute_archetype_core_centrality", &compute_archetype_core_centrality,
+        "Computes node centrality scores",
+        py::arg("G"), py::arg("sample_assignments");
 
   // Network
   m.def("buildNetwork", &buildNetwork,
