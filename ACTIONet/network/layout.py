@@ -47,6 +47,10 @@ def layout_network(
     If 'adata=None' or 'return_raw=True', returns dict with 2D/3D coordinates and color values.
     """
 
+    alg_name = layout_algorithm.upper()
+    if alg_name not in ["UMAP", "TUMAP"]:
+        raise ValueError("'layout_algorithm' must be 'tumap' or 'umap'.")
+
     if adata is not None:
         if isinstance(adata, AnnData):
             adata = adata.copy() if copy else adata
@@ -68,7 +72,7 @@ def layout_network(
     layout = _an.layoutNetwork(
         G=G,
         initial_position=initial_coordinates,
-        algorithm=layout_algorithm,
+        algorithm=alg_name,
         compactness_level=compactness_level,
         n_epochs=n_epochs,
         thread_no=thread_no,

@@ -62,8 +62,8 @@ def run_ACTIONet(
 
     # Prune nonspecific and/or unreliable archetypes
     pp.prune_archetypes(
-        ACTION_out["C"],
-        ACTION_out["H"],
+        C_trace=ACTION_out["C"],
+        H_trace=ACTION_out["H"],
         adata=adata,
         min_specificity_z_threshold=min_specificity_z_threshold,
         min_cells=min_cells_per_archetype,
@@ -72,7 +72,7 @@ def run_ACTIONet(
 
     # Build ACTIONet
     nt.build_network(
-        adata,
+        data=adata,
         net_key_out=net_key_out,
         density=network_density,
         thread_no=thread_no,
