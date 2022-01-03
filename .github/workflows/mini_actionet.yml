@@ -5,7 +5,7 @@ on:
       - 'R-devel'
 jobs:
   main:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 3000
     steps:
       - name: Checkout
@@ -34,7 +34,6 @@ jobs:
           push: true |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           build-args: |
-            PARENT_DOCKER=shmohammadi86/genomics:latest
             GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
           tags: |
-            shmohammadi86/actionet:mini
+            shmohammadi86/actionet:mini-r_devel
