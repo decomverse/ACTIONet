@@ -1,6 +1,6 @@
 name: mini-ACTIONet
 on:
-  push: true
+  push:
     branches:
       - 'R-devel'
 jobs:
@@ -31,9 +31,6 @@ jobs:
         with:
           context: ./mini_docker
           file: ./mini_docker/Dockerfile
-          push: true |
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          build-args: |
-            GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
-          tags: |
-            shmohammadi86/actionet:mini-r_devel
+          push: true
+          build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
+          tags: shmohammadi86/actionet:mini-r_devel
