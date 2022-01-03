@@ -31,7 +31,7 @@ jobs:
         with:
           context: ./mini_docker
           file: ./mini_docker/Dockerfile
-          push: true |
+          push: true
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           build-args: |
             GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
