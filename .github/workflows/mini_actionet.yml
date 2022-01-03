@@ -2,10 +2,10 @@ name: mini-ACTIONet
 on:
   push:
     branches:
-      - 'python-release'
+      - 'python-devel'
 jobs:
   main:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 3000
     steps:
       - name: Checkout
@@ -31,10 +31,6 @@ jobs:
         with:
           context: ./mini_docker
           file: ./mini_docker/Dockerfile
-          push: true|
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          build-args: |
-            PARENT_DOCKER=shmohammadi86/genomics:latest
-            GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
-          tags: |
-            shmohammadi86/actionet:mini
+          push: true
+          build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
+          tags: shmohammadi86/actionet:mini-python_devel
