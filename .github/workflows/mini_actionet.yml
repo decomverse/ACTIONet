@@ -2,7 +2,7 @@ name: mini-ACTIONet
 on:
   push:
     branches:
-      - 'R-release'
+      - 'R-devel'
 jobs:
   main:
     runs-on: self-hosted
