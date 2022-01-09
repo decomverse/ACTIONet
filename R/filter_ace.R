@@ -118,7 +118,7 @@ filter.ace.by.attr <- function(
   max_umis_per_cell = NULL
 ) {
 
-    IDX = .get_attr_or_split_idx(ace, by)
+    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, by)
 
     if (any(duplicated(rownames(ace)))) {
         msg = sprintf("Adding suffix to duplicate rownames.\n")
