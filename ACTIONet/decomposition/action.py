@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn._config import config_context
 
 import _ACTIONet as _an
-from ACTIONet.decomposition import SPA
+from .spa import *
 
 
 class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
