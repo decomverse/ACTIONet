@@ -60,7 +60,6 @@ html_theme = "sphinx_rtd_theme"
 #html_static_path = ['_static']
 
 source_suffix = [".rst", ".md"]
-
 #napolean settings
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
