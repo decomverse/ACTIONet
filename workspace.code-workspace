@@ -12,6 +12,7 @@
 			"optional": "cpp",
 			"armadillo": "cpp",
 			"complex": "cpp"
-		}
+		},
+		"autoDocstring.docstringFormat": "numpy"
 	}
 }
