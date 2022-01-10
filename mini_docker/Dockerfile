@@ -4,7 +4,7 @@ FROM "jupyter/scipy-notebook"
 USER root
 
 #install python version
-RUN apt-get update && apt-get install -yq --no-install-recommends libhdf5-dev libsuitesparse-dev libnss3 xvfb
+RUN apt-get update && apt-get install -yq --no-install-recommends libhdf5-dev libsuitesparse-dev libnss3 xvfb make
 
 #make sure cmake version is >=3.19
 RUN conda install -c conda-forge cmake
