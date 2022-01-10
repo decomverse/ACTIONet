@@ -1,4 +1,5 @@
-FROM "shmohammadi86/genomics:singlecell"
+#FROM "shmohammadi86/genomics:singlecell"
+FROM "jupyter/scipy-notebook"
 
 #install python version
 RUN apt-get install -y libhdf5-dev libsuitesparse-dev libnss3 xvfb
