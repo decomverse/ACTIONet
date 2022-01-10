@@ -7,6 +7,7 @@ list(APPEND CMAKE_MODULE_PATH "${ACTIONet_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_compile_options(-w)
@@ -30,7 +31,7 @@ endif()
 include_directories(${Python_INCLUDE_DIRS})
 
 ############ Headers
-include_directories(${ACTIONet_SOURCE_DIR}/_ACTIONet)
+include_directories(${ACTIONet_SOURCE_DIR}/_ACTIONet/include)
 include_directories(${ACTIONet_SOURCE_DIR}/lib/ACTIONet/include)
 include_directories(${ACTIONet_SOURCE_DIR}/lib/ACTIONet/include/arma)
 include_directories(${ACTIONet_SOURCE_DIR}/lib/ACTIONet/include/arma/armadillo_bits)
