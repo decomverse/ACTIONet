@@ -393,9 +393,9 @@ py::dict unify_archetypes(arma::Mat<npdouble> &S_r,
 }
 
 // Computes node centrality scores
-vec compute_archetype_core_centrality(arma::SpMat<npdouble> &G, uvec assignments) {
+arma::vec compute_archetype_core_centrality(arma::SpMat<npdouble> &G, uvec assignments) {
 
-  vec node_centrality = ACTIONet::compute_archetype_core_centrality(G = G, sample_assignments = assignments);
+  vec node_centrality = ACTIONet::compute_archetype_core_centrality(G, assignments);
 
   return node_centrality;
 }
@@ -470,7 +470,7 @@ py::dict layoutNetwork(arma::SpMat<npdouble> &G,
 // @param seed Random seed
 //
 // @return clusters Assignment vector of samples to clusters
-vec signed_cluster(arma::SpMat<npdouble> &A, double resolution_parameter = 1.0,
+arma::vec signed_cluster(arma::SpMat<npdouble> &A, double resolution_parameter = 1.0,
                    uvec initial_clusters_ = uvec(), int seed = 0) {
   uvec initial_clusters_uvec(A.n_rows);
   if (initial_clusters_.n_elem == A.n_rows) {
@@ -494,7 +494,7 @@ vec signed_cluster(arma::SpMat<npdouble> &A, double resolution_parameter = 1.0,
 // vector for clusters (if available) ' @param seed Random seed
 //'
 //' @return clusters Assignment vector of samples to clusters
-vec unsigned_cluster(arma::SpMat<npdouble> &A,
+arma::vec unsigned_cluster(arma::SpMat<npdouble> &A,
                      double resolution_parameter = 1.0,
                      uvec initial_clusters_ = uvec(), int seed = 0) {
   uvec initial_clusters_uvec(A.n_rows);
@@ -651,7 +651,7 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
   m.def("compute_archetype_core_centrality", &compute_archetype_core_centrality,
         "Computes node centrality scores",
-        py::arg("G"), py::arg("sample_assignments");
+        py::arg("G"), py::arg("sample_assignments"));
 
   // Network
   m.def("buildNetwork", &buildNetwork,
@@ -687,13 +687,13 @@ PYBIND11_MODULE(_ACTIONet, m) {
         &compute_network_diffusion,
         "Computes network diffusion using a given adjacency matrix (Old version)",
         py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-        py::arg("alpha") = 0.85, py::arg("max_it") = 5;
+        py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
 m.def("compute_network_diffusion_fast",
         &compute_network_diffusion_fast,
         "Computes network diffusion using a given adjacency matrix",
         py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-        py::arg("alpha") = 0.85, py::arg("max_it") = 5;
+        py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
   m.def("compute_network_diffusion_Chebyshev", &compute_network_diffusion_Chebyshev,
         "Normalizes adjacency matrix using different strategies",
