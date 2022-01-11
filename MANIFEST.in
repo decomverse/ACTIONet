@@ -1,5 +1,2 @@
 include README.md
 global-include CMakeLists.txt *.cmake
-recursive-include src *
-recursive-include lib/pybind11 *
-recursive-include ACTIONet/data *

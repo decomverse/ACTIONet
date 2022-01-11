@@ -1,5 +1,3 @@
-#include <ACTIONet.h>
-#include <arma_wrapper.h>
 #include <numpy/npy_common.h>
 #include <pybind11/stl.h>
 #include <stdint.h>
@@ -7,6 +5,8 @@
 #include <functional>
 #include <string>
 #include <utility>
+#include "include/ACTIONet.h"
+#include "include/arma_wrapper.h"
 
 using aw::dcube;
 using aw::dmat;
@@ -412,7 +412,8 @@ arma::vec compute_archetype_core_centrality(arma::SpMat<npdouble> &G, uvec assig
 // If it is true, only mutual-nearest-neighbors are returned (default=true).
 // @param k Optional parameter specifying k for knn algorithm (default=10).
 // @param M 'M' parameter to pass to UMAP (default=16).
-// @param ef_construction 'ef_construction' parameter to pass to UMAP (default=200).
+// @param ef_construction 'ef_construction' parameter to pass to UMAP
+// (default=200).
 // @param ef 'ef' parameter to pass to UMAP (default=50).
 //
 // @return G Adjacency matrix of the ACTIONet graph.
@@ -432,7 +433,8 @@ arma::SpMat<npdouble> buildNetwork(arma::Mat<npdouble> &H,
 // Performs stochastic force-directed layout on the input graph
 //
 // @param G Adjacency matrix of the ACTIONet graph
-// @param initial_position Reduced kernel matrix (is used for reproducible initialization).
+// @param initial_position Reduced kernel matrix (is used for reproducible
+// initialization).
 // @param algorithm Algorithm to use for visualization layout (default="TUMAP").
 // @param compactness_level A value between 0-100, indicating the compactness of
 // ACTIONet layout (default=50)
@@ -518,20 +520,24 @@ arma::SpMat<npdouble> normalize_adj(arma::SpMat<npdouble> &G,
   return (P);
 }
 
-arma::Mat<npdouble> compute_network_diffusion(
-    arma::SpMat<npdouble> &G, arma::SpMat<npdouble> &X0, int thread_no = 0,
-    double alpha = 0.85, int max_it = 5) {
-
-  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion(G = G, X0 = X0, thread_no = thread_no, alpha = alpha, max_it = max_it);
+arma::Mat<npdouble> compute_network_diffusion(arma::SpMat<npdouble> &G,
+                                              arma::SpMat<npdouble> &X0,
+                                              int thread_no = 0,
+                                              double alpha = 0.85,
+                                              int max_it = 5) {
+  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion(
+      G = G, X0 = X0, thread_no = thread_no, alpha = alpha, max_it = max_it);
 
   return (X);
 }
 
-arma::Mat<npdouble> compute_network_diffusion_fast(
-    arma::SpMat<npdouble> &G, arma::SpMat<npdouble> &X0, int thread_no = 0,
-    double alpha = 0.85, int max_it = 5) {
-
-  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion_fast(G = G, X0 = X0, thread_no = thread_no, alpha = alpha, max_it = max_it);
+arma::Mat<npdouble> compute_network_diffusion_fast(arma::SpMat<npdouble> &G,
+                                                   arma::SpMat<npdouble> &X0,
+                                                   int thread_no = 0,
+                                                   double alpha = 0.85,
+                                                   int max_it = 5) {
+  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion_fast(
+      G = G, X0 = X0, thread_no = thread_no, alpha = alpha, max_it = max_it);
 
   return (X);
 }
@@ -540,11 +546,12 @@ arma::Mat<npdouble> compute_network_diffusion_Chebyshev(
     arma::SpMat<npdouble> &G, arma::Mat<npdouble> &X0, int thread_no = 0,
     double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8,
     int norm_type = 1) {
-
   arma::SpMat<npdouble> P = normalize_adj(G, norm_type);
   arma::Mat<npdouble> X0_norm = normalise(X0, 1, 0);
 
-  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion_Chebyshev(P = P, X = X0_norm, thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold);
+  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion_Chebyshev(
+      P = P, X = X0_norm, thread_no = thread_no, alpha = alpha, max_it = max_it,
+      res_threshold = res_threshold);
 
   return (X);
 }
@@ -644,10 +651,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
         py::arg("C_trace"), py::arg("H_trace"),
         py::arg("min_specificity_z_threshold") = -3, py::arg("min_cells") = 3);
 
-  m.def("unify_archetypes", &unify_archetypes,
-        "Identifies and aggregates redundant archetypes into equivalent classes",
-        py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
-        py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
+  m.def(
+      "unify_archetypes", &unify_archetypes,
+      "Identifies and aggregates redundant archetypes into equivalent classes",
+      py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
+      py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
 
   m.def("compute_archetype_core_centrality", &compute_archetype_core_centrality,
         "Computes node centrality scores",
@@ -689,17 +697,17 @@ PYBIND11_MODULE(_ACTIONet, m) {
         py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
         py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
-m.def("compute_network_diffusion_fast",
-        &compute_network_diffusion_fast,
+  m.def("compute_network_diffusion_fast", &compute_network_diffusion_fast,
         "Computes network diffusion using a given adjacency matrix",
         py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
         py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
-  m.def("compute_network_diffusion_Chebyshev", &compute_network_diffusion_Chebyshev,
-        "Normalizes adjacency matrix using different strategies",
-        py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-        py::arg("alpha") = 0.85, py::arg("max_it") = 5,
-        py::arg("res_threshold") = 1e-8, py::arg("norm_type") = 1);
+  m.def("compute_network_diffusion_Chebyshev",
+        &compute_network_diffusion_Chebyshev,
+        "Normalizes adjacency matrix using different strategies", py::arg("G"),
+        py::arg("X0"), py::arg("thread_no") = 0, py::arg("alpha") = 0.85,
+        py::arg("max_it") = 5, py::arg("res_threshold") = 1e-8,
+        py::arg("norm_type") = 1);
 
   m.def("run_LPA", &run_LPA,
         "Run label prepagation on a given set of known labels", py::arg("G"),
