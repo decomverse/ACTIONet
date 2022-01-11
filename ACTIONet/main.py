@@ -23,7 +23,7 @@ def run_ACTIONet(
         mutual_edges_only: Optional[bool] = True,
         layout_compactness: Optional[int] = 50,
         layout_epochs: Optional[int] = 1000,
-        layout_algorithm: Optional[int] = 0,
+        layout_algorithm: Optional[str] = "tumap",
         layout_in_parallel: Optional[bool] = True,
         unification_violation_threshold: Optional[float] = 0,
         footprint_key: Optional[str] = "archetype_footprint",
@@ -79,7 +79,6 @@ def run_ACTIONet(
         mutual_edges_only=mutual_edges_only,
         distance_metric=distance_metric,
         nn_approach=nn_approach,
-        k=k,
         copy=False,
         return_raw=False
     )

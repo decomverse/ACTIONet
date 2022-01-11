@@ -12,8 +12,8 @@ def _compute_archetype_specificity(S, H):
     H = np.array(H, dtype=np.float64)
     if sparse.issparse(S):
         S = S.tocsc().astype(dtype=np.float64)
-        return _an.compute_archetype_feature_specificity(S, H)
-    return _an.compute_archetype_feature_specificity_full(S, H)
+        return _an.compute_feature_specificity(S, H)
+    return _an.compute_feature_specificity(S, H)
 
 
 def _compute_cluster_specificity(S, assignments):

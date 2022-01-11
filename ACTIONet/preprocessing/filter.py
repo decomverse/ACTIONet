@@ -9,7 +9,7 @@ from .. import misc_utils as ut
 def filter_adata(
     adata: AnnData,
     layer_key: Optional[str] = None,
-    min_cells_per_feature: Optional[int] = None,
+    min_cells_per_feature: Optional[float] = None,
     min_features_per_cell: Optional[int] = None,
     min_umis_per_cell: Optional[int] = None,
     max_umis_per_cell: Optional[int] = None,

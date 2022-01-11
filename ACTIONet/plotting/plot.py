@@ -272,83 +272,83 @@ def plot_ACTIONet_gradient(
         )
 
 
-plot.ACTIONet.gradient <- function(ace,
-                                   x,
-                                   alpha_val = 0.85,
-                                   log_scale = FALSE,
-                                   nonparameteric = FALSE,
-                                   trans_attr = NULL,
-                                   trans_fac = 1.5,
-                                   trans_th = -0.5,
-                                   point_size = 1,
-                                   stroke_size = point_size * 0.1,
-                                   stroke_contrast_fac = 0.1,
-                                   grad_palette = "magma",
-                                   net_attr = "ACTIONet",
-                                   coordinate_key = "ACTIONet2D") {
-  NA_col <- "#eeeeee"
-
-  if (length(x) != ncol(ace)) {
-    warning("Length of input vector doesn't match the number of cells.")
-    return()
-  }
-  ## Create color gradient generator
-  if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
-    grad_palette <- switch(grad_palette,
-      greys = grDevices::gray.colors(100),
-      inferno = viridis::inferno(500, alpha = 0.8),
-      magma = viridis::magma(500, alpha = 0.8),
-      viridis = viridis::viridis(500, alpha = 0.8),
-      BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
-      Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
-      RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
-    )
-  } else {
-    # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
-    grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
-  }
-
-  if (log_scale == TRUE) {
-    x <- log1p(x)
-  }
-
-  if (alpha_val > 0) {
-    x <- as.numeric(propNetworkScores(
-      G = colNets(ace)[[net_attr]],
-      scores = as.matrix(x)
-    ))
-  }
-
-  col_func <- (scales::col_bin(
-    palette = grad_palette,
-    domain = NULL,
-    na.color = NA_col,
-    bins = 7
-  ))
-
-  if (nonparameteric == TRUE) {
-    plot_fill_col <- col_func(rank(x))
-  } else {
-    plot_fill_col <- col_func(x)
-  }
-
-  idx <- order(x, decreasing = FALSE)
-
-  p_out <- plot.ACTIONet(
-    ace = ace,
-    label_attr = NULL,
-    color_attr = plot_fill_col,
-    trans_attr = trans_attr,
-    trans_fac = trans_fac,
-    trans_th = trans_th,
-    point_size = point_size,
-    stroke_size = stroke_size,
-    stroke_contrast_fac = stroke_contrast_fac,
-    palette = NULL,
-    add_text_labels = FALSE,
-    point_order = idx,
-    coordinate_key = coordinate_key
-  )
-
-  return(p_out)
-}
+# plot.ACTIONet.gradient <- function(ace,
+#                                    x,
+#                                    alpha_val = 0.85,
+#                                    log_scale = FALSE,
+#                                    nonparameteric = FALSE,
+#                                    trans_attr = NULL,
+#                                    trans_fac = 1.5,
+#                                    trans_th = -0.5,
+#                                    point_size = 1,
+#                                    stroke_size = point_size * 0.1,
+#                                    stroke_contrast_fac = 0.1,
+#                                    grad_palette = "magma",
+#                                    net_attr = "ACTIONet",
+#                                    coordinate_key = "ACTIONet2D") {
+#   NA_col <- "#eeeeee"
+#
+#   if (length(x) != ncol(ace)) {
+#     warning("Length of input vector doesn't match the number of cells.")
+#     return()
+#   }
+#   ## Create color gradient generator
+#   if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+#     grad_palette <- switch(grad_palette,
+#       greys = grDevices::gray.colors(100),
+#       inferno = viridis::inferno(500, alpha = 0.8),
+#       magma = viridis::magma(500, alpha = 0.8),
+#       viridis = viridis::viridis(500, alpha = 0.8),
+#       BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
+#       Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
+#       RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
+#     )
+#   } else {
+#     # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
+#     grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
+#   }
+#
+#   if (log_scale == TRUE) {
+#     x <- log1p(x)
+#   }
+#
+#   if (alpha_val > 0) {
+#     x <- as.numeric(propNetworkScores(
+#       G = colNets(ace)[[net_attr]],
+#       scores = as.matrix(x)
+#     ))
+#   }
+#
+#   col_func <- (scales::col_bin(
+#     palette = grad_palette,
+#     domain = NULL,
+#     na.color = NA_col,
+#     bins = 7
+#   ))
+#
+#   if (nonparameteric == TRUE) {
+#     plot_fill_col <- col_func(rank(x))
+#   } else {
+#     plot_fill_col <- col_func(x)
+#   }
+#
+#   idx <- order(x, decreasing = FALSE)
+#
+#   p_out <- plot.ACTIONet(
+#     ace = ace,
+#     label_attr = NULL,
+#     color_attr = plot_fill_col,
+#     trans_attr = trans_attr,
+#     trans_fac = trans_fac,
+#     trans_th = trans_th,
+#     point_size = point_size,
+#     stroke_size = stroke_size,
+#     stroke_contrast_fac = stroke_contrast_fac,
+#     palette = NULL,
+#     add_text_labels = FALSE,
+#     point_order = idx,
+#     coordinate_key = coordinate_key
+#   )
+#
+#   return(p_out)
+# }
