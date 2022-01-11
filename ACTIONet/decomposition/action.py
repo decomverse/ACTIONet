@@ -4,23 +4,23 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn._config import config_context
+from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
-from .spa import *
 
 
-class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
+class ACTION(TransformerMixin, BaseEstimator):
     """Dimensionality reduction using ACTION decomposition.
     This transformer performs ACTION decomposition on input data.
 
     The objective function is:
        .. math::
-            0.5 * ||X - WH||_F^2
+            0.5 * ||X - AZ||_F^2
     Where:
-        :math: W = XC,
-        :math: 0 <= C_ij, H_ij,
-        :math: \sum_{i} C_ij = 1,
-        :math: \sum_{i} H_ij = 1,
+        :math: Z = BX,
+        :math: 0 <= B_ij, A_ij,
+        :math: \sum_{i} A_ij = 1,
+        :math: \sum_{i} B_ij = 1,
 
     Parameters
     ----------
@@ -35,18 +35,26 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
     Attributes
     ----------
     components_ : ndarray of shape (n_components, n_features)
-        Factorization matrix, sometimes called 'dictionary'.
+        Archetype matrix (Z in AA, or W in NMF terminology)
 
     n_components_ : int
         The number of components. It is same as the `n_components` parameter
-        if it was given. Otherwise, it will be same as the number of
-        features.
+        if it was given.
 
     n_features_in_ : int
         Number of features seen during :term:`fit`.
 
-    coeff : ndarray of shape (n_components, n_features)
-        Coefficient matrix C in the AA decomposition.
+    reconstruction_err_ : float
+        Loss function for the final solution
+
+    coeff_ : ndarray of shape (n_components, n_samples)
+        Coefficient matrix B (convex sample weights) in the archetypal decomposition
+
+    See Also
+    --------
+    SPA : Successive Projection Algorithm to solve convex NMF
+    ArchetypalAnalysis : Archetypal analysis
+    ACTIONMR : Multi-resolution extension of the ACTION decomposition.
 
     References
     ----------
@@ -56,10 +64,12 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
     Examples
     --------
     >>> from decomp import ACTION
+    >>> import numpy as np
+    >>> X = np.random.normal(0, 1, (100, 30))
     >>> action = ACTION(n_components=5)
     >>> action.fit(X)
     ACTION(n_components=5, n_iter=100)
-    >>> print(action.err_)
+    >>> print(action.reconstruction_err_)
     >>> print(action.components_)
     """
 
@@ -93,8 +103,8 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         self.fit_transform(X, **params)
         return self
 
-    def fit_transform(self, X, y=None, W=None, H=None):
-        """Learn an ACTION model for the data X and returns the transformed data.
+    def fit_transform(self, X, y=None):
+        """Learn an ACTION decomposition for the data X and returns the transformed data.
         This is more efficient than calling fit followed by transform.
 
         Parameters
@@ -106,36 +116,25 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         y : Ignored
             Not used, present for API consistency by convention.
 
-        W : array-like of shape (n_samples, n_components)
-            It is used as initial guess for the solution of W.
-
-        H : Ignored
-            In future versions, it can be used to initialize AA iterations.
-
         Returns
         -------
-        W : ndarray of shape (n_samples, n_components)
+        A : ndarray of shape (n_samples, n_components)
             Transformed data.
         """
         X = self._validate_data(X, accept_sparse=False)
 
-        if W == None:
-            W0 = SPA(n_components=self.n_components).fit_transform(X)
-        else:
-            W0 = W
-
         with config_context(assume_finite=True):
-            C, H = self._fit_transform(X, W0=W0)
+            A, B, Z = self._fit_transform(X)
 
-        W = np.dot(X, C)
+        self.coeff_ = B
+        self.components_ = Z
+        self.n_components_ = Z.shape[0]
+        self.n_features_in_ = Z.shape[1]
+        self.reconstruction_err_ = np.linalg.norm(X - np.matmul(A, Z), "fro")
 
-        self.coeff = C
-        self.n_components_ = H.shape[0]
-        self.components_ = H
+        return A
 
-        return W
-
-    def _fit_transform(self, X, y=None, W=None, H=None):
+    def _fit_transform(self, X, y=None):
         """Learn an ACTION model for the data X and returns the transformed data.
         This is more efficient than calling fit followed by transform.
 
@@ -148,29 +147,66 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         y : Ignored
             Not used, present for API consistency by convention.
 
-        W : array-like of shape (n_samples, n_components)
-            It is used as initial guess for the solution of W.
-
-        H : Ignored
-            In future versions, it can be used to initialize AA iterations.
-
         Returns
         -------
-        C: ndarray of shape (n_samples, n_archetypes)
-            Coefficient matrix (C) in archetypal analysis
-        H: ndarray of shape (n_archetypes, n_features)
+        A: ndarray of shape (n_features, n_samples)
             Loading matrix
+        B: ndarray of coefficient matrix (n_components, n_samples)
+            Archetype Matrix
+        Z: ndarray of shape (n_components, n_features)
+            Archetype Matrix
         """
+
         out = _an.run_ACTION(
-            S_r=X,
+            S_r=X.T,
             k_min=self.n_components,
             k_max=self.n_components,
             thread_no=self.thread_no,
-            max_it=self.iter_no,
+            max_it=self.n_iter,
             min_delta=self.tol,
         )
 
-        C = out["C"][self.n_components - 1]
-        H = out["H"][self.n_components - 1]
+        B = out["C"][self.n_components - 1].T
+        A = out["H"][self.n_components - 1].T
+        Z = np.matmul(B, X)
 
-        return C, H
+        return A, B, Z
+
+    def transform(self, X):
+        """Transform the data X according to the fitted ACTION model.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_samples, n_features)
+            Training vector, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+
+        Returns
+        -------
+        A : ndarray of shape (n_samples, n_components)
+            Transformed data.
+        """
+
+        check_is_fitted(self)
+        X = self._validate_data(
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
+
+        Z = self.components_
+
+        with config_context(assume_finite=True):
+            A = _an.run_simplex_regression(Z.T, X.T).T
+
+        return A
+
+
+import _ACTIONet as _an
+import numpy as np
+
+X = np.random.normal(0, 1, (1000, 100))
+Xt = X.T
+
+aa = ACTION(n_components=5)
+A = aa.fit_transform(X)
+print(aa.reconstruction_err_)
+print(aa.components_[0:10, :])
