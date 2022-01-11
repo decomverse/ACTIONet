@@ -27,7 +27,7 @@ def layout_network(
     :param adata: AnnData object possibly containing 'reduction_key' in '.obsm' and 'net_key' in '.obsp'.
     :param G:Adjacency matrix to use for constructing layout. Required if 'adata=None'.
     :param initial_coordinates: Reduced representation matrix to use for constructing layout. Required if 'adata=None'.
-    :param reduction_key:Key of 'adata.obms' containing reduced matrix to use for 'initial_coordinates' in 'layoutNetwork()' (default="ACTION").Ignored if 'adata=None'.
+    :param reduction_key: Key of 'adata.obms' containing reduced matrix to use for 'initial_coordinates' in 'layoutNetwork()' (default="ACTION").Ignored if 'adata=None'.
     :param net_key: Key of 'adata.obmp' containing adjacency matrix to use for 'G' in 'layoutNetwork()' (default="ACTIONet").  Ignored if 'adata=None'.
     :param compactness_level: Between 0-100. Ignored if 'layout_algorithm="tumap"'.
     :param layout_algorithm: Algorithm to use for constructing layout: \
