@@ -1,10 +1,12 @@
 """ACTION decomposition for dense matrices.
 """
-import numpy as np
-import _ACTIONet as _an
 
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn._config import config_context
+
+import _ACTIONet as _an
+from .spa import *
 
 
 class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
@@ -13,7 +15,7 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
 
     The objective function is:
        .. math::
-            0.5 * ||X - XCH||_{loss}^2
+            0.5 * ||X - WH||_F^2
     Where:
         :math: W = XC,
         :math: 0 <= C_ij, H_ij,
@@ -23,23 +25,28 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
     Parameters
     ----------
     n_components : int, default=None
-        Number of components, if n_components is not set all features
-        are kept.
+        Number of components.
     n_iter : int, default=100
         Number of iterations for AA solver.
     tol : float, default=1e-6
-        Tolerance of the stopping condition.
+        Tolerance of the stopping condition for AA solver.
 
 
     Attributes
     ----------
     components_ : ndarray of shape (n_components, n_features)
         Factorization matrix, sometimes called 'dictionary'.
+
     n_components_ : int
         The number of components. It is same as the `n_components` parameter
         if it was given. Otherwise, it will be same as the number of
         features.
 
+    n_features_in_ : int
+        Number of features seen during :term:`fit`.
+
+    coeff : ndarray of shape (n_components, n_features)
+        Coefficient matrix C in the AA decomposition.
 
     References
     ----------
@@ -49,31 +56,35 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
     Examples
     --------
     >>> from decomp import ACTION
-    >>> action = ACTION(n_components=5, n_iter=7)
+    >>> action = ACTION(n_components=5)
     >>> action.fit(X)
-    ACTION(n_components=5, n_iter=7)
+    ACTION(n_components=5, n_iter=100)
     >>> print(action.err_)
-    >>> print(svd.components_)
+    >>> print(action.components_)
     """
 
-    def __init__(self, n_components=2, *, n_iter=100, tol=1e-16, thread_no=0):
+    def __init__(self, n_components=None, *, n_iter=100, tol=1e-16, thread_no=0):
         self.n_components = n_components
         self.n_iter = n_iter
         self.tol = tol
-        self.thread_no = 1
+        self.thread_no = thread_no
 
     def fit(self, X, y=None, **params):
         """Learn a ACTION model for the data X.
+
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+        X : ndarray of shape (n_samples, n_features)
             Training vector, where `n_samples` is the number of samples
             and `n_features` is the number of features.
+
         y : Ignored
             Not used, present for API consistency by convention.
+
         **params : kwargs
             Parameters (keyword arguments) and values passed to
             the fit_transform instance.
+
         Returns
         -------
         self : object
@@ -82,18 +93,25 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         self.fit_transform(X, **params)
         return self
 
-    def fit_transform(self, X, y=None, W0=None):
+    def fit_transform(self, X, y=None, W=None, H=None):
         """Learn an ACTION model for the data X and returns the transformed data.
         This is more efficient than calling fit followed by transform.
+
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+        X : ndarray of shape (n_samples, n_features)
             Training vector, where `n_samples` is the number of samples
             and `n_features` is the number of features.
+
         y : Ignored
             Not used, present for API consistency by convention.
-        W0 : array-like of shape (n_samples, n_components)
-           Used as initial guess for the solution.
+
+        W : array-like of shape (n_samples, n_components)
+            It is used as initial guess for the solution of W.
+
+        H : Ignored
+            In future versions, it can be used to initialize AA iterations.
+
         Returns
         -------
         W : ndarray of shape (n_samples, n_components)
@@ -101,11 +119,14 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         """
         X = self._validate_data(X, accept_sparse=False)
 
-        with config_context(assume_finite=True):
-            out = self._fit_transform(X, W0=W0)
+        if W == None:
+            W0 = SPA(n_components=self.n_components).fit_transform(X)
+        else:
+            W0 = W
 
-        C = out["C"][self.n_components - 1]
-        H = out["H"][self.n_components - 1]
+        with config_context(assume_finite=True):
+            C, H = self._fit_transform(X, W0=W0)
+
         W = np.dot(X, C)
 
         self.coeff = C
@@ -114,24 +135,31 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
 
         return W
 
-    def _fit_transform(self, X, y=None, W0=None):
-        """Learn a ACTION model for the data X and returns the transformed data.
+    def _fit_transform(self, X, y=None, W=None, H=None):
+        """Learn an ACTION model for the data X and returns the transformed data.
+        This is more efficient than calling fit followed by transform.
+
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Data matrix to be decomposed
+        X : ndarray of shape (n_samples, n_features)
+            Training vector, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+
         y : Ignored
+            Not used, present for API consistency by convention.
+
         W : array-like of shape (n_samples, n_components)
-            Used as initial guess for the solution.
-        update_H : bool, default=True
-            If True, both W and H will be estimated from initial guesses,
-            this corresponds to a call to the 'fit_transform' method.
-            If False, only W will be estimated, this corresponds to a call
-            to the 'transform' method.
+            It is used as initial guess for the solution of W.
+
+        H : Ignored
+            In future versions, it can be used to initialize AA iterations.
+
         Returns
         -------
-        out:
-            list of C and H matrices.
+        C: ndarray of shape (n_samples, n_archetypes)
+            Coefficient matrix (C) in archetypal analysis
+        H: ndarray of shape (n_archetypes, n_features)
+            Loading matrix
         """
         out = _an.run_ACTION(
             S_r=X,
@@ -142,4 +170,7 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
             min_delta=self.tol,
         )
 
-        return out
+        C = out["C"][self.n_components - 1]
+        H = out["H"][self.n_components - 1]
+
+        return C, H
