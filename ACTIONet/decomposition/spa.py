@@ -1,12 +1,43 @@
 """SPA decomposition for dense matrices.
 """
+
 import numpy as np
-import _ACTIONet as _an
+from typing import Optional, Tuple, Union
+from scipy.sparse import issparse, spmatrix
+
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn._config import config_context
 
-# from sklearn.utils.validation import check_is_fitted
+import _ACTIONet as _an
+
+
+def runSPA(A: Union[np.ndarray, spmatrix], k: int,) -> Tuple[np.ndarray, np.ndarray]:
+    """Successive Projection Algorithm (SPA).
+    Runs SPA algorithm to solve separable NMF problem.
+
+    Parameters
+    ----------
+    A : ndarray of shape (n_samples, n_features)
+        Input matrix
+
+    k : int
+        Number of columns to select
+
+    Returns
+    -------
+    selected_columns: ndarray of size n_components
+        Selected columns from matrix X
+
+    norms: ndarray of size n_components
+        Residual norm of the matrix (loss function)
+    """
+    result = _an.run_SPA(A, k)
+
+    return (
+        result["selected_columns"],
+        result["norms"],
+    )
 
 
 class SPA(TransformerMixin, BaseEstimator):

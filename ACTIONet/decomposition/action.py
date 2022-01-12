@@ -9,6 +9,56 @@ from sklearn.utils.validation import check_is_fitted
 import _ACTIONet as _an
 
 
+def runACTION(
+    data: Union[AnnData, np.ndarray],
+    reduction_key: Optional[str] = "ACTION",
+    k_min: Optional[int] = 2,
+    k_max: Optional[int] = 30,
+    thread_no: Optional[int] = 0,
+    max_it: Optional[int] = 50,
+    min_delta: Optional[float] = 1e-300,
+) -> dict:
+    """\
+    Run ACTION decomposition [Mohammadi, 2018]
+
+    Computes reduced ACTION decomposition.
+
+    Parameters
+    ----------
+    data
+        The (annotated) data matrix of shape `n_obs` × `n_vars`.
+        Rows correspond to cells and columns to genes.
+    reduction_key:
+        Key of '.obms' to use as input for ACTION (default="ACTION")
+        Ignored if 'data' is not an 'AnnData' object.
+    k_min, k_max
+        Min. and max. # of archetypes to consider.
+    thread_no
+        Number of threads. Defaults to number of threads available - 2.
+    max_it, min_delta:
+        Define stopping conditions of inner AA loop
+
+    Returns
+    -------
+    ACTION_out
+        A dictionary with traces of C and H matrices
+    """
+    data_is_AnnData = isinstance(data, AnnData)
+
+    if data_is_AnnData:
+        if reduction_key not in data.obsm.keys():
+            raise ValueError("Did not find adata.obsm['" + reduction_key + "'].")
+        else:
+            X = data.obsm[reduction_key]
+    else:
+        X = data
+
+    X = X.T.astype(dtype=np.float64)
+    ACTION_out = _an.run_ACTION(X, k_min, k_max, thread_no, max_it, min_delta)
+
+    return ACTION_out
+
+
 class ACTION(TransformerMixin, BaseEstimator):
     """Dimensionality reduction using ACTION decomposition.
     This transformer performs ACTION decomposition on input data.
@@ -199,14 +249,3 @@ class ACTION(TransformerMixin, BaseEstimator):
 
         return A
 
-
-import _ACTIONet as _an
-import numpy as np
-
-X = np.random.normal(0, 1, (1000, 100))
-Xt = X.T
-
-aa = ACTION(n_components=5)
-A = aa.fit_transform(X)
-print(aa.reconstruction_err_)
-print(aa.components_[0:10, :])
