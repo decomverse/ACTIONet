@@ -2,11 +2,48 @@
 """
 
 import numpy as np
+from typing import Optional, Tuple
+
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn._config import config_context
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
+
+
+def runAA(
+    A: np.ndarray,
+    k: int,
+    max_iter: Optional[int] = 50,
+    min_delta: Optional[float] = 1e-16,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Archetypal Analysis (AA)
+    Runs archetypal analysis.
+
+    Parameters
+    ----------
+    A : ndarray of shape (n_samples, n_features)
+        Input matrix
+
+    k : int
+        Number of columns to select
+
+    max_iter, min_delta: double
+        Define stopping conditions of AA
+
+    Returns
+    -------
+    C
+        Convex matrix of archetype coefficients (# observations x # archetypes)
+    H
+        Convex matrix of observation coefficients (# archetypes x # observations)
+    """
+
+    AA_out = _an.run_AA(A, k, max_iter, min_delta)
+    return (
+        AA_out["C"],
+        AA_out["H"],
+    )
 
 
 class ArchetypalAnalysis(TransformerMixin, BaseEstimator):

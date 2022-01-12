@@ -5,32 +5,33 @@ from anndata import AnnData
 
 from . import network as nt
 from . import preprocessing as pp
+from . import decomposition as decomp
 
 
 def run_ACTIONet(
-        adata: AnnData,
-        k: Optional[int] = 10,
-        k_max: Optional[int] = 30,
-        layer_key: Optional[str] = None,
-        reduction_key: Optional[str] = "ACTION",
-        net_key_out: Optional[str] = "ACTIONet",
-        min_cells_per_archetype: Optional[int] = 2,
-        max_iter_ACTION: Optional[int] = 50,
-        min_specificity_z_threshold: Optional[int] = -3,
-        distance_metric: Optional[str] = "jsd",
-        nn_approach: Optional[str] = "k*nn",
-        network_density: Optional[int] = 1,
-        mutual_edges_only: Optional[bool] = True,
-        layout_compactness: Optional[int] = 50,
-        layout_epochs: Optional[int] = 1000,
-        layout_algorithm: Optional[str] = "tumap",
-        layout_in_parallel: Optional[bool] = True,
-        unification_violation_threshold: Optional[float] = 0,
-        footprint_key: Optional[str] = "archetype_footprint",
-        footprint_alpha: Optional[float] = 0.85,
-        thread_no: Optional[int] = 0,
-        seed: Optional[int] = 0,
-        copy: Optional[bool] = False,
+    adata: AnnData,
+    k: Optional[int] = 10,
+    k_max: Optional[int] = 30,
+    layer_key: Optional[str] = None,
+    reduction_key: Optional[str] = "ACTION",
+    net_key_out: Optional[str] = "ACTIONet",
+    min_cells_per_archetype: Optional[int] = 2,
+    max_iter_ACTION: Optional[int] = 50,
+    min_specificity_z_threshold: Optional[int] = -3,
+    distance_metric: Optional[str] = "jsd",
+    nn_approach: Optional[str] = "k*nn",
+    network_density: Optional[int] = 1,
+    mutual_edges_only: Optional[bool] = True,
+    layout_compactness: Optional[int] = 50,
+    layout_epochs: Optional[int] = 1000,
+    layout_algorithm: Optional[str] = "tumap",
+    layout_in_parallel: Optional[bool] = True,
+    unification_violation_threshold: Optional[float] = 0,
+    footprint_key: Optional[str] = "archetype_footprint",
+    footprint_alpha: Optional[float] = 0.85,
+    thread_no: Optional[int] = 0,
+    seed: Optional[int] = 0,
+    copy: Optional[bool] = False,
 ):
 
     adata = adata.copy() if copy else adata
@@ -50,7 +51,7 @@ def run_ACTIONet(
         S_r = adata.obsm[reduction_key].astype(dtype=np.float64)
 
     # Run ACTION
-    ACTION_out = pp.ACTION(
+    ACTION_out = decomp.runACTION(
         data=S_r,  # data must be `n_obs` × `n_vars/red_dim`
         reduction_key=None,
         k_min=2,
@@ -67,7 +68,7 @@ def run_ACTIONet(
         adata=adata,
         min_specificity_z_threshold=min_specificity_z_threshold,
         min_cells=min_cells_per_archetype,
-        copy=False
+        copy=False,
     )
 
     # Build ACTIONet
@@ -80,7 +81,7 @@ def run_ACTIONet(
         distance_metric=distance_metric,
         nn_approach=nn_approach,
         copy=False,
-        return_raw=False
+        return_raw=False,
     )
 
     nt.layout_network(
@@ -95,7 +96,7 @@ def run_ACTIONet(
         thread_no=thread_no if layout_in_parallel else 1,
         seed=seed,
         copy=False,
-        return_raw=False
+        return_raw=False,
     )
 
     # Identiy equivalent classes of archetypes and group them together
@@ -107,7 +108,7 @@ def run_ACTIONet(
         violation_threshold=unification_violation_threshold,
         thread_no=thread_no,
         copy=False,
-        return_raw=False
+        return_raw=False,
     )
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
@@ -119,7 +120,7 @@ def run_ACTIONet(
         net_key=net_key_out,
         assignment_key="assigned_archetype",
         copy=False,
-        return_raw=False
+        return_raw=False,
     )
 
     # Smooth archetype footprints
@@ -132,7 +133,7 @@ def run_ACTIONet(
         alpha_val=footprint_alpha,
         thread_no=thread_no,
         copy=False,
-        return_raw=False
+        return_raw=False,
     )
 
     # Compute gene specificity for each archetype
@@ -143,7 +144,7 @@ def run_ACTIONet(
         layer_key=None,
         footprint_key=footprint_key,
         copy=False,
-        return_raw=False
+        return_raw=False,
     )
 
     # nt.construct_backbone(
