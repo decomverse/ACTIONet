@@ -1,203 +1,151 @@
 """Multi-resolution ACTION decomposition for dense matrices.
 """
 
-from typing import Optional, Union
+from typing import Union
 
-import numpy as np
-import pandas as pd
 from anndata import AnnData
-from natsort import natsorted
-from scipy import sparse
-
-from sklearn.base import BaseEstimator, TransformerMixin
+from scipy.sparse import issparse, spmatrix, csc_matrix
 from sklearn._config import config_context
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
+from .utils import *
 
 
-def prune_archetypes(
-    C_trace: list,
-    H_trace: list,
-    adata: Optional[AnnData] = None,
-    min_specificity_z_threshold: Optional[float] = -3,
-    min_cells: Optional[int] = 2,
-    copy: Optional[bool] = False,
-    return_raw: Optional[bool] = False
-) -> Union[dict, AnnData, None]:
-    """\
-    Archetype pruning
-
-    Initial pruning of archetypes
-
-    Parameters
-    ----------
-    C_trace, H_trace:
-        Output of pp.ACTION()
-    adata
-        Optional AnnData object in which to store output of 'prune_archetypes()'
-    min_specificity_z_threshold:
-        Controls level of prunning for non-specific archetypes
-        (larger values remove more archetypes)
-    min_cells:
-        Minimum number of influential cells for each archetype
-        to be considered nontrivial
-    copy
-        If 'adata' is given, return a copy instead of writing to `adata`
-    return_raw
-        If 'return_raw=True' and 'data' is AnnData, return raw output of 'prune_archetypes()'.
-    Returns
-    -------
-
-    pruned : dict
-        dict containing 'C_stacked' and 'H_stacked' matrices
-
-    adata : anndata.AnnData
-        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
-
-        `.obsm['C_stacked']`
-        `.obsm['H_stacked']`
-        `.uns['obsm_annot']['C_stacked']['type']`
-        `.uns['obsm_annot']['H_stacked']['type']`
-    """
-
-    if adata is not None:
-        if isinstance(adata, AnnData):
-            adata = adata.copy() if copy else adata
-        else:
-            raise ValueError("'adata' is not an AnnData object.")
-
-    pruned = _an.prune_archetypes(
-        C_trace, H_trace, min_specificity_z_threshold, min_cells
-    )
-
-    pruned["C_stacked"] = sparse.csc_matrix(pruned["C_stacked"])
-    pruned["H_stacked"] = sparse.csc_matrix(pruned["H_stacked"].T)
-
-    if return_raw or adata is None:
-        return pruned
-    else:
-        adata.obsm["C_stacked"] = pruned["C_stacked"]
-        adata.obsm["H_stacked"] = pruned["H_stacked"]
-        adata.uns.setdefault("obsm_annot", {}).update(
-            {
-                "C_stacked": {"type": np.array([b"internal"], dtype=object)},
-                "H_stacked": {"type": np.array([b"internal"], dtype=object)},
-            }
-        )
-        return adata if copy else None
-
-
-def unify_archetypes(
-    adata: Optional[AnnData] = None,
-    S_r: Union[np.ndarray, sparse.spmatrix, None] = None,
-    C_stacked: Union[np.ndarray, sparse.spmatrix, None] = None,
-    H_stacked: Union[np.ndarray, sparse.spmatrix, None] = None,
-    reduction_key: Optional[str] = "ACTION",
-    violation_threshold: Optional[float] = 0,
-    thread_no: Optional[int] = 0,
-    copy: Optional[bool] = False,
-    return_raw: Optional[bool] = False
-) -> AnnData:
-
-    """\
-    Archetype unification
-
-    Aggregates redundant archetypes.
+def runACTIONMR(
+        data: Union[AnnData, np.ndarray, spmatrix],
+        k_min: int = 2,
+        k_max: int = 30,
+        max_iter: Optional[int] = 100,
+        min_delta: Optional[float] = 1e-100,
+        specificity_th: Optional[int] = -3,
+        min_cells_per_archetype: Optional[int] = 2,
+        unification_th: Optional[float] = 0,
+        thread_no: Optional[int] = 0,
+        reduction_key: Optional[str] = "ACTION",
+        return_W: Optional[bool] = False,
+        return_raw: Optional[bool] = False,
+        copy: Optional[bool] = False,
+        ) -> Union[AnnData, dict]:
+    """Run Archetypal Analysis
 
     Parameters
     ----------
-    adata:
-        AnnData object containing 'reduction_key' in '.obsm' and 'net_key' in '.obsp'.
-    S_r:
-        Reduced representation matrix to use for unification.
-        Required if 'adata=None'.
-    C_stacked:
-        Matrix containing output 'C_stacked' of 'prune_archetypes()' to use for unification.
-        Required if 'adata=None', otherwise retrieved from 'adata.obsm["C_stacked"]'
-    H_stacked:
-        Matrix containing output 'H_stacked' of 'prune_archetypes()' to use for unification.
-        Required if 'adata=None', otherwise retrieved from 'adata.obsm["H_stacked"]'
-    reduction_key:
-        Key of 'adata.obms' containing reduced matrix to use for 'S_r' in 'unify_archetypes()' (default="ACTION").
-        Ignored if 'adata=None'.
-    violation_threshold:
-        Archetype unification resolution parameter (default=0)
-    thread_no:
+    data : Union[AnnData, np.ndarray, sparse.spmatrix]
+        Input data matrix or AnnData object containing the data.
+    k_min : int, default=2
+        Minimum number of components/archetypes to consider.
+    k_max : int, default=None
+        Maximum number of components/archetypes to consider.
+    max_iter : Optional[int], optional
+        Maximum number of AA inner iterations, by default 50
+    min_delta : Optional[float], optional
+        Convergence parameter for AA, by default 1e-100
+    specificity_th : float, default=-3
+        Z-score threshold for filtering likely "mixed" archetypes
+    min_cells_per_archetype: int, default=2
+        Minimum number of cells that are used to define an archetype
+    unification_th : float between [0, 1], default=0
+        Amount of redundancy that is tolerated in the unified archetypes. Higher value results in larger number of archetypes
+    thread_no
         Number of threads. Defaults to number of threads available - 2.
-    copy
-        If 'adata' is given, return a copy instead of writing to `adata`
-    return_raw
-        If 'adata' is given, return dict of raw 'unify_archetypes()' output instead of storing to 'adata'.
+    reduction_key : Optional[str], optional
+        Key for reduction stored in obsm/varm (only if return_raw == False), by default "ACTION"
+    return_W : Optional[bool], optional
+        Returns 'W_stacked' and 'W_unified' as part of output.
+    return_raw : Optional[bool], optional
+        Returns raw output of 'reduce_kernel()' as dict, by default False
+    copy : Optional[bool], optional
+        If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
+
     Returns
     -------
-    adata : anndata.AnnData
-        if `copy=True` returns None or else adds fields to `adata`:
-
-        `.obsm['C_unified']`
-        `.obsm['H_unified']`
-        `.uns['ACTION']['archetypes']['unified']`
-
-    unified : dict
-        If 'adata=None' or 'return_raw=True', a dict containing 'C_unified' and 'H_unified' matrices
+    Union[AnnData, dict]
+        Result of archetypal analysis. 
+        If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
+            "W_unified": Multi-resolution Archetypal matrix,
+            "H_unified": Multi-resolution Loading matrix,
+            "C_unified": Multi-resolution Coefficient matrix,
+            "W_stacked": Multi-level Archetypal matrix,
+            "H_stacked": Multi-level Loading matrix,
+            "C_stacked": Multi-level Coefficient matrix,
+        Otherwise, these values are stored in the input AnnData object obsm/varm with `reduction_key` prefix.
     """
 
-    if adata is not None:
-        if isinstance(adata, AnnData):
-            adata = adata.copy() if copy else adata
-            S_r = S_r if S_r is not None else adata.obsm[reduction_key]
-            C_stacked = C_stacked if C_stacked is not None else adata.obsm["C_stacked"]
-            H_stacked = H_stacked if H_stacked is not None else adata.obsm["H_stacked"]
+    data_is_AnnData = isinstance(data, AnnData)
+
+    if data_is_AnnData:
+        if reduction_key not in data.obsm.keys():
+            raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
         else:
-            raise ValueError("'adata' is not an AnnData object.")
+            X = data.obsm[reduction_key]
     else:
-        if S_r is None or C_stacked is None or H_stacked is None:
-            raise ValueError("'G' and 'S_r' cannot be NoneType if 'adata=None'.")
-        if not isinstance(S_r, (np.ndarray, sparse.spmatrix)):
-            raise ValueError("'S_r' must be numpy.ndarray or sparse.spmatrix.")
-        if not isinstance(C_stacked, (np.ndarray, sparse.spmatrix)):
-            raise ValueError("'C_stacked' must be numpy.ndarray or sparse.spmatrix.")
-        if not isinstance(H_stacked, (np.ndarray, sparse.spmatrix)):
-            raise ValueError("'H_stacked' must be numpy.ndarray or sparse.spmatrix.")
+        X = data
 
-    S_r = S_r.T.astype(dtype=np.float64)
+    if issparse(X):
+        X = X.toarray()
 
-    if sparse.issparse(C_stacked):
-        C_stacked = C_stacked.toarray()
+    X = X.T.astype(dtype=np.float64)
 
-    if sparse.issparse(H_stacked):
-        H_stacked = H_stacked.toarray()
+    ACTION_out = _an.run_ACTION(
+            S_r=X,
+            k_min=k_min,
+            k_max=k_max,
+            thread_no=thread_no,
+            max_it=max_iter,
+            min_delta=min_delta
+            )
 
-    C_stacked = C_stacked.astype(dtype=np.float64)
-    H_stacked = H_stacked.T.astype(dtype=np.float64)
+    pruned = prune_archetypes(
+            C_trace=ACTION_out["C"],
+            H_trace=ACTION_out["H"],
+            adata=None,
+            specificity_th=specificity_th,
+            min_cells=min_cells_per_archetype,
+            copy=False,
+            return_raw=True
+            )
 
-    unified = _an.unify_archetypes(
-        S_r, C_stacked, H_stacked, violation_threshold, thread_no
-    )
+    unified = unify_archetypes(
+            adata=None,
+            S_r=X,
+            C_stacked=pruned["C_stacked"],
+            H_stacked=pruned["H_stacked"],
+            reduction_key=None,
+            violation_threshold=unification_th,
+            thread_no=thread_no,
+            copy=False,
+            return_raw=True
+            )
 
-    unified["C_unified"] = sparse.csc_matrix(unified["C_unified"])
-    unified["H_unified"] = sparse.csc_matrix(unified["H_unified"].T)
+    ACTIONMR_out = {
+        "C_stacked": csc_matrix(pruned["C_stacked"]),
+        "H_stacked": csc_matrix(pruned["H_stacked"]),
+        "C_unified": csc_matrix(unified["C_unified"]),
+        "H_unified": csc_matrix(unified["H_unified"]),
+        "assigned_archetype": pd.Categorical(
+                values=unified["assigned_archetype"].astype(int),
+                categories=natsorted(map(int, np.unique(unified["assigned_archetype"]))),
+                ),
+        }
 
-    if return_raw or adata is None:
-        return unified
+    if return_raw or not data_is_AnnData:
+        if return_W:
+            ACTIONMR_out["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
+            ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
+        return ACTIONMR_out
     else:
-        adata.obsm["C_unified"] = unified["C_unified"]
-        adata.obsm["H_unified"] = unified["H_unified"]
+        data.obsm[reduction_key + "_" + "C_stacked"] = ACTIONMR_out["C_stacked"]
+        data.obsm[reduction_key + "_" + "H_stacked"] = ACTIONMR_out["H_stacked"].T
+        data.obsm[reduction_key + "_" + "C_unified"] = ACTIONMR_out["C_unified"]
+        data.obsm[reduction_key + "_" + "H_unified"] = ACTIONMR_out["H_unified"].T
+        data.obs[reduction_key + "_" + "assigned_archetype"] = ACTIONMR_out["assigned_archetype"]
+        if return_W:
+            data.varm[reduction_key + "_" + "W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
+            data.varm[reduction_key + "_" + "W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
 
-        adata.uns.setdefault("obsm_annot", {}).update(
-            {
-                "C_unified": {"type": np.array([b"internal"], dtype=object)},
-                "H_unified": {"type": np.array([b"internal"], dtype=object)},
-            }
-        )
-
-        groups = unified["assigned_archetype"]
-        adata.obs["assigned_archetype"] = pd.Categorical(
-            values=groups.astype(int),
-            categories=natsorted(map(int, np.unique(groups))),
-        )
-
-        return adata if copy else None
+        return data if copy else None
 
 
 class ACTIONMR(TransformerMixin, BaseEstimator):
@@ -217,22 +165,25 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
     Parameters
     ----------
-    depth : int, default=None
+    k_min : int, default=2
+        Minimum number of components/archetypes to consider.
+
+    k_max : int, default=None
         Maximum number of components/archetypes to consider.
 
-    n_iter : int, default=100
+    max_iter : int, default=100
         Number of iterations for AA solver.
 
-    tol : float, default=1e-6
+    min_delta : float, default=1e-6
         Tolerance of the stopping condition for AA solver.
 
-    min_specificity_z_threshold : float, default=-3
+    specificity_th : float, default=-3
         Z-score threshold for filtering likely "mixed" archetypes
 
-    min_cells_per_arch: int, default=2
+    min_cells_per_archetype: int, default=2
         Minimum number of cells that are used to define an archetype
 
-    unification_violation_threshold : float between [0, 1], default=0
+    unification_th : float between [0, 1], default=0
         Amount of redundancy that is tolerated in the unified archetypes. Higher value results in larger number of archetypes
         
     thread_no: int, default=0
@@ -280,33 +231,35 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
     Examples
     --------
-    >>> from decomp import ACTIONMR
-    >>> import numpy as np
-    >>> X = np.random.normal(0, 1, (1000, 100))
-    >>> actionmr = ACTIONMR(depth=30)
-    >>> actionmr.fit(X)
-    ACTIONMR(depth=30)
-    >>> print(actionmr.reconstruction_err_)
-    >>> print(actionmr.components_)
+    from decomp import ACTIONMR
+    import numpy as np
+    X = np.random.normal(0, 1, (1000, 100))
+    actionmr = ACTIONMR(k_max=30)
+    actionmr.fit(X)
+    ACTIONMR(k_max=30)
+    print(actionmr.reconstruction_err_)
+    print(actionmr.components_)
     """
 
     def __init__(
-        self,
-        depth=None,
-        *,
-        n_iter=100,
-        tol=1e-16,
-        min_specificity_z_threshold=-3,
-        min_cells_per_arch=2,
-        unification_violation_threshold=0,
-        thread_no=0,
-    ):
-        self.depth = depth
-        self.n_iter = n_iter
-        self.tol = tol
-        self.min_specificity_z_threshold = min_specificity_z_threshold
-        self.min_cells_per_arch = min_cells_per_arch
-        self.unification_violation_threshold = unification_violation_threshold
+            self,
+            k_min=2,
+            k_max=None,
+            *,
+            max_iter=100,
+            min_delta=1e-16,
+            specificity_th=-3,
+            min_cells_per_archetype=2,
+            unification_th=0,
+            thread_no=0,
+            ):
+        self.k_min = k_min
+        self.k_max = k_max
+        self.max_iter = max_iter
+        self.min_delta = min_delta
+        self.specificity_th = specificity_th
+        self.min_cells_per_archetype = min_cells_per_archetype
+        self.unification_th = unification_th
         self.thread_no = thread_no
 
     def fit(self, X, y=None, **params):
@@ -361,7 +314,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
                 stacked_coeffs,
                 stacked_loadings,
                 assigned_archetype,
-            ) = self._fit_transform(X)
+                ) = self._fit_transform(X)
 
         self.coeff_ = B
         self.components_ = Z
@@ -392,12 +345,12 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         -------
         A: ndarray of shape (n_features, n_mr_components)
             Multi-resolution loading matrix
-            n_mr_components is the estimated # of multi-resolution archetypes (based on unification_violation_threshold)
+            n_mr_components is the estimated # of multi-resolution archetypes (based on unification_th)
             Computed from stacked_loadings after the unification process to retain nonredundant archetypes.
 
         B: ndarray of shape (n_mr_components, n_samples)
             Multi-resolution coefficient matrix. 
-            n_mr_components is the estimated # of multi-resolution archetypes (based on unification_violation_threshold)
+            n_mr_components is the estimated # of multi-resolution archetypes (based on unification_th)
             Computed from stacked_coeffs after the unification process to retain nonredundant archetypes.
 
         Z: ndarray of shape (n_mr_features, n_features)
@@ -415,38 +368,30 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             Discretized sample to archetype assignments
         """
 
-        ACTION_out = _an.run_ACTION(
-            S_r=X.T,
-            k_min=2,
-            k_max=self.depth,
-            thread_no=self.thread_no,
-            max_it=self.n_iter,
-            min_delta=self.tol,
-        )
+        actionmr_out = runACTIONMR(
+                data=X,
+                k_min=self.k_min,
+                k_max=self.k_max,
+                max_iter=self.max_iter,
+                min_delta=self.min_delta,
+                specificity_th=self.specificity_th,
+                min_cells_per_archetype=self.min_cells_per_archetype,
+                unification_th=self.unification_th,
+                thread_no=self.thread_no,
+                reduction_key=None,
+                return_W=True,
+                return_raw=True,
+                copy=False,
+                )
 
-        pruned = _an.prune_archetypes(
-            ACTION_out["C"],
-            ACTION_out["H"],
-            self.min_specificity_z_threshold,
-            self.min_cells_per_arch,
-        )
+        stacked_coeffs = actionmr_out["C_stacked"].T
+        stacked_loadings = actionmr_out["H_stacked"].T
 
-        unified = _an.unify_archetypes(
-            X.T,
-            pruned["C_stacked"],
-            pruned["H_stacked"],
-            self.unification_violation_threshold,
-            self.thread_no,
-        )
+        B = actionmr_out["C_unified"].toarray().T.astype(dtype=np.float64)
+        A = actionmr_out["H_unified"].toarray().T.astype(dtype=np.float64)
+        assigned_archetype = actionmr_out["assigned_archetype"]
 
-        stacked_coeffs = sparse.csc_matrix(pruned["C_stacked"].T)
-        stacked_loadings = sparse.csc_matrix(pruned["H_stacked"].T)
-
-        B = unified["C_unified"].toarray().T.astype(dtype=np.float64)
-        A = unified["H_unified"].toarray().T.astype(dtype=np.float64)
-        assigned_archetype = unified["assigned_archetype"]
-
-        Z = np.matmul(B, X)
+        Z = actionmr_out["W_unified"].T.astype(dtype=np.float64)
 
         return A, B, Z, stacked_coeffs, stacked_loadings, assigned_archetype
 
@@ -467,8 +412,8 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
         check_is_fitted(self)
         X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+                )
 
         Z = self.components_
 
