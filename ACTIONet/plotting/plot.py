@@ -12,8 +12,8 @@ import pandas as pd
 from random import sample
 from .color import *
 from .palettes import palette_default
-from ..tools import misc_utils as ut
-from . import plot_utils as pu
+from ..tools import utils_public as ut
+from . import utils as pu
 import _ACTIONet as _an
 
 pio.orca.config.use_xvfb = True

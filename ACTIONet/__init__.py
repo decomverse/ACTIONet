@@ -6,5 +6,4 @@ from . import network as nt
 from . import plotting as pl
 from . import preprocessing as pp
 from . import tools as tl
-from .tools import misc_utils as ut
 from .main import *

@@ -1,38 +1,46 @@
 from typing import Optional, Union
 
 import numpy as np
-import pandas as pd
 from anndata import AnnData
 from scipy import sparse
 
 import _ACTIONet as _an
+from .. import tools as tl
 
 
-def _compute_archetype_specificity(S, H):
+def __compute_archetype_specificity(S, H, thread_no=0):
     H = np.array(H, dtype=np.float64)
     if sparse.issparse(S):
         S = S.tocsc().astype(dtype=np.float64)
-        return _an.compute_feature_specificity(S, H)
-    return _an.compute_feature_specificity(S, H)
+        out = _an.compute_archetype_feature_specificity(S, H, thread_no)
+    else:
+        S = np.array(S, dtype=np.float64)
+        out = _an.compute_archetype_feature_specificity_full(S, H, thread_no)
+
+    return out
 
 
-def _compute_cluster_specificity(S, assignments):
+def __compute_cluster_specificity(S, sample_assignments, thread_no=0):
     if sparse.issparse(S):
         S = S.tocsc().astype(dtype=np.float64)
-        return _an.compute_cluster_feature_specificity(S, assignments)
-    return _an.compute_cluster_feature_specificity_full(S, assignments)
+        out = _an.compute_cluster_feature_specificity(S, sample_assignments, thread_no)
+    else:
+        S = np.array(S, dtype=np.float64)
+        out = _an.compute_cluster_feature_specificity_full(S, sample_assignments, thread_no)
+
+    return out
 
 
 def compute_archetype_feature_specificity(
-    adata: Optional[AnnData] = None,
-    S: Union[np.ndarray, sparse.spmatrix] = None,
-    H: Union[np.ndarray, sparse.spmatrix] = None,
-    layer_key: Optional[str] = None,
-    footprint_key: Optional[str] = "archetype_footprint",
-    copy: Optional[bool] = False,
-    return_raw: Optional[bool] = False
-) -> Union[AnnData, dict, None]:
-
+        adata: Optional[AnnData] = None,
+        S: Union[np.ndarray, sparse.spmatrix] = None,
+        H: Union[np.ndarray, sparse.spmatrix] = None,
+        layer_key: Optional[str] = None,
+        footprint_key: Optional[str] = "archetype_footprint",
+        thread_no: Optional[int] = 0,
+        copy: Optional[bool] = False,
+        return_raw: Optional[bool] = False
+        ) -> Union[AnnData, dict, None]:
     """Computes Feature (i.e., gene) specificity of archetypes \
     Uses Archetype footprints to estimate markers (soft clustering) 
     :param adata: AnnData object possibly containing '.layers["layer_key"]' and '.obsm["footprint_key"]'.
@@ -41,12 +49,13 @@ def compute_archetype_feature_specificity(
     :param H: Matrix-like object containing archetype footprint \
         Required if 'adata=None', otherwise retrieved from '.obsm["footprint_key"]'
     :param layer_key: Key of 'layers' to retrieve gene expression matrix.
-    :param footprint_key:Key in `adata.obsm` that holds the archetype footprint.
-    :param copy: If 'adata' is given, return a copy instead of writing to `adata`
+    :param footprint_key: Key in `adata.obsm` that holds the archetype footprint.
+    :param thread_no: Number of threads.
+    param copy: If 'adata' is given, return a copy instead of writing to `adata`
     :param return_raw: If 'adata' is given, return dict of 'compute_archetype_feature_specificity()' output instead of storing to 'adata'.
     ...
     :return adata : anndata.AnnData \
-        if `copy=True` returns None or else adds fields to `adata` \
+        If `copy=True` returns None or else adds fields to `adata` \
         `.varm["unified_feature_profile"]` \
         `.varm["unified_feature_specificity"]`
     :return specificity: dict \
@@ -75,27 +84,33 @@ def compute_archetype_feature_specificity(
     S = S.astype(dtype=np.float64)
     H = H.astype(dtype=np.float64)
 
-    specificity = _compute_archetype_specificity(S, H)
+    specificity = __compute_archetype_specificity(S=S, H=H, thread_no=thread_no)
 
     if return_raw or adata is None:
         return specificity
     else:
         adata.varm["unified_feature_profile"] = specificity["archetypes"]
         adata.varm["unified_feature_specificity"] = specificity["upper_significance"]
-        # adata.varm["lower_significance"] = specificity["lower_significance"]
 
         adata.uns.setdefault("varm_annot", {}).update(
-            {
-                "unified_feature_profile": {"type": np.array([b'internal'], dtype=object)},
-                "unified_feature_specificity": {"type": np.array([b'reduction'], dtype=object)},
-            })
+                {
+                    "unified_feature_profile": {"type": np.array([b'internal'], dtype=object)},
+                    "unified_feature_specificity": {"type": np.array([b'reduction'], dtype=object)},
+                    }
+                )
 
         return adata if copy else None
 
 
 def compute_cluster_feature_specificity(
-    adata: AnnData, cluster_key: Optional[str] = "leiden", copy: Optional[bool] = False
-) -> Optional[AnnData]:
+        adata: AnnData,
+        cluster_key: Optional[str] = None,
+        output_prefix: Optional[str] = None,
+        layer_key: Optional[str] = None,
+        thread_no: Optional[int] = 0,
+        copy: Optional[bool] = False,
+        return_raw: Optional[bool] = False,
+        ) -> Optional[AnnData]:
     """\
     Computes Feature (i.e., gene) specificity of clusters
 
@@ -103,34 +118,53 @@ def compute_cluster_feature_specificity(
     Parameters
     ----------
     adata
-        Current AnnData object storing the ACTIONet results
+        Current AnnData object storing the ACTIONet results.
     cluster_key
-        Key in `adata.obs` that holds the clustering variable
+        Key in `adata.obs` that holds the clustering variable.
+    output_prefix
+        String to prefix keys in 'adata.varm' where output is stored.
+    layer_key
+        Key of 'layers' to containing gene expression matrix. Defaults to 'adata.X' if 'None'.
+    thread_no : Optional[int], optional
+        Number of threads.
     copy
         Return a copy instead of writing to adata.
+    return_raw
+        If 'adata' is given, return dict of 'compute_cluster_feature_specificity()' output instead of storing to 'adata'.
 
     Returns
     -------
         adata : anndata.AnnData
-        if `copy=True` returns None or else adds fields to `adata`:
+        If `copy=True` returns None or else adds fields to `adata`:
+        `.varm[f'{cluster_key}_feature_specificity']`
 
-        `.varm[f'{cluster_key}_profile']`
-        `.varm[f'{cluster_key}_upper_significance']`
-        `.varm[f'{cluster_key}_lower_significance']`
+        specificity: dict
+        If 'return_raw=True', returns dict containing 'average_profile', 'upper_significance', and 'lower_significance' matrices.
     """
+
     if cluster_key not in adata.obs.keys():
-        raise ValueError(f"Did not find adata.obs['{cluster_key}'].")
+        raise ValueError(f"'{cluster_key}' not in adata.obs_keys()")
     adata = adata.copy() if copy else adata
 
-    S = adata.X.T
-    assignments = adata.obs[cluster_key]
-    if isinstance(assignments, pd.Series):
-        assignments = pd.factorize(assignments)[0]
+    if layer_key is not None:
+        S = adata.layers[layer_key]
+    else:
+        S = adata.X
 
-    specificity = _compute_cluster_specificity(S, assignments)
+    S = S.T.astype(dtype=np.float64)
 
-    adata.varm[f"{cluster_key}_profile"] = specificity["archetypes"]
-    adata.varm[f"{cluster_key}_upper_significance"] = specificity["upper_significance"]
-    adata.varm[f"{cluster_key}_lower_significance"] = specificity["lower_significance"]
+    idx_clust = tl.get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
 
-    return adata if copy else None
+    specificity_out = __compute_cluster_specificity(S=S, sample_assignments=idx_clust["index"], thread_no=thread_no)
+
+    if return_raw:
+        return specificity_out
+    else:
+        adata.varm[f"{output_prefix}_feature_specificity"] = specificity_out["upper_significance"]
+        adata.uns.setdefault("varm_annot", {}).update(
+                {
+                    f"{output_prefix}_feature_specificity": {"type": np.array([b'reduction'], dtype=object)},
+                    }
+                )
+
+        return adata if copy else None

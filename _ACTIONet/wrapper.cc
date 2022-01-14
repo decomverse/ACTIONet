@@ -507,7 +507,8 @@ arma::vec signed_cluster(arma::SpMat<npdouble> &A,
 //' @return clusters Assignment vector of samples to clusters
 arma::vec unsigned_cluster(arma::SpMat<npdouble> &A,
                            double resolution_parameter = 1.0,
-                           uvec initial_clusters_ = uvec(), int seed = 0) {
+                           arma::uvec initial_clusters_ = arma::uvec(),
+                           int seed = 0) {
   uvec initial_clusters_uvec(A.n_rows);
   if (initial_clusters_.n_elem == A.n_rows) {
     for (int i = 0; i < A.n_rows; i++)
@@ -582,6 +583,135 @@ arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3,
   arma::vec new_labels =
       ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
   return (new_labels);
+}
+
+py::dict compute_archetype_feature_specificity_bin(arma::SpMat<npdouble> &S,
+                                                   arma::Mat<npdouble> &H,
+                                                   int thread_no = 0) {
+  field<mat> res = ACTIONet::compute_feature_specificity_bin(S, H, thread_no);
+
+  py::dict out_list;
+  out_list["archetypes"] = res(0);
+  out_list["upper_significance"] = res(1);
+  out_list["lower_significance"] = res(2);
+
+  return (out_list);
+}
+
+py::dict compute_archetype_feature_specificity(arma::SpMat<npdouble> &S, arma::Mat<npdouble> &H, int thread_no = 0) {
+  
+  field<mat> res = ACTIONet::compute_feature_specificity(S, H, thread_no);
+
+  py::dict out_list;
+  out_list["archetypes"] = res(0);
+  out_list["upper_significance"] = res(1);
+  out_list["lower_significance"] = res(2);
+
+  return (out_list);
+}
+
+py::dict compute_archetype_feature_specificity_full(arma::Mat<npdouble> &S, arma::Mat<npdouble> &H, int thread_no = 0) {
+
+    field<mat> res = ACTIONet::compute_feature_specificity(S, H, thread_no);
+
+    py::dict out_list;
+    out_list["archetypes"] = res(0);
+    out_list["upper_significance"] = res(1);
+    out_list["lower_significance"] = res(2);
+
+    return (out_list);
+}
+
+py::dict compute_cluster_feature_specificity(arma::SpMat<npdouble> &S,
+                                             arma::uvec sample_assignments,
+                                             int thread_no = 0) {
+  field<mat> res =
+      ACTIONet::compute_feature_specificity(S, sample_assignments, thread_no);
+
+  py::dict out_list;
+  out_list["average_profile"] = res(0);
+  out_list["upper_significance"] = res(1);
+  out_list["lower_significance"] = res(2);
+
+  return (out_list);
+}
+
+py::dict compute_cluster_feature_specificity_full(arma::Mat<npdouble> &S,
+                                                  arma::uvec sample_assignments,
+                                                  int thread_no = 0) {
+  field<mat> res =
+      ACTIONet::compute_feature_specificity(S, sample_assignments, thread_no);
+
+  py::dict out_list;
+  out_list["average_profile"] = res(0);
+  out_list["upper_significance"] = res(1);
+  out_list["lower_significance"] = res(2);
+
+  return (out_list);
+}
+
+py::dict autocorrelation_Geary(arma::SpMat<npdouble> &G,
+                               arma::Mat<npdouble> scores,
+                               int normalization_method = 1, int perm_no = 30,
+                               int thread_no = 0) {
+  arma::field<arma::vec> out = ACTIONet::autocorrelation_Geary(
+      G, scores, normalization_method, perm_no, thread_no);
+
+  py::dict res;
+  res["Geary_C"] = out[0];
+  res["zscore"] = out[1];
+  res["mu"] = out[2];
+  res["sigma"] = out[3];
+
+  return (res);
+}
+
+py::dict autocorrelation_Geary_full(arma::Mat<npdouble> &G,
+                                    arma::Mat<npdouble> scores,
+                                    int normalization_method = 1,
+                                    int perm_no = 30, int thread_no = 0) {
+  arma::field<arma::vec> out = ACTIONet::autocorrelation_Geary(
+      G, scores, normalization_method, perm_no, thread_no);
+
+  py::dict res;
+  res["Geary_C"] = out[0];
+  res["zscore"] = out[1];
+  res["mu"] = out[2];
+  res["sigma"] = out[3];
+
+  return (res);
+}
+
+py::dict autocorrelation_Moran(arma::SpMat<npdouble> &G,
+                               arma::Mat<npdouble> scores,
+                               int normalization_method = 1, int perm_no = 30,
+                               int thread_no = 0) {
+  arma::field<arma::vec> out = ACTIONet::autocorrelation_Moran(
+      G, scores, normalization_method, perm_no, thread_no);
+
+  py::dict res;
+  res["Moran_I"] = out[0];
+  res["zscore"] = out[1];
+  res["mu"] = out[2];
+  res["sigma"] = out[3];
+
+  return (res);
+}
+
+py::dict autocorrelation_Moran_full(arma::Mat<npdouble> &G,
+                                    arma::Mat<npdouble> scores,
+                                    int normalization_method = 1,
+                                    int perm_no = 30, int thread_no = 0) {
+  arma::field<arma::vec> out = ACTIONet::autocorrelation_Moran(
+      G, scores, normalization_method, perm_no, thread_no);
+
+  py::dict res;
+  res["Moran_I"] = out[0];
+  res["zscore"] = out[1];
+  res["mu"] = out[2];
+  res["sigma"] = out[3];
+
+  return (res);
 }
 
 PYBIND11_MODULE(_ACTIONet, m) {
@@ -729,6 +859,51 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Run label prepagation on a given set of known labels", py::arg("G"),
         py::arg("labels"), py::arg("lambda") = 1, py::arg("iters") = 3,
         py::arg("sig_threshold") = 3, py::arg("fixed_labels_") = arma::vec());
+
+  m.def("compute_archetype_feature_specificity_bin",
+        &compute_archetype_feature_specificity_bin,
+        "Computes feature specificity of genes for each archetype",
+        py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
+
+   m.def("compute_archetype_feature_specificity",
+         &compute_archetype_feature_specificity,
+         "Computes feature specificity of genes for each archetype",
+         py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
+
+   m.def("compute_archetype_feature_specificity_full",
+         &compute_archetype_feature_specificity_full,
+         "Computes feature specificity of genes for each archetype",
+         py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
+
+  m.def("compute_cluster_feature_specificity",
+        &compute_cluster_feature_specificity,
+        "Computes feature specificity of genes for each archetype",
+        py::arg("S"), py::arg("sample_assignments"), py::arg("thread_no") = 0);
+
+  m.def("compute_cluster_feature_specificity_full",
+        &compute_cluster_feature_specificity_full,
+        "Computes feature specificity of genes for each archetype",
+        py::arg("S"), py::arg("sample_assignments"), py::arg("thread_no") = 0);
+
+  m.def("autocorrelation_Geary", &autocorrelation_Geary,
+        "Computes spatial (network) autocorrelation (Geary)", py::arg("G"),
+        py::arg("scores"), py::arg("normalization_method") = 1,
+        py::arg("perm_no") = 30, py::arg("thread_no") = 0);
+
+  m.def("autocorrelation_Moran", &autocorrelation_Moran,
+        "Computes spatial (network) autocorrelation (Moran)", py::arg("G"),
+        py::arg("scores"), py::arg("normalization_method") = 1,
+        py::arg("perm_no") = 30, py::arg("thread_no") = 0);
+
+  m.def("autocorrelation_Geary_full", &autocorrelation_Geary_full,
+        "Computes spatial (network) autocorrelation (Geary)", py::arg("G"),
+        py::arg("scores"), py::arg("normalization_method") = 1,
+        py::arg("perm_no") = 30, py::arg("thread_no") = 0);
+
+  m.def("autocorrelation_Moran_full", &autocorrelation_Moran_full,
+        "Computes spatial (network) autocorrelation (Moran)", py::arg("G"),
+        py::arg("scores"), py::arg("normalization_method") = 1,
+        py::arg("perm_no") = 30, py::arg("thread_no") = 0);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;

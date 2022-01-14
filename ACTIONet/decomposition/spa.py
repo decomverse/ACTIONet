@@ -1,17 +1,17 @@
 """SPA decomposition for dense matrices.
 """
 
-import numpy as np
 from typing import Tuple
 
-from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np
 from sklearn._config import config_context
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
 
 
-def runSPA(A: np.ndarray, k: int,) -> Tuple[np.ndarray, np.ndarray]:
+def runSPA(A: np.ndarray, k: int, ) -> Tuple[np.ndarray, np.ndarray]:
     """Successive Projection Algorithm (SPA).
     Runs SPA algorithm to solve separable NMF problem.
 
@@ -36,7 +36,7 @@ def runSPA(A: np.ndarray, k: int,) -> Tuple[np.ndarray, np.ndarray]:
     return (
         result["selected_columns"],
         result["norms"],
-    )
+        )
 
 
 class SPA(TransformerMixin, BaseEstimator):
@@ -92,12 +92,12 @@ class SPA(TransformerMixin, BaseEstimator):
 
     Examples
     --------
-    >>> from ACTIONet.decomposition import SPA
-    >>> spa = SPA(n_components=5)
-    >>> spa.fit(X)
+    from ACTIONet.decomposition import SPA
+    spa = SPA(n_components=5)
+    spa.fit(X)
     SPA(n_components=5)
-    >>> print(spa.selected_samples)
-    >>> print(spa.components_)
+    print(spa.selected_samples)
+    print(spa.components_)
     """
 
     def __init__(self, n_components=None):
@@ -210,8 +210,8 @@ class SPA(TransformerMixin, BaseEstimator):
         check_is_fitted(self)
 
         X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+                )
 
         H = self.components_
         with config_context(assume_finite=True):

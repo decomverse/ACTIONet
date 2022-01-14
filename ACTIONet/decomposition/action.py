@@ -1,65 +1,98 @@
 """ACTION decomposition for dense matrices.
 """
 
-import numpy as np
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn._config import config_context
-from sklearn.utils.validation import check_is_fitted
-
 from typing import Optional, Union
+
+import numpy as np
 from anndata import AnnData
+from scipy.sparse import issparse, spmatrix
+from sklearn._config import config_context
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
 
 
 def runACTION(
-    data: Union[AnnData, np.ndarray],
-    reduction_key: Optional[str] = "ACTION",
-    k_min: Optional[int] = 2,
-    k_max: Optional[int] = 30,
-    thread_no: Optional[int] = 0,
-    max_it: Optional[int] = 50,
-    min_delta: Optional[float] = 1e-300,
-) -> dict:
-    """\
-    Run ACTION decomposition [Mohammadi, 2018]
-
-    Computes reduced ACTION decomposition.
+        data: Union[AnnData, np.ndarray, spmatrix],
+        reduction_key: Optional[str] = "ACTION",
+        depth: Optional[int] = 10,
+        thread_no: Optional[int] = 0,
+        max_it: Optional[int] = 50,
+        min_delta: Optional[float] = 1e-300,
+        return_raw: Optional[bool] = False,
+        copy: Optional[bool] = False,
+        ) -> Union[AnnData, dict]:
+    """Run Archetypal Analysis
 
     Parameters
     ----------
-    data
-        The (annotated) data matrix of shape `n_obs` × `n_vars`.
-        Rows correspond to cells and columns to genes.
-    reduction_key:
-        Key of '.obms' to use as input for ACTION (default="ACTION")
-        Ignored if 'data' is not an 'AnnData' object.
-    k_min, k_max
-        Min. and max. # of archetypes to consider.
+    data : Union[AnnData, np.ndarray, sparse.spmatrix]
+        Input data matrix or AnnData object containing the data.
+    reduction_key : Optional[str]
+        Key for reduction stored in obsm/varm (only if return_raw == False), by default "ACTION"
+    depth : int
+        Number of archetypes, by default 10
     thread_no
         Number of threads. Defaults to number of threads available - 2.
-    max_it, min_delta:
-        Define stopping conditions of inner AA loop
+    max_it : Optional[int]
+        Maximum number of AA inner iterations, by default 50
+    min_delta : Optional[float]
+        Convergence parameter for AA, by default 1e-100
+    return_raw : Optional[bool]
+        Returns raw output of 'run_ACTION()' as dict, by default False
+    copy : Optional[bool]
+        If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
 
     Returns
     -------
-    ACTION_out
-        A dictionary with traces of C and H matrices
+    Union[AnnData, dict]
+        Result of archetypal analysis.
+        If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
+            "W": Archetypal matrix,
+            "H": Loading matrix,
+            "C": Coefficient matrix,
+        Otherwise, these values are stored in the input AnnData object obsm/varm with `reduction_key` prefix.
     """
+
     data_is_AnnData = isinstance(data, AnnData)
 
     if data_is_AnnData:
         if reduction_key not in data.obsm.keys():
-            raise ValueError("Did not find adata.obsm['" + reduction_key + "'].")
+            raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
         else:
             X = data.obsm[reduction_key]
     else:
         X = data
 
-    X = X.T.astype(dtype=np.float64)
-    ACTION_out = _an.run_ACTION(X, k_min, k_max, thread_no, max_it, min_delta)
+    if issparse(X):
+        X = X.toarray()
 
-    return ACTION_out
+    X = X.T.astype(dtype=np.float64)
+
+    ACTION_out = _an.run_ACTION(
+            S_r=X,
+            k_min=depth,
+            k_max=depth,
+            thread_no=thread_no,
+            max_it=max_it,
+            min_delta=min_delta
+            )
+
+    ACTION_out = {
+        "C": ACTION_out["C"][depth - 1],
+        "H": ACTION_out["H"][depth - 1],
+        }
+    ACTION_out["W"] = np.matmul(X, ACTION_out["C"])
+
+    if return_raw or not data_is_AnnData:
+        return ACTION_out
+    else:
+        data.obsm[reduction_key + "_" + "C"] = ACTION_out["C"]
+        data.obsm[reduction_key + "_" + "H"] = ACTION_out["H"].T
+        data.varm[reduction_key + "_" + "W"] = ACTION_out["W"]
+
+        return data if copy else None
 
 
 class ACTION(TransformerMixin, BaseEstimator):
@@ -79,10 +112,10 @@ class ACTION(TransformerMixin, BaseEstimator):
     ----------
     n_components : int, default=None
         Number of components.
-    n_iter : int, default=100
+    max_it : int, default=100
         Number of iterations for AA solver.
-    tol : float, default=1e-6
-        Tolerance of the stopping condition for AA solver.
+    min_delta : float, default=1e-6
+        min_deltaerance of the stopping condition for AA solver.
 
 
     Attributes
@@ -116,20 +149,20 @@ class ACTION(TransformerMixin, BaseEstimator):
 
     Examples
     --------
-    >>> from decomp import ACTION
-    >>> import numpy as np
-    >>> X = np.random.normal(0, 1, (100, 30))
-    >>> action = ACTION(n_components=5)
-    >>> action.fit(X)
-    ACTION(n_components=5, n_iter=100)
-    >>> print(action.reconstruction_err_)
-    >>> print(action.components_)
+    from decomp import ACTION
+    import numpy as np
+    X = np.random.normal(0, 1, (100, 30))
+    action = ACTION(n_components=5)
+    action.fit(X)
+    ACTION(n_components=5, max_it=100)
+    print(action.reconstruction_err_)
+    print(action.components_)
     """
 
-    def __init__(self, n_components=None, *, n_iter=100, tol=1e-16, thread_no=0):
+    def __init__(self, n_components=None, *, max_it=100, min_delta=1e-16, thread_no=0):
         self.n_components = n_components
-        self.n_iter = n_iter
-        self.tol = tol
+        self.max_it = max_it
+        self.min_delta = min_delta
         self.thread_no = thread_no
 
     def fit(self, X, y=None, **params):
@@ -210,18 +243,18 @@ class ACTION(TransformerMixin, BaseEstimator):
             Archetype Matrix
         """
 
-        out = _an.run_ACTION(
-            S_r=X.T,
-            k_min=self.n_components,
-            k_max=self.n_components,
-            thread_no=self.thread_no,
-            max_it=self.n_iter,
-            min_delta=self.tol,
-        )
+        out = runACTION(
+                data=X,
+                reduction_key=None,
+                depth=self.n_components,
+                thread_no=self.thread_no,
+                max_it=self.max_it,
+                min_delta=self.min_delta,
+                return_raw=True,
+                copy=False
+                )
 
-        B = out["C"][self.n_components - 1].T
-        A = out["H"][self.n_components - 1].T
-        Z = np.matmul(B, X)
+        B, A, Z = out["C"].T, out["H"].T, out["W"].T
 
         return A, B, Z
 
@@ -242,8 +275,8 @@ class ACTION(TransformerMixin, BaseEstimator):
 
         check_is_fitted(self)
         X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+                )
 
         Z = self.components_
 
@@ -251,4 +284,3 @@ class ACTION(TransformerMixin, BaseEstimator):
             A = _an.run_simplex_regression(Z.T, X.T).T
 
         return A
-

@@ -1,10 +1,13 @@
 import numpy as np
 
 import _ACTIONet as _an
+from typing import Optional, Tuple, Union
 
 
 def run_simplex_regression(
-    A: np.ndarray, B: np.ndarray, computeXtX: bool = False
+    A: np.ndarray,
+    B: np.ndarray,
+    computeXtX: Optional[bool] = False
 ) -> np.ndarray:
 
     """

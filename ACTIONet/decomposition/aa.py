@@ -1,49 +1,119 @@
 """Archetypal Analysis (robust) for dense matrices.
 """
 
-import numpy as np
-from typing import Optional, Tuple
+from typing import Optional, Union
 
-from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np
+from anndata import AnnData
+from scipy.sparse import issparse, spmatrix
 from sklearn._config import config_context
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
 
 
 def runAA(
-    A: np.ndarray,
-    k: int,
-    max_iter: Optional[int] = 50,
-    min_delta: Optional[float] = 1e-16
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Archetypal Analysis (AA)
-    Runs archetypal analysis.
+        data: Union[AnnData, np.ndarray, spmatrix],
+        dim: Optional[int] = 10,
+        max_iter: Optional[int] = 100,
+        min_delta: Optional[float] = 1e-100,
+        Z: Optional[np.ndarray] = None,
+        layer_key: Optional[str] = None,
+        decomp_key_prefix: Optional[str] = "AA",
+        return_raw: Optional[bool] = False,
+        use_highly_variable: Optional[bool] = False,
+        copy: Optional[bool] = False,
+        ) -> Union[AnnData, dict]:
+    """Run Archetypal Analysis
 
     Parameters
     ----------
-    A : ndarray of shape (n_samples, n_features)
-        Input matrix
-
-    k : int
-        Number of columns to select
-
-    max_iter, min_delta: double
-        Define stopping conditions of AA
+    data : Union[AnnData, np.ndarray, sparse.spmatrix]
+        Input data matrix or AnnData object containing the data.
+    dim : Optional[int], optional
+        Number of archetypes, by default 10
+    max_iter : Optional[int], optional
+        Maximum number of AA inner iterations, by default 50
+    min_delta : Optional[float], optional
+        Convergence parameter for AA, by default 1e-100
+    Z : Optional[np.ndarray], optional
+        Initial archetypes. If not provided, it will be initialized using convex NMF (SPA), by default None
+    layer_key : Optional[str], optional
+        Key of 'layers' to use as matrix for reduction, by default None
+    decomp_key_prefix : Optional[str], optional
+        Prefix to be added to the reduction key stored in obsm/varm (only if return_raw == False), by default "AA"
+    return_raw : Optional[bool], optional
+        Returns raw output of 'reduce_kernel()' as dict, by default False
+    use_highly_variable : Optional[bool], optional
+        Whether to use highly variable genes only, stored in `.var['highly_variable']`, by default False
+    copy : Optional[bool], optional
+        If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
 
     Returns
     -------
-    C
-        Convex matrix of archetype coefficients (# observations x # archetypes)
-    H
-        Convex matrix of observation coefficients (# archetypes x # observations)
+    Union[AnnData, dict]
+        Result of archetypal analysis. 
+        If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
+            "W": Archetypal matrix,
+            "H": Loading matrix,
+            "C": Coefficient matrix,
+        Otherwise, these values are stored in the input AnnData object obsm/varm with `decomp_key_prefix` prefix.
     """
 
-    AA_out = _an.run_AA(A, k, max_iter, min_delta)
-    return (
-        AA_out["C"],
-        AA_out["H"]
-    )
+    data_is_AnnData = isinstance(data, AnnData)
+    if data_is_AnnData:
+        adata = data.copy() if copy else data
+    else:
+        adata = AnnData(data.T)
+
+    adata_temp = adata
+
+    # ACTIONet C++ library takes cells as columns
+    if layer_key is not None:
+        X = adata_temp.layers[layer_key].T
+    else:
+        X = adata_temp.X.T
+
+    X = X.astype(dtype=np.float64)
+
+    if issparse(X):
+        X = X.toarray()
+
+    if Z == None:
+        selected_samples = _an.run_SPA(X, dim)["selected_columns"].astype(int) - 1
+        Z = X[:, selected_samples]
+    else:
+        dim = Z.shape[1]
+
+    print(X.shape)
+
+    AA_out = _an.run_AA(X, Z, max_iter, min_delta)
+    AA_out["W"] = np.matmul(X, AA_out["C"])
+
+    if return_raw or not data_is_AnnData:
+        return AA_out
+
+    else:
+        adata.uns[decomp_key_prefix] = {}
+        adata.uns[decomp_key_prefix]["params"] = {
+            "use_highly_variable": use_highly_variable
+            }
+
+        adata.obsm[decomp_key_prefix + "_" + "C"] = AA_out["C"]
+        adata.obsm[decomp_key_prefix + "_" + "H"] = AA_out["H"].T
+
+        if use_highly_variable:
+            adata.varm[decomp_key_prefix + "_" + "W"] = np.zeros(
+                    shape=(adata.n_vars, dim)
+                    )
+            adata.varm[decomp_key_prefix + "_" + "W"][
+                adata.var["highly_variable"]
+            ] = AA_out["W"]
+        else:
+            adata.varm[decomp_key_prefix + "_" + "W"] = AA_out["W"]
+
+        return adata if copy else None
 
 
 class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
@@ -164,17 +234,8 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         """
         X = self._validate_data(X, accept_sparse=False)
 
-        if Z == None:
-            Xt = X.T
-            selected_samples = (
-                _an.run_SPA(Xt, self.n_components)["selected_columns"].astype(int) - 1
-            )
-            Z0 = X[selected_samples, :]
-        else:
-            Z0 = Z
-
         with config_context(assume_finite=True):
-            A, B, Z = self._fit_transform(X, Z=Z0)
+            A, B, Z = self._fit_transform(X, Z=Z)
 
         self.coeff_ = B
         self.components_ = Z
@@ -209,7 +270,14 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         Z: ndarray of shape (n_components, n_features)
             Archetype Matrix
         """
-        out = _an.run_AA(X.T, Z.T, self.n_iter, self.tol)
+        out = runAA(
+                data=X.T,
+                dim=self.n_components,
+                Z=Z,
+                max_iter=self.n_iter,
+                min_delta=self.tol,
+                return_raw=True,
+                )
 
         B, Z, A = out["C"].T, out["W"].T, out["H"].T
 
@@ -232,8 +300,8 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
 
         check_is_fitted(self)
         X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+                )
 
         Z = self.components_
 
