@@ -552,15 +552,19 @@ arma::Mat<npdouble> compute_network_diffusion_fast(arma::SpMat<npdouble> &G,
 }
 
 arma::Mat<npdouble> compute_network_diffusion_Chebyshev(
-    arma::SpMat<npdouble> &G, arma::Mat<npdouble> &X0, int thread_no = 0,
+    arma::SpMat<npdouble> &G, arma::Mat<npdouble> X0, int thread_no = 0,
     double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8,
-    int norm_type = 1) {
-  arma::SpMat<npdouble> P = normalize_adj(G, norm_type);
-  arma::Mat<npdouble> X0_norm = normalise(X0, 1, 0);
+    int norm_type = 0) {
+  if (G.n_rows != X0.n_rows) {
+    fprintf(stderr, "Dimnsion mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows,
+            G.n_cols, X0.n_rows, X0.n_cols);
+    return (mat());
+  }
+
+  arma::SpMat<npdouble> P = ACTIONet::normalize_adj(G, norm_type);
 
   arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion_Chebyshev(
-      P = P, X = X0_norm, thread_no = thread_no, alpha = alpha, max_it = max_it,
-      res_threshold = res_threshold);
+      P, X0, thread_no, alpha, max_it, res_threshold);
 
   return (X);
 }

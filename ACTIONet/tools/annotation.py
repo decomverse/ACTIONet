@@ -5,7 +5,7 @@ import numpy as np
 from anndata import AnnData
 
 from . import imputation as imputation
-from .. import misc_utils as ut
+from . import misc_utils as ut
 
 
 def annotate_archetypes_using_labels(
