@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 import scanpy as sc
 from anndata import AnnData
-from .. import misc_utils as ut
+from ..tools import misc_utils as ut
 
 
 def filter_adata(
@@ -13,7 +13,7 @@ def filter_adata(
     min_features_per_cell: Optional[int] = None,
     min_umis_per_cell: Optional[int] = None,
     max_umis_per_cell: Optional[int] = None,
-    copy: Optional[bool] = False
+    copy: Optional[bool] = False,
 ) -> Optional[AnnData]:
     """Filter AnnData by cells or genes.
 
@@ -55,7 +55,11 @@ def filter_adata(
     while previous_dims != adata.shape:
         previous_dims = adata.shape
 
-        if min_umis_per_cell is not None or max_umis_per_cell is not None or min_features_per_cell is not None:
+        if (
+            min_umis_per_cell is not None
+            or max_umis_per_cell is not None
+            or min_features_per_cell is not None
+        ):
             sc.pp.filter_cells(
                 adata,
                 min_counts=min_umis_per_cell,
@@ -65,7 +69,9 @@ def filter_adata(
         if min_cells_per_feature is not None:
             sc.pp.filter_genes(
                 adata,
-                min_cells=min_cells_per_feature * original_dims[0] if min_cells_per_feature > 0 and min_cells_per_feature < 1 else min_cells_per_feature
+                min_cells=min_cells_per_feature * original_dims[0]
+                if min_cells_per_feature > 0 and min_cells_per_feature < 1
+                else min_cells_per_feature,
             )
 
     if layer_key is not None:

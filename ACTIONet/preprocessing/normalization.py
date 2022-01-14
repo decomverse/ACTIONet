@@ -3,15 +3,15 @@ from typing import Optional
 import numpy as np
 from scipy import sparse
 from anndata import AnnData
-from .. import misc_utils as ut
+from ..tools import misc_utils as ut
 
 
-def normalize_adata(
-        adata: AnnData,
-        layer_key: Optional[str] = None,
-        layer_key_out: Optional[str] = None,
-        log_scale: Optional[bool] = True,
-        copy: Optional[bool] = False
+def normalize(
+    adata: AnnData,
+    layer_key: Optional[str] = None,
+    layer_key_out: Optional[str] = None,
+    log_scale: Optional[bool] = True,
+    copy: Optional[bool] = False,
 ) -> Optional[AnnData]:
 
     adata = adata.copy() if copy else adata

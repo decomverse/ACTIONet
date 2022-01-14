@@ -3,7 +3,7 @@ from anndata import AnnData
 import numpy as np
 from scipy import sparse
 
-from .. import misc_utils as ut
+from ..tools import misc_utils as ut
 import _ACTIONet as _an
 
 
@@ -88,7 +88,7 @@ def build(
 
 
 def layout(
-    data: Union[AnnData, np.ndarray, sparse.spmatrix] = None,
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
     algorithm: Optional[str] = "tumap",
     initial_coordinates: Union[np.ndarray, sparse.spmatrix] = None,
     compactness_level: Optional[int] = 50,
@@ -139,20 +139,20 @@ def layout(
     if alg_name not in ["UMAP", "TUMAP"]:
         raise ValueError("'layout_algorithm' must be 'tumap' or 'umap'.")
 
-    if data is not None:
-        if isinstance(data, AnnData):
-            adata = data.copy() if copy else data
-            initial_coordinates = (
-                initial_coordinates
-                if initial_coordinates is not None
-                else adata.obsm[reduction_key]
-            )
-            if net_key in adata.obsp.keys():
-                G = adata.obsp[net_key]
-            else:
-                raise Exception("missing %s in adata.obsp of AnnData" % net_key)
+    data_is_AnnData = isinstance(data, AnnData)
+    if data_is_AnnData:
+        adata = data.copy() if copy else data
+        initial_coordinates = (
+            initial_coordinates
+            if initial_coordinates is not None
+            else adata.obsm[reduction_key]
+        )
+        if net_key in adata.obsp.keys():
+            G = adata.obsp[net_key]
         else:
-            G = data
+            raise Exception("missing %s in adata.obsp of AnnData" % net_key)
+    else:
+        G = data
 
     if G is None or initial_coordinates is None:
         raise ValueError("'G' and 'initial_coordinates' cannot be NoneType.")
@@ -178,7 +178,7 @@ def layout(
         seed=seed,
     )
 
-    if return_raw or adata is None:
+    if return_raw or not data_is_AnnData:
         return layout
     else:
         adata.obsm["ACTIONred"] = initial_coordinates[0:3, :].T

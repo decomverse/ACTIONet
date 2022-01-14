@@ -8,89 +8,9 @@ from scipy import sparse
 import _ACTIONet as _an
 
 
-def centrality(
-    data: Union[AnnData, np.ndarray, sparse.spmatrix],
-    algorithm: str = "local_coreness",
-    annotations: Union[np.ndarray, list, pd.Series] = None,
-    annotations_key: Optional[str] = "assigned_archetype",
-    net_key: Optional[str] = "ACTIONet",
-    copy: Optional[bool] = False,
-    return_raw: Optional[bool] = False,
-) -> Union[AnnData, np.ndarray, None]:
-    """Computes node centrality scores
-
-    Compute node centralities using different measures
-
-    Parameters
-    ----------
-    data : Union[AnnData, np.ndarray, sparse.spmatrix]
-        Adjacency matrix of the input graph or AnnData object containing the network.
-    algorithm: str
-        centrality algorithm. Can be "coreness", "local_coreness", "pagerank", "personalized_pagerank", default is "local_coreness"
-    annotations:
-        list-like object containing sample annotations/scores of each observation (for localized measures).
-        Required if 'adata=None'.
-    annotations_key:
-        Key of 'adata.obs' containing list-like object of sample annotations/scores (default="assigned_archetype").
-        Ignored if data is not an AnnData object.
-    net_key:
-        Key of 'adata.obsp' containing adjacency matrix (default="ACTIONet").
-        Ignored if data is not an AnnData object.
-    copy
-        If 'adata' is given, return a copy instead of writing to `adata`
-    return_raw
-        If 'adata' is given, return array of raw node centrality scores instead of storing to 'adata'.
-
-    Returns
-    -------
-    adata : anndata.AnnData
-        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
-
-        `.obs['node_centrality']`
-
-    node_centrality : np.ndarray
-        If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
-    """
-    if data is not None:
-        if isinstance(data, AnnData):
-            adata = data.copy() if copy else data
-            annotations = (
-                annotations if annotations is not None else adata.obsm[annotations_key]
-            )
-            if net_key in adata.obsp.keys():
-                G = adata.obsp[net_key]
-            else:
-                raise Exception("missing %s in adata.obsp of AnnData" % net_key)
-        else:
-            G = data
-
-    if G is None or annotations is None:
-        raise ValueError("'G' and 'assignments' cannot be NoneType.")
-    if not isinstance(G, (np.ndarray, sparse.spmatrix)):
-        raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
-    if not isinstance(annotations, (np.ndarray, sparse.spmatrix)):
-        raise ValueError("'assignments' must be numpy.ndarray or sparse.spmatrix.")
-
-    if algorithm == "local_coreness":
-        node_centrality = _an.compute_archetype_core_centrality(G, annotations)
-    elif algorithm == "coreness":
-        node_centrality = _an.compute_core_number(G)
-    # elif algorithm == "pagerank":
-    #     u=np.empty(G.shape[0]);
-    #     u.fill(1/G.shape[0])
-    #     pr = diffusion(G, u)
-    #     node_centrality = pr[:, 1]
-
-    if return_raw or adata is None:
-        return node_centrality
-    else:
-        adata.obs["node_centrality"] = node_centrality
-        return adata if copy else None
-
-
 def diffusion(
     data: Union[AnnData, np.ndarray, sparse.spmatrix],
-    scores: Union[np.ndarray, sparse.spmatrix] = None,
+    scores: Optional[Union[np.ndarray, sparse.spmatrix]] = None,
     algorithm: Optional[str] = "pagerank_chebyshev",
     alpha_val: Optional[float] = 0.85,
     max_it: Optional[int] = 5,
@@ -111,7 +31,7 @@ def diffusion(
     scores : Union[np.ndarray, sparse.spmatrix], optional
         Input scores, by default None
     algorithm : Optional[str], optional
-        Diffusion algorithm to use. Can be "pagerank", "pagerank_sym", by default "pagerank_chebyshev"
+        Diffusion algorithm to use. Can be "pagerank", "pagerank_sym", by default "pagerank"
     alpha_val : Optional[float], optional
         Diffusion parameter. Larger values results in more long-range diffusion, by default 0.85
     max_it : Optional[int], optional
@@ -144,16 +64,20 @@ def diffusion(
     smoothed_scores : np.ndarray
         If `adata=None` or `return_raw=True`, returns array of archetype footprint.
     """
-    if data is not None:
-        if isinstance(data, AnnData):
-            adata = data.copy() if copy else data
-            scores = scores if scores is not None else adata.obsm[scores_key]
-            if net_key in adata.obsp.keys():
-                G = adata.obsp[net_key]
-            else:
-                raise Exception("missing %s in adata.obsp of AnnData" % net_key)
+    alg_name = algorithm.lower()
+    if alg_name not in ["pagerank", "pagerank_sym"]:
+        raise ValueError("'layout_algorithm' must be 'pagerank' or 'pagerank_sym'.")
+
+    data_is_AnnData = isinstance(data, AnnData)
+    if data_is_AnnData:
+        adata = data.copy() if copy else data
+        scores = scores if scores is not None else adata.obsm[scores_key]
+        if net_key in adata.obsp.keys():
+            G = adata.obsp[net_key]
         else:
-            G = data
+            raise Exception("missing %s in adata.obsp of AnnData" % net_key)
+    else:
+        G = data
 
     if G is None or scores is None:
         raise ValueError("'G' and 'scores' cannot be NoneType.")
@@ -165,126 +89,146 @@ def diffusion(
     G = G.astype(dtype=np.float64)
     scores = scores.astype(dtype=np.float64)
 
-    if not sparse.issparse(scores):
-        scores = sparse.csc_matrix(scores)
+    if not sparse.issparse(G):
+        G = sparse.csc_matrix(G)
 
-    smoothed_scores = _an.compute_network_diffusion_fast(
-        G=G, X0=scores, alpha=alpha_val, thread_no=thread_no, max_it=max_it
-    )
+    if sparse.issparse(scores):
+        scores = scores.toarray()
+
+    if algorithm == "pagerank":
+        smoothed_scores = _an.compute_network_diffusion_Chebyshev(
+            G=G,
+            X0=scores,
+            thread_no=thread_no,
+            alpha=alpha_val,
+            max_it=max_it,
+            res_threshold=threshold,
+            norm_type=0,
+        )
+    elif algorithm == "pagerank_sym":
+        smoothed_scores = _an.compute_network_diffusion_Chebyshev(
+            G=G,
+            X0=scores,
+            thread_no=thread_no,
+            alpha=alpha_val,
+            max_it=max_it,
+            res_threshold=threshold,
+            norm_type=2,
+        )
 
     smoothed_scores = np.array(smoothed_scores, dtype=np.float64)
 
-    if return_raw or adata is None:
+    if return_raw or not data_is_AnnData:
         return smoothed_scores
     else:
         adata.obsm[smoothed_scores_key] = smoothed_scores
         return adata if copy else None
 
 
-def construct_backbone(
-    adata: Optional[AnnData] = None,
-    footprint: Union[np.ndarray, sparse.spmatrix] = None,
+def centrality(
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    annotations: Optional[Union[np.ndarray, list, pd.Series]] = None,
+    algorithm: str = "personalized_coreness",
+    annotations_key: Optional[str] = "assigned_archetype",
     net_key: Optional[str] = "ACTIONet",
-    footprint_key: Optional[str] = "archetype_footprint",
-    scale: Optional[bool] = True,
-    layout_compactness: Optional[int] = 50,
-    layout_epochs: Optional[int] = 100,
-    alpha_val: Optional[float] = 0.85,
-    thread_no: Optional[int] = 0,
-    max_it: Optional[int] = 5,
-    seed: Optional[int] = 0,
     copy: Optional[bool] = False,
-) -> Optional[AnnData]:
+    return_raw: Optional[bool] = False,
+) -> Union[AnnData, np.ndarray, None]:
+    """Computes node centrality scores
 
-    if adata is not None:
-        if isinstance(adata, AnnData):
-            adata = adata.copy() if copy else adata
+    Compute node centralities using different measures
+
+    Parameters
+    ----------
+    data : Union[AnnData, np.ndarray, sparse.spmatrix]
+        Adjacency matrix of the input graph or AnnData object containing the network.
+    annotations:
+        list-like object containing sample annotations/scores of each observation (for localized measures).
+    algorithm: str
+        centrality algorithm. Can be "coreness", "personalized_coreness", "pagerank", "personalized_pagerank", default is "personalized_coreness"
+        Required if 'adata=None'.
+    annotations_key:
+        Key of 'adata.obs' containing list-like object of sample annotations/scores (default="assigned_archetype").
+        Ignored if data is not an AnnData object.
+    net_key:
+        Key of 'adata.obsp' containing adjacency matrix (default="ACTIONet").
+        Ignored if data is not an AnnData object.
+    copy
+        If 'adata' is given, return a copy instead of writing to `adata`
+    return_raw
+        If 'adata' is given, return array of raw node centrality scores instead of storing to 'adata'.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        if 'adata' given and `copy=True` returns None or else adds fields to `adata`:
+
+        `.obs['node_centrality']`
+
+    node_centrality : np.ndarray
+        If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
+    """
+    alg_name = algorithm.lower()
+    if alg_name not in [
+        "pagerank",
+        "personalized_pagerank",
+        "coreness",
+        "personalized_coreness",
+    ]:
+        raise ValueError(
+            "'layout_algorithm' must be 'pagerank or 'coreness', 'personalized_pagerank', and 'personalized_coreness'"
+        )
+
+    data_is_AnnData = isinstance(data, AnnData)
+    if data_is_AnnData:
+        adata = data.copy() if copy else data
+        annotations = (
+            annotations if annotations is not None else adata.obsm[annotations_key]
+        )
+        if net_key in adata.obsp.keys():
+            G = adata.obsp[net_key]
         else:
-            raise ValueError("'adata' is not an AnnData object.")
-
-    if footprint_key not in adata.obsm.keys():
-        diffusion(
-            adata=adata,
-            G=None,
-            H_unified=None,
-            net_key=net_key,
-            footprint_key=footprint_key,
-            alpha_val=alpha_val,
-            thread_no=thread_no,
-            max_it=max_it,
-            copy=False,
-            return_raw=False,
-        )
-
-    footprint = footprint if footprint is not None else adata.obsm[footprint_key]
-
-    if scale:
-        W = np.exp(
-            (footprint - np.mean(footprint, axis=0)) / np.std(footprint, axis=0, ddof=1)
-        )
+            raise Exception("missing %s in adata.obsp of AnnData" % net_key)
     else:
-        W = np.exp(footprint)
+        G = data
 
-    W = sparse.csc_matrix(W)
+    if G is None:
+        raise ValueError("'G' cannot be NoneType.")
+    if not isinstance(G, (np.ndarray, sparse.spmatrix)):
+        raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
 
-    arch_vis_out = _an.transform_layout(
-        W=W,
-        coor2D=adata.obsm["ACTIONet2D"].T,
-        coor3D=adata.obsm["ACTIONet3D"].T,
-        colRGB=adata.obsm["denovo_color"].T,
-        compactness_level=layout_compactness,
-        n_epochs=layout_epochs,
-        thread_no=thread_no,
-        seed=seed,
-    )
+    if not sparse.issparse(G):
+        G = sparse.csc_matrix(G)
 
-    arch_G = _an.compute_full_sim(footprint, thread_no)
-    np.fill_diagonal(arch_G, 0)
+    if not annotations is None:
+        if isinstance(annotations, pd.Series):
+            annotations = np.array(annotations.tolist())
+        else:
+            annotations = annotations.toarray()
 
-    backbone = {
-        "G": arch_G,
-        "coordinates": arch_vis_out["coordinates"],
-        "coordinates_3D": arch_vis_out["coordinates_3D"],
-    }
+    if algorithm == "coreness":
+        node_centrality = _an.compute_core_number(G)
+    elif algorithm == "personalized_coreness":
+        if annotations is None:
+            raise ValueError("'annotations' cannot be None for personalized_coreness")
 
-    # adata.uns['metadata']["ACTIONet_backbone"] = backbone
-    adata.uns.setdefault("metadata", {}).update(
-        {"backbone": backbone,}
-    )
+        node_centrality = _an.compute_archetype_core_centrality(G, annotations)
+    elif algorithm == "pagerank":
+        u = np.ones(G.shape[0])
+        scores = u / u.shape[0]
+        node_centrality = diffusion(G, algorithm="pagerank", scores=scores)
+    elif algorithm == "personalized_pagerank":
+        if annotations is None:
+            raise ValueError("'annotations' cannot be None for personalized_coreness")
 
-    return adata if copy else None
+        u = annotations
+        scores = u / u.shape[0]
+        node_centrality = diffusion(G, algorithm="pagerank", scores=scores)
 
+    node_centrality = np.array(node_centrality, dtype=np.float64)
 
-def correct_cell_annotations(
-    adata: Optional[AnnData],
-    initial_labels: Optional[list],
-    iters: Optional[int] = 3,
-    lambda_param: Optional[float] = 0,
-    sig_threshold: Optional[int] = 3,
-    min_cell_fraction: Optional[float] = 0.001,
-):
-    """
-    Uses a variant of the label propagation algorithm to correct likely noisy labels
-
-    #' @param ace Input results to be clustered
-    #' (alternatively it can be the ACTIONet igraph object)
-    #' @param initial_labels Annotations to correct with missing values (NA) in it.
-    #' It can be either a named annotation (inside ace$annotations) or a label vector.
-    #' @param LFR.threshold How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)
-    #' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-    #' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
-    #' @param min.cell.fraction Annotations with less that this fraction will be removed
-    #'
-    #' @return ace with updated annotations added to ace$annotations
-    #'
-    #' @examples
-    #' ace = add.cell.annotations(ace, cell.labels, 'input_annotations')
-    #' ace = correct.cell.annotations(ace, 'input_annotations', 'updated_annotations')
-    #' @export
-    """
-    pass
-
-
-def enhance_cell_annotations():
-    pass
-
+    if return_raw or not data_is_AnnData:
+        return node_centrality
+    else:
+        adata.obs["node_centrality"] = node_centrality
+        return adata if copy else None

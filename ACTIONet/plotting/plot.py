@@ -12,7 +12,7 @@ import pandas as pd
 from random import sample
 from .color import *
 from .palettes import palette_default
-from .. import misc_utils as ut
+from ..tools import misc_utils as ut
 from . import plot_utils as pu
 import _ACTIONet as _an
 
@@ -276,10 +276,7 @@ def plot_ACTIONet_gradient(
         x = np.log1p(x)
 
     if alpha_val > 0:
-        x = _an.compute_network_diffusion_fast(
-            G=G,
-            X0=sparse.csc_matrix(x)
-        )
+        x = _an.compute_network_diffusion_fast(G=G, X0=sparse.csc_matrix(x))
 
 
 # plot.ACTIONet.gradient <- function(ace,
