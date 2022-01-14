@@ -20,6 +20,7 @@ def build(
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False,
 ) -> Union[AnnData, sparse.spmatrix, None]:
+
     """Computes knn/k*nn graphs from input data
 
     Parameters
@@ -99,6 +100,7 @@ def layout(
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False,
 ) -> Union[AnnData, sparse.spmatrix, None]:
+
     """Computes knn/k*nn graphs from input data
 
     Parameters
