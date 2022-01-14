@@ -244,8 +244,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         Archetype matrix (Z in AA, or W in NMF terminology)
 
     n_components_ : int
-        The number of components. It is same as the `n_components` parameter
-        if it was given.
+        The estimated number of multi-resolution components
 
     n_features_in_ : int
         Number of features seen during :term:`fit`.
@@ -253,9 +252,21 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
     reconstruction_err_ : float
         Loss function for the final solution
 
-    coeff_ : ndarray of shape (n_components, n_samples)
-        Coefficient matrix B (convex sample weights) in the archetypal decomposition
+    coeff_ : ndarray of shape (n_components_, n_samples)
+        Multi-resolution coefficient matrix B (convex sample weights)
 
+    stacked_coeffs: ndarray of shape (n_ml_features, n_samples)
+        Concatenation of B matrices aross different "k" values, after prunning noisy archetypes
+        n_ml_components is the remaining number of archetypes after prunning.
+
+    stacked_loadings: ndarray of shape (n_ml_features, n_samples)
+        Concatenation of A matrices aross different "k" values, after prunning noisy archetypes
+        n_ml_components is the remaining number of archetypes after prunning.
+
+    assigned_archetype: array of size n_samples
+        Discretized sample to archetype assignments
+
+        
     See Also
     --------
     SPA : Successive Projection Algorithm to solve convex NMF
@@ -343,13 +354,24 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         X = self._validate_data(X, accept_sparse=False)
 
         with config_context(assume_finite=True):
-            A, B, Z = self._fit_transform(X)
+            (
+                A,
+                B,
+                Z,
+                stacked_coeffs,
+                stacked_loadings,
+                assigned_archetype,
+            ) = self._fit_transform(X)
 
         self.coeff_ = B
         self.components_ = Z
         self.n_components_ = Z.shape[0]
         self.n_features_in_ = Z.shape[1]
         self.reconstruction_err_ = np.linalg.norm(X - np.matmul(A, Z), "fro")
+
+        self.stacked_coeffs = stacked_coeffs
+        self.stacked_loadings = stacked_loadings
+        self.assigned_archetype = assigned_archetype
 
         return A
 
@@ -368,12 +390,29 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
         Returns
         -------
-        A: ndarray of shape (n_features, n_samples)
-            Loading matrix
-        B: ndarray of coefficient matrix (n_components, n_samples)
-            Archetype Matrix
-        Z: ndarray of shape (n_components, n_features)
-            Archetype Matrix
+        A: ndarray of shape (n_features, n_mr_components)
+            Multi-resolution loading matrix
+            n_mr_components is the estimated # of multi-resolution archetypes (based on unification_violation_threshold)
+            Computed from stacked_loadings after the unification process to retain nonredundant archetypes.
+
+        B: ndarray of shape (n_mr_components, n_samples)
+            Multi-resolution coefficient matrix. 
+            n_mr_components is the estimated # of multi-resolution archetypes (based on unification_violation_threshold)
+            Computed from stacked_coeffs after the unification process to retain nonredundant archetypes.
+
+        Z: ndarray of shape (n_mr_features, n_features)
+            Multi-resolution archetype matrix
+
+        stacked_coeffs: ndarray of shape (n_ml_features, n_samples)
+            Concatenation of B matrices aross different "k" values, after prunning noisy archetypes
+            n_ml_components is the remaining number of archetypes after prunning.
+
+        stacked_loadings: ndarray of shape (n_features, n_ml_features)
+            Concatenation of A matrices aross different "k" values, after prunning noisy archetypes
+            n_ml_components is the remaining number of archetypes after prunning.
+
+        assigned_archetype: array of size n_samples
+            Discretized sample to archetype assignments
         """
 
         ACTION_out = _an.run_ACTION(
@@ -400,12 +439,16 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             self.thread_no,
         )
 
+        stacked_coeffs = sparse.csc_matrix(pruned["C_stacked"].T)
+        stacked_loadings = sparse.csc_matrix(pruned["H_stacked"].T)
+
         B = unified["C_unified"].toarray().T.astype(dtype=np.float64)
         A = unified["H_unified"].toarray().T.astype(dtype=np.float64)
+        assigned_archetype = unified["assigned_archetype"]
 
         Z = np.matmul(B, X)
 
-        return A, B, Z
+        return A, B, Z, stacked_coeffs, stacked_loadings, assigned_archetype
 
     def transform(self, X):
         """Transform the data X according to the fitted ACTION model.
@@ -433,10 +476,3 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             A = _an.run_simplex_regression(Z.T, X.T).T
 
         return A
-
-
-# X = np.random.normal(0, 1, (1000, 100))
-# actionmr = ACTIONMR(depth=20)
-# actionmr.fit(X)
-# print(actionmr.reconstruction_err_)
-# print(actionmr.components_)
