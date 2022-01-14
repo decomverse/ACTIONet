@@ -2,17 +2,16 @@
 """
 
 import numpy as np
-from typing import Optional, Tuple, Union
-from scipy.sparse import issparse, spmatrix
-
+from typing import Tuple
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn._config import config_context
+from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
 
 
-def runSPA(A: Union[np.ndarray, spmatrix], k: int,) -> Tuple[np.ndarray, np.ndarray]:
+def runSPA(A: np.ndarray, k: int,) -> Tuple[np.ndarray, np.ndarray]:
     """Successive Projection Algorithm (SPA).
     Runs SPA algorithm to solve separable NMF problem.
 
@@ -52,9 +51,9 @@ class SPA(TransformerMixin, BaseEstimator):
        .. math::
             0.5 * ||X - WH||_F^2
     Where:
-        :math: W = X[, k],
-        :math: 0 <= H_ij,
-        :math: \sum_{i} H_ij = 1,
+        :math: H = X[k, ],
+        :math: 0 <= W_ij,
+        :math: \sum_{i} W_ij = 1,
 
     Parameters
     ----------
@@ -152,15 +151,15 @@ class SPA(TransformerMixin, BaseEstimator):
         X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32])
 
         with config_context(assume_finite=True):
-            selected_columns, residual_norms = self._fit_transform(X)
+            selected_samples, residual_norms = self._fit_transform(X)
 
-        W = X[:, selected_columns]
-        H = _an.run_simplex_regression(W, X)
+        H = X[selected_samples, :]
+        W = _an.run_simplex_regression(H.T, X.T).T
 
+        self.selected_samples = selected_samples
+        self.residual_norms = residual_norms
         self.n_components_ = H.shape[0]
         self.components_ = H
-        self.selected_samples = selected_columns
-        self.residual_norms = residual_norms
 
         return W
 
@@ -169,9 +168,8 @@ class SPA(TransformerMixin, BaseEstimator):
 
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Training vector, where `n_samples` is the number of samples
-            and `n_features` is the number of features.
+        X : ndarray of shape (n_samples, n_features)
+            Input matrix
 
         y : Ignored
             Not used, present for API consistency by convention.
@@ -182,18 +180,18 @@ class SPA(TransformerMixin, BaseEstimator):
 
         Returns
         -------
-        selected_columns: ndarray of size n_components
-            Selected columns from matrix X
+        selected_samples: ndarray of size n_components
+            Selected samples from matrix X
 
         residual_norms: ndarray of size n_components
             Residual norm of the matrix (loss function)
         """
-        out = _an.run_SPA(X, self.n_components)  # Run SPA
+        out = _an.run_SPA(X.T, self.n_components)  # Run SPA
 
-        selected_columns = out["selected_columns"].astype(int) - 1
+        selected_samples = out["selected_columns"].astype(int) - 1
         residual_norms = out["norms"]
 
-        return selected_columns, residual_norms
+        return selected_samples, residual_norms
 
     def transform(self, X):
         """Transform the data X according to the fitted convex NMF model.
@@ -206,16 +204,17 @@ class SPA(TransformerMixin, BaseEstimator):
 
         Returns
         -------
-        W : ndarray of shape (n_samples, n_components)
+        H : ndarray of shape (n_samples, n_components)
             Transformed data.
         """
-        self.check_is_fitted(self)
+        check_is_fitted(self)
 
         X = self._validate_data(
             X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
         )
 
+        H = self.components_
         with config_context(assume_finite=True):
-            W = self.fit_transform(X)
+            W = _an.run_simplex_regression(H.T, X.T).T
 
         return W

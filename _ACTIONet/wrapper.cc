@@ -393,11 +393,19 @@ py::dict unify_archetypes(arma::Mat<npdouble> &S_r,
 }
 
 // Computes node centrality scores
-arma::vec compute_archetype_core_centrality(arma::SpMat<npdouble> &G, uvec assignments) {
-
-  vec node_centrality = ACTIONet::compute_archetype_core_centrality(G, assignments);
+arma::vec compute_archetype_core_centrality(arma::SpMat<npdouble> &G,
+                                            uvec assignments) {
+  vec node_centrality =
+      ACTIONet::compute_archetype_core_centrality(G, assignments);
 
   return node_centrality;
+}
+
+// Compute node coreness
+arma::vec compute_core_number(arma::SpMat<npdouble> &G) {
+  uvec core_num = ACTIONet::compute_core_number(G);
+
+  return (conv_to<vec>::from(core_num));
 }
 
 // Builds an interaction network from the multi-level archetypal decompositions
@@ -472,8 +480,9 @@ py::dict layoutNetwork(arma::SpMat<npdouble> &G,
 // @param seed Random seed
 //
 // @return clusters Assignment vector of samples to clusters
-arma::vec signed_cluster(arma::SpMat<npdouble> &A, double resolution_parameter = 1.0,
-                   uvec initial_clusters_ = uvec(), int seed = 0) {
+arma::vec signed_cluster(arma::SpMat<npdouble> &A,
+                         double resolution_parameter = 1.0,
+                         uvec initial_clusters_ = uvec(), int seed = 0) {
   uvec initial_clusters_uvec(A.n_rows);
   if (initial_clusters_.n_elem == A.n_rows) {
     for (int i = 0; i < A.n_rows; i++)
@@ -497,8 +506,8 @@ arma::vec signed_cluster(arma::SpMat<npdouble> &A, double resolution_parameter =
 //'
 //' @return clusters Assignment vector of samples to clusters
 arma::vec unsigned_cluster(arma::SpMat<npdouble> &A,
-                     double resolution_parameter = 1.0,
-                     uvec initial_clusters_ = uvec(), int seed = 0) {
+                           double resolution_parameter = 1.0,
+                           uvec initial_clusters_ = uvec(), int seed = 0) {
   uvec initial_clusters_uvec(A.n_rows);
   if (initial_clusters_.n_elem == A.n_rows) {
     for (int i = 0; i < A.n_rows; i++)
@@ -658,8 +667,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
       py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
 
   m.def("compute_archetype_core_centrality", &compute_archetype_core_centrality,
-        "Computes node centrality scores",
+        "Computes node centrality scores based on localized coreness",
         py::arg("G"), py::arg("sample_assignments"));
+
+  m.def("compute_core_number", &compute_core_number,
+        "Computes node centrality scores based on coreness", py::arg("G"));
 
   // Network
   m.def("buildNetwork", &buildNetwork,
@@ -691,11 +703,11 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Normalizes adjacency matrix using different strategies", py::arg("G"),
         py::arg("norm_type") = 0);
 
-  m.def("compute_network_diffusion",
-        &compute_network_diffusion,
-        "Computes network diffusion using a given adjacency matrix (Old version)",
-        py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-        py::arg("alpha") = 0.85, py::arg("max_it") = 5);
+  m.def(
+      "compute_network_diffusion", &compute_network_diffusion,
+      "Computes network diffusion using a given adjacency matrix (Old version)",
+      py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
+      py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
   m.def("compute_network_diffusion_fast", &compute_network_diffusion_fast,
         "Computes network diffusion using a given adjacency matrix",

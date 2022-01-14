@@ -2,6 +2,7 @@ from ACTIONet import *
 
 # Imports PBMC 3k dataset from scanpy
 import scanpy as sc
+
 pbmc = sc.datasets.pbmc3k_processed()
 ACE = pbmc
 ACE
@@ -16,7 +17,7 @@ C, H = run_ACTION(ACE)
 prune_archetypes(ACE, C, H)
 
 # Uses k*-NN together with JS metric on archetypes to construct cell-cell network (ACTIONet graph)
-buildNetwork(ACE, mutual_edges_only = True)
+buildNetwork(ACE, mutual_edges_only=True)
 
 # Computes 2D/3D embedding of cells, as well as their de novo coloring
 layoutNetwork(ACE)
@@ -25,7 +26,7 @@ layoutNetwork(ACE)
 unify_archetypes(ACE)
 
 # Compute centrality of each vertex within the subgraph induced by assigned cells to each archetype
-compute_archetype_core_centrality(ACE)
+compute_core_centrality(ACE)
 
 
 sc.plotting.embedding(ACE, "ACTIONet2D", color="louvain")
@@ -35,6 +36,9 @@ sc.plotting.embedding(ACE, "ACTIONet2D", color="assigned_archetypes")
 # Evaluate clustering quality w.r.t. Leiden clusters (not the best, but just a sanity check)
 celltypes = pbmc.obs.louvain
 from sklearn.metrics.cluster import normalized_mutual_info_score
+
 normalized_mutual_info_score(celltypes, ACE.obs["assigned_archetypes"])
 
-ACE.write("/home/shahin/Dropbox/Projects/SingleCell/repositories/ACTION/meta_repo_python/tests/ACTIONet_out_python.h5ad")
+ACE.write(
+    "/home/shahin/Dropbox/Projects/SingleCell/repositories/ACTION/meta_repo_python/tests/ACTIONet_out_python.h5ad"
+)
