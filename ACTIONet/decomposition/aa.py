@@ -15,7 +15,7 @@ def runAA(
     A: np.ndarray,
     k: int,
     max_iter: Optional[int] = 50,
-    min_delta: Optional[float] = 1e-16,
+    min_delta: Optional[float] = 1e-16
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Archetypal Analysis (AA)
     Runs archetypal analysis.
@@ -42,7 +42,7 @@ def runAA(
     AA_out = _an.run_AA(A, k, max_iter, min_delta)
     return (
         AA_out["C"],
-        AA_out["H"],
+        AA_out["H"]
     )
 
 

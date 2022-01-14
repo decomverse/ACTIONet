@@ -31,7 +31,7 @@ def run_ACTIONet(
     footprint_alpha: Optional[float] = 0.85,
     thread_no: Optional[int] = 0,
     seed: Optional[int] = 0,
-    copy: Optional[bool] = False,
+    copy: Optional[bool] = False
 ):
 
     adata = adata.copy() if copy else adata
@@ -58,7 +58,7 @@ def run_ACTIONet(
         k_max=k_max,
         thread_no=thread_no,
         max_it=max_iter_ACTION,
-        min_delta=1e-300,
+        min_delta=1e-300
     )
 
     # Prune nonspecific and/or unreliable archetypes
@@ -68,7 +68,7 @@ def run_ACTIONet(
         adata=adata,
         min_specificity_z_threshold=min_specificity_z_threshold,
         min_cells=min_cells_per_archetype,
-        copy=False,
+        copy=False
     )
 
     # Build ACTIONet
@@ -81,7 +81,7 @@ def run_ACTIONet(
         distance_metric=distance_metric,
         nn_approach=nn_approach,
         copy=False,
-        return_raw=False,
+        return_raw=False
     )
 
     nt.layout_network(
@@ -96,7 +96,7 @@ def run_ACTIONet(
         thread_no=thread_no if layout_in_parallel else 1,
         seed=seed,
         copy=False,
-        return_raw=False,
+        return_raw=False
     )
 
     # Identiy equivalent classes of archetypes and group them together
@@ -108,7 +108,7 @@ def run_ACTIONet(
         violation_threshold=unification_violation_threshold,
         thread_no=thread_no,
         copy=False,
-        return_raw=False,
+        return_raw=False
     )
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of
@@ -120,7 +120,7 @@ def run_ACTIONet(
         net_key=net_key_out,
         assignment_key="assigned_archetype",
         copy=False,
-        return_raw=False,
+        return_raw=False
     )
 
     # Smooth archetype footprints
@@ -133,7 +133,7 @@ def run_ACTIONet(
         alpha_val=footprint_alpha,
         thread_no=thread_no,
         copy=False,
-        return_raw=False,
+        return_raw=False
     )
 
     # Compute gene specificity for each archetype
@@ -144,7 +144,7 @@ def run_ACTIONet(
         layer_key=None,
         footprint_key=footprint_key,
         copy=False,
-        return_raw=False,
+        return_raw=False
     )
 
     # nt.construct_backbone(

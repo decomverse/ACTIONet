@@ -23,7 +23,7 @@ def prune_archetypes(
     min_specificity_z_threshold: Optional[float] = -3,
     min_cells: Optional[int] = 2,
     copy: Optional[bool] = False,
-    return_raw: Optional[bool] = False,
+    return_raw: Optional[bool] = False
 ) -> Union[dict, AnnData, None]:
     """\
     Archetype pruning
@@ -97,8 +97,9 @@ def unify_archetypes(
     violation_threshold: Optional[float] = 0,
     thread_no: Optional[int] = 0,
     copy: Optional[bool] = False,
-    return_raw: Optional[bool] = False,
+    return_raw: Optional[bool] = False
 ) -> AnnData:
+
     """\
     Archetype unification
 
