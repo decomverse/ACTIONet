@@ -529,7 +529,7 @@ get.top.marker.genes <- function(
 
   return_type = match.arg(return_type)
 
-  cluster_vec = .get_attr_or_split_idx(ace, clusters, return_vec = TRUE)
+  cluster_vec = ACTIONetExperiment:::.get_attr_or_split_idx(ace, clusters, return_vec = TRUE)
   features_use = .preprocess_annotation_features(ace, features_use = features_use)
 
   ace  = compute.cluster.feature.specificity(

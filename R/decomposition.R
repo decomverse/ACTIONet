@@ -70,34 +70,52 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
         W <- X %*% C
         extra <- list(C = C)
     } else if (method == "ACTION_decomposition_MR") {
-        ACTION.out <- run_ACTION(
-            S_r = X,
-            k_min = params$k_min,
-            k_max = params$k_max,
-            thread_no = params$thread_no,
-            max_it = params$max_iter,
-            min_delta = 1e-300
+
+        out <- decomp.ACTION_MR(
+          ace = NULL,
+          S_r = X,
+          k_min = params$k_min,
+          k_max = params$k_max,
+          min_specificity_z_thresh = params$min_specificity_z_thresh,
+          min_cells_per_arch = params$min_cells_per_arch,
+          unification_violation_threshold = params$unification_violation_threshold,
+          max_iter = params$max_iter,
+          thread_no = params$thread_no,
+          reduction_slot = NULL,
+          return_raw = TRUE,
+          seed = params$seed
         )
 
-        # Prune nonspecific and/or unreliable archetypes
-        pruning.out <- prune_archetypes(
-            C_trace = ACTION.out$C,
-            H_trace = ACTION.out$H,
-            min_specificity_z_thresh = params$min_specificity_z_thresh,
-            min_cells = params$min_cells_per_arch
-        )
+        return(out)
 
-        # Identiy equivalent classes of archetypes and group them together
-        unification.out <- unify_archetypes(
-            S_r = X,
-            C_stacked = pruning.out$C_stacked,
-            H_stacked = pruning.out$H_stacked,
-            violation_threshold = params$unification_violation_threshold,
-            thread_no = params$thread_no
-        )
-        H <- unification.out$H_unified
-        W <- X %*% unification.out$C_unified
-        extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
+        # ACTION.out <- run_ACTION(
+        #     S_r = X,
+        #     k_min = params$k_min,
+        #     k_max = params$k_max,
+        #     thread_no = params$thread_no,
+        #     max_it = params$max_iter,
+        #     min_delta = 1e-300
+        # )
+        #
+        # # Prune nonspecific and/or unreliable archetypes
+        # pruning.out <- prune_archetypes(
+        #     C_trace = ACTION.out$C,
+        #     H_trace = ACTION.out$H,
+        #     min_specificity_z_thresh = params$min_specificity_z_thresh,
+        #     min_cells = params$min_cells_per_arch
+        # )
+        #
+        # # Identiy equivalent classes of archetypes and group them together
+        # unification.out <- unify_archetypes(
+        #     S_r = X,
+        #     C_stacked = pruning.out$C_stacked,
+        #     H_stacked = pruning.out$H_stacked,
+        #     violation_threshold = params$unification_violation_threshold,
+        #     thread_no = params$thread_no
+        # )
+        # H <- unification.out$H_unified
+        # W <- X %*% unification.out$C_unified
+        # extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
     } else if (method == "ACTION_decomposition_MR_with_batch_correction") {
         ACTION.out <- run_ACTION_with_batch_correction(
             S_r = X,
@@ -110,26 +128,152 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
         )
 
         # Prune nonspecific and/or unreliable archetypes
-        pruning.out <- prune_archetypes(
-            C_trace = ACTION.out$C,
-            H_trace = ACTION.out$H,
-            min_specificity_z_thresh = params$min_specificity_z_thresh,
-            min_cells = params$min_cells_per_arch
+        pruning.out <- .run.pruneArchetypes(
+          C_trace = ACTION.out$C,
+          H_trace = ACTION.out$H,
+          ace = NULL,
+          min_specificity_z_thresh = params$min_specificity_z_thresh,
+          min_cells_per_arch = params$min_cells_per_arch,
+          return_raw = TRUE
         )
+        # pruning.out <- prune_archetypes(
+        #     C_trace = ACTION.out$C,
+        #     H_trace = ACTION.out$H,
+        #     min_specificity_z_thresh = params$min_specificity_z_thresh,
+        #     min_cells = params$min_cells_per_arch
+        # )
+
 
         # Identiy equivalent classes of archetypes and group them together
-        unification.out <- unify_archetypes(
-            S_r = X,
-            C_stacked = pruning.out$C_stacked,
-            H_stacked = pruning.out$H_stacked,
-            violation_threshold = params$unification_violation_threshold,
-            thread_no = params$thread_no
+        unification.out <- .run.unifyArchetypes(
+          ace = NULL,
+          S_r = X,
+          C_stacked = pruning.out$C_stacked,
+          H_stacked = pruning.out$H_stacked,
+          reduction_slot = NULL,
+          C_stacked_slot = NULL,
+          H_stacked_slot = NULL,
+          violation_threshold = params$unification_violation_threshold,
+          thread_no = params$thread_no,
+          return_raw = TRUE
         )
+
+        # unification.out <- unify_archetypes(
+        #     S_r = X,
+        #     C_stacked = pruning.out$C_stacked,
+        #     H_stacked = pruning.out$H_stacked,
+        #     violation_threshold = params$unification_violation_threshold,
+        #     thread_no = params$thread_no
+        # )
+
         H <- unification.out$H_unified
         W <- X %*% unification.out$C_unified
         extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
+
+        out <- list(W = W, H = H, extra = extra)
+        return(out)
     }
 
     out <- list(W = W, H = H, extra = extra)
     return(out)
+}
+
+
+#' Run ACTION_decomposition_MR
+decomp.ACTION_MR <- function(
+  ace = NULL,
+  S_r = NULL,
+  k_min = 2,
+  k_max = 30,
+  min_specificity_z_thresh = -3,
+  min_cells_per_arch = 2,
+  unification_violation_threshold = 0,
+  max_iter = 50,
+  thread_no = 0,
+  reduction_slot = "ACTION",
+  return_raw = FALSE,
+  seed = 0
+) {
+
+  if(return_raw == FALSE && is.null(ace)){
+    err = sprintf("'ace' cannot be null if 'return_raw=FALSE'")
+    stop(err)
+  }
+
+  if(!is.null(ace){
+    if(class(ace) != "ACTIONetExperiment"){
+      err <- sprintf("'ace' must be 'ACTIONetExperiment'.\n")
+      stop(err)
+    }
+  })
+
+  if(is.null(S_r)){
+    if (!(reduction_slot %in% names(colMaps(ace)))) {
+      err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", reduction_slot)
+      stop(err)
+    }
+    S_r <- Matrix::t(scale(colMaps(ace)[[reduction_slot]]))
+  }
+
+  ACTION.out <- run_ACTION(
+      S_r = S_r,
+      k_min = k_min,
+      k_max = k_max,
+      thread_no = thread_no,
+      max_it = max_iter,
+      min_delta = 1e-300
+  )
+
+  # Prune nonspecific and/or unreliable archetypes
+  pruning.out <- .run.pruneArchetypes(
+    C_trace = ACTION.out$C,
+    H_trace = ACTION.out$H,
+    ace = NULL,
+    min_specificity_z_thresh = min_specificity_z_thresh,
+    min_cells_per_arch = min_cells_per_arch,
+    return_raw = TRUE
+  )
+
+  # Identiy equivalent classes of archetypes and group them together
+  unification.out <- .run.unifyArchetypes(
+    ace = NULL,
+    S_r = S_r,
+    C_stacked = pruning.out$C_stacked,
+    H_stacked = pruning.out$H_stacked,
+    reduction_slot = NULL,
+    C_stacked_slot = NULL,
+    H_stacked_slot = NULL,
+    violation_threshold = unification_violation_threshold,
+    thread_no = thread_no,
+    return_raw = TRUE
+  )
+
+  H <- unification.out$H_unified
+  W <- X %*% unification.out$C_unified
+  extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
+
+  out <- list(W = W, H = H, extra = extra)
+
+  if(return_raw ==  TRUE) {
+    return(out)
+  } else {
+    # Store resulting decompositions
+    colMaps(ace)[["H_stacked"]] <- Matrix::t(as(out$extra$H_stacked, "sparseMatrix"))
+    colMapTypes(ace)[["H_stacked"]] <- "internal"
+
+    colMaps(ace)[["C_stacked"]] <- as(out$extra$C_stacked, "sparseMatrix")
+    colMapTypes(ace)[["C_stacked"]] <- "internal"
+
+    H_unified <- as(Matrix::t(out$extra$H_unified), "sparseMatrix")
+    colMaps(ace)[["H_unified"]] <- H_unified
+    colMapTypes(ace)[["H_unified"]] <- "internal"
+
+    colMaps(ace)[["C_unified"]] <- as(out$extra$C_unified, "sparseMatrix")
+    colMapTypes(ace)[["C_unified"]] <- "internal"
+
+    ace$assigned_archetype <- c(out$extra$assigned_archetype)
+
+    return(ace)
+  }
+
 }
