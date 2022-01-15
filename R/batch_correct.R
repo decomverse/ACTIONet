@@ -19,7 +19,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(
         return(ace)
     }
 
-    ace = as.ACTIONetExperiment(ace)
+    ace = as(ace, "ACTIONetExperiment")
     m_data = metadata(ace)
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
@@ -95,7 +95,7 @@ reduce.and.batch.correct.ace.Harmony <- function(
         stop(err)
     }
 
-    ace = as.ACTIONetExperiment(ace)
+    ace = as(ace, "ACTIONetExperiment")
 
     batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
@@ -135,7 +135,7 @@ batch.correct.ace.Harmony <- function(
         stop(err)
     }
 
-    ace = as.ACTIONetExperiment(ace)
+    ace = as(ace, "ACTIONetExperiment")
     batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
     colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(
