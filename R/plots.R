@@ -80,6 +80,14 @@ plot.ACTIONet <- function(ace,
   plot_coors <- .get_plot_coors(ace, coordinate_attr)
   plot_labels <- .get_plot_labels(label_attr, ace)
   plot_fill_col <- .get_plot_colors(color_attr, plot_labels, ace, color_slot, palette)
+  if (!is.null(label_attr)) {
+    na.mask <- plot_labels == "NA"
+    plot_fill_col[na.mask] <- "#eeeeee"
+    names(plot_fill_col)[na.mask] <- "?"
+    plot_labels[na.mask] <- "?"
+    point_order <- c(which(na.mask), which(!na.mask))
+  }
+
   plot_alpha <- .get_plot_transparency(trans_attr, ace, trans_fac, trans_th, TRUE)
   plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
 
@@ -110,7 +118,11 @@ plot.ACTIONet <- function(ace,
   )
 
   if (is.null(point_order)) {
-    pidx <- sample(NROW(plot_data))
+    if ((is(ace, "ACTIONetExperiment")) & ("node_centrality" %in% colnames(colData(ace)))) {
+      p_idx <- order(ace$node_centrality, decreasing = T)
+    } else {
+      pidx <- sample(NROW(plot_data))
+    }
   } else {
     pidx <- point_order
   }
@@ -785,7 +797,6 @@ plot.ACTIONet.gradient <- function(ace,
   if (alpha_val > 0) {
     x <- as.numeric(networkDiffusion(
       G = colNets(ace)[[net_slot]],
-      algorithm = "pagerank",
       scores = as.matrix(x)
     ))
   }

@@ -197,6 +197,7 @@ networkPropagation <- function(G, initial_labels, algorithm = "LPA", lambda = 0,
       initial_labels.factor <- initial_labels
       initial_labels <- as.numeric(initial_labels.factor)
     }
+    initial_labels[is.na(initial_labels)] <- -1
 
     if (is(G, "ACTIONetExperiment")) {
       G <- colNets(G)[[network_slot]]
