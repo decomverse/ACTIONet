@@ -1,5 +1,5 @@
 FROM rocker/tidyverse
-
+ARG GITHUB_PAT
 LABEL name="actionet/tidyverse" \
 	version=1.0.0 \
 	vendor="ACTIONet" \
