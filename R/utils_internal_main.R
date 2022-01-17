@@ -295,7 +295,7 @@
   # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
   U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
   SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-  V.smooth <- propNetworkScores(G, SVD.out$v)
+  V.smooth <- networkDiffusion(G = G, scores = SVD.out$v)
 
   H <- V.smooth %*% diag(SVD.out$d)
 

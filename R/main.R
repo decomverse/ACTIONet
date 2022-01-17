@@ -152,7 +152,7 @@ runACTIONet <- function(ace,
   # U <- as.matrix(Matrix::t(S_r) %*% Diagonal(length(sigma), 1 / sigma))
   # SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
   # # V_svd <- SVD.out$v
-  # V.smooth <- propNetworkScores(G, SVD.out$v)
+  # V.smooth <- networkDiffusion(G, SVD.out$v)
   #
   # H <- V.smooth %*% diag(SVD.out$d)
   # W <- SVD.out$u
@@ -181,8 +181,9 @@ runACTIONet <- function(ace,
 
   # Smooth archetype footprints
   # Ht_unified <- colMaps(ace)[["H_unified"]]
-  archetype_footprint <- propNetworkScores(
+  archetype_footprint <- networkDiffusion(
     G = G,
+    algorithm = "pagerank",
     scores = as.matrix(colMaps(ace)[["H_unified"]]),
     thread_no = thread_no,
     alpha = footprint_alpha
@@ -345,7 +346,7 @@ run.ACTIONet <- function(ace,
   ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  S_r_norm <- propNetworkScores(G, scores = Matrix::t(S_r), alpha = imputation_alpha, max_it = 5, thread_no = thread_no)
+  S_r_norm <- networkDiffusion(G, scores = Matrix::t(S_r), algorithm = "pagerank", alpha = imputation_alpha, max_it = 5, thread_no = thread_no)
   colMaps(ace)[["ACTIONnorm"]] <- S_r_norm
   colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
 
@@ -377,8 +378,9 @@ run.ACTIONet <- function(ace,
   )
 
   # Smooth archetype footprints
-  archetype_footprint <- propNetworkScores(
+  archetype_footprint <- networkDiffusion(
     G = G,
+    algorithm = "pagerank",
     scores = as.matrix(colMaps(ace)[["H_unified"]]),
     thread_no = thread_no,
     alpha = footprint_alpha
@@ -648,8 +650,9 @@ rerunArchAggr <- function(ace,
   ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
   # Ht_unified <- colMaps(ace)[["H_unified"]]
-  archetype_footprint <- propNetworkScores(
+  archetype_footprint <- networkDiffusion(
     G = G,
+    algorithm = "pagerank",
     scores = as.matrix(colMaps(ace)[[sprintf("H_%s", unified_suffix)]]),
     thread_no = thread_no,
     alpha = footprint_alpha
