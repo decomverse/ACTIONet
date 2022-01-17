@@ -40,7 +40,7 @@ infer.missing.cell.annotations <- function(ace,
   # }
 
   fixed_samples <- which(!is.na(initial_labels))
-  Labels <- networkPropagation(G = colNets(ace)[network_slot], initial_labels = initial_labels, iters = iters, lambda = lambda = , sig_threshold = sig_threshold, fixed_samples = fixed_samples)
+  Labels <- networkPropagation(G = colNets(ace)[network_slot], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold, fixed_samples = fixed_samples)
 
   return(Labels)
 }
@@ -69,8 +69,8 @@ correct.cell.annotations <- function(ace,
                                      iters = 3,
                                      lambda = 0,
                                      sig_threshold = 3,
-                                     network_slot = "ACTIONet") {  
-  algorithm = tolower(algorithm)
+                                     network_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
 
   # label_type <- "numeric"
   # if (is.character(initial_labels)) {
@@ -93,8 +93,8 @@ correct.cell.annotations <- function(ace,
   # if (label_type == "char" | label_type == "factor") {
   #   Labels <- levels(initial_labels.factor)[Labels]
   # }
-  Labels <- networkPropagation(G = colNets(ace)[network_slot], initial_labels = initial_labels, iters = iters, lambda = lambda = , sig_threshold = sig_threshold)
-  
+  Labels <- networkPropagation(G = colNets(ace)[network_slot], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold)
+
 
   return(Labels)
 }
