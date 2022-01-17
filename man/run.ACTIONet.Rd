@@ -25,6 +25,7 @@ run.ACTIONet(
   unification_violation_threshold = 0,
   footprint_alpha = 0.85,
   thread_no = 0,
+  imputation_alpha = 0.9,
   full_trace = FALSE,
   seed = 0
 )
@@ -85,6 +86,6 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 Run main ACTIONet pipeline
 }
 \examples{
-ace = reduce.ace(ace)
-ace = run.ACTIONet(ace)
+ace <- reduce.ace(ace)
+ace <- run.ACTIONet(ace)
 }

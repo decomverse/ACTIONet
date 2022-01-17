@@ -6,14 +6,9 @@
 \usage{
 runACTIONet(
   ace,
-  batch = NULL,
   k_min = 2,
   k_max = 30,
   assay_name = "logcounts",
-  batch_attr = NULL,
-  batch_correction_method = "Harmony",
-  rerun_reduction = FALSE,
-  reduced_dim = 50,
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
@@ -26,12 +21,11 @@ runACTIONet(
   imputation_alpha = 0.9,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = "TUMAP",
+  layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
   unification_violation_threshold = 0,
   footprint_alpha = 0.15,
   thread_no = 0,
-  full_trace = FALSE,
   seed = 0
 )
 }
@@ -43,14 +37,6 @@ runACTIONet(
 \item{k_max}{Maximum depth of decompositions. (default=30)}
 
 \item{assay_name}{Name of assay to be used. (default='logcounts')}
-
-\item{batch_attr}{Which attribute to use for batch correction. No batch correction is done if it is NULL (default=NULL)}
-
-\item{batch_correction_method}{Batch-correction method. Currently can be MNN, Harmony, and BatchOrtho (default="Harmony")}
-
-\item{rerun_reduction}{Which attribute to use for batch correction. No batch correction is done if it is NULL (default=TRUE)}
-
-\item{reduced_dim}{Which attribute to use for batch correction. No batch correction is done if it is NULL (default=50)}
 
 \item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel. (default='ACTION')}
 
@@ -86,8 +72,6 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 \item{footprint_alpha}{Archetype smoothing parameter. (default=0.85)}
 
 \item{thread_no}{Number of parallel threads. (default=0)}
-
-\item{full_trace}{Return list of all intermediate output. Intended for debugging. (default='FALSE')}
 
 \item{seed}{Seed for random initialization. (default=0)}
 }

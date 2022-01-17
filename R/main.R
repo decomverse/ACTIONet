@@ -321,13 +321,7 @@ run.ACTIONet <- function(ace,
     min_cells_per_arch = min_cells_per_arch,
     return_raw = TRUE
   )
-  # pruning.out <- prune_archetypes(
-  #   C_trace = ACTION.out$C,
-  #   H_trace = ACTION.out$H,
-  #   min_specificity_z_thresh = min_specificity_z_thresh,
-  #   min_cells = min_cells_per_arch
-  # )
-  #
+
   colMaps(ace)[["H_stacked"]] <- Matrix::t(as(pruning.out$H_stacked, "sparseMatrix"))
   colMapTypes(ace)[["H_stacked"]] <- "internal"
 
@@ -356,10 +350,6 @@ run.ACTIONet <- function(ace,
   colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
 
   # Layout ACTIONet
-  # initial_coordinates <- ACTIONetExperiment:::.tscalet(S_r)
-  # colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
-  # colMapTypes(ace)[["ACTIONred"]] <- "embedding"
-
   ace <- .run.layoutNetwork(ace,
     G = G,
     initial_coordinates = ACTIONetExperiment:::.tscalet(S_r),
@@ -386,26 +376,7 @@ run.ACTIONet <- function(ace,
     return_raw = FALSE
   )
 
-
-  # unification.out <- unify_archetypes(
-  #   S_r = S_r,
-  #   C_stacked = pruning.out$C_stacked,
-  #   H_stacked = pruning.out$H_stacked,
-  #   violation_threshold = unification_violation_threshold,
-  #   thread_no = thread_no
-  # )
-  #
-  # Ht_unified <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
-  # colMaps(ace)[["H_unified"]] <- Ht_unified
-  # colMapTypes(ace)[["H_unified"]] <- "internal"
-  #
-  # colMaps(ace)[["C_unified"]] <- as(unification.out$C_unified, "sparseMatrix")
-  # colMapTypes(ace)[["C_unified"]] <- "internal"
-  #
-  # ace$assigned_archetype <- c(unification.out$assigned_archetype)
-
   # Smooth archetype footprints
-  # Ht_unified <- colMaps(ace)[["H_unified"]]
   archetype_footprint <- propNetworkScores(
     G = G,
     scores = as.matrix(colMaps(ace)[["H_unified"]]),
@@ -423,25 +394,6 @@ run.ACTIONet <- function(ace,
     footprint_slot = NULL,
     return_raw = FALSE
   )
-
-  # H <- Matrix::t(archetype_footprint)
-  # if (is.matrix(S)) {
-  #   specificity.out <- compute_archetype_feature_specificity_full(S, H)
-  # } else {
-  #   specificity.out <- compute_archetype_feature_specificity(S, H)
-  # }
-  #
-  # specificity.out <- lapply(specificity.out, function(specificity.scores) {
-  #   rownames(specificity.scores) <- rownames(ace)
-  #   colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores), sep = "")
-  #   return(specificity.scores)
-  # })
-  #
-  # rowMaps(ace)[["unified_feature_profile"]] <- specificity.out[["archetypes"]]
-  # rowMapTypes(ace)[["unified_feature_profile"]] <- "internal"
-  #
-  # rowMaps(ace)[["unified_feature_specificity"]] <- specificity.out[["upper_significance"]]
-  # rowMapTypes(ace)[["unified_feature_specificity"]] <- "reduction"
 
   # ace <- constructBackbone(
   #   ace = ace,
