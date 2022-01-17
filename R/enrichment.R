@@ -485,15 +485,12 @@ compute.phi <- function(
 
 
 assess.categorical.autocorrelation <- function(
-  ace,
+  A,
   labels,
   perm.no = 100
 ) {
 
     set.seed(0)
-
-    A = ace$ACTIONet
-    labels = as.numeric(as.factor(labels))
 
     w = A@x
     s0 = sum(w)

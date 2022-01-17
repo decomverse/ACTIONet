@@ -213,6 +213,84 @@ networkPropagation <- function(G, initial_labels, algorithm = "LPA", lambda = 0,
   return(updated_labels)
 }
 
+
+networkCentrality <- function(G, annotations = NULL, algorithm = "personalized_coreness", alpha_val = 0.85, network_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
+
+  if (is(G, "ACTIONetExperiment")) {
+    G <- colNets(G)[[network_slot]]
+  }
+
+  if (!is.null(annotations)) {
+    label_type <- "numeric"
+    if (is.character(annotations)) {
+      label_type <- "char"
+      annotations.factor <- factor(annotations)
+      annotations <- as.numeric(annotations.factor)
+    } else if (is.factor(annotations)) {
+      label_type <- "factor"
+      annotations.factor <- annotations
+      annotations <- as.numeric(annotations.factor)
+    }
+  }
+
+  if (algorithm == "personalized_coreness") {
+    centrality <- compute_archetype_core_centrality(G, annotations)
+  } else if (algorithm == "personalized_pagerank") {
+    design <- model.matrix(~ .0 + as.factor(annotations))
+    design <- scale(design, center = F, scale = fastColSums(design))
+    scores <- networkDiffusion(G = G, scores = as.matrix(design), alpha = alpha_val)
+    scores <- apply(scores, 2, function(x) x / max(x))
+    centrality <- apply(scores, 1, max)
+  } else if (algorithm == "pagerank") {
+    centrality <- networkDiffusion(G = G, scores = as.matrix(rep(1 / nrow(G), nrow(G))), alpha = alpha_val)
+  } else if (algorithm == "coreness") {
+    centrality <- compute_core_number(G)
+  }
+
+  return(centrality)
+}
+
+
+networkAutocorrelation <- function(G, scores = NULL, algorithm = "Geary", score_normalization_method = 1L, perm_no = 0, thread_no = 0L, network_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
+
+  if (is(G, "ACTIONetExperiment")) {
+    G <- colNets(G)[[network_slot]]
+  }
+
+  if (algorithm == "geary") {
+    if (is.sparseMatrix(G)) {
+      out <- ACTIONet::autocorrelation_Geary(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    } else {
+      out <- ACTIONet::autocorrelation_Geary_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    }
+  } else if (algorithm == "moran") {
+    if (is.sparseMatrix(G)) {
+      out <- ACTIONet::autocorrelation_Moran(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    } else {
+      out <- ACTIONet::autocorrelation_Moran_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    }
+  } else if (algorithm == "categorical") {
+    if (is.character(scores)) {
+      label_type <- "char"
+      annotations.factor <- factor(scores)
+      annotations <- as.numeric(annotations.factor)
+    } else if (is.factor(scores)) {
+      label_type <- "factor"
+      annotations.factor <- scores
+      annotations <- as.numeric(annotations.factor)
+    } else {
+      annotations <- scores
+    }
+    out <- assess.categorical.autocorrelation(A = G, labels = annotations, perm.no = perm_no)
+  }
+
+  return(out)
+}
+
+
+
 literallyAnyOtherName <- function(ace, z_threshold = 1, global = FALSE, network_slot = "ACTIONet") {
   G <- colNets(ace)[[network_slot]]
   if (global == TRUE) {
