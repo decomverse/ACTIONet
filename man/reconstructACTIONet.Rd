@@ -16,8 +16,8 @@ reconstructACTIONet(
   layout_in_parallel = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
-  output_slot = "ACTIONet",
-  H_slot = "H_stacked",
+  new_net_slot = "ACTIONet",
+  H_stacked_slot = "H_stacked",
   seed = 0
 )
 }
@@ -44,7 +44,7 @@ reconstructACTIONet(
 
 \item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel. (default='ACTION')}
 
-\item{output_slot}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
+\item{new_net_slot}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
 
 \item{seed}{Seed for random initialization. (default=0)}
 }
@@ -56,6 +56,6 @@ Reconstructs the ACTIONet graph with the new parameters (uses prior decompositio
 }
 \examples{
 plot.ACTIONet(ace)
-ace.updated = reconstructACTIONet(ace, network_density = 0.1)
+ace.updated <- reconstructACTIONet(ace, network_density = 0.1)
 plot.ACTIONet(ace.updated)
 }
