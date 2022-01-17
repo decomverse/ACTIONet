@@ -899,10 +899,10 @@ visualize.markers <- function(ace,
   out <- sapply(colnames(expression_profile), function(feat_name) {
     x <- expression_profile[, feat_name]
 
-    nnz <- round(sum(x^2)^2 / sum(x^4))
-    x.threshold <- sort(x, decreasing = TRUE)[nnz]
-    x[x < x.threshold] <- 0
-    x <- x / max(x)
+    # nnz <- round(sum(x^2)^2 / sum(x^4))
+    # x.threshold <- sort(x, decreasing = TRUE)[nnz]
+    # x[x < x.threshold] <- 0
+    # x <- x / max(x)
 
     p_out <- plot.ACTIONet.gradient(
       ace = ace,

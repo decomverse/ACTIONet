@@ -135,9 +135,6 @@ annotate.clusters.using.markers <- function(ace,
                                             marker.genes,
                                             specificity.slot.name,
                                             rand.sample.no = 1000) {
-  if (!grepl("_feature_specificity", specificity.slot.name)) {
-    specificity.slot.name <- paste(specificity.slot.name, "feature_specificity", sep = "_")
-  }
   if (!(specificity.slot.name %in% names(rowMaps(ace)))) {
     message(sprintf("%s does not exist in rowMaps(ace)", specificity.slot.name))
   }
