@@ -755,8 +755,7 @@ plot.ACTIONet.gradient <- function(ace,
                                    stroke_contrast_fac = 0.1,
                                    grad_palette = "magma",
                                    net_slot = "ACTIONet",
-                                   coordinate_attr = "ACTIONet2D"
-                                 ) {
+                                   coordinate_attr = "ACTIONet2D") {
   NA_col <- "#eeeeee"
 
   if (length(x) != ncol(ace)) {
@@ -784,8 +783,9 @@ plot.ACTIONet.gradient <- function(ace,
   }
 
   if (alpha_val > 0) {
-    x <- as.numeric(propNetworkScores(
+    x <- as.numeric(networkDiffusion(
       G = colNets(ace)[[net_slot]],
+      algorithm = "pagerank",
       scores = as.matrix(x)
     ))
   }

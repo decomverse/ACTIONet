@@ -172,7 +172,7 @@ imputeGenes <- function(ace,
                 U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
                 SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
                 V_svd <- SVD.out$v
-                V.smooth <- propNetworkScores(colNets(ace)[[net_slot]], V_svd, alpha = alpha_val) # This can also be done with network-regularized SVD directly
+                V.smooth <- networkDiffusion(colNets(ace)[[net_slot]], algorithm = "pagerank", V_svd, alpha = alpha_val) # This can also be done with network-regularized SVD directly
                 H <- V.smooth %*% diag(SVD.out$d)
                 U <- SVD.out$u
                 rownames(U) <- rownames(ace)
@@ -187,8 +187,9 @@ imputeGenes <- function(ace,
     } else if (algorithm == "ACTION") { # TODO: Fix this!! We need to also impute C. What alpha values?
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
             Ht_unified <- colMaps(ace)[["H_unified"]]
-            H <- propNetworkScores(
+            H <- networkDiffusion(
                 G = G,
+                algorithm = "pagerank",
                 scores = as.matrix(Ht_unified),
                 thread_no = thread_no,
                 alpha = alpha_val
@@ -201,7 +202,7 @@ imputeGenes <- function(ace,
         imputed.expression <- W %*% t(H)
     } else if (algorithm == "ACTIONET") {
         G <- colNets(ace)[[net_slot]]
-        imputed.expression <- t(propNetworkScores(G, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no))
+        imputed.expression <- t(networkDiffusion(G, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_iters, thread_no = thread_no))
     }
     rownames(imputed.expression) <- genes
 
