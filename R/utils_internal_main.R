@@ -1,18 +1,15 @@
 
-.run.layoutNetwork <- function(
-  ace,
-  G = NULL,
-  initial_coordinates = NULL,
-  compactness_level = 50,
-  n_epochs = 1000,
-  layout_alg = c("tumap", "umap"),
-  thread_no = 0,
-  reduction_slot = "ACTION",
-  net_slot = "ACTIONet",
-  seed = 0,
-  return_raw = FALSE
-) {
-
+.run.layoutNetwork <- function(ace,
+                               G = NULL,
+                               initial_coordinates = NULL,
+                               compactness_level = 50,
+                               n_epochs = 1000,
+                               layout_alg = c("tumap", "umap"),
+                               thread_no = 0,
+                               reduction_slot = "ACTION",
+                               net_slot = "ACTIONet",
+                               seed = 0,
+                               return_raw = FALSE) {
   layout_alg <- match.arg(toupper(layout_alg), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
 
   if (is.null(G)) {
@@ -41,7 +38,7 @@
     seed = seed
   )
 
-  if(return_raw == TRUE) {
+  if (return_raw == TRUE) {
     return(vis.out)
   } else {
     colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
@@ -67,28 +64,24 @@
 
     return(ace)
   }
-
 }
 
-.run.archetypeFeatureSpecificity <- function(
-  ace,
-  S = NULL,
-  H = NULL,
-  assay_name = "logcounts",
-  footprint_slot = "archetype_footprint",
-  return_raw = FALSE
-) {
-
-  if(is.null(S)){
-    if ( !(assay_name %in% names(assays(ace))) ) {
+.run.archetypeFeatureSpecificity <- function(ace,
+                                             S = NULL,
+                                             H = NULL,
+                                             assay_name = "logcounts",
+                                             footprint_slot = "archetype_footprint",
+                                             return_raw = FALSE) {
+  if (is.null(S)) {
+    if (!(assay_name %in% names(assays(ace)))) {
       err <- sprintf("'S' not given and %s is not an assay of the input %s object.\n", assay_name, class(ace))
       stop(err)
     }
     S <- SummarizedExperiment::assays(ace)[[assay_name]]
   }
 
-  if(is.null(H)){
-    if ( !(footprint_slot %in% names(colMaps(ace))) ) {
+  if (is.null(H)) {
+    if (!(footprint_slot %in% names(colMaps(ace)))) {
       err <- sprintf("'H' not given and %s is not in 'colMaps'.\n", footprint_slot)
       stop(err)
     }
@@ -107,7 +100,7 @@
     return(specificity.scores)
   })
 
-  if(return_raw == TRUE) {
+  if (return_raw == TRUE) {
     return(specificity.out)
   } else {
     rowMaps(ace)[["unified_feature_profile"]] <- specificity.out[["archetypes"]]
@@ -118,31 +111,27 @@
 
     return(ace)
   }
-
 }
 
 
 #' Prune nonspecific and/or unreliable archetypes
-.run.pruneArchetypes <- function(
-  C_trace,
-  H_trace,
-  ace = NULL,
-  min_specificity_z_thresh = -3,
-  min_cells_per_arch = 2,
-  return_raw = FALSE
-) {
-
-  if(return_raw == FALSE && is.null(ace)){
-    err = sprintf("'ace' cannot be null if 'return_raw=FALSE'")
+.run.pruneArchetypes <- function(C_trace,
+                                 H_trace,
+                                 ace = NULL,
+                                 min_specificity_z_thresh = -3,
+                                 min_cells_per_arch = 2,
+                                 return_raw = FALSE) {
+  if (return_raw == FALSE && is.null(ace)) {
+    err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
     stop(err)
   }
 
-  if(!is.null(ace){
-    if(class(ace) != "ACTIONetExperiment"){
+  if (!is.null(ace)) {
+    if (class(ace) != "ACTIONetExperiment") {
       err <- sprintf("'ace' must be 'ACTIONetExperiment'.\n")
       stop(err)
     }
-  })
+  }
 
   pruning.out <- prune_archetypes(
     C_trace = C_trace,
@@ -151,7 +140,7 @@
     min_cells = min_cells_per_arch
   )
 
-  if(return_raw == TRUE) {
+  if (return_raw == TRUE) {
     return(pruning.out)
   } else {
     colMaps(ace)[["H_stacked"]] <- Matrix::t(as(pruning.out$H_stacked, "sparseMatrix"))
@@ -166,33 +155,30 @@
 
 
 #' Identiy equivalent classes of archetypes and group them together
-.run.unifyArchetypes <- function(
-  ace = NULL,
-  S_r = NULL,
-  C_stacked = NULL,
-  H_stacked = NULL,
-  reduction_slot = "ACTION",
-  C_stacked_slot = "C_stacked",
-  H_stacked_slot = "H_stacked",
-  unified_suffix = "unified",
-  violation_threshold = 0,
-  thread_no = 0,
-  return_raw = FALSE
-) {
-
-  if(return_raw == FALSE && is.null(ace)){
-    err = sprintf("'ace' cannot be null if 'return_raw=FALSE'")
+.run.unifyArchetypes <- function(ace = NULL,
+                                 S_r = NULL,
+                                 C_stacked = NULL,
+                                 H_stacked = NULL,
+                                 reduction_slot = "ACTION",
+                                 C_stacked_slot = "C_stacked",
+                                 H_stacked_slot = "H_stacked",
+                                 unified_suffix = "unified",
+                                 violation_threshold = 0,
+                                 thread_no = 0,
+                                 return_raw = FALSE) {
+  if (return_raw == FALSE && is.null(ace)) {
+    err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
     stop(err)
   }
 
-  if(!is.null(ace){
-    if(class(ace) != "ACTIONetExperiment"){
+  if (!is.null(ace)) {
+    if (class(ace) != "ACTIONetExperiment") {
       err <- sprintf("'ace' must be 'ACTIONetExperiment'.\n")
       stop(err)
     }
-  })
+  }
 
-  if(is.null(S_r)){
+  if (is.null(S_r)) {
     if (!(reduction_slot %in% names(colMaps(ace)))) {
       err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", reduction_slot)
       stop(err)
@@ -200,7 +186,7 @@
     S_r <- Matrix::t(colMaps(ace)[[reduction_slot]])
   }
 
-  if(is.null(C_stacked)){
+  if (is.null(C_stacked)) {
     if (!(C_stacked_slot %in% names(colMaps(ace)))) {
       err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", C_stacked_slot)
       stop(err)
@@ -208,7 +194,7 @@
     C_stacked <- as.matrix(colMaps(ace)[[C_stacked_slot]])
   }
 
-  if(is.null(H_stacked)){
+  if (is.null(H_stacked)) {
     if (!(H_stacked_slot %in% names(colMaps(ace)))) {
       err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", H_stacked_slot)
       stop(err)
@@ -224,7 +210,7 @@
     thread_no = thread_no
   )
 
-  if(return_raw == TRUE) {
+  if (return_raw == TRUE) {
     return(unification.out)
   } else {
     Ht_unified <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
@@ -241,32 +227,29 @@
 }
 
 
-.smoothPCs <- function(
-  ace = NULL,
-  S_r = NULL,
-  V = NULL,
-  A = NULL,
-  B = NULL,
-  sigma = NULL,
-  G = NULL,
-  reduction_slot = "ACTION",
-  net_slot = "ACTIONet",
-  return_raw = FALSE
-) {
-
-  if(return_raw == FALSE && is.null(ace)){
-    err = sprintf("'ace' cannot be null if 'return_raw=FALSE'")
+.smoothPCs <- function(ace = NULL,
+                       S_r = NULL,
+                       V = NULL,
+                       A = NULL,
+                       B = NULL,
+                       sigma = NULL,
+                       G = NULL,
+                       reduction_slot = "ACTION",
+                       net_slot = "ACTIONet",
+                       return_raw = FALSE) {
+  if (return_raw == FALSE && is.null(ace)) {
+    err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
     stop(err)
   }
 
-  vars = list(
+  vars <- list(
     V = V,
     A = A,
     B = B,
     sigma = sigma
   )
 
-  if(is.null(S_r)){
+  if (is.null(S_r)) {
     if (!(reduction_slot %in% names(colMaps(ace)))) {
       err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", reduction_slot)
       stop(err)
@@ -282,29 +265,29 @@
     G <- colNets(ace)[[net_slot]]
   }
 
-  if (any(sapply(vars, is.null))){
-    if (is.null(ace)){
+  if (any(sapply(vars, is.null))) {
+    if (is.null(ace)) {
       err <- sprintf("'ace' cannot be 'NULL' if any of 'V','A','B', or 'sigma' are missing.\n")
       stop(err)
     }
 
-    vars$V = rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
-    vars$A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-    vars$B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-    vars$sigma = S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
+    vars$V <- rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
+    vars$A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
+    vars$B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
+    vars$sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
 
-    if( any(sapply(vars, is.null)) ){
-      nullvars = paste(names(vars)[which(sapply(vars, is.null))], collapse = ",")
-      err = sprintf("'%s' missing from 'ace'.\n", nullvars)
+    if (any(sapply(vars, is.null))) {
+      nullvars <- paste(names(vars)[which(sapply(vars, is.null))], collapse = ",")
+      err <- sprintf("'%s' missing from 'ace'.\n", nullvars)
       stop(err)
     }
   }
 
 
-  V = vars$V
-  A = vars$A
-  B = vars$B
-  sigma = vars$sigma
+  V <- vars$V
+  A <- vars$A
+  B <- vars$B
+  sigma <- vars$sigma
 
   # V <- rowMaps[[sprintf("%s_V", reduction_slot)]]
   # A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
@@ -318,7 +301,7 @@
 
 
   if (return_raw == TRUE) {
-    out = list(U = U, SVD.out = SVD.out, V.smooth = V.smooth, H = H)
+    out <- list(U = U, SVD.out = SVD.out, V.smooth = V.smooth, H = H)
     return(out)
   } else {
     W <- SVD.out$u
@@ -328,6 +311,4 @@
     rowMapTypes(ace)[["SVD_U"]] <- colMapTypes(ace)[["SVD_V_smooth"]] <- "internal"
     return(ace)
   }
-
-
 }

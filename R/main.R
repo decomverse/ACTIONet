@@ -33,31 +33,28 @@
 #' @examples
 #' ace <- runACTIONet(ace)
 #' @export
-runACTIONet <- function(
-  ace,
-  k_min = 2,
-  k_max = 30,
-  assay_name = "logcounts",
-  reduction_slot = "ACTION",
-  net_slot_out = "ACTIONet",
-  min_cells_per_arch = 2,
-  max_iter_ACTION = 50,
-  min_specificity_z_thresh = -3,
-  distance_metric = "jsd",
-  nn_approach = "k*nn",
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  imputation_alpha = 0.9,
-  layout_compactness = 50,
-  layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
-  layout_in_parallel = TRUE,
-  unification_violation_threshold = 0,
-  footprint_alpha = 0.15,
-  thread_no = 0,
-  seed = 0
-) {
-
+runACTIONet <- function(ace,
+                        k_min = 2,
+                        k_max = 30,
+                        assay_name = "logcounts",
+                        reduction_slot = "ACTION",
+                        net_slot_out = "ACTIONet",
+                        min_cells_per_arch = 2,
+                        max_iter_ACTION = 50,
+                        min_specificity_z_thresh = -3,
+                        distance_metric = "jsd",
+                        nn_approach = "k*nn",
+                        network_density = 1,
+                        mutual_edges_only = TRUE,
+                        imputation_alpha = 0.9,
+                        layout_compactness = 50,
+                        layout_epochs = 1000,
+                        layout_algorithm = c("tumap", "umap"),
+                        layout_in_parallel = TRUE,
+                        unification_violation_threshold = 0,
+                        footprint_alpha = 0.15,
+                        thread_no = 0,
+                        seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -104,7 +101,7 @@ runACTIONet <- function(
 
   ace <- decomp.ACTION_MR(
     ace = ace,
-    S_r = S_r
+    S_r = S_r,
     k_min = k_min,
     k_max = k_max,
     min_specificity_z_thresh = min_specificity_z_thresh,
@@ -169,7 +166,7 @@ runACTIONet <- function(
   # colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
   # colMapTypes(ace)[["ACTIONred"]] <- "embedding"
 
-# Layout ACTIONet. Now it uses the smoothed S_r
+  # Layout ACTIONet. Now it uses the smoothed S_r
   ace <- .run.layoutNetwork(ace,
     G = G,
     initial_coordinates = ACTIONetExperiment:::.tscalet(S_r),
@@ -200,7 +197,7 @@ runACTIONet <- function(
     assay_name = NULL,
     footprint_slot = NULL,
     return_raw = FALSE
-  ) {
+  )
   # H <- Matrix::t(archetype_footprint)
   # if (is.matrix(S)) {
   #   specificity.out <- compute_archetype_feature_specificity_full(S, H)
@@ -268,32 +265,29 @@ runACTIONet <- function(
 #' ace <- reduce.ace(ace)
 #' ace <- run.ACTIONet(ace)
 #' @export
-run.ACTIONet <- function(
-  ace,
-  k_min = 2,
-  k_max = 30,
-  assay_name = "logcounts",
-  reduction_slot = "ACTION",
-  net_slot_out = "ACTIONet",
-  min_cells_per_arch = 2,
-  max_iter_ACTION = 50,
-  min_specificity_z_thresh = -3,
-  distance_metric = "jsd",
-  nn_approach = "k*nn",
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
-  layout_in_parallel = TRUE,
-  unification_violation_threshold = 0,
-  footprint_alpha = 0.85,
-  thread_no = 0,
-  imputation_alpha = 0.9,
-  full_trace = FALSE,
-  seed = 0
-) {
-
+run.ACTIONet <- function(ace,
+                         k_min = 2,
+                         k_max = 30,
+                         assay_name = "logcounts",
+                         reduction_slot = "ACTION",
+                         net_slot_out = "ACTIONet",
+                         min_cells_per_arch = 2,
+                         max_iter_ACTION = 50,
+                         min_specificity_z_thresh = -3,
+                         distance_metric = "jsd",
+                         nn_approach = "k*nn",
+                         network_density = 1,
+                         mutual_edges_only = TRUE,
+                         layout_compactness = 50,
+                         layout_epochs = 1000,
+                         layout_algorithm = c("tumap", "umap"),
+                         layout_in_parallel = TRUE,
+                         unification_violation_threshold = 0,
+                         footprint_alpha = 0.85,
+                         thread_no = 0,
+                         imputation_alpha = 0.9,
+                         full_trace = FALSE,
+                         seed = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -383,7 +377,7 @@ run.ACTIONet <- function(
     ace = ace,
     S_r = S_r,
     C_stacked = pruning.out$C_stacked,
-    H_stacked = pruning.out$H_stacked,,
+    H_stacked = pruning.out$H_stacked, ,
     reduction_slot = NULL,
     C_stacked_slot = NULL,
     H_stacked_slot = NULL,
@@ -393,22 +387,22 @@ run.ACTIONet <- function(
   )
 
 
-      # unification.out <- unify_archetypes(
-      #   S_r = S_r,
-      #   C_stacked = pruning.out$C_stacked,
-      #   H_stacked = pruning.out$H_stacked,
-      #   violation_threshold = unification_violation_threshold,
-      #   thread_no = thread_no
-      # )
-      #
-      # Ht_unified <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
-      # colMaps(ace)[["H_unified"]] <- Ht_unified
-      # colMapTypes(ace)[["H_unified"]] <- "internal"
-      #
-      # colMaps(ace)[["C_unified"]] <- as(unification.out$C_unified, "sparseMatrix")
-      # colMapTypes(ace)[["C_unified"]] <- "internal"
-      #
-      # ace$assigned_archetype <- c(unification.out$assigned_archetype)
+  # unification.out <- unify_archetypes(
+  #   S_r = S_r,
+  #   C_stacked = pruning.out$C_stacked,
+  #   H_stacked = pruning.out$H_stacked,
+  #   violation_threshold = unification_violation_threshold,
+  #   thread_no = thread_no
+  # )
+  #
+  # Ht_unified <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
+  # colMaps(ace)[["H_unified"]] <- Ht_unified
+  # colMapTypes(ace)[["H_unified"]] <- "internal"
+  #
+  # colMaps(ace)[["C_unified"]] <- as(unification.out$C_unified, "sparseMatrix")
+  # colMapTypes(ace)[["C_unified"]] <- "internal"
+  #
+  # ace$assigned_archetype <- c(unification.out$assigned_archetype)
 
   # Smooth archetype footprints
   # Ht_unified <- colMaps(ace)[["H_unified"]]
@@ -428,7 +422,7 @@ run.ACTIONet <- function(
     assay_name = NULL,
     footprint_slot = NULL,
     return_raw = FALSE
-  ) {
+  )
 
   # H <- Matrix::t(archetype_footprint)
   # if (is.matrix(S)) {
@@ -472,12 +466,11 @@ run.ACTIONet <- function(
       time = Sys.time()
     )
 
-    out = list(ace = ace, trace = trace)
+    out <- list(ace = ace, trace = trace)
     return(out)
   } else {
     return(ace)
   }
-
 }
 
 
@@ -504,23 +497,20 @@ run.ACTIONet <- function(
 #' ace.updated <- reconstructACTIONet(ace, network_density = 0.1)
 #' plot.ACTIONet(ace.updated)
 #' @export
-reconstructACTIONet <- function(
-  ace,
-  network_density = 1,
-  distance_metric = "jsd",
-  nn_approach = "k*nn",
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
-  layout_in_parallel = TRUE,
-  thread_no = 0,
-  reduction_slot = "ACTION",
-  new_net_slot = "ACTIONet",
-  H_stacked_slot = "H_stacked",
-  seed = 0
-) {
-
+reconstructACTIONet <- function(ace,
+                                network_density = 1,
+                                distance_metric = "jsd",
+                                nn_approach = "k*nn",
+                                mutual_edges_only = TRUE,
+                                layout_compactness = 50,
+                                layout_epochs = 1000,
+                                layout_algorithm = c("tumap", "umap"),
+                                layout_in_parallel = TRUE,
+                                thread_no = 0,
+                                reduction_slot = "ACTION",
+                                new_net_slot = "ACTIONet",
+                                H_stacked_slot = "H_stacked",
+                                seed = 0) {
   set.seed(seed)
   layout_algorithm <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
 
@@ -585,19 +575,16 @@ reconstructACTIONet <- function(
 #' ace.updated <- rerunLayout(ace, layout_compactness = 20)
 #' plot.ACTIONet(ace.updated)
 #' @export
-rerunLayout <- function(
-  ace,
-  layout_compactness = 50,
-  layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  thread_no = 0,
-  reduction_slot = "ACTION",
-  net_slot = "ACTIONet",
-  seed = 0
-) {
-
+rerunLayout <- function(ace,
+                        layout_compactness = 50,
+                        layout_epochs = 1000,
+                        layout_algorithm = c("tumap", "umap"),
+                        network_density = 1,
+                        mutual_edges_only = TRUE,
+                        thread_no = 0,
+                        reduction_slot = "ACTION",
+                        net_slot = "ACTIONet",
+                        seed = 0) {
   layout_alg <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
 
   ace <- .run.layoutNetwork(
@@ -629,23 +616,20 @@ rerunLayout <- function(
 
 
 #' @export
-rerunArchAggr <- function(
-  ace,
-  assay_name = "logcounts",
-  reduction_slot = "ACTION",
-  C_stacked_slot = "C_stacked",
-  H_stacked_slot = "H_stacked",
-  net_slot = "ACTIONet",
-  unified_suffix = "unified",
-  footprint_alpha = 0.85,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 100,
-  thread_no = 0,
-  unification_violation_threshold = 0
-) {
-
+rerunArchAggr <- function(ace,
+                          assay_name = "logcounts",
+                          reduction_slot = "ACTION",
+                          C_stacked_slot = "C_stacked",
+                          H_stacked_slot = "H_stacked",
+                          net_slot = "ACTIONet",
+                          unified_suffix = "unified",
+                          footprint_alpha = 0.85,
+                          network_density = 1,
+                          mutual_edges_only = TRUE,
+                          layout_compactness = 50,
+                          layout_epochs = 100,
+                          thread_no = 0,
+                          unification_violation_threshold = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -737,7 +721,7 @@ rerunArchAggr <- function(
     assay_name = NULL,
     footprint_slot = NULL,
     return_raw = FALSE
-  ) {
+  )
 
 
   # H <- Matrix::t(archetype_footprint)
@@ -774,15 +758,13 @@ rerunArchAggr <- function(
   return(ace)
 }
 
-constructBackbone <- function(
-  ace,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_algorithm = c("tumap", "umap"),
-  layout_compactness = 50,
-  layout_epochs = 100,
-  net_slot = "ACTIONet"
-) {
+constructBackbone <- function(ace,
+                              network_density = 1,
+                              mutual_edges_only = TRUE,
+                              layout_algorithm = c("tumap", "umap"),
+                              layout_compactness = 50,
+                              layout_epochs = 100,
+                              net_slot = "ACTIONet") {
   # if (!("archetype_footprint" %in% names(colMaps(ace)))) {
   #     G <- colNets(ace)[[net_slot]]
   #     Ht_unified <- colMaps(ace)[["H_unified"]]
