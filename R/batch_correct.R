@@ -63,7 +63,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(
 #' (It uses Harmony for batch-correction: https://github.com/immunogenomics/harmony)
 #'
 #' @param ace ACTIONetExperiment object
-#' @param batch_attr Vector of length ncol(ace) or column name of colData(ace) containing batch labels.
+#' @param batch_attr Vector of length NCOL(ace) or column name of colData(ace) containing batch labels.
 #' @param reduced_dim Dimension of SVD used for reducing kernel matrix
 #' @param max_iter Number of SVD iterations
 #'

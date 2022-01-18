@@ -19,7 +19,7 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
   species = match.arg(species)
   metric = match.arg(metric)
 
-  features_use = ACTIONet:::.preprocess_annotation_features(ace, features_use = features_use)
+  features_use = .get_feature_vec(ace, features_use = features_use)
 
   if(species != "other")
     mask = features_use %in% .get_mtRNA_genes(species)

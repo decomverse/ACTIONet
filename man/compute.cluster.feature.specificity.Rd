@@ -6,23 +6,25 @@
 \usage{
 compute.cluster.feature.specificity(
   ace,
-  clusters,
-  output_slot,
-  assay_name = "logcounts"
+  cluster_attr,
+  output_prefix,
+  assay_name = "logcounts",
+  features_use = NULL
 )
 }
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{clusters}{Cluster}
+\item{cluster_attr}{Vector of length NCOL(ace) or column name of colData(ace) containing cluster labels.}
 
-\item{output_slot}{Name of the output in rowMaps(ace) to store results}
+\item{output_prefix}{String to prefix names of rowMaps(ace) where output is stored.}
 
-\item{renormalize.logcounts.slot}{Name of the new assay with updated logcounts adjusted using archetypes
-Typically it is either 'logcounts' or 'logcounts'}
+\item{assay_name}{Name of assay to be used. (default="logcounts")}
+
+\item{features_use}{A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the feature names. Default uses rownames(ace). (default=NULL)}
 }
 \value{
-`ACE` object with specificity scores of each cluster added to rowMaps(ace) as a matrix with name defined by output_slot
+`ACE` object with specificity scores of each cluster added to rowMaps(ace) as a matrix with name defined by output_prefix
 }
 \description{
 Computes feature (i.e. gene) specificity scores for each cluster

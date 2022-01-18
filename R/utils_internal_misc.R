@@ -1,11 +1,13 @@
 
-.preprocess_annotation_features <- function(ace, features_use = NULL) {
+.get_feature_vec <- function(ace, features_use = NULL) {
     if (is.null(features_use)) {
         features_use <- rownames(ace)
     } else {
-        features_use <- ACTIONetExperiment:::.get_attr_or_split_idx(ace,
-            attr = features_use, return_vec = TRUE,
-            d = 1
+        features_use <- ACTIONetExperiment:::.get_attr_or_split_idx(
+          ace = ace,
+          attr = features_use,
+          return_vec = TRUE,
+          d = 1
         )
     }
     return(features_use)

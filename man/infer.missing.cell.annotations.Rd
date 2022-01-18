@@ -9,7 +9,8 @@ infer.missing.cell.annotations(
   initial_labels,
   iters = 3,
   lambda = 0,
-  sig_threshold = 3
+  sig_threshold = 3,
+  net_slot = "ACTIONet"
 )
 }
 \arguments{

@@ -33,28 +33,31 @@
 #' @examples
 #' ace <- runACTIONet(ace)
 #' @export
-runACTIONet <- function(ace,
-                        k_min = 2,
-                        k_max = 30,
-                        assay_name = "logcounts",
-                        reduction_slot = "ACTION",
-                        net_slot_out = "ACTIONet",
-                        min_cells_per_arch = 2,
-                        max_iter_ACTION = 50,
-                        min_specificity_z_thresh = -3,
-                        distance_metric = "jsd",
-                        nn_approach = "k*nn",
-                        network_density = 1,
-                        mutual_edges_only = TRUE,
-                        imputation_alpha = 0.9,
-                        layout_compactness = 50,
-                        layout_epochs = 1000,
-                        layout_algorithm = c("tumap", "umap"),
-                        layout_in_parallel = TRUE,
-                        unification_violation_threshold = 0,
-                        footprint_alpha = 0.15,
-                        thread_no = 0,
-                        seed = 0) {
+runACTIONet <- function(
+  ace,
+  k_min = 2,
+  k_max = 30,
+  assay_name = "logcounts",
+  reduction_slot = "ACTION",
+  net_slot_out = "ACTIONet",
+  min_cells_per_arch = 2,
+  max_iter_ACTION = 50,
+  min_specificity_z_thresh = -3,
+  distance_metric = "jsd",
+  nn_approach = "k*nn",
+  network_density = 1,
+  mutual_edges_only = TRUE,
+  imputation_alpha = 0.9,
+  layout_compactness = 50,
+  layout_epochs = 1000,
+  layout_algorithm = c("tumap", "umap"),
+  layout_in_parallel = TRUE,
+  unification_violation_threshold = 0,
+  footprint_alpha = 0.15,
+  thread_no = 0,
+  seed = 0
+) {
+
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -254,7 +257,7 @@ runACTIONet <- function(ace,
 #' @param unification_violation_threshold Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
 #' @param thread_no Number of parallel threads. (default=0)
-#' @param full_trace Return list of all intermediate output. Intended for debugging. (default='FALSE')
+#' @param full_trace Return list of all intermediate output. Intended for debugging. (default=FALSE)
 #' @param seed Seed for random initialization. (default=0)
 #'
 #' @return \itemize{
