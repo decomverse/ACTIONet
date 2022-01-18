@@ -17,7 +17,7 @@ infer.missing.cell.annotations <- function(ace,
                                            initial_labels,
                                            iters = 3,
                                            lambda = 0,
-                                           sig_threshold = 3, network_slot = "ACTIONet") {
+                                           sig_threshold = 3, net_slot = "ACTIONet") {
   # label_type <- "numeric"
   # if (is.character(initial_labels)) {
   #   label_type <- "char"
@@ -40,7 +40,7 @@ infer.missing.cell.annotations <- function(ace,
   # }
 
   fixed_samples <- which(!is.na(initial_labels))
-  Labels <- networkPropagation(G = colNets(ace)[[network_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold, fixed_samples = fixed_samples)
+  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold, fixed_samples = fixed_samples)
 
   return(Labels)
 }
@@ -69,7 +69,7 @@ correct.cell.annotations <- function(ace,
                                      iters = 3,
                                      lambda = 0,
                                      sig_threshold = 3,
-                                     network_slot = "ACTIONet") {
+                                     net_slot = "ACTIONet") {
   algorithm <- tolower(algorithm)
 
   # label_type <- "numeric"
@@ -93,7 +93,7 @@ correct.cell.annotations <- function(ace,
   # if (label_type == "char" | label_type == "factor") {
   #   Labels <- levels(initial_labels.factor)[Labels]
   # }
-  Labels <- networkPropagation(G = colNets(ace)[[network_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold)
+  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold)
 
 
   return(Labels)
@@ -167,11 +167,21 @@ construct.tspanner <- function(backbone,
   return(G)
 }
 
-networkDiffusion <- function(G, scores, algorithm = "pagerank", alpha = 0.9, thread_no = 0, max_it = 5, res_threshold = 1e-8, network_slot = "ACTIONet") {
+networkDiffusion <- function(
+  G,
+  scores,
+  algorithm = "pagerank",
+  alpha = 0.9,
+  thread_no = 0,
+  max_it = 5,
+  res_threshold = 1e-8,
+  net_slot = "ACTIONet"
+) {
+
   algorithm <- tolower(algorithm)
 
   if (is(G, "ACTIONetExperiment")) {
-    G <- colNets(G)[[network_slot]]
+    G <- colNets(G)[[net_slot]]
   }
 
   if (algorithm == "pagerank") {
@@ -183,7 +193,17 @@ networkDiffusion <- function(G, scores, algorithm = "pagerank", alpha = 0.9, thr
   return(x)
 }
 
-networkPropagation <- function(G, initial_labels, algorithm = "LPA", lambda = 0, iters = 3, sig_threshold = 3, network_slot = "ACTIONet", fixed_samples = NULL) {
+networkPropagation <- function(
+  G,
+  initial_labels,
+  algorithm = "LPA",
+  lambda = 0,
+  iters = 3,
+  sig_threshold = 3,
+  net_slot = "ACTIONet",
+  fixed_samples = NULL
+) {
+
   algorithm <- tolower(algorithm)
 
   if (algorithm == "lpa") {
@@ -200,7 +220,7 @@ networkPropagation <- function(G, initial_labels, algorithm = "LPA", lambda = 0,
     initial_labels[is.na(initial_labels)] <- -1
 
     if (is(G, "ACTIONetExperiment")) {
-      G <- colNets(G)[[network_slot]]
+      G <- colNets(G)[[net_slot]]
     }
     updated_labels <- run_LPA(G, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
     updated_labels[updated_labels == -1] <- NA
@@ -214,11 +234,18 @@ networkPropagation <- function(G, initial_labels, algorithm = "LPA", lambda = 0,
 }
 
 
-networkCentrality <- function(G, annotations = NULL, algorithm = "personalized_coreness", alpha_val = 0.85, network_slot = "ACTIONet") {
+networkCentrality <- function(
+  G,
+  annotations = NULL,
+  algorithm = "personalized_coreness",
+  alpha_val = 0.85,
+  net_slot = "ACTIONet"
+) {
+  
   algorithm <- tolower(algorithm)
 
   if (is(G, "ACTIONetExperiment")) {
-    G <- colNets(G)[[network_slot]]
+    G <- colNets(G)[[net_slot]]
   }
 
   if (!is.null(annotations)) {
@@ -252,11 +279,11 @@ networkCentrality <- function(G, annotations = NULL, algorithm = "personalized_c
 }
 
 
-networkAutocorrelation <- function(G, scores = NULL, algorithm = "Geary", score_normalization_method = 1L, perm_no = 0, thread_no = 0L, network_slot = "ACTIONet") {
+networkAutocorrelation <- function(G, scores = NULL, algorithm = "Geary", score_normalization_method = 1L, perm_no = 0, thread_no = 0L, net_slot = "ACTIONet") {
   algorithm <- tolower(algorithm)
 
   if (is(G, "ACTIONetExperiment")) {
-    G <- colNets(G)[[network_slot]]
+    G <- colNets(G)[[net_slot]]
   }
 
   if (algorithm == "geary") {
@@ -291,8 +318,8 @@ networkAutocorrelation <- function(G, scores = NULL, algorithm = "Geary", score_
 
 
 
-literallyAnyOtherName <- function(ace, z_threshold = 1, global = FALSE, network_slot = "ACTIONet") {
-  G <- colNets(ace)[[network_slot]]
+literallyAnyOtherName <- function(ace, z_threshold = 1, global = FALSE, net_slot = "ACTIONet") {
+  G <- colNets(ace)[[net_slot]]
   if (global == TRUE) {
     cn <- compute_core_number(G)
   } else {

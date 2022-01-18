@@ -72,7 +72,7 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{thread_no}{Number of parallel threads. (default=0)}
 
-\item{full_trace}{Return list of all intermediate output. Intended for debugging. (default='FALSE')}
+\item{full_trace}{Return list of all intermediate output. Intended for debugging. (default=FALSE)}
 
 \item{seed}{Seed for random initialization. (default=0)}
 }

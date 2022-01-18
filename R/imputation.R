@@ -9,7 +9,7 @@
 #' expression_imputed <- impute.genes.using.archetype(ace, genes)
 #' @export
 impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
-    features_use <- .preprocess_annotation_features(ace, features_use = features_use)
+    features_use <- .get_feature_vec(ace, features_use = features_use)
 
     genes <- intersect(unique(genes), rownames(ace))
 
@@ -34,7 +34,7 @@ impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
 #' expression_imputed <- impute.genes.using.archetype(ace, genes)
 #' @export
 impute.specific.genes.using.archetypes <- function(ace, genes) {
-    features_use <- .preprocess_annotation_features(ace, features_use = features_use)
+    features_use <- .get_feature_vec(ace, features_use = features_use)
     genes <- intersect(unique(genes), rownames(ace))
 
 
@@ -71,7 +71,7 @@ impute.genes.using.ACTIONet <- function(ace,
                                         thread_no = 0,
                                         diffusion_iters = 5,
                                         assay_name = "logcounts") {
-    features_use <- .preprocess_annotation_features(ace, features_use = features_use)
+    features_use <- .get_feature_vec(ace, features_use = features_use)
 
     genes <- unique(genes)
 

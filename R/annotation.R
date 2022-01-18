@@ -146,7 +146,7 @@ annotate.archetypes.using.markers <- function(ace,
                                               markers,
                                               features_use = NULL,
                                               significance_slot = "unified_feature_specificity") {
-  features_use <- .preprocess_annotation_features(ace, features_use)
+  features_use <- .get_feature_vec(ace, features_use)
   marker_mat <- .preprocess_annotation_markers(markers, features_use)
 
   marker_stats <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat)$logPvals)
@@ -194,7 +194,7 @@ annotate.cells.using.markers <- function(ace,
                                          net_slot = "ACTIONet",
                                          assay_name = "logcounts",
                                          max_iter = 5) {
-  features_use <- .preprocess_annotation_features(ace, features_use)
+  features_use <- .get_feature_vec(ace, features_use)
   marker_mat <- .preprocess_annotation_markers(markers, features_use)
 
   # marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
@@ -234,7 +234,7 @@ annotate.cells.using.markers.updated <- function(ace,
                                                  thread_no = 0,
                                                  net_slot = "ACTIONet",
                                                  assay_name = "logcounts") {
-  features_use <- .preprocess_annotation_features(ace, features_use)
+  features_use <- .get_feature_vec(ace, features_use)
   marker_mat <- .preprocess_annotation_markers(markers, features_use)
 
   # marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
@@ -360,8 +360,8 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 #' @export
 annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algorithm = "PCA", pre_alpha = 0.9, post_alpha = 0.9, diffusion_iters = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, mask_threshold = 1, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
-  features_use <- ACTIONet:::.preprocess_annotation_features(ace, features_use)
-  marker_mat_full <- ACTIONet:::.preprocess_annotation_markers(markers, features_use)
+  features_use <- .get_feature_vec(ace, features_use)
+  marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
   mask <- fastRowSums(abs(marker_mat_full)) != 0
   marker_mat <- marker_mat_full[mask, ]
 
@@ -425,7 +425,7 @@ annotateArchs <- function(ace, annotation_source, archetype_slot = "H_unified") 
     arch_enrichment <- Matrix::t(assess_enrichment(scores, associations)$logPvals)
     colnames(arch_enrichment) <- levels(f)
   } else {
-    features_use <- .preprocess_annotation_features(ace, NULL)
+    features_use <- .get_feature_vec(ace, NULL)
     marker_mat <- .preprocess_annotation_markers(annotation_source, features_use)
     arch_enrichment <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat)$logPvals)
     colnames(arch_enrichment) <- colnames(marker_mat)
@@ -462,7 +462,7 @@ annotateClusters <- function(ace, annotation_source, cluster_name = "Leiden") {
     colnames(cluster_enrichment) <- levels(f)
     rownames(cluster_enrichment) <- levels(f2)
   } else {
-    features_use <- .preprocess_annotation_features(ace, NULL)
+    features_use <- .get_feature_vec(ace, NULL)
     marker_mat <- as(.preprocess_annotation_markers(annotation_source, features_use), "sparseMatrix")
 
     scores <- as.matrix(rowMaps(ace)[[cluster_slot]])

@@ -1,22 +1,47 @@
 #' @export
-normalize.scran <- function(
+normalize.scuttle <- function(
   ace,
   batch_attr = NULL,
   assay_name = "counts",
+  assay_out = "logcounts",
   BPPARAM = SerialParam()
 ) {
 
     ACTIONetExperiment:::.check_and_load_package(c("scran", "scater"))
     batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
 
-    ace = scran::computeSumFactors(
-      ace,
+    sf = scuttle::pooledSizeFactors(
+      x = SummarizedExperiment::assays(ace)[[assay_name]],
       clusters = batch_attr,
-      assay.type = assay_name,
+      ref.clust = NULL,
+      max.cluster.size = 3000,
+      positive = TRUE,
+      scaling = NULL,
+      min.mean = NULL,
+      subset.row = NULL,
       BPPARAM = BPPARAM
     )
 
-    ace = scater::logNormCounts(ace, exprs_values = assay_name)
+    SummarizedExperiment::assays(ace)[[assay_out]] = scuttle::normalizeCounts(
+      x = SummarizedExperiment::assays(ace)[[assay_name]],
+      size.factors = sf,
+      log = NULL,
+      transform = "log",
+      pseudo.count = 1,
+      center.size.factors = TRUE,
+      subset.row = NULL,
+      normalize.all = FALSE,
+      downsample = FALSE,
+      down.target = NULL,
+      down.prop = 0.01,
+      BPPARAM = BPPARAM,
+      size_factors = NULL,
+      pseudo_count = NULL,
+      center_size_factors = NULL,
+      subset_row = NULL,
+      down_target = NULL,
+      down_prop = NULL
+    )
 
     return(ace)
 }
@@ -26,6 +51,7 @@ normalize.multiBatchNorm <- function(
   ace,
   batch_attr,
   assay_name = "counts",
+  assay_out = "logcounts",
   BPPARAM = SerialParam()
 ) {
 
@@ -40,7 +66,7 @@ normalize.multiBatchNorm <- function(
       BPPARAM = BPPARAM
     )
 
-    SummarizedExperiment::assays(ace)[["logcounts"]] = SummarizedExperiment::assays(sce_temp)[["logcounts"]]
+    SummarizedExperiment::assays(ace)[[assay_out]] = SummarizedExperiment::assays(sce_temp)[["logcounts"]]
 
     return(ace)
 }
@@ -48,11 +74,12 @@ normalize.multiBatchNorm <- function(
 #' @export
 normalize.Linnorm <- function(
   ace,
-  assay_name = "counts"
+  assay_name = "counts",
+  assay_out = "logcounts"
 ) {
 
     ACTIONetExperiment:::.check_and_load_package("Linnorm")
-    SummarizedExperiment::assays(ace)[["logcounts"]] = Linnorm(SummarizedExperiment::assays(ace)[[assay_name]])
+    SummarizedExperiment::assays(ace)[[assay_out]] = Linnorm(SummarizedExperiment::assays(ace)[[assay_name]])
     return(ace)
 }
 
@@ -60,15 +87,16 @@ normalize.Linnorm <- function(
 normalize.default <- function(
   ace,
   assay_name = "counts",
-  log_scale = TRUE,
-  median_scale = TRUE
+  assay_out = "logcounts",
+  log_transform = TRUE,
+  scale_factor = TRUE
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
-    B = rescale.matrix(S, log_scale, median_scale)
+    B = normalize.matrix(S, log_transform, scale_factor)
     rownames(B) = rownames(ace)
     colnames(B) = colnames(ace)
-    SummarizedExperiment::assays(ace)[["logcounts"]] = B
+    SummarizedExperiment::assays(ace)[[assay_out]] = B
     return(ace)
 }
 
@@ -78,15 +106,18 @@ normalize.ace <- function(
   norm_method = "default",
   batch_attr = NULL,
   assay_name = "counts",
-  BPPARAM = SerialParam()
+  assay_out = "logcounts",
+  BPPARAM = SerialParam(),
+  ...
 ) {
 
     if (norm_method == "scran") {
 
-        ace = normalize.scran(
+        ace = normalize.scuttle(
           ace = ace,
           batch_attr = batch_attr,
           assay_name = assay_name,
+          assay_out = assay_out,
           BPPARAM = BPPARAM
         )
 
@@ -96,6 +127,7 @@ normalize.ace <- function(
           ace = ace,
           batch_attr = batch_attr,
           assay_name = assay_name,
+          assay_out = assay_out,
           BPPARAM = BPPARAM
         )
 
@@ -103,7 +135,8 @@ normalize.ace <- function(
 
         ace = normalize.Linnorm(
           ace = ace,
-          assay_name = assay_name
+          assay_name = assay_name,
+          assay_out = assay_out
         )
 
     } else {
@@ -111,8 +144,9 @@ normalize.ace <- function(
         ace = normalize.default(
           ace = ace,
           assay_name = assay_name,
-          log_scale = TRUE,
-          median_scale = TRUE
+          assay_out = assay_out,
+          log_transform = TRUE,
+          scale_factor = "median",
         )
         norm_method = "default"
     }
@@ -124,7 +158,7 @@ normalize.ace <- function(
 
 
 #' @export
-post.normalize.ace <- function(ace, net_slot = "ACTIONet", counts_slot = "counts", normcounts_slot = "normcounts", log_scale = T, alpha_val = 0.99, lib.size = 10^6) {
+post.normalize.ace <- function(ace, net_slot = "ACTIONet", counts_slot = "counts", normcounts_slot = "normcounts", log_transform = T, alpha_val = 0.99, lib.size = 10^6) {
   G = colNets(ace)[[net_slot]]
   C = assays(ace)[[counts_slot]]
   umis = Matrix::colSums(C)
@@ -142,14 +176,14 @@ post.normalize.ace <- function(ace, net_slot = "ACTIONet", counts_slot = "counts
 
   if(is.matrix(C)) {
     B =  Matrix::t(Matrix::t(C) * w)
-    if (log_scale == TRUE) {
+    if (log_transform == TRUE) {
         B = log1p(B)
     }
   } else {
       A = as(C, "dgTMatrix")
 
       x = A@x*w[A@j + 1]
-      if (log_scale == TRUE) {
+      if (log_transform == TRUE) {
           x = log1p(x)
       }
       B = Matrix::sparseMatrix(i = A@i + 1, j = A@j + 1, x = x,

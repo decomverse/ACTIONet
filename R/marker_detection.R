@@ -7,19 +7,20 @@ get.top.marker.genes <- function(
   features_use = NULL,
   feat_subset = NULL,
   assay_name = "logcounts",
-  return_type = c("data.frame", "df", "list")
+  to_return = c("data.frame", "df", "list")
 ){
 
-  return_type = match.arg(return_type)
+  to_return = match.arg(to_return)
 
   cluster_vec = ACTIONetExperiment:::.get_attr_or_split_idx(ace, clusters, return_vec = TRUE)
-  features_use = .preprocess_annotation_features(ace, features_use = features_use)
+  features_use = .get_feature_vec(ace, features_use = features_use)
 
   ace  = compute.cluster.feature.specificity(
     ace = ace,
     clusters = cluster_vec,
-    output_slot = "temp_slot",
-    assay_name = assay_name
+    output_prefix = "temp_slot",
+    assay_name = assay_name,
+    features_use = features_use
   )
 
   feat_spec = rowMaps(ace)[["temp_slot_feature_specificity"]]
@@ -45,7 +46,7 @@ get.top.marker.genes <- function(
 
   df = data.frame(feat_spec_top)
 
-  if(return_type == "list")
+  if(to_return == "list")
     return(as.list(df))
   else
     return(df)
