@@ -8,7 +8,7 @@ normalize.scuttle <- function(
 ) {
 
     ACTIONetExperiment:::.check_and_load_package(c("scran", "scater"))
-    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
 
     sf = scuttle::pooledSizeFactors(
       x = SummarizedExperiment::assays(ace)[[assay_name]],
@@ -56,7 +56,7 @@ normalize.multiBatchNorm <- function(
 ) {
 
     ACTIONetExperiment:::.check_and_load_package(c("scran", "batchelor"))
-    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
     sce_temp = as.SingleCellExperiment(ace)
 
     sce_temp = batchelor::multiBatchNorm(
