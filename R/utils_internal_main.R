@@ -119,7 +119,7 @@
 .run.pruneArchetypes <- function(C_trace,
                                  H_trace,
                                  ace = NULL,
-                                 min_specificity_z_thresh = -3,
+                                 specificity_th = -3,
                                  min_cells_per_arch = 2,
                                  return_raw = FALSE) {
   if (return_raw == FALSE && is.null(ace)) {
@@ -137,7 +137,7 @@
   pruning.out <- prune_archetypes(
     C_trace = C_trace,
     H_trace = H_trace,
-    min_specificity_z_thresh = min_specificity_z_thresh,
+    min_specificity_z_thresh = specificity_th,
     min_cells = min_cells_per_arch
   )
 
