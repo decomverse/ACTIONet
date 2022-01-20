@@ -51,7 +51,7 @@ def compute_archetype_feature_specificity(
     :param layer_key: Key of 'layers' to retrieve gene expression matrix.
     :param footprint_key: Key in `adata.obsm` that holds the archetype footprint.
     :param thread_no: Number of threads.
-    param copy: If 'adata' is given, return a copy instead of writing to `adata`
+    :param copy: If 'adata' is given, return a copy instead of writing to `adata`
     :param return_raw: If 'adata' is given, return dict of 'compute_archetype_feature_specificity()' output instead of storing to 'adata'.
     ...
     :return adata : anndata.AnnData \
