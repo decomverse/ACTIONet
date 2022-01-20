@@ -338,14 +338,6 @@ NULL
 #' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) ==
 NULL
 
-#' Computes sparse network diffusion over a given network, starting with an
-NULL
-
-#'
-#' @param G Input graph
-#' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) ==
-NULL
-
 #' Computes feature enrichment wrt a given annotation
 #'
 #' @param scores Specificity scores of features
@@ -836,17 +828,6 @@ compute_network_diffusion_direct <- function(G, X0, thread_no = 0L, alpha = 0.85
     .Call(`_ACTIONet_compute_network_diffusion_direct`, G, X0, thread_no, alpha)
 }
 
-#'
-#' @return Matrix of sparse diffusion scores
-#'
-#' @examples
-#' G = colNets(ace)$ACTIONet
-#' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
-#' smoothed.expression = compute_sparse_network_diffusion(G, gene.expression)
-compute_sparse_network_diffusion <- function(G, X0, alpha = 0.85, rho = 1e-4, epsilon = 0.001, max_iter = 20L) {
-    .Call(`_ACTIONet_compute_sparse_network_diffusion`, G, X0, alpha, rho, epsilon, max_iter)
-}
-
 assess_enrichment <- function(scores, associations, thread_no = 0L) {
     .Call(`_ACTIONet_assess_enrichment`, scores, associations, thread_no)
 }
@@ -1095,9 +1076,9 @@ compute_network_diffusion_Chebyshev <- function(P, X0, thread_no = 0L, alpha = 0
 #' @examples
 #' G = colNets(ace)$ACTIONet
 #' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
-#' smoothed.expression = compute_network_diffusion(G, gene.expression)
-compute_network_diffusion <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 5L, res_threshold = 1e-8, norm_type = 0L) {
-    .Call(`_ACTIONet_compute_network_diffusion`, G, X0, thread_no, alpha, max_it, res_threshold, norm_type)
+#' smoothed.expression = compute_network_diffusion_approx(G, gene.expression)
+compute_network_diffusion_approx <- function(G, X0, thread_no = 0L, alpha = 0.85, max_it = 5L, res_threshold = 1e-8, norm_type = 0L) {
+    .Call(`_ACTIONet_compute_network_diffusion_approx`, G, X0, thread_no, alpha, max_it, res_threshold, norm_type)
 }
 
 compute_marker_aggregate_stats_nonparametric <- function(S, marker_mat, thread_no = 0L) {

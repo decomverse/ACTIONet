@@ -398,8 +398,7 @@ annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algor
 
   if (post_alpha != 0) {
     G <- colNets(ace)[[net_slot]]
-    P <- normalize_adj(G, 0)
-    marker_stats <- compute_network_diffusion_Chebyshev(P, marker_stats, alpha = post_alpha, max_it = diffusion_iters, thread_no = thread_no)
+    marker_stats <- compute_network_diffusion_approx(G, marker_stats, thread_no = thread_no, alpha = post_alpha, max_it = diffusion_iters)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)

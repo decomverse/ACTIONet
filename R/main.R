@@ -676,7 +676,7 @@ rerunArchAggr <- function(ace,
   colMaps(ace)$archetype_footprint <- archetype_footprint
 
   # Ht_unified <- colMaps(ace)[[sprintf("H_%s", unified_suffix)]]
-  # archetype_footprint <- compute_network_diffusion_fast(
+  # archetype_footprint <- compute_network_diffusion_approx(
   #   G = G,
   #   X0 = Ht_unified,
   #   thread_no = thread_no,
@@ -741,7 +741,7 @@ constructBackbone <- function(ace,
   #     G <- colNets(ace)[[net_slot]]
   #     Ht_unified <- colMaps(ace)[["H_unified"]]
   #
-  #     archetype_footprint <- compute_network_diffusion_fast(
+  #     archetype_footprint <- compute_network_diffusion_approx(
   #       G = G,
   #       X0 = Ht_unified,
   #       thread_no = thread_no,
