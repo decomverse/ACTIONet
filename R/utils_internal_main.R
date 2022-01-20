@@ -71,6 +71,7 @@
                                              H = NULL,
                                              assay_name = "logcounts",
                                              footprint_slot = "archetype_footprint",
+                                             thread_no = 0,
                                              return_raw = FALSE) {
   if (is.null(S)) {
     if (!(assay_name %in% names(assays(ace)))) {
@@ -89,9 +90,9 @@
   }
 
   if (is.matrix(S)) {
-    specificity.out <- compute_archetype_feature_specificity_full(S, H)
+    specificity.out <- compute_archetype_feature_specificity_full(S, H, thread_no)
   } else {
-    specificity.out <- compute_archetype_feature_specificity(S, H)
+    specificity.out <- compute_archetype_feature_specificity(S, H, thread_no)
   }
 
   specificity.out <- lapply(specificity.out, function(specificity.scores) {

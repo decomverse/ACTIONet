@@ -1,7 +1,7 @@
 #' @export
 get.top.marker.genes <- function(
   ace,
-  clusters,
+  cluster_attr,
   top_genes = 10,
   most_specific = FALSE,
   features_use = NULL,
@@ -12,12 +12,12 @@ get.top.marker.genes <- function(
 
   to_return = match.arg(to_return)
 
-  cluster_vec = ACTIONetExperiment:::.get_attr_or_split_idx(ace, clusters, return_vec = TRUE)
+  clusters = ACTIONetExperiment::get.data.or.split(ace, attr = cluster_attr, to_return = "data")
   features_use = .get_feature_vec(ace, features_use = features_use)
 
   ace  = compute.cluster.feature.specificity(
     ace = ace,
-    clusters = cluster_vec,
+    cluster_attr = clusters,
     output_prefix = "temp_slot",
     assay_name = assay_name,
     features_use = features_use
@@ -51,6 +51,7 @@ get.top.marker.genes <- function(
   else
     return(df)
 }
+
 
 process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
   if(length(var_of_interest) == 1) {

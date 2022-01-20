@@ -20,7 +20,7 @@ compute.cluster.feature.specificity <- function(
 ) {
 
   features_use = .get_feature_vec(ace, features_use)
-  clusters = ACTIONetExperiment:::.get_attr_or_split_idx(ace, cluster_attr, return_vec = TRUE)
+  # clusters = ACTIONetExperiment::get.data.or.split(ace, attr = cluster_attr, to_return = "data")
 
   S <- SummarizedExperiment::assays(ace)[[assay_name]]
 
@@ -29,7 +29,7 @@ compute.cluster.feature.specificity <- function(
   # } else {
   #   UL <- sort(unique(clusters))
   # }
-  sa = ACTIONetExperiment::get.data.or.split(ace, attr = clusters, to_return = "levels")
+  sa = ACTIONetExperiment::get.data.or.split(ace, attr = cluster_attr, to_return = "levels")
   # UL <- sort(unique(clusters))
   # labels <- match(clusters, UL)
   #

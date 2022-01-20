@@ -200,13 +200,14 @@ runACTIONet <- function(
     H = Matrix::t(archetype_footprint),
     assay_name = NULL,
     footprint_slot = NULL,
+    thread_no = thread_no,
     return_raw = FALSE
   )
   # H <- Matrix::t(archetype_footprint)
   # if (is.matrix(S)) {
-  #   specificity.out <- compute_archetype_feature_specificity_full(S, H)
+  #   specificity.out <- compute_archetype_feature_specificity_full(S, H, thread_no)
   # } else {
-  #   specificity.out <- compute_archetype_feature_specificity(S, H)
+  #   specificity.out <- compute_archetype_feature_specificity(S, H, thread_no)
   # }
   #
   # specificity.out <- lapply(specificity.out, function(specificity.scores) {
@@ -397,6 +398,7 @@ run.ACTIONet <- function(ace,
     H = Matrix::t(archetype_footprint),
     assay_name = NULL,
     footprint_slot = NULL,
+    thread_no = thread_no,
     return_raw = FALSE
   )
 
@@ -678,6 +680,7 @@ rerunArchAggr <- function(ace,
     H = Matrix::t(archetype_footprint),
     assay_name = NULL,
     footprint_slot = NULL,
+    thread_no = thread_no,
     return_raw = FALSE
   )
 
@@ -686,9 +689,9 @@ rerunArchAggr <- function(ace,
   #
   # # Compute gene specificity for each archetype
   # if (is.matrix(S)) {
-  #   specificity.out <- compute_archetype_feature_specificity_full(S, H)
+  #   specificity.out <- compute_archetype_feature_specificity_full(S, H, thread_no)
   # } else {
-  #   specificity.out <- compute_archetype_feature_specificity(S, H)
+  #   specificity.out <- compute_archetype_feature_specificity(S, H, thread_no)
   # }
   #
   # specificity.out <- lapply(specificity.out, function(specificity.scores) {

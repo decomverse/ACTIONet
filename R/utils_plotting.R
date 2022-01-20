@@ -91,7 +91,7 @@ CPal_default <- c(
   }
 
   if (is(data, "ACTIONetExperiment")) {
-    plot_labels <- ACTIONetExperiment:::.get_attr_or_split_idx(data, attr = label_attr, return_vec = TRUE)
+    plot_labels <- ACTIONetExperiment::get.data.or.split(data, attr = label_attr, to_return = "data")
   } else {
     plot_labels <- label_attr
   }
@@ -125,7 +125,7 @@ CPal_default <- c(
       }
     } else if (is.character(color_attr)) {
       if (length(color_attr) == 1) {
-        plot_colors <- ACTIONetExperiment:::.get_attr_or_split_idx(data, attr = color_attr, return_vec = TRUE)
+        plot_colors <- ACTIONetExperiment::get.data.or.split(data, attr = color_attr, to_return = "data")
       } else {
         plot_colors <- color_attr
       }
@@ -195,12 +195,12 @@ CPal_default <- c(
   }
 
   # if (length(trans_attr) == 1) {
-  #   alpha_fac <- ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = trans_attr, return_vec = TRUE)
+  #   alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
   # } else {
   #   alpha_fac <- trans_attr
   # }
 
-  alpha_fac <- ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = trans_attr, return_vec = TRUE)
+  alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
 
   if (scale == TRUE) {
     z <- scale(alpha_fac)
