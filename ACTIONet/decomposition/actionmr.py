@@ -33,7 +33,7 @@ def runACTIONMR(
     Parameters
     ----------
     data : Union[AnnData, np.ndarray, sparse.spmatrix]
-        Input data matrix or AnnData object containing the data.
+        Matrix or AnnData object of shape `n_obs` × `n_vars`.
     k_min : int, default=2
         Minimum number of components/archetypes to consider.
     k_max : int, default=None

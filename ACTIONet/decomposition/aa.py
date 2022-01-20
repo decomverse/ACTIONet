@@ -22,7 +22,6 @@ def runAA(
         layer_key: Optional[str] = None,
         decomp_key_prefix: Optional[str] = "AA",
         return_raw: Optional[bool] = False,
-        use_highly_variable: Optional[bool] = False,
         copy: Optional[bool] = False,
         ) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
@@ -30,7 +29,7 @@ def runAA(
     Parameters
     ----------
     data : Union[AnnData, np.ndarray, sparse.spmatrix]
-        Input data matrix or AnnData object containing the data.
+        Matrix or AnnData object of shape `n_obs` × `n_vars`.
     dim : Optional[int], optional
         Number of archetypes, by default 10
     max_iter : Optional[int], optional
@@ -45,8 +44,6 @@ def runAA(
         Prefix to be added to the reduction key stored in obsm/varm (only if return_raw == False), by default "AA"
     return_raw : Optional[bool], optional
         Returns raw output of 'reduce_kernel()' as dict, by default False
-    use_highly_variable : Optional[bool], optional
-        Whether to use highly variable genes only, stored in `.var['highly_variable']`, by default False
     copy : Optional[bool], optional
         If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
 
@@ -65,53 +62,33 @@ def runAA(
     if data_is_AnnData:
         adata = data.copy() if copy else data
     else:
-        adata = AnnData(data.T)
-
-    adata_temp = adata
+        adata = AnnData(data)
 
     # ACTIONet C++ library takes cells as columns
     if layer_key is not None:
-        X = adata_temp.layers[layer_key].T
+        X = adata.layers[layer_key]
     else:
-        X = adata_temp.X.T
+        X = adata.X
 
-    X = X.astype(dtype=np.float64)
+    X = X.T.astype(dtype=np.float64)
 
     if issparse(X):
         X = X.toarray()
 
-    if Z == None:
+    if Z is None:
         selected_samples = _an.run_SPA(X, dim)["selected_columns"].astype(int) - 1
         Z = X[:, selected_samples]
-    else:
-        dim = Z.shape[1]
-
-    print(X.shape)
 
     AA_out = _an.run_AA(X, Z, max_iter, min_delta)
     AA_out["W"] = np.matmul(X, AA_out["C"])
 
     if return_raw or not data_is_AnnData:
         return AA_out
-
     else:
         adata.uns[decomp_key_prefix] = {}
-        adata.uns[decomp_key_prefix]["params"] = {
-            "use_highly_variable": use_highly_variable
-            }
-
         adata.obsm[decomp_key_prefix + "_" + "C"] = AA_out["C"]
         adata.obsm[decomp_key_prefix + "_" + "H"] = AA_out["H"].T
-
-        if use_highly_variable:
-            adata.varm[decomp_key_prefix + "_" + "W"] = np.zeros(
-                    shape=(adata.n_vars, dim)
-                    )
-            adata.varm[decomp_key_prefix + "_" + "W"][
-                adata.var["highly_variable"]
-            ] = AA_out["W"]
-        else:
-            adata.varm[decomp_key_prefix + "_" + "W"] = AA_out["W"]
+        adata.varm[decomp_key_prefix + "_" + "W"] = AA_out["W"]
 
         return adata if copy else None
 
@@ -170,14 +147,14 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
 
     Examples
     --------
-    >>> from decomp import ArchetypalAnalysis
-    >>> import numpy as np
-    >>> X = np.random.normal(0, 1, (100, 30))
-    >>> aa = ArchetypalAnalysis(n_components=5)
-    >>> aa.fit(X)
+    from decomp import ArchetypalAnalysis
+    import numpy as np
+    X = np.random.normal(0, 1, (100, 30))
+    aa = ArchetypalAnalysis(n_components=5)
+    aa.fit(X)
     ArchetypalAnalysis(n_components=5, n_iter=100)
-    >>> print(aa.reconstruction_err_)
-    >>> print(aa.components_)
+    print(aa.reconstruction_err_)
+    print(aa.components_)
     """
 
     def __init__(self, n_components=None, *, n_iter=100, tol=1e-16, thread_no=0):

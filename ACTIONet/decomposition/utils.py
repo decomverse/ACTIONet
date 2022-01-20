@@ -124,7 +124,7 @@ def unify_archetypes(
     Returns
     -------
     adata : anndata.AnnData
-        if `copy=True` returns None or else adds fields to `adata`:
+        if `copy=True`. Adds fields to `adata`:
 
         `.obsm['C_unified']`
         `.obsm['H_unified']`

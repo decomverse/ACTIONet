@@ -530,17 +530,6 @@ arma::SpMat<npdouble> normalize_adj(arma::SpMat<npdouble> &G,
   return (P);
 }
 
-arma::Mat<npdouble> compute_network_diffusion(arma::SpMat<npdouble> &G,
-                                              arma::SpMat<npdouble> &X0,
-                                              int thread_no = 0,
-                                              double alpha = 0.85,
-                                              int max_it = 5) {
-  arma::Mat<npdouble> X = ACTIONet::compute_network_diffusion(
-      G = G, X0 = X0, thread_no = thread_no, alpha = alpha, max_it = max_it);
-
-  return (X);
-}
-
 arma::Mat<npdouble> compute_network_diffusion_fast(arma::SpMat<npdouble> &G,
                                                    arma::SpMat<npdouble> &X0,
                                                    int thread_no = 0,
@@ -552,14 +541,14 @@ arma::Mat<npdouble> compute_network_diffusion_fast(arma::SpMat<npdouble> &G,
   return (X);
 }
 
-arma::Mat<npdouble> compute_network_diffusion_Chebyshev(
+arma::Mat<npdouble> compute_network_diffusion_approx(
     arma::SpMat<npdouble> &G, arma::Mat<npdouble> X0, int thread_no = 0,
     double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8,
     int norm_type = 0) {
-  if (G.n_rows != X0.n_rows) {
-    fprintf(stderr, "Dimnsion mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows,
-            G.n_cols, X0.n_rows, X0.n_cols);
-    return (mat());
+
+   if (G.n_rows != X0.n_rows) {
+    REprintf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
+    return (arma::Mat());
   }
 
   arma::SpMat<npdouble> P = ACTIONet::normalize_adj(G, norm_type);
@@ -837,20 +826,13 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Normalizes adjacency matrix using different strategies", py::arg("G"),
         py::arg("norm_type") = 0);
 
-  m.def(
-      "compute_network_diffusion", &compute_network_diffusion,
-      "Computes network diffusion using a given adjacency matrix (Old version)",
-      py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
-      py::arg("alpha") = 0.85, py::arg("max_it") = 5);
-
   m.def("compute_network_diffusion_fast", &compute_network_diffusion_fast,
         "Computes network diffusion using a given adjacency matrix",
         py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
         py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
-  m.def("compute_network_diffusion_Chebyshev",
-        &compute_network_diffusion_Chebyshev,
-        "Normalizes adjacency matrix using different strategies", py::arg("G"),
+  m.def("compute_network_diffusion_approx", &compute_network_diffusion_approx,
+        "Computes network diffusion using a given adjacency matrix", py::arg("G"),
         py::arg("X0"), py::arg("thread_no") = 0, py::arg("alpha") = 0.85,
         py::arg("max_it") = 5, py::arg("res_threshold") = 1e-8,
         py::arg("norm_type") = 1);
