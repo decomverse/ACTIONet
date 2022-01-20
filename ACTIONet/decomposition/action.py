@@ -28,7 +28,7 @@ def runACTION(
     Parameters
     ----------
     data : Union[AnnData, np.ndarray, sparse.spmatrix]
-        Input data matrix or AnnData object containing the data.
+        Matrix or AnnData object of shape `n_obs` × `n_vars`.
     reduction_key : Optional[str]
         Key for reduction stored in obsm/varm (only if return_raw == False), by default "ACTION"
     depth : int

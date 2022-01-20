@@ -20,7 +20,7 @@ def reduce_kernel(
         copy: Optional[bool] = False,
         ) -> Union[AnnData, np.ndarray, spmatrix, dict]:
     """Kernel Reduction Method [Mohammadi2020].  Computes SVD-reduced form of the kernel matrix.
-    :param data: The (annotated) data matrix of shape `n_obs` × `n_vars`. Rows correspond to cells and columns to genes.
+    :param data: Matrix or AnnData object of shape `n_obs` × `n_vars`.
     :param dim: Target dimension. Defaults to 50, or 1 - minimum dimension size of selected representation.
     :param max_iter: Maximum number of iterations
     :param reduction_key: Prefix of key to use for reduction output

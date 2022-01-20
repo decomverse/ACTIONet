@@ -14,7 +14,7 @@ def run_ACTIONet(
         k_max: Optional[int] = 30,
         layer_key: Optional[str] = None,
         reduction_key: Optional[str] = "ACTION",
-        net_key: Optional[str] = "ACTIONet",
+        net_key_out: Optional[str] = "ACTIONet",
         min_cells_per_archetype: Optional[int] = 2,
         max_iter_ACTION: Optional[int] = 50,
         specificity_th: Optional[int] = -3,
@@ -48,8 +48,8 @@ def run_ACTIONet(
     if reduction_key not in adata.obsm.keys():
         raise ValueError("Did not find adata.obsm['" + reduction_key + "']. ")
 
-    alg_name = layout_algorithm.upper()
-    if alg_name not in ["UMAP", "TUMAP"]:
+    alg_name = layout_algorithm.lower()
+    if alg_name not in ["umap", "tumap"]:
         raise ValueError("'layout_algorithm' must be 'tumap' or 'umap'.")
 
     decomp.runACTIONMR(
@@ -76,8 +76,8 @@ def run_ACTIONet(
             density=network_density,
             mutual_edges_only=mutual_edges_only,
             k=network_k,
-            net_key=net_key,
-            data_key="H_stacked",
+            net_key_out=net_key_out,
+            H_key="H_stacked",
             thread_no=thread_no,
             copy=False,
             return_raw=False,
@@ -92,7 +92,7 @@ def run_ACTIONet(
             n_epochs=layout_epochs,
             thread_no=thread_no if layout_in_parallel else 1,
             reduction_key=reduction_key,
-            net_key=net_key,
+            net_key=net_key_out,
             seed=seed,
             copy=False,
             return_raw=False,
@@ -101,7 +101,7 @@ def run_ACTIONet(
     # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
     net.centrality(
             adata,
-            algorithm="personalized_coreness",
+            algorithm="localized_coreness",
             annotations_key="assigned_archetype",
             copy=False,
             return_raw=False,

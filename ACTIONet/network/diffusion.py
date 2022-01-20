@@ -129,9 +129,8 @@ def diffusion(
 
 def centrality(
         data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        annotations: Optional[Union[np.ndarray, list, pd.Series]] = None,
-        algorithm: str = "personalized_coreness",
-        annotations_key: Optional[str] = "assigned_archetype",
+        label_attr: Union[str, np.ndarray, list, pd.Series] = "assigned_archetype",
+        algorithm: Optional[str] = "coreness",
         net_key: Optional[str] = "ACTIONet",
         centrality_key: Optional[str] = "node_centrality",
         copy: Optional[bool] = False,
@@ -143,19 +142,22 @@ def centrality(
 
     Parameters
     ----------
-    data : Union[AnnData, np.ndarray, sparse.spmatrix]
+    data: Union[AnnData, np.ndarray, sparse.spmatrix]
         Adjacency matrix of the input graph or AnnData object containing the network.
-    annotations:
-        list-like object containing sample annotations/scores of each observation (for localized measures).
+    label_attr:
+        list-like object or key in .obs containing labels/scores of each observation (for localized measures).
     algorithm: str
-        centrality algorithm. Can be "coreness", "personalized_coreness", "pagerank", "personalized_pagerank", default is "personalized_coreness"
+        centrality algorithm. Can be "coreness", "localized_coreness", "pagerank", "localized_pagerank", default is "localized_coreness"
         Required if 'adata=None'.
-    annotations_key:
-        Key of 'adata.obs' containing list-like object of sample annotations/scores (default="assigned_archetype").
+    label_attr:
+        Key of 'adata.obs' containing list-like object of sample label_attr/scores (default="assigned_archetype").
         Ignored if data is not an AnnData object.
     net_key:
         Key of 'adata.obsp' containing adjacency matrix (default="ACTIONet").
         Ignored if data is not an AnnData object.
+    centrality_key:
+        Key of 'adata.obsm' to store centrality scores. (default="node_centrality")
+        Ignored if `adata=None`
     copy
         If 'adata' is given, return a copy instead of writing to `adata`
     return_raw
@@ -172,21 +174,14 @@ def centrality(
         If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
     """
     alg_name = algorithm.lower()
-    if alg_name not in [
-        "pagerank",
-        "personalized_pagerank",
-        "coreness",
-        "personalized_coreness",
-        ]:
-        raise ValueError(
-                "'algorithm' must be 'pagerank or 'coreness', 'personalized_pagerank', and 'personalized_coreness'"
-                )
+    if alg_name not in ["coreness", "pagerank", "localized_coreness", "localized_pagerank"]:
+        raise ValueError("'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'.")
 
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
         adata = data.copy() if copy else data
-        annotations = (
-            annotations if annotations is not None else adata.obs[annotations_key]
+        label_attr = (
+            label_attr if label_attr is not None else adata.obs[label_attr]
         )
         if net_key in adata.obsp.keys():
             G = adata.obsp[net_key]
@@ -203,28 +198,28 @@ def centrality(
     if not sparse.issparse(G):
         G = sparse.csc_matrix(G)
 
-    if not annotations is None:
-        if isinstance(annotations, pd.Series):
-            annotations = np.array(annotations.tolist())
-        elif sparse.issparse(annotations):
-            annotations = annotations.toarray()
+    if not label_attr is None:
+        if isinstance(label_attr, pd.Series):
+            label_attr = np.array(label_attr.tolist())
+        elif sparse.issparse(label_attr):
+            label_attr = label_attr.toarray()
 
     if algorithm == "coreness":
         node_centrality = _an.compute_core_number(G)
-    elif algorithm == "personalized_coreness":
-        if annotations is None:
-            raise ValueError("'annotations' cannot be None for personalized_coreness")
+    elif algorithm == "localized_coreness":
+        if label_attr is None:
+            raise ValueError("'label_attr' cannot be None for localized_coreness")
 
-        node_centrality = _an.compute_archetype_core_centrality(G, annotations)
+        node_centrality = _an.compute_archetype_core_centrality(G, label_attr)
     elif algorithm == "pagerank":
         u = np.ones(G.shape[0])
         scores = u / u.shape[0]
         node_centrality = diffusion(G, algorithm="pagerank", scores=scores)
-    elif algorithm == "personalized_pagerank":
-        if annotations is None:
-            raise ValueError("'annotations' cannot be None for personalized_coreness")
+    elif algorithm == "localized_pagerank":
+        if label_attr is None:
+            raise ValueError("'label_attr' cannot be None for localized_coreness")
 
-        u = annotations
+        u = label_attr
         scores = u / u.shape[0]
         node_centrality = diffusion(G, algorithm="pagerank", scores=scores)
 
@@ -344,24 +339,6 @@ def autocorrelation(
         auto_out = assess_categorical_autocorrelation(G, scores, perm_no)
 
     return auto_out
-
-
-def string_list_to_int_list(string_list):
-    """
-    maps strings to ints
-    i.e. ['a','b','c','b','a']--> [1,2,3,2,1]
-    """
-    # generate the map
-    string_to_int = {}
-    index = 0
-    for entry in string_list:
-        if entry not in string_to_int:
-            string_to_int[entry] = index
-            index += 1
-    int_list = [0] * len(string_list)
-    for i in range(len(string_list)):
-        int_list[i] = string_to_int[string_list[i]]
-    return int_list
 
 
 def compute_phi(A, labels, s0, s1, s2):
