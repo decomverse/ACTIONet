@@ -131,7 +131,18 @@ runACTIONet <- function(
   colNets(ace)[[net_slot_out]] <- G
 
   # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-  ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
+  # ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
+
+  ace <- networkCentrality(
+    ace = ace,
+    G = G,
+    label_attr = "assigned_archetype",
+    algorithm = "localized_coreness",
+    alpha_val = 0,
+    net_slot = NULL,
+    centrality_attr = "node_centrality",
+    return_raw = FALSE
+  )
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
   ace <- .smoothPCs(

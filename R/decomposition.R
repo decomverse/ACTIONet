@@ -267,7 +267,7 @@ decomp.ACTION_MR <- function(ace = NULL,
     colMaps(ace)[["C_unified"]] <- as(out$extra$C_unified, "sparseMatrix")
     colMapTypes(ace)[["C_unified"]] <- "internal"
 
-    ace$assigned_archetype <- c(out$extra$assigned_archetype)
+    SummarizedExperiment::colData(ace)[["assigned_archetype"]] <- c(out$extra$assigned_archetype)
 
     return(ace)
   }

@@ -235,47 +235,79 @@ networkPropagation <- function(
 
 
 networkCentrality <- function(
-  G,
-  annotations = NULL,
-  algorithm = "personalized_coreness",
-  alpha_val = 0.85,
-  net_slot = "ACTIONet"
+  ace = NULL,
+  G = NULL,
+  label_attr = NULL,
+  algorithm = c("coreness", "pagerank", "localized_coreness", "localized_pagerank"),
+  alpha_val = 0,
+  net_slot = "ACTIONet",
+  centrality_attr = "node_centrality",
+  return_raw = FALSE
 ) {
-  
-  algorithm <- tolower(algorithm)
 
-  if (is(G, "ACTIONetExperiment")) {
-    G <- colNets(G)[[net_slot]]
+  algorithm <- match.arg(algorithm)
+
+  if( is.null(ace) && is.null(G) ){
+    err = sprintf("Either 'ace' or 'G' must be given.\n")
+    stop(err)
   }
 
-  if (!is.null(annotations)) {
-    label_type <- "numeric"
-    if (is.character(annotations)) {
-      label_type <- "char"
-      annotations.factor <- factor(annotations)
-      annotations <- as.numeric(annotations.factor)
-    } else if (is.factor(annotations)) {
-      label_type <- "factor"
-      annotations.factor <- annotations
-      annotations <- as.numeric(annotations.factor)
+  if (is.null(G)) {
+    if (!(net_slot %in% names(colNets(ace)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(ace)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
+
+  if(algorithm %in% c("localized_coreness", "localized_pagerank") && is.null(label_attr) ){
+    err = sprintf("'label_attr' cannot be 'NULL' if 'algorithm=%s'.\n", algorithm)
+    stop(err)
+  }
+
+  if(alpha_val > 1){
+    alpha_val = 1
+  } else if (alpha_val < 0) {
+    alpha_val = 0
+  }
+
+  if (!is.null(label_attr)) {
+    if(!is.null(ace)){
+        assignments = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")$index
+    } else {
+        assignments = as.numeric(factor(label_attr))
+        if ( length(assignments) != NROW(G) ){
+          err = sprintf("'label_attr' does not match 'NROW(G)'.\n")
+          stop(err)
+        }
     }
   }
 
-  if (algorithm == "personalized_coreness") {
-    centrality <- compute_archetype_core_centrality(G, annotations)
-  } else if (algorithm == "personalized_pagerank") {
-    design <- model.matrix(~ .0 + as.factor(annotations))
-    design <- scale(design, center = F, scale = fastColSums(design))
-    scores <- networkDiffusion(G = G, scores = as.matrix(design), alpha = alpha_val)
+  if (algorithm == "coreness") {
+    centrality <- compute_core_number(G)
+  } else if (algorithm == "pagerank") {
+    centrality <- networkDiffusion(G = G, scores = as.matrix(rep(1 / NROW(G), NROW(G))), alpha = alpha_val)
+  } else if (algorithm == "localized_coreness") {
+    centrality <- compute_archetype_core_centrality(G, assignments)
+  } else if (algorithm == "localized_pagerank") {
+    design.mat <- model.matrix(~ 0 + as.factor(assignments))
+    design.mat <- scale(design.mat, center = FALSE, scale = colSums(design.mat))
+    scores <- networkDiffusion(G = G, scores = as.matrix(design.mat), alpha = alpha_val)
     scores <- apply(scores, 2, function(x) x / max(x))
     centrality <- apply(scores, 1, max)
-  } else if (algorithm == "pagerank") {
-    centrality <- networkDiffusion(G = G, scores = as.matrix(rep(1 / nrow(G), nrow(G))), alpha = alpha_val)
-  } else if (algorithm == "coreness") {
-    centrality <- compute_core_number(G)
   }
 
-  return(centrality)
+  centrality = c(centrality)
+
+  if (return_raw == TRUE || is.null(ace)){
+      return(centrality)
+  } else {
+    SummarizedExperiment::colData(ace)[[centrality_attr]] = centrality
+    return(ace)
+  }
+
 }
 
 
