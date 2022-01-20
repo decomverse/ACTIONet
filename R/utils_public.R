@@ -38,3 +38,11 @@ normalize.matrix <- function(
 
     return(B)
 }
+
+#' @export
+fastRowVars <- function(mat) {
+    mat <- as(mat, "dgTMatrix")
+    E <- fastRowMeans(mat)
+    V <- computeSparseRowVariances(mat@i + 1, mat@x, E, ncol(mat))
+    return(V)
+}

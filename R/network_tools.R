@@ -178,16 +178,22 @@ networkDiffusion <- function(
   net_slot = "ACTIONet"
 ) {
 
-  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm)
+
+  if(alpha >= 1){
+    alpha = 1
+  } else if (alpha <= 0) {
+    alpha = 0
+  }
 
   if (is(G, "ACTIONetExperiment")) {
     G <- colNets(G)[[net_slot]]
   }
 
   if (algorithm == "pagerank") {
-    x <- compute_network_diffusion(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = 0)
+    x <- compute_network_diffusion_approx(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = 0)
   } else if (algorithm == "pagerank_sym") {
-    x <- compute_network_diffusion(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = 2)
+    x <- compute_network_diffusion_approx(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = 2)
   }
 
   return(x)
@@ -204,7 +210,7 @@ networkPropagation <- function(
   fixed_samples = NULL
 ) {
 
-  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm)
 
   if (algorithm == "lpa") {
     label_type <- "numeric"
@@ -239,7 +245,7 @@ networkCentrality <- function(
   G = NULL,
   label_attr = NULL,
   algorithm = c("coreness", "pagerank", "localized_coreness", "localized_pagerank"),
-  alpha_val = 0,
+  alpha = 0.9,
   net_slot = "ACTIONet",
   centrality_attr = "node_centrality",
   return_raw = FALSE
@@ -262,16 +268,25 @@ networkCentrality <- function(
     G =  as(G, "dgCMatrix")
   }
 
-  if(algorithm %in% c("localized_coreness", "localized_pagerank") && is.null(label_attr) ){
-    err = sprintf("'label_attr' cannot be 'NULL' if 'algorithm=%s'.\n", algorithm)
-    stop(err)
+  if(alpha >= 1){
+    alpha = 0.99
+    warning("alpha=0.99")
+  } else if (alpha < 0) {
+    alpha = 0
+    warning("alpha=0")
   }
 
-  if(alpha_val > 1){
-    alpha_val = 1
-  } else if (alpha_val < 0) {
-    alpha_val = 0
+  if( algorithm %in% c("pagerank", "localized_pagerank") ) {
+    if(is.null(label_attr)){
+      err = sprintf("'label_attr' cannot be 'NULL' if 'algorithm=%s'.\n", algorithm)
+      stop(err)
+    }
+    # if (alpha == 0) {
+    #   err = sprintf("'alpha' must be non-zero positive when 'algorithm=%s'.\n", algorithm)
+    #   stop(err)
+    # }
   }
+
 
   if (!is.null(label_attr)) {
     if(!is.null(ace)){
@@ -288,13 +303,13 @@ networkCentrality <- function(
   if (algorithm == "coreness") {
     centrality <- compute_core_number(G)
   } else if (algorithm == "pagerank") {
-    centrality <- networkDiffusion(G = G, scores = as.matrix(rep(1 / NROW(G), NROW(G))), alpha = alpha_val)
+    centrality <- networkDiffusion(G = G, scores = as.matrix(rep(1 / NROW(G), NROW(G))), alpha = alpha)
   } else if (algorithm == "localized_coreness") {
     centrality <- compute_archetype_core_centrality(G, assignments)
   } else if (algorithm == "localized_pagerank") {
     design.mat <- model.matrix(~ 0 + as.factor(assignments))
     design.mat <- scale(design.mat, center = FALSE, scale = colSums(design.mat))
-    scores <- networkDiffusion(G = G, scores = as.matrix(design.mat), alpha = alpha_val)
+    scores <- networkDiffusion(G = G, scores = as.matrix(design.mat), alpha = alpha)
     scores <- apply(scores, 2, function(x) x / max(x))
     centrality <- apply(scores, 1, max)
   }

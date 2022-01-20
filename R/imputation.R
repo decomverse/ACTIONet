@@ -109,9 +109,10 @@ impute.genes.using.ACTIONet <- function(ace,
     # Perform network-diffusion
     G <- colNets(ace)$ACTIONet
 
-    expression_imputed <- compute_network_diffusion_fast(
+    expression_imputed <- compute_network_diffusion_approx(
         G = G,
-        X0 = as(U, "sparseMatrix"),
+        # X0 = as(U, "sparseMatrix"),
+        X0 = Matrix::as.matrix(U),
         thread_no = thread_no,
         alpha = alpha_val,
         max_it = diffusion_iters

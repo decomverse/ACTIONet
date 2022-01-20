@@ -163,7 +163,7 @@ post.normalize.ace <- function(ace, net_slot = "ACTIONet", counts_slot = "counts
   C = assays(ace)[[counts_slot]]
   umis = Matrix::colSums(C)
   umis.sp = as(as.matrix(umis), "sparseMatrix")
-  umis.norm = compute_network_diffusion_fast(G, umis, alpha = alpha_val)
+  umis.norm = compute_network_diffusion_approx(G, umis, alpha = alpha_val)
 
   x = log(as.numeric(umis.norm[, 1]))
   x = x - min(x, na.rm = T)
