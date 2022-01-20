@@ -9,10 +9,10 @@
 #' @param net_slot_out  Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')
 #' @param min_cells_per_arch Minimum number of observations required to construct an archetype. (default=2)
 #' @param max_iter_ACTION Maximum number of iterations for ACTION algorithm. (default=50)
-#' @param min_specificity_z_thresh Defines the stringency of pruning nonspecific archetypes.
+#' @param specificity_th Defines the stringency of pruning nonspecific archetypes.
 #' The larger the value, the more archetypes will be filtered out. (default=-3)
-#' @param distance_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
-#' @param nn_approach Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
+#' @param network_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
+#' @param network_algorithm Algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
 #' @param network_density Density factor of ACTIONet graph. (default=1)
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param imputation_alpha Network diffusion parameter to smooth PCs (S_r). (default=0.9)
@@ -20,7 +20,7 @@
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
 #' @param layout_algorithm Algorithm for computing plot layout. can be "UMAP", "TUMAP" (faster), or "forced_atlas". (default="TUMAP")
 #' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
-#' @param unification_violation_threshold Archetype unification resolution parameter. (default=0)
+#' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param seed Seed for random initialization. (default=0)
@@ -42,9 +42,9 @@ runACTIONet <- function(
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
   max_iter_ACTION = 50,
-  min_specificity_z_thresh = -3,
-  distance_metric = "jsd",
-  nn_approach = "k*nn",
+  specificity_th = -3,
+  network_metric = "jsd",
+  network_algorithm = "k*nn",
   network_density = 1,
   mutual_edges_only = TRUE,
   imputation_alpha = 0.9,
@@ -52,7 +52,7 @@ runACTIONet <- function(
   layout_epochs = 1000,
   layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
-  unification_violation_threshold = 0,
+  unification_th = 0,
   footprint_alpha = 0.15,
   thread_no = 0,
   seed = 0
@@ -76,9 +76,9 @@ runACTIONet <- function(
   # params <- list()
   # params$k_min <- k_min
   # params$k_max <- k_max
-  # params$min_specificity_z_thresh <- min_specificity_z_thresh
+  # params$specificity_th <- specificity_th
   # params$min_cells_per_arch <- min_cells_per_arch
-  # params$unification_violation_threshold <- unification_violation_threshold
+  # params$unification_th <- unification_th
   # params$max_iter <- max_iter_ACTION
   # params$thread_no <- thread_no
   # params$seed <- seed
@@ -107,9 +107,9 @@ runACTIONet <- function(
     S_r = S_r,
     k_min = k_min,
     k_max = k_max,
-    min_specificity_z_thresh = min_specificity_z_thresh,
+    specificity_th = specificity_th,
     min_cells_per_arch = min_cells_per_arch,
-    unification_violation_threshold = unification_violation_threshold,
+    unification_th = unification_th,
     max_iter = max_iter_ACTION,
     thread_no = thread_no,
     reduction_slot = reduction_slot,
@@ -122,8 +122,8 @@ runACTIONet <- function(
   H <- as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]]))
   G <- buildNetwork(
     H = H,
-    algorithm = nn_approach,
-    distance_metric = distance_metric,
+    algorithm = network_algorithm,
+    distance_metric = network_metric,
     density = network_density,
     thread_no = thread_no,
     mutual_edges_only = mutual_edges_only
@@ -245,17 +245,17 @@ runACTIONet <- function(
 #' @param net_slot_out  Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')
 #' @param min_cells_per_arch Minimum number of observations required to construct an archetype. (default=2)
 #' @param max_iter_ACTION Maximum number of iterations for ACTION algorithm. (default=50)
-#' @param min_specificity_z_thresh Defines the stringency of pruning nonspecific archetypes.
+#' @param specificity_th Defines the stringency of pruning nonspecific archetypes.
 #' The larger the value, the more archetypes will be filtered out. (default=-3)
-#' @param distance_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
-#' @param nn_approach Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
+#' @param network_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
+#' @param network_algorithm Algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
 #' @param network_density Density factor of ACTIONet graph. (default=1)
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
 #' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
 #' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
-#' @param unification_violation_threshold Archetype unification resolution parameter. (default=0)
+#' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param full_trace Return list of all intermediate output. Intended for debugging. (default=FALSE)
@@ -278,16 +278,16 @@ run.ACTIONet <- function(ace,
                          net_slot_out = "ACTIONet",
                          min_cells_per_arch = 2,
                          max_iter_ACTION = 50,
-                         min_specificity_z_thresh = -3,
-                         distance_metric = "jsd",
-                         nn_approach = "k*nn",
+                         specificity_th = -3,
+                         network_metric = "jsd",
+                         network_algorithm = "k*nn",
                          network_density = 1,
                          mutual_edges_only = TRUE,
                          layout_compactness = 50,
                          layout_epochs = 1000,
                          layout_algorithm = c("tumap", "umap"),
                          layout_in_parallel = TRUE,
-                         unification_violation_threshold = 0,
+                         unification_th = 0,
                          footprint_alpha = 0.85,
                          thread_no = 0,
                          imputation_alpha = 0.9,
@@ -322,7 +322,7 @@ run.ACTIONet <- function(ace,
     C_trace = ACTION.out$C,
     H_trace = ACTION.out$H,
     ace = NULL,
-    min_specificity_z_thresh = min_specificity_z_thresh,
+    specificity_th = specificity_th,
     min_cells_per_arch = min_cells_per_arch,
     return_raw = TRUE
   )
@@ -338,8 +338,8 @@ run.ACTIONet <- function(ace,
   set.seed(seed)
   G <- buildNetwork(
     H = pruning.out$H_stacked,
-    algorithm = nn_approach,
-    distance_metric = distance_metric,
+    algorithm = network_algorithm,
+    distance_metric = network_metric,
     density = network_density,
     thread_no = thread_no,
     mutual_edges_only = mutual_edges_only
@@ -376,7 +376,7 @@ run.ACTIONet <- function(ace,
     reduction_slot = NULL,
     C_stacked_slot = NULL,
     H_stacked_slot = NULL,
-    violation_threshold = unification_violation_threshold,
+    violation_threshold = unification_th,
     thread_no = thread_no,
     return_raw = FALSE
   )
@@ -437,8 +437,8 @@ run.ACTIONet <- function(ace,
 #'
 #' @param ace ACTIONetExperiment object.
 #' @param network_density Density factor of ACTIONet graph. (default=1)
-#' @param distance_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
-#' @param nn_approach Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
+#' @param network_metric Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')
+#' @param algorithm Algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
@@ -453,13 +453,13 @@ run.ACTIONet <- function(ace,
 #'
 #' @examples
 #' plot.ACTIONet(ace)
-#' ace.updated <- reconstructACTIONet(ace, network_density = 0.1)
+#' ace.updated <- rebuildACTIONet(ace, network_density = 0.1)
 #' plot.ACTIONet(ace.updated)
 #' @export
-reconstructACTIONet <- function(ace,
+rebuildACTIONet <- function(ace,
                                 network_density = 1,
-                                distance_metric = "jsd",
-                                nn_approach = "k*nn",
+                                network_metric = "jsd",
+                                algorithm = "k*nn",
                                 mutual_edges_only = TRUE,
                                 layout_compactness = 50,
                                 layout_epochs = 1000,
@@ -488,8 +488,8 @@ reconstructACTIONet <- function(ace,
 
   G <- buildNetwork(
     H = H_stacked,
-    algorithm = nn_approach,
-    distance_metric = distance_metric,
+    algorithm = algorithm,
+    distance_metric = network_metric,
     density = network_density,
     thread_no = thread_no,
     mutual_edges_only = mutual_edges_only
@@ -588,7 +588,7 @@ rerunArchAggr <- function(ace,
                           layout_compactness = 50,
                           layout_epochs = 100,
                           thread_no = 0,
-                          unification_violation_threshold = 0) {
+                          unification_th = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -629,7 +629,7 @@ rerunArchAggr <- function(ace,
     C_stacked_slot = NULL,
     H_stacked_slot = NULL,
     unified_suffix = unified_suffix,
-    violation_threshold = unification_violation_threshold,
+    violation_threshold = unification_th,
     thread_no = thread_no,
     return_raw = FALSE
   )
@@ -638,7 +638,7 @@ rerunArchAggr <- function(ace,
   #   S_r = S_r,
   #   C_stacked = C_stacked,
   #   H_stacked = H_stacked,
-  #   violation_threshold = unification_violation_threshold,
+  #   violation_threshold = unification_th,
   #   thread_no = thread_no
   # )
 
