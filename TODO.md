@@ -14,7 +14,7 @@
 * Add back backbone + spanner + visualization
 * Test unification
 * Speed-up gene/cell filtering
-* Fix `correct.cell.annotations` to take character
+* Fix `correct.cell.labels` to take character
 
 ## To be tested
 * `transform_layout()` for embedding datasets into ACTIONet plot

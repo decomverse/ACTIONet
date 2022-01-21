@@ -1,3 +1,4 @@
+#' @export
 networkDiffusion <- function(
   ace = NULL,
   G = NULL,
@@ -82,6 +83,8 @@ networkDiffusion <- function(
   return(x)
 }
 
+
+#' @export
 networkCentrality <- function(
   ace = NULL,
   G = NULL,
@@ -186,6 +189,7 @@ networkCentrality <- function(
 }
 
 
+#' @export
 networkPropagation <- function(
   ace = NULL,
   G = NULL,
@@ -245,64 +249,61 @@ networkPropagation <- function(
 }
 
 
-#' Uses a variant of the label propagation algorithm to infer missing labels
-#'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
-#' @param initial_labels Annotations to correct with missing values (NA) in it.
-#' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-#' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
-#' @param adjust.levels Whether or not re-adjust labels at the end
-#'
-#' @return ace with updated annotations added to ace$annotations
-#'
-#' @examples
-#' ace <- infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
 #' @export
-infer.missing.cell.annotations <- function(ace,
-                                           initial_labels,
-                                           iters = 3,
-                                           lambda = 0,
-                                           sig_th = 3, net_slot = "ACTIONet") {
+infer.missing.cell.labels <- function(
+  ace,
+  label_attr,
+  iters = 3,
+  lambda = 0,
+  sig_th = 3,
+  net_slot = "ACTIONet"
+) {
 
+
+  initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
   fixed_samples <- which(!is.na(initial_labels))
-  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th, fixed_samples = fixed_samples)
 
-  return(Labels)
+  labels <- networkPropagation <- function(
+    ace = ace,
+    G = NULL,
+    label_attr = initial_labels,
+    fixed_samples = fixed_samples,
+    algorithm = "LPA",
+    lambda = lambda,
+    iters = iters,
+    sig_th = sig_th,
+    net_slot = net_slot
+  )
+
+  return(labels)
 }
 
 
-
-#' Uses a variant of the label propagation algorithm to correct likely noisy labels
-#'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
-#' @param initial_labels Annotations to correct with missing values (NA) in it.
-#' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param LFR.threshold How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)
-#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-#' @param iters How many iterative rounds of correction/inference should be performed (default=3)
-#'
-#' @return ace with updated annotations added to ace$annotations
-#'
-#' @examples
-#' ace <- add.cell.annotations(ace, cell.labels, "input_annotations")
-#' ace <- correct.cell.annotations(ace, "input_annotations", "updated_annotations")
 #' @export
-correct.cell.annotations <- function(ace,
-                                     initial_labels,
-                                     algorithm = "lpa",
+correct.cell.labels <- function(ace,
+                                     label_attr,
+                                     algorithm = "LPA",
                                      iters = 3,
                                      lambda = 0,
                                      sig_th = 3,
                                      net_slot = "ACTIONet") {
-  algorithm <- tolower(algorithm)
 
-  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th)
+  # Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th)
 
+  initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
+  labels <- networkPropagation <- function(
+    ace = ace,
+    G = NULL,
+    label_attr = initial_labels,
+    fixed_samples = fixed_samples,
+    algorithm = algorithm,
+    lambda = lambda,
+    iters = iters,
+    sig_th = sig_th,
+    net_slot = net_slot
+  )
 
-  return(Labels)
+  return(labels)
 }
 
 EnhAdj <- function(Adj) {
@@ -408,23 +409,5 @@ networkAutocorrelation <- function(G, scores = NULL, algorithm = "Geary", score_
     out <- assess.categorical.autocorrelation(A = G, labels = annotations, perm.no = perm_no)
   }
 
-  return(out)
-}
-
-
-
-literallyAnyOtherName <- function(ace, z_threshold = 1, global = FALSE, net_slot = "ACTIONet") {
-  G <- colNets(ace)[[net_slot]]
-  if (global == TRUE) {
-    cn <- compute_core_number(G)
-  } else {
-    cn <- ace$node_centrality
-  }
-  x <- networkDiffusion(G, scores = as.matrix(cn))
-  z <- -(x - median(x)) / mad(x)
-
-  mask <- z_threshold < z
-
-  out <- list(score = exp(z), is_filtered = mask, z.score = z)
   return(out)
 }
