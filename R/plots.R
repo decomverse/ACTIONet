@@ -796,7 +796,7 @@ plot.ACTIONet.gradient <- function(ace,
       alpha_val = 1
     x <- as.numeric(networkDiffusion(
       G = colNets(ace)[[net_slot]],
-      scores = as.matrix(x),
+      scores = x,
       algorithm = "pagerank",
       alpha = alpha_val,
       thread_no = 0

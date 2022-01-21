@@ -237,6 +237,7 @@
                        G = NULL,
                        reduction_slot = "ACTION",
                        net_slot = "ACTIONet",
+                       thread_no = 0,
                        return_raw = FALSE) {
   if (return_raw == FALSE && is.null(ace)) {
     err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
@@ -296,7 +297,7 @@
   # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
   U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
   SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-  V.smooth <- networkDiffusion(G = G, scores = SVD.out$v)
+  V.smooth <- networkDiffusion(G = G, scores = SVD.out$v, algorithm = "pagerank", alpha = 0.9, thread_no = thread_no)
 
   H <- V.smooth %*% diag(SVD.out$d)
 

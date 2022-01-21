@@ -359,14 +359,14 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algorithm = "PCA", pre_alpha = 0.9, post_alpha = 0.9, diffusion_iters = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, mask_threshold = 1, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algorithm = "PCA", pre_alpha = 0.9, post_alpha = 0.9, diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, mask_threshold = 1, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   features_use <- .get_feature_vec(ace, features_use)
   marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
   mask <- fastRowSums(abs(marker_mat_full)) != 0
   marker_mat <- marker_mat_full[mask, ]
 
   if (algorithm == "eigengene") {
-    subS <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha_val = pre_alpha, diffusion_iters = diffusion_iters, net_slot = net_slot, algorithm = imputation_algorithm)
+    subS <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha_val = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = imputation_algorithm)
     marker_stats <- compute_markers_eigengene(subS, marker_mat, normalization = 0, thread_no = thread_no)
   } else if (algorithm == "pagerank") {
     G <- colNets(ace)[[net_slot]]
@@ -398,7 +398,7 @@ annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algor
 
   if (post_alpha != 0) {
     G <- colNets(ace)[[net_slot]]
-    marker_stats <- compute_network_diffusion_approx(G, marker_stats, thread_no = thread_no, alpha = post_alpha, max_it = diffusion_iters)
+    marker_stats <- compute_network_diffusion_approx(G, marker_stats, thread_no = thread_no, alpha = post_alpha, max_it = diffusion_it)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)
