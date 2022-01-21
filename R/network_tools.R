@@ -1,172 +1,3 @@
-#' Uses a variant of the label propagation algorithm to infer missing labels
-#'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
-#' @param initial_labels Annotations to correct with missing values (NA) in it.
-#' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-#' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
-#' @param adjust.levels Whether or not re-adjust labels at the end
-#'
-#' @return ace with updated annotations added to ace$annotations
-#'
-#' @examples
-#' ace <- infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
-#' @export
-infer.missing.cell.annotations <- function(ace,
-                                           initial_labels,
-                                           iters = 3,
-                                           lambda = 0,
-                                           sig_threshold = 3, net_slot = "ACTIONet") {
-  # label_type <- "numeric"
-  # if (is.character(initial_labels)) {
-  #   label_type <- "char"
-  #   initial_labels.factor <- factor(initial_labels)
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # } else if (is.factor(initial_labels)) {
-  #   label_type <- "factor"
-  #   initial_labels.factor <- initial_labels
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # }
-
-  # fixed_labels_ <- which(!is.na(initial_labels))
-  # initial_labels[is.na(initial_labels)] <- -1
-
-  # Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
-
-  # Labels[Labels == -1] <- NA
-  # if (label_type == "char" | label_type == "factor") {
-  #   Labels <- levels(initial_labels.factor)[Labels]
-  # }
-
-  fixed_samples <- which(!is.na(initial_labels))
-  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold, fixed_samples = fixed_samples)
-
-  return(Labels)
-}
-
-
-
-#' Uses a variant of the label propagation algorithm to correct likely noisy labels
-#'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
-#' @param initial_labels Annotations to correct with missing values (NA) in it.
-#' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param LFR.threshold How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)
-#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-#' @param iters How many iterative rounds of correction/inference should be performed (default=3)
-#'
-#' @return ace with updated annotations added to ace$annotations
-#'
-#' @examples
-#' ace <- add.cell.annotations(ace, cell.labels, "input_annotations")
-#' ace <- correct.cell.annotations(ace, "input_annotations", "updated_annotations")
-#' @export
-correct.cell.annotations <- function(ace,
-                                     initial_labels,
-                                     algorithm = "lpa",
-                                     iters = 3,
-                                     lambda = 0,
-                                     sig_threshold = 3,
-                                     net_slot = "ACTIONet") {
-  algorithm <- tolower(algorithm)
-
-  # label_type <- "numeric"
-  # if (is.character(initial_labels)) {
-  #   label_type <- "char"
-  #   initial_labels.factor <- factor(initial_labels)
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # } else if (is.factor(initial_labels)) {
-  #   label_type <- "factor"
-  #   initial_labels.factor <- initial_labels
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # }
-
-  # cc <- table(initial_labels)
-  # initial_labels[initial_labels %in% as.numeric(names(cc)[cc < min_cells])] <- -1
-  # initial_labels[is.na(initial_labels)] <- -1
-
-  # Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
-  # Labels[Labels == -1] <- NA
-
-  # if (label_type == "char" | label_type == "factor") {
-  #   Labels <- levels(initial_labels.factor)[Labels]
-  # }
-  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold)
-
-
-  return(Labels)
-}
-
-EnhAdj <- function(Adj) {
-  Adj[is.na(Adj)] <- 0
-  Adj[Adj < 0] <- 0
-
-  A <- as(Adj, "dgTMatrix")
-  diag(A) <- 0
-  eps <- 1e-16
-  rs <- fastRowSums(A)
-  rs[rs == 0] <- 1
-  P <- Matrix::sparseMatrix(
-    i = A@i + 1,
-    j = A@j + 1,
-    x = A@x / rs[A@i + 1],
-    dims = dim(A)
-  )
-
-  w <- sqrt(Matrix::colSums(P) + eps)
-  W <- P %*% Matrix::Diagonal(x = 1 / w, n = length(w))
-  P <- W %*% Matrix::t(W)
-  P <- as.matrix(P)
-  diag(P) <- 0
-
-  return(P)
-}
-
-
-construct.tspanner <- function(backbone,
-                               stretch.factor = 10) {
-  backbone[backbone < 0] <- 0
-  diag(backbone) <- 0
-
-  backbone.graph <- igraph::graph_from_adjacency_matrix(
-    adjmatrix = backbone,
-    mode = "undirected",
-    weighted = TRUE
-  )
-
-  # Construct t-spanner
-  t <- (2 * stretch.factor - 1)
-
-  d <- 1 - igraph::E(backbone.graph)$weight
-  EL <- igraph::get.edgelist(backbone.graph, names = FALSE)
-  perm <- order(d, decreasing = FALSE)
-
-  backbone.graph.sparse <- igraph::delete_edges(
-    graph = backbone.graph,
-    edges = igraph::E(backbone.graph)
-  )
-
-  for (i in 1:length(d)) {
-    u <- EL[perm[i], 1]
-    v <- EL[perm[i], 2]
-    sp <- igraph::distances(backbone.graph.sparse, v = u, to = v)[1, 1]
-
-    if (sp > t * d[perm[i]]) {
-      backbone.graph.sparse <- igraph::add_edges(
-        graph = backbone.graph.sparse,
-        edges = EL[perm[i], ],
-        attr = list(weight = 1 - d[perm[i]])
-      )
-    }
-  }
-
-  G <- as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
-
-  return(G)
-}
-
 networkDiffusion <- function(
   ace = NULL,
   G = NULL,
@@ -179,7 +10,7 @@ networkDiffusion <- function(
   net_slot = "ACTIONet"
 ) {
 
-  algorithm <- match.arg(algorithm)
+  algorithm <- match.arg(tolower(algorithm))
 
   if( is.null(ace) && is.null(G) ){
     err = sprintf("Either 'ace' or 'G' must be given.\n")
@@ -356,43 +187,190 @@ networkCentrality <- function(
 
 
 networkPropagation <- function(
-  G,
-  initial_labels,
+  ace = NULL,
+  G = NULL,
+  label_attr = NULL,
+  fixed_samples = NULL,
   algorithm = "LPA",
   lambda = 0,
   iters = 3,
-  sig_threshold = 3,
-  net_slot = "ACTIONet",
-  fixed_samples = NULL
+  sig_th = 3,
+  net_slot = "ACTIONet"
 ) {
 
-  algorithm <- match.arg(algorithm)
+  if( is.null(ace) && is.null(G) ){
+    err = sprintf("Either 'ace' or 'G' must be given.\n")
+    stop(err)
+  }
+
+  if( is.null(label_attr) ){
+    err = sprintf("'label_attr' cannot be 'NULL'.\n")
+    stop(err)
+  }
+
+  if (is.null(G)) {
+    if (!(net_slot %in% names(colNets(ace)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(ace)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
+
+  if(!is.null(ace)){
+    sa = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")
+    labels = sa$index
+    keys = sa$keys
+  } else {
+    if ( length(label_attr) != NROW(G) ){
+      err = sprintf("'length(label_attr)' must equal 'NROW(G)'.\n")
+      stop(err)
+    }
+    lf = factor(label_attr)
+    labels = as.numeric(lf)
+    keys = levels(lf)
+  }
+  labels[is.na(labels)] <- -1
 
   if (algorithm == "lpa") {
-    label_type <- "numeric"
-    if (is.character(initial_labels)) {
-      label_type <- "char"
-      initial_labels.factor <- factor(initial_labels)
-      initial_labels <- as.numeric(initial_labels.factor)
-    } else if (is.factor(initial_labels)) {
-      label_type <- "factor"
-      initial_labels.factor <- initial_labels
-      initial_labels <- as.numeric(initial_labels.factor)
-    }
-    initial_labels[is.na(initial_labels)] <- -1
+    new_labels <- run_LPA(G = G, labels = labels, lambda = lambda, iters = iters, sig_threshold = sig_th, fixed_labels_ = fixed_samples)
+    new_labels[new_labels == -1] <- NA
+    new_labels <- keys[new_labels]
+  } else {
+    new_labels <- keys[labels]
+  }
 
-    if (is(G, "ACTIONetExperiment")) {
-      G <- colNets(G)[[net_slot]]
-    }
-    updated_labels <- run_LPA(G, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
-    updated_labels[updated_labels == -1] <- NA
+  return(new_labels)
+}
 
-    if (label_type == "char" | label_type == "factor") {
-      updated_labels <- levels(initial_labels.factor)[updated_labels]
+
+#' Uses a variant of the label propagation algorithm to infer missing labels
+#'
+#' @param ace Input results to be clustered
+#' (alternatively it can be the ACTIONet igraph object)
+#' @param initial_labels Annotations to correct with missing values (NA) in it.
+#' It can be either a named annotation (inside ace$annotations) or a label vector.
+#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
+#' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
+#' @param adjust.levels Whether or not re-adjust labels at the end
+#'
+#' @return ace with updated annotations added to ace$annotations
+#'
+#' @examples
+#' ace <- infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
+#' @export
+infer.missing.cell.annotations <- function(ace,
+                                           initial_labels,
+                                           iters = 3,
+                                           lambda = 0,
+                                           sig_th = 3, net_slot = "ACTIONet") {
+
+  fixed_samples <- which(!is.na(initial_labels))
+  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th, fixed_samples = fixed_samples)
+
+  return(Labels)
+}
+
+
+
+#' Uses a variant of the label propagation algorithm to correct likely noisy labels
+#'
+#' @param ace Input results to be clustered
+#' (alternatively it can be the ACTIONet igraph object)
+#' @param initial_labels Annotations to correct with missing values (NA) in it.
+#' It can be either a named annotation (inside ace$annotations) or a label vector.
+#' @param LFR.threshold How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)
+#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
+#' @param iters How many iterative rounds of correction/inference should be performed (default=3)
+#'
+#' @return ace with updated annotations added to ace$annotations
+#'
+#' @examples
+#' ace <- add.cell.annotations(ace, cell.labels, "input_annotations")
+#' ace <- correct.cell.annotations(ace, "input_annotations", "updated_annotations")
+#' @export
+correct.cell.annotations <- function(ace,
+                                     initial_labels,
+                                     algorithm = "lpa",
+                                     iters = 3,
+                                     lambda = 0,
+                                     sig_th = 3,
+                                     net_slot = "ACTIONet") {
+  algorithm <- tolower(algorithm)
+
+  Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th)
+
+
+  return(Labels)
+}
+
+EnhAdj <- function(Adj) {
+  Adj[is.na(Adj)] <- 0
+  Adj[Adj < 0] <- 0
+
+  A <- as(Adj, "dgTMatrix")
+  diag(A) <- 0
+  eps <- 1e-16
+  rs <- fastRowSums(A)
+  rs[rs == 0] <- 1
+  P <- Matrix::sparseMatrix(
+    i = A@i + 1,
+    j = A@j + 1,
+    x = A@x / rs[A@i + 1],
+    dims = dim(A)
+  )
+
+  w <- sqrt(Matrix::colSums(P) + eps)
+  W <- P %*% Matrix::Diagonal(x = 1 / w, n = length(w))
+  P <- W %*% Matrix::t(W)
+  P <- as.matrix(P)
+  diag(P) <- 0
+
+  return(P)
+}
+
+
+construct.tspanner <- function(backbone,
+                               stretch.factor = 10) {
+  backbone[backbone < 0] <- 0
+  diag(backbone) <- 0
+
+  backbone.graph <- igraph::graph_from_adjacency_matrix(
+    adjmatrix = backbone,
+    mode = "undirected",
+    weighted = TRUE
+  )
+
+  # Construct t-spanner
+  t <- (2 * stretch.factor - 1)
+
+  d <- 1 - igraph::E(backbone.graph)$weight
+  EL <- igraph::get.edgelist(backbone.graph, names = FALSE)
+  perm <- order(d, decreasing = FALSE)
+
+  backbone.graph.sparse <- igraph::delete_edges(
+    graph = backbone.graph,
+    edges = igraph::E(backbone.graph)
+  )
+
+  for (i in 1:length(d)) {
+    u <- EL[perm[i], 1]
+    v <- EL[perm[i], 2]
+    sp <- igraph::distances(backbone.graph.sparse, v = u, to = v)[1, 1]
+
+    if (sp > t * d[perm[i]]) {
+      backbone.graph.sparse <- igraph::add_edges(
+        graph = backbone.graph.sparse,
+        edges = EL[perm[i], ],
+        attr = list(weight = 1 - d[perm[i]])
+      )
     }
   }
 
-  return(updated_labels)
+  G <- as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
+
+  return(G)
 }
 
 

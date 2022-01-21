@@ -2239,7 +2239,9 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
       fixed_labels_vec(i) = fixed_labels(i) - 1;
     }
   }
-  return (ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
+
+  mat new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
+  return (new_labels);
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]
