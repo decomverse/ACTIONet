@@ -215,7 +215,7 @@ runACTIONet <- function(
   colMaps(ace)$archetype_footprint <- archetype_footprint
 
   # Compute gene specificity for each archetype
-  ace <- .run.archetypeFeatureSpecificity(
+  ace <- archetypeFeatureSpecificity(
     ace = ace,
     S = S,
     H = Matrix::t(archetype_footprint),
@@ -438,7 +438,7 @@ run.ACTIONet <- function(ace,
   # colMaps(ace)$archetype_footprint <- archetype_footprint
 
   # Compute gene specificity for each archetype
-  ace <- .run.archetypeFeatureSpecificity(
+  ace <- archetypeFeatureSpecificity(
     ace = ace,
     S = S,
     H = Matrix::t(archetype_footprint),
@@ -743,7 +743,7 @@ rerunArchAggr <- function(ace,
   # colMaps(ace)$archetype_footprint <- archetype_footprint
 
   # Compute gene specificity for each archetype
-  ace <- .run.archetypeFeatureSpecificity(
+  ace <- archetypeFeatureSpecificity(
     ace = ace,
     S = S,
     H = Matrix::t(archetype_footprint),

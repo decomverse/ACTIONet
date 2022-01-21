@@ -66,54 +66,6 @@
   }
 }
 
-.run.archetypeFeatureSpecificity <- function(ace,
-                                             S = NULL,
-                                             H = NULL,
-                                             assay_name = "logcounts",
-                                             footprint_slot = "archetype_footprint",
-                                             thread_no = 0,
-                                             return_raw = FALSE) {
-  if (is.null(S)) {
-    if (!(assay_name %in% names(assays(ace)))) {
-      err <- sprintf("'S' not given and %s is not an assay of the input %s object.\n", assay_name, class(ace))
-      stop(err)
-    }
-    S <- SummarizedExperiment::assays(ace)[[assay_name]]
-  }
-
-  if (is.null(H)) {
-    if (!(footprint_slot %in% names(colMaps(ace)))) {
-      err <- sprintf("'H' not given and %s is not in 'colMaps'.\n", footprint_slot)
-      stop(err)
-    }
-    H <- Matrix::t(colMaps(ace)[[footprint_slot]])
-  }
-
-  if (is.matrix(S)) {
-    specificity.out <- compute_archetype_feature_specificity_full(S, H, thread_no)
-  } else {
-    specificity.out <- compute_archetype_feature_specificity(S, H, thread_no)
-  }
-
-  specificity.out <- lapply(specificity.out, function(specificity.scores) {
-    rownames(specificity.scores) <- rownames(ace)
-    colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores), sep = "")
-    return(specificity.scores)
-  })
-
-  if (return_raw == TRUE) {
-    return(specificity.out)
-  } else {
-    rowMaps(ace)[["unified_feature_profile"]] <- specificity.out[["archetypes"]]
-    rowMapTypes(ace)[["unified_feature_profile"]] <- "internal"
-
-    rowMaps(ace)[["unified_feature_specificity"]] <- specificity.out[["upper_significance"]]
-    rowMapTypes(ace)[["unified_feature_specificity"]] <- "reduction"
-
-    return(ace)
-  }
-}
-
 
 #' Prune nonspecific and/or unreliable archetypes
 .run.pruneArchetypes <- function(C_trace,
