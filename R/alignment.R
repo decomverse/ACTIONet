@@ -193,7 +193,7 @@ annotate_cells_from_alignment <- function(ace,
   newLabels <- colnames(cell.enrichment.mat)[apply(cell.enrichment.mat, 1, which.max)]
   newLabels.confidence <- apply(cell.enrichment.mat, 1, max)
 
-  newLabels.corrected <- correct.cell.annotations(ace, newLabels)
+  newLabels.corrected <- correct.cell.labels(ace, newLabels)
 
   newLabels.annot <- annotate.archetypes.using.labels(ace, newLabels.corrected)
 
