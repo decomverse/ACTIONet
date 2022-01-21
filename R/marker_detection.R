@@ -1,5 +1,5 @@
 #' @export
-get.top.marker.genes <- function(
+getMarkers.ACTIONet <- function(
   ace,
   cluster_attr,
   top_genes = 10,
@@ -12,19 +12,23 @@ get.top.marker.genes <- function(
 
   to_return = match.arg(to_return)
 
-  clusters = ACTIONetExperiment::get.data.or.split(ace, attr = cluster_attr, to_return = "data")
+  sa = ACTIONetExperiment::get.data.or.split(ace, attr = cluster_attr, to_return = "levels")
   features_use = .get_feature_vec(ace, features_use = features_use)
 
-  ace  = compute.cluster.feature.specificity(
-    ace = ace,
-    cluster_attr = clusters,
-    output_prefix = "temp_slot",
-    assay_name = assay_name,
-    features_use = features_use
+  specificity <- clusterFeatureSpecificity(
+    ace = NULL,
+    S = SummarizedExperiment::assays(ace)[[assay_name]],
+    cluster_attr = sa$index,
+    output_prefix = NULL,
+    assay_name = NULL,
+    return_raw = TRUE
   )
 
-  feat_spec = rowMaps(ace)[["temp_slot_feature_specificity"]]
+  # feat_spec <- specificity[["upper_significance"]]
+  feat_spec = specificity[["upper_significance"]] - specificity[["lower_significance"]]
+  feat_spec[feat_spec < 0] = 0
   rownames(feat_spec) = features_use
+  colnames(feat_spec) = sa$keys
 
   if(!is.null(feat_subset))
     feat_spec = feat_spec[rownames(feat_spec) %in% feat_subset, ]
@@ -53,68 +57,7 @@ get.top.marker.genes <- function(
 }
 
 
-process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
-  if(length(var_of_interest) == 1) {
-    if(is.character(var_of_interest)) {
-      if(var_of_interest %in% colnames(colData(ace))) {
-        v = colData(ace)[[var_of_interest]]
-      } else {
-        warning(sprintf("Variable %s not found", var_of_interest))
-        return(NULL)
-      }
-    }
-  } else if(length(var_of_interest) == ncol(ace)) {
-    v = var_of_interest
-  } else {
-    warning(sprintf("Unknown var_of_interest"))
-    return(NULL)
-  }
-
-  if( (class(v) == "numeric") | (class(v) == "character"))  {
-    uv = sort(unique(v))
-    if(max.class < length(uv)) {
-      warning(sprintf("Variable %s has %d unique values (max.class = %d)", var_of_interest, length(uv), max.class))
-      return(NULL)
-    }
-    f = factor(v, uv)
-  } else if(class(v) == "factor") {
-    f = v
-  }
-
-  f = droplevels(f)
-  return(f)
-}
-
-findMarkers.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
-  require(ACTIONet)
-  print("Running findMarkers.ACTIONet()")
-
-  if(class(f) != "factor") {
-    warning("f must be a factor")
-    return(ace)
-  }
-  f = droplevels(f)
-
-  out = compute_cluster_feature_specificity(logcounts(ace), as.numeric(f))
-  metadata(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = out
-
-  scores = as.matrix(out$upper_significance - out$lower_significance)
-  colnames(scores) = levels(f)
-  rownames(scores) = rownames(ace)
-
-  if(pos.only == T)
-    scores[scores < 0] = 0 # Only "positive markers" [negative would be markers in other levels]
-
-  blacklisted.rows = grep(blacklist.pattern, rownames(ace), ignore.case = T)
-  scores[blacklisted.rows, ] = 0
-
-  rowMaps(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = scores
-  rowMapTypes(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = "reduction"
-
-  return(ace)
-}
-
-findMarkers.wilcox <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+getMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(presto)
   print("Running findMarkers.wilcox()")
 
@@ -146,7 +89,7 @@ findMarkers.wilcox <- function(ace, f, out.name = "cond", pos.only = T, blacklis
   return(ace)
 }
 
-findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+getMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(scran)
   print("Running findMarkers.scran()")
 
@@ -180,7 +123,7 @@ findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   return(ace)
 }
 
-findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
+getMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
   require(limma)
   print("Running findMarkers.limma()")
 
@@ -234,7 +177,7 @@ findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   return(ace)
 }
 
-findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
+getMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
   print("Running findMarkers.limma.pb()")
 
   set.seed(0)
@@ -273,8 +216,8 @@ findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blackl
   return(ace)
 }
 
-findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
-  f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
+getMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
+  # f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
   if (method == "ACTIONet") {
     ace = findMarkers.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
   } else if(method == "wilcox") {
