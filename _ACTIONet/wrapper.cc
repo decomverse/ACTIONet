@@ -164,7 +164,7 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
   res["sigma"] = sigma;
 
   arma::Mat<npdouble> V = reduction(2);
-  // printf("%d x %d\n", V.n_rows, V.n_cols);
+
   for (int i = 0; i < V.n_cols; i++) {
     vec v = V.col(i) * sigma(i);
     v = round(v * 1e5) / 1e5;
@@ -194,7 +194,7 @@ py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50,
   res["sigma"] = sigma;
 
   arma::Mat<npdouble> V = reduction(2);
-  // printf("%d x %d\n", V.n_rows, V.n_cols);
+
   for (int i = 0; i < V.n_cols; i++) {
     vec v = V.col(i) * sigma(i);
     v = round(v * 1e5) / 1e5;
@@ -547,8 +547,8 @@ arma::Mat<npdouble> compute_network_diffusion_approx(
     int norm_type = 0) {
 
    if (G.n_rows != X0.n_rows) {
-    REprintf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
-    return (arma::Mat());
+    stderr_printf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
+    return (arma::mat());
   }
 
   arma::SpMat<npdouble> P = ACTIONet::normalize_adj(G, norm_type);
