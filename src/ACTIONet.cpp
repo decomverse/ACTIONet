@@ -2480,7 +2480,7 @@ mat compute_network_diffusion_approx(sp_mat &G, mat &X0, int thread_no = 0, doub
 {
   if (G.n_rows != X0.n_rows)
   {
-    REprintf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
+    stderr_printf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
     return (mat());
   }
 
