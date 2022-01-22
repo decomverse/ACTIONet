@@ -7,6 +7,7 @@ getMarkers.ACTIONet <- function(
   features_use = NULL,
   feat_subset = NULL,
   assay_name = "logcounts",
+  thread_no = 0,
   to_return = c("data.frame", "df", "list")
 ){
 
@@ -21,6 +22,7 @@ getMarkers.ACTIONet <- function(
     cluster_attr = sa$index,
     output_prefix = NULL,
     assay_name = NULL,
+    thread_no = thread_no,
     return_raw = TRUE
   )
 

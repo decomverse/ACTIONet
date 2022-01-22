@@ -6,6 +6,7 @@ clusterFeatureSpecificity <- function(
   cluster_attr = NULL,
   output_prefix = NULL,
   assay_name = "logcounts",
+  thread_no = 0,
   return_raw = FALSE
 ) {
 
@@ -50,9 +51,9 @@ clusterFeatureSpecificity <- function(
 
   # Compute gene specificity for each cluster
   if (is.matrix(S)) {
-    specificity.out <- compute_cluster_feature_specificity_full(S, clusters)
+    specificity.out <- compute_cluster_feature_specificity_full(S, clusters, thread_no)
   } else {
-    specificity.out <- compute_cluster_feature_specificity(S, clusters)
+    specificity.out <- compute_cluster_feature_specificity(S, clusters, thread_no)
   }
 
   specificity.out <- lapply(specificity.out, function(scores) {
