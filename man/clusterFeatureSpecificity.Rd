@@ -10,6 +10,7 @@ clusterFeatureSpecificity(
   cluster_attr = NULL,
   output_prefix = NULL,
   assay_name = "logcounts",
+  thread_no = 0,
   return_raw = FALSE
 )
 }
