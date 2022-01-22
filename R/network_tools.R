@@ -11,7 +11,7 @@ networkDiffusion <- function(
   net_slot = "ACTIONet"
 ) {
 
-  algorithm <- match.arg(tolower(algorithm))
+  algorithm <- match.arg(algorithm)
 
   if( is.null(ace) && is.null(G) ){
     err = sprintf("Either 'ace' or 'G' must be given.\n")
