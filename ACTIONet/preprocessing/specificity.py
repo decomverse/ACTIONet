@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import numpy as np
+import pandas as pd
 from anndata import AnnData
 from scipy import sparse
 
@@ -31,7 +32,7 @@ def __compute_cluster_specificity(S, sample_assignments, thread_no=0):
     return out
 
 
-def compute_archetype_feature_specificity(
+def archetypeFeatureSpecificity(
         adata: Optional[AnnData] = None,
         S: Union[np.ndarray, sparse.spmatrix] = None,
         H: Union[np.ndarray, sparse.spmatrix] = None,
@@ -102,9 +103,9 @@ def compute_archetype_feature_specificity(
         return adata if copy else None
 
 
-def compute_cluster_feature_specificity(
-        adata: AnnData,
-        cluster_key: Optional[str] = None,
+def clusterFeatureSpecificity(
+        data: Union[np.ndarray, sparse.spmatrix] = None,
+        cluster_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
         output_prefix: Optional[str] = None,
         layer_key: Optional[str] = None,
         thread_no: Optional[int] = 0,
@@ -117,10 +118,10 @@ def compute_cluster_feature_specificity(
     Uses cluster membership vector to estimate markers (disjoint clustering)
     Parameters
     ----------
-    adata
-        Current AnnData object storing the ACTIONet results.
-    cluster_key
-        Key in `adata.obs` that holds the clustering variable.
+    data
+        AnnData object or expression matrix of shape `n_obs` × `n_vars`..
+    cluster_attr
+        List-like object of length 'data.shape[0]' containing clusters labels or key in `adata.obs` that holds the clustering variable.
     output_prefix
         String to prefix keys in 'adata.varm' where output is stored.
     layer_key
@@ -142,22 +143,36 @@ def compute_cluster_feature_specificity(
         If 'return_raw=True', returns dict containing 'average_profile', 'upper_significance', and 'lower_significance' matrices.
     """
 
-    if cluster_key not in adata.obs.keys():
-        raise ValueError(f"'{cluster_key}' not in adata.obs_keys()")
-    adata = adata.copy() if copy else adata
+    data_is_AnnData = isinstance(data, AnnData)
 
-    if layer_key is not None:
-        S = adata.layers[layer_key]
+    if cluster_attr is None:
+        raise ValueError(f"'cluster_attr' cannot be 'None.")
+
+    if data_is_AnnData:
+        adata = data.copy() if copy else data
+
+        if layer_key is not None:
+            if layer_key not in adata.layers.keys():
+                raise ValueError(f"'{layer_key}' not in 'adata.layers.keys()'.")
+            S = adata.layers[layer_key]
+        else:
+            S = adata.X
+
+        sa = tl.get_data_or_split(adata=adata, attr=cluster_attr, to_return="levels")
+        clusters = sa["index"]
+
     else:
-        S = adata.X
+        adata = None
+        if len(cluster_attr) != data.shape[0]:
+            raise ValueError(f"'len(cluster_attr)' must equal 'data.shape[0]'.")
+        S = data
+        clusters = pd.factorize(list(cluster_attr), sort=True)[0]
 
     S = S.T.astype(dtype=np.float64)
 
-    idx_clust = tl.get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
+    specificity_out = __compute_cluster_specificity(S=S, sample_assignments=clusters, thread_no=thread_no)
 
-    specificity_out = __compute_cluster_specificity(S=S, sample_assignments=idx_clust["index"], thread_no=thread_no)
-
-    if return_raw:
+    if return_raw or not data_is_AnnData:
         return specificity_out
     else:
         adata.varm[f"{output_prefix}_feature_specificity"] = specificity_out["upper_significance"]
