@@ -1,4 +1,4 @@
-.Rproj.user
+.Rproj*
 .Rhistory
 .RData
 .Ruserdata
@@ -11,9 +11,6 @@
 tests/tmp
 build
 dist
-lib
 *.back
 **/.DS_Store
-README.md
-pybind11/
 .vscode/

@@ -1,81 +1,6 @@
 #include "ACTIONet.h"
 #include <cholmod.h>
 
-#include <atomic>
-#include <thread>
-
-std::mutex mtx; // mutex for critical section
-
-template <class Function>
-inline void ParallelFor(size_t start, size_t end, size_t numThreads,
-                        Function fn)
-{
-    if (numThreads <= 0)
-    {
-        numThreads = SYS_THREADS_DEF;
-    }
-
-    if (numThreads == 1)
-    {
-        for (size_t id = start; id < end; id++)
-        {
-            fn(id, 0);
-        }
-    }
-    else
-    {
-        std::vector<std::thread> threads;
-        std::atomic<size_t> current(start);
-
-        // keep track of exceptions in threads
-        // https://stackoverflow.com/a/32428427/1713196
-        std::exception_ptr lastException = nullptr;
-        std::mutex lastExceptMutex;
-
-        for (size_t threadId = 0; threadId < numThreads; ++threadId)
-        {
-            threads.push_back(std::thread([&, threadId]
-                                          {
-                                              while (true)
-                                              {
-                                                  size_t id = current.fetch_add(1);
-
-                                                  if ((id >= end))
-                                                  {
-                                                      break;
-                                                  }
-
-                                                  try
-                                                  {
-                                                      fn(id, threadId);
-                                                  }
-                                                  catch (...)
-                                                  {
-                                                      std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-                                                      lastException = std::current_exception();
-                                                      /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-                                                      current = end;
-                                                      break;
-                                                  }
-                                              }
-                                          }));
-        }
-        for (auto &thread : threads)
-        {
-            thread.join();
-        }
-        if (lastException)
-        {
-            std::rethrow_exception(lastException);
-        }
-    }
-}
-
 namespace ACTIONet
 {
 
@@ -125,7 +50,6 @@ namespace ACTIONet
         double *x_ptr = (double *)chol_A->x;
         int *i_ptr = (int *)chol_A->i;
 
-        mtx.lock();
         A.sync();
         {
             for (int k = 0; k < A.n_nonzero; k++)
@@ -138,7 +62,6 @@ namespace ACTIONet
                 ptr[k] = A.col_ptrs[k];
             }
         }
-        mtx.unlock();
 
         return chol_A;
     }
@@ -149,7 +72,6 @@ namespace ACTIONet
         A = arma::sp_mat(chol_A->nrow, chol_A->ncol);
         A.mem_resize(static_cast<unsigned>(chol_A->nzmax));
 
-        mtx.lock();
         A.sync();
         double *in_x_ptr = (double *)chol_A->x;
         int *in_i_ptr = (int *)chol_A->i;
@@ -173,7 +95,6 @@ namespace ACTIONet
 
         // set the number of non-zero elements
         arma::access::rw(A.n_nonzero) = chol_A->nzmax;
-        mtx.unlock();
 
         return A;
     }
@@ -256,21 +177,18 @@ namespace ACTIONet
         if (thread_no > N)
         {
             thread_no = N;
-            ParallelFor(0, B.n_cols, thread_no, [&](unsigned int k, size_t threadId)
-                        {
+
+            parallelFor(0, B.n_cols, [&] (unsigned int k) {
                             vec u = B.col(k);
                             vec v = spmat_vec_product(A, u);
-                            mtx.lock();
                             res.col(k) = v;
-                            mtx.unlock();
-                        });
+                        }, thread_no);
         }
         else
         {
             int slice_size = ceil((double)N / thread_no);
 
-            ParallelFor(0, thread_no, thread_no, [&](unsigned int k, size_t threadId)
-                        {
+            parallelFor(0, thread_no, [&] (unsigned int k) {
                             int i = k * slice_size;
                             if (i <= (N - 1))
                             {
@@ -280,11 +198,9 @@ namespace ACTIONet
 
                                 mat subB = B.cols(i, j);
                                 mat subC = spmat_mat_product(A, subB);
-                                mtx.lock();
                                 res.cols(i, j) = subC;
-                                mtx.unlock();
                             }
-                        });
+                        }, thread_no);
         }
 
         return (res);
@@ -304,21 +220,17 @@ namespace ACTIONet
         if (thread_no > N)
         {
             thread_no = N;
-            ParallelFor(0, B.n_cols, thread_no, [&](size_t k, size_t threadId)
-                        {
+            parallelFor(0, thread_no, [&] (size_t k) {
                             vec u = B.col(k);
                             vec v = A * u;
-                            mtx.lock();
                             res.col(k) = v;
-                            mtx.unlock();
-                        });
+                        }, thread_no);
         }
         else
         {
             int slice_size = ceil((double)N / thread_no);
 
-            ParallelFor(0, thread_no, thread_no, [&](size_t k, size_t threadId)
-                        {
+            parallelFor(0, thread_no, [&] (size_t k) {
                             int i = k * slice_size;
                             if (i <= (N - 1))
                             {
@@ -328,11 +240,9 @@ namespace ACTIONet
 
                                 mat subB = B.cols(i, j);
                                 mat subC = A * subB;
-                                mtx.lock();
                                 res.cols(i, j) = subC;
-                                mtx.unlock();
                             }
-                        });
+                        }, thread_no);
         }
 
         return (res);

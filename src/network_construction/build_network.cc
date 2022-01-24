@@ -11,15 +11,15 @@
 #include <space_l2.h>
 
 template <class Function>
-inline void ParallelFor(size_t start, size_t end, size_t thread_no,
+inline void ParallelFor(size_t start, size_t end, size_t numThreads,
                         Function fn)
 {
-  if (thread_no <= 0)
+  if (numThreads <= 0)
   {
-    thread_no = SYS_THREADS_DEF;
+    numThreads = SYS_THREADS_DEF;
   }
 
-  if (thread_no == 1)
+  if (numThreads == 1)
   {
     for (size_t id = start; id < end; id++)
     {
@@ -36,7 +36,7 @@ inline void ParallelFor(size_t start, size_t end, size_t thread_no,
     std::exception_ptr lastException = nullptr;
     std::mutex lastExceptMutex;
 
-    for (size_t threadId = 0; threadId < thread_no; ++threadId)
+    for (size_t threadId = 0; threadId < numThreads; ++threadId)
     {
       threads.push_back(std::thread([&, threadId]
                                     {
@@ -153,14 +153,13 @@ namespace ACTIONet
     // stdout_printf("sample # = %d, dim = %d\n", sample_no, dim);
 
     mat G = zeros(sample_no, sample_no);
-    ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId)
-                {
+    parallelFor(0, sample_no, [&] (size_t i) {
                   for (int j = 0; j < sample_no; j++)
                   {
                     //use the JSD distance function here
                     G(i, j) = Sim(H.colptr(i), H.colptr(j), log_vec, dim);
                   }
-                });
+                }, thread_no);
 
     G = clamp(G, 0.0, 1.0);
 
@@ -243,15 +242,15 @@ namespace ACTIONet
     stdout_printf("\tBuilding index ... ");
     fmat X = conv_to<fmat>::from(H);
 
-    ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId)
-                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); });
+    parallelFor(0, max_elements, [&] (size_t j)
+                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
     stdout_printf("done\n");
 
     stdout_printf("\tIdentifying nearest neighbors ... ");
     mat idx = zeros(sample_no, kNN + 1);
     mat dist = zeros(sample_no, kNN + 1);
     //		for(int i = 0; i < sample_no; i++) {
-    ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId)
+    parallelFor(0, sample_no, [&] (size_t i)
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), kNN + 1);
@@ -311,7 +310,7 @@ namespace ACTIONet
 
     sp_mat G(sample_no, sample_no);
     // for(int v = 0; v < sample_no; v++) {
-    ParallelFor(0, sample_no, 1, [&](size_t v, size_t threadId)
+    parallelFor(0, sample_no, [&] (size_t v)
                 {
                   vec delta = Delta.col(v);
 
@@ -327,7 +326,7 @@ namespace ACTIONet
                     int src = v_idx(i);
                     G(src, dst) = 1.0 - v_dist(i);
                   }
-                });
+                }, thread_no);
     stdout_printf("done\n");
 
     stdout_printf("\tFinalizing network ... ");
@@ -406,8 +405,8 @@ namespace ACTIONet
     stdout_printf("\tBuilding index ... ");
     fmat X = conv_to<fmat>::from(H);
     int max_elements = X.n_cols;
-    ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId)
-                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); });
+    parallelFor(0, max_elements, [&] (size_t j)
+                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
     stdout_printf("done\n");
 
     stdout_printf("\tConstructing k*-NN ... ");
@@ -417,7 +416,9 @@ namespace ACTIONet
     vector<vector<double>> vv(thread_no);
 
     //		for(int i = 0; i < sample_no; i++) {
+    //parallelFor(0, sample_no, [&] (size_t i)
     ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId)
+
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> results =
                       appr_alg->searchKStarnn(X.colptr(i), LC);
@@ -529,15 +530,15 @@ namespace ACTIONet
     stdout_printf("\tBuilding index ... ");
     int max_elements = H.n_cols;
     fmat X = conv_to<fmat>::from(H);
-    ParallelFor(0, max_elements, thread_no, [&](size_t j, size_t threadId)
-                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); });
+    parallelFor(0, max_elements, [&] (size_t j)
+                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
     stdout_printf("done\n");
 
     sp_mat G(sample_no, sample_no);
 
     stdout_printf("\tConstructing k*-NN ... ");
     //		for(int i = 0; i < sample_no; i++) {
-    ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId)
+    parallelFor(0, sample_no, [&] (size_t i)
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), k);
@@ -555,7 +556,7 @@ namespace ACTIONet
                     G(i, result_tuple.second) = 1.0 - result_tuple.first;
                     result.pop();
                   }
-                });
+                }, thread_no);
     stdout_printf("done\n");
 
     delete (appr_alg);

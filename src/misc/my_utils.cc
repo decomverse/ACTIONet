@@ -37,76 +37,6 @@ double r8_normal_01_cdf_inverse(double p);
 
 namespace ACTIONet
 {
-  template <class Function>
-  inline void ParallelFor(size_t start, size_t end, size_t thread_no,
-                          Function fn)
-  {
-    if (thread_no <= 0)
-    {
-      thread_no = std::thread::hardware_concurrency();
-    }
-
-    if (thread_no == 1)
-    {
-      for (size_t id = start; id < end; id++)
-      {
-        fn(id, 0);
-      }
-    }
-    else
-    {
-      std::vector<std::thread> threads;
-      std::atomic<size_t> current(start);
-
-      // keep track of exceptions in threads
-      // https://stackoverflow.com/a/32428427/1713196
-      std::exception_ptr lastException = nullptr;
-      std::mutex lastExceptMutex;
-
-      for (size_t threadId = 0; threadId < thread_no; ++threadId)
-      {
-        threads.push_back(std::thread([&, threadId]
-                                      {
-                                        while (true)
-                                        {
-                                          size_t id = current.fetch_add(1);
-
-                                          if ((id >= end))
-                                          {
-                                            break;
-                                          }
-
-                                          try
-                                          {
-                                            fn(id, threadId);
-                                          }
-                                          catch (...)
-                                          {
-                                            std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-                                            lastException = std::current_exception();
-                                            /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-                                            current = end;
-                                            break;
-                                          }
-                                        }
-                                      }));
-      }
-      for (auto &thread : threads)
-      {
-        thread.join();
-      }
-      if (lastException)
-      {
-        std::rethrow_exception(lastException);
-      }
-    }
-  }
-
   /**
  * @brief Generate a single random number using the capped Tausworthe RNG
  *
@@ -417,15 +347,14 @@ namespace ACTIONet
     rowvec sigma = stddev(A, 0);
     int N = A.n_cols;
 
-    ParallelFor(0, N, thread_no, [&](size_t j, size_t threadId)
-                {
+    parallelFor(0, N, [&] (size_t j) {
                   vec v = A.col(j);
                   double med = arma::median(v);
                   double mad = arma::median(arma::abs(v - med));
 
                   vec z = (v - med) / mad;
                   A.col(j) = z;
-                });
+                }, thread_no);
     A.replace(datum::nan, 0); // replace each NaN with 0
 
     return A;
@@ -436,9 +365,6 @@ namespace ACTIONet
     rowvec mu = mean(A, 0);
     rowvec sigma = stddev(A, 0);
     int N = A.n_cols;
-
-    ParallelFor(0, N, thread_no, [&](size_t j, size_t threadId)
-                { A.col(j) = (A.col(j) - mu(j)) / sigma(j); });
 
     A.replace(datum::nan, 0); // replace each NaN with 0
 
@@ -491,9 +417,8 @@ namespace ACTIONet
     int N = A.n_cols;
 
     mat Zr = zeros(M, N);
-    ParallelFor(0, N, thread_no, [&](size_t i, size_t threadId)
-                {
-                  vec v = A.col(i);
+    parallelFor(0, N, [&] (size_t i) {
+                vec v = A.col(i);
                   vec p = rank_vec(v) / (v.n_elem + 1);
 
                   /*
@@ -510,7 +435,7 @@ namespace ACTIONet
                   }
 
                   Zr.col(i) = v_RINT;
-                });
+                }, thread_no);
     Zr.replace(datum::nan, 0); // replace each NaN with 0
 
     return (Zr);
