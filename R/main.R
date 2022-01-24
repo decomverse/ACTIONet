@@ -136,8 +136,7 @@ runACTIONet <- function(
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
     G = G,
     annotations = colData(ace)[["assigned_archetype"]],
-    algorithm = "localized_coreness",
-    alpha_val = 0
+    algorithm = "personalized_coreness"
   )
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)

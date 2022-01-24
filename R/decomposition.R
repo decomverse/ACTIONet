@@ -245,7 +245,7 @@ decomp.ACTION_MR <- function(ace = NULL,
   )
 
   H <- unification.out$H_unified
-  W <- X %*% unification.out$C_unified
+  W <- S_r %*% unification.out$C_unified
   extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
 
   out <- list(W = W, H = H, extra = extra)
