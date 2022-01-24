@@ -30,6 +30,9 @@
 #include <clustering/HDBSCAN/hdbscan.hpp>
 #include <math/cryptor.hpp>
 #include <math/pcg/pcg_random.hpp>
+#include <mini_thread/mini_thread.h>
+
+using namespace mini_thread;
 
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS

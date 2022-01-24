@@ -2,62 +2,6 @@
 
 namespace ACTIONet {
 field<mat> run_AA(mat &A, mat &W0, int max_it, double min_delta);
-
-template <class Function>
-inline void ParallelFor(size_t start, size_t end, size_t numThreads,
-                        Function fn) {
-  if (numThreads <= 0) {
-    numThreads = SYS_THREADS_DEF;
-  }
-
-  if (numThreads == 1) {
-    for (size_t id = start; id < end; id++) {
-      fn(id, 0);
-    }
-  } else {
-    std::vector<std::thread> threads;
-    std::atomic<size_t> current(start);
-
-    // keep track of exceptions in threads
-    // https://stackoverflow.com/a/32428427/1713196
-    std::exception_ptr lastException = nullptr;
-    std::mutex lastExceptMutex;
-
-    for (size_t threadId = 0; threadId < numThreads; ++threadId) {
-      threads.push_back(std::thread([&, threadId] {
-        while (true) {
-          size_t id = current.fetch_add(1);
-
-          if ((id >= end)) {
-            break;
-          }
-
-          try {
-            fn(id, threadId);
-          } catch (...) {
-            std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-            lastException = std::current_exception();
-            /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-            current = end;
-            break;
-          }
-        }
-      }));
-    }
-    for (auto &thread : threads) {
-      thread.join();
-    }
-    if (lastException) {
-      std::rethrow_exception(lastException);
-    }
-  }
-}
-
 // Solves the weighted Archetypal Analysis (AA) problem
 field<mat> run_weighted_AA(mat &A, mat &W0, vec w, int max_it = 50,
                            double min_delta = 0.01) {
@@ -134,7 +78,7 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
   int current_k = 0;
   int total = k_min - 1;
   printf("Iterating from k=%d ... %d\n", k_min, k_max);
-  ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId) {
+  parallelFor(k_min, k_max + 1, [&] (size_t kk) {
     total++;
     printf("\tk = %d\n", total);
     SPA_results SPA_res = run_SPA(X_r_scaled, kk);
@@ -151,7 +95,7 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
 
     trace.C[kk] = AA_res(0);
     trace.H[kk] = AA_res(1);
-  });
+  }, thread_no);
 
   return trace;
 }
@@ -337,7 +281,7 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
   int current_k = 0;
   int total = k_min - 1;
   printf("Iterating from k=%d ... %d\n", k_min, k_max);
-  ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId) {
+  parallelFor(k_min, k_max + 1, [&] (size_t kk) {
     total++;
     printf("\tk = %d\n", total);
     SPA_results SPA_res = run_SPA(X_r_L1, kk);
@@ -352,7 +296,7 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
     trace.B[kk] = AA_res(1);
     trace.C[kk] = AA_res(2);
     trace.D[kk] = AA_res(3);
-  });
+  }, thread_no);
 
   return trace;
 }
@@ -464,7 +408,7 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
                 (k_max - k_min + 1));
   FLUSH;
 
-  ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId) {
+  parallelFor(k_min, k_max + 1, [&] (size_t kk) {
     SPA_results SPA_res = run_SPA(X_r, kk);
     trace.selected_cols[kk] = SPA_res.selected_columns;
 
@@ -480,7 +424,7 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
                   (k_max - k_min + 1));
     FLUSH;
     
-  });
+  }, thread_no);
   stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
                 (k_max - k_min + 1));
 

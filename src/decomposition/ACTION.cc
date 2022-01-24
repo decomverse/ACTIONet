@@ -90,76 +90,6 @@ namespace ACTIONet
     return decomposition;
   }
 
-  template <class Function>
-  inline void ParallelFor(size_t start, size_t end, size_t thread_no,
-                          Function fn)
-  {
-    if (thread_no <= 0)
-    {
-      thread_no = SYS_THREADS_DEF;
-    }
-
-    if (thread_no == 1)
-    {
-      for (size_t id = start; id < end; id++)
-      {
-        fn(id, 0);
-      }
-    }
-    else
-    {
-      std::vector<std::thread> threads;
-      std::atomic<size_t> current(start);
-
-      // keep track of exceptions in threads
-      // https://stackoverflow.com/a/32428427/1713196
-      std::exception_ptr lastException = nullptr;
-      std::mutex lastExceptMutex;
-
-      for (size_t threadId = 0; threadId < thread_no; ++threadId)
-      {
-        threads.push_back(std::thread([&, threadId]
-                                      {
-                                        while (true)
-                                        {
-                                          size_t id = current.fetch_add(1);
-
-                                          if ((id >= end))
-                                          {
-                                            break;
-                                          }
-
-                                          try
-                                          {
-                                            fn(id, threadId);
-                                          }
-                                          catch (...)
-                                          {
-                                            std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-                                            lastException = std::current_exception();
-                                            /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-                                            current = end;
-                                            break;
-                                          }
-                                        }
-                                      }));
-      }
-      for (auto &thread : threads)
-      {
-        thread.join();
-      }
-      if (lastException)
-      {
-        std::rethrow_exception(lastException);
-      }
-    }
-  }
-
   // Solves separable NMF problem
   SPA_results run_SPA_rows_sparse(sp_mat &A, int k)
   {
@@ -367,8 +297,7 @@ namespace ACTIONet
                   (k_max - k_min + 1));
     FLUSH;
 
-    ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId)
-                {
+    parallelFor(k_min, k_max + 1, [&] (size_t kk) {
                   SPA_results SPA_res = run_SPA(X_r, kk);
                   trace.selected_cols[kk] = SPA_res.selected_columns;
 
@@ -385,7 +314,7 @@ namespace ACTIONet
                   stderr_printf("\r\t%s %d/%d finished", status_msg, current_k,
                                 (k_max - k_min + 1));
                   FLUSH;
-                });
+                }, thread_no);
     stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
                   (k_max - k_min + 1));
 
@@ -588,8 +517,7 @@ namespace ACTIONet
     int current_k = 0;
     int total = k_min - 1;
     stdout_printf("Iterating from k=%d ... %d\n", k_min, k_max);
-    ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kkk, size_t threadId)
-                {
+    parallelFor(k_min, k_max + 1, [&] (size_t kkk) {
                   total++;
                   stdout_printf("\tk = %d\n", total);
 
@@ -604,7 +532,7 @@ namespace ACTIONet
 
                   trace.C[kkk] = AA_res(0);
                   trace.H[kkk] = AA_res(1);
-                });
+                }, thread_no);
 
     return trace;
   }
@@ -755,8 +683,7 @@ namespace ACTIONet
     char status_msg[50];
     sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
 
-    ParallelFor(k_min, k_max + 1, thread_no, [&](size_t kk, size_t threadId)
-                {
+    parallelFor(k_min, k_max + 1, [&] (size_t kk) {
                   //for(int kk = k_min; kk <= k_max; kk++) {
                   //printf("K = %d\n", kk);
 
@@ -792,12 +719,6 @@ namespace ACTIONet
                   printf("\r\t%s %d/%d finished", status_msg, current_k,
                          (k_max - k_min + 1));
                   fflush(stdout);
-
-                  if (threadId == 0)
-                  {
-                    printf("\nComputing consensus\n");
-                    fflush(stdout);
-                  }
 
                   // Compute consensus latent subspace, H^*
                   findConsensus(S_r, run_trace, kk, alpha, lambda, Opt_iters, thread_no); // sets secondary and consensus objects
@@ -851,7 +772,7 @@ namespace ACTIONet
                       run_trace.indiv_trace[kk].C_consensus[i].col(j) = C.col(j);
                     }
                   }
-                });
+                }, thread_no);
 
     return run_trace;
   }

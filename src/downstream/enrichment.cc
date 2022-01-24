@@ -2,61 +2,6 @@
 
 namespace ACTIONet {
 
-template <class Function>
-inline void ParallelFor(size_t start, size_t end, size_t thread_no,
-                        Function fn) {
-  if (thread_no <= 0) {
-    thread_no = SYS_THREADS_DEF;
-  }
-
-  if (thread_no == 1) {
-    for (size_t id = start; id < end; id++) {
-      fn(id, 0);
-    }
-  } else {
-    std::vector<std::thread> threads;
-    std::atomic<size_t> current(start);
-
-    // keep track of exceptions in threads
-    // https://stackoverflow.com/a/32428427/1713196
-    std::exception_ptr lastException = nullptr;
-    std::mutex lastExceptMutex;
-
-    for (size_t threadId = 0; threadId < thread_no; ++threadId) {
-      threads.push_back(std::thread([&, threadId] {
-        while (true) {
-          size_t id = current.fetch_add(1);
-
-          if ((id >= end)) {
-            break;
-          }
-
-          try {
-            fn(id, threadId);
-          } catch (...) {
-            std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-            lastException = std::current_exception();
-            /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-            current = end;
-            break;
-          }
-        }
-      }));
-    }
-    for (auto &thread : threads) {
-      thread.join();
-    }
-    if (lastException) {
-      std::rethrow_exception(lastException);
-    }
-  }
-}
-
 field<mat> assess_enrichment(mat &scores, sp_mat &associations,
                              int thread_no = 0) {
   field<mat> res(3);
@@ -87,8 +32,7 @@ field<mat> assess_enrichment(mat &scores, sp_mat &associations,
   mat thresholds = zeros(associations.n_cols, scores.n_cols);
 
   // for(int k = 0; k < associations.n_cols; k++) {
-  ParallelFor(
-      0, associations.n_cols, thread_no, [&](size_t k, size_t threadId) {
+  parallelFor(0, associations.n_cols, [&] (size_t k) {
         int n_k = n_success(k);
         if (n_k > 1) {
           double p_k = p_success(k);
@@ -136,7 +80,7 @@ field<mat> assess_enrichment(mat &scores, sp_mat &associations,
             thresholds(k, j) = rows[v.index_max(), j];
           }
         }
-      });
+      }, thread_no);
 
   field<mat> output(2);
   output(0) = logPvals;

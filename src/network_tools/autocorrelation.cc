@@ -1,82 +1,7 @@
 #include <ACTIONet.h>
-#include "cholmod.h"
-
-#include <atomic>
-#include <thread>
-
-extern std::mutex mtx; // mutex for critical section
 
 namespace ACTIONet
 {
-    template <class Function>
-    inline void ParallelFor(size_t start, size_t end, size_t thread_no,
-                            Function fn)
-    {
-        if (thread_no <= 0)
-        {
-            thread_no = std::thread::hardware_concurrency();
-        }
-
-        if (thread_no == 1)
-        {
-            for (size_t id = start; id < end; id++)
-            {
-                fn(id, 0);
-            }
-        }
-        else
-        {
-            std::vector<std::thread> threads;
-            std::atomic<size_t> current(start);
-
-            // keep track of exceptions in threads
-            // https://stackoverflow.com/a/32428427/1713196
-            std::exception_ptr lastException = nullptr;
-            std::mutex lastExceptMutex;
-
-            for (size_t threadId = 0; threadId < thread_no; ++threadId)
-            {
-                threads.push_back(std::thread([&, threadId]
-                                              {
-                                                  while (true)
-                                                  {
-                                                      size_t id = current.fetch_add(1);
-
-                                                      if ((id >= end))
-                                                      {
-                                                          break;
-                                                      }
-
-                                                      try
-                                                      {
-                                                          fn(id, threadId);
-                                                      }
-                                                      catch (...)
-                                                      {
-                                                          std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-                                                          lastException = std::current_exception();
-                                                          /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-                                                          current = end;
-                                                          break;
-                                                      }
-                                                  }
-                                              }));
-            }
-            for (auto &thread : threads)
-            {
-                thread.join();
-            }
-            if (lastException)
-            {
-                std::rethrow_exception(lastException);
-            }
-        }
-    }
 
     mat normalize_scores(mat scores, int method = 1, int thread_no = 0)
     {
@@ -125,14 +50,12 @@ namespace ACTIONet
         vec norm_factors = nV / (W * norm_sq);
 
         vec stat = zeros(scores_no);
-        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
+        parallelFor(0, scores_no, [&] (unsigned int i) 
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, G * x);
-                        mtx.lock();
                         stat(i) = y;
-                        mtx.unlock();
-                    });
+                    }, thread_no);
 
         vec mu = zeros(scores_no);
         vec sigma = zeros(scores_no);
@@ -142,7 +65,7 @@ namespace ACTIONet
             stdout_printf("Computing permutations ... ");
 
             mat rand_stats = zeros(scores_no, perm_no);
-            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+            parallelFor(0, perm_no, [&] (unsigned int j) 
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -153,10 +76,8 @@ namespace ACTIONet
                                 vec rand_x = score_permuted.col(i);
                                 v(i) = dot(rand_x, G * rand_x);
                             }
-                            mtx.lock();
                             rand_stats.col(j) = v;
-                            mtx.unlock();
-                        });
+                        }, thread_no);
             stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
@@ -191,14 +112,12 @@ namespace ACTIONet
         vec norm_factors = nV / (W * norm_sq);
 
         vec stat = zeros(scores_no);
-        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
+        parallelFor(0, scores_no, [&] (unsigned int i) 
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, spmat_vec_product(G, x));
-                        mtx.lock();
                         stat(i) = y;
-                        mtx.unlock();
-                    });
+                    }, thread_no);
 
         vec mu = zeros(scores_no);
         vec sigma = zeros(scores_no);
@@ -207,8 +126,9 @@ namespace ACTIONet
         {
             stdout_printf("Computing permutations ... ");
 
+            
             mat rand_stats = zeros(scores_no, perm_no);
-            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+            parallelFor(0, perm_no, [&] (unsigned int j) 
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -219,16 +139,15 @@ namespace ACTIONet
                                 vec rand_x = score_permuted.col(i);
                                 v(i) = dot(rand_x, spmat_vec_product(G, rand_x));
                             }
-                            mtx.lock();
                             rand_stats.col(j) = v;
-                            mtx.unlock();
-                        });
+                        }, thread_no);
             stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
             sigma = stddev(rand_stats, 0, 1);
             z = (stat - mu) / sigma;
             z.replace(datum::nan, 0);
+            
         }
         // Summary stats
         stdout_printf("done\n");
@@ -262,14 +181,12 @@ namespace ACTIONet
         L.diag() = d;
 
         vec stat = zeros(scores_no);
-        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
+        parallelFor(0, scores_no, [&] (unsigned int i) 
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, L * x);
-                        mtx.lock();
                         stat(i) = y;
-                        mtx.unlock();
-                    });
+                    }, thread_no);
 
         vec mu = zeros(scores_no);
         vec sigma = zeros(scores_no);
@@ -279,7 +196,7 @@ namespace ACTIONet
             stdout_printf("Computing permutations ... ");
 
             mat rand_stats = zeros(scores_no, perm_no);
-            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+            parallelFor(0, perm_no, [&] (unsigned int j) 
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -290,10 +207,8 @@ namespace ACTIONet
                                 vec rand_x = score_permuted.col(i);
                                 v(i) = dot(rand_x, L * rand_x);
                             }
-                            mtx.lock();
                             rand_stats.col(j) = v;
-                            mtx.unlock();
-                        });
+                        }, thread_no);
             stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
@@ -333,14 +248,12 @@ namespace ACTIONet
         L.diag() = d;
 
         vec stat = zeros(scores_no);
-        ParallelFor(0, scores_no, thread_no, [&](size_t i, size_t threadId)
+        parallelFor(0, scores_no, [&] (unsigned int i) 
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, spmat_vec_product(L, x));
-                        mtx.lock();
                         stat(i) = y;
-                        mtx.unlock();
-                    });
+                    }, thread_no);
 
         vec mu = zeros(scores_no);
         vec sigma = zeros(scores_no);
@@ -350,7 +263,7 @@ namespace ACTIONet
             stdout_printf("Computing permutations ... ");
 
             mat rand_stats = zeros(scores_no, perm_no);
-            ParallelFor(0, perm_no, thread_no, [&](size_t j, size_t threadId)
+            parallelFor(0, perm_no, [&] (unsigned int j) 
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -361,10 +274,8 @@ namespace ACTIONet
                                 vec rand_x = score_permuted.col(i);
                                 v(i) = dot(rand_x, spmat_vec_product(L, rand_x));
                             }
-                            mtx.lock();
                             rand_stats.col(j) = v;
-                            mtx.unlock();
-                        });
+                        }, thread_no);
 
             stdout_printf("Done\n");
 

@@ -2,76 +2,6 @@
 
 namespace ACTIONet
 {
-  template <class Function>
-  inline void ParallelFor(size_t start, size_t end, size_t thread_no,
-                          Function fn)
-  {
-    if (thread_no <= 0)
-    {
-      thread_no = std::thread::hardware_concurrency();
-    }
-
-    if (thread_no == 1)
-    {
-      for (size_t id = start; id < end; id++)
-      {
-        fn(id, 0);
-      }
-    }
-    else
-    {
-      std::vector<std::thread> threads;
-      std::atomic<size_t> current(start);
-
-      // keep track of exceptions in threads
-      // https://stackoverflow.com/a/32428427/1713196
-      std::exception_ptr lastException = nullptr;
-      std::mutex lastExceptMutex;
-
-      for (size_t threadId = 0; threadId < thread_no; ++threadId)
-      {
-        threads.push_back(std::thread([&, threadId]
-                                      {
-                                        while (true)
-                                        {
-                                          size_t id = current.fetch_add(1);
-
-                                          if ((id >= end))
-                                          {
-                                            break;
-                                          }
-
-                                          try
-                                          {
-                                            fn(id, threadId);
-                                          }
-                                          catch (...)
-                                          {
-                                            std::unique_lock<std::mutex> lastExcepLock(lastExceptMutex);
-                                            lastException = std::current_exception();
-                                            /*
-             * This will work even when current is the largest value that
-             * size_t can fit, because fetch_add returns the previous value
-             * before the increment (what will result in overflow
-             * and produce 0 instead of current + 1).
-             */
-                                            current = end;
-                                            break;
-                                          }
-                                        }
-                                      }));
-      }
-      for (auto &thread : threads)
-      {
-        thread.join();
-      }
-      if (lastException)
-      {
-        std::rethrow_exception(lastException);
-      }
-    }
-  }
-
   sp_mat scale_expression(sp_mat &S)
   {
     sp_mat T = S;
@@ -118,14 +48,14 @@ namespace ACTIONet
 
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    ParallelFor(0, perm_no, thread_no, [&](size_t i, size_t threadId)
+    parallelFor(0, perm_no, [&] (size_t i)
                 {
                   uvec perm = randperm(N);
                   mat rand_stats = mat(trans(sp_mat(X.cols(perm) * S)));
                   mat shifted_vals = (rand_stats - stats);
                   E += shifted_vals;
                   Esq += square(shifted_vals);
-                });
+                }, thread_no);
     mat mu = E / perm_no + stats;
     mat sigma = sqrt((Esq - square(E) / perm_no) / (perm_no - 1));
     mat Z = (stats - mu) / sigma;
@@ -146,7 +76,7 @@ namespace ACTIONet
 
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    ParallelFor(0, perm_no, thread_no, [&](size_t i, size_t threadId)
+    parallelFor(0, perm_no, [&] (size_t i)
                 {
                   uvec perm = randperm(N);
                   sp_mat raw_rand_stats = trans(sp_mat(X.cols(perm) * S));
@@ -155,7 +85,7 @@ namespace ACTIONet
                   mat shifted_vals = (rand_stats - stats);
                   E += shifted_vals;
                   Esq += square(shifted_vals);
-                });
+                }, thread_no);
     mat mu = E / perm_no + stats;
     mat sigma = sqrt((Esq - square(E) / perm_no) / (perm_no - 1));
     mat Z = (stats - mu) / sigma;
@@ -306,7 +236,7 @@ namespace ACTIONet
     int N = X.n_cols;
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    ParallelFor(0, perm_no, thread_no, [&](size_t i, size_t threadId)
+    parallelFor(0, perm_no, [&] (size_t i)
                 {
                   uvec perm = randperm(N);
 
@@ -315,7 +245,7 @@ namespace ACTIONet
 
                   E += rand_stats;
                   Esq += square(rand_stats);
-                });
+                }, thread_no);
     mat mu = E / perm_no;
     mat sigma = sqrt(Esq / perm_no - square(mu));
     mat Z = (stats - mu) / sigma;
@@ -453,7 +383,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     }
 
     mat stats = zeros(Z.n_rows, marker_mat.n_cols);
-    ParallelFor(0, marker_mat.n_cols, thread_no, [&](size_t i, size_t threadId)
+    parallelFor(0, marker_mat.n_cols, [&] (size_t i)
                 {
                   vec v = vec(marker_mat.col(i));
                   uvec idx = find(v != 0);
@@ -473,7 +403,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
                   u = u * stddev(z) / stddev(u);
 
                   stats.col(i) = u;
-                });
+                }, thread_no);
     /*
     mat Zt = normalise(trans(Z), 1, 0);
     mat basis = normalise(Zt * stats, 1, 0);
@@ -481,5 +411,22 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 */
     return (stats);
   }
+
+/*
+  mat annotate_cells_decoupled(mat &W, mat &H, sp_mat &marker_mat, int thread_no) {
+    sp_mat It = trans(marker_mat);
+
+    mat factor_stats = spmat_mat_product(It, W);
+
+    factor_stats_z = ...
+   
+    mat cell_stats = factor_stats_z * H;
+    
+    rowvec w = sqrt(sum(square(H)));
+    cell_stats.each_row() %= denom;
+
+    return(cell_stats);
+  }
+*/
 
 } // namespace ACTIONet
