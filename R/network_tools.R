@@ -142,11 +142,11 @@ networkCentrality <- function(
       net_slot = NULL
     )
 
-  } else if (algorithm == "localized_coreness") {
+  } else if (algorithm == "personalized_coreness") {
 
     centrality <- compute_archetype_core_centrality(G, assignments)
 
-  } else if (algorithm == "localized_pagerank") {
+  } else if (algorithm == "personalized_pagerank") {
 
     design.mat <- model.matrix(~ 0 + as.factor(assignments))
     design.mat <- scale(design.mat, center = FALSE, scale = colSums(design.mat))
@@ -164,8 +164,6 @@ networkCentrality <- function(
     centrality <- apply(scores, 1, max)
 
   }
-
-  centrality = c(centrality)
 
   return(centrality)
 
