@@ -1289,45 +1289,6 @@ mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no = 0,
   return (Diff);
 }
 
-//' Computes sparse network diffusion over a given network, starting with an
-// arbitrarty set of initial scores
-//'
-//' @param G Input graph
-//' @param X0 Matrix of initial values per diffusion (ncol(G) == nrow(G) ==
-// ncol(X0)) ' @param alpha Random-walk depth ( between [0, 1] ) ' @param rho
-// Sparsity controling parameter ' @param epsilon,max_it Conditions on the
-// length of diffusion
-//'
-//' @return Matrix of sparse diffusion scores
-//'
-//' @examples
-//' G = colNets(ace)$ACTIONet
-//' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
-//' smoothed.expression = compute_sparse_network_diffusion(G, gene.expression)
-// [[Rcpp::export]]
-sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0,
-                                        double alpha = 0.85, double rho = 1e-4,
-                                        double epsilon = 0.001,
-                                        int max_iter = 20)
-{
-  sp_mat U = X0.transform([](double val)
-                          { return (val < 0 ? 0 : val); });
-  U = normalise(U, 1, 0);
-
-  sp_mat scores = ACTIONet::compute_sparse_network_diffusion(G, U, alpha, rho,
-                                                             epsilon, max_iter);
-  /*
-          sp_mat scores(size(X0));
-          for(int i = 0; i < X0.n_cols; i++) {
-                  vec v = vec(X0.col(i));
-                  vec pr = ACTIONet::solve_fista(alpha, rho, epsilon, G, v, 20);
-                  scores.col(i) = pr;
-          }
-  */
-
-  return (scores);
-}
-
 //' Computes feature enrichment wrt a given annotation
 //'
 //' @param scores Specificity scores of features
@@ -2278,7 +2239,9 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
       fixed_labels_vec(i) = fixed_labels(i) - 1;
     }
   }
-  return (ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec));
+
+  mat new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
+  return (new_labels);
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -2511,19 +2474,17 @@ mat compute_network_diffusion_Chebyshev(sp_mat &P, mat &X0, int thread_no = 0, d
 //' @examples
 //' G = colNets(ace)$ACTIONet
 //' gene.expression = Matrix::t(logcounts(ace))[c("CD19", "CD14", "CD16"), ]
-//' smoothed.expression = compute_network_diffusion(G, gene.expression)
+//' smoothed.expression = compute_network_diffusion_approx(G, gene.expression)
 // [[Rcpp::export]]
-mat compute_network_diffusion(sp_mat &G, mat &X0, int thread_no = 0, double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8, int norm_type = 0)
+mat compute_network_diffusion_approx(sp_mat &G, mat &X0, int thread_no = 0, double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8, int norm_type = 0)
 {
   if (G.n_rows != X0.n_rows)
   {
-    fprintf(stderr, "Dimnsion mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
+    stderr_printf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
     return (mat());
   }
 
   sp_mat P = normalize_adj(G, norm_type);
-  //mat X0_norm = normalise(X0, 1, 0);
-
   mat X = ACTIONet::compute_network_diffusion_Chebyshev(P, X0, thread_no, alpha, max_it, res_threshold);
 
   return (X);
@@ -2553,55 +2514,3 @@ vec sweepcut(sp_mat &A, vec s, int min_size = 5, int max_size = -1)
 
   return (cond);
 }
-
-/*
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-List compute_marker_aggregate_stats_nonparametric_smoothed(sp_mat &G, mat &S, sp_mat &marker_mat, int thread_no = 0, int max_iter = 1, int norm_type = 0, double alpha = 0.85, int diff_max_iter = 3)
-{
-  field<mat> res = ACTIONet::compute_marker_aggregate_stats_nonparametric_smoothed(G, S, marker_mat, thread_no, max_iter, norm_type, alpha, diff_max_iter);
-
-  List out_list;
-  out_list["cell_stats"] = res(0);
-  out_list["marker_weights"] = res(1);
-  out_list["Z"] = res(2);
-
-  return (out_list);
-}
-*/
-/*
-
-RMatD forceatlas(
-    S4 m, Nullable<RMatD> init = R_NilValue, Nullable<RVecD> center = R_NilValue, Nullable<RVecD> vsizes = R_NilValue,
-    int dim = 2, int iter = 100, scalar delta = 1.0, scalar tol = 1.0, scalar k = 10.0, scalar G = 1.0,
-    bool linlog = false, bool strong = false, bool nohubs = false, bool overlap = false)
-{
-  Fa2Params params(delta, tol, k, G, linlog, strong, nohubs, overlap);
-  EigenMat W = as<EigenMat>(m);
-  Vec orig = (center.isNull()) ? Vec::Zero(dim) : as<Vec>(center.get());
-  EigenMat pos = (init.isNull()) ? EigenMat::Random(W.rows(), 2) * 1000 : as_rowmat(init.get());
-  Vec sizes = (vsizes.isNull()) ? Vec::Ones(W.rows()) : as<Vec>(vsizes);
-  GraphData gd(W, sizes);
-
-  Fa2Worker wrkr(pos, orig, gd, params);
-  for (int i = 0; i < iter; i++)
-  {
-    wrkr.fa2_epoch();
-  }
-
-  return wrap_rowmat(pos);
-}
-*/
-
-/*
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-mat layout_forceatlas2(sp_mat G, mat init_pos, vec center, int dim = 2, bool directed = false, int max_iter = 100, bool linlog = false, bool nohubs = false,
-                       double k = 400, double gravity = 1, double ks = 0.1, double ksmax = 10, double delta = 1,
-                       double tolerance = 0.1)
-{
-  mat pos = ACTIONet::layout_forceatlas2(G, init_pos, center, dim = 2, directed, max_iter, linlog, nohubs, k, gravity, ks, ksmax, delta, tolerance);
-
-  return (pos);
-}
-*/

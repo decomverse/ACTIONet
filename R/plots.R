@@ -58,36 +58,31 @@ plot.ACTIONetExperiment <- function(ace, ...) {
 #' plot.ACTIONet(ace, ace$assigned_archetype)
 #' @import ggplot2
 #' @export
-plot.ACTIONet <- function(ace,
-                          label_attr = NULL,
-                          color_attr = NULL,
-                          trans_attr = NULL,
-                          trans_fac = 1.5,
-                          trans_th = -0.5,
-                          point_size = 1,
-                          stroke_size = point_size * 0.1,
-                          stroke_contrast_fac = 0.1,
-                          palette = CPal_default,
-                          add_text_labels = TRUE,
-                          text_size = 3,
-                          nudge_text_labels = FALSE,
-                          show_legend = FALSE,
-                          coordinate_attr = "ACTIONet2D",
-                          color_slot = "denovo_color",
-                          point_order = NULL,
-                          use_repel = TRUE,
-                          repel_force = 0.05) {
+plot.ACTIONet <- function(
+  ace,
+  label_attr = NULL,
+  color_attr = NULL,
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 1,
+  stroke_size = point_size * 0.1,
+  stroke_contrast_fac = 0.1,
+  palette = CPal_default,
+  add_text_labels = TRUE,
+  text_size = 3,
+  nudge_text_labels = FALSE,
+  show_legend = FALSE,
+  coordinate_attr = "ACTIONet2D",
+  color_slot = "denovo_color",
+  point_order = NULL,
+  use_repel = TRUE,
+  repel_force = 0.05
+) {
+
   plot_coors <- .get_plot_coors(ace, coordinate_attr)
   plot_labels <- .get_plot_labels(label_attr, ace)
   plot_fill_col <- .get_plot_colors(color_attr, plot_labels, ace, color_slot, palette)
-  if (!is.null(label_attr)) {
-    na.mask <- plot_labels == "NA"
-    plot_fill_col[na.mask] <- "#eeeeee"
-    names(plot_fill_col)[na.mask] <- "?"
-    plot_labels[na.mask] <- "?"
-    point_order <- c(which(na.mask), which(!na.mask))
-  }
-
   plot_alpha <- .get_plot_transparency(trans_attr, ace, trans_fac, trans_th, TRUE)
   plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
 
@@ -118,11 +113,7 @@ plot.ACTIONet <- function(ace,
   )
 
   if (is.null(point_order)) {
-    if ((is(ace, "ACTIONetExperiment")) & ("node_centrality" %in% colnames(colData(ace)))) {
-      p_idx <- order(ace$node_centrality, decreasing = T)
-    } else {
-      pidx <- sample(NROW(plot_data))
-    }
+    pidx <- sample(NROW(plot_data))
   } else {
     pidx <- point_order
   }
@@ -291,14 +282,17 @@ plot.ACTIONet.3D <- function(ace,
 #' feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' plot.top.k.features(feat_scores, 3)
 #' @export
-plot.top.k.features <- function(feat_scores,
-                                top_features = 3,
-                                normalize = TRUE,
-                                reorder_columns = TRUE,
-                                row.title = "Archetypes",
-                                column.title = "Genes",
-                                rowPal = "black",
-                                title = "Enrichment") {
+plot.top.k.features <- function(
+  feat_scores,
+  top_features = 3,
+  normalize = TRUE,
+  reorder_columns = TRUE,
+  row.title = "Archetypes",
+  column.title = "Genes",
+  rowPal = "black",
+  title = "Enrichment"
+) {
+
   W <- select.top.k.features(
     feat_scores = feat_scores,
     top_features = top_features,
@@ -347,14 +341,17 @@ plot.top.k.features <- function(feat_scores,
 #' feat_scores <- as.matrix(rowMaps(ace)[["unified_feature_specificity"]])
 #' plot.ACTIONet.feature.view(ace, feat_scores, 5)
 #' @export
-plot.ACTIONet.feature.view <- function(ace,
-                                       feat_scores,
-                                       top_features = 5,
-                                       palette = NULL,
-                                       title = "Feature view",
-                                       label_size = 1,
-                                       renormalize = FALSE,
-                                       footprint_slot = "H_unified") {
+plot.ACTIONet.feature.view <- function(
+  ace,
+  feat_scores,
+  top_features = 5,
+  palette = NULL,
+  title = "Feature view",
+  label_size = 1,
+  renormalize = FALSE,
+  footprint_slot = "H_unified"
+) {
+
   M <- as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
 
   if (ncol(feat_scores) != ncol(colMaps(ace)[["H_unified"]])) {
@@ -677,7 +674,7 @@ plot.individual.gene <- function(ace,
                                  assay_name = "logcounts",
                                  palette = CPal_default) {
   clusters <- .preprocess_annotation_labels(ace, labels)
-  features_use <- .preprocess_annotation_features(ace, features_use)
+  features_use <- .get_feature_vec(ace, features_use)
 
   Labels <- names(clusters)
   Annot <- sort(unique(Labels))
@@ -795,9 +792,14 @@ plot.ACTIONet.gradient <- function(ace,
   }
 
   if (alpha_val > 0) {
+    if (alpha_val > 1)
+      alpha_val = 1
     x <- as.numeric(networkDiffusion(
       G = colNets(ace)[[net_slot]],
-      scores = as.matrix(x)
+      scores = x,
+      algorithm = "pagerank",
+      alpha = alpha_val,
+      thread_no = 0
     ))
   }
 
@@ -867,7 +869,7 @@ visualize.markers <- function(ace,
                               net_slot = "ACTIONet",
                               coordinate_attr = "ACTIONet2D",
                               single_plot = FALSE) {
-  features_use <- .preprocess_annotation_features(ace, features_use = features_use)
+  features_use <- .get_feature_vec(ace, features_use = features_use)
   markers_all <- sort(unique(unlist(markers)))
   marker_set <- intersect(markers_all, features_use)
 

@@ -8,7 +8,7 @@
   C_trace,
   H_trace,
   ace = NULL,
-  min_specificity_z_thresh = -3,
+  specificity_th = -3,
   min_cells_per_arch = 2,
   return_raw = FALSE
 )

@@ -1,102 +1,309 @@
-#' Uses a variant of the label propagation algorithm to infer missing labels
-#'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
-#' @param initial_labels Annotations to correct with missing values (NA) in it.
-#' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-#' @param max_iter How many iterative rounds of correction/inference should be performed (default=3)
-#' @param adjust.levels Whether or not re-adjust labels at the end
-#'
-#' @return ace with updated annotations added to ace$annotations
-#'
-#' @examples
-#' ace <- infer.missing.cell.annotations(ace, sce$assigned_archetypes, "updated_archetype_annotations")
 #' @export
-infer.missing.cell.annotations <- function(ace,
-                                           initial_labels,
-                                           iters = 3,
-                                           lambda = 0,
-                                           sig_threshold = 3, network_slot = "ACTIONet") {
-  # label_type <- "numeric"
-  # if (is.character(initial_labels)) {
-  #   label_type <- "char"
-  #   initial_labels.factor <- factor(initial_labels)
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # } else if (is.factor(initial_labels)) {
-  #   label_type <- "factor"
-  #   initial_labels.factor <- initial_labels
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # }
+networkDiffusion <- function(
+  ace = NULL,
+  G = NULL,
+  scores_attr = NULL,
+  algorithm = c("pagerank", "pagerank_sym"),
+  alpha = 0.9,
+  thread_no = 0,
+  max_it = 5,
+  res_threshold = 1e-8,
+  net_slot = "ACTIONet"
+) {
 
-  # fixed_labels_ <- which(!is.na(initial_labels))
-  # initial_labels[is.na(initial_labels)] <- -1
+  algorithm <- match.arg(algorithm)
 
-  # Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold, fixed_labels_ = fixed_labels_)
+  if( is.null(ace) && is.null(G) ){
+    err = sprintf("Either 'ace' or 'G' must be given.\n")
+    stop(err)
+  }
 
-  # Labels[Labels == -1] <- NA
-  # if (label_type == "char" | label_type == "factor") {
-  #   Labels <- levels(initial_labels.factor)[Labels]
-  # }
+  if( is.null(scores_attr) ){
+    err = sprintf("'scores_attr' cannot be 'NULL'.\n")
+    stop(err)
+  }
 
-  fixed_samples <- which(!is.na(initial_labels))
-  Labels <- networkPropagation(G = colNets(ace)[[network_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold, fixed_samples = fixed_samples)
+  if (is.null(G)) {
+    if (!(net_slot %in% names(colNets(ace)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(ace)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
 
-  return(Labels)
+  if(alpha >= 1){
+    alpha = 0.99
+    warning("alpha=0.99")
+  } else if (alpha < 0) {
+    alpha = 0
+    warning("alpha=0")
+  }
+
+  if (length(score_attr) == 1) {
+    if(is.null(ace)){
+      err = sprintf("'ace' cannot be 'NULL' if 'length(score_attr)=1'.\n")
+      stop(err)
+    } else {
+      scores = ACTIONetExperiment::get.data.or.split(ace, attr = score_attr, to_return = "data")
+    }
+  } else {
+    if ( length(scores_attr) != NROW(G) ){
+      err = sprintf("'length(score_attr)' must equal 'NROW(G)'.\n")
+      stop(err)
+    }
+    scores = scores_attr
+  }
+
+  scores = Matrix::as.matrix(as.scores)
+
+  if (algorithm == "pagerank") {
+    x <- compute_network_diffusion_approx(
+      G = G,
+      X0 = scores,
+      thread_no = thread_no,
+      alpha = alpha,
+      max_it = max_it,
+      res_threshold = res_threshold,
+      norm_type = 0
+    )
+  } else if (algorithm == "pagerank_sym") {
+    x <- compute_network_diffusion_approx(
+      G = G,
+      X0 = scores,
+      thread_no = thread_no,
+      alpha = alpha,
+      max_it = max_it,
+      res_threshold = res_threshold,
+      norm_type = 2
+    )
+  }
+
+  return(x)
 }
 
 
-
-#' Uses a variant of the label propagation algorithm to correct likely noisy labels
-#'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
-#' @param initial_labels Annotations to correct with missing values (NA) in it.
-#' It can be either a named annotation (inside ace$annotations) or a label vector.
-#' @param LFR.threshold How aggressively to update labels. The smaller the value, the more labels will be changed (default=2)
-#' @param double.stochastic Whether to densify adjacency matrix before running label propagation (default=FALSE).
-#' @param iters How many iterative rounds of correction/inference should be performed (default=3)
-#'
-#' @return ace with updated annotations added to ace$annotations
-#'
-#' @examples
-#' ace <- add.cell.annotations(ace, cell.labels, "input_annotations")
-#' ace <- correct.cell.annotations(ace, "input_annotations", "updated_annotations")
 #' @export
-correct.cell.annotations <- function(ace,
-                                     initial_labels,
-                                     algorithm = "lpa",
+networkCentrality <- function(
+  ace = NULL,
+  G = NULL,
+  label_attr = NULL,
+  algorithm = c("coreness", "pagerank", "localized_coreness", "localized_pagerank"),
+  alpha = 0.9,
+  net_slot = "ACTIONet",
+  diffusion_it = 5,
+  res_threshold = 1e-8,
+  thread_no = 0
+) {
+
+  algorithm <- match.arg(algorithm)
+
+  if( is.null(ace) && is.null(G) ){
+    err = sprintf("Either 'ace' or 'G' must be given.\n")
+    stop(err)
+  }
+
+  if (is.null(G)) {
+    if (!(net_slot %in% names(colNets(ace)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(ace)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
+
+  if( algorithm %in% c("pagerank", "localized_pagerank") ) {
+    if( is.null(label_attr) ){
+      err = sprintf("'label_attr' cannot be 'NULL' if 'algorithm=%s'.\n", algorithm)
+      stop(err)
+    }
+
+    if(alpha >= 1){
+      alpha = 0.99
+      warning("alpha=0.99")
+    } else if (alpha < 0) {
+      alpha = 0
+      warning("alpha=0")
+    }
+  }
+
+  if (!is.null(label_attr)) {
+    if(!is.null(ace)){
+        assignments = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")$index
+    } else {
+        assignments = as.numeric(factor(label_attr))
+        if ( length(assignments) != NROW(G) ){
+          err = sprintf("'length(label_attr)' must equal 'NROW(G)'.\n")
+          stop(err)
+        }
+    }
+  }
+
+  if (algorithm == "coreness") {
+
+    centrality <- compute_core_number(G)
+
+  } else if (algorithm == "pagerank") {
+
+    centrality <- networkDiffusion(
+      ace = NULL,
+      G = G,
+      scores_attr = rep(1 / NROW(G), NROW(G)),
+      algorithm = "pagerank",
+      alpha = alpha,
+      thread_no = thread_no,
+      max_it = diffusion_it,
+      res_threshold = res_threshold,
+      net_slot = NULL
+    )
+
+  } else if (algorithm == "localized_coreness") {
+
+    centrality <- compute_archetype_core_centrality(G, assignments)
+
+  } else if (algorithm == "localized_pagerank") {
+
+    design.mat <- model.matrix(~ 0 + as.factor(assignments))
+    design.mat <- scale(design.mat, center = FALSE, scale = colSums(design.mat))
+    scores <- networkDiffusion(
+      G = G,
+      scores_attr = design.mat,
+      algorithm = "pagerank",
+      alpha = alpha,
+      thread_no = thread_no,
+      max_it = diffusion_it,
+      res_threshold = res_threshold,
+      net_slot = NULL
+    )
+    scores <- apply(scores, 2, function(x) x / max(x))
+    centrality <- apply(scores, 1, max)
+
+  }
+
+  centrality = c(centrality)
+
+  return(centrality)
+
+}
+
+
+#' @export
+networkPropagation <- function(
+  ace = NULL,
+  G = NULL,
+  label_attr = NULL,
+  fixed_samples = NULL,
+  algorithm = "LPA",
+  lambda = 0,
+  iters = 3,
+  sig_th = 3,
+  net_slot = "ACTIONet"
+) {
+
+  if( is.null(ace) && is.null(G) ){
+    err = sprintf("Either 'ace' or 'G' must be given.\n")
+    stop(err)
+  }
+
+  if( is.null(label_attr) ){
+    err = sprintf("'label_attr' cannot be 'NULL'.\n")
+    stop(err)
+  }
+
+  if (is.null(G)) {
+    if (!(net_slot %in% names(colNets(ace)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(ace)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
+
+  if(!is.null(ace)){
+    sa = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")
+    labels = sa$index
+    keys = sa$keys
+  } else {
+    if ( length(label_attr) != NROW(G) ){
+      err = sprintf("'length(label_attr)' must equal 'NROW(G)'.\n")
+      stop(err)
+    }
+    lf = factor(label_attr)
+    labels = as.numeric(lf)
+    keys = levels(lf)
+  }
+  labels[is.na(labels)] <- -1
+
+  if (algorithm == "lpa") {
+    new_labels <- run_LPA(G = G, labels = labels, lambda = lambda, iters = iters, sig_threshold = sig_th, fixed_labels_ = fixed_samples)
+    new_labels[new_labels == -1] <- NA
+    new_labels <- keys[new_labels]
+  } else {
+    new_labels <- keys[labels]
+  }
+
+  return(new_labels)
+}
+
+
+#' @export
+infer.missing.cell.labels <- function(
+  ace,
+  label_attr,
+  iters = 3,
+  lambda = 0,
+  sig_th = 3,
+  net_slot = "ACTIONet"
+) {
+
+
+  initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
+  fixed_samples <- which(!is.na(initial_labels))
+
+  labels <- networkPropagation <- function(
+    ace = ace,
+    G = NULL,
+    label_attr = initial_labels,
+    fixed_samples = fixed_samples,
+    algorithm = "LPA",
+    lambda = lambda,
+    iters = iters,
+    sig_th = sig_th,
+    net_slot = net_slot
+  )
+
+  return(labels)
+}
+
+
+#' @export
+correct.cell.labels <- function(ace,
+                                     label_attr,
+                                     algorithm = "LPA",
                                      iters = 3,
                                      lambda = 0,
-                                     sig_threshold = 3,
-                                     network_slot = "ACTIONet") {
-  algorithm <- tolower(algorithm)
+                                     sig_th = 3,
+                                     net_slot = "ACTIONet") {
 
-  # label_type <- "numeric"
-  # if (is.character(initial_labels)) {
-  #   label_type <- "char"
-  #   initial_labels.factor <- factor(initial_labels)
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # } else if (is.factor(initial_labels)) {
-  #   label_type <- "factor"
-  #   initial_labels.factor <- initial_labels
-  #   initial_labels <- as.numeric(initial_labels.factor)
-  # }
+  # Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th)
 
-  # cc <- table(initial_labels)
-  # initial_labels[initial_labels %in% as.numeric(names(cc)[cc < min_cells])] <- -1
-  # initial_labels[is.na(initial_labels)] <- -1
+  initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
+  labels <- networkPropagation <- function(
+    ace = ace,
+    G = NULL,
+    label_attr = initial_labels,
+    fixed_samples = fixed_samples,
+    algorithm = algorithm,
+    lambda = lambda,
+    iters = iters,
+    sig_th = sig_th,
+    net_slot = net_slot
+  )
 
-  # Labels <- run_LPA(ace$ACTIONet, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
-  # Labels[Labels == -1] <- NA
-
-  # if (label_type == "char" | label_type == "factor") {
-  #   Labels <- levels(initial_labels.factor)[Labels]
-  # }
-  Labels <- networkPropagation(G = colNets(ace)[[network_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_threshold = sig_threshold)
-
-
-  return(Labels)
+  return(labels)
 }
 
 EnhAdj <- function(Adj) {
@@ -167,50 +374,42 @@ construct.tspanner <- function(backbone,
   return(G)
 }
 
-networkDiffusion <- function(G, scores, algorithm = "pagerank", alpha = 0.9, thread_no = 0, max_it = 5, res_threshold = 1e-8, network_slot = "ACTIONet") {
+
+networkAutocorrelation <- function(G, scores = NULL, algorithm = "Geary", score_normalization_method = 1L, perm_no = 0, thread_no = 0L, net_slot = "ACTIONet") {
   algorithm <- tolower(algorithm)
 
   if (is(G, "ACTIONetExperiment")) {
-    G <- colNets(G)[[network_slot]]
+    G <- colNets(G)[[net_slot]]
   }
 
-  if (algorithm == "pagerank") {
-    x <- compute_network_diffusion(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = 0)
-  } else if (algorithm == "pagerank_sym") {
-    x <- compute_network_diffusion(G = G, X0 = as.matrix(scores), thread_no = thread_no, alpha = alpha, max_it = max_it, res_threshold = res_threshold, norm_type = 2)
-  }
-
-  return(x)
-}
-
-networkPropagation <- function(G, initial_labels, algorithm = "LPA", lambda = 0, iters = 3, sig_threshold = 3, network_slot = "ACTIONet", fixed_samples = NULL) {
-  algorithm <- tolower(algorithm)
-
-  if (algorithm == "lpa") {
-    label_type <- "numeric"
-    if (is.character(initial_labels)) {
+  if (algorithm == "geary") {
+    if (is.sparseMatrix(G)) {
+      out <- ACTIONet::autocorrelation_Geary(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    } else {
+      out <- ACTIONet::autocorrelation_Geary_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    }
+  } else if (algorithm == "moran") {
+    if (is.sparseMatrix(G)) {
+      out <- ACTIONet::autocorrelation_Moran(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    } else {
+      out <- ACTIONet::autocorrelation_Moran_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    }
+  } else if (algorithm == "categorical") {
+    if (is.character(scores)) {
       label_type <- "char"
-      initial_labels.factor <- factor(initial_labels)
-      initial_labels <- as.numeric(initial_labels.factor)
-    } else if (is.factor(initial_labels)) {
+      annotations.factor <- factor(scores)
+      annotations <- as.numeric(annotations.factor)
+    } else if (is.factor(scores)) {
       label_type <- "factor"
-      initial_labels.factor <- initial_labels
-      initial_labels <- as.numeric(initial_labels.factor)
+      annotations.factor <- scores
+      annotations <- as.numeric(annotations.factor)
+    } else {
+      annotations <- scores
     }
-    initial_labels[is.na(initial_labels)] <- -1
-
-    if (is(G, "ACTIONetExperiment")) {
-      G <- colNets(G)[[network_slot]]
-    }
-    updated_labels <- run_LPA(G, initial_labels, lambda = lambda, iters = iters, sig_threshold = sig_threshold)
-    updated_labels[updated_labels == -1] <- NA
-
-    if (label_type == "char" | label_type == "factor") {
-      updated_labels <- levels(initial_labels.factor)[updated_labels]
-    }
+    out <- assess.categorical.autocorrelation(A = G, labels = annotations, perm.no = perm_no)
   }
 
-  return(updated_labels)
+  return(out)
 }
 
 
