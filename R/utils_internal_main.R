@@ -171,7 +171,7 @@
     colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] <- "internal"
 
     colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(unification.out$C_unified, "sparseMatrix")
-    colMapTypes(ace)[[printf("C_%s", unified_suffix)]] <- "internal"
+    colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] <- "internal"
 
     colData(ace)[["assigned_archetype"]] <- c(unification.out$assigned_archetype)
 

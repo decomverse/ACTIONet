@@ -176,9 +176,8 @@ imputeGenes <- function(ace,
 
                 # This can also be done with network-regularized SVD directly
                 V.smooth <- networkDiffusion(
-                  ace = NULL,
                   G = colNets(ace)[[net_slot]],
-                  scores_attr = V_svd,
+                  scores = V_svd,
                   algorithm = "pagerank",
                   alpha = alpha_val,
                   thread_no = thread_no,
@@ -186,7 +185,6 @@ imputeGenes <- function(ace,
                   res_threshold = 1e-8,
                   net_slot = NULL
                 )
-                # V.smooth <- networkDiffusion(G = colNets(ace)[[net_slot]], algorithm = "pagerank", scores_attr = V_svd, alpha = alpha_val)
 
                 H <- V.smooth %*% diag(SVD.out$d)
                 U <- SVD.out$u
@@ -211,9 +209,8 @@ imputeGenes <- function(ace,
             # )
 
             H <- networkDiffusion(
-              ace = NULL,
               G = G,
-              scores_attr = Ht_unified,
+              scores = Ht_unified,
               algorithm = "pagerank",
               alpha = alpha_val,
               thread_no = thread_no,
@@ -232,9 +229,8 @@ imputeGenes <- function(ace,
         G <- colNets(ace)[[net_slot]]
         # imputed.expression <- t(networkDiffusion(G, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_it, thread_no = thread_no))
         imputed.expression <- networkDiffusion(
-          ace = NULL,
           G = G,
-          scores_attr = Matrix::t(subS),
+          scores = Matrix::t(subS),
           algorithm = "pagerank",
           alpha = alpha_val,
           thread_no = thread_no,

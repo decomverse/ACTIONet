@@ -146,7 +146,7 @@ normalize.ace <- function(
           assay_name = assay_name,
           assay_out = assay_out,
           log_transform = TRUE,
-          scale_factor = "median",
+          scale_factor = "median"
         )
         norm_method = "default"
     }
