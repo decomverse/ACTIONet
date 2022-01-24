@@ -19,7 +19,7 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
   species = match.arg(species)
   metric = match.arg(metric)
 
-  features_use = ACTIONet:::.preprocess_annotation_features(ace, features_use = features_use)
+  features_use = .get_feature_vec(ace, features_use = features_use)
 
   if(species != "other")
     mask = features_use %in% .get_mtRNA_genes(species)
@@ -34,7 +34,12 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
 
   if(!is.null(by)){
 
-    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, by, groups_use)
+    IDX = ACTIONetExperiment::get.data.or.split(
+      ace,
+      attr = by,
+      groups_use = groups_use,
+      to_return = "split"
+    )
 
     if(metric == "pct"){
       frac.list = lapply(IDX, function(idx){
@@ -140,7 +145,7 @@ plot.counts.by.attr <- function(
 
   require(ggplot2)
 
-  IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr)
+  IDX = ACTIONetExperiment::get.data.or.split(ace, attr = attr, to_return = "split")
   mat = assays(ace)[[assay]]
 
   if(nonzero == TRUE)

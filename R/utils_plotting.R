@@ -91,7 +91,7 @@ CPal_default <- c(
   }
 
   if (is(data, "ACTIONetExperiment")) {
-    plot_labels <- ACTIONetExperiment:::.get_attr_or_split_idx(data, attr = label_attr, return_vec = TRUE)
+    plot_labels <- ACTIONetExperiment::get.data.or.split(data, attr = label_attr, to_return = "data")
   } else {
     plot_labels <- label_attr
   }
@@ -125,7 +125,7 @@ CPal_default <- c(
       }
     } else if (is.character(color_attr)) {
       if (length(color_attr) == 1) {
-        plot_colors <- ACTIONetExperiment:::.get_attr_or_split_idx(data, attr = color_attr, return_vec = TRUE)
+        plot_colors <- ACTIONetExperiment::get.data.or.split(data, attr = color_attr, to_return = "data")
       } else {
         plot_colors <- color_attr
       }
@@ -182,32 +182,37 @@ CPal_default <- c(
 }
 
 
-.get_plot_transparency <- function(trans_attr,
-                                   ace = NULL,
-                                   trans_fac = 1.5,
-                                   trans_th = -0.5,
-                                   scale = TRUE) {
+.get_plot_transparency <- function(
+  trans_attr = NULL,
+  ace = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  scale = TRUE
+) {
+
   if (is.null(trans_attr)) {
     return(1)
-  } else {
-    if (length(trans_attr) == 1) {
-      alpha_fac <- ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = trans_attr, return_vec = TRUE)
-    } else {
-      alpha_fac <- trans_attr
-    }
-
-    if (scale == TRUE) {
-      z <- scale(alpha_fac)
-    } else {
-      z <- alpha_fac
-    }
-
-    alpha_val <- 1 / (1 + exp(-trans_fac * (z - trans_th)))
-    alpha_val[z > trans_th] <- 1
-    alpha_val <- alpha_val^trans_fac
-
-    return(alpha_val)
   }
+
+  # if (length(trans_attr) == 1) {
+  #   alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
+  # } else {
+  #   alpha_fac <- trans_attr
+  # }
+
+  alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
+
+  if (scale == TRUE) {
+    z <- scale(alpha_fac)
+  } else {
+    z <- alpha_fac
+  }
+
+  alpha_val <- 1 / (1 + exp(-trans_fac * (z - trans_th)))
+  alpha_val[z > trans_th] <- 1
+  alpha_val <- alpha_val^trans_fac
+
+  return(alpha_val)
 }
 
 
@@ -218,16 +223,19 @@ CPal_default <- c(
 
 
 #' @import ggplot2
-.layout_plot_labels <- function(plot_data = NULL,
-                                label_names = NULL,
-                                label_colors = NULL,
-                                darken = TRUE,
-                                alpha_val = 0.5,
-                                text_size = 3,
-                                constrast_fac = 0.5,
-                                nudge = FALSE,
-                                use_repel = TRUE,
-                                repel_force = 0.05) {
+.layout_plot_labels <- function(
+  plot_data = NULL,
+  label_names = NULL,
+  label_colors = NULL,
+  darken = TRUE,
+  alpha_val = 0.5,
+  text_size = 3,
+  constrast_fac = 0.5,
+  nudge = FALSE,
+  use_repel = TRUE,
+  repel_force = 0.05
+) {
+
   if (is.null(label_names)) {
     label_names <- sort(unique(plot_data$labels))
   }

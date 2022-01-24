@@ -34,13 +34,13 @@ get.pseudobulk.SE <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, sample_attr)
+    IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
     good_batches = sapply(IDX, length) >= min_cells_per_batch
 
     if(!all(good_batches)){
       old_batches = names(IDX)
       ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
-      IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, sample_attr)
+      IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
       bad_batch_names = setdiff(old_batches, names(IDX))
       msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)

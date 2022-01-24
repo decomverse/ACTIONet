@@ -23,8 +23,8 @@ reduce.and.batch.correct.ace.fastMNN <- function(
     m_data = metadata(ace)
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
-    mnn_batch = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
-    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr)
+    mnn_batch = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
+    IDX = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "split")
     merge_order = order(sapply(IDX, function(idx) length(idx)), decreasing = TRUE)
 
     set.seed(0)
@@ -63,7 +63,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(
 #' (It uses Harmony for batch-correction: https://github.com/immunogenomics/harmony)
 #'
 #' @param ace ACTIONetExperiment object
-#' @param batch_attr Vector of length ncol(ace) or column name of colData(ace) containing batch labels.
+#' @param batch_attr Vector of length NCOL(ace) or column name of colData(ace) containing batch labels.
 #' @param reduced_dim Dimension of SVD used for reducing kernel matrix
 #' @param max_iter Number of SVD iterations
 #'
@@ -97,7 +97,7 @@ reduce.and.batch.correct.ace.Harmony <- function(
 
     ace = as(ace, "ACTIONetExperiment")
 
-    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
 
     ace = reduce.ace(
       ace = ace,
@@ -136,7 +136,7 @@ batch.correct.ace.Harmony <- function(
     }
 
     ace = as(ace, "ACTIONetExperiment")
-    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
 
     colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(
       data_mat = colMaps(ace)[[reduction_slot]],
@@ -222,7 +222,7 @@ orthogonalize.ace.batch.simple <- function(
   reduction_slot = "ACTION"
 ) {
 
-    batch_attr = ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = batch_attr, return_vec = TRUE)
+    batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
     batch_attr = as.factor(batch_attr)
     design_mat = stats::model.matrix(~batch_attr)
 

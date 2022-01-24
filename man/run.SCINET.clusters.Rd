@@ -17,7 +17,7 @@ run.SCINET.clusters(
 \arguments{
 \item{ace}{ACTIONet output object}
 
-\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using clusterFeatureSpecificity() function}
 
 \item{G}{Baseline network as an adjacency matrix or igraph object.
 If it is NULL, PCNet is loaded as the baseline from SCINET package.}
@@ -39,7 +39,7 @@ Computes a list of cluster-specific interactomes
 \examples{
 data('curatedMarkers_human') # pre-packaged in ACTIONet
 marker.genes = curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-ace = compute.cluster.feature.specificity(ace, ace$clusters, 'cluster_specificity_scores')
+ace = clusterFeatureSpecificity(ace, ace$clusters, 'cluster_specificity_scores')
 network.list = run.SCINET.clusters(ace, 'cluster_specificity_scores')
 G = network.list[[1]]
 V(G)$name[order(V(G)$specificity, decreasing = T)[1:10]]

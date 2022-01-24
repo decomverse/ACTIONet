@@ -18,7 +18,7 @@ reduce.and.batch.correct.ace.Harmony(
 \arguments{
 \item{ace}{ACTIONetExperiment object}
 
-\item{batch_attr}{Vector of length ncol(ace) or column name of colData(ace) containing batch labels.}
+\item{batch_attr}{Vector of length NCOL(ace) or column name of colData(ace) containing batch labels.}
 
 \item{reduced_dim}{Dimension of SVD used for reducing kernel matrix}
 

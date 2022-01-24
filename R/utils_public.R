@@ -11,23 +11,38 @@ orthoProject <- function(A, S, prenorm = F, postnorm = F) {
     return(A_r)
 }
 
-rescale.matrix <- function(
+normalize.matrix <- function(
   S,
-  log_scale = FALSE,
-  median_scale = FALSE
+  log_transform = FALSE,
+  scale_factor = NULL
 ) {
+
+    if( (scale_factor != "median") && !is.numeric(scale_factor) && !is.null(scale_factor)) {
+      err = sprintf("'scale_factor' must be 'median' or numeric.\n")
+      stop(err)
+    }
 
     cs = Matrix::colSums(S)
     cs[cs == 0] = 1
     B = Matrix::t(Matrix::t(S) / cs)
 
-    if (median_scale == TRUE){
+    if (scale_factor == "median"){
       B = B * median(cs)
+    } else if (is.numeric(scale_factor)){
+      B = B * scale_factor
     }
 
-    if (log_scale == TRUE) {
+    if (log_transform == TRUE) {
         B = log1p(B)
     }
 
     return(B)
+}
+
+#' @export
+fastRowVars <- function(mat) {
+    mat <- as(mat, "dgTMatrix")
+    E <- fastRowMeans(mat)
+    V <- computeSparseRowVariances(mat@i + 1, mat@x, E, ncol(mat))
+    return(V)
 }

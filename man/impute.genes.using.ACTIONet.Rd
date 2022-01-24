@@ -10,7 +10,7 @@ impute.genes.using.ACTIONet(
   features_use = NULL,
   alpha_val = 0.85,
   thread_no = 0,
-  diffusion_iters = 5,
+  diffusion_it = 5,
   assay_name = "logcounts"
 )
 }
@@ -25,7 +25,7 @@ The larger it is, the deeper the diffusion, which results in less nonzeros (defa
 
 \item{thread_no}{Number of parallel threads}
 
-\item{diffusion_iters}{Number of diffusion iterations (default = 5)}
+\item{diffusion_it}{Number of diffusion iterations (default = 5)}
 
 \item{assay_name}{Slot in the ace object with normalized counts.}
 }
