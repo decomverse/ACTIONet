@@ -134,12 +134,10 @@ runACTIONet <- function(
   # ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
 
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
-    ace = ace,
     G = G,
-    label_attr = "assigned_archetype",
+    annotations = colData(ace)[["assigned_archetype"]],
     algorithm = "localized_coreness",
-    alpha_val = 0,
-    net_slot = NULL,
+    alpha_val = 0
   )
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
@@ -202,9 +200,8 @@ runACTIONet <- function(
   #   alpha = footprint_alpha
   # )
   archetype_footprint <- networkDiffusion(
-    ace = NULL,
     G = G,
-    scores_attr = colMaps(ace)[["H_unified"]],
+    scores = colMaps(ace)[["H_unified"]],
     algorithm = "pagerank",
     alpha = footprint_alpha,
     thread_no = thread_no,
@@ -367,14 +364,10 @@ run.ACTIONet <- function(ace,
   )
   colNets(ace)[[net_slot_out]] <- G
 
-  # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-  ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
-
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
   S_r_norm <- networkDiffusion(
-    ace = NULL,
     G = G,
-    scores_attr = Matrix::t(S_r),
+    scores = Matrix::t(S_r),
     algorithm = "pagerank",
     alpha = imputation_alpha,
     thread_no = thread_no,
@@ -382,8 +375,6 @@ run.ACTIONet <- function(ace,
     res_threshold = 1e-8,
     net_slot = NULL
   )
-  # S_r_norm <- networkDiffusion(G, scores = Matrix::t(S_r), algorithm = "pagerank", alpha = imputation_alpha, max_it = 5, thread_no = thread_no)
-
   colMaps(ace)[["ACTIONnorm"]] <- S_r_norm
   colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
 
@@ -414,11 +405,13 @@ run.ACTIONet <- function(ace,
     return_raw = FALSE
   )
 
+  # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
+  ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
+
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(
-    ace = NULL,
     G = G,
-    scores_attr = colMaps(ace)[["H_unified"]],
+    scores = colMaps(ace)[["H_unified"]],
     algorithm = "pagerank",
     alpha = footprint_alpha,
     thread_no = thread_no,
@@ -702,12 +695,10 @@ rerunArchAggr <- function(ace,
   # SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality <- function(
 
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
-    ace = ace,
     G = G,
-    label_attr = "assigned_archetype",
+    annotations = colData(ace)[["assigned_archetype"]],
     algorithm = "localized_coreness",
-    alpha_val = 0,
-    net_slot = NULL
+    alpha_val = 0 
   )
 
   # Ht_unified <- colMaps(ace)[["H_unified"]]
@@ -721,9 +712,8 @@ rerunArchAggr <- function(ace,
   # colMaps(ace)$archetype_footprint <- archetype_footprint
 
   archetype_footprint <- networkDiffusion(
-    ace = NULL,
     G = G,
-    scores_attr = colMaps(ace)[[sprintf("H_%s", unified_suffix)]],
+    scores = colMaps(ace)[[sprintf("H_%s", unified_suffix)]],
     algorithm = "pagerank",
     alpha = footprint_alpha,
     thread_no = thread_no,
