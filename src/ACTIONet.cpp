@@ -2514,3 +2514,14 @@ vec sweepcut(sp_mat &A, vec s, int min_size = 5, int max_size = -1)
 
   return (cond);
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 1, int gene_scaling_method = 2, double diffusion_alpha = 0.85, int thread_no = 0) {
+  mat stats = ACTIONet::aggregate_genesets(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, diffusion_alpha, thread_no);
+
+  return (stats);
+}
+
+    
+
