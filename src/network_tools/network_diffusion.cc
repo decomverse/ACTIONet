@@ -299,6 +299,13 @@ namespace ACTIONet
   mat compute_network_diffusion_Chebyshev(sp_mat &P, mat &X0, int thread_no,
                                           double alpha, int max_it, double res_threshold)
   {
+    if(alpha == 1) {
+      fprintf(stderr, "alpha should be in (0, 1). Value of %.2f was provided.\n", alpha);
+      return(X0);
+    } else if(alpha == 0) {
+      return(X0);
+    }
+    
     alpha = 1 - alpha; // Traditional defitition is to have alpha as weight of prior. Here, alpha is depth of difffusion
 
     mat mPPreviousScore = X0; //zeros(size(X0));
