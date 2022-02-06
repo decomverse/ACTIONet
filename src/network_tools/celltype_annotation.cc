@@ -428,5 +428,77 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     return(cell_stats);
   }
 */
+  sp_mat normalize_expression_profile(sp_mat &S, int normalization = 1) {
+    sp_mat T;
+    if (normalization == 0)
+    {
+      printf("No norm");
+      T = S;
+    }
+    else if (normalization == 1)
+    {
+      printf("LSI");
+      T = LSI(S);
+    }
+
+    return(T); 
+  }
+
+  mat aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double diffusion_alpha, int thread_no)
+  {
+    if(S.n_rows != marker_mat.n_rows) {
+      fprintf(stderr, "Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
+      return(mat());
+    }
+    if(S.n_cols != G.n_rows) {
+      fprintf(stderr, "Number of cell in the expression matrix (S) and cell network (G) do not match\n");
+      return(mat());
+    }
+
+    sp_mat markers_mat_bin = spones(marker_mat);
+    vec marker_counts = vec(trans(sum(markers_mat_bin)));
+
+    // 0: no normalization, 1: TF/IDF
+    printf("Normalize expreesion profile\n");
+    sp_mat T = normalize_expression_profile(S, expression_normalization_method);
+
+    // 0: pagerank, 2: sym_pagerank
+    printf("Normalize adjacency matrix\n");
+    sp_mat P = normalize_adj(G, network_normalization_method);
+
+    mat marker_stats(S.n_cols, marker_mat.n_cols);
+    for(int j = 0; j < marker_mat.n_cols; j++) {
+      printf("j = %d\n", j);
+      mat marker_expr(S.n_cols, marker_counts(j));
+
+      printf("subsetting expression\n");
+      int idx = 0;
+      for (sp_mat::col_iterator it = marker_mat.begin_col(j); it != marker_mat.end_col(j); it++) {
+        double w = (*it);
+        marker_expr.col(idx) = w*vec(trans(S.row(it.row())));        
+        idx++;
+      }
+
+      //0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
+      printf("normalize_scores\n");      
+      mat marker_expr_scaled = normalize_scores(marker_expr, gene_scaling_method, thread_no);
+
+      printf("compute_network_diffusion_Chebyshev\n");
+      mat marker_expr_imputed = compute_network_diffusion_Chebyshev(P, marker_expr_scaled, thread_no);
+
+      mat Sigma = cov(marker_expr_imputed);
+      //double norm_factor = sqrt(sum(sum(Sigma)));
+      double norm_factor = sqrt(sum(Sigma.diag()));
+
+      vec aggr_stats = sum(marker_expr_imputed, 1); // each column is a marker gene
+      aggr_stats = aggr_stats / norm_factor;
+      marker_stats.col(j) = aggr_stats;
+    }
+    mat marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats, thread_no);
+
+    return(marker_stats_smoothed);
+  }
+
+
 
 } // namespace ACTIONet

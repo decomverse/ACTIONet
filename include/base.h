@@ -425,6 +425,10 @@ namespace ACTIONet
 
     vec sweepcut(sp_mat &A, vec s, int min_size = 5, int max_size = -1);
 
+    mat normalize_scores(mat scores, int method = 1, int thread_no = 0);
+
+    mat aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 1, int gene_scaling_method = 2, double diffusion_alpha = 0.85, int thread_no = 0);
+
 } // namespace ACTIONet
 
 #endif

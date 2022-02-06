@@ -3,28 +3,32 @@
 namespace ACTIONet
 {
 
-    mat normalize_scores(mat scores, int method = 1, int thread_no = 0)
+    mat normalize_scores(mat scores, int method, int thread_no)
     {
         mat normalized_scores(size(scores));
         switch (method)
         {
         case 0: //"none"
         {
+            printf("no norm");
             normalized_scores = scores;
             break;
         }
         case 1: //"zscore"
         {
+            printf("z-score");
             normalized_scores = zscore(scores, thread_no);
             break;
         }
         case 2: //"RINT" (nonparametric)
         {
+            printf("RINT");
             normalized_scores = RIN_transform(scores, thread_no);
             break;
         }
         case 3: //"robust_zscore" (kinda hack!)
         {
+            printf("robust z");
             normalized_scores = robust_zscore(scores, thread_no);
             break;
         }
