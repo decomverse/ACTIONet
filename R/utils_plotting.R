@@ -244,7 +244,7 @@ CPal_default <- c(
   label_coors <- label_coors[label_names]
   centroids <- lapply(label_coors, function(df) {
     mat <- as.matrix(df)
-    cent <- apply(mat, 2, function(x) mean(x, trim = 0.25))
+    cent <- apply(mat, 2, function(x) mean(x, trim = 0.45))
     return(cent)
   })
 
