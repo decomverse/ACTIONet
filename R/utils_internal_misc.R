@@ -60,3 +60,18 @@
     out <- list(design_mat = design_mat, variable_name = variable_name)
     return(out)
 }
+
+.check_G_ace <- function(G, net_slot = NULL){
+  if( is.null(G) ){
+    err = sprintf("'G' must be given.\n")
+    stop(err)
+  } else if (is(G, "ACTIONetExperiment")) {
+    if (!(net_slot %in% names(colNets(G)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(G)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
+}
