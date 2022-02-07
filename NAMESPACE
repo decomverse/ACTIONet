@@ -3,7 +3,6 @@
 S3method(filter,ace)
 S3method(filter,ace.by.attr)
 S3method(plot,ACTIONet)
-S3method(plot,ACTIONet.3D)
 S3method(plot,ACTIONet.feature.view)
 S3method(plot,ACTIONet.gene.view)
 S3method(plot,ACTIONet.gradient)
