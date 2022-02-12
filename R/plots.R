@@ -15,7 +15,7 @@ plot.ACTIONetExperiment <- function(ace, ...) {
       p_out <- plot.ACTIONet(ace)
     } else if ("gradient_attr" %in% names(x)) {
       p_out <- do.call(plot.ACTIONet.gradient, as.list(args))
-    } else if ("labels_attr" %in% names(x)) {
+    } else if ("label_attr" %in% names(x)) {
       p_out <- do.call(plot.ACTIONet, as.list(args))
     } else if ((length(unique(x[[1]])) > 50) & (is.numeric(x[[1]]))) {
       p_out <- do.call(plot.ACTIONet.gradient, as.list(args))

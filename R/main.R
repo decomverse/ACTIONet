@@ -695,7 +695,7 @@ rerunArchAggr <- function(ace,
 
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
     G = G,
-    labels_attr = colData(ace)[["assigned_archetype"]],
+    label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "localized_coreness",
     alpha_val = 0
   )

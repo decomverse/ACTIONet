@@ -55,12 +55,16 @@ get.pseudobulk.SE <- function(
     S0 = sapply(counts_list, ACTIONetExperiment:::fastRowSums) + pseudocount
     se_assays$counts = S0
 
-    E0 = sapply(counts_list, ACTIONetExperiment:::fastRowMeans)
-    se_assays$mean = E0
+    if (with_E == TRUE) {
+      E0 = sapply(counts_list, ACTIONetExperiment:::fastRowMeans)
+      se_assays$mean = E0
+    }
 
-    V0 = sapply(counts_list, ACTIONetExperiment:::fastRowVars)
-    se_assays$var = V0
-
+    if (with_V == TRUE) {
+      V0 = sapply(counts_list, matrixStats::rowVars)
+      se_assays$var = V0
+    }
+  
     if (ensemble == TRUE) {
         if (!any(with_S, with_E, with_V)) {
             err = sprintf("No ensemble assays to make.\n")
