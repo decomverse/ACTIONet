@@ -697,7 +697,7 @@ rerunArchAggr <- function(ace,
     G = G,
     label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "localized_coreness",
-    alpha_val = 0
+    alpha = 0
   )
 
   # Ht_unified <- colMaps(ace)[["H_unified"]]

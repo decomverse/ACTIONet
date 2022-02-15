@@ -17,7 +17,9 @@ normalize.matrix <- function(
   scale_factor = NULL
 ) {
 
-    if( (scale_factor != "median") && !is.numeric(scale_factor) && !is.null(scale_factor)) {
+    if (is.null(scale_factor)) {
+      scale_factor = 1
+    } else if ( (scale_factor != "median") && !is.numeric(scale_factor) ) {
       err = sprintf("'scale_factor' must be 'median' or numeric.\n")
       stop(err)
     }
@@ -28,10 +30,10 @@ normalize.matrix <- function(
 
     if (scale_factor == "median"){
       B = B * median(cs)
-    } else if (is.numeric(scale_factor)){
+    } else {
       B = B * scale_factor
     }
-
+    
     if (log_transform == TRUE) {
         B = log1p(B)
     }
