@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plot.ACTIONet.interactive}
 \alias{plot.ACTIONet.interactive}
-\title{Interactive ACTIONet visualizetion with Plotly}
+\title{Interactive ACTIONet visualization with Plotly}
 \usage{
 \method{plot}{ACTIONet.interactive}(
   data,
@@ -63,7 +63,7 @@
 plotly object
 }
 \description{
-Interactive ACTIONet visualizetion with Plotly
+Interactive ACTIONet visualization with Plotly
 }
 \examples{
 

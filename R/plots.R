@@ -15,7 +15,7 @@ plot.ACTIONetExperiment <- function(ace, ...) {
       p_out <- plot.ACTIONet(ace)
     } else if ("gradient_attr" %in% names(x)) {
       p_out <- do.call(plot.ACTIONet.gradient, as.list(args))
-    } else if ("labels_attr" %in% names(x)) {
+    } else if ("label_attr" %in% names(x)) {
       p_out <- do.call(plot.ACTIONet, as.list(args))
     } else if ((length(unique(x[[1]])) > 50) & (is.numeric(x[[1]]))) {
       p_out <- do.call(plot.ACTIONet.gradient, as.list(args))
@@ -84,12 +84,19 @@ plot.ACTIONet <- function(
   plot_labels <- .get_plot_labels(label_attr, ace)
   plot_fill_col <- .get_plot_colors(color_attr, plot_labels, ace, color_slot, palette)
   plot_alpha <- .get_plot_transparency(trans_attr, ace, trans_fac, trans_th, TRUE)
-  plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
+  if(is.numeric(plot_fill_col)){
+    plot_border_col <- plot_fill_col
+  } else {
+    plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
+  }
 
   if (is.null(plot_labels)) {
     data_labels <- "NA"
     add_text_labels <- FALSE
-    show_legend <- FALSE
+    # show_legend <- FALSE
+    if (is.character(color_attr)) {
+      show_legend <- FALSE
+    }
     legend_labels <- NULL
     legend_fill_colors <- NULL
   } else {
@@ -97,11 +104,6 @@ plot.ACTIONet <- function(
     names(plot_fill_col) <- plot_labels
     legend_labels <- sort(unique(plot_labels))
     legend_fill_colors <- plot_fill_col[legend_labels]
-  }
-
-  if (!is.null(color_attr)) {
-    show_legend <- FALSE
-    legend_fill_colors <- NULL
   }
 
   plot_data <- data.frame(plot_coors,
@@ -134,15 +136,40 @@ plot.ACTIONet <- function(
       size = point_size,
       stroke = stroke_size,
       show.legend = show_legend
-    ) +
-    scale_fill_identity(
-      guide = "legend",
-      labels = legend_labels,
-      breaks = legend_fill_colors
-    ) +
-    scale_color_identity() +
-    scale_alpha_identity() +
-    .default_ggtheme
+    )
+
+    p_out <- .get_ggplot_scale(
+      p_out,
+      col_vals = plot_data$fill,
+      grad_palette = palette,
+      stroke_contrast_fac = stroke_contrast_fac,
+      legend_labels = legend_labels,
+      legend_fill_colors = legend_fill_colors
+    )
+
+    # if (!is.null(color_attr) && !is.character(plot_data$fill)) {
+    #   p_out <- p_out +
+    #   scale_colour_gradientn(
+    #     colors = palette,
+    #     na.value = "grey50",
+    #     guide = "colourbar",
+    #     aesthetics = "colour"
+    #   ) +
+    #   scale_fill_gradientn(
+    #     colors = colorspace::darken(palette, stroke_contrast_fac),
+    #     na.value = "grey50",
+    #     guide = NULL
+    #   )
+    # } else {
+    #   p_out <- p_out + scale_fill_identity(
+    #     guide = "legend",
+    #     labels = legend_labels,
+    #     breaks = legend_fill_colors
+    #   ) +
+    #   scale_color_identity() #+
+    #   # scale_alpha_identity() #+
+    #   # .default_ggtheme
+    # }
 
   if (!is.null(plot_labels) && add_text_labels == TRUE) {
     text_layer <- .layout_plot_labels(
@@ -160,115 +187,285 @@ plot.ACTIONet <- function(
     p_out <- p_out + text_layer
   }
 
+  p_out <- p_out + scale_alpha_identity() + .default_ggtheme + labs(fill="cat")
+
   p_out
 }
 
-#' Main ACTIONet 3D plotting functions
+
+#' Plots gradient of (imputed) values on ACTIONet scatter plot.
 #'
-#' @param ace ACTIONet output object
-#' @param labels Annotation of interest (clusters, celltypes, etc.) to be projected on the ACTIONet plot
-#' @param trans_attr Additional continuous attribute to project onto the transparency of nodes
-#' @param trans_th, trans_fac Control the effect of transparency mapping
-#' @param point_size Size of nodes in the ACTIONet plot
-#' @param palette Color palette (named vector or a name for a given known palette)
-#' @param title Main title of the plot
-#' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
+#' @param ace 'ACTIONetExperiment' object
+#' @param x Numeric vector of length NCOL(ace).
+#' @param alpha_val Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).
+#' @param log_scale Logical value for whether to log-scale values of 'x' (default:'FALSE').
+#' @param use_rank If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').
+#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
+#' @param trans_fac Transparency modifier (default:1.5).
+#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked (default:-0.5).
+#' @param point_size Size of points in ggplot (default:1).
+#' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
+#' @param stroke_contrast_fac Factor by which to darken point outline for contrast (default:0.1).
+#' @param grad_palette Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.
+#' @param net_slot Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
+#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').
 #'
-#' @return Visualized ACTIONet
+#' @return 'ggplot' object.
 #'
 #' @examples
-#' ace <- run.ACTIONet(sce)
-#' plot.ACTIONet.3D(ace, ace$assigned_archetype, trans_attr = ace$node_centrality)
+#' ace <- run.ACTIONet(ace)
+#' x <- logcounts(ace)["CD14", ]
+#' plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
 #' @export
-plot.ACTIONet.3D <- function(ace,
-                             labels = NULL,
-                             trans_attr = NULL,
-                             trans_th = -1,
-                             trans_fac = 1,
-                             point_size = 1,
-                             palette = CPal_default,
-                             coordinate_slot = "ACTIONet3D") {
-  nV <- length(ncol(ace))
 
-  point_size <- point_size * 0.2
+plot.ACTIONet.gradient <- function(
+  ace,
+  x,
+  alpha_val = 0,
+  log_scale = FALSE,
+  use_rank = FALSE,
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 1,
+  stroke_size = point_size * 0.1,
+  stroke_contrast_fac = 0.1,
+  grad_palette = "magma",
+  show_legend = FALSE,
+  net_slot = "ACTIONet",
+  coordinate_attr = "ACTIONet2D"
+) {
 
-  if (class(ace) == "ACTIONetExperiment") {
-    labels <- .preprocess_annotation_labels(labels, ace)
-    if (is.character(coordinate_slot)) {
-      coors <- as.matrix(colMaps(ace)[[coordinate_slot]])
-      coor.mu <- apply(coors, 2, mean)
-      coor.sigma <- apply(coors, 2, sd)
-      coors <- scale(coors)
-    } else {
-      coors <- as.matrix(coordinate_slot)
-      coor.mu <- apply(coors, 2, mean)
-      coor.sigma <- apply(coors, 2, sd)
-      coors <- scale(coors)
-    }
+  if (length(x) != ncol(ace)) {
+    warning("Length of input vector doesn't match the number of cells.")
+    return()
+  }
+  ## Create color gradient generator
+  if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
+    grad_palette <- switch(grad_palette,
+      greys = grDevices::gray.colors(100),
+      inferno = viridis::inferno(500, alpha = 0.8),
+      magma = viridis::magma(500, alpha = 0.8),
+      viridis = viridis::viridis(500, alpha = 0.8),
+      BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
+      Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
+      RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
+    )
   } else {
-    if (is.matrix(ace) | ACTIONetExperiment:::is.sparseMatrix(ace)) {
-      coors <- as.matrix(ace)
-      coor.mu <- apply(coors, 2, mean)
-      coor.sigma <- apply(coors, 2, sd)
-      coors <- scale(coors)
-      labels <- .preprocess_annotation_labels(labels)
-    } else {
-      err <- sprintf("Unknown type for object 'ace'.\n")
-      stop(err)
-    }
+    grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
   }
 
-  if (is.null(labels)) {
-    if (class(ace) == "ACTIONetExperiment") {
-      vCol <- grDevices::rgb(colMaps(ace)$denovo_color)
-    } else {
-      vCol <- rep("tomato", nrow(coors))
-    }
-    Annot <- NULL
-  } else {
-    Annot <- names(labels)[match(sort(unique(labels)), labels)]
-    if (length(palette) > 1) {
-      if (length(palette) < length(Annot)) {
-        palette <- CPal_default
-      }
-      if (is.null(names(palette))) {
-        Pal <- palette[1:length(Annot)]
-      } else {
-        Pal <- palette[Annot]
-      }
-    } else {
-      Pal <- ggpubr::get_palette(palette, length(Annot))
-    }
-
-    names(Pal) <- Annot
-    vCol <- Pal[names(labels)]
+  if (log_scale == TRUE) {
+    x <- log1p(x)
   }
 
-  if (!is.null(trans_attr)) {
-    z <- scale(trans_attr) # (trans_attr - median(trans_attr))/mad(trans_attr)
-    beta <- 1 / (1 + exp(-trans_fac * (z - trans_th)))
-    beta[z > trans_th] <- 1
-    beta <- beta^trans_fac
-
-    vCol.border <- scales::alpha(colorspace::darken(vCol, 0.5), beta)
-    vCol <- scales::alpha(vCol, beta)
-  } else {
-    vCol.border <- colorspace::darken(vCol, 0.5)
+  if (alpha_val > 0) {
+    if (alpha_val > 1)
+      alpha_val = 1
+    x <- as.numeric(networkDiffusion(
+      G = colNets(ace)[[net_slot]],
+      scores = x,
+      algorithm = "pagerank",
+      alpha = alpha_val,
+      thread_no = 0
+    ))
   }
 
-  threejs::scatterplot3js(
-    x = coors[, 1],
-    y = coors[, 2],
-    z = coors[, 3],
-    axis.scales = FALSE,
-    size = point_size,
-    axis = FALSE,
-    grid = FALSE,
-    color = as.character(vCol),
-    stroke = as.character(vCol.border),
-    bg = "black"
+  if (use_rank == TRUE) {
+    col_vals <- rank(x)
+  } else {
+    col_vals <- x
+  }
+
+  idx <- order(x, decreasing = FALSE)
+
+  p_out <- plot.ACTIONet(
+    ace = ace,
+    label_attr = NULL,
+    color_attr = col_vals,
+    trans_attr = trans_attr,
+    trans_fac = trans_fac,
+    trans_th = trans_th,
+    point_size = point_size,
+    stroke_size = stroke_size,
+    stroke_contrast_fac = stroke_contrast_fac,
+    palette = grad_palette,
+    add_text_labels = FALSE,
+    point_order = idx,
+    coordinate_attr = coordinate_attr,
+    show_legend = show_legend
   )
+
+  return(p_out)
 }
+
+
+#' Interactive ACTIONet visualization with Plotly
+#'
+#' @param data 'ACTIONetExperiment' object or numeric matrix of X-Y(-Z) coordinates.
+#' @param label_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, cell types, etc.). (default:'NULL')
+#' @param color_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing hex colors to use for each point, or matrix/data.frame containing RGB values to pass to grDevices::rgb(). (default:'NULL')
+#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent. (default:'NULL')
+#' @param trans_fac Transparency modifier. (default:1.5)
+#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked. (default:-0.5)
+#' @param point_size Size of points in ggplot. (default:3)
+#' @param stroke_size Size of points outline (stroke) in ggplot. (default:point_size*0.1)
+#' @param stroke_color Marker stroke color. Can be any (single) color value accepted by plotly. If not given, darkened fill colors are used. (default:'NULL')
+#' @param stroke_contrast_fac Factor by which to darken point outline for contrast if 'stroke_color=NULL'. (default:0.1)
+#' @param palette Color palette. character vector of hex colors or a palette name to pass to 'ggpubr::get_palette()'. (default:CPal_default)
+#' @param show_legend Show legend based on labels. (default:'NULL')
+#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D or 3D plot coordinates if 'data' is an 'ACTIONetExperiment' object. (default:'ACTIONet2D' or 'ACTIONet3D' if 'plot_3d=TRUE')
+#' @param color_slot Name of entry in colMaps(ace) containing RGB values for default point colors generated by 'layout_ACTIONet()'. Used only if no other coloring parameters are given or valid. (default:'denovo_color')
+#' @param point_order Integer vector specifying order in which to plot individual points. (default:'NULL')
+#' @param hover_text Vector of values to display on hover. (default:'NULL')
+#' @param plot_3d Visualize plot in 3D using 'scatter3D'. Required 3D coordinate input (defaults to 'ACTIONet3D' if data is 'ACTIONetExperiment'). (default:'FALSE')
+#' @return plotly object
+#'
+#' @examples
+#'
+#' plot.ACTIONet.interactive(ace, ace$assigned_archetype, plot_3d = TRUE)
+#' @rawNamespace import(plotly, except = 'last_plot')
+#' @export
+plot.ACTIONet.interactive <- function(
+  data,
+  label_attr = NULL,
+  color_attr = NULL,
+  trans_attr = NULL,
+  trans_fac = 1.5,
+  trans_th = -0.5,
+  point_size = 3,
+  stroke_size = point_size * 0.1,
+  stroke_color = NULL,
+  stroke_contrast_fac = 0.1,
+  palette = CPal_default,
+  show_legend = NULL,
+  coordinate_attr = "ACTIONet2D",
+  color_slot = "denovo_color",
+  point_order = NULL,
+  hover_text = NULL,
+  plot_3d = FALSE
+) {
+
+  plot_coors <- .get_plot_coors(data, coordinate_attr)
+  plot_labels <- .get_plot_labels(label_attr, data)
+  plot_fill_col <- .get_plot_colors(color_attr, plot_labels, data, color_slot, palette)
+  plot_alpha <- .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
+
+  if(is.numeric(plot_fill_col)){
+    plot_border_col <- plot_fill_col
+  } else if (is.null(stroke_color)){
+    plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
+  } else {
+    plot_border_col <- stroke_color
+  }
+
+  if (plot_3d == TRUE) {
+    if (NCOL(plot_coors) < 3) {
+      if ("ACTIONet3D" %in% names(colMaps(data))) {
+        msg <- sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
+        message(msg)
+        plot_coors <- .get_plot_coors(data, "ACTIONet3D")
+      } else {
+        err <- sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\n")
+        stop(err)
+      }
+    }
+  }
+
+  plot_data <- data.frame(plot_coors,
+    fill = plot_fill_col,
+    color = plot_border_col,
+    trans = plot_alpha,
+    idx = 1:NROW(plot_coors)
+  )
+
+  if (is.null(label_attr)) {
+    # show_legend <- FALSE
+    plot_data$labels <- "NA"
+  } else {
+    plot_data$labels <- plot_labels
+  }
+
+  if (!is.null(hover_text)) {
+    plot_data$text <- hover_text
+  } else {
+    if (is.null(label_attr)) {
+      plot_data$text <- plot_data$idx
+    } else {
+      plot_data$text <- plot_data$labels
+    }
+  }
+
+  if (is.null(point_order)) {
+    pidx <- sample(NROW(plot_data))
+  } else {
+    pidx <- point_order
+  }
+
+  plot_data <- plot_data[pidx, ]
+
+  cont_attr <- c(color_attr, trans_attr)
+  if (is.null(label_attr) | any(!sapply(cont_attr, is.null))) {
+    if (is.null(show_legend)) {
+      show_legend <- FALSE
+    }
+
+    # if(is.numeric(plot_fill_col)) {
+    #   plot_data$text <- plot_data$fill
+    #   plot_data$color <- plot_data$fill
+    #   if(!is.character(palette) || length(palette) > 1){
+    #     grad_palette = "Viridis"
+    #   } else {
+    #     grad_palette = palette
+    #   }
+    # } else {
+    #   plot_data$fill <- grDevices::rgb(t(grDevices::col2rgb(plot_data$fill) / 255), alpha = plot_data$trans)
+    #   plot_data$color <- grDevices::rgb(t(grDevices::col2rgb(plot_data$color) / 255), alpha = plot_data$trans)
+    #   grad_palette = NULL
+    # }
+
+    p <- .make_plotly_scatter_single_trace(
+      x = plot_data$x,
+      y = plot_data$y,
+      z = plot_data$z,
+      label_attr = plot_data$labels,
+      col_vals = plot_data$fill,
+      cols_stroke = plot_data$color,
+      point_size = point_size,
+      stroke_size = stroke_size,
+      show_legend = show_legend,
+      hover_text = plot_data$text,
+      grad_palette = palette,
+      plot_3d = plot_3d
+    )
+  } else {
+    if (is.null(show_legend)) {
+      show_legend <- TRUE
+    }
+
+    col_idx <- which(!duplicated(plot_data$labels))
+    palette_fill <- plot_data$fill[col_idx]
+    palette_stroke <- plot_data$color[col_idx]
+    names(palette_fill) <- names(palette_stroke) <- plot_data$labels[col_idx]
+
+    p <- .make_plotly_scatter_split_trace(
+      x = plot_data$x,
+      y = plot_data$y,
+      z = plot_data$z,
+      label_attr = plot_data$labels,
+      cols_fill = palette_fill,
+      cols_stroke = palette_stroke,
+      point_size = point_size,
+      stroke_size = stroke_size,
+      show_legend = show_legend,
+      hover_text = plot_data$text,
+      plot_3d = plot_3d
+    )
+  }
+
+  return(p)
+}
+
 
 #' Plots heatmap of the top-ranked features of an enrichment table
 #'
@@ -505,155 +702,6 @@ plot.ACTIONet.gene.view <- function(ace,
   )
 }
 
-#' Interactive ACTIONet visualizetion with Plotly
-#'
-#' @param data 'ACTIONetExperiment' object or numeric matrix of X-Y(-Z) coordinates.
-#' @param label_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing cell labels of interest (clusters, cell types, etc.). (default:'NULL')
-#' @param color_attr Character vector of length NROW(ace) or colname of 'colData(ace)' containing hex colors to use for each point, or matrix/data.frame containing RGB values to pass to grDevices::rgb(). (default:'NULL')
-#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent. (default:'NULL')
-#' @param trans_fac Transparency modifier. (default:1.5)
-#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked. (default:-0.5)
-#' @param point_size Size of points in ggplot. (default:3)
-#' @param stroke_size Size of points outline (stroke) in ggplot. (default:point_size*0.1)
-#' @param stroke_color Marker stroke color. Can be any (single) color value accepted by plotly. If not given, darkened fill colors are used. (default:'NULL')
-#' @param stroke_contrast_fac Factor by which to darken point outline for contrast if 'stroke_color=NULL'. (default:0.1)
-#' @param palette Color palette. character vector of hex colors or a palette name to pass to 'ggpubr::get_palette()'. (default:CPal_default)
-#' @param show_legend Show legend based on labels. (default:'NULL')
-#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D or 3D plot coordinates if 'data' is an 'ACTIONetExperiment' object. (default:'ACTIONet2D' or 'ACTIONet3D' if 'plot_3d=TRUE')
-#' @param color_slot Name of entry in colMaps(ace) containing RGB values for default point colors generated by 'layout_ACTIONet()'. Used only if no other coloring parameters are given or valid. (default:'denovo_color')
-#' @param point_order Integer vector specifying order in which to plot individual points. (default:'NULL')
-#' @param hover_text Vector of values to display on hover. (default:'NULL')
-#' @param plot_3d Visualize plot in 3D using 'scatter3D'. Required 3D coordinate input (defaults to 'ACTIONet3D' if data is 'ACTIONetExperiment'). (default:'FALSE')
-#' @return plotly object
-#'
-#' @examples
-#'
-#' plot.ACTIONet.interactive(ace, ace$assigned_archetype, plot_3d = TRUE)
-#' @rawNamespace import(plotly, except = 'last_plot')
-#' @export
-plot.ACTIONet.interactive <- function(data,
-                                      label_attr = NULL,
-                                      color_attr = NULL,
-                                      trans_attr = NULL,
-                                      trans_fac = 1.5,
-                                      trans_th = -0.5,
-                                      point_size = 3,
-                                      stroke_size = point_size * 0.1,
-                                      stroke_color = NULL,
-                                      stroke_contrast_fac = 0.1,
-                                      palette = CPal_default,
-                                      show_legend = NULL,
-                                      coordinate_attr = "ACTIONet2D",
-                                      color_slot = "denovo_color",
-                                      point_order = NULL,
-                                      hover_text = NULL,
-                                      plot_3d = FALSE) {
-  plot_coors <- .get_plot_coors(data, coordinate_attr)
-  plot_labels <- .get_plot_labels(label_attr, data)
-  plot_fill_col <- .get_plot_colors(color_attr, plot_labels, data, color_slot, palette)
-  plot_alpha <- .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
-
-  if (is.null(stroke_color)) {
-    plot_border_col <- colorspace::darken(plot_fill_col, stroke_contrast_fac)
-  } else {
-    plot_border_col <- stroke_color
-  }
-
-  if (plot_3d == TRUE) {
-    if (NCOL(plot_coors) < 3) {
-      if ("ACTIONet3D" %in% names(colMaps(data))) {
-        msg <- sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
-        message(msg)
-        plot_coors <- .get_plot_coors(data, "ACTIONet3D")
-      } else {
-        err <- sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\n")
-        stop(err)
-      }
-    }
-  }
-
-  plot_data <- data.frame(plot_coors,
-    fill = plot_fill_col,
-    color = plot_border_col,
-    trans = plot_alpha,
-    idx = 1:NROW(plot_coors)
-  )
-
-  if (is.null(label_attr)) {
-    show_legend <- FALSE
-    plot_data$labels <- "NA"
-  } else {
-    plot_data$labels <- plot_labels
-  }
-
-  if (!is.null(hover_text)) {
-    plot_data$text <- hover_text
-  } else {
-    if (is.null(label_attr)) {
-      plot_data$text <- plot_data$idx
-    } else {
-      plot_data$text <- plot_data$labels
-    }
-  }
-
-  if (is.null(point_order)) {
-    pidx <- sample(NROW(plot_data))
-  } else {
-    pidx <- point_order
-  }
-
-  plot_data <- plot_data[pidx, ]
-
-  cont_attr <- c(color_attr, trans_attr)
-  if (is.null(label_attr) | any(!sapply(cont_attr, is.null))) {
-    if (is.null(show_legend)) {
-      show_legend <- FALSE
-    }
-
-    plot_data$fill <- grDevices::rgb(t(grDevices::col2rgb(plot_data$fill) / 255), alpha = plot_data$trans)
-    plot_data$color <- grDevices::rgb(t(grDevices::col2rgb(plot_data$color) / 255), alpha = plot_data$trans)
-
-    p <- .make_plotly_scatter_single_trace(
-      x = plot_data$x,
-      y = plot_data$y,
-      z = plot_data$z,
-      label_attr = plot_data$labels,
-      cols_fill = plot_data$fill,
-      cols_stroke = plot_data$color,
-      point_size = point_size,
-      stroke_size = stroke_size,
-      show_legend = show_legend,
-      hover_text = plot_data$text,
-      plot_3d = plot_3d
-    )
-  } else {
-    if (is.null(show_legend)) {
-      show_legend <- TRUE
-    }
-
-    col_idx <- which(!duplicated(plot_data$labels))
-    palette_fill <- plot_data$fill[col_idx]
-    palette_stroke <- plot_data$color[col_idx]
-    names(palette_fill) <- names(palette_stroke) <- plot_data$labels[col_idx]
-
-    p <- .make_plotly_scatter_split_trace(
-      x = plot_data$x,
-      y = plot_data$y,
-      z = plot_data$z,
-      label_attr = plot_data$labels,
-      cols_fill = palette_fill,
-      cols_stroke = palette_stroke,
-      point_size = point_size,
-      stroke_size = stroke_size,
-      show_legend = show_legend,
-      hover_text = plot_data$text,
-      plot_3d = plot_3d
-    )
-  }
-
-  return(p)
-}
-
 
 #' Plot gene expression violin plot
 #'
@@ -724,118 +772,6 @@ plot.individual.gene <- function(ace,
     add.params = list(fill = "white")
   )
   print(gp)
-}
-
-#' Plots gradient of (imputed) values on ACTIONet scatter plot.
-#'
-#' @param ace 'ACTIONetExperiment' object
-#' @param x Numeric vector of length NCOL(ace).
-#' @param alpha_val Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).
-#' @param log_scale Logical value for whether to log-scale values of 'x' (default:'FALSE').
-#' @param use_rank If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').
-#' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
-#' @param trans_fac Transparency modifier (default:1.5).
-#' @param trans_th Minimum Z-score for which points with 'scale(trans_attr) < trans_th' are masked (default:-0.5).
-#' @param point_size Size of points in ggplot (default:1).
-#' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
-#' @param stroke_contrast_fac Factor by which to darken point outline for contrast (default:0.1).
-#' @param grad_palette Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.
-#' @param net_slot Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
-#' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').
-#'
-#' @return 'ggplot' object.
-#'
-#' @examples
-#' ace <- run.ACTIONet(ace)
-#' x <- logcounts(ace)["CD14", ]
-#' plot.ACTIONet.gradient(ace, x, trans_attr = ace$node_centrality)
-#' @export
-
-plot.ACTIONet.gradient <- function(ace,
-                                   x,
-                                   alpha_val = 0,
-                                   log_scale = FALSE,
-                                   use_rank = FALSE,
-                                   trans_attr = NULL,
-                                   trans_fac = 1.5,
-                                   trans_th = -0.5,
-                                   point_size = 1,
-                                   stroke_size = point_size * 0.1,
-                                   stroke_contrast_fac = 0.1,
-                                   grad_palette = "magma",
-                                   net_slot = "ACTIONet",
-                                   coordinate_attr = "ACTIONet2D") {
-  NA_col <- "#eeeeee"
-
-  if (length(x) != ncol(ace)) {
-    warning("Length of input vector doesn't match the number of cells.")
-    return()
-  }
-  ## Create color gradient generator
-  if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
-    grad_palette <- switch(grad_palette,
-      greys = grDevices::gray.colors(100),
-      inferno = viridis::inferno(500, alpha = 0.8),
-      magma = viridis::magma(500, alpha = 0.8),
-      viridis = viridis::viridis(500, alpha = 0.8),
-      BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
-      Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
-      RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
-    )
-  } else {
-    # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
-    grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
-  }
-
-  if (log_scale == TRUE) {
-    x <- log1p(x)
-  }
-
-  if (alpha_val > 0) {
-    if (alpha_val > 1)
-      alpha_val = 1
-    x <- as.numeric(networkDiffusion(
-      G = colNets(ace)[[net_slot]],
-      scores = x,
-      algorithm = "pagerank",
-      alpha = alpha_val,
-      thread_no = 0
-    ))
-  }
-
-  col_func <- (scales::col_bin(
-    palette = grad_palette,
-    domain = NULL,
-    na.color = NA_col,
-    bins = 7
-  ))
-
-  if (use_rank == TRUE) {
-    plot_fill_col <- col_func(rank(x))
-  } else {
-    plot_fill_col <- col_func(x)
-  }
-
-  idx <- order(x, decreasing = FALSE)
-
-  p_out <- plot.ACTIONet(
-    ace = ace,
-    label_attr = NULL,
-    color_attr = plot_fill_col,
-    trans_attr = trans_attr,
-    trans_fac = trans_fac,
-    trans_th = trans_th,
-    point_size = point_size,
-    stroke_size = stroke_size,
-    stroke_contrast_fac = stroke_contrast_fac,
-    palette = NULL,
-    add_text_labels = FALSE,
-    point_order = idx,
-    coordinate_attr = coordinate_attr,
-    show_legend = FALSE
-  )
-
-  return(p_out)
 }
 
 

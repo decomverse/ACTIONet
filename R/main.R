@@ -135,7 +135,7 @@ runACTIONet <- function(
 
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
     G = G,
-    annotations = colData(ace)[["assigned_archetype"]],
+    label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "personalized_coreness"
   )
 
@@ -695,9 +695,9 @@ rerunArchAggr <- function(ace,
 
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
     G = G,
-    annotations = colData(ace)[["assigned_archetype"]],
+    label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "localized_coreness",
-    alpha_val = 0 
+    alpha = 0
   )
 
   # Ht_unified <- colMaps(ace)[["H_unified"]]
