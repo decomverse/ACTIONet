@@ -237,8 +237,8 @@ infer.missing.cell.labels <- function(
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data")
   fixed_samples <- which(!is.na(initial_labels))
 
-  labels <- networkPropagation <- function(
-    G = NULL,
+  labels <- networkPropagation(
+    G = ace,
     labels = initial_labels,
     fixed_samples = fixed_samples,
     algorithm = "LPA",
@@ -264,8 +264,8 @@ correct.cell.labels <- function(ace,
   # Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th)
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data")
-  labels <- networkPropagation <- function(
-    G = NULL,
+  labels <- networkPropagation(
+    G = ace,
     labels = initial_labels,
     fixed_samples = fixed_samples,
     algorithm = algorithm,
