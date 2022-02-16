@@ -17,6 +17,7 @@
   stroke_size = point_size * 0.1,
   stroke_contrast_fac = 0.1,
   grad_palette = "magma",
+  show_legend = FALSE,
   net_slot = "ACTIONet",
   coordinate_attr = "ACTIONet2D"
 )
