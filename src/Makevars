@@ -26,8 +26,8 @@ ifeq ($(UNAME),Linux)
 else ifeq ($(UNAME),Darwin)
     $(info Using Mac OS configurations)
     NPROC=$(shell sysctl -n hw.logicalcpu)
-    PKG_CPPFLAGS+=-I`locate suite-sparse |grep include | sort| head -n 1` -DACCELERATE
-    PKG_LIBS=-L`locate suite-sparse |grep lib | sort| head -n 1` -framework accelerate
+    PKG_CPPFLAGS+=-I/usr/local/opt/suite-sparse/include -DACCELERATE
+    PKG_LIBS=-L/usr/local/opt/suite-sparse/lib -framework accelerate
 # else ifeq ($(UNAME),CYGWIN*|MINGW32*|MSYS*|MINGW*)
 #     $(info Using Windows configurations)
 #     NPROC=${NUMBER_OF_PROCESSORS}
