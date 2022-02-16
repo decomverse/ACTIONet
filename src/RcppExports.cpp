@@ -3590,9 +3590,9 @@ RcppExport SEXP _ACTIONet_sweepcut(SEXP ASEXP, SEXP sSEXP, SEXP min_sizeSEXP, SE
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// aggregate_genesets
-mat aggregate_genesets(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double diffusion_alpha, int thread_no);
-static SEXP _ACTIONet_aggregate_genesets_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP diffusion_alphaSEXP, SEXP thread_noSEXP) {
+// aggregate_genesets_plus
+mat aggregate_genesets_plus(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no);
+static SEXP _ACTIONet_aggregate_genesets_plus_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
@@ -3601,17 +3601,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type network_normalization_method(network_normalization_methodSEXP);
     Rcpp::traits::input_parameter< int >::type expression_normalization_method(expression_normalization_methodSEXP);
     Rcpp::traits::input_parameter< int >::type gene_scaling_method(gene_scaling_methodSEXP);
-    Rcpp::traits::input_parameter< double >::type diffusion_alpha(diffusion_alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type pre_alpha(pre_alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type post_alpha(post_alphaSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(aggregate_genesets(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, diffusion_alpha, thread_no));
+    rcpp_result_gen = Rcpp::wrap(aggregate_genesets_plus(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_aggregate_genesets(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP diffusion_alphaSEXP, SEXP thread_noSEXP) {
+RcppExport SEXP _ACTIONet_aggregate_genesets_plus(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, expression_normalization_methodSEXP, gene_scaling_methodSEXP, diffusion_alphaSEXP, thread_noSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_plus_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, expression_normalization_methodSEXP, gene_scaling_methodSEXP, pre_alphaSEXP, post_alphaSEXP, thread_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -3757,7 +3758,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*compute_marker_aggregate_stats_nonparametric)(mat&,sp_mat&,int)");
         signatures.insert("mat(*compute_markers_eigengene)(mat&,sp_mat&,int,int)");
         signatures.insert("vec(*sweepcut)(sp_mat&,vec,int,int)");
-        signatures.insert("mat(*aggregate_genesets)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,int)");
+        signatures.insert("mat(*aggregate_genesets_plus)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -3860,7 +3861,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_marker_aggregate_stats_nonparametric", (DL_FUNC)_ACTIONet_compute_marker_aggregate_stats_nonparametric_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_markers_eigengene", (DL_FUNC)_ACTIONet_compute_markers_eigengene_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_sweepcut", (DL_FUNC)_ACTIONet_sweepcut_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets", (DL_FUNC)_ACTIONet_aggregate_genesets_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_plus", (DL_FUNC)_ACTIONet_aggregate_genesets_plus_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -3962,7 +3963,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_marker_aggregate_stats_nonparametric", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats_nonparametric, 3},
     {"_ACTIONet_compute_markers_eigengene", (DL_FUNC) &_ACTIONet_compute_markers_eigengene, 4},
     {"_ACTIONet_sweepcut", (DL_FUNC) &_ACTIONet_sweepcut, 4},
-    {"_ACTIONet_aggregate_genesets", (DL_FUNC) &_ACTIONet_aggregate_genesets, 8},
+    {"_ACTIONet_aggregate_genesets_plus", (DL_FUNC) &_ACTIONet_aggregate_genesets_plus, 9},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},
