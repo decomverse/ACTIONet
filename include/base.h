@@ -189,7 +189,7 @@ namespace ACTIONet
                                         int pincmaxiter);
 
     // Robust archetypal analysis method
-    field<mat> run_AA(mat &S, mat &W0, int max_it, double min_delta);
+    field<mat> run_AA(mat &A, mat &W0, int max_it = 100, double min_delta = 1e-6);
 
     // Online archetypal analysis method (Online Dictionary Learning for Approximate
     // Archetypal Analysis)
@@ -428,7 +428,10 @@ namespace ACTIONet
     mat normalize_scores(mat scores, int method = 1, int thread_no = 0);
 
     mat aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 1, int gene_scaling_method = 2, double post_alpha = 0.85, int thread_no = 0);
-    mat aggregate_genesets_plus(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 1, int gene_scaling_method = 2, double pre_alpha = 0, double post_alpha = 0.85, int thread_no = 0);
+    mat aggregate_genesets_mahalanobis_2archs(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0, double post_alpha = 0.85, int thread_no = 0);
+    mat aggregate_genesets_mahalanobis_2gmm(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0, double post_alpha = 0.85, int thread_no = 0);
+    mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, double pre_alpha = 0, double post_alpha = 0.85, int thread_no = 0);
+    mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, double pre_alpha = 0, double post_alpha = 0.85, int thread_no = 0, int perm_no = 30);
 
 } // namespace ACTIONet
 
