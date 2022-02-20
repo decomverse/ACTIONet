@@ -1093,8 +1093,20 @@ sweepcut <- function(A, s, min_size = 5L, max_size = -1L) {
     .Call(`_ACTIONet_sweepcut`, A, s, min_size, max_size)
 }
 
-aggregate_genesets_plus <- function(G, S, marker_mat, network_normalization_method = 0L, expression_normalization_method = 1L, gene_scaling_method = 2L, pre_alpha = 0, post_alpha = 0.85, thread_no = 0L) {
-    .Call(`_ACTIONet_aggregate_genesets_plus`, G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no)
+aggregate_genesets_mahalanobis_2archs <- function(G, S, marker_mat, network_normalization_method = 0L, expression_normalization_method = 0L, gene_scaling_method = 0L, pre_alpha = 0.85, post_alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_aggregate_genesets_mahalanobis_2archs`, G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no)
+}
+
+aggregate_genesets_mahalanobis_2gmm <- function(G, S, marker_mat, network_normalization_method = 0L, expression_normalization_method = 0L, gene_scaling_method = 0L, pre_alpha = 0.85, post_alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_aggregate_genesets_mahalanobis_2gmm`, G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no)
+}
+
+aggregate_genesets_weighted_enrichment <- function(G, S, marker_mat, network_normalization_method = 0L, expression_normalization_method = 0L, pre_alpha = 0.85, post_alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_aggregate_genesets_weighted_enrichment`, G, S, marker_mat, network_normalization_method, expression_normalization_method, pre_alpha, post_alpha, thread_no)
+}
+
+aggregate_genesets_weighted_enrichment_permutation <- function(G, S, marker_mat, network_normalization_method = 0L, expression_normalization_method = 0L, pre_alpha = 0.85, post_alpha = 0.85, thread_no = 0L, perm_no = 30L) {
+    .Call(`_ACTIONet_aggregate_genesets_weighted_enrichment_permutation`, G, S, marker_mat, network_normalization_method, expression_normalization_method, pre_alpha, post_alpha, thread_no, perm_no)
 }
 
 roll_var <- function(X) {
