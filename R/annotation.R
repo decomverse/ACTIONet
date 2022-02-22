@@ -359,31 +359,37 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algorithm = "PCA", pre_alpha = 0.9, post_alpha = 0.9, diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, mask_threshold = 1, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none", 
+pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+
+  if (!(net_slot %in% names(colNets(ace)))) {
+      warning(sprintf("net_slot does not exist in colNets(ace)."))
+      return()
+  } else {  
+      G <- colNets(ace)[[net_slot]]
+  }
+
   features_use <- .get_feature_vec(ace, features_use)
   marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
-  mask <- fastRowSums(abs(marker_mat_full)) != 0
-  marker_mat <- marker_mat_full[mask, ]
+  mask <- Matrix::rowSums(abs(marker_mat_full)) != 0
+  marker_mat = marker_mat_full[mask, ]
 
-  if (algorithm == "eigengene") {
-    subS <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha_val = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = imputation_algorithm)
-    marker_stats <- compute_markers_eigengene(subS, marker_mat, normalization = 0, thread_no = thread_no)
-  } else if (algorithm == "pagerank") {
-    G <- colNets(ace)[[net_slot]]
-    S <- as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
+  if(pre_imputation_algorithm == "none") {
+    S = assays(ace)[[assay_name]]
+    sub_S = S[mask, ]
+  } else {
+    sub_S <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha_val = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm)
+  }
+  sub_S = as(sub_S, "sparseMatrix")
 
-    marker_stats <- compute_marker_aggregate_stats(
-      G = G,
-      S = S,
-      marker_mat = marker_mat_full,
-      alpha = pre_alpha,
-      thread_no = thread_no
-    )
-  } else if (algorithm == "TFIDF") {
-    G <- colNets(ace)[[net_slot]]
-    S <- as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
-
-    marker_stats <- compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat_full, alpha = pre_alpha, thread_no = thread_no, normalization = TFIDF_prenorm)
+  network_normalization_code = 0
+  if(network_normalization_method == "pagerank_sym") {
+    network_normalization_code = 2
+  }
+  if(algorithm == "enrichment_permutation_test") {
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+  } else if(algorithm == "enrichment_parametric") {
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -394,21 +400,73 @@ annotateCells <- function(ace, markers, algorithm = "pagerank", imputation_algor
       normalize = TRUE,
       H.slot = H_slot
     ))
-  }
-
-  if (post_alpha != 0) {
-    G <- colNets(ace)[[net_slot]]
-    marker_stats <- compute_network_diffusion_approx(G, marker_stats, thread_no = thread_no, alpha = post_alpha, max_it = diffusion_it)
+  } else {
+    warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)
   marker_stats[!is.finite(marker_stats)] <- 0
   annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
   conf <- apply(marker_stats, 1, max)
-  annots.masked <- annots
-  annots.masked[conf < mask_threshold] <- "?"
 
-  out <- list(Label = annots, Confidence = conf, Enrichment = marker_stats, Label.masked = annots.masked)
+  out <- list(Label = annots, Confidence = conf, Enrichment = marker_stats)
+
+  return(out)
+}
+
+#' @export
+scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", 
+pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+  if (!(net_slot %in% names(colNets(ace)))) {
+      warning(sprintf("net_slot does not exist in colNets(ace)."))
+      return()
+  } else {  
+      G <- colNets(ace)[[net_slot]]
+  }
+
+  features_use <- .get_feature_vec(ace, features_use)
+  marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
+  mask <- Matrix::rowSums(abs(marker_mat_full)) != 0
+  marker_mat = marker_mat_full[mask, ]
+
+  if(pre_imputation_algorithm == "none") {
+    S = assays(ace)[[assay_name]]
+    sub_S = S[mask, ]
+  } else {
+    sub_S <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha_val = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm)
+  }
+  sub_S = as(sub_S, "sparseMatrix")
+
+  network_normalization_code = 0
+  if(network_normalization_method == "pagerank_sym") {
+    network_normalization_code = 2
+  }
+  if(algorithm == "mahalanobis_2gmm") {
+    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+  } else if(algorithm == "mahalanobis_2archs") {
+    marker_stats = aggregate_genesets_mahalanobis_2archs(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+  } else if (algorithm == "archetypes") {
+    arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
+    arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
+
+    marker_stats <- as.matrix(map.cell.scores.from.archetype.enrichment(
+      ace = ace,
+      enrichment_mat = arch_enrichment_mat,
+      normalize = TRUE,
+      H.slot = H_slot
+    ))
+  } else {
+    warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
+    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+  }
+
+  colnames(marker_stats) <- colnames(marker_mat)
+  marker_stats[!is.finite(marker_stats)] <- 0
+  annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
+  conf <- apply(marker_stats, 1, max)
+
+  out <- list(Label = annots, Confidence = conf, Enrichment = marker_stats)
 
   return(out)
 }
