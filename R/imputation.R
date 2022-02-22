@@ -149,6 +149,7 @@ imputeGenes <- function(ace,
                         genes,
                         algorithm = "PCA",
                         alpha_val = 0.9,
+                        network_normalization_method = "pagerank_sym",
                         thread_no = 0,
                         diffusion_it = 5,
                         force_reimpute = FALSE,
@@ -158,6 +159,14 @@ imputeGenes <- function(ace,
     algorithm <- toupper(algorithm)
     S <- assays(ace)[[assay_name]]
     subS <- S[genes, ]
+
+    if (!(net_slot %in% names(colNets(ace)))) {
+        warning(sprintf("net_slot does not exist in colNets(ace)."))
+        return()
+    } else {  
+        G <- colNets(ace)[[net_slot]]
+    }
+
     if (algorithm == "PCA") {
         V_slot <- sprintf("%s_V", reduction_slot)
         if (!(V_slot %in% names(rowMaps(ace)))) {
@@ -176,9 +185,9 @@ imputeGenes <- function(ace,
 
                 # This can also be done with network-regularized SVD directly
                 V.smooth <- networkDiffusion(
-                  G = colNets(ace)[[net_slot]],
+                  G = G,
                   scores = V_svd,
-                  algorithm = "pagerank",
+                  algorithm = network_normalization_method,
                   alpha = alpha_val,
                   thread_no = thread_no,
                   max_it = diffusion_it,
@@ -202,7 +211,7 @@ imputeGenes <- function(ace,
             Ht_unified <- colMaps(ace)[["H_unified"]]
             # H <- networkDiffusion(
             #     G = G,
-            #     algorithm = "pagerank",
+            #     algorithm = network_normalization_method,
             #     scores = as.matrix(Ht_unified),
             #     thread_no = thread_no,
             #     alpha = alpha_val
@@ -211,7 +220,7 @@ imputeGenes <- function(ace,
             H <- networkDiffusion(
               G = G,
               scores = Ht_unified,
-              algorithm = "pagerank",
+              algorithm = network_normalization_method,
               alpha = alpha_val,
               thread_no = thread_no,
               max_it = diffusion_it,
@@ -226,12 +235,11 @@ imputeGenes <- function(ace,
         W <- as.matrix(subS %*% C)
         imputed.expression <- W %*% t(H)
     } else if (algorithm == "ACTIONET") {
-        G <- colNets(ace)[[net_slot]]
         # imputed.expression <- t(networkDiffusion(G, Matrix::t(subS), alpha = alpha_val, max_it = diffusion_it, thread_no = thread_no))
         imputed.expression <- networkDiffusion(
           G = G,
           scores = Matrix::t(subS),
-          algorithm = "pagerank",
+          algorithm = network_normalization_method,
           alpha = alpha_val,
           thread_no = thread_no,
           max_it = diffusion_it,
