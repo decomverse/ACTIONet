@@ -717,7 +717,6 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
         mat sigma = Delta * trans(Delta) / (n-1);
         mat sigma_inv = pinv(sigma);
 
-        printf("Computing Mahalanobis distances ... ");
         for(int k = 0; k < n; k++) {
           vec delta = Delta.col(k);
           double dist = dot(delta, sigma_inv * delta);        
