@@ -319,6 +319,7 @@ plot.ACTIONet.gradient <- function(
 #' @param point_order Integer vector specifying order in which to plot individual points. (default:'NULL')
 #' @param hover_text Vector of values to display on hover. (default:'NULL')
 #' @param plot_3d Visualize plot in 3D using 'scatter3D'. Required 3D coordinate input (defaults to 'ACTIONet3D' if data is 'ACTIONetExperiment'). (default:'FALSE')
+#' @param scale_coors Scale and center plot coordinates. (default:'TRUE')
 #' @return plotly object
 #'
 #' @examples
@@ -343,10 +344,11 @@ plot.ACTIONet.interactive <- function(
   color_slot = "denovo_color",
   point_order = NULL,
   hover_text = NULL,
-  plot_3d = FALSE
+  plot_3d = FALSE,
+  scale_coors = TRUE
 ) {
 
-  plot_coors <- .get_plot_coors(data, coordinate_attr)
+  plot_coors <- .get_plot_coors(data, coordinate_attr, scale_coors)
   plot_labels <- .get_plot_labels(label_attr, data)
   plot_fill_col <- .get_plot_colors(color_attr, plot_labels, data, color_slot, palette)
   plot_alpha <- .get_plot_transparency(trans_attr, data, trans_fac, trans_th, TRUE)
@@ -364,7 +366,7 @@ plot.ACTIONet.interactive <- function(
       if ("ACTIONet3D" %in% names(colMaps(data))) {
         msg <- sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\nUsing 'ACTIONet3D'.\n")
         message(msg)
-        plot_coors <- .get_plot_coors(data, "ACTIONet3D")
+        plot_coors <- .get_plot_coors(data, "ACTIONet3D", scale_coors)
       } else {
         err <- sprintf("'plot_3d == TRUE' but given coordinates have < 3 columns.\n")
         stop(err)
