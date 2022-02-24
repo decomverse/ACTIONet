@@ -1,5 +1,5 @@
 #' @export
-findMarkers.ACTIONet <- function(
+findMarkers.ACTIONet.v0 <- function(
   ace,
   cluster_attr,
   top_genes = 10,
@@ -58,6 +58,66 @@ findMarkers.ACTIONet <- function(
     return(df)
 }
 
+process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
+  if(length(var_of_interest) == 1) {
+    if(is.character(var_of_interest)) {
+      if(var_of_interest %in% colnames(colData(ace))) {
+        v = colData(ace)[[var_of_interest]]
+      } else {
+        warning(sprintf("Variable %s not found", var_of_interest))
+        return(NULL)
+      }
+    }
+  } else if(length(var_of_interest) == ncol(ace)) {
+    v = var_of_interest
+  } else {
+    warning(sprintf("Unknown var_of_interest"))
+    return(NULL)
+  }
+
+  if( (class(v) == "numeric") | (class(v) == "character"))  {
+    uv = sort(unique(v))
+    if(max.class < length(uv)) {
+      warning(sprintf("Variable %s has %d unique values (max.class = %d)", var_of_interest, length(uv), max.class))
+      return(NULL)
+    }
+    f = factor(v, uv)
+  } else if(class(v) == "factor") {
+    f = v
+  }
+
+  f = droplevels(f)
+  return(f)
+}
+
+findMarkers.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+  require(ACTIONet)
+  print("Running findMarkers.ACTIONet()")
+
+  if(class(f) != "factor") {
+    warning("f must be a factor")
+    return(ace)
+  }
+  f = droplevels(f)
+
+  out = compute_cluster_feature_specificity(logcounts(ace), as.numeric(f))
+  metadata(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = out
+
+  scores = as.matrix(out$upper_significance - out$lower_significance)
+  colnames(scores) = levels(f)
+  rownames(scores) = rownames(ace)
+
+  if(pos.only == T)
+    scores[scores < 0] = 0 # Only "positive markers" [negative would be markers in other levels]
+
+  blacklisted.rows = grep(blacklist.pattern, rownames(ace), ignore.case = T)
+  scores[blacklisted.rows, ] = 0
+
+  rowMaps(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = scores
+  rowMapTypes(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = "reduction"
+
+  return(ace)
+}
 
 findMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(presto)
@@ -219,7 +279,8 @@ findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blackl
 }
 
 findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
-  # f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
+  f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
+  
   if (method == "ACTIONet") {
     ace = findMarkers.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
   } else if(method == "wilcox") {
