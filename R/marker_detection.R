@@ -1,5 +1,5 @@
 #' @export
-getMarkers.ACTIONet <- function(
+findMarkers.ACTIONet <- function(
   ace,
   cluster_attr,
   top_genes = 10,
@@ -59,7 +59,7 @@ getMarkers.ACTIONet <- function(
 }
 
 
-getMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+findMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(presto)
   print("Running findMarkers.wilcox()")
 
@@ -91,7 +91,7 @@ getMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blackli
   return(ace)
 }
 
-getMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(scran)
   print("Running findMarkers.scran()")
 
@@ -125,7 +125,7 @@ getMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.
   return(ace)
 }
 
-getMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
+findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
   require(limma)
   print("Running findMarkers.limma()")
 
@@ -179,7 +179,7 @@ getMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.
   return(ace)
 }
 
-getMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
+findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
   print("Running findMarkers.limma.pb()")
 
   set.seed(0)
@@ -218,7 +218,7 @@ getMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blackli
   return(ace)
 }
 
-getMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
+findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
   # f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
   if (method == "ACTIONet") {
     ace = findMarkers.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
