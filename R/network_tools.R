@@ -73,7 +73,7 @@ networkDiffusion <- function(
 networkCentrality <- function(
   G,
   label_attr = NULL,
-  algorithm = c("coreness", "pagerank", "localized_coreness", "localized_pagerank"),
+  algorithm = c("coreness", "pagerank", "personalized_coreness", "personalized_pagerank"),
   alpha = 0.9,
   net_slot = "ACTIONet",
   diffusion_it = 5,
@@ -113,7 +113,7 @@ networkCentrality <- function(
   #   G =  as(G, "dgCMatrix")
   # }
 
-  if( algorithm %in% c("pagerank", "localized_pagerank") ) {
+  if( algorithm %in% c("pagerank", "personalized_pagerank") ) {
     if( is.null(label_attr) ){
       err = sprintf("'label_attr' cannot be 'NULL' if 'algorithm=%s'.\n", algorithm)
       stop(err)
