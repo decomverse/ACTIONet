@@ -1,5 +1,5 @@
 #' @export
-computeGeneSpecifity.ACTIONet.v0 <- function(
+findMarkers.ACTIONet <- function(
   ace,
   cluster_attr,
   top_genes = 10,
@@ -26,7 +26,6 @@ computeGeneSpecifity.ACTIONet.v0 <- function(
     return_raw = TRUE
   )
 
-  # feat_spec <- specificity[["upper_significance"]]
   feat_spec = specificity[["upper_significance"]] - specificity[["lower_significance"]]
   feat_spec[feat_spec < 0] = 0
   rownames(feat_spec) = features_use
@@ -161,7 +160,7 @@ computeGeneSpecifity.scran <- function(ace, f, out.name = "cond", pos.only = T, 
   }
   f = droplevels(f)
 
-  out = scran::computeGeneSpecifity(logcounts(ace), f)
+  out = scran::findMarkers(logcounts(ace), f)
   metadata(ace)[[sprintf("%s_markers_scran", out.name)]] = out
 
   scores = do.call(cbind, lapply(out, function(DF) {
@@ -258,7 +257,6 @@ computeGeneSpecifity.limma.pb <- function(ace, f, out.name = "cond", pos.only = 
   })
   pb=do.call(cbind,ll)
   weight=sapply(IDX[mask],function(idx){
-    # return(sum(S[,idx]))
     return(length(idx))
   })
   rownames(pb)=rownames(ace)
