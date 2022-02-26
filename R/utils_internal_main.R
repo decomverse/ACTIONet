@@ -66,59 +66,12 @@
   }
 }
 
-.run.archetypeFeatureSpecificity <- function(ace,
-                                             S = NULL,
-                                             H = NULL,
-                                             assay_name = "logcounts",
-                                             footprint_slot = "archetype_footprint",
-                                             return_raw = FALSE) {
-  if (is.null(S)) {
-    if (!(assay_name %in% names(assays(ace)))) {
-      err <- sprintf("'S' not given and %s is not an assay of the input %s object.\n", assay_name, class(ace))
-      stop(err)
-    }
-    S <- SummarizedExperiment::assays(ace)[[assay_name]]
-  }
-
-  if (is.null(H)) {
-    if (!(footprint_slot %in% names(colMaps(ace)))) {
-      err <- sprintf("'H' not given and %s is not in 'colMaps'.\n", footprint_slot)
-      stop(err)
-    }
-    H <- Matrix::t(colMaps(ace)[[footprint_slot]])
-  }
-
-  if (is.matrix(S)) {
-    specificity.out <- compute_archetype_feature_specificity_full(S, H)
-  } else {
-    specificity.out <- compute_archetype_feature_specificity(S, H)
-  }
-
-  specificity.out <- lapply(specificity.out, function(specificity.scores) {
-    rownames(specificity.scores) <- rownames(ace)
-    colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores), sep = "")
-    return(specificity.scores)
-  })
-
-  if (return_raw == TRUE) {
-    return(specificity.out)
-  } else {
-    rowMaps(ace)[["unified_feature_profile"]] <- specificity.out[["archetypes"]]
-    rowMapTypes(ace)[["unified_feature_profile"]] <- "internal"
-
-    rowMaps(ace)[["unified_feature_specificity"]] <- specificity.out[["upper_significance"]]
-    rowMapTypes(ace)[["unified_feature_specificity"]] <- "reduction"
-
-    return(ace)
-  }
-}
-
 
 #' Prune nonspecific and/or unreliable archetypes
 .run.pruneArchetypes <- function(C_trace,
                                  H_trace,
                                  ace = NULL,
-                                 min_specificity_z_thresh = -3,
+                                 specificity_th = -3,
                                  min_cells_per_arch = 2,
                                  return_raw = FALSE) {
   if (return_raw == FALSE && is.null(ace)) {
@@ -136,7 +89,7 @@
   pruning.out <- prune_archetypes(
     C_trace = C_trace,
     H_trace = H_trace,
-    min_specificity_z_thresh = min_specificity_z_thresh,
+    min_specificity_z_thresh = specificity_th,
     min_cells = min_cells_per_arch
   )
 
@@ -218,7 +171,7 @@
     colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] <- "internal"
 
     colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(unification.out$C_unified, "sparseMatrix")
-    colMapTypes(ace)[[printf("C_%s", unified_suffix)]] <- "internal"
+    colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] <- "internal"
 
     colData(ace)[["assigned_archetype"]] <- c(unification.out$assigned_archetype)
 
@@ -236,6 +189,7 @@
                        G = NULL,
                        reduction_slot = "ACTION",
                        net_slot = "ACTIONet",
+                       thread_no = 0,
                        return_raw = FALSE) {
   if (return_raw == FALSE && is.null(ace)) {
     err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
@@ -295,7 +249,7 @@
   # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
   U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
   SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-  V.smooth <- networkDiffusion(G = G, scores = SVD.out$v)
+  V.smooth <- networkDiffusion(G = G, scores = SVD.out$v, algorithm = "pagerank", alpha = 0.9, thread_no = thread_no)
 
   H <- V.smooth %*% diag(SVD.out$d)
 

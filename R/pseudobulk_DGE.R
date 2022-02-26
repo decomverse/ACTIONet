@@ -34,13 +34,13 @@ get.pseudobulk.SE <- function(
   BPPARAM = BiocParallel::SerialParam()
 ) {
 
-    IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, sample_attr)
+    IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
     good_batches = sapply(IDX, length) >= min_cells_per_batch
 
     if(!all(good_batches)){
       old_batches = names(IDX)
       ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
-      IDX = ACTIONetExperiment:::.get_attr_or_split_idx(ace, sample_attr)
+      IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
       bad_batch_names = setdiff(old_batches, names(IDX))
       msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)
@@ -48,19 +48,23 @@ get.pseudobulk.SE <- function(
 
     counts_mat = SummarizedExperiment::assays(ace)[[assay]]
     sample_names = names(IDX)
-    counts_list = lapply(IDX, function(idx) counts_mat[, idx, drop = FALSE])
+    counts_list = bplapply(IDX, function(idx) counts_mat[, idx, drop = FALSE], BPPARAM = BPPARAM)
 
     se_assays = list()
 
-    S0 = sapply(counts_list, ACTIONetExperiment:::fastRowSums) + pseudocount
+    S0 = do.call(cbind, bplapply(counts_list, ACTIONetExperiment:::fastRowSums, BPPARAM = BPPARAM)) + pseudocount
     se_assays$counts = S0
 
-    E0 = sapply(counts_list, ACTIONetExperiment:::fastRowMeans)
-    se_assays$mean = E0
+    if (with_E == TRUE) {
+      E0 = do.call(cbind, bplapply(counts_list, ACTIONetExperiment:::fastRowMeans, BPPARAM = BPPARAM))
+      se_assays$mean = E0
+    }
 
-    V0 = sapply(counts_list, ACTIONetExperiment:::fastRowVars)
-    se_assays$var = V0
-
+    if (with_V == TRUE) {
+      V0 = do.call(cbind, bplapply(counts_list,  MatrixGenerics::rowVars, BPPARAM = BPPARAM))
+      se_assays$var = V0
+    }
+  
     if (ensemble == TRUE) {
         if (!any(with_S, with_E, with_V)) {
             err = sprintf("No ensemble assays to make.\n")

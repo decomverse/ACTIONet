@@ -13,16 +13,16 @@ run.ACTIONet(
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
   max_iter_ACTION = 50,
-  min_specificity_z_thresh = -3,
-  distance_metric = "jsd",
-  nn_approach = "k*nn",
+  specificity_th = -3,
+  network_metric = "jsd",
+  network_algorithm = "k*nn",
   network_density = 1,
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
   layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
-  unification_violation_threshold = 0,
+  unification_th = 0,
   footprint_alpha = 0.85,
   thread_no = 0,
   imputation_alpha = 0.9,
@@ -47,12 +47,12 @@ run.ACTIONet(
 
 \item{max_iter_ACTION}{Maximum number of iterations for ACTION algorithm. (default=50)}
 
-\item{min_specificity_z_thresh}{Defines the stringency of pruning nonspecific archetypes.
+\item{specificity_th}{Defines the stringency of pruning nonspecific archetypes.
 The larger the value, the more archetypes will be filtered out. (default=-3)}
 
-\item{distance_metric}{Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')}
+\item{network_metric}{Distance metric with which to compute cell-to-cell similarity during network construction. Options are 'jsd' (Jensen-Shannon divergence), L2-norm ('l2'), and inner product ('ip'). (default='jsd')}
 
-\item{nn_approach}{Nearest-neighbor algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')}
+\item{network_algorithm}{Algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')}
 
 \item{network_density}{Density factor of ACTIONet graph. (default=1)}
 
@@ -66,13 +66,13 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
-\item{unification_violation_threshold}{Archetype unification resolution parameter. (default=0)}
+\item{unification_th}{Archetype unification resolution parameter. (default=0)}
 
 \item{footprint_alpha}{Archetype smoothing parameter. (default=0.85)}
 
 \item{thread_no}{Number of parallel threads. (default=0)}
 
-\item{full_trace}{Return list of all intermediate output. Intended for debugging. (default='FALSE')}
+\item{full_trace}{Return list of all intermediate output. Intended for debugging. (default=FALSE)}
 
 \item{seed}{Seed for random initialization. (default=0)}
 }

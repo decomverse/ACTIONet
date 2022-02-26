@@ -948,27 +948,6 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline sp_mat compute_sparse_network_diffusion(sp_mat& G, sp_mat& X0, double alpha = 0.85, double rho = 1e-4, double epsilon = 0.001, int max_iter = 20) {
-        typedef SEXP(*Ptr_compute_sparse_network_diffusion)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_sparse_network_diffusion p_compute_sparse_network_diffusion = NULL;
-        if (p_compute_sparse_network_diffusion == NULL) {
-            validateSignature("sp_mat(*compute_sparse_network_diffusion)(sp_mat&,sp_mat&,double,double,double,int)");
-            p_compute_sparse_network_diffusion = (Ptr_compute_sparse_network_diffusion)R_GetCCallable("ACTIONet", "_ACTIONet_compute_sparse_network_diffusion");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_sparse_network_diffusion(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(X0)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(rho)), Shield<SEXP>(Rcpp::wrap(epsilon)), Shield<SEXP>(Rcpp::wrap(max_iter)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<sp_mat >(rcpp_result_gen);
-    }
-
     inline List assess_enrichment(mat& scores, sp_mat& associations, int thread_no = 0) {
         typedef SEXP(*Ptr_assess_enrichment)(SEXP,SEXP,SEXP);
         static Ptr_assess_enrichment p_assess_enrichment = NULL;
@@ -1977,17 +1956,17 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline mat compute_network_diffusion(sp_mat& G, mat& X0, int thread_no = 0, double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8, int norm_type = 0) {
-        typedef SEXP(*Ptr_compute_network_diffusion)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_compute_network_diffusion p_compute_network_diffusion = NULL;
-        if (p_compute_network_diffusion == NULL) {
-            validateSignature("mat(*compute_network_diffusion)(sp_mat&,mat&,int,double,int,double,int)");
-            p_compute_network_diffusion = (Ptr_compute_network_diffusion)R_GetCCallable("ACTIONet", "_ACTIONet_compute_network_diffusion");
+    inline mat compute_network_diffusion_approx(sp_mat& G, mat& X0, int thread_no = 0, double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8, int norm_type = 0) {
+        typedef SEXP(*Ptr_compute_network_diffusion_approx)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_compute_network_diffusion_approx p_compute_network_diffusion_approx = NULL;
+        if (p_compute_network_diffusion_approx == NULL) {
+            validateSignature("mat(*compute_network_diffusion_approx)(sp_mat&,mat&,int,double,int,double,int)");
+            p_compute_network_diffusion_approx = (Ptr_compute_network_diffusion_approx)R_GetCCallable("ACTIONet", "_ACTIONet_compute_network_diffusion_approx");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_network_diffusion(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(X0)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(res_threshold)), Shield<SEXP>(Rcpp::wrap(norm_type)));
+            rcpp_result_gen = p_compute_network_diffusion_approx(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(X0)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(res_threshold)), Shield<SEXP>(Rcpp::wrap(norm_type)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -2059,6 +2038,90 @@ namespace ACTIONet {
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<vec >(rcpp_result_gen);
+    }
+
+    inline mat aggregate_genesets_mahalanobis_2archs(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0) {
+        typedef SEXP(*Ptr_aggregate_genesets_mahalanobis_2archs)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_aggregate_genesets_mahalanobis_2archs p_aggregate_genesets_mahalanobis_2archs = NULL;
+        if (p_aggregate_genesets_mahalanobis_2archs == NULL) {
+            validateSignature("mat(*aggregate_genesets_mahalanobis_2archs)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int)");
+            p_aggregate_genesets_mahalanobis_2archs = (Ptr_aggregate_genesets_mahalanobis_2archs)R_GetCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_mahalanobis_2archs");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_aggregate_genesets_mahalanobis_2archs(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(network_normalization_method)), Shield<SEXP>(Rcpp::wrap(expression_normalization_method)), Shield<SEXP>(Rcpp::wrap(gene_scaling_method)), Shield<SEXP>(Rcpp::wrap(pre_alpha)), Shield<SEXP>(Rcpp::wrap(post_alpha)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline mat aggregate_genesets_mahalanobis_2gmm(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0) {
+        typedef SEXP(*Ptr_aggregate_genesets_mahalanobis_2gmm)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_aggregate_genesets_mahalanobis_2gmm p_aggregate_genesets_mahalanobis_2gmm = NULL;
+        if (p_aggregate_genesets_mahalanobis_2gmm == NULL) {
+            validateSignature("mat(*aggregate_genesets_mahalanobis_2gmm)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int)");
+            p_aggregate_genesets_mahalanobis_2gmm = (Ptr_aggregate_genesets_mahalanobis_2gmm)R_GetCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_mahalanobis_2gmm");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_aggregate_genesets_mahalanobis_2gmm(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(network_normalization_method)), Shield<SEXP>(Rcpp::wrap(expression_normalization_method)), Shield<SEXP>(Rcpp::wrap(gene_scaling_method)), Shield<SEXP>(Rcpp::wrap(pre_alpha)), Shield<SEXP>(Rcpp::wrap(post_alpha)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline mat aggregate_genesets_weighted_enrichment(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0) {
+        typedef SEXP(*Ptr_aggregate_genesets_weighted_enrichment)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_aggregate_genesets_weighted_enrichment p_aggregate_genesets_weighted_enrichment = NULL;
+        if (p_aggregate_genesets_weighted_enrichment == NULL) {
+            validateSignature("mat(*aggregate_genesets_weighted_enrichment)(sp_mat&,sp_mat&,sp_mat&,int,int,double,double,int)");
+            p_aggregate_genesets_weighted_enrichment = (Ptr_aggregate_genesets_weighted_enrichment)R_GetCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_weighted_enrichment");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_aggregate_genesets_weighted_enrichment(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(network_normalization_method)), Shield<SEXP>(Rcpp::wrap(expression_normalization_method)), Shield<SEXP>(Rcpp::wrap(pre_alpha)), Shield<SEXP>(Rcpp::wrap(post_alpha)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline mat aggregate_genesets_weighted_enrichment_permutation(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0, int perm_no = 30) {
+        typedef SEXP(*Ptr_aggregate_genesets_weighted_enrichment_permutation)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_aggregate_genesets_weighted_enrichment_permutation p_aggregate_genesets_weighted_enrichment_permutation = NULL;
+        if (p_aggregate_genesets_weighted_enrichment_permutation == NULL) {
+            validateSignature("mat(*aggregate_genesets_weighted_enrichment_permutation)(sp_mat&,sp_mat&,sp_mat&,int,int,double,double,int,int)");
+            p_aggregate_genesets_weighted_enrichment_permutation = (Ptr_aggregate_genesets_weighted_enrichment_permutation)R_GetCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_weighted_enrichment_permutation");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_aggregate_genesets_weighted_enrichment_permutation(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(network_normalization_method)), Shield<SEXP>(Rcpp::wrap(expression_normalization_method)), Shield<SEXP>(Rcpp::wrap(pre_alpha)), Shield<SEXP>(Rcpp::wrap(post_alpha)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(perm_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
     }
 
 }
