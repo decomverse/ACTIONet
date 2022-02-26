@@ -387,9 +387,9 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     network_normalization_code = 2
   }
   if(algorithm == "enrichment_permutation_test") {
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
   } else if(algorithm == "enrichment_parametric") {
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -443,9 +443,9 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     network_normalization_code = 2
   }
   if(algorithm == "mahalanobis_2gmm") {
-    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if(algorithm == "mahalanobis_2archs") {
-    marker_stats = aggregate_genesets_mahalanobis_2archs(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_mahalanobis_2archs(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
