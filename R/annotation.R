@@ -225,37 +225,6 @@ annotate.cells.using.markers <- function(ace,
 }
 
 
-#' @export
-annotate.cells.using.markers.updated <- function(ace,
-                                                 markers,
-                                                 features_use = NULL,
-                                                 alpha_val = 0.9,
-                                                 normlization = 1,
-                                                 thread_no = 0,
-                                                 net_slot = "ACTIONet",
-                                                 assay_name = "logcounts") {
-  features_use <- .get_feature_vec(ace, features_use)
-  marker_mat <- .preprocess_annotation_markers(markers, features_use)
-
-  # marker_mat = as(sapply(marker_set, function(gs) as.numeric(features_use %in% gs) ), "sparseMatrix")
-  G <- colNets(ace)[[net_slot]]
-  S <- as(SummarizedExperiment::assays(ace)[[assay_name]], "sparseMatrix")
-
-  cell.scores <- compute_marker_aggregate_stats_TFIDF_sum_smoothed(G, S, marker_mat, alpha = alpha_val, thread_no = thread_no, normalization = normlization)
-  Labels <- factor(colnames(marker_mat)[apply(cell.scores, 1, which.max)], colnames(marker_mat))
-  colnames(cell.scores) <- colnames(marker_mat)
-  conf <- apply(cell.scores, 1, max)
-
-  out <- list(
-    Label = Labels,
-    Confidence = conf,
-    Enrichment = cell.scores
-  )
-
-  return(out)
-}
-
-
 #' Annotates cells by interpolating marker-based archetype annotations
 #'
 #' @param ace ACTIONet output object
@@ -359,13 +328,13 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none", 
+annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none",
 pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
 
   if (!(net_slot %in% names(colNets(ace)))) {
       warning(sprintf("net_slot does not exist in colNets(ace)."))
       return()
-  } else {  
+  } else {
       G <- colNets(ace)[[net_slot]]
   }
 
@@ -416,12 +385,12 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
 }
 
 #' @export
-scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", 
+scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none",
 pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
       warning(sprintf("net_slot does not exist in colNets(ace)."))
       return()
-  } else {  
+  } else {
       G <- colNets(ace)[[net_slot]]
   }
 
