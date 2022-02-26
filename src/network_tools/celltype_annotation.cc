@@ -748,7 +748,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     return(marker_stats_smoothed);
   }
 
-  mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, double pre_alpha, double post_alpha, int thread_no)
+  mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no)
   {
     if(S.n_rows != marker_mat.n_rows) {
       fprintf(stderr, "Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
@@ -780,8 +780,10 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
       printf("done\n");
     }
 
+    printf("Computing enrichment ... ");
     field<mat> res = assess_enrichment(T, marker_mat, thread_no);
     mat marker_stats = trans(res(0));
+    printf("done\n");
 
     marker_stats.replace(datum::nan, 0);
 
@@ -796,7 +798,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
   }
 
 
-  mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, double pre_alpha, double post_alpha, int thread_no, int perm_no)
+  mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no, int perm_no)
   {
     if(S.n_rows != marker_mat.n_rows) {
       fprintf(stderr, "Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
@@ -827,8 +829,16 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
       T = trans(T);
       printf("done\n");
     }
+
+
+    printf("Computing enrichment ... ");
     sp_mat X = trans(marker_mat);
+
     mat Y = T;
+    //0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
+    if(gene_scaling_method != 0) {
+      Y = normalize_scores(T, gene_scaling_method, thread_no);
+    }        
     mat stats = spmat_mat_product(X, Y);
 
   
@@ -846,6 +856,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     mat mu = stats + E / perm_no;
     mat sigma = sqrt ( (Esq - square(E) / perm_no) / (perm_no - 1) );
     mat marker_stats = trans((stats - mu) / sigma);
+    printf("done\n");
 
     marker_stats.replace(datum::nan, 0);
 
