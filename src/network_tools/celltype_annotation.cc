@@ -621,6 +621,8 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
       }
     }, thread_no);
 
+    marker_stats.replace(datum::nan, 0);
+
     mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
     if(post_alpha != 0) {
       printf("post-smoothing expression values ... ");
@@ -734,6 +736,8 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
       }
     }, thread_no);
 
+    marker_stats.replace(datum::nan, 0);
+
     mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
     if(post_alpha != 0) {
       printf("post-smoothing expression values ... ");
@@ -778,6 +782,8 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
 
     field<mat> res = assess_enrichment(T, marker_mat, thread_no);
     mat marker_stats = trans(res(0));
+
+    marker_stats.replace(datum::nan, 0);
 
     mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
     if(post_alpha != 0) {
@@ -841,6 +847,7 @@ mat compute_marker_aggregate_stats_basic_sum_smoothed(sp_mat &G, sp_mat &S, sp_m
     mat sigma = sqrt ( (Esq - square(E) / perm_no) / (perm_no - 1) );
     mat marker_stats = trans((stats - mu) / sigma);
 
+    marker_stats.replace(datum::nan, 0);
 
     mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
     if(post_alpha != 0) {
