@@ -147,7 +147,7 @@ impute.genes.using.ACTIONet <- function(ace,
 #' @export
 imputeGenes <- function(ace,
                         genes,
-                        algorithm = "PCA",
+                        algorithm = "ACTIONet",
                         alpha_val = 0.9,
                         network_normalization_method = "pagerank_sym",
                         thread_no = 0,

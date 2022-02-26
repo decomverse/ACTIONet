@@ -455,7 +455,7 @@ clusterCells <- function(ace, algorithm = "Leiden",
   }
 
   colData(ace)[[cluster_name]] <- cl
-  ace <- findMarkers.ace(ace, cl, out.name = cluster_name)
+  ace <- computeGeneSpecifity.ace(ace, cl, out.name = cluster_name)
 
   return(ace)
 }

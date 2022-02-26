@@ -1,5 +1,5 @@
 #' @export
-findMarkers.ACTIONet.v0 <- function(
+computeGeneSpecifity.ACTIONet.v0 <- function(
   ace,
   cluster_attr,
   top_genes = 10,
@@ -90,9 +90,9 @@ process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
   return(f)
 }
 
-findMarkers.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+computeGeneSpecifity.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(ACTIONet)
-  print("Running findMarkers.ACTIONet()")
+  print("Running computeGeneSpecifity.ACTIONet()")
 
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -119,9 +119,9 @@ findMarkers.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blackl
   return(ace)
 }
 
-findMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+computeGeneSpecifity.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(presto)
-  print("Running findMarkers.wilcox()")
+  print("Running computeGeneSpecifity.wilcox()")
 
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -151,9 +151,9 @@ findMarkers.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blackl
   return(ace)
 }
 
-findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+computeGeneSpecifity.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(scran)
-  print("Running findMarkers.scran()")
+  print("Running computeGeneSpecifity.scran()")
 
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -161,7 +161,7 @@ findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   }
   f = droplevels(f)
 
-  out = scran::findMarkers(logcounts(ace), f)
+  out = scran::computeGeneSpecifity(logcounts(ace), f)
   metadata(ace)[[sprintf("%s_markers_scran", out.name)]] = out
 
   scores = do.call(cbind, lapply(out, function(DF) {
@@ -185,9 +185,9 @@ findMarkers.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   return(ace)
 }
 
-findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
+computeGeneSpecifity.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
   require(limma)
-  print("Running findMarkers.limma()")
+  print("Running computeGeneSpecifity.limma()")
 
   if(class(f) != "factor") {
     warning("f must be a factor")
@@ -239,8 +239,8 @@ findMarkers.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist
   return(ace)
 }
 
-findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
-  print("Running findMarkers.limma.pb()")
+computeGeneSpecifity.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
+  print("Running computeGeneSpecifity.limma.pb()")
 
   set.seed(0)
   if(resolution == -1) {
@@ -269,7 +269,7 @@ findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blackl
 
   z = (weight-median(weight))/mad(weight)
   mask = z > -1
-  pb.ace = findMarkers.limma(pb.ace[, mask], pb.ace$condition[mask], out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, weight = weight[mask])
+  pb.ace = computeGeneSpecifity.limma(pb.ace[, mask], pb.ace$condition[mask], out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, weight = weight[mask])
 
   metadata(ace)[[sprintf("%s_markers_limma_pb", out.name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out.name)]]
   rowMaps(ace)[[sprintf("%s_markers_limma_pb", out.name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out.name)]]
@@ -278,19 +278,19 @@ findMarkers.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blackl
   return(ace)
 }
 
-findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
+computeGeneSpecifity.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
   f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
-  
+
   if (method == "ACTIONet") {
-    ace = findMarkers.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
   } else if(method == "wilcox") {
-    ace = findMarkers.wilcox(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.wilcox(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
   } else if(method == "scran") {
-    ace = findMarkers.scran(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.scran(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
   } else if(method == "limma") {
-    ace = findMarkers.limma(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.limma(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
   } else if(method == "limma_pseudobulk") {
-    ace = findMarkers.limma.pb(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, resolution = resolution, min.size = min.size)
+    ace = computeGeneSpecifity.limma.pb(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, resolution = resolution, min.size = min.size)
   }
 
   return(ace)
@@ -298,7 +298,7 @@ findMarkers.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name 
 
 
 clusterMarkers <- function(ace, clusters) {
-  ace <- findMarkers.ace(ace, cl, out.name = "Leiden")
+  ace <- computeGeneSpecifity.ace(ace, cl, out.name = "Leiden")
   df <- ace$Leiden_markers_ACTIONet
 
   markers <- apply(df, 2, function(x) rownames(df)[scale(x) > 10])
