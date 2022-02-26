@@ -328,7 +328,7 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none",
+annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none", gene_scaling_method = 3,
 pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
 
   if (!(net_slot %in% names(colNets(ace)))) {
@@ -356,9 +356,9 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     network_normalization_code = 2
   }
   if(algorithm == "enrichment_permutation_test") {
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
   } else if(algorithm == "enrichment_parametric") {
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -371,7 +371,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     ))
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)
@@ -385,7 +385,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
 }
 
 #' @export
-scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none",
+scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", , gene_scaling_method = 3,
 pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
       warning(sprintf("net_slot does not exist in colNets(ace)."))
@@ -412,9 +412,9 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     network_normalization_code = 2
   }
   if(algorithm == "mahalanobis_2gmm") {
-    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if(algorithm == "mahalanobis_2archs") {
-    marker_stats = aggregate_genesets_mahalanobis_2archs(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_mahalanobis_2archs(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -427,7 +427,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     ))
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
-    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)
