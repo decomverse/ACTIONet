@@ -385,7 +385,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
 }
 
 #' @export
-scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", , gene_scaling_method = 3,
+scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", gene_scaling_method = 3,
 pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 0, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
       warning(sprintf("net_slot does not exist in colNets(ace)."))
