@@ -1,11 +1,13 @@
 
-.preprocess_annotation_features <- function(ace, features_use = NULL) {
+.get_feature_vec <- function(ace, features_use = NULL) {
     if (is.null(features_use)) {
         features_use <- rownames(ace)
     } else {
-        features_use <- ACTIONetExperiment:::.get_attr_or_split_idx(ace,
-            attr = features_use, return_vec = TRUE,
-            d = 1
+        features_use <- ACTIONetExperiment::get.data.or.split(
+          ace = ace,
+          attr = features_use,
+          to_return = "data",
+          d = 1
         )
     }
     return(features_use)
@@ -17,11 +19,12 @@
     }
 
     if (is.character(labels)) {
-        if (length(labels) == 1) {
-              labels <- ACTIONetExperiment:::.get_attr_or_split_idx(ace, attr = labels, return_vec = TRUE)
-          } else {
-              labels <- factor(labels)
-          }
+        # if (length(labels) == 1) {
+        #       labels <- ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data")
+        #   } else {
+        #       labels <- factor(labels)
+        #   }
+        labels <- factor(ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data"))
     }
 
     if ((length(labels) > 1) & is.logical(labels)) {
@@ -56,4 +59,19 @@
 
     out <- list(design_mat = design_mat, variable_name = variable_name)
     return(out)
+}
+
+.check_G_ace <- function(G, net_slot = NULL){
+  if( is.null(G) ){
+    err = sprintf("'G' must be given.\n")
+    stop(err)
+  } else if (is(G, "ACTIONetExperiment")) {
+    if (!(net_slot %in% names(colNets(G)))) {
+      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+      stop(err)
+    }
+    G <- colNets(G)[[net_slot]]
+  } else {
+    G =  as(G, "dgCMatrix")
+  }
 }

@@ -75,9 +75,9 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
       S_r = X,
       k_min = params$k_min,
       k_max = params$k_max,
-      min_specificity_z_thresh = params$min_specificity_z_thresh,
+      specificity_th = params$specificity_th,
       min_cells_per_arch = params$min_cells_per_arch,
-      unification_violation_threshold = params$unification_violation_threshold,
+      unification_th = params$unification_th,
       max_iter = params$max_iter,
       thread_no = params$thread_no,
       reduction_slot = NULL,
@@ -100,7 +100,7 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
     # pruning.out <- prune_archetypes(
     #     C_trace = ACTION.out$C,
     #     H_trace = ACTION.out$H,
-    #     min_specificity_z_thresh = params$min_specificity_z_thresh,
+    #     min_specificity_z_thresh = params$specificity_th,
     #     min_cells = params$min_cells_per_arch
     # )
     #
@@ -109,7 +109,7 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
     #     S_r = X,
     #     C_stacked = pruning.out$C_stacked,
     #     H_stacked = pruning.out$H_stacked,
-    #     violation_threshold = params$unification_violation_threshold,
+    #     violation_threshold = params$unification_th,
     #     thread_no = params$thread_no
     # )
     # H <- unification.out$H_unified
@@ -131,14 +131,14 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
       C_trace = ACTION.out$C,
       H_trace = ACTION.out$H,
       ace = NULL,
-      min_specificity_z_thresh = params$min_specificity_z_thresh,
+      specificity_th = params$specificity_th,
       min_cells_per_arch = params$min_cells_per_arch,
       return_raw = TRUE
     )
     # pruning.out <- prune_archetypes(
     #     C_trace = ACTION.out$C,
     #     H_trace = ACTION.out$H,
-    #     min_specificity_z_thresh = params$min_specificity_z_thresh,
+    #     min_specificity_z_thresh = params$specificity_th,
     #     min_cells = params$min_cells_per_arch
     # )
 
@@ -152,7 +152,7 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
       reduction_slot = NULL,
       C_stacked_slot = NULL,
       H_stacked_slot = NULL,
-      violation_threshold = params$unification_violation_threshold,
+      violation_threshold = params$unification_th,
       thread_no = params$thread_no,
       return_raw = TRUE
     )
@@ -161,7 +161,7 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
     #     S_r = X,
     #     C_stacked = pruning.out$C_stacked,
     #     H_stacked = pruning.out$H_stacked,
-    #     violation_threshold = params$unification_violation_threshold,
+    #     violation_threshold = params$unification_th,
     #     thread_no = params$thread_no
     # )
 
@@ -183,9 +183,9 @@ decomp.ACTION_MR <- function(ace = NULL,
                              S_r = NULL,
                              k_min = 2,
                              k_max = 30,
-                             min_specificity_z_thresh = -3,
+                             specificity_th = -3,
                              min_cells_per_arch = 2,
-                             unification_violation_threshold = 0,
+                             unification_th = 0,
                              max_iter = 50,
                              thread_no = 0,
                              reduction_slot = "ACTION",
@@ -225,7 +225,7 @@ decomp.ACTION_MR <- function(ace = NULL,
     C_trace = ACTION.out$C,
     H_trace = ACTION.out$H,
     ace = NULL,
-    min_specificity_z_thresh = min_specificity_z_thresh,
+    specificity_th = specificity_th,
     min_cells_per_arch = min_cells_per_arch,
     return_raw = TRUE
   )
@@ -239,13 +239,13 @@ decomp.ACTION_MR <- function(ace = NULL,
     reduction_slot = NULL,
     C_stacked_slot = NULL,
     H_stacked_slot = NULL,
-    violation_threshold = unification_violation_threshold,
+    violation_threshold = unification_th,
     thread_no = thread_no,
     return_raw = TRUE
   )
 
   H <- unification.out$H_unified
-  W <- X %*% unification.out$C_unified
+  W <- S_r %*% unification.out$C_unified
   extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
 
   out <- list(W = W, H = H, extra = extra)
@@ -267,7 +267,7 @@ decomp.ACTION_MR <- function(ace = NULL,
     colMaps(ace)[["C_unified"]] <- as(out$extra$C_unified, "sparseMatrix")
     colMapTypes(ace)[["C_unified"]] <- "internal"
 
-    ace$assigned_archetype <- c(out$extra$assigned_archetype)
+    SummarizedExperiment::colData(ace)[["assigned_archetype"]] <- c(out$extra$assigned_archetype)
 
     return(ace)
   }

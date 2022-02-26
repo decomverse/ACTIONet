@@ -1,51 +1,3 @@
-#' Computes feature (i.e. gene) specificity scores for each cluster
-#'
-#' @param ace ACTIONet output object
-#' @param clusters Cluster
-#' @param output_slot Name of the output in rowMaps(ace) to store results
-#' @param renormalize.logcounts.slot Name of the new assay with updated logcounts adjusted using archetypes
-#' Typically it is either 'logcounts' or 'logcounts'
-
-#' @return `ACE` object with specificity scores of each cluster added to rowMaps(ace) as a matrix with name defined by output_slot
-#'
-#' @examples
-#' ace <- compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
-#' @export
-compute.cluster.feature.specificity <- function(ace,
-                                                clusters,
-                                                output_slot,
-                                                assay_name = "logcounts") {
-  S <- SummarizedExperiment::assays(ace)[[assay_name]]
-
-  if (is.factor(clusters)) {
-    UL <- levels(clusters)
-  } else {
-    UL <- sort(unique(clusters))
-  }
-  lables <- match(clusters, UL)
-
-  # Compute gene specificity for each cluster
-  if (is.matrix(S)) {
-    specificity.out <- compute_cluster_feature_specificity_full(S, lables)
-  } else {
-    specificity.out <- compute_cluster_feature_specificity(S, lables)
-  }
-
-  specificity.out <- lapply(specificity.out, function(specificity.scores) {
-    rownames(specificity.scores) <- rownames(ace)
-    colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores))
-    return(specificity.scores)
-  })
-
-  X <- specificity.out[["upper_significance"]]
-  colnames(X) <- UL
-
-  rowMaps(ace)[[sprintf("%s_feature_specificity", output_slot)]] <- X
-  rowMapTypes(ace)[[sprintf("%s_feature_specificity", output_slot)]] <- "reduction"
-
-  return(ace)
-}
-
 
 #' Annotate clusters using prior cell annotations
 #' (It uses Fisher's exact test for computing overlaps -- approximate HGT is used)
@@ -116,7 +68,7 @@ annotate.clusters.using.labels <- function(ace,
 #'
 #' @param ace ACTIONet output object
 #' @param marker.genes A list of lists (each a set of markers for a given cell type)
-#' @param specificity.slot.name An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function
+#' @param specificity.slot.name An entry in the rowMaps(ace), precomputed using clusterFeatureSpecificity() function
 #' @param rand.sample.no Number of random permutations (default=1000)
 #'
 #' @return A named list: \itemize{
@@ -128,7 +80,7 @@ annotate.clusters.using.labels <- function(ace,
 #' @examples
 #' data("curatedMarkers_human") # pre-packaged in ACTIONet
 #' marker.genes <- curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-#' ace <- compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
+#' ace <- clusterFeatureSpecificity(ace, ace$clusters, "cluster_specificity_scores")
 #' arch.annot <- annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = "cluster_specificity_scores")
 #' @export
 annotate.clusters.using.markers <- function(ace,
@@ -259,7 +211,7 @@ annotate.clusters.using.markers <- function(ace,
 #'
 #' @export
 annotate.profile.using.markers <- function(profile, markers) {
-  marker_mat <- ACTIONet:::.preprocess_annotation_markers(markers, rownames(profile))
+  marker_mat <- .preprocess_annotation_markers(markers, rownames(profile))
 
   enrichment.out <- assess_enrichment(profile, marker_mat)
 
@@ -416,11 +368,11 @@ clusterNetwork <- function(G, algorithm = "Leiden",
                            resolution_parameter = 1.0,
                            initial_clustering = NULL,
                            seed = 0,
-                           network_slot = "ACTIONet") {
+                           net_slot = "ACTIONet") {
   algorithm <- tolower(algorithm)
 
   if (is(G, "ACTIONetExperiment")) {
-    G <- colNets(G)[[network_slot]]
+    G <- colNets(G)[[net_slot]]
   }
   if (algorithm == "leiden") {
     if (is.matrix(G)) {
@@ -481,7 +433,7 @@ clusterCells <- function(ace, algorithm = "Leiden",
                          resolution_parameter = 1.0,
                          initial_clustering = NULL,
                          seed = 0,
-                         network_slot = "ACTIONet") {
+                         net_slot = "ACTIONet") {
   if (!is.null(initial_clustering)) {
     if (is.character(initial_clustering)) {
       initial_clustering <- as.factor(initial_clustering)
@@ -498,12 +450,12 @@ clusterCells <- function(ace, algorithm = "Leiden",
       resolution_parameter = resolution_parameter,
       initial_clustering = initial_clustering,
       seed = seed,
-      network_slot = network_slot
+      net_slot = net_slot
     )
   }
 
   colData(ace)[[cluster_name]] <- cl
-  ace <- findMarkers.ace(ace, cl, out.name = cluster_name)
+  ace <- computeGeneSpecifity.ace(ace, cl, out.name = cluster_name)
 
   return(ace)
 }

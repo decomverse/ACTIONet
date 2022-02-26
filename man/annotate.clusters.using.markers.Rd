@@ -17,7 +17,7 @@ annotate.clusters.using.markers(
 
 \item{marker.genes}{A list of lists (each a set of markers for a given cell type)}
 
-\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using compute.cluster.feature.specificity() function}
+\item{specificity.slot.name}{An entry in the rowMaps(ace), precomputed using clusterFeatureSpecificity() function}
 
 \item{rand.sample.no}{Number of random permutations (default=1000)}
 }
@@ -35,6 +35,6 @@ Annotate clusters using known marker genes
 \examples{
 data("curatedMarkers_human") # pre-packaged in ACTIONet
 marker.genes <- curatedMarkers_human$Blood$PBMC$Monaco2019.12celltypes$marker.genes
-ace <- compute.cluster.feature.specificity(ace, ace$clusters, "cluster_specificity_scores")
+ace <- clusterFeatureSpecificity(ace, ace$clusters, "cluster_specificity_scores")
 arch.annot <- annotate.clusters.using.markers(ace, marker.genes = marker.genes, specificity.slot.name = "cluster_specificity_scores")
 }

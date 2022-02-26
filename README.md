@@ -67,7 +67,6 @@ brew install git
 Now clone a fresh copy of the repository:
 
 ```bash
-<<<<<<< HEAD
 git clone https://github.com/shmohammadi86/ACTIONet.git
 ```
 
