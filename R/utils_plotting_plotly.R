@@ -1,7 +1,6 @@
 .axis_params <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
 
 
-#' @import plotly
 .set_default_layout_plotly <- function(
   p,
   show_legend = FALSE,
@@ -35,7 +34,6 @@
 }
 
 
-#' @import plotly
 .make_plotly_scatter_single_trace <- function(
   x,
   y,
@@ -135,7 +133,6 @@
 }
 
 
-#' @import plotly
 .make_plotly_scatter_split_trace <- function(
   x,
   y,

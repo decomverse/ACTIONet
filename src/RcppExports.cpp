@@ -3675,8 +3675,8 @@ RcppExport SEXP _ACTIONet_aggregate_genesets_mahalanobis_2gmm(SEXP GSEXP, SEXP S
     return rcpp_result_gen;
 }
 // aggregate_genesets_weighted_enrichment
-mat aggregate_genesets_weighted_enrichment(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, int expression_normalization_method, double pre_alpha, double post_alpha, int thread_no);
-static SEXP _ACTIONet_aggregate_genesets_weighted_enrichment_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP) {
+mat aggregate_genesets_weighted_enrichment(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no);
+static SEXP _ACTIONet_aggregate_genesets_weighted_enrichment_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
@@ -3684,18 +3684,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
     Rcpp::traits::input_parameter< int >::type network_normalization_method(network_normalization_methodSEXP);
     Rcpp::traits::input_parameter< int >::type expression_normalization_method(expression_normalization_methodSEXP);
+    Rcpp::traits::input_parameter< int >::type gene_scaling_method(gene_scaling_methodSEXP);
     Rcpp::traits::input_parameter< double >::type pre_alpha(pre_alphaSEXP);
     Rcpp::traits::input_parameter< double >::type post_alpha(post_alphaSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(aggregate_genesets_weighted_enrichment(G, S, marker_mat, network_normalization_method, expression_normalization_method, pre_alpha, post_alpha, thread_no));
+    rcpp_result_gen = Rcpp::wrap(aggregate_genesets_weighted_enrichment(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_aggregate_genesets_weighted_enrichment(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP) {
+RcppExport SEXP _ACTIONet_aggregate_genesets_weighted_enrichment(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_weighted_enrichment_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, expression_normalization_methodSEXP, pre_alphaSEXP, post_alphaSEXP, thread_noSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_weighted_enrichment_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, expression_normalization_methodSEXP, gene_scaling_methodSEXP, pre_alphaSEXP, post_alphaSEXP, thread_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -3716,8 +3717,8 @@ RcppExport SEXP _ACTIONet_aggregate_genesets_weighted_enrichment(SEXP GSEXP, SEX
     return rcpp_result_gen;
 }
 // aggregate_genesets_weighted_enrichment_permutation
-mat aggregate_genesets_weighted_enrichment_permutation(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, int expression_normalization_method, double pre_alpha, double post_alpha, int thread_no, int perm_no);
-static SEXP _ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP, SEXP perm_noSEXP) {
+mat aggregate_genesets_weighted_enrichment_permutation(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no, int perm_no);
+static SEXP _ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP, SEXP perm_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
@@ -3725,19 +3726,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< sp_mat& >::type marker_mat(marker_matSEXP);
     Rcpp::traits::input_parameter< int >::type network_normalization_method(network_normalization_methodSEXP);
     Rcpp::traits::input_parameter< int >::type expression_normalization_method(expression_normalization_methodSEXP);
+    Rcpp::traits::input_parameter< int >::type gene_scaling_method(gene_scaling_methodSEXP);
     Rcpp::traits::input_parameter< double >::type pre_alpha(pre_alphaSEXP);
     Rcpp::traits::input_parameter< double >::type post_alpha(post_alphaSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< int >::type perm_no(perm_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(aggregate_genesets_weighted_enrichment_permutation(G, S, marker_mat, network_normalization_method, expression_normalization_method, pre_alpha, post_alpha, thread_no, perm_no));
+    rcpp_result_gen = Rcpp::wrap(aggregate_genesets_weighted_enrichment_permutation(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no, perm_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_aggregate_genesets_weighted_enrichment_permutation(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP, SEXP perm_noSEXP) {
+RcppExport SEXP _ACTIONet_aggregate_genesets_weighted_enrichment_permutation(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP expression_normalization_methodSEXP, SEXP gene_scaling_methodSEXP, SEXP pre_alphaSEXP, SEXP post_alphaSEXP, SEXP thread_noSEXP, SEXP perm_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, expression_normalization_methodSEXP, pre_alphaSEXP, post_alphaSEXP, thread_noSEXP, perm_noSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, expression_normalization_methodSEXP, gene_scaling_methodSEXP, pre_alphaSEXP, post_alphaSEXP, thread_noSEXP, perm_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -3885,8 +3887,8 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("vec(*sweepcut)(sp_mat&,vec,int,int)");
         signatures.insert("mat(*aggregate_genesets_mahalanobis_2archs)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int)");
         signatures.insert("mat(*aggregate_genesets_mahalanobis_2gmm)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int)");
-        signatures.insert("mat(*aggregate_genesets_weighted_enrichment)(sp_mat&,sp_mat&,sp_mat&,int,int,double,double,int)");
-        signatures.insert("mat(*aggregate_genesets_weighted_enrichment_permutation)(sp_mat&,sp_mat&,sp_mat&,int,int,double,double,int,int)");
+        signatures.insert("mat(*aggregate_genesets_weighted_enrichment)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int)");
+        signatures.insert("mat(*aggregate_genesets_weighted_enrichment_permutation)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4096,8 +4098,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_sweepcut", (DL_FUNC) &_ACTIONet_sweepcut, 4},
     {"_ACTIONet_aggregate_genesets_mahalanobis_2archs", (DL_FUNC) &_ACTIONet_aggregate_genesets_mahalanobis_2archs, 9},
     {"_ACTIONet_aggregate_genesets_mahalanobis_2gmm", (DL_FUNC) &_ACTIONet_aggregate_genesets_mahalanobis_2gmm, 9},
-    {"_ACTIONet_aggregate_genesets_weighted_enrichment", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment, 8},
-    {"_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment_permutation, 9},
+    {"_ACTIONet_aggregate_genesets_weighted_enrichment", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment, 9},
+    {"_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment_permutation, 10},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},

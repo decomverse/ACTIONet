@@ -18,7 +18,7 @@ Description:
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
 Depends: R (>= 4.0.0), Rcpp, RcppArmadillo, ACTIONetExperiment, Matrix, SingleCellExperiment, hdf5r, BiocParallel
-Imports: scran, scater, ggplot2, ggpubr, ggrepel, RColorBrewer, pals, seriation, dplyr, grid, matrixStats, gplots, batchelor, ComplexHeatmap
+Imports: scran, scater, ggplot2, ggpubr, ggrepel, RColorBrewer, pals, seriation, grid, matrixStats, gplots, batchelor, ComplexHeatmap
 Suggests: metap, multtest, ComplexHeatmap, limma, DESeq2, ineq
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
