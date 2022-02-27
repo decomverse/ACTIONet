@@ -87,34 +87,6 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
 
     return(out)
 
-    # ACTION.out <- run_ACTION(
-    #     S_r = X,
-    #     k_min = params$k_min,
-    #     k_max = params$k_max,
-    #     thread_no = params$thread_no,
-    #     max_it = params$max_iter,
-    #     min_delta = 1e-300
-    # )
-    #
-    # # Prune nonspecific and/or unreliable archetypes
-    # pruning.out <- prune_archetypes(
-    #     C_trace = ACTION.out$C,
-    #     H_trace = ACTION.out$H,
-    #     min_specificity_z_thresh = params$specificity_th,
-    #     min_cells = params$min_cells_per_arch
-    # )
-    #
-    # # Identiy equivalent classes of archetypes and group them together
-    # unification.out <- unify_archetypes(
-    #     S_r = X,
-    #     C_stacked = pruning.out$C_stacked,
-    #     H_stacked = pruning.out$H_stacked,
-    #     violation_threshold = params$unification_th,
-    #     thread_no = params$thread_no
-    # )
-    # H <- unification.out$H_unified
-    # W <- X %*% unification.out$C_unified
-    # extra <- list(H = ACTION.out$H, C = ACTION.out$C, H_stacked = pruning.out$H_stacked, C_stacked = pruning.out$C_stacked, H_unified = unification.out$H_unified, C_unified = unification.out$C_unified, assigned_archetype = unification.out$assigned_archetype)
   } else if (method == "ACTION_decomposition_MR_with_batch_correction") {
     ACTION.out <- run_ACTION_with_batch_correction(
       S_r = X,
@@ -135,13 +107,6 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
       min_cells_per_arch = params$min_cells_per_arch,
       return_raw = TRUE
     )
-    # pruning.out <- prune_archetypes(
-    #     C_trace = ACTION.out$C,
-    #     H_trace = ACTION.out$H,
-    #     min_specificity_z_thresh = params$specificity_th,
-    #     min_cells = params$min_cells_per_arch
-    # )
-
 
     # Identiy equivalent classes of archetypes and group them together
     unification.out <- .run.unifyArchetypes(
@@ -156,14 +121,6 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
       thread_no = params$thread_no,
       return_raw = TRUE
     )
-
-    # unification.out <- unify_archetypes(
-    #     S_r = X,
-    #     C_stacked = pruning.out$C_stacked,
-    #     H_stacked = pruning.out$H_stacked,
-    #     violation_threshold = params$unification_th,
-    #     thread_no = params$thread_no
-    # )
 
     H <- unification.out$H_unified
     W <- X %*% unification.out$C_unified
@@ -191,17 +148,20 @@ decomp.ACTION_MR <- function(ace = NULL,
                              reduction_slot = "ACTION",
                              return_raw = FALSE,
                              seed = 0) {
+                               
   if (return_raw == FALSE && is.null(ace)) {
     err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
     stop(err)
   }
 
-  if (!is.null(ace)) {
-    if (class(ace) != "ACTIONetExperiment") {
-      err <- sprintf("'ace' must be 'ACTIONetExperiment'.\n")
-      stop(err)
-    }
-  }
+  # if (!is.null(ace)) {
+  #   if (class(ace) != "ACTIONetExperiment") {
+  #     err <- sprintf("'ace' must be 'ACTIONetExperiment'.\n")
+  #     stop(err)
+  #   }
+  # }
+
+  ace <- .validate_ace(ace, allow_null = TRUE)
 
   if (is.null(S_r)) {
     if (!(reduction_slot %in% names(colMaps(ace)))) {

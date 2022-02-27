@@ -19,11 +19,6 @@
     }
 
     if (is.character(labels)) {
-        # if (length(labels) == 1) {
-        #       labels <- ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data")
-        #   } else {
-        #       labels <- factor(labels)
-        #   }
         labels <- factor(ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data"))
     }
 
@@ -59,6 +54,21 @@
 
     out <- list(design_mat = design_mat, variable_name = variable_name)
     return(out)
+}
+
+.validate_ace <- function(ace, allow_null = FALSE){
+
+  if (is.null(ace) && !allow_null) {
+    err <- sprintf("`ace` cannot be `NULL`.\n")
+    stop(err)
+  }
+
+  if (class(ace) != "ACTIONetExperiment") {
+    err <- sprintf("`ace` must be `ACTIONetExperiment`.\n")
+    stop(err)
+  }
+
+  return(ace)
 }
 
 .validate_net <- function(G, net_slot = NULL, row = FALSE){

@@ -21,7 +21,7 @@ imputeGenes <- function(
     algorithm <- tolower(algorithm)
     algorithm <- match.arg(algorithm)
 
-    exp_raw = SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, , drop = FALSE]
+    expr_raw = SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, , drop = FALSE]
 
     G <- .validate_net(ace, net_slot)
 
@@ -54,8 +54,8 @@ imputeGenes <- function(
             H <- colMaps(ace)[["SVD_V_smooth"]]
         }
 
-        exp_imp <- W %*% Matrix::t(H)
-        exp_imp[exp_imp < 0] <- 0
+        expr_imp <- W %*% Matrix::t(H)
+        expr_imp[expr_imp < 0] <- 0
 
     } else if (algorithm == "action") { # TODO: Fix this!! We need to also impute C. What alpha values?
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
@@ -73,13 +73,13 @@ imputeGenes <- function(
             H <- ace$archetype_footprint
         }
         C <- colMaps(ace)$C_unified
-        W <- as.matrix(exp_raw %*% C)
-        exp_imp <- W %*% Matrix::t(H)
+        W <- as.matrix(expr_raw %*% C)
+        expr_imp <- W %*% Matrix::t(H)
 
     } else if (algorithm == "actionet") {
-        exp_imp <- networkDiffusion(
+        expr_imp <- networkDiffusion(
           G = G,
-          scores = Matrix::t(exp_raw),
+          scores = Matrix::t(expr_raw),
           algorithm = diffusion_algorithm,
           alpha = alpha,
           thread_no = thread_no,
@@ -87,20 +87,20 @@ imputeGenes <- function(
           res_threshold = 1e-8,
           net_slot = NULL
         )
-        exp_imp = Matrix::t(exp_imp)
+        expr_imp = Matrix::t(expr_imp)
     }
 
-    rownames(exp_imp) <- matched_feat
+    rownames(expr_imp) <- matched_feat
 
-    # Re-scaling expresion of genes
-    m1 <- apply(exp_raw, 1, max)
-    m2 <- apply(exp_imp, 1, max)
+    # Re-scale expression of genes
+    m1 <- apply(expr_raw, 1, max)
+    m2 <- apply(expr_imp, 1, max)
     ratio <- m1 / m2
     ratio[m2 == 0] <- 1
-    D <- Diagonal(nrow(exp_imp), ratio)
-    exp_imp <- Matrix::t(as.matrix(D %*% exp_imp))
+    D <- Diagonal(nrow(expr_imp), ratio)
+    expr_imp <- Matrix::t(as.matrix(D %*% expr_imp))
 
-    return(exp_imp)
+    return(expr_imp)
 }
 
 
