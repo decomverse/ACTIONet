@@ -180,17 +180,23 @@
 }
 
 
-.smoothPCs <- function(ace = NULL,
-                       S_r = NULL,
-                       V = NULL,
-                       A = NULL,
-                       B = NULL,
-                       sigma = NULL,
-                       G = NULL,
-                       reduction_slot = "ACTION",
-                       net_slot = "ACTIONet",
-                       thread_no = 0,
-                       return_raw = FALSE) {
+.smoothPCs <- function(
+  ace = NULL,
+  S_r = NULL,
+  V = NULL,
+  A = NULL,
+  B = NULL,
+  sigma = NULL,
+  G = NULL,
+  diffusion_algorithm = "pagerank",
+  alpha = 0.9,
+  diffusion_it = 5,
+  reduction_slot = "ACTION",
+  net_slot = "ACTIONet",
+  thread_no = 0,
+  return_raw = FALSE
+) {
+
   if (return_raw == FALSE && is.null(ace)) {
     err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
     stop(err)
@@ -249,10 +255,16 @@
   # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
   U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
   SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-  V.smooth <- networkDiffusion(G = G, scores = SVD.out$v, algorithm = "pagerank", alpha = 0.9, thread_no = thread_no)
+  V.smooth <- networkDiffusion(
+    G = G,
+    scores = SVD.out$v,
+    algorithm = diffusion_algorithm,
+    alpha = alpha,
+    thread_no = thread_no,
+    max_it = diffusion_it
+  )
 
   H <- V.smooth %*% diag(SVD.out$d)
-
 
   if (return_raw == TRUE) {
     out <- list(U = U, SVD.out = SVD.out, V.smooth = V.smooth, H = H)

@@ -1,17 +1,15 @@
 .default_ggtheme <- ggplot2::theme(
-  axis.title = element_blank(),
+  axis.title = ggplot2::element_blank(),
   axis.text = ggplot2::element_blank(),
   axis.ticks = ggplot2::element_blank(),
-  panel.grid = element_blank(),
+  panel.grid = ggplot2::element_blank(),
   panel.background = ggplot2::element_blank(),
-  plot.background = element_rect(fill = "white", color = NA),
+  plot.background = ggplot2::element_rect(fill = "white", color = NA),
   legend.title = ggplot2::element_blank(),
   legend.background = ggplot2::element_blank(),
   legend.key = ggplot2::element_blank(),
   plot.margin = grid::unit(c(1, 1, 1, 1), "lines")
 )
-
-
 
 
 #' @import ggplot2

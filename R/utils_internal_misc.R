@@ -61,17 +61,33 @@
     return(out)
 }
 
-.check_G_ace <- function(G, net_slot = NULL){
+.validate_net <- function(G, net_slot = NULL, row = FALSE){
   if( is.null(G) ){
     err = sprintf("'G' must be given.\n")
     stop(err)
-  } else if (is(G, "ACTIONetExperiment")) {
-    if (!(net_slot %in% names(colNets(G)))) {
-      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-      stop(err)
+  }
+
+  if (is(G, "ACTIONetExperiment")) {
+    if (row == TRUE) {
+
+      if (!(net_slot %in% names(rowNets(G)))) {
+        err <- sprintf("Attribute '%s' is not in 'rowNets'.\n", net_slot)
+        stop(err)
+      }
+      G <- rowNets(G)[[net_slot]]
+
+    } else {
+
+      if (!(net_slot %in% names(colNets(G)))) {
+        err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+        stop(err)
+      }
+      G <- colNets(G)[[net_slot]]
+
     }
-    G <- colNets(G)[[net_slot]]
   } else {
     G =  as(G, "dgCMatrix")
   }
+
+  return(G)
 }

@@ -12,7 +12,7 @@ networkDiffusion <- function(
 
   algorithm <- match.arg(algorithm)
 
-  G <- .check_G_ace(G, net_slot)
+  G <- .validate_net(G, net_slot)
 
   # if( is.null(G) ){
   #   err = sprintf("'G' must be given.\n")
@@ -83,7 +83,7 @@ networkCentrality <- function(
 
   algorithm <- match.arg(algorithm)
 
-  G <- .check_G_ace(G, net_slot)
+  G <- .validate_net(G, net_slot)
 
   # if( is.null(G) ){
   #   err = sprintf("'G' must be given.\n")
@@ -213,7 +213,7 @@ networkPropagation <- function(
    #   G =  as(G, "dgCMatrix")
    # }
 
-  G <- .check_G_ace(G, net_slot)
+  G <- .validate_net(G, net_slot)
 
   if( is.null(label_attr) ){
     err = sprintf("'scores' cannot be 'NULL'.\n")
@@ -391,7 +391,7 @@ networkAutocorrelation <- function(
   # }
 
 
-  G <- .check_G_ace(G, net_slot)
+  G <- .validate_net(G, net_slot)
 
   if (algorithm == "geary") {
     if (is.sparseMatrix(G)) {

@@ -185,6 +185,7 @@ plot.counts.by.attr <- function(
 
 }
 
+#' @import ggplot2
 .plot_gg_violin <- function(df, x, y, fill, x_label = NULL, y_label = NULL, plot_title = NULL, palette = NULL){
 
   require(ggplot2)
