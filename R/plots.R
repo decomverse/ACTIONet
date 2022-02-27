@@ -93,7 +93,6 @@ plot.ACTIONet <- function(
   if (is.null(plot_labels)) {
     data_labels <- "NA"
     add_text_labels <- FALSE
-    # show_legend <- FALSE
     if (is.character(color_attr)) {
       show_legend <- FALSE
     }
@@ -146,30 +145,6 @@ plot.ACTIONet <- function(
       legend_labels = legend_labels,
       legend_fill_colors = legend_fill_colors
     )
-
-    # if (!is.null(color_attr) && !is.character(plot_data$fill)) {
-    #   p_out <- p_out +
-    #   scale_colour_gradientn(
-    #     colors = palette,
-    #     na.value = "grey50",
-    #     guide = "colourbar",
-    #     aesthetics = "colour"
-    #   ) +
-    #   scale_fill_gradientn(
-    #     colors = colorspace::darken(palette, stroke_contrast_fac),
-    #     na.value = "grey50",
-    #     guide = NULL
-    #   )
-    # } else {
-    #   p_out <- p_out + scale_fill_identity(
-    #     guide = "legend",
-    #     labels = legend_labels,
-    #     breaks = legend_fill_colors
-    #   ) +
-    #   scale_color_identity() #+
-    #   # scale_alpha_identity() #+
-    #   # .default_ggtheme
-    # }
 
   if (!is.null(plot_labels) && add_text_labels == TRUE) {
     text_layer <- .layout_plot_labels(
@@ -382,7 +357,6 @@ plot.ACTIONet.interactive <- function(
   )
 
   if (is.null(label_attr)) {
-    # show_legend <- FALSE
     plot_data$labels <- "NA"
   } else {
     plot_data$labels <- plot_labels
@@ -411,20 +385,6 @@ plot.ACTIONet.interactive <- function(
     if (is.null(show_legend)) {
       show_legend <- FALSE
     }
-
-    # if(is.numeric(plot_fill_col)) {
-    #   plot_data$text <- plot_data$fill
-    #   plot_data$color <- plot_data$fill
-    #   if(!is.character(palette) || length(palette) > 1){
-    #     grad_palette = "Viridis"
-    #   } else {
-    #     grad_palette = palette
-    #   }
-    # } else {
-    #   plot_data$fill <- grDevices::rgb(t(grDevices::col2rgb(plot_data$fill) / 255), alpha = plot_data$trans)
-    #   plot_data$color <- grDevices::rgb(t(grDevices::col2rgb(plot_data$color) / 255), alpha = plot_data$trans)
-    #   grad_palette = NULL
-    # }
 
     p <- .make_plotly_scatter_single_trace(
       x = plot_data$x,
@@ -787,26 +747,30 @@ plot.individual.gene <- function(ace,
 #' @param point_size Size of nodes in the ACTIONet plot
 #' @param grad_palette Color palette (named vector or a name for a given known palette)
 #' @param coordinate_slot Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
-#' @param alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
+#' @param alpha Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
 #'
 #' @return Visualized ACTIONet with projected scores
 #'
 #' @examples
 #' ace <- run.ACTIONet(sce)
 #' visualize.markers(ace, markers = c("CD14", "CD19", "CD3G"), trans_attr = ace$node_centrality)
-visualize.markers <- function(ace,
-                              markers,
-                              features_use = NULL,
-                              alpha_val = 0.9,
-                              assay_name = "logcounts",
-                              trans_attr = NULL,
-                              trans_th = -0.5,
-                              trans_fac = 3,
-                              grad_palette = "magma",
-                              point_size = 1,
-                              net_slot = "ACTIONet",
-                              coordinate_attr = "ACTIONet2D",
-                              single_plot = FALSE) {
+visualize.markers <- function(
+  ace,
+  markers,
+  features_use = NULL,
+  alpha = 0.9,
+  imputation_algorithm = "actionet",
+  assay_name = "logcounts",
+  trans_attr = NULL,
+  trans_th = -0.5,
+  trans_fac = 3,
+  grad_palette = "magma",
+  point_size = 1,
+  net_slot = "ACTIONet",
+  coordinate_attr = "ACTIONet2D",
+  single_plot = FALSE
+) {
+
   features_use <- .get_feature_vec(ace, features_use = features_use)
   markers_all <- sort(unique(unlist(markers)))
   marker_set <- intersect(markers_all, features_use)
@@ -817,22 +781,27 @@ visualize.markers <- function(ace,
   }
 
   if (length(marker_set) == 1) {
-    alpha_val <- 0
+    alpha <- 0
   }
 
-  if (alpha_val > 0) {
-    expression_profile <- impute.genes.using.ACTIONet(
+  if (alpha > 0) {
+
+    expr_profile <- imputeGenes(
       ace = ace,
       genes = marker_set,
+      algorithm = imputation_algorithm,
       features_use = features_use,
-      alpha_val = alpha_val
+      alpha = alpha,
+      assay_name = assay_name,
+      net_slot = net_slot
     )
+
   } else {
-    expression_profile <- assays(ace)[[assay_name]][match(marker_set, features_use), ,
+    expr_profile <- assays(ace)[[assay_name]][match(marker_set, features_use), ,
       drop = FALSE
     ]
-    expression_profile <- Matrix::t(expression_profile)
-    colnames(expression_profile) <- marker_set
+    expr_profile <- Matrix::t(expr_profile)
+    colnames(expr_profile) <- marker_set
   }
 
   print(sprintf("Markers Visualized: %s", paste0(marker_set, collapse = ", ")))
@@ -841,24 +810,19 @@ visualize.markers <- function(ace,
     print(sprintf("Markers Missing: %s", paste0(markers_missing, collapse = ", ")))
   }
 
-  if (single_plot == TRUE && NCOL(expression_profile) > 1) {
+  if (single_plot == TRUE && NCOL(expr_profile) > 1) {
     n <- length(marker_set)
     d <- .plot_arrange_dim(n)
     point_size <- point_size / d[1]
   }
 
-  out <- sapply(colnames(expression_profile), function(feat_name) {
-    x <- expression_profile[, feat_name]
-
-    # nnz <- round(sum(x^2)^2 / sum(x^4))
-    # x.threshold <- sort(x, decreasing = TRUE)[nnz]
-    # x[x < x.threshold] <- 0
-    # x <- x / max(x)
+  out <- sapply(colnames(expr_profile), function(feat_name) {
+    x <- expr_profile[, feat_name]
 
     p_out <- plot.ACTIONet.gradient(
       ace = ace,
       x = x,
-      alpha_val = 0,
+      alpha = 0,
       log_scale = FALSE,
       use_rank = FALSE,
       trans_attr = trans_attr,
@@ -877,14 +841,11 @@ visualize.markers <- function(ace,
     return(p_out)
   }, simplify = FALSE)
 
-  # n = length(out)
   if (length(out) == 1) {
     out <- out[[1]]
   }
 
   if (single_plot == TRUE && length(out) > 1) {
-    # n = length(marker_set)
-    # d = .plot_arrange_dim(n)
     out <- ggpubr::ggarrange(
       plotlist = out,
       nrow = d[1],
@@ -984,25 +945,32 @@ plot.archetype.selected.genes <- function(ace,
 }
 
 
-plot.ACTIONet.archetype.footprint <- function(ace,
-                                              markers,
-                                              features_use = NULL,
-                                              alpha_val = 0.9,
-                                              assay_name = "logcounts",
-                                              trans_attr = NULL,
-                                              trans_th = 0,
-                                              trans_fac = 2,
-                                              grad_palette = "magma",
-                                              point_size = 0.5,
-                                              net_slot = "ACTIONet",
-                                              coordinate_attr = "ACTIONet2D",
-                                              single_plot = FALSE,
-                                              arch.labels = NULL) {
-  archetype_footprint <- ace$archetype_footprint
-  if (is.null(arch.labels)) {
-    arch.labels <- sapply(1:NCOL(archetype_footprint), function(i) sprintf("Archetype %d", i))
+plot.ACTIONet.archetype.footprint <- function(
+  ace,
+  markers,
+  features_use = NULL,
+  alpha_val = 0.9,
+  assay_name = "logcounts",
+  footprint_slot = "archetype_footprint",
+  trans_attr = NULL,
+  trans_th = 0,
+  trans_fac = 2,
+  grad_palette = "magma",
+  point_size = 0.5,
+  net_slot = "ACTIONet",
+  coordinate_attr = "ACTIONet2D",
+  single_plot = FALSE,
+  arch.labels = NULL
+) {
+
+
+  if (!(footprint_slot %in% names(colMaps(ace)))) {
+    err <- sprintf("`%s` is not in `colMaps(ace)`.\n", footprint_slot)
+    stop(err)
   }
-  colnames(archetype_footprint) <- arch.labels
+  archetype_footprint <- Matrix::t(colMaps(ace)[[footprint_slot]])
+
+  colnames(archetype_footprint) <- sapply(1:NCOL(archetype_footprint), function(i) sprintf("Archetype %d", i))
 
   if (single_plot == TRUE && NCOL(archetype_footprint) > 1) {
     n <- NCOL(archetype_footprint)
@@ -1013,14 +981,15 @@ plot.ACTIONet.archetype.footprint <- function(ace,
   out <- sapply(colnames(archetype_footprint), function(arch) {
     x <- archetype_footprint[, arch]
 
-    nnz <- round(sum(x^2)^2 / sum(x^4))
-    x.threshold <- sort(x, decreasing = TRUE)[nnz]
-    x[x < x.threshold] <- 0
-    x <- x / max(x)
+    # nnz <- round(sum(x^2)^2 / sum(x^4))
+    # x.threshold <- sort(x, decreasing = TRUE)[nnz]
+    # x[x < x.threshold] <- 0
+    # x <- x / max(x)
 
     if (is.null(trans_attr)) {
       trans_attr <- x
     }
+
     p_out <- plot.ACTIONet.gradient(
       ace = ace,
       x = x,
@@ -1043,14 +1012,11 @@ plot.ACTIONet.archetype.footprint <- function(ace,
     return(p_out)
   }, simplify = FALSE)
 
-  # n = length(out)
   if (length(out) == 1) {
     out <- out[[1]]
   }
 
   if (single_plot == TRUE && length(out) > 1) {
-    # n = length(marker_set)
-    # d = .plot_arrange_dim(n)
 
     out <- ggpubr::ggarrange(
       plotlist = out,

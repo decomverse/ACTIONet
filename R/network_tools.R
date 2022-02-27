@@ -10,22 +10,10 @@ networkDiffusion <- function(
   net_slot = "ACTIONet"
 ) {
 
-  algorithm <- match.arg(algorithm)
+  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
 
   G <- .validate_net(G, net_slot)
-
-  # if( is.null(G) ){
-  #   err = sprintf("'G' must be given.\n")
-  #   stop(err)
-  # } else if (is(G, "ACTIONetExperiment")) {
-  #   if (!(net_slot %in% names(colNets(G)))) {
-  #     err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-  #     stop(err)
-  #   }
-  #   G <- colNets(G)[[net_slot]]
-  # } else {
-  #   G =  as(G, "dgCMatrix")
-  # }
 
   if( is.null(scores) ){
     err = sprintf("'scores' cannot be 'NULL'.\n")
@@ -81,37 +69,10 @@ networkCentrality <- function(
   thread_no = 0
 ) {
 
-  algorithm <- match.arg(algorithm)
+  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
 
   G <- .validate_net(G, net_slot)
-
-  # if( is.null(G) ){
-  #   err = sprintf("'G' must be given.\n")
-  #   stop(err)
-  # } else if (is(G, "ACTIONetExperiment")) {
-  #   if (!(net_slot %in% names(colNets(G)))) {
-  #     err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-  #     stop(err)
-  #   }
-  #   G <- colNets(G)[[net_slot]]
-  # } else {
-  #   G =  as(G, "dgCMatrix")
-  # }
-
-  # if( is.null(ace) && is.null(G) ){
-  #   err = sprintf("Either 'ace' or 'G' must be given.\n")
-  #   stop(err)
-  # }
-
-  # if (is.null(G)) {
-  #   if (!(net_slot %in% names(colNets(ace)))) {
-  #     err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-  #     stop(err)
-  #   }
-  #   G <- colNets(ace)[[net_slot]]
-  # } else {
-  #   G =  as(G, "dgCMatrix")
-  # }
 
   if( algorithm %in% c("pagerank", "personalized_pagerank") ) {
     if( is.null(label_attr) ){
@@ -191,28 +152,15 @@ networkPropagation <- function(
   G,
   label_attr = NULL,
   fixed_samples = NULL,
-  algorithm = c("LPA"),
+  algorithm = c("lpa"),
   lambda = 0,
   iters = 3,
   sig_th = 3,
   net_slot = "ACTIONet"
 ) {
 
-  algorithm <- match.arg(algorithm)
-
-   # if( is.null(G) ){
-   #   err = sprintf("'G' must be given.\n")
-   #   stop(err)
-   # } else if (is(G, "ACTIONetExperiment")) {
-   #   if (!(net_slot %in% names(colNets(G)))) {
-   #     err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-   #     stop(err)
-   #   }
-   #   G <- colNets(G)[[net_slot]]
-   # } else {
-   #   G =  as(G, "dgCMatrix")
-   # }
-
+  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
   G <- .validate_net(G, net_slot)
 
   if( is.null(label_attr) ){
@@ -287,8 +235,6 @@ correct.cell.labels <- function(
   sig_th = 3,
   net_slot = "ACTIONet"
 ) {
-
-  # Labels <- networkPropagation(G = colNets(ace)[[net_slot]], initial_labels = initial_labels, iters = iters, lambda = lambda, sig_th = sig_th)
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
   labels <- networkPropagation(
@@ -385,11 +331,7 @@ networkAutocorrelation <- function(
 ) {
 
   algorithm <- tolower(algorithm)
-
-  # if (is(G, "ACTIONetExperiment")) {
-  #   G <- colNets(G)[[net_slot]]
-  # }
-
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
 
   G <- .validate_net(G, net_slot)
 

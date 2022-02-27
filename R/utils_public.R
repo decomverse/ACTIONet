@@ -33,18 +33,10 @@ normalize.matrix <- function(
     } else {
       B = B * scale_factor
     }
-    
+
     if (log_transform == TRUE) {
         B = log1p(B)
     }
 
     return(B)
 }
-
-# #' @export
-# fastRowVars <- function(mat) {
-#     mat <- as(mat, "dgTMatrix")
-#     E <- fastRowMeans(mat)
-#     V <- computeSparseRowVariances(mat@i + 1, mat@x, E, ncol(mat))
-#     return(V)
-# }

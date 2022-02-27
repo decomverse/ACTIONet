@@ -154,12 +154,6 @@ CPal_default <- c(
     return(1)
   }
 
-  # if (length(trans_attr) == 1) {
-  #   alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
-  # } else {
-  #   alpha_fac <- trans_attr
-  # }
-
   alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
 
   if (scale == TRUE) {

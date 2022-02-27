@@ -1,16 +1,20 @@
 
-.run.layoutNetwork <- function(ace,
-                               G = NULL,
-                               initial_coordinates = NULL,
-                               compactness_level = 50,
-                               n_epochs = 1000,
-                               layout_alg = c("tumap", "umap"),
-                               thread_no = 0,
-                               reduction_slot = "ACTION",
-                               net_slot = "ACTIONet",
-                               seed = 0,
-                               return_raw = FALSE) {
-  layout_alg <- match.arg(toupper(layout_alg), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
+.run.layoutNetwork <- function(
+  ace,
+  G = NULL,
+  initial_coordinates = NULL,
+  compactness_level = 50,
+  n_epochs = 1000,
+  algorithm = c("tumap", "umap"),
+  thread_no = 0,
+  reduction_slot = "ACTION",
+  net_slot = "ACTIONet",
+  seed = 0,
+  return_raw = FALSE
+) {
+
+  algorithm = tolower(algorithm)
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
 
   if (is.null(G)) {
     if (!(net_slot %in% names(colNets(ace)))) {
@@ -31,7 +35,7 @@
   vis.out <- layoutNetwork(
     G = G,
     initial_position = initial_coordinates,
-    algorithm = layout_alg,
+    algorithm = algorithm,
     compactness_level = compactness_level,
     n_epochs = n_epochs,
     thread_no = thread_no,
@@ -243,16 +247,11 @@
     }
   }
 
-
   V <- vars$V
   A <- vars$A
   B <- vars$B
   sigma <- vars$sigma
 
-  # V <- rowMaps[[sprintf("%s_V", reduction_slot)]]
-  # A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-  # B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-  # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
   U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
   SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
   V.smooth <- networkDiffusion(
