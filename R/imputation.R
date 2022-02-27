@@ -3,6 +3,7 @@ imputeGenes <- function(
   ace,
   genes,
   algorithm = c("actionet", "action", "pca"),
+  features_use = NULL,
   alpha = 0.9,
   diffusion_algorithm = "pagerank_sym",
   thread_no = 0,
@@ -14,59 +15,17 @@ imputeGenes <- function(
 ) {
 
     features_use <- .get_feature_vec(ace, features_use = features_use)
-    matched.genes <- intersect(unique(genes), features_use)
-    matched.idx <- match(matched.genes, features_use)
-    # genes <- intersect(genes, rownames(ace))
+    matched_feat <- intersect(unique(genes), features_use)
+    idx_feat <- match(matched_feat, features_use)
 
     algorithm <- tolower(algorithm)
     algorithm <- match.arg(algorithm)
 
-    # S <- assays(ace)[[assay_name]]
-    # exp_raw <- S[genes, ]
-
-    exp_raw = SummarizedExperiment::assays(ace)[[assay_name]][matched.idx, , drop = FALSE]
+    exp_raw = SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, , drop = FALSE]
 
     G <- .validate_net(ace, net_slot)
 
     if (algorithm == "pca") {
-        # V_slot <- sprintf("%s_V", reduction_slot)
-        # if (!(V_slot %in% names(rowMaps(ace)))) {
-        #     err <- sprintf("%s does not exist in rowMaps(ace). Run `reduce.ace()`.", V_slot)
-        #     stop(err)
-        # } else {
-        #     if (!("SVD_V_smooth" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
-        #         S_r <- colMaps(ace)[[reduction_slot]]
-        #         A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-        #         B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-        #         V <- rowMaps(ace)[[V_slot]]
-        #         sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
-        #         U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
-        #         SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-        #         V_svd <- SVD.out$v
-        #
-        #         # This can also be done with network-regularized SVD directly
-        #         V.smooth <- networkDiffusion(
-        #           G = G,
-        #           scores = V_svd,
-        #           algorithm = diffusion_algorithm,
-        #           alpha = alpha,
-        #           thread_no = thread_no,
-        #           max_it = diffusion_it,
-        #           res_threshold = 1e-8,
-        #           net_slot = NULL
-        #         )
-        #
-        #         H <- V.smooth %*% diag(SVD.out$d)
-        #         U <- SVD.out$u
-        #         rownames(U) <- rownames(ace)
-        #         W <- U[matched.idx, , drop = FALSE]
-        #     } else {
-        #         W <- rowMaps(ace)[["SVD_U"]][matched.idx, , drop = FALSE]
-        #         H <- colMaps(ace)[["SVD_V_smooth"]]
-        #     }
-        # }
-        # exp_imp <- W %*% Matrix::t(H)
-        # exp_imp[exp_imp < 0] <- 0
 
         V_slot <- sprintf("%s_V", reduction_slot)
         if (!(V_slot %in% names(rowMaps(ace)))) {
@@ -75,26 +34,6 @@ imputeGenes <- function(
         }
 
         if (!("SVD_V_smooth" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
-            # S_r <- colMaps(ace)[[reduction_slot]]
-            # A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-            # B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-            # V <- rowMaps(ace)[[V_slot]]
-            # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
-            # U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
-            # SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-            # V_svd <- SVD.out$v
-            #
-            # # This can also be done with network-regularized SVD directly
-            # V.smooth <- networkDiffusion(
-            #   G = G,
-            #   scores = V_svd,
-            #   algorithm = diffusion_algorithm,
-            #   alpha = alpha,
-            #   thread_no = thread_no,
-            #   max_it = diffusion_it,
-            #   res_threshold = 1e-8,
-            #   net_slot = NULL
-            # )
 
             out <- .smoothPCs(
               ace = ace,
@@ -118,7 +57,6 @@ imputeGenes <- function(
         exp_imp <- W %*% Matrix::t(H)
         exp_imp[exp_imp < 0] <- 0
 
-
     } else if (algorithm == "action") { # TODO: Fix this!! We need to also impute C. What alpha values?
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
 
@@ -137,6 +75,7 @@ imputeGenes <- function(
         C <- colMaps(ace)$C_unified
         W <- as.matrix(exp_raw %*% C)
         exp_imp <- W %*% Matrix::t(H)
+
     } else if (algorithm == "actionet") {
         exp_imp <- networkDiffusion(
           G = G,
@@ -151,7 +90,7 @@ imputeGenes <- function(
         exp_imp = Matrix::t(exp_imp)
     }
 
-    rownames(exp_imp) <- matched.genes
+    rownames(exp_imp) <- matched_feat
 
     # Re-scaling expresion of genes
     m1 <- apply(exp_raw, 1, max)
@@ -159,87 +98,11 @@ imputeGenes <- function(
     ratio <- m1 / m2
     ratio[m2 == 0] <- 1
     D <- Diagonal(nrow(exp_imp), ratio)
-    exp_imp <- as.matrix(D %*% exp_imp)
+    exp_imp <- Matrix::t(as.matrix(D %*% exp_imp))
 
     return(exp_imp)
 }
 
-
-# .impute.features.ACTIONet <- function(){
-#
-# }
-#
-# .impute.features.ACTION <- function(){
-#
-# }
-#
-# .impute.features.PCA <- function(
-#   ace,
-#   G,
-#   idx_feat,
-#   reduction_slot = "ACTION",
-#   force_reimpute = FALSE,
-#   diffusion_algorithm = "pagerank_sym",
-#   alpha = 0.9,
-#   diffusion_it = 5,
-#   thread_no = 0
-# ){
-#
-#   V_slot <- sprintf("%s_V", reduction_slot)
-#   if (!(V_slot %in% names(rowMaps(ace)))) {
-#       err <- sprintf("`%s` does not exist in rowMaps(ace). Run `reduce.ace()`.", V_slot)
-#       stop(err)
-#   }
-#
-#   if (!("SVD_V_smooth" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
-#       # S_r <- colMaps(ace)[[reduction_slot]]
-#       # A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-#       # B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-#       # V <- rowMaps(ace)[[V_slot]]
-#       # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
-#       # U <- as.matrix(S_r %*% Diagonal(length(sigma), 1 / sigma))
-#       # SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-#       # V_svd <- SVD.out$v
-#       #
-#       # # This can also be done with network-regularized SVD directly
-#       # V.smooth <- networkDiffusion(
-#       #   G = G,
-#       #   scores = V_svd,
-#       #   algorithm = diffusion_algorithm,
-#       #   alpha = alpha,
-#       #   thread_no = thread_no,
-#       #   max_it = diffusion_it,
-#       #   res_threshold = 1e-8,
-#       #   net_slot = NULL
-#       # )
-#
-#       out <- .smoothPCs(
-#         ace = ace,
-#         G = G,
-#         diffusion_algorithm = diffusion_algorithm,
-#         alpha = alpha,
-#         diffusion_it = diffusion_it,
-#         reduction_slot = reduction_slot,
-#         thread_no = thread_no,
-#         return_raw = TRUE
-#       )
-#
-#       # out <- list(U = U, SVD.out = SVD.out, V.smooth = V.smooth, H = H)
-#
-#       H <- out$H
-#       W <- out$SVD.out$u
-#       rownames(W) <- rownames(ace)
-#       W <- W[idx_feat, , drop = FALSE]
-#   } else {
-#       W <- rowMaps(ace)[["SVD_U"]][idx_feat, , drop = FALSE]
-#       H <- colMaps(ace)[["SVD_V_smooth"]]
-#   }
-#
-#   exp_imp <- W %*% Matrix::t(H)
-#   exp_imp[exp_imp < 0] <- 0
-#
-#   return(exp_imp)
-# }
 
 #' Imputing expression of genes by interpolating over archetype profile
 #'
@@ -253,18 +116,16 @@ imputeGenes <- function(
 #' expression_imputed <- impute.genes.using.archetype(ace, genes)
 #' @export
 impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
-    # features_use <- .get_feature_vec(ace, features_use = features_use)
-    # genes <- intersect(unique(genes), features_use)
 
     features_use <- .get_feature_vec(ace, features_use = features_use)
-    matched.genes <- intersect(unique(genes), features_use)
-    matched.idx <- match(matched.genes, features_use)
+    matched_feat <- intersect(unique(genes), features_use)
+    idx_feat <- match(matched_feat, features_use)
 
-    Z <- rowMaps(ace)[["archetype_gene_profile"]][matched.idx, , drop = FALSE]
+    Z <- rowMaps(ace)[["archetype_gene_profile"]][idx_feat, , drop = FALSE]
     H <- Matrix::t(colMaps(ace)[["H_unified"]])
 
     expression_imputed <- Matrix::t(Z %*% H)
-    colnames(expression_imputed) <- matched.genes
+    colnames(expression_imputed) <- matched_feat
 
     return(expression_imputed)
 }
@@ -282,18 +143,16 @@ impute.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
 #' expression_imputed <- impute.genes.using.archetype(ace, genes)
 #' @export
 impute.specific.genes.using.archetypes <- function(ace, genes, features_use = NULL) {
-    # features_use <- .get_feature_vec(ace, features_use = features_use)
-    # genes <- intersect(unique(genes), features_use)
 
     features_use <- .get_feature_vec(ace, features_use = features_use)
-    matched.genes <- intersect(unique(genes), features_use)
-    matched.idx <- match(matched.genes, features_use)
+    matched_feat <- intersect(unique(genes), features_use)
+    idx_feat <- match(matched_feat, features_use)
 
-    Z <- log1p(rowMaps(ace)[["unified_feature_specificity"]][matched.idx, , drop = FALSE])
+    Z <- log1p(rowMaps(ace)[["unified_feature_specificity"]][idx_feat, , drop = FALSE])
     H <- Matrix::t(colMaps(ace)[["H_unified"]])
 
     expression_imputed <- Matrix::t(Z %*% H)
-    colnames(expression_imputed) <- matched.genes
+    colnames(expression_imputed) <- matched_feat
 
     return(expression_imputed)
 }
@@ -327,10 +186,9 @@ impute.genes.using.ACTIONet <- function(
 ) {
 
     features_use <- .get_feature_vec(ace, features_use = features_use)
-    # genes <- unique(genes)
 
-    matched.genes <- intersect(unique(genes), features_use)
-    matched.idx <- match(matched.genes, features_use)
+    matched_feat <- intersect(unique(genes), features_use)
+    idx_feat <- match(matched_feat, features_use)
 
     # Smooth/impute gene expressions
     if (!(assay_name %in% names(SummarizedExperiment::assays(ace)))) {
@@ -338,7 +196,7 @@ impute.genes.using.ACTIONet <- function(
         stop(err)
     }
 
-    expression_raw <- SummarizedExperiment::assays(ace)[[assay_name]][matched.idx, ,
+    expression_raw <- SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, ,
         drop = FALSE
     ]
     if (ACTIONetExperiment:::is.sparseMatrix(expression_raw)) {
@@ -358,7 +216,7 @@ impute.genes.using.ACTIONet <- function(
         U <- expression_raw / Matrix::colSums(expression_raw)
     }
     U <- U[, cs > 0]
-    gg <- matched.genes[cs > 0]
+    gg <- matched_feat[cs > 0]
 
     # Perform network-diffusion
     G <- colNets(ace)$ACTIONet
