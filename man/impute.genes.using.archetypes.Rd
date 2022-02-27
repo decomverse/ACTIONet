@@ -10,6 +10,8 @@ impute.genes.using.archetypes(ace, genes, features_use = NULL)
 \item{ace}{ACTIONet output}
 
 \item{genes}{List of genes to impute}
+
+\item{features_use}{A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'genes'.}
 }
 \value{
 A matrix of imputed expression values

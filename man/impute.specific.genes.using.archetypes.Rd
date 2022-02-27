@@ -4,12 +4,14 @@
 \alias{impute.specific.genes.using.archetypes}
 \title{Imputing expression specificity of genes by interpolating over archetype profile}
 \usage{
-impute.specific.genes.using.archetypes(ace, genes)
+impute.specific.genes.using.archetypes(ace, genes, features_use = NULL)
 }
 \arguments{
 \item{ace}{ACTIONet output}
 
 \item{genes}{List of genes to impute}
+
+\item{features_use}{A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'genes'.}
 }
 \value{
 A matrix of imputed expression values
