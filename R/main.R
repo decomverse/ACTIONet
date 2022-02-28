@@ -72,36 +72,6 @@ runACTIONet <- function(
   S <- SummarizedExperiment::assays(ace)[[assay_name]]
   S_r <- Matrix::t(colMaps(ace)[[reduction_slot]])
 
-  # # Set parameters for ACTION_decomposition_MR
-  # params <- list()
-  # params$k_min <- k_min
-  # params$k_max <- k_max
-  # params$specificity_th <- specificity_th
-  # params$min_cells_per_arch <- min_cells_per_arch
-  # params$unification_th <- unification_th
-  # params$max_iter <- max_iter_ACTION
-  # params$thread_no <- thread_no
-  # params$seed <- seed
-  #
-  # # Run ACTION_decomposition_MR
-  # ACTION.out <- ACTIONet::decomp(X = S_r, params = params, method = "ACTION_decomposition_MR")
-  #
-  # # Store resulting decompositions
-  # colMaps(ace)[["H_stacked"]] <- Matrix::t(as(ACTION.out$extra$H_stacked, "sparseMatrix"))
-  # colMapTypes(ace)[["H_stacked"]] <- "internal"
-  #
-  # colMaps(ace)[["C_stacked"]] <- as(ACTION.out$extra$C_stacked, "sparseMatrix")
-  # colMapTypes(ace)[["C_stacked"]] <- "internal"
-  #
-  # H_unified <- as(Matrix::t(ACTION.out$extra$H_unified), "sparseMatrix")
-  # colMaps(ace)[["H_unified"]] <- H_unified
-  # colMapTypes(ace)[["H_unified"]] <- "internal"
-  #
-  # colMaps(ace)[["C_unified"]] <- as(ACTION.out$extra$C_unified, "sparseMatrix")
-  # colMapTypes(ace)[["C_unified"]] <- "internal"
-  #
-  # ace$assigned_archetype <- c(ACTION.out$extra$assigned_archetype)
-
   ace <- decomp.ACTION_MR(
     ace = ace,
     S_r = S_r,
@@ -130,9 +100,6 @@ runACTIONet <- function(
   )
   colNets(ace)[[net_slot_out]] <- G
 
-  # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-  # ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
-
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
     G = G,
     label_attr = colData(ace)[["assigned_archetype"]],
@@ -154,35 +121,14 @@ runACTIONet <- function(
     return_raw = FALSE
   )
 
-
-  # V <- rowMaps(ace)[[sprintf("%s_V", reduction_slot)]]
-  # A <- rowMaps(ace)[[sprintf("%s_A", reduction_slot)]]
-  # B <- colMaps(ace)[[sprintf("%s_B", reduction_slot)]]
-  # sigma <- S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]]
-  # U <- as.matrix(Matrix::t(S_r) %*% Diagonal(length(sigma), 1 / sigma))
-  # SVD.out <- ACTIONet::perturbedSVD(V, sigma, U, -A, B)
-  # # V_svd <- SVD.out$v
-  # V.smooth <- networkDiffusion(G, SVD.out$v)
-  #
-  # H <- V.smooth %*% diag(SVD.out$d)
-  # W <- SVD.out$u
-  # rownames(W) <- rownames(ace)
-  # rowMaps(ace)[["SVD_U"]] <- W
-  # colMaps(ace)[["SVD_V_smooth"]] <- H
-  # rowMapTypes(ace)[["SVD_U"]] <- colMapTypes(ace)[["SVD_V_smooth"]] <- "internal"
-  #
-
-  # initial_coordinates <- ACTIONetExperiment:::.tscalet(S_r)
-  # colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
-  # colMapTypes(ace)[["ACTIONred"]] <- "embedding"
-
   # Layout ACTIONet. Now it uses the smoothed S_r
-  ace <- .run.layoutNetwork(ace,
+  ace <- .run.layoutNetwork(
+    ace,
     G = G,
     initial_coordinates = ACTIONetExperiment:::.tscalet(S_r),
     compactness_level = layout_compactness,
     n_epochs = layout_epochs,
-    layout_alg = layout_algorithm,
+    algorithm = layout_algorithm,
     thread_no = ifelse(layout_in_parallel, thread_no, 1),
     reduction_slot = NULL,
     net_slot = NULL,
@@ -190,14 +136,6 @@ runACTIONet <- function(
   )
 
   # Smooth archetype footprints
-  # Ht_unified <- colMaps(ace)[["H_unified"]]
-  # archetype_footprint <- networkDiffusion(
-  #   G = G,
-  #   algorithm = "pagerank",
-  #   scores = as.matrix(colMaps(ace)[["H_unified"]]),
-  #   thread_no = thread_no,
-  #   alpha = footprint_alpha
-  # )
   archetype_footprint <- networkDiffusion(
     G = G,
     scores = colMaps(ace)[["H_unified"]],
@@ -220,24 +158,6 @@ runACTIONet <- function(
     thread_no = thread_no,
     return_raw = FALSE
   )
-  # H <- Matrix::t(archetype_footprint)
-  # if (is.matrix(S)) {
-  #   specificity.out <- compute_archetype_feature_specificity_full(S, H, thread_no)
-  # } else {
-  #   specificity.out <- compute_archetype_feature_specificity(S, H, thread_no)
-  # }
-  #
-  # specificity.out <- lapply(specificity.out, function(specificity.scores) {
-  #   rownames(specificity.scores) <- rownames(ace)
-  #   colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores), sep = "")
-  #   return(specificity.scores)
-  # })
-  #
-  # rowMaps(ace)[["unified_feature_profile"]] <- specificity.out[["archetypes"]]
-  # rowMapTypes(ace)[["unified_feature_profile"]] <- "internal"
-  #
-  # rowMaps(ace)[["unified_feature_specificity"]] <- specificity.out[["upper_significance"]]
-  # rowMapTypes(ace)[["unified_feature_specificity"]] <- "reduction"
 
   # ace <- constructBackbone(
   #   ace = ace,
@@ -378,12 +298,13 @@ run.ACTIONet <- function(ace,
   colMapTypes(ace)[["ACTIONnorm"]] <- "internal"
 
   # Layout ACTIONet
-  ace <- .run.layoutNetwork(ace,
+  ace <- .run.layoutNetwork(
+    ace,
     G = G,
     initial_coordinates = ACTIONetExperiment:::.tscalet(S_r),
     compactness_level = layout_compactness,
     n_epochs = layout_epochs,
-    layout_alg = layout_algorithm,
+    algorithm = layout_algorithm,
     thread_no = ifelse(layout_in_parallel, thread_no, 1),
     reduction_slot = NULL,
     net_slot = NULL,
@@ -419,15 +340,6 @@ run.ACTIONet <- function(ace,
     net_slot = NULL
   )
   colMaps(ace)$archetype_footprint <- archetype_footprint
-
-  # archetype_footprint <- networkDiffusion(
-  #   G = G,
-  #   algorithm = "pagerank",
-  #   scores = as.matrix(colMaps(ace)[["H_unified"]]),
-  #   thread_no = thread_no,
-  #   alpha = footprint_alpha
-  # )
-  # colMaps(ace)$archetype_footprint <- archetype_footprint
 
   # Compute gene specificity for each archetype
   ace <- archetypeFeatureSpecificity(
@@ -509,7 +421,8 @@ rebuildACTIONet <- function(ace,
                                 H_stacked_slot = "H_stacked",
                                 seed = 0) {
   set.seed(seed)
-  layout_algorithm <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
+  layout_algorithm <- tolower(layout_algorithm)
+  layout_algorithm <- match.arg(layout_algorithm, several.ok = FALSE)
 
   if (!(reduction_slot %in% names(colMaps(ace)))) {
     err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", reduction_slot)
@@ -537,9 +450,9 @@ rebuildACTIONet <- function(ace,
   # Layout ACTIONet
   ace <- rerunLayout(
     ace = ace,
-    layout_compactness = layout_compactness,
-    layout_epochs = layout_epochs,
-    layout_algorithm = layout_algorithm,
+    compactness = layout_compactness,
+    epochs = layout_epochs,
+    algorithm = layout_algorithm,
     thread_no = ifelse(layout_in_parallel, thread_no, 1),
     network_density = network_density,
     mutual_edges_only = mutual_edges_only,
@@ -569,28 +482,32 @@ rebuildACTIONet <- function(ace,
 #'
 #' @examples
 #' plot.ACTIONet(ace)
-#' ace.updated <- rerunLayout(ace, layout_compactness = 20)
+#' ace.updated <- rerunLayout(ace, compactness = 20)
 #' plot.ACTIONet(ace.updated)
 #' @export
-rerunLayout <- function(ace,
-                        layout_compactness = 50,
-                        layout_epochs = 1000,
-                        layout_algorithm = c("tumap", "umap"),
-                        network_density = 1,
-                        mutual_edges_only = TRUE,
-                        thread_no = 0,
-                        reduction_slot = "ACTION",
-                        net_slot = "ACTIONet",
-                        seed = 0) {
-  layout_alg <- match.arg(toupper(layout_algorithm), choices = c("TUMAP", "UMAP"), several.ok = FALSE)
+rerunLayout <- function(
+  ace,
+  compactness = 50,
+  epochs = 1000,
+  algorithm = c("tumap", "umap"),
+  network_density = 1,
+  mutual_edges_only = TRUE,
+  thread_no = 0,
+  reduction_slot = "ACTION",
+  net_slot = "ACTIONet",
+  seed = 0
+) {
+
+  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
 
   ace <- .run.layoutNetwork(
     ace = ace,
     G = NULL,
     initial_coordinates = NULL,
-    compactness_level = layout_compactness,
-    n_epochs = layout_epochs,
-    layout_alg = layout_alg,
+    compactness_level = compactness,
+    n_epochs = epochs,
+    algorithm = algorithm,
     thread_no = thread_no,
     reduction_slot = reduction_slot,
     net_slot = net_slot,
@@ -602,8 +519,8 @@ rerunLayout <- function(ace,
   #   ace = ace,
   #   network_density = network_density,
   #   mutual_edges_only = mutual_edges_only,
-  #   layout_compactness = layout_compactness,
-  #   layout_epochs = layout_epochs / 5,
+  #   layout_compactness = compactness,
+  #   layout_epochs = epochs / 5,
   #   thread_no = 1,
   #   net_slot = net_slot_out
   # )
@@ -672,43 +589,12 @@ rerunArchAggr <- function(ace,
     return_raw = FALSE
   )
 
-  # unification.out <- unify_archetypes(
-  #   S_r = S_r,
-  #   C_stacked = C_stacked,
-  #   H_stacked = H_stacked,
-  #   violation_threshold = unification_th,
-  #   thread_no = thread_no
-  # )
-
-  # colMaps(ace)[[sprintf("H_%s", unified_suffix)]] <- as(Matrix::t(unification.out$H_unified), "sparseMatrix")
-  # colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] <- "internal"
-  #
-  # colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(unification.out$C_unified, "sparseMatrix")
-  # colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] <- "internal"
-  #
-  # colData(ace)[["assigned_archetype"]] <- c(unification.out$assigned_archetype)
-
-  # Use graph core of global and induced subgraphs to infer centrality/quality of
-  # each cell
-  # ace$node_centrality <- c(compute_archetype_core_centrality(G, ace$assigned_archetype))
-  # SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality <- function(
-
   SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
     G = G,
     label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "personalized_coreness",
     alpha = 0
   )
-
-  # Ht_unified <- colMaps(ace)[["H_unified"]]
-  # archetype_footprint <- networkDiffusion(
-  #   G = G,
-  #   algorithm = "pagerank",
-  #   scores = as.matrix(colMaps(ace)[[sprintf("H_%s", unified_suffix)]]),
-  #   thread_no = thread_no,
-  #   alpha = footprint_alpha
-  # )
-  # colMaps(ace)$archetype_footprint <- archetype_footprint
 
   archetype_footprint <- networkDiffusion(
     G = G,
@@ -722,15 +608,6 @@ rerunArchAggr <- function(ace,
   )
   colMaps(ace)$archetype_footprint <- archetype_footprint
 
-  # Ht_unified <- colMaps(ace)[[sprintf("H_%s", unified_suffix)]]
-  # archetype_footprint <- compute_network_diffusion_approx(
-  #   G = G,
-  #   X0 = Ht_unified,
-  #   thread_no = thread_no,
-  #   alpha = footprint_alpha
-  # )
-  # colMaps(ace)$archetype_footprint <- archetype_footprint
-
   # Compute gene specificity for each archetype
   ace <- archetypeFeatureSpecificity(
     ace = ace,
@@ -741,28 +618,6 @@ rerunArchAggr <- function(ace,
     thread_no = thread_no,
     return_raw = FALSE
   )
-
-
-  # H <- Matrix::t(archetype_footprint)
-  #
-  # # Compute gene specificity for each archetype
-  # if (is.matrix(S)) {
-  #   specificity.out <- compute_archetype_feature_specificity_full(S, H, thread_no)
-  # } else {
-  #   specificity.out <- compute_archetype_feature_specificity(S, H, thread_no)
-  # }
-  #
-  # specificity.out <- lapply(specificity.out, function(specificity.scores) {
-  #   rownames(specificity.scores) <- rownames(ace)
-  #   colnames(specificity.scores) <- paste("A", 1:ncol(specificity.scores), sep = "")
-  #   return(specificity.scores)
-  # })
-  #
-  # rowMaps(ace)[[sprintf("%s_feature_profile", unified_suffix)]] <- specificity.out[["archetypes"]]
-  # rowMapTypes(ace)[[sprintf("%s_feature_profile", unified_suffix)]] <- "internal"
-  #
-  # rowMaps(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] <- specificity.out[["upper_significance"]]
-  # rowMapTypes(ace)[[sprintf("%s_feature_specificity", unified_suffix)]] <- "reduction"
 
   # ace <- constructBackbone(
   #   ace = ace,

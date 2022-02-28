@@ -8,7 +8,7 @@ impute.genes.using.ACTIONet(
   ace,
   genes,
   features_use = NULL,
-  alpha_val = 0.85,
+  alpha = 0.85,
   thread_no = 0,
   diffusion_it = 5,
   assay_name = "logcounts"
@@ -18,9 +18,11 @@ impute.genes.using.ACTIONet(
 \item{ace}{Input results to be clustered
 (alternatively it can be the ACTIONet igraph object)}
 
-\item{genes}{The list of genes to perform imputation for.}
+\item{genes}{The list of genes to perform imputation on.}
 
-\item{alpha_val}{Depth of diffusion between (0, 1).
+\item{features_use}{A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'genes'.}
+
+\item{alpha}{Depth of diffusion between (0, 1).
 The larger it is, the deeper the diffusion, which results in less nonzeros (default = 0.85).}
 
 \item{thread_no}{Number of parallel threads}
