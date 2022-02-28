@@ -19,11 +19,6 @@
     }
 
     if (is.character(labels)) {
-        # if (length(labels) == 1) {
-        #       labels <- ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data")
-        #   } else {
-        #       labels <- factor(labels)
-        #   }
         labels <- factor(ACTIONetExperiment::get.data.or.split(ace, attr = labels, to_return = "data"))
     }
 
@@ -61,17 +56,48 @@
     return(out)
 }
 
-.check_G_ace <- function(G, net_slot = NULL){
+.validate_ace <- function(ace, allow_null = FALSE){
+
+  if (is.null(ace) && !allow_null) {
+    err <- sprintf("`ace` cannot be `NULL`.\n")
+    stop(err)
+  }
+
+  if (class(ace) != "ACTIONetExperiment") {
+    err <- sprintf("`ace` must be `ACTIONetExperiment`.\n")
+    stop(err)
+  }
+
+  return(ace)
+}
+
+.validate_net <- function(G, net_slot = NULL, row = FALSE){
   if( is.null(G) ){
     err = sprintf("'G' must be given.\n")
     stop(err)
-  } else if (is(G, "ACTIONetExperiment")) {
-    if (!(net_slot %in% names(colNets(G)))) {
-      err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-      stop(err)
+  }
+
+  if (is(G, "ACTIONetExperiment")) {
+    if (row == TRUE) {
+
+      if (!(net_slot %in% names(rowNets(G)))) {
+        err <- sprintf("Attribute '%s' is not in 'rowNets'.\n", net_slot)
+        stop(err)
+      }
+      G <- rowNets(G)[[net_slot]]
+
+    } else {
+
+      if (!(net_slot %in% names(colNets(G)))) {
+        err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+        stop(err)
+      }
+      G <- colNets(G)[[net_slot]]
+
     }
-    G <- colNets(G)[[net_slot]]
   } else {
     G =  as(G, "dgCMatrix")
   }
+
+  return(G)
 }
