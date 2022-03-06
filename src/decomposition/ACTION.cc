@@ -302,7 +302,7 @@ namespace ACTIONet
   ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 100,
                                  double min_delta = 1e-6, int max_trial = 3)
   {
-    stdout_printf("Running ACTION++ (%d threads):", thread_no); FLUSH;
+    stdout_printf("Running ACTION++ (%d threads):"); FLUSH;
 
     int D = std::min((int)S_r.n_rows, (int)S_r.n_cols);
     if (k_max == -1)
