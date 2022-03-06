@@ -9,7 +9,8 @@ visualize.markers(
   ace,
   markers,
   features_use = NULL,
-  alpha_val = 0.9,
+  alpha = 0.9,
+  imputation_algorithm = "actionet",
   assay_name = "logcounts",
   trans_attr = NULL,
   trans_th = -0.5,
@@ -18,7 +19,8 @@ visualize.markers(
   point_size = 1,
   net_slot = "ACTIONet",
   coordinate_attr = "ACTIONet2D",
-  single_plot = FALSE
+  single_plot = FALSE,
+  show_legend = FALSE
 )
 }
 \arguments{
@@ -26,7 +28,7 @@ visualize.markers(
 
 \item{markers}{Set of row features (e.g. genes) to visualize .}
 
-\item{alpha_val}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
+\item{alpha}{Between [0, 1]. If it is greater than 0, smoothing of scores would be performed}
 
 \item{trans_attr}{Additional continuous attribute to project onto the transparency of nodes}
 

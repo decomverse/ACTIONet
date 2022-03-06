@@ -14,29 +14,35 @@ orthoProject <- function(A, S, prenorm = F, postnorm = F) {
 normalize.matrix <- function(
   S,
   log_transform = FALSE,
-  scale_factor = NULL
+  scale_param = NULL
 ) {
 
-    if (is.null(scale_factor)) {
-      scale_factor = 1
-    } else if ( (scale_factor != "median") && !is.numeric(scale_factor) ) {
-      err = sprintf("'scale_factor' must be 'median' or numeric.\n")
-      stop(err)
-    }
+  if (is.null(scale_param)) {
+    scale_param = 1
+  } else if ( !is.function(scale_param) && !is.numeric(scale_param) ) {
+    err = sprintf("`scale_param` must be `function` or `numeric`.\n")
+    stop(err)
+  } else if ( !(length(scale_param) == NCOL(S)) &&  !(length(scale_param) == 1) ) {
+    err = sprintf("`scale_param` must be of length 1 or `NCOL(S)`.\n")
+  }
 
-    cs = Matrix::colSums(S)
-    cs[cs == 0] = 1
-    B = Matrix::t(Matrix::t(S) / cs)
+  cs = Matrix::colSums(S)
+  cs[cs == 0] = 1
+  B = Matrix::t(Matrix::t(S) / cs)
 
-    if (scale_factor == "median"){
-      B = B * median(cs)
+  if (is.function(scale_param)){
+    B = B * scale_param(cs)
+  } else {
+    if(length(scale_param) > 1){
+      B = Matrix::t(Matrix::t(B) * scale_param)
     } else {
-      B = B * scale_factor
+      B = B * scale_param
     }
+  }
 
-    if (log_transform == TRUE) {
-        B = log1p(B)
-    }
+  if (log_transform == TRUE) {
+    B = log1p(B)
+  }
 
-    return(B)
+  return(B)
 }

@@ -1,7 +1,7 @@
 #' @export
 networkDiffusion <- function(
-  G,
-  scores = NULL,
+  data,
+  scores, ## `scores` can be a matrix
   algorithm = c("pagerank", "pagerank_sym"),
   alpha = 0.9,
   thread_no = 0,
@@ -13,22 +13,22 @@ networkDiffusion <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  G <- .validate_net(G, net_slot)
-
-  if( is.null(scores) ){
-    err = sprintf("'scores' cannot be 'NULL'.\n")
-    stop(err)
-  }
+  # if( is.null(scores) ){
+  #   err = sprintf("`scores` cannot be `NULL`.\n")
+  #   stop(err)
+  # }
   scores = Matrix::as.matrix(scores)
-  if ( NROW(scores) != NCOL(G) ){
-    err = sprintf("'length(scores)' must equal 'NCOL(G)'.\n")
+  if ( NROW(scores) != NCOL(data) ){
+    err = sprintf("`length(scores)` must equal `NCOL(data)`.\n")
     stop(err)
   }
+
+  G <- .validate_net(data, net_slot)
 
   if(alpha >= 1){
-    stop("alpha => 1")
+    stop("`alpha` => 1")
   } else if (alpha < 0) {
-    stop("alpha < 0")
+    stop("`alpha` < 0")
   }
 
   if (algorithm == "pagerank") {
@@ -59,7 +59,7 @@ networkDiffusion <- function(
 
 #' @export
 networkCentrality <- function(
-  G,
+  data,
   label_attr = NULL,
   algorithm = c("coreness", "pagerank", "personalized_coreness", "personalized_pagerank"),
   alpha = 0.9,
@@ -72,7 +72,7 @@ networkCentrality <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  G <- .validate_net(G, net_slot)
+  G <- .validate_net(data, net_slot)
 
   if( algorithm %in% c("pagerank", "personalized_pagerank") ) {
     if( is.null(label_attr) ){
@@ -90,15 +90,19 @@ networkCentrality <- function(
   }
 
   if (!is.null(label_attr)) {
-    if(!is.null(ace)){
-        assignments = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")$index
-    } else {
-        assignments = as.numeric(factor(label_attr))
-        if ( length(assignments) != NCOL(G) ){
-          err = sprintf("'length(label_attr)' must equal 'NCOL(G)'.\n")
-          stop(err)
-        }
-    }
+    label_attr <- validate_attr(data, label_attr)
+    assignments = as.numeric(factor(label_attr))
+
+    # if(!is.null(ace)){
+    #     assignments = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")$index
+    # } else {
+    #     assignments = as.numeric(factor(label_attr))
+    #     if ( length(assignments) != NCOL(G) ){
+    #       err = sprintf("'length(label_attr)' must equal 'NCOL(G)'.\n")
+    #       stop(err)
+    #     }
+    # }
+
   }
 
   if (algorithm == "coreness") {
@@ -108,7 +112,7 @@ networkCentrality <- function(
   } else if (algorithm == "pagerank") {
 
     centrality <- networkDiffusion(
-      G = G,
+      data = G,
       scores = rep(1 / NCOL(G), NCOL(G)),
       algorithm = "pagerank",
       alpha = alpha,
@@ -127,7 +131,7 @@ networkCentrality <- function(
     design.mat <- model.matrix(~ 0 + as.factor(assignments))
     design.mat <- scale(design.mat, center = FALSE, scale = colSums(design.mat))
     scores <- networkDiffusion(
-      G = G,
+      data = G,
       scores = design.mat,
       algorithm = "pagerank",
       alpha = alpha,
@@ -149,8 +153,8 @@ networkCentrality <- function(
 
 #' @export
 networkPropagation <- function(
-  G,
-  label_attr = NULL,
+  data,
+  label_attr,
   fixed_samples = NULL,
   algorithm = c("lpa"),
   lambda = 0,
@@ -161,27 +165,32 @@ networkPropagation <- function(
 
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
-  G <- .validate_net(G, net_slot)
 
-  if( is.null(label_attr) ){
-    err = sprintf("'scores' cannot be 'NULL'.\n")
-    stop(err)
-  }
+  G <- .validate_net(data, net_slot)
 
-  if ( length(label_attr) != NCOL(G) ){
-    err = sprintf("'length(label_attr)' must equal 'NCOL(G)'.\n")
-    stop(err)
-  }
+  lf <- factor(validate_attr(data, label_attr))
+  labels = as.numeric(lf)
+  keys = levels(lf)
 
-  if(!is(G, "ACTIONetExperiment")){
-    sa = ACTIONetExperiment::get.data.or.split(G, attr = label_attr, to_return = "levels")
-    labels = sa$index
-    keys = sa$keys
-  } else {
-    lf = factor(label_attr)
-    labels = as.numeric(lf)
-    keys = levels(lf)
-  }
+  # if( is.null(label_attr) ){
+  #   err = sprintf("`label_attr` cannot be 'NULL'.\n")
+  #   stop(err)
+  # }
+
+  # if ( length(label_attr) != NCOL(G) ){
+  #   err = sprintf("'length(label_attr)' must equal 'NCOL(G)'.\n")
+  #   stop(err)
+  # }
+
+  # if(!is(data, "ACTIONetExperiment")){
+  #   sa = ACTIONetExperiment::get.data.or.split(G, attr = label_attr, to_return = "levels")
+  #   labels = sa$index
+  #   keys = sa$keys
+  # } else {
+  #   lf = factor(label_attr)
+  #   labels = as.numeric(lf)
+  #   keys = levels(lf)
+  # }
 
   labels[is.na(labels)] <- -1
 
@@ -198,34 +207,6 @@ networkPropagation <- function(
 
 
 #' @export
-infer.missing.cell.labels <- function(
-  ace,
-  label_attr,
-  iters = 3,
-  lambda = 0,
-  sig_th = 3,
-  net_slot = "ACTIONet"
-) {
-
-  initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
-  fixed_samples <- which(!is.na(initial_labels))
-
-  labels <- networkPropagation(
-    G = NULL,
-    label_attr = initial_labels,
-    fixed_samples = fixed_samples,
-    algorithm = "LPA",
-    lambda = lambda,
-    iters = iters,
-    sig_th = sig_th,
-    net_slot = net_slot
-  )
-
-  return(labels)
-}
-
-
-#' @export
 correct.cell.labels <- function(
   ace,
   label_attr,
@@ -238,7 +219,7 @@ correct.cell.labels <- function(
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
   labels <- networkPropagation(
-    G = ace,
+    data = ace,
     label_attr = initial_labels,
     fixed_samples = fixed_samples,
     algorithm = algorithm,

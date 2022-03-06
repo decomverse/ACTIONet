@@ -6,9 +6,9 @@
 \usage{
 rerunLayout(
   ace,
-  layout_compactness = 50,
-  layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
+  compactness = 50,
+  epochs = 1000,
+  algorithm = c("tumap", "umap"),
   network_density = 1,
   mutual_edges_only = TRUE,
   thread_no = 0,
@@ -19,12 +19,6 @@ rerunLayout(
 }
 \arguments{
 \item{ace}{ACTIONetExperiment object.}
-
-\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
-
-\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
-
-\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
 
 \item{network_density}{Density factor of ACTIONet graph (default=1).}
 
@@ -37,6 +31,12 @@ rerunLayout(
 \item{net_slot}{Slot in colMaps(ace) containing ACTIONet adjacency matrix (default='ACTIONet').}
 
 \item{seed}{Seed for random initialization (default=0).}
+
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
+
+\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
+
+\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
 }
 \value{
 ace Updated ace object
@@ -46,6 +46,6 @@ Rerun layout on the ACTIONet graph with new parameters
 }
 \examples{
 plot.ACTIONet(ace)
-ace.updated <- rerunLayout(ace, layout_compactness = 20)
+ace.updated <- rerunLayout(ace, compactness = 20)
 plot.ACTIONet(ace.updated)
 }
