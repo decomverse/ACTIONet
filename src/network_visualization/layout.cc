@@ -393,12 +393,15 @@ namespace ACTIONet
   mat Z = robust_zscore(score);
 */
 
+
     mat U;
     vec s;
     mat V;
-    svd_econ(U, s, V, coordinates_3D);
-    mat Z = zscore(U);
+    svd_econ(U, s, V, coordinates_3D, "left", "std");
 
+    mat Z = normalize_scores(U, 2, thread_no);
+    // Z = clamp(Z, -7, 7);
+    
     vec a = 75 * Z.col(0);
     vec b = 75 * Z.col(1);
 
@@ -421,7 +424,7 @@ namespace ACTIONet
 
     res(0) = coordinates;
     res(1) = coordinates_3D;
-    res(2) = RGB_colors; //RGB_colors;
+    res(2) = RGB_colors;
     return res;
   }
 
