@@ -3,7 +3,7 @@
 namespace ACTIONet {
 sp_mat renormalize_input_matrix(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments) {
-  printf("Computing and normalizing pseudobulk profiles ... ");
+  stdout_printf("Computing and normalizing pseudobulk profiles ... ");
   mat pb = compute_pseudo_bulk_per_cluster(S, sample_assignments);
   rowvec mean_pb_t = trans(mean(pb, 1));
 
@@ -16,10 +16,10 @@ sp_mat renormalize_input_matrix(
 
     pb.col(j) *= (num / denom);
   }
-  printf("done\n");
+  stdout_printf("done\n"); FLUSH;
 
   // Align individual columns now
-  printf("Normalizing individual columns ... ");
+  stdout_printf("Normalizing columns ... ");
 
   sp_mat S_norm = S;
   mat pb_t = trans(pb);
@@ -32,14 +32,14 @@ sp_mat renormalize_input_matrix(
 
     S_norm.col(j) *= (num / denom);
   }
-  printf("done\n");
+  stdout_printf("done\n"); FLUSH;
 
   return (S_norm);
 }
 
 mat renormalize_input_matrix(mat &S,
                              arma::Col<unsigned long long> sample_assignments) {
-  printf("Computing and normalizing pseudobulk profiles ... ");
+  stdout_printf("Computing and normalizing pseudobulk profiles ... ");
   mat pb = compute_pseudo_bulk_per_cluster(S, sample_assignments);
   rowvec mean_pb_t = trans(mean(pb, 1));
 
@@ -52,10 +52,10 @@ mat renormalize_input_matrix(mat &S,
 
     pb.col(j) *= (num / denom);
   }
-  printf("done\n");
+  stdout_printf("done\n"); FLUSH;
 
   // Align individual columns now
-  printf("Normalizing individual columns ... ");
+  stdout_printf("Normalizing columns ... ");
 
   mat S_norm = S;
   mat pb_t = trans(pb);
@@ -68,7 +68,7 @@ mat renormalize_input_matrix(mat &S,
 
     S_norm.col(j) *= (num / denom);
   }
-  printf("done\n");
+  stdout_printf("done\n"); FLUSH;
 
   return (S_norm);
 }

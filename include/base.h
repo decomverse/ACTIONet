@@ -240,9 +240,6 @@ namespace ACTIONet
                                  int k_min, int k_max, int thread_no, int max_it,
                                  double min_delta);
 
-    ACTION_results run_ACTION_dev(mat &S_r, int k_min, int k_max, int thread_no,
-                                  bool auto_stop, int max_it, double min_delta);
-
     ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
                                        int thread_no, int max_it, double min_delta);
 
@@ -344,10 +341,6 @@ namespace ACTIONet
                                        double alpha, int max_it);
     mat compute_network_diffusion_direct(sp_mat &G, sp_mat &X0, int thread_no,
                                          double alpha);
-    sp_mat compute_sparse_network_diffusion(sp_mat &G, sp_mat &X0, double alpha,
-                                            double rho, double epsilon,
-                                            int max_iter);
-
     mat compute_network_diffusion_SFMULT(sp_mat &G, sp_mat &X0, double alpha, int max_it);
 
     vec NetDBSCAN(sp_mat &G, int minPts, double eps, double alpha_val);
@@ -428,7 +421,7 @@ namespace ACTIONet
     mat normalize_scores(mat scores, int method = 1, int thread_no = 0);
 
     mat aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double post_alpha = 0.85, int thread_no = 0);
-    
+
     mat aggregate_genesets_mahalanobis_2archs(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.15, double post_alpha = 0.85, int thread_no = 0);
     mat aggregate_genesets_mahalanobis_2gmm(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.15, double post_alpha = 0.85, int thread_no = 0);
     mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.15, double post_alpha = 0.85, int thread_no = 0);

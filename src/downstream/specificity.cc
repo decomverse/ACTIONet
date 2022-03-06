@@ -18,10 +18,6 @@ namespace ACTIONet
                   h /= (mu == 0) ? 1 : mu;
                 }); // For numerical stability
 
-    // printf("Compute stats ... ");
-    // vec row_p = vec(mean(Sb, 1));
-    // rowvec col_p = rowvec(mean(Sb, 0));
-
     // Heuristic optimization! Shall add parallel for later on
     vec row_p = zeros(Sb.n_rows);
     vec col_p = zeros(Sb.n_cols);
@@ -68,7 +64,7 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
@@ -93,8 +89,6 @@ namespace ACTIONet
     double min_val = S.min();
     S.for_each([min_val](mat::elem_type &val)
                { val -= min_val; });
-
-    //stdout_printf("Compute stats ... ");
 
     // Heuristic optimization! Shall add parallel for later on
     vec row_p = zeros(S.n_rows);
@@ -142,7 +136,7 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
@@ -155,13 +149,6 @@ namespace ACTIONet
   {
     stdout_printf("Computing feature specificity ... ");
     field<mat> res(3);
-
-    /*
-    // make sure all values are positive
-    double min_val = S.min();
-    S.for_each([min_val](mat::elem_type &val)
-               { val -= min_val; });
-    */
 
     mat Sb = S;
     uvec nnz_idx = find(Sb > 0);
@@ -208,7 +195,7 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
