@@ -500,20 +500,12 @@ namespace ACTIONet
     mat H_arch = normalise(mat(H_stacked * C_stacked_sp), 1, 0);
     H_arch.replace(datum::nan, 0); // replace each NaN with 0
 
-    stdout_printf("Running NMU\n");
     int dim = min((int)H_arch.n_cols, 100);
     field<mat> NMU_out = recursiveNMU_mine(H_arch, dim, 1000, 100);
 
     mat W_NMU = NMU_out(0);
     mat H_NMU = NMU_out(1);
     vec factor_weight = NMU_out(2);
-
-    /*
-  output.C_unified = W_NMU;
-  output.H_unified = H_NMU;
-  output.dag_adj = factor_weight;
-  return(output);
-*/
 
     double M = 16, ef_construction = 200, ef = 50, density = 1.0;
     sp_mat backbone = ACTIONet::buildNetwork(H_arch, "k*nn", "jsd", density, thread_no, M, ef_construction, ef, true, 10);
