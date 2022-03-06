@@ -120,7 +120,6 @@ namespace ACTIONet
     mat D = diagmat(sqrt(sum(P) + 1e-16));
     mat W = P * D;
     mat P2 = W * trans(W);
-    // P2.diag().zeros();
 
     return (P2);
   }
@@ -291,9 +290,6 @@ namespace ACTIONet
       vec x = abs(U.col(0)) * sqrt(s(0));
       vec y = abs(V.col(0)) * sqrt(s(0));
 
-      //factor_weights(k) = sum(abs(V.col(0)));
-      //factor_weights(k) *= s(0)*factor_weights(k);
-
       W.col(k) = x;
       H.col(k) = y;
 
@@ -309,7 +305,6 @@ namespace ACTIONet
         x = A * y;
         x.transform([](double val)
                     { return (val < 0 ? 0 : val); });
-        //x /= dot(y, y);
         x /= (max(x) + 1e-16);
 
         y = trans(trans(x) * A);
@@ -339,7 +334,6 @@ namespace ACTIONet
       M.transform([](double val)
                   { return (val < 0 ? 0 : val); });
 
-      //factor_weights(k) = sqrt(sum(sum(square(oldM-M))));
       obj(k) = (sum(sum(square(M))) / denom);
       ss(k) = s(0);
 
@@ -371,25 +365,16 @@ namespace ACTIONet
 
     mat M0 = M;
 
-    //M =  normalise(M, 1, 0);
-    //M = zscore(M);
-
     vec s;
     mat U, V;
     double denom = sum(sum(square(M)));
     for (int k = 0; k < dim; k++)
     {
-      //field<mat> SVD_res = HalkoSVD(M, 1, max_SVD_iter, 0, 0);
-      //mat U = SVD_res(0); vec s = SVD_res(1); mat V = SVD_res(2);
-
-      //svds( U, s, V, sp_mat(M), 1, temp，"std");
-      //svd(U, s, V, M, "std");
       field<mat> SVD_res = IRLB_SVD(M, 1, max_SVD_iter, 0, 0);
       U = SVD_res(0);
       s = SVD_res(1);
       V = SVD_res(2);
 
-      //vec w = vec(cor(M0, U.col(0)));
       vec w = trans(trans(U.col(0)) * M);
       int selected_columns = index_max(w);
 
@@ -398,20 +383,12 @@ namespace ACTIONet
       H.col(k).zeros();
       H(selected_columns, k) = 1;
 
-      //mat oldM = M;
       vec v = M.col(selected_columns);
       M -= v * (trans(v) * M) / dot(v, v);
-      //factor_weights(k) = sum(sum(oldM - M));
       M.transform([](double val)
                   { return (val < 0 ? 0 : val); });
 
-      //factor_weights(k) = (sum(sum(square(M))) / denom);
       factor_weights(k) = (sum(sum(abs(M))) / M.n_cols);
-      //factor_weights(k) = max(sum(abs(M)));
-      //factor_weights(k) = max(sum(square(M)));
-      //factor_weights(k) = s(0);
-
-      //factor_weights(k) = min(max(cor(W, M)));
     }
 
     field<mat> out(3);
@@ -494,7 +471,6 @@ namespace ACTIONet
 
     unification_results output;
 
-    //mat C_stacked_norm = normalise(C_stacked, 1, 0);
     sp_mat C_stacked_sp = sp_mat(C_stacked);
     C_stacked_sp = normalise(C_stacked_sp, 1, 0);
     mat H_arch = normalise(mat(H_stacked * C_stacked_sp), 1, 0);
@@ -542,100 +518,16 @@ namespace ACTIONet
     stdout_printf("Selected archetypes: %d\n", state_no);
 
     // Compute unified archetypes
-    //mat C_norm = normalise(C_stacked, 1, 0);
     mat C_unified = C_stacked.cols(selected_archs);
     mat W_r_unified = S_r * C_unified;
 
     mat H_unified = run_simplex_regression(W_r_unified, S_r, false);
     uvec assigned_archetypes = trans(index_max(H_unified, 0));
 
-    /*
-    // Construct Ontology!
-    graph_undirected inputNetwork(Sim);
-    DAGraph ontology;
-    ontology.setTerminalName("archetype");
-    nodeDistanceObject nodeDistances;
-
-    double threshold = 0.05;
-    double density = 0.5;
-
-    dagConstruct::constructDAG(inputNetwork, ontology, nodeDistances, threshold,
-                               density);
-
-    vector<vector<int>> dag_nodes;
-    vector<int> dag_nodes_type;
-
-    for (int k = 0; k < Sim.n_rows; k++) {
-      vector<int> v;
-      v.push_back(k);
-      dag_nodes.push_back(v);
-      dag_nodes_type.push_back(0);
-    }
-
-    for (map<pair<unsigned, unsigned>, string>::iterator edgesIt =
-             ontology.edgesBegin();
-         edgesIt != ontology.edgesEnd(); ++edgesIt) {
-      unsigned ii = edgesIt->first.first;
-      unsigned jj = edgesIt->first.second;
-
-      vector<int> v;
-      int tt;
-      if (edgesIt->second == "archetype") {
-        v.push_back(jj);
-        tt = 0;
-      } else {  // Internal node
-        for (int kk = 0; kk < dag_nodes[jj].size(); kk++) {
-          v.push_back(dag_nodes[jj][kk]);
-        }
-        tt = 1;
-      }
-
-      if (ii >= dag_nodes.size()) {
-        dag_nodes.push_back(v);
-        dag_nodes_type.push_back(tt);
-      } else {  // merge
-        for (int kk = 0; kk < v.size(); kk++) {
-          dag_nodes[ii].push_back(v[kk]);
-        }
-
-        if (edgesIt->second != "archetype") dag_nodes_type[ii] = 1;
-      }
-
-      // cout << ontology.getName(edgesIt->first.first) << "\t" <<
-      // ontology.getName(edgesIt->first.second) << "\t" << edgesIt->second <<
-      // "\t"
-      // << ontology.getWeight(edgesIt->first.first) << endl;
-    }
-
-    // Get internal adjacency matrix of DAGs
-    int dag_node_counts = dag_nodes.size();
-    mat dag_adj = zeros(dag_node_counts, dag_node_counts);
-    vec dag_node_annotations = zeros(dag_node_counts);
-    for (map<pair<unsigned, unsigned>, string>::iterator edgesIt =
-             ontology.edgesBegin();
-         edgesIt != ontology.edgesEnd(); ++edgesIt) {
-      unsigned ii = edgesIt->first.first;
-      unsigned jj = edgesIt->first.second;
-      double w = ontology.getWeight(edgesIt->first.first);
-
-      if (edgesIt->second == "archetype") {
-        dag_node_annotations(ii) = 1;
-      } else {
-        dag_node_annotations(ii) = 2;
-      }
-
-      dag_adj(ii, jj) = 1;
-    }
-
-    output.dag_adj = dag_adj;
-    output.dag_node_annotations = dag_node_annotations;
-  */
-
     output.C_unified = C_unified;
     output.H_unified = H_unified;
     output.assigned_archetypes = assigned_archetypes;
     output.arch_membership_weights = H_NMU.cols(selected_cols);
-    // output.selected_archetypes = selected_archetypes(idx);
 
     FLUSH;
     return (output);
