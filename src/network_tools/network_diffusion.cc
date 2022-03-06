@@ -305,7 +305,7 @@ namespace ACTIONet
     } else if(alpha == 0) {
       return(X0);
     }
-    
+
     alpha = 1 - alpha; // Traditional defitition is to have alpha as weight of prior. Here, alpha is depth of difffusion
 
     mat mPPreviousScore = X0; //zeros(size(X0));
@@ -339,6 +339,12 @@ namespace ACTIONet
       muPrevious = mu;
       mPPreviousScore = mPreviousScore;
       mPreviousScore = mScore;
+    }
+
+    // Temporarty fix. Sometimes diffusion values become small negative numbers
+    double m0 = min(min(X0));
+    if(0 <= m0) {
+      mScore = clamp(mScore, 0, max(max(mScore)));
     }
 
     return (mScore);

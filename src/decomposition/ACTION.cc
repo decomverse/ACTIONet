@@ -5,7 +5,7 @@ namespace ACTIONet
 {
 
   // Solves the standard Archetypal Analysis (AA) problem
-  field<mat> run_AA(mat &A, mat &W0, int max_it = 100, double min_delta = 1e-6)
+  field<mat> run_AA(mat &A, mat &W0, int max_it, double min_delta)
   {
     int sample_no = A.n_cols;
     int d = A.n_rows;  // input dimension
