@@ -172,7 +172,7 @@ plot.ACTIONet <- function(
 #'
 #' @param ace 'ACTIONetExperiment' object
 #' @param x Numeric vector of length NCOL(ace).
-#' @param alpha_val Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).
+#' @param alpha Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha=0' (default:0.85).
 #' @param log_scale Logical value for whether to log-scale values of 'x' (default:'FALSE').
 #' @param use_rank If 'FALSE', values of 'x' are used as breaks for color gradient. If 'TRUE' the ranks of the values of 'x' are used instead  (default:'FALSE').
 #' @param trans_attr Numeric vector of length NROW(ace) or colname of 'colData(ace)' used to compute point transparency. Smaller values are more transparent.
@@ -182,7 +182,7 @@ plot.ACTIONet <- function(
 #' @param stroke_size Size of points outline (stroke) in ggplot (default:point_size*0.1).
 #' @param stroke_contrast_fac Factor by which to darken point outline for contrast (default:0.1).
 #' @param grad_palette Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.
-#' @param net_slot Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').
+#' @param net_slot Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha>0' (default:'ACTIONet').
 #' @param coordinate_attr Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').
 #'
 #' @return 'ggplot' object.
@@ -196,7 +196,7 @@ plot.ACTIONet <- function(
 plot.ACTIONet.gradient <- function(
   ace,
   x,
-  alpha_val = 0,
+  alpha = 0,
   log_scale = FALSE,
   use_rank = FALSE,
   trans_attr = NULL,
@@ -234,14 +234,14 @@ plot.ACTIONet.gradient <- function(
     x <- log1p(x)
   }
 
-  if (alpha_val > 0) {
-    if (alpha_val > 1)
-      alpha_val = 1
+  if (alpha > 0) {
+    if (alpha > 1)
+      alpha = 1
     x <- as.numeric(networkDiffusion(
-      G = colNets(ace)[[net_slot]],
+      data = colNets(ace)[[net_slot]],
       scores = x,
       algorithm = "pagerank",
-      alpha = alpha_val,
+      alpha = alpha,
       thread_no = 0
     ))
   }
@@ -768,7 +768,8 @@ visualize.markers <- function(
   point_size = 1,
   net_slot = "ACTIONet",
   coordinate_attr = "ACTIONet2D",
-  single_plot = FALSE
+  single_plot = FALSE,
+  show_legend = FALSE
 ) {
 
   features_use <- .get_feature_vec(ace, features_use = features_use)
@@ -832,6 +833,7 @@ visualize.markers <- function(
       stroke_size = point_size * 0.1,
       stroke_contrast_fac = 0.1,
       grad_palette = grad_palette,
+      show_legend = show_legend,
       net_slot = net_slot,
       coordinate_attr = coordinate_attr
     ) +
@@ -949,7 +951,7 @@ plot.ACTIONet.archetype.footprint <- function(
   ace,
   markers,
   features_use = NULL,
-  alpha_val = 0.9,
+  alpha = 0.9,
   assay_name = "logcounts",
   footprint_slot = "archetype_footprint",
   trans_attr = NULL,
@@ -993,7 +995,7 @@ plot.ACTIONet.archetype.footprint <- function(
     p_out <- plot.ACTIONet.gradient(
       ace = ace,
       x = x,
-      alpha_val = 0,
+      alpha = 0,
       log_scale = FALSE,
       use_rank = FALSE,
       trans_attr = trans_attr,

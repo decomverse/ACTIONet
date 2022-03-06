@@ -89,11 +89,11 @@ normalize.default <- function(
   assay_name = "counts",
   assay_out = "logcounts",
   log_transform = TRUE,
-  scale_factor = TRUE
+  scale_param = stats::median
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
-    B = normalize.matrix(S, log_transform, scale_factor)
+    B = normalize.matrix(S, log_transform, scale_param)
     rownames(B) = rownames(ace)
     colnames(B) = colnames(ace)
     SummarizedExperiment::assays(ace)[[assay_out]] = B
@@ -146,7 +146,7 @@ normalize.ace <- function(
           assay_name = assay_name,
           assay_out = assay_out,
           log_transform = TRUE,
-          scale_factor = "median"
+          scale_param = stats::median
         )
         norm_method = "default"
     }

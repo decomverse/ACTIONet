@@ -73,7 +73,7 @@
 
 .validate_net <- function(G, net_slot = NULL, row = FALSE){
   if( is.null(G) ){
-    err = sprintf("'G' must be given.\n")
+    err = sprintf("`G` must be given.\n")
     stop(err)
   }
 
@@ -81,7 +81,7 @@
     if (row == TRUE) {
 
       if (!(net_slot %in% names(rowNets(G)))) {
-        err <- sprintf("Attribute '%s' is not in 'rowNets'.\n", net_slot)
+        err <- sprintf("`%s` is not an attribute of `rowNets`.\n", net_slot)
         stop(err)
       }
       G <- rowNets(G)[[net_slot]]
@@ -89,7 +89,7 @@
     } else {
 
       if (!(net_slot %in% names(colNets(G)))) {
-        err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
+        err <- sprintf("`%s` is not an attribute of `colNets`.\n", net_slot)
         stop(err)
       }
       G <- colNets(G)[[net_slot]]
@@ -100,4 +100,33 @@
   }
 
   return(G)
+}
+
+validate_attr <- function(data, attr, return_type = "data"){
+
+  if( is.null(data) ){
+    err = sprintf("`data` cannot be `NULL`.\n")
+    stop(err)
+  }
+
+  if( is.null(attr) ){
+    err = sprintf("`attr` cannot be `NULL`.\n")
+    stop(err)
+  }
+
+  if (is(data, "ACTIONetExperiment")) {
+
+    attr = ACTIONetExperiment::get.data.or.split(data, attr = attr, to_return = return_type)
+
+  } else {
+
+    attr = c(attr)
+    if ( !(length(attr) == NCOL(data)) ){
+      err = sprintf("`length(attr)` must equal `NCOL(data)`.\n")
+      stop(err)
+    }
+
+  }
+
+  return(attr)
 }

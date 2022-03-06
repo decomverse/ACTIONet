@@ -61,7 +61,7 @@ imputeGenes <- function(
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
 
             H <- networkDiffusion(
-              G = G,
+              data = G,
               scores = colMaps(ace)[["H_unified"]],
               algorithm = diffusion_algorithm,
               alpha = alpha,
@@ -78,7 +78,7 @@ imputeGenes <- function(
 
     } else if (algorithm == "actionet") {
         expr_imp <- networkDiffusion(
-          G = G,
+          data = G,
           scores = Matrix::t(expr_raw),
           algorithm = diffusion_algorithm,
           alpha = alpha,

@@ -100,8 +100,8 @@ runACTIONet <- function(
   )
   colNets(ace)[[net_slot_out]] <- G
 
-  SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
-    G = G,
+  colData(ace)[["node_centrality"]] <- networkCentrality(
+    data = G,
     label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "personalized_coreness"
   )
@@ -137,7 +137,7 @@ runACTIONet <- function(
 
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(
-    G = G,
+    data = G,
     scores = colMaps(ace)[["H_unified"]],
     algorithm = "pagerank",
     alpha = footprint_alpha,
@@ -285,7 +285,7 @@ run.ACTIONet <- function(ace,
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
   S_r_norm <- networkDiffusion(
-    G = G,
+    data = G,
     scores = Matrix::t(S_r),
     algorithm = "pagerank",
     alpha = imputation_alpha,
@@ -330,7 +330,7 @@ run.ACTIONet <- function(ace,
 
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(
-    G = G,
+    data = G,
     scores = colMaps(ace)[["H_unified"]],
     algorithm = "pagerank",
     alpha = footprint_alpha,
@@ -589,15 +589,15 @@ rerunArchAggr <- function(ace,
     return_raw = FALSE
   )
 
-  SummarizedExperiment::colData(ace)[["node_centrality"]] <- networkCentrality(
-    G = G,
+  colData(ace)[["node_centrality"]] <- networkCentrality(
+    data = G,
     label_attr = colData(ace)[["assigned_archetype"]],
     algorithm = "personalized_coreness",
     alpha = 0
   )
 
   archetype_footprint <- networkDiffusion(
-    G = G,
+    data = G,
     scores = colMaps(ace)[[sprintf("H_%s", unified_suffix)]],
     algorithm = "pagerank",
     alpha = footprint_alpha,

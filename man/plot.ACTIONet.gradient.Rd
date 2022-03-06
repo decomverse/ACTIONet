@@ -7,7 +7,7 @@
 \method{plot}{ACTIONet.gradient}(
   ace,
   x,
-  alpha_val = 0,
+  alpha = 0,
   log_scale = FALSE,
   use_rank = FALSE,
   trans_attr = NULL,
@@ -27,7 +27,7 @@
 
 \item{x}{Numeric vector of length NCOL(ace).}
 
-\item{alpha_val}{Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha_val=0' (default:0.85).}
+\item{alpha}{Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha=0' (default:0.85).}
 
 \item{log_scale}{Logical value for whether to log-scale values of 'x' (default:'FALSE').}
 
@@ -47,7 +47,7 @@
 
 \item{grad_palette}{Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.}
 
-\item{net_slot}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha_val>0' (default:'ACTIONet').}
+\item{net_slot}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha>0' (default:'ACTIONet').}
 
 \item{coordinate_attr}{Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').}
 }
