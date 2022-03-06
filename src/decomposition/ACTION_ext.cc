@@ -346,7 +346,7 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
 
   }, thread_no);
   stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
-                (k_max - k_min + 1));
+                (k_max - k_min + 1)); FLUSH;
 
   return trace;
 
