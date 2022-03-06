@@ -160,9 +160,6 @@ namespace ACTIONet
         }
 
         double obj = sum(exp(negated_shifted_vals / sigma));
-        // printf("%d- rho = %.3f, degree = %d, log2(k) = %.2e, sigma = %.2e,
-        // residual = %.2e, iters = %d\n", i, rho, vals.n_elem, target, sigma,
-        // abs(obj - target), j);
 
         for (sp_mat::col_iterator it = G.begin_col(i); it != G.end_col(i); ++it)
         {
@@ -184,11 +181,11 @@ namespace ACTIONet
       thread_no = SYS_THREADS_DEF;
     }
 
-    stdout_printf("Computing layout (%d threads):\n", thread_no);
+    stdout_printf("Computing layout (%d threads):\n", thread_no); FLUSH;
 
     field<mat> res(3);
 
-    mat init_coors = initial_position.rows(0, 2); //round(initial_position.rows(0, 2) * 1e6) * 1e-6;
+    mat init_coors = initial_position.rows(0, 2);
 
     sp_mat H = G;
     H.for_each([](sp_mat::elem_type &val)
@@ -202,13 +199,11 @@ namespace ACTIONet
       compactness_level = (compactness_level < 0) ? 0 : compactness_level;
       compactness_level = (compactness_level > 100) ? 100 : compactness_level;
       stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
-                    compactness_level, n_epochs);
-      FLUSH;
+                    compactness_level, n_epochs); FLUSH;
     }
     else
     {
-      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs);
-      FLUSH;
+      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs); FLUSH;
     }
 
     double a_param = UMAP_A[compactness_level];
@@ -219,35 +214,6 @@ namespace ACTIONet
     vector<unsigned int> positive_head(nE);
     vector<unsigned int> positive_tail(nE);
     vector<float> epochs_per_sample(nE);
-
-    /*
-    const double* values = G.values;
-    const uword* rows = G.row_indices;
-    const uword* col_offsets = G.col_ptrs;
-
-    uword* cols = new uword[G.n_nonzero];
-
-    uvec cv(col_offsets, G.n_cols + 1);
-    vec delta = diff(conv_to<vec>::from(cv));
-    vec kk = join_vert(zeros(1), cumsum(delta));
-    for(int j = 0; j < nV; j++) {
-      int k = (int)kk[j];
-      int M = (int)delta[j];
-      for (int l = 0; l < M; l++) {
-        cols[k + l] = j;
-      }
-    }
-
-    double w_max = arma::max(vec(values, G.n_nonzero));
-    //ParallelFor(0, nE, thread_no, [&](size_t i, size_t threadId) {
-    for(int i = 0; i < nE; i++) {
-      epochs_per_sample[i] =
-          w_max /
-          values[i];  // Higher the weight of the edge, the more likely it is to
-                      // be sampled (inversely proportional to
-    epochs_per_sample) positive_head[i] = rows[i]; positive_tail[i] = cols[i];
-    }
-  */
 
     int i = 0;
     double w_max = max(max(H));
@@ -260,35 +226,14 @@ namespace ACTIONet
     }
 
     // Initial coordinates of vertices (0-simplices)
-    /*
-  fmat initial_coor2D = conv_to<fmat>::from(init_coors.rows(0, 1));
-  vector<float> head_vec(initial_coor2D.memptr(),
-                        initial_coor2D.memptr() + initial_coor2D.n_elem);
-  */
     vector<float> head_vec(init_coors.n_cols * 2);
     fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
     float *ptr = sub_coor.memptr();
     memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
     vector<float> tail_vec(head_vec);
 
-    /*
-          fmat coordinates_float_back(head_vec.data(), 2, nV);
-          mat X = conv_to<mat>::from(coordinates_float_back);
+    stdout_printf("\tComputing 2D layout ... ");
 
-
-          mat Y = zeros(nE, 3);
-          for(int i = 0; i < nE; i++) {
-                  Y(i, 0) = positive_head[i];
-                  Y(i, 1) = positive_tail[i];
-                  Y(i, 2) = epochs_per_sample[i];
-          }
-
-          res(0) = X;
-          res(1) = Y;
-          return res;
-  */
-
-    stdout_printf("\tComputing 2D layout ... "); // fflush(stdout);
     // Stores linearized coordinates [x1, y1, x2, y2, ...]
     vector<float> result;
 
@@ -321,23 +266,11 @@ namespace ACTIONet
     mat coordinates = conv_to<mat>::from(coordinates_float);
     coordinates = trans(coordinates);
 
-    stdout_printf("done\n");
-    FLUSH; // fflush(stdout);
+    stdout_printf("done\n"); FLUSH;
 
     /****************************
    *  Compute 3D Embedding	*
    ***************************/
-    /*
-    fmat initial_coor3D =
-        conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
-
-    head_vec.clear();
-    head_vec.resize(initial_coor3D.n_elem);
-    std::copy(initial_coor3D.memptr(),
-              initial_coor3D.memptr() + initial_coor3D.n_elem,
-    head_vec.begin()); tail_vec = head_vec;
-  */
-
     head_vec.clear();
     head_vec.resize(init_coors.n_cols * 3);
     sub_coor =
@@ -346,7 +279,8 @@ namespace ACTIONet
     memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
     tail_vec = head_vec;
 
-    stdout_printf("\tComputing 3D layout ... "); // fflush(stdout);
+    stdout_printf("\tComputing 3D layout ... ");
+
     result.clear();
 
     switch (layout_alg)
@@ -373,26 +307,14 @@ namespace ACTIONet
 
     fmat coordinates_3D_float(result.data(), 3, nV);
     mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
-    // coordinates_3D = robust_zscore(trans(coordinates_3D));
     coordinates_3D = trans(coordinates_3D);
 
-    stdout_printf("done\n");
-    FLUSH; // fflush(stdout);
+    stdout_printf("done\n"); FLUSH;
 
     /****************************
    *  Now compute node colors *
    ***************************/
-    stdout_printf("\tComputing node colors ... "); // fflush(stdout);
-
-    /*
-  mat coeff;
-  mat score;
-  vec latent;
-  vec tsquared;
-  princomp(coeff, score, latent, tsquared, coordinates_3D);
-  mat Z = robust_zscore(score);
-*/
-
+    stdout_printf("\tComputing node colors ... ");
 
     mat U;
     vec s;
@@ -400,8 +322,7 @@ namespace ACTIONet
     svd_econ(U, s, V, coordinates_3D, "left", "std");
 
     mat Z = normalize_scores(U, 2, thread_no);
-    // Z = clamp(Z, -7, 7);
-    
+
     vec a = 75 * Z.col(0);
     vec b = 75 * Z.col(1);
 
@@ -419,8 +340,7 @@ namespace ACTIONet
       RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
     }
 
-    stdout_printf("done\n");
-    FLUSH;
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = coordinates;
     res(1) = coordinates_3D;
@@ -441,84 +361,22 @@ namespace ACTIONet
     field<mat> res(3);
 
     int D = initial_position.n_rows;
-    mat init_coors = initial_position.rows(0, min(2, D)); //round(initial_position.rows(0, 2) * 1e6) * 1e-6;
-
-    /*
-    fmat coordinates_float(result.data(), 2, nV);
-    mat coordinates = conv_to<mat>::from(coordinates_float);
-    coordinates = trans(coordinates);
-    stdout_printf("done\n");
-    FLUSH; // fflush(stdout);
-  */
+    mat init_coors = initial_position.rows(0, min(2, D));
 
     /****************************
    *  Compute 3D Embedding	*
    ***************************/
     if (2 < D)
     {
-      /*
-    fmat coordinates_3D_float(result.data(), 3, nV);
-    mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
-    // coordinates_3D = robust_zscore(trans(coordinates_3D));
-    coordinates_3D = trans(coordinates_3D);
-
-    stdout_printf("done\n");
-    FLUSH; // fflush(stdout);
-*/
+      // Empty
     }
     else
     {
-      /*
-      coordinates_3D.col(0) = coordinates.col(0);
-      coordinates_3D.col(1) = coordinates.col(1);
-      coordinates_3D.col(2) = ;
-      */
+      // Empty
     }
     /****************************
    *  Now compute node colors *
    ***************************/
-
-    /*
-    stdout_printf("\tComputing node colors ... "); // fflush(stdout);
-
-    mat U;
-    vec s;
-    mat V;
-    svd_econ(U, s, V, coordinates_3D);
-    mat Z = zscore(U);
-
-    vec a = 75 * Z.col(0);
-    vec b = 75 * Z.col(1);
-
-    vec L;
-    if (D == 2)
-    {
-      L = ones(Z.n_rows) * 50;
-    }
-    else
-    {
-      L = Z.col(2);
-      L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
-    }
-
-    double r_channel, g_channel, b_channel;
-    mat RGB_colors = zeros(nV, 3);
-    for (int i = 0; i < nV; i++)
-    {
-      Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
-
-      RGB_colors(i, 0) = min(1.0, max(0.0, r_channel));
-      RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
-      RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
-    }
-
-    stdout_printf("done\n");
-    FLUSH;
-
-    res(0) = coordinates;
-    res(1) = coordinates_3D;
-    res(2) = RGB_colors; //RGB_colors;
-    */
 
     return res;
   }
@@ -553,13 +411,11 @@ namespace ACTIONet
       compactness_level = (compactness_level < 0) ? 0 : compactness_level;
       compactness_level = (compactness_level > 100) ? 100 : compactness_level;
       stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
-                    compactness_level, n_epochs);
-      FLUSH;
+                    compactness_level, n_epochs); FLUSH;
     }
     else
     {
-      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs);
-      FLUSH;
+      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs); FLUSH;
     }
 
     double a_param = UMAP_A[compactness_level];
@@ -591,7 +447,7 @@ namespace ACTIONet
     ptr = sub_coor.memptr();
     memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
 
-    stdout_printf("\tComputing 2D layout ... "); // fflush(stdout);
+    stdout_printf("\tComputing 2D layout ... ");
     // Stores linearized coordinates [x1, y1, x2, y2, ...]
     vector<float> result;
 
@@ -625,15 +481,14 @@ namespace ACTIONet
     coordinates = trans(coordinates);
     res(0) = coordinates;
 
-    stdout_printf("done\n");
-    FLUSH; // fflush(stdout);
+    stdout_printf("done\n"); FLUSH;
 
     if (D == 3)
     {
       /****************************
      *  Compute 3D Embedding	*
      ***************************/
-      stdout_printf("\tComputing 3D layout ... "); // fflush(stdout);
+      stdout_printf("\tComputing 3D layout ... ");
       result.clear();
 
       head_vec.clear();
@@ -674,13 +529,12 @@ namespace ACTIONet
       mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
       coordinates_3D = trans(coordinates_3D);
 
-      stdout_printf("done\n");
-      FLUSH; // fflush(stdout);
+      stdout_printf("done\n"); FLUSH;
 
       /****************************
      *  Now compute node colors *
      ***************************/
-      stdout_printf("\tComputing node colors ... "); // fflush(stdout);
+      stdout_printf("\tComputing node colors ... ");
 
       mat U;
       vec s;

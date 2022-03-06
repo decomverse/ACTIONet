@@ -13,16 +13,6 @@ namespace ACTIONet
   {
     X = normalise(X, 1, 0);
 
-    /*
-  rowvec d = sum(G, 0);
-  uvec idx = find(c != 0);
-  d[idx] = 1 / d[idx];
-
-  sp_mat D;
-  D.diag() = d;
-
-  sp_mat I = speye(size(G));
-  */
     sp_mat P = normalise(G, 1, 0);
     sp_mat I = speye(P.n_rows, P.n_cols);
     sp_mat A = I - alpha * P;
@@ -57,7 +47,6 @@ namespace ACTIONet
       parallelFor(0, X.n_cols, [&] (size_t i)
                   { X.col(i) = P * X.col(i) + X0.col(i) * (zt * X.col(i)); }, thread_no);
     }
-    // X = normalise(X, 1)
 
     return (X);
   }
@@ -249,8 +238,6 @@ namespace ACTIONet
     uvec idxr = find(row_sums == 0);
     uvec idxc = find(col_sums == 0);
 
-    //row_sums(row_sums == 0).ones();
-    //col_sums(col_sums == 0).ones();
     row_sums.transform([](double val)
                        { return (val == 0 ? 1 : val); });
     col_sums.transform([](double val)
@@ -320,12 +307,6 @@ namespace ACTIONet
     {
       double mu = 2.0 / (1.0 - alpha) * muPrevious - muPPrevious;
 
-      //mat PY = spmat_mat_product_parallel(P, mPreviousScore, thread_no);
-      //double w1 = (2.0 * muPrevious) / ((1 - alpha) * mu);
-      //double w2 = -(muPPrevious / mu);
-
-      //mScore = w1 * ((1 - alpha) * spmat_mat_product_parallel(P, mPreviousScore, thread_no) + alpha * X0) +
-      //       w2 * mPPreviousScore;
       mScore = 2 * (muPrevious / mu) * spmat_mat_product_parallel(P, mPreviousScore, thread_no) - (muPPrevious / mu) * mPPreviousScore + (2 * muPrevious) / ((1 - alpha) * mu) * alpha * X0;
 
       double res = norm(mScore - mPreviousScore);
@@ -349,35 +330,5 @@ namespace ACTIONet
 
     return (mScore);
   }
-
-  /*
-  mat compute_network_diffusion_SFMULT(sp_mat &G, sp_mat &X0, double alpha = 0.85, int max_it = 3)
-  {
-    int N = G.n_rows;
-    vec z = ones(N);
-    vec c = vec(trans(sum(G, 0)));
-    uvec idx = find(c);
-    z(idx) = ones(idx.n_elem) * (1.0 - alpha);
-    z = z / N;
-
-    sp_mat P = alpha * normalise(G, 1, 0);
-    X0 = normalise(X0, 1, 0);
-    mat X = mat(X0);
-
-    X0 *= N;
-    rowvec zt = trans(z);
-
-    for (int it = 0; it < max_it; it++)
-    {
-      rowvec v = zt * X;
-      mat shift = sfmult(X0, diagmat(v), 0, 0, 0, 0, 0, 0);
-      X = sfmult(P, X, 0, 0, 0, 0, 0, 0);
-      X += shift;
-    }
-    // X = normalise(X, 1)
-
-    return (X);
-  }
-*/
 
 } // namespace ACTIONet

@@ -7,9 +7,9 @@ field<mat> assess_enrichment(mat &scores, sp_mat &associations,
   field<mat> res(3);
 
   if (scores.n_rows != associations.n_rows) {
-    fprintf(stderr,
-            "Number of rows in scores and association matrices should both "
-            "match the number of features\n");
+    stderr_printf("Number of rows in scores and association matrices should both match the number of features\n");
+    FLUSH;
+    return(res);
   }
 
   associations = spones(associations);

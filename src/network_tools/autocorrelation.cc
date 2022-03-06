@@ -10,30 +10,26 @@ namespace ACTIONet
         {
         case 0: //"none"
         {
-            printf("no norm");
             normalized_scores = scores;
             break;
         }
         case 1: //"zscore"
         {
-            printf("z-score");
             normalized_scores = zscore(scores, thread_no);
             break;
         }
         case 2: //"RINT" (nonparametric)
         {
-            printf("RINT");
             normalized_scores = RIN_transform(scores, thread_no);
             break;
         }
         case 3: //"robust_zscore" (kinda hack!)
         {
-            printf("robust z");
             normalized_scores = robust_zscore(scores, thread_no);
             break;
         }
         default:
-            fprintf(stderr, "Unknown normalization method\n");
+            stdout_printf(stderr, "Unknown normalization method\n");
             normalized_scores = scores;
         }
         return (normalized_scores);
@@ -54,7 +50,7 @@ namespace ACTIONet
         vec norm_factors = nV / (W * norm_sq);
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, G * x);
@@ -69,7 +65,7 @@ namespace ACTIONet
             stdout_printf("Computing permutations ... ");
 
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -116,7 +112,7 @@ namespace ACTIONet
         vec norm_factors = nV / (W * norm_sq);
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, spmat_vec_product(G, x));
@@ -130,9 +126,9 @@ namespace ACTIONet
         {
             stdout_printf("Computing permutations ... ");
 
-            
+
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -151,7 +147,7 @@ namespace ACTIONet
             sigma = stddev(rand_stats, 0, 1);
             z = (stat - mu) / sigma;
             z.replace(datum::nan, 0);
-            
+
         }
         // Summary stats
         stdout_printf("done\n");
@@ -185,7 +181,7 @@ namespace ACTIONet
         L.diag() = d;
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, L * x);
@@ -200,7 +196,7 @@ namespace ACTIONet
             stdout_printf("Computing permutations ... ");
 
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -252,7 +248,7 @@ namespace ACTIONet
         L.diag() = d;
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, spmat_vec_product(L, x));
@@ -267,7 +263,7 @@ namespace ACTIONet
             stdout_printf("Computing permutations ... ");
 
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
