@@ -68,7 +68,7 @@ namespace ACTIONet
 
     if (verbose)
     {
-      stdout_printf("IRLB_ (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
+      stdout_printf("IRLB (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
       FLUSH;
     }
 
@@ -317,7 +317,7 @@ namespace ACTIONet
 
     if (converged != 1)
     {
-      stderr_printf("IRLB_SVD did NOT converge! Try increasing the number of iterations\n");
+      stderr_printf("IRLB did NOT converge! Try increasing the number of iterations\n");
       FLUSH;
     }
 
@@ -337,7 +337,7 @@ namespace ACTIONet
 
     if (verbose)
     {
-      stdout_printf("IRLB_ (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
+      stdout_printf("IRLB (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
       FLUSH;
     }
 
@@ -563,7 +563,7 @@ namespace ACTIONet
 
     if (converged != 1)
     {
-      stderr_printf("IRLB_SVD did NOT converge! Try increasing the number of iterations\n");
+      stderr_printf("IRLB did NOT converge! Try increasing the number of iterations\n");
     }
 
     return (orient_SVD(out));
