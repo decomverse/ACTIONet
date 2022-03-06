@@ -165,21 +165,6 @@ namespace ACTIONet
     return x;
   }
 
-  /*
-        double randN ( ) {
-                double r1;
-                double r2;
-                const double r8_pi = 3.14159265358979323846;
-                double x;
-
-                r1 = ( (double)(rand()) + 1. )/( (double)(RAND_MAX) + 1. );
-                r2 = ( (double)(rand()) + 1. )/( (double)(RAND_MAX) + 1. );
-                x = sqrt ( - 2.0 * log ( r1 ) ) * cos ( 2.0 * r8_pi * r2 );
-
-                return x;
-        }
-*/
-
   void randN_normsinv(double *values, int n)
   {
     for (int i = 0; i < n; i++)

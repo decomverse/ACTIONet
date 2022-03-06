@@ -214,7 +214,7 @@ namespace ACTIONet
       thread_no = SYS_THREADS_DEF; // std::thread::hardware_concurrency();
     }
 
-    stdout_printf("Building adaptive network (density = %.2f)\n", density);
+    stdout_printf("Building adaptive network (density = %.2f)\n", density); FLUSH;
 
     if (distance_metric == "jsd")
     {
@@ -244,7 +244,7 @@ namespace ACTIONet
 
     parallelFor(0, max_elements, [&] (size_t j)
                 { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     stdout_printf("\tIdentifying nearest neighbors ... ");
     mat idx = zeros(sample_no, kNN + 1);
@@ -273,10 +273,9 @@ namespace ACTIONet
                     result.pop();
                   }
                 });
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     delete (appr_alg);
-    //delete (space);
 
     dist = clamp(dist, 0.0, 1.0);
     idx = clamp(idx, 0, sample_no - 1);
@@ -288,8 +287,6 @@ namespace ACTIONet
     vec beta_sq_sum = zeros(sample_no);
 
     mat lambda = zeros(size(beta));
-    // lambda.col(0) = datum::inf*ones(sample_no);
-    // lambda.col(1) = beta.col(1) + 1;
     int k;
     for (k = 1; k <= kNN; k++)
     {
@@ -309,7 +306,7 @@ namespace ACTIONet
     Delta.shed_row(0);
 
     sp_mat G(sample_no, sample_no);
-    // for(int v = 0; v < sample_no; v++) {
+
     parallelFor(0, sample_no, [&] (size_t v)
                 {
                   vec delta = Delta.col(v);
@@ -327,7 +324,7 @@ namespace ACTIONet
                     G(src, dst) = 1.0 - v_dist(i);
                   }
                 }, thread_no);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     stdout_printf("\tFinalizing network ... ");
     G.replace(datum::nan, 0); // replace each NaN with 0
@@ -346,7 +343,7 @@ namespace ACTIONet
       stdout_printf("\n\t\tKeeping mutual nearest-neighbors only ... ");
       G_sym = sqrt(G % Gt);
     }
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     G_sym.diag().zeros();
 
@@ -407,7 +404,7 @@ namespace ACTIONet
     int max_elements = X.n_cols;
     parallelFor(0, max_elements, [&] (size_t j)
                 { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     stdout_printf("\tConstructing k*-NN ... ");
 
@@ -459,10 +456,9 @@ namespace ACTIONet
     }
     sp_mat G(locations, values, sample_no, sample_no);
 
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     delete (appr_alg);
-    //delete (space);
 
     stdout_printf("\tFinalizing network ... ");
     G.replace(datum::nan, 0); // replace each NaN with 0
@@ -481,7 +477,7 @@ namespace ACTIONet
       // stdout_printf("\n\t\tKeeping mutual nearest-neighbors only ... ");
       G_sym = sqrt(G % Gt);
     }
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     G_sym.diag().zeros();
 
@@ -501,7 +497,7 @@ namespace ACTIONet
       throw distMetException;
     }
 
-    stdout_printf("Building fixed-degree network (k = %d)\n", (int)k);
+    stdout_printf("Building fixed-degree network (k = %d)\n", (int)k); FLUSH;
     if (thread_no <= 0)
     {
       thread_no = SYS_THREADS_DEF; // std::thread::hardware_concurrency();
@@ -532,7 +528,7 @@ namespace ACTIONet
     fmat X = conv_to<fmat>::from(H);
     parallelFor(0, max_elements, [&] (size_t j)
                 { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     sp_mat G(sample_no, sample_no);
 
@@ -543,11 +539,11 @@ namespace ACTIONet
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), k);
 
-                  if (result.size() != (k))
-                  {
-                    //X.col(i).print("X");
-                    printf("%d- %d\n", i, result.size());
-                  }
+                  // if (result.size() != (k))
+                  // {
+                  //   //X.col(i).print("X");
+                  //   printf("%d- %d\n", i, result.size());
+                  // }
 
                   for (size_t j = 0; j < result.size(); j++)
                   {
@@ -557,10 +553,9 @@ namespace ACTIONet
                     result.pop();
                   }
                 }, thread_no);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     delete (appr_alg);
-    //delete (space);
 
     stdout_printf("\tFinalizing network ... ");
     G.replace(datum::nan, 0); // replace each NaN with 0
@@ -579,7 +574,7 @@ namespace ACTIONet
       stdout_printf("\n\t\tKeeping mutual nearest-neighbors only ... ");
       G_sym = sqrt(G % Gt);
     }
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     G_sym.diag().zeros();
 
