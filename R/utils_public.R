@@ -11,6 +11,7 @@ orthoProject <- function(A, S, prenorm = F, postnorm = F) {
     return(A_r)
 }
 
+#' @export
 normalize.matrix <- function(
   S,
   log_transform = FALSE,
