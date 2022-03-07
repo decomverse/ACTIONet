@@ -2227,7 +2227,7 @@ mat NetEnh(mat A)
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue)
+vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0)
 {
   uvec fixed_labels_vec;
   if (fixed_labels_.isNotNull())
@@ -2240,7 +2240,7 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
     }
   }
 
-  mat new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
+  mat new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec, thread_no);
   return (new_labels);
 }
 
