@@ -2,21 +2,22 @@
 
 namespace ACTIONet {
 
-mat assess_label_enrichment(sp_mat &H, sp_mat &M) {
-  mat Obs = mat(M * H);
+mat assess_label_enrichment(sp_mat &H, mat &M, int thread_no = 0) {
+  mat Obs = spmat_mat_product_parallel(H, M, thread_no);
 
-  vec p = vec(mean(M, 1));
-  mat Exp = (p * sum(H));
+  rowvec p = mean(M, 0);
+  mat Exp = sum(H, 1) * p;
 
   mat Lambda = Obs - Exp;
 
-  mat Nu = (p * sum(square(H)));
-  vec a = vec(trans(max(H, 0)));
+  mat Nu = (sum(square(H), 1) * p);
+  vec a = vec(max(H, 1));
 
   mat Lambda_scaled = Lambda;
-  for (int j = 0; j < Lambda_scaled.n_cols; j++) {
-    Lambda_scaled.col(j) *= (a(j) / 3);
+  for (int j = 0; j < Lambda_scaled.n_rows; j++) {
+    Lambda_scaled.row(j) *= (a(j) / 3);
   }
+
   mat logPvals_upper = square(Lambda) / (2 * (Nu + Lambda_scaled));
   uvec lidx = find(Lambda <= 0);
   logPvals_upper(lidx) = zeros(lidx.n_elem);
@@ -25,19 +26,20 @@ mat assess_label_enrichment(sp_mat &H, sp_mat &M) {
   return logPvals_upper;
 }
 
-sp_mat one_hot_encoding(vec labels) {
+mat one_hot_encoding(vec labels) {
   int n = labels.n_elem;
 
   vec vals = unique(labels);
+
   uvec idx = find(0 <= vals);
   vals = vals(idx);
 
   int k = vals.n_elem;
-  sp_mat M(k, n);
+  mat M = zeros(n, k);
   for (int i = 0; i < k; i++) {
     uvec idx = find(labels == vals(i));
     for (int j = 0; j < idx.n_elem; j++) {
-      M(i, idx(j)) = 1;
+      M(idx(j), i) = 1;
     }
   }
 
@@ -45,7 +47,7 @@ sp_mat one_hot_encoding(vec labels) {
 }
 
 vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
-        double sig_threshold = 3, uvec fixed_labels = uvec()) {
+        double sig_threshold = 3, uvec fixed_labels = uvec(), int thread_no = 0) {
   int n = G.n_rows;
 
   vec updated_labels = labels;
@@ -53,19 +55,20 @@ vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
   sp_mat H = G;
   H.diag().ones();
   H.diag() *= lambda;          // add "inertia"
-  H = n * normalise(H, 1, 0);  // column-normalize to n
+  H = n * normalize_adj(H, 1); // row-normalize to n
 
   for (int it = 0; it < iters; it++) {
+    printf("Iter %d\n", it);
     vec vals = unique(updated_labels);
     uvec idx = find(0 <= vals);
     vals = vals(idx);
 
-    sp_mat M = one_hot_encoding(updated_labels);
+    mat M = one_hot_encoding(updated_labels);
 
-    mat logPvals = assess_label_enrichment(H, M);
+    mat logPvals = assess_label_enrichment(H, M, thread_no);
 
-    vec max_sig = trans(max(logPvals, 0));
-    vec new_labels = vals(trans(index_max(logPvals, 0)));
+    vec max_sig = max(logPvals, 1);
+    vec new_labels = vals(index_max(logPvals, 1));
 
     // Only update vertices with significant enrichment in their neighborhood
     uvec sig_idx = find(sig_threshold < max_sig);
