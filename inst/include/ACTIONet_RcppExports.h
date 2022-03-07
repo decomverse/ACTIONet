@@ -1578,17 +1578,17 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline vec run_LPA(sp_mat& G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue) {
-        typedef SEXP(*Ptr_run_LPA)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline vec run_LPA(sp_mat& G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0) {
+        typedef SEXP(*Ptr_run_LPA)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_LPA p_run_LPA = NULL;
         if (p_run_LPA == NULL) {
-            validateSignature("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>)");
+            validateSignature("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
             p_run_LPA = (Ptr_run_LPA)R_GetCCallable("ACTIONet", "_ACTIONet_run_LPA");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_run_LPA(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(labels)), Shield<SEXP>(Rcpp::wrap(lambda)), Shield<SEXP>(Rcpp::wrap(iters)), Shield<SEXP>(Rcpp::wrap(sig_threshold)), Shield<SEXP>(Rcpp::wrap(fixed_labels_)));
+            rcpp_result_gen = p_run_LPA(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(labels)), Shield<SEXP>(Rcpp::wrap(lambda)), Shield<SEXP>(Rcpp::wrap(iters)), Shield<SEXP>(Rcpp::wrap(sig_threshold)), Shield<SEXP>(Rcpp::wrap(fixed_labels_)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();

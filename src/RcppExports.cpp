@@ -2760,8 +2760,8 @@ RcppExport SEXP _ACTIONet_NetEnh(SEXP ASEXP) {
     return rcpp_result_gen;
 }
 // run_LPA
-vec run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_);
-static SEXP _ACTIONet_run_LPA_try(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP) {
+vec run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_, int thread_no);
+static SEXP _ACTIONet_run_LPA_try(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
@@ -2770,15 +2770,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type iters(itersSEXP);
     Rcpp::traits::input_parameter< double >::type sig_threshold(sig_thresholdSEXP);
     Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type fixed_labels_(fixed_labels_SEXP);
-    rcpp_result_gen = Rcpp::wrap(run_LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_));
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_, thread_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_run_LPA(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP) {
+RcppExport SEXP _ACTIONet_run_LPA(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP, SEXP thread_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_run_LPA_try(GSEXP, labelsSEXP, lambdaSEXP, itersSEXP, sig_thresholdSEXP, fixed_labels_SEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_run_LPA_try(GSEXP, labelsSEXP, lambdaSEXP, itersSEXP, sig_thresholdSEXP, fixed_labels_SEXP, thread_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -3863,7 +3864,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*orthogonalize_basal_full)(mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
         signatures.insert("umat(*MWM_rank1)(vec,vec,double,double)");
         signatures.insert("mat(*NetEnh)(mat)");
-        signatures.insert("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>)");
+        signatures.insert("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
         signatures.insert("List(*run_AA_with_batch_correction)(mat&,mat&,vec,int,int,double,double)");
         signatures.insert("List(*run_ACTION_with_batch_correction)(mat&,vec,int,int,int,int,int,double,double)");
         signatures.insert("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");
@@ -4074,7 +4075,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_orthogonalize_basal_full", (DL_FUNC) &_ACTIONet_orthogonalize_basal_full, 7},
     {"_ACTIONet_MWM_rank1", (DL_FUNC) &_ACTIONet_MWM_rank1, 4},
     {"_ACTIONet_NetEnh", (DL_FUNC) &_ACTIONet_NetEnh, 1},
-    {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 6},
+    {"_ACTIONet_run_LPA", (DL_FUNC) &_ACTIONet_run_LPA, 7},
     {"_ACTIONet_run_AA_with_batch_correction", (DL_FUNC) &_ACTIONet_run_AA_with_batch_correction, 7},
     {"_ACTIONet_run_ACTION_with_batch_correction", (DL_FUNC) &_ACTIONet_run_ACTION_with_batch_correction, 9},
     {"_ACTIONet_compute_marker_aggregate_stats", (DL_FUNC) &_ACTIONet_compute_marker_aggregate_stats, 7},
