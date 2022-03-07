@@ -10,30 +10,26 @@ namespace ACTIONet
         {
         case 0: //"none"
         {
-            printf("no norm");
             normalized_scores = scores;
             break;
         }
         case 1: //"zscore"
         {
-            printf("z-score");
             normalized_scores = zscore(scores, thread_no);
             break;
         }
         case 2: //"RINT" (nonparametric)
         {
-            printf("RINT");
             normalized_scores = RIN_transform(scores, thread_no);
             break;
         }
         case 3: //"robust_zscore" (kinda hack!)
         {
-            printf("robust z");
             normalized_scores = robust_zscore(scores, thread_no);
             break;
         }
         default:
-            fprintf(stderr, "Unknown normalization method\n");
+            stderr_printf("Unknown normalization method\n"); FLUSH;
             normalized_scores = scores;
         }
         return (normalized_scores);
@@ -46,15 +42,16 @@ namespace ACTIONet
         int scores_no = scores.n_cols;
         stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
         mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
-        stdout_printf("done\n");
+        stdout_printf("done\n"); FLUSH;
 
-        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        stdout_printf("Computing auto-correlation over network ... ", nV, scores_no);
+
         double W = sum(sum(G));
         vec norm_sq = vec(trans(sum(square(normalized_scores))));
         vec norm_factors = nV / (W * norm_sq);
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, G * x);
@@ -66,10 +63,8 @@ namespace ACTIONet
         vec z = zeros(scores_no);
         if (0 < perm_no)
         {
-            stdout_printf("Computing permutations ... ");
-
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -82,16 +77,15 @@ namespace ACTIONet
                             }
                             rand_stats.col(j) = v;
                         }, thread_no);
-            stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
             sigma = stddev(rand_stats, 0, 1);
             z = (stat - mu) / sigma;
             z.replace(datum::nan, 0);
         }
-        // Summary stats
-        stdout_printf("done\n");
+        stdout_printf("done\n"); FLUSH;
 
+        // Summary stats
         field<vec> results(4);
         results(0) = stat % norm_factors;
         results(1) = z;
@@ -106,17 +100,15 @@ namespace ACTIONet
         int nV = G.n_rows;
         int scores_no = scores.n_cols;
 
-        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
         mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
-        stdout_printf("done\n");
 
-        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        stdout_printf("Computing auto-correlation over network ... ", nV, scores_no);
         double W = sum(sum(G));
         vec norm_sq = vec(trans(sum(square(normalized_scores))));
         vec norm_factors = nV / (W * norm_sq);
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, spmat_vec_product(G, x));
@@ -128,11 +120,8 @@ namespace ACTIONet
         vec z = zeros(scores_no);
         if (0 < perm_no)
         {
-            stdout_printf("Computing permutations ... ");
-
-            
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -145,17 +134,16 @@ namespace ACTIONet
                             }
                             rand_stats.col(j) = v;
                         }, thread_no);
-            stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
             sigma = stddev(rand_stats, 0, 1);
             z = (stat - mu) / sigma;
             z.replace(datum::nan, 0);
-            
-        }
-        // Summary stats
-        stdout_printf("done\n");
 
+        }
+        stdout_printf("done\n"); FLUSH;
+
+        // Summary stats
         field<vec> results(4);
         results(0) = stat % norm_factors;
         results(1) = z;
@@ -170,11 +158,9 @@ namespace ACTIONet
     {
         int nV = G.n_rows;
         int scores_no = scores.n_cols;
-        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
         mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
-        stdout_printf("done\n");
 
-        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        stdout_printf("Computing auto-correlation over network ... ", nV, scores_no);
         double W = sum(sum(G));
         vec norm_sq = vec(trans(sum(square(normalized_scores))));
         vec norm_factors = (nV - 1) / ((2 * W) * norm_sq);
@@ -185,7 +171,7 @@ namespace ACTIONet
         L.diag() = d;
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, L * x);
@@ -197,10 +183,8 @@ namespace ACTIONet
         vec z = zeros(scores_no);
         if (0 < perm_no)
         {
-            stdout_printf("Computing permutations ... ");
-
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -213,16 +197,15 @@ namespace ACTIONet
                             }
                             rand_stats.col(j) = v;
                         }, thread_no);
-            stdout_printf("Done\n");
 
             mu = mean(rand_stats, 1);
             sigma = stddev(rand_stats, 0, 1);
             z = (stat - mu) / sigma;
             z.replace(datum::nan, 0);
         }
-        // Summary stats
-        stdout_printf("done\n");
+        stdout_printf("done\n"); FLUSH;
 
+        // Summary stats
         field<vec> results(4);
         results(0) = stat % norm_factors;
         results(1) = -z;
@@ -236,12 +219,9 @@ namespace ACTIONet
     {
         int nV = G.n_rows;
         int scores_no = scores.n_cols;
-
-        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
         mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
-        stdout_printf("done\n");
 
-        stdout_printf("Computing auto-correlation over network of %d samples for %d scores\n", nV, scores_no);
+        stdout_printf("Computing auto-correlation over network ... ", nV, scores_no);
         double W = sum(sum(G));
         vec norm_sq = vec(trans(sum(square(normalized_scores))));
         vec norm_factors = (nV - 1) / ((2 * W) * norm_sq);
@@ -252,7 +232,7 @@ namespace ACTIONet
         L.diag() = d;
 
         vec stat = zeros(scores_no);
-        parallelFor(0, scores_no, [&] (unsigned int i) 
+        parallelFor(0, scores_no, [&] (unsigned int i)
                     {
                         vec x = normalized_scores.col(i);
                         double y = dot(x, spmat_vec_product(L, x));
@@ -264,10 +244,8 @@ namespace ACTIONet
         vec z = zeros(scores_no);
         if (0 < perm_no)
         {
-            stdout_printf("Computing permutations ... ");
-
             mat rand_stats = zeros(scores_no, perm_no);
-            parallelFor(0, perm_no, [&] (unsigned int j) 
+            parallelFor(0, perm_no, [&] (unsigned int j)
                         {
                             uvec perm = randperm(nV);
                             mat score_permuted = normalized_scores.rows(perm);
@@ -281,16 +259,14 @@ namespace ACTIONet
                             rand_stats.col(j) = v;
                         }, thread_no);
 
-            stdout_printf("Done\n");
-
             mu = mean(rand_stats, 1);
             sigma = stddev(rand_stats, 0, 1);
             z = (stat - mu) / sigma;
             z.replace(datum::nan, 0);
         }
-        // Summary stats
-        stdout_printf("done\n");
+        stdout_printf("done\n"); FLUSH;
 
+        // Summary stats
         field<vec> results(4);
         results(0) = stat % norm_factors;
         results(1) = -z;

@@ -9,9 +9,8 @@ field<mat> run_weighted_AA(mat &A, mat &W0, vec w, int max_it = 50,
   field<mat> decomposition(2);
 
   if (N != w.n_elem) {
-    fprintf(stderr,
-            "Number of elements in the weight vector should match the total "
-            "number of samples (columns in A)\n");
+    stdout_printf("Number of elements in the weight vector should match the total number of samples (columns in A)\n");
+    FLUSH;
     return (decomposition);
   }
 
@@ -22,12 +21,6 @@ field<mat> run_weighted_AA(mat &A, mat &W0, vec w, int max_it = 50,
   }
   decomposition = run_AA(A_scaled, W0, max_it, min_delta);
 
-  /*
-  for(int i = 0; i < N; i++) {
-          decomposition(0).row(i) /= w[i];
-          decomposition(1).col(i) *= w[i];
-  }
-  */
   mat C = decomposition(0);
   mat weighted_archs = A_scaled * C;
   mat H = run_simplex_regression(weighted_archs, A, false);
@@ -41,7 +34,7 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
                                    double min_delta = 1e-16) {
   int feature_no = S_r.n_rows;
 
-  printf("Running ACTION\n");
+  stdout_printf("Running weighted ACTION (%d threads):", thread_no); FLUSH;
 
   if (k_max == -1) k_max = (int)S_r.n_cols;
 
@@ -49,11 +42,6 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
   k_max = std::min(k_max, (int)S_r.n_cols);
 
   ACTION_results trace;
-  /*
-  trace.H.resize(k_max + 1);
-  trace.C.resize(k_max + 1);
-  trace.selected_cols.resize(k_max + 1);
-  */
 
   trace.H = field<mat>(k_max + 1);
   trace.C = field<mat>(k_max + 1);
@@ -61,9 +49,8 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
 
   int N = S_r.n_cols;
   if (N != w.n_elem) {
-    fprintf(stderr,
-            "Number of elements in the weight vector should match the total "
-            "number of samples (columns in S_r)\n");
+    stderr_printf("Number of elements in the weight vector should match the total number of samples (columns in S_r)\n");
+    FLUSH;
     return (trace);
   }
 
@@ -76,11 +63,13 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
   }
 
   int current_k = 0;
-  int total = k_min - 1;
-  printf("Iterating from k=%d ... %d\n", k_min, k_max);
+  char status_msg[50];
+
+  sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+  stderr_printf("\n\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1));
+  FLUSH;
+
   parallelFor(k_min, k_max + 1, [&] (size_t kk) {
-    total++;
-    printf("\tk = %d\n", total);
     SPA_results SPA_res = run_SPA(X_r_scaled, kk);
     trace.selected_cols[kk] = SPA_res.selected_columns;
 
@@ -95,89 +84,20 @@ ACTION_results run_weighted_ACTION(mat &S_r, vec w, int k_min, int k_max,
 
     trace.C[kk] = AA_res(0);
     trace.H[kk] = AA_res(1);
+    current_k++;
+
+    stderr_printf("\r\t%s %d/%d finished", status_msg, current_k,
+                  (k_max - k_min + 1));
+    FLUSH;
+
   }, thread_no);
 
-  return trace;
-}
-
-ACTION_results run_ACTION_dev(mat &S_r, int k_min, int k_max, int thread_no,
-                              bool auto_stop = true, int max_it = 30,
-                              double min_delta = 0.01) {
-  int feature_no = S_r.n_rows;
-
-  printf("Running ACTION (developmental version)\n");
-
-  if (k_max == -1) k_max = (int)S_r.n_cols;
-
-  k_min = std::max(k_min, 2);
-  k_max = std::min(k_max, (int)S_r.n_cols);
-
-  ACTION_results trace;
-  /*
-  trace.H.resize(k_max + 1);
-  trace.C.resize(k_max + 1);
-  trace.selected_cols.resize(k_max + 1);
-  */
-
-  trace.H = field<mat>(k_max + 1);
-  trace.C = field<mat>(k_max + 1);
-  trace.selected_cols = field<uvec>(k_max + 1);
-
-  mat X_r = normalise(S_r, 1);  // ATTENTION!
-
-  int current_k = 0;
-  printf("Iterating from k=%d ... %d (auto stop = %d)\n", k_min, k_max,
-         auto_stop);
-  for (int kk = k_min; kk <= k_max; kk++) {
-    printf("\tk = %d\n", kk);
-    SPA_results SPA_res = run_SPA(X_r, kk);
-    trace.selected_cols[kk] = SPA_res.selected_columns;
-
-    mat W = X_r.cols(trace.selected_cols[kk]);
-    if (kk > k_min) {
-      W.cols(span(0, kk - 2)) = X_r * trace.C[kk - 1];
-    }
-    // W.print("W");
-
-    field<mat> AA_res = run_AA(X_r, W, max_it, min_delta);
-
-    if (auto_stop) {
-      mat C = AA_res(0);
-      bool has_trivial_arch = false;
-      for (int c = 0; c < C.n_cols; c++) {
-        int r = 0, nnz_counts = 0;
-        while (r < C.n_rows) {
-          if (C(r, c) > 0) nnz_counts++;
-
-          if (nnz_counts > 1) break;
-
-          r++;
-        }
-        if (nnz_counts <= 1) {
-          has_trivial_arch = true;
-          break;
-        }
-      }
-      if (has_trivial_arch > 0) {
-        printf("\t\tFound trivial archetypes at k = %d\n", kk);
-
-        break;
-      }
-    }
-
-    current_k = std::max(current_k, kk);
-
-    trace.C[kk] = AA_res(0);
-    trace.H[kk] = AA_res(1);
-  }
-  /*
-  trace.H.resize(current_k+1);
-  trace.C.resize(current_k+1);
-  trace.selected_cols.resize(current_k+1);
-  */
+  stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
+                (k_max - k_min + 1)); FLUSH;
 
   return trace;
 }
+
 
 field<mat> Online_update_AA(mat &Xt, mat &D, mat &A, mat &B) {
   // Compute archetype coefficients using the last learned dictionary
@@ -260,7 +180,7 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
                                         int k_min, int k_max, int thread_no) {
   int feature_no = S_r.n_rows;
 
-  printf("Running Online ACTION\n");
+  stdout_printf("Running online ACTION (%d threads):", thread_no); FLUSH;
 
   if (k_max == -1) k_max = (int)S_r.n_cols;
 
@@ -279,11 +199,14 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
   mat X_r_L2 = normalise(S_r, 2, 0);
 
   int current_k = 0;
-  int total = k_min - 1;
-  printf("Iterating from k=%d ... %d\n", k_min, k_max);
+  char status_msg[50];
+
+  sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+  stderr_printf("\n\t%s %d/%d finished", status_msg, current_k,
+                (k_max - k_min + 1));
+  FLUSH;
+
   parallelFor(k_min, k_max + 1, [&] (size_t kk) {
-    total++;
-    printf("\tk = %d\n", total);
     SPA_results SPA_res = run_SPA(X_r_L1, kk);
     trace.selected_cols[kk] = SPA_res.selected_columns;
 
@@ -296,7 +219,16 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
     trace.B[kk] = AA_res(1);
     trace.C[kk] = AA_res(2);
     trace.D[kk] = AA_res(3);
+
+    current_k++;
+
+    stderr_printf("\r\t%s %d/%d finished", status_msg, current_k,
+                  (k_max - k_min + 1));
+    FLUSH;
   }, thread_no);
+
+  stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
+                (k_max - k_min + 1)); FLUSH;
 
   return trace;
 }
@@ -304,7 +236,7 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
 
 	mat oneHot_encoding(vec batches) {
 		vec uniue_batches = sort(unique(batches));
-		
+
 		mat encoding = zeros(uniue_batches.n_elem, batches.n_elem);
 		for(int i = 0; i < uniue_batches.n_elem; i++) {
 			uvec idx = find(batches == uniue_batches[i]);
@@ -313,27 +245,27 @@ Online_ACTION_results run_online_ACTION(mat &S_r, field<uvec> samples,
 
 			encoding.row(i) = trans(batch_encoding);
 		}
-		
+
 		return(encoding);
 	}
-	
+
 field<mat> run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {
-	mat Phi = oneHot_encoding(batch);		
+	mat Phi = oneHot_encoding(batch);
 	mat Phi_moe = join_vert(ones(1, Z.n_cols), Phi);
 
 int sample_no = Z.n_cols, k = W0.n_cols;
 
   mat C = zeros(sample_no, k);
   mat H = zeros(k, sample_no);
-  	
+
 	// First round is just AA using raw input
 	mat W = W0;
 	mat Z_corr  = Z;
-	
+
 	for(int correction_round = 0; correction_round < max_correction_rounds; correction_round++) {
-		field<mat> AA_res = run_AA(Z_corr, W, max_it, min_delta);		
+		field<mat> AA_res = run_AA(Z_corr, W, max_it, min_delta);
 		C = AA_res(0);
-		H = AA_res(1);				
+		H = AA_res(1);
 
 		// Correction using mixture of experts -- Adopted from the Harmony method
 		Z_corr = Z;
@@ -341,12 +273,12 @@ int sample_no = Z.n_cols, k = W0.n_cols;
 			rowvec h = H.row(k);
 			//mat Phi_Rk = Phi_moe * arma::diagmat(h);
 			mat Phi_Rk = Phi_moe.each_row() % h;
-			
+
 			mat beta = arma::inv(Phi_Rk * Phi_moe.t() + lambda) * Phi_Rk * Z.t();
-			beta.row(0).zeros(); // do not remove the intercept 
+			beta.row(0).zeros(); // do not remove the intercept
 			Z_corr -= beta.t() * Phi_Rk;
-		}		
-		W = Z_corr * C; // Start the next round of AA from current state 				
+		}
+		W = Z_corr * C; // Start the next round of AA from current state
 	}
 
 
@@ -359,12 +291,10 @@ int sample_no = Z.n_cols, k = W0.n_cols;
   decomposition(0) = C;
   decomposition(1) = H;
   decomposition(2) = Z_corr;
-  
+
 
   return decomposition;
 }
-
-
 
 
 ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, int k_max, int thread_no,
@@ -375,9 +305,6 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
 
   int feature_no = S_r.n_rows;
 
-
-
-
   stdout_printf("Running ACTION (%d threads, with batch correction):", thread_no);
   FLUSH;
 
@@ -387,11 +314,6 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
   k_max = std::min(k_max, (int)S_r.n_cols);
 
   ACTION_results trace;
-  /*
-  trace.H.resize(k_max + 1);
-  trace.C.resize(k_max + 1);
-  trace.selected_cols.resize(k_max + 1);
-  */
 
   trace.H = field<mat>(k_max + 1);
   trace.C = field<mat>(k_max + 1);
@@ -400,7 +322,6 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
   mat X_r = normalise(S_r, 1);  // ATTENTION!
 
   int current_k = 0;
-  // int total = k_min-1;
   char status_msg[50];
 
   sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
@@ -413,9 +334,8 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
     trace.selected_cols[kk] = SPA_res.selected_columns;
 
     mat W = X_r.cols(trace.selected_cols[kk]);
-	field<mat> AA_res = run_AA_with_batch_correction(X_r, W, batch, max_it, max_correction_rounds, lambda, min_delta);
-	
-    // AA_res = run_AA_old(X_r, W);
+    field<mat> AA_res = run_AA_with_batch_correction(X_r, W, batch, max_it, max_correction_rounds, lambda, min_delta);
+
     trace.C[kk] = AA_res(0);
     trace.H[kk] = AA_res(1);
     current_k++;
@@ -423,13 +343,13 @@ ACTION_results run_ACTION_with_batch_correction(mat &S_r, vec batch, int k_min, 
     stderr_printf("\r\t%s %d/%d finished", status_msg, current_k,
                   (k_max - k_min + 1));
     FLUSH;
-    
+
   }, thread_no);
   stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
-                (k_max - k_min + 1));
+                (k_max - k_min + 1)); FLUSH;
 
   return trace;
-  
+
 }
 
 

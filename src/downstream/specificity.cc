@@ -18,10 +18,6 @@ namespace ACTIONet
                   h /= (mu == 0) ? 1 : mu;
                 }); // For numerical stability
 
-    // printf("Compute stats ... ");
-    // vec row_p = vec(mean(Sb, 1));
-    // rowvec col_p = rowvec(mean(Sb, 0));
-
     // Heuristic optimization! Shall add parallel for later on
     vec row_p = zeros(Sb.n_rows);
     vec col_p = zeros(Sb.n_cols);
@@ -34,12 +30,9 @@ namespace ACTIONet
     }
     row_p /= Sb.n_cols;
     col_p /= Sb.n_rows;
-    // printf("done\n");
 
-    // printf("Computing observation statistics ... ");
     mat Obs = spmat_mat_product_parallel(Sb, Ht, thread_no);
 
-    // printf("Computing expectation statistics ... ");
     double rho = mean(col_p);
     vec beta = col_p / rho; // Relative density compared to the overall density
     mat Gamma = Ht;
@@ -52,9 +45,6 @@ namespace ACTIONet
 
     mat Exp = row_p * sum(Gamma, 0);
     mat Nu = row_p * sum(square(Gamma), 0);
-    // printf("done\n");
-
-    // printf("Computing significance ... ");
     mat Lambda = Obs - Exp;
 
     mat logPvals_lower = square(Lambda) / (2 * Nu);
@@ -74,7 +64,7 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
@@ -100,11 +90,7 @@ namespace ACTIONet
     S.for_each([min_val](mat::elem_type &val)
                { val -= min_val; });
 
-    //stdout_printf("Compute stats ... ");
-
     // Heuristic optimization! Shall add parallel for later on
-    printf("Computing stats ...");
-    fflush(stdout);
     vec row_p = zeros(S.n_rows);
     vec col_p = zeros(S.n_cols);
     vec row_factor = zeros(S.n_rows);
@@ -120,16 +106,9 @@ namespace ACTIONet
     row_factor /= row_p;
     row_p /= S.n_cols;
     col_p /= S.n_rows;
-    printf("Done!\n");
-    fflush(stdout);
 
-    //stdout_printf("done\n");
-
-    stdout_printf("Computing observation statistics ... ");
     mat Obs = spmat_mat_product_parallel(S, Ht, thread_no);
-    printf("done\n");
 
-    //stdout_printf("Computing expectation statistics ... ");
     double rho = mean(col_p);
     vec beta = col_p / rho; // Relative density compared to the overall density
     mat Gamma = Ht;
@@ -143,9 +122,6 @@ namespace ACTIONet
     mat Exp = (row_p % row_factor) * sum(Gamma, 0);
     mat Nu = (row_p % square(row_factor)) * sum(square(Gamma), 0);
     mat A = (row_factor * trans(a));
-    //stdout_printf("done\n");
-
-    //stdout_printf("Computing significance ... ");
     mat Lambda = Obs - Exp;
 
     mat logPvals_lower = square(Lambda) / (2 * Nu);
@@ -160,7 +136,7 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
@@ -173,13 +149,6 @@ namespace ACTIONet
   {
     stdout_printf("Computing feature specificity ... ");
     field<mat> res(3);
-
-    /*
-    // make sure all values are positive
-    double min_val = S.min();
-    S.for_each([min_val](mat::elem_type &val)
-               { val -= min_val; });
-    */
 
     mat Sb = S;
     uvec nnz_idx = find(Sb > 0);
@@ -199,7 +168,6 @@ namespace ACTIONet
 
     mat Obs = mat_mat_product_parallel(S, Ht, thread_no);
 
-    // printf("Computing expectation statistics ... ");
     double rho = mean(col_p);
     vec beta = col_p / rho; // Relative density compared to the overall density
     mat Gamma = Ht;
@@ -213,9 +181,6 @@ namespace ACTIONet
     mat Exp = (row_p % row_factor) * sum(Gamma, 0);
     mat Nu = (row_p % square(row_factor)) * sum(square(Gamma), 0);
     mat A = (row_factor * trans(a));
-    // printf("done\n");
-
-    // printf("Computing significance ... ");
     mat Lambda = Obs - Exp;
 
     mat logPvals_lower = square(Lambda) / (2 * Nu);
@@ -230,7 +195,7 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n");
+    stdout_printf("done\n"); FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;

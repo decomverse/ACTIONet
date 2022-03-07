@@ -18,7 +18,6 @@ namespace ACTIONet
     vec c(sample_no);
 
     double old_RSS = 0;
-    // printf("(New) %d- %d\n", k, max_it);
 
     for (int it = 0; it < max_it; it++)
     {
@@ -46,7 +45,6 @@ namespace ACTIONet
         }
         else
         {
-          // b = (1.0 / norm_sq) *R*ht + w;
           vec b = w;
           cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols,
                       (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1,
@@ -67,12 +65,6 @@ namespace ACTIONet
       double RSS = norm(R, "fro");
       double delta_RSS = abs(RSS - old_RSS) / A_norm;
       old_RSS = RSS;
-      /*
-    double delta_C = norm(C - C_old, "fro") / norm(C, "fro");
-    double delta_H = norm(H - H_old, "fro") / norm(H, "fro");	
-    printf("\t<%d, %d>- norm_RSS = %e, delta_RSS = %e, delta_C = %.3e, delta_H = %.3e\n", k, it, RSS/A_norm, delta_RSS, delta_C, delta_H);
-    printf("\t<%d, %d>- norm_RSS = %e\n", k, it, delta_RSS);
-    */
 
       if (delta_RSS < min_delta)
         break;
@@ -95,11 +87,7 @@ namespace ACTIONet
   {
     int m = A.n_rows;
     int n = A.n_cols;
-
-    printf("Computing square values ... ");
-    fflush(stdout);
     sp_mat A_sq = square(A);
-    printf("done\n");
 
     cholmod_common chol_c;
     cholmod_start(&chol_c);
@@ -112,13 +100,10 @@ namespace ACTIONet
 
     uvec K(k); // selected columns from A
 
-    printf("Computing norms ... ");
     vec o = ones(n);
     vec normM(m);
     dsdmult('n', m, n, AS_sq, o.memptr(), normM.memptr(), &chol_c);
     vec normM1 = normM;
-    printf("done\n");
-
     mat U(n, k);
 
     vec norm_trace = zeros(k);
@@ -165,7 +150,7 @@ namespace ACTIONet
       uvec idx = find(U > 0);
       double perc = 100 * idx.n_elem / U.n_elem;
       stdout_printf("\t%d- res_norm = %f, U_density = %.2f%% (%d nnz)\n", i, a, perc,
-                    idx.n_elem);
+                    idx.n_elem); FLUSH;
 
       normM = normM - (r % r);
     }
@@ -266,8 +251,7 @@ namespace ACTIONet
 
     int feature_no = S_r.n_rows;
 
-    stdout_printf("Running ACTION (%d threads):", thread_no);
-    FLUSH;
+    stdout_printf("Running ACTION (%d threads):", thread_no); FLUSH;
 
     if (k_max == -1)
       k_max = (int)S_r.n_cols;
@@ -276,11 +260,6 @@ namespace ACTIONet
     k_max = std::min(k_max, (int)S_r.n_cols);
 
     ACTION_results trace;
-    /*
-  trace.H.resize(k_max + 1);
-  trace.C.resize(k_max + 1);
-  trace.selected_cols.resize(k_max + 1);
-  */
 
     trace.H = field<mat>(k_max + 1);
     trace.C = field<mat>(k_max + 1);
@@ -289,7 +268,6 @@ namespace ACTIONet
     mat X_r = normalise(S_r, 1); // ATTENTION!
 
     int current_k = 0;
-    // int total = k_min-1;
     char status_msg[50];
 
     sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
@@ -306,7 +284,6 @@ namespace ACTIONet
                   field<mat> AA_res;
 
                   AA_res = run_AA(X_r, W, max_it, min_delta);
-                  // AA_res = run_AA_old(X_r, W);
                   trace.C[kk] = AA_res(0);
                   trace.H[kk] = AA_res(1);
                   current_k++;
@@ -315,8 +292,9 @@ namespace ACTIONet
                                 (k_max - k_min + 1));
                   FLUSH;
                 }, thread_no);
+
     stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
-                  (k_max - k_min + 1));
+                  (k_max - k_min + 1)); FLUSH;
 
     return trace;
   }
@@ -324,7 +302,7 @@ namespace ACTIONet
   ACTION_results run_ACTION_plus(mat &S_r, int k_min, int k_max, int max_it = 100,
                                  double min_delta = 1e-6, int max_trial = 3)
   {
-    stdout_printf("Running ACTION++\n");
+    stdout_printf("Running ACTION++ (%d threads):"); FLUSH;
 
     int D = std::min((int)S_r.n_rows, (int)S_r.n_cols);
     if (k_max == -1)
@@ -348,16 +326,16 @@ namespace ACTIONet
     field<mat> AA_res;
     int cur_idx = 0, jj, kk;
     stdout_printf("Iterating from k=%d ... %d (max trial = %d)\n", k_min, k_max,
-                  max_trial);
+                  max_trial); FLUSH;
     for (kk = k_min; kk <= k_max; kk++)
     {
-      stdout_printf("\tk = %d\n", kk);
+      stdout_printf("\tk = %d\n", kk); FLUSH;
 
       for (jj = 0; jj < max_trial; jj++)
       {
         cur_idx++;
         stdout_printf("\t\tTrial %d: candidate %d = %d ... ", jj + 1, cur_idx + 1,
-                      selected_cols(cur_idx));
+                      selected_cols(cur_idx)); FLUSH;
         mat W_tmp = join_rows(W, X_r.col(selected_cols(cur_idx)));
 
         AA_res = run_AA(X_r, W_tmp, max_it, min_delta);
@@ -367,15 +345,15 @@ namespace ACTIONet
 
         if ((trivial_counts == 0))
         {
-          stdout_printf("success\n");
+          stdout_printf("success\n"); FLUSH;
           selected_cols(kk - 1) = selected_cols(cur_idx);
           break;
         }
 
-        stdout_printf("failed\n");
+        stdout_printf("failed\n"); FLUSH;
         if ((cur_idx == (D - 1)))
         {
-          stdout_printf("Reached end of the line!\n");
+          stdout_printf("Reached end of the line!\n"); FLUSH;
           break;
         }
       }
@@ -412,8 +390,6 @@ namespace ACTIONet
     mat W = W0;
     vec c(sample_no);
 
-    // printf("(New) %d- %d\n", k, max_it);
-
     for (int it = 0; it < max_it; it++)
     {
       mat combined_W = join_rows(W, W_prior);
@@ -421,7 +397,6 @@ namespace ACTIONet
 
       H = combined_H.rows(span(0, k - 1));
 
-      // mat C_old = C;
       mat R = A - W * H;
       mat Ht = trans(H);
       for (int i = 0; i < k; i++)
@@ -441,7 +416,6 @@ namespace ACTIONet
         }
         else
         {
-          // b = (1.0 / norm_sq) *R*ht + w;
           vec b = w;
           cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols,
                       (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1,
@@ -459,15 +433,6 @@ namespace ACTIONet
           W.col(i) = w_new;
         }
       }
-      /*
-    double delta = arma::max(rowvec(sum(abs(C - C_old)))) / 2.0;
-
-    //double RSS = norm(R, "fro"); RSS *= RSS;
-    //printf("\t<%d, %d>- RSS = %.3e, delta = %.3e\n", l, it, RSS, delta);
-
-    if(delta < min_delta)
-            break;
-    */
     }
 
     C = clamp(C, 0, 1);
@@ -489,6 +454,7 @@ namespace ACTIONet
     int feature_no = S_r.n_rows;
 
     stdout_printf("Running subACTION (%d threads) for parent archetype %d\n", thread_no, kk + 1);
+    FLUSH;
 
     if (k_max == -1)
       k_max = (int)S_r.n_cols;
@@ -515,34 +481,41 @@ namespace ACTIONet
     trace.selected_cols = field<uvec>(k_max + 1);
 
     int current_k = 0;
-    int total = k_min - 1;
-    stdout_printf("Iterating from k=%d ... %d\n", k_min, k_max);
+    char status_msg[50];
+
+    sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+    stderr_printf("\n\t%s %d/%d finished", status_msg, current_k,
+                  (k_max - k_min + 1));
+    FLUSH;
+
+    stdout_printf("Iterating from k=%d ... %d\n", k_min, k_max); FLUSH;
     parallelFor(k_min, k_max + 1, [&] (size_t kkk) {
-                  total++;
-                  stdout_printf("\tk = %d\n", total);
+      SPA_results SPA_res = run_SPA(X_r_scaled, kkk);
+      trace.selected_cols[kkk] = SPA_res.selected_columns;
 
-                  SPA_results SPA_res = run_SPA(X_r_scaled, kkk);
-                  trace.selected_cols[kkk] = SPA_res.selected_columns;
+      mat W = X_r.cols(trace.selected_cols[kkk]);
+      field<mat> AA_res;
+      AA_res = run_AA_with_prior(X_r_scaled, W, W_prior, max_it, min_delta);
 
-                  mat W = X_r.cols(trace.selected_cols[kkk]);
+      trace.C[kkk] = AA_res(0);
+      trace.H[kkk] = AA_res(1);
+      current_k++;
 
-                  field<mat> AA_res;
+      stderr_printf("\r\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1));
+      FLUSH;
+    }, thread_no);
 
-                  AA_res = run_AA_with_prior(X_r_scaled, W, W_prior, max_it, min_delta);
-
-                  trace.C[kkk] = AA_res(0);
-                  trace.H[kkk] = AA_res(1);
-                }, thread_no);
+    stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k, (k_max - k_min + 1));
+    FLUSH;
 
     return trace;
   }
 
   /* alpha: sums to one and indicates relative importance of each view
- * 
+ *
  */
   void findConsensus(vector<mat> S, full_trace &run_trace, int arch_no, vec alpha, double lambda, int max_it, int)
   {
-    //printf("Find shared subspace\n");
 
     register int i;
     int ds_no = run_trace.indiv_trace[arch_no].H_primary.size(); // number of datasets ( ~ 2)
@@ -554,7 +527,6 @@ namespace ACTIONet
                     { return (max(0.0, val)); });
     alpha = normalise(alpha, 1);
 
-    //printf("Permute archetypes")
     run_trace.indiv_trace[arch_no].C_secondary[0] = run_trace.indiv_trace[arch_no].C_primary[0];
     run_trace.indiv_trace[arch_no].H_secondary[0] = run_trace.indiv_trace[arch_no].H_primary[0];
     for (int ds = 1; ds < ds_no; ds++)
@@ -649,7 +621,7 @@ namespace ACTIONet
 
   full_trace runACTION_muV(vector<mat> S_r, int k_min, int k_max, vec alpha, double lambda, int AA_iters, int Opt_iters, int thread_no)
   {
-    printf("Running ACTION\n");
+    stdout_printf("Running ACTION muV (%d threads):", thread_no); FLUSH;
 
     double lambda2 = 1e-5, epsilon = 1e-5;
 
@@ -681,25 +653,23 @@ namespace ACTIONet
     field<mat> AA_res(2, 1);
     int current_k = 0;
     char status_msg[50];
+
     sprintf(status_msg, "Iterating from k = %d ... %d:", k_min, k_max);
+    stderr_printf("\n\t%s %d/%d finished", status_msg, current_k,
+                  (k_max - k_min + 1));
+    FLUSH;
 
     parallelFor(k_min, k_max + 1, [&] (size_t kk) {
-                  //for(int kk = k_min; kk <= k_max; kk++) {
-                  //printf("K = %d\n", kk);
 
                   // Solve ACTION for a fixed-k to "jump-start" the joint optimization problem.
                   for (int i = 0; i < S_r.size(); i++)
                   {
-                    //printf("\tRun ACTION for dataset %d/%d\n", i+1, S_r.size());
 
                     SPA_results SPA_res = run_SPA(S_r[i], kk);
                     run_trace.indiv_trace[kk].selected_cols[i] = SPA_res.selected_columns;
 
-                    //run_trace.indiv_trace[kk].selected_cols[i] = SPA(S_r[i], kk);
-
                     mat W = S_r[i].cols(run_trace.indiv_trace[kk].selected_cols[i]);
 
-                    //AA_res = AA(X_r, W);
                     AA_res = run_AA(S_r[i], W, AA_iters);
 
                     mat C0 = AA_res(0);
@@ -714,11 +684,7 @@ namespace ACTIONet
                     H0 = normalise(H0, 1);
                     run_trace.indiv_trace[kk].H_primary[i] = H0;
                   }
-                  current_k++;
 
-                  printf("\r\t%s %d/%d finished", status_msg, current_k,
-                         (k_max - k_min + 1));
-                  fflush(stdout);
 
                   // Compute consensus latent subspace, H^*
                   findConsensus(S_r, run_trace, kk, alpha, lambda, Opt_iters, thread_no); // sets secondary and consensus objects
@@ -751,7 +717,6 @@ namespace ACTIONet
                       }
                       else
                       {
-                        // b = (1.0 / norm_sq) *R*ht + w;
                         vec b = w;
                         cblas_dgemv(CblasColMajor, CblasNoTrans, R.n_rows, R.n_cols,
                                     (1.0 / norm_sq), R.memptr(), R.n_rows, h.memptr(), 1, 1,
@@ -772,7 +737,13 @@ namespace ACTIONet
                       run_trace.indiv_trace[kk].C_consensus[i].col(j) = C.col(j);
                     }
                   }
+                  current_k++;
+                  stderr_printf("\r\t%s %d/%d finished", status_msg, current_k, (k_max - k_min + 1));
+                  FLUSH;
                 }, thread_no);
+
+                stdout_printf("\r\t%s %d/%d finished\n", status_msg, current_k,
+                              (k_max - k_min + 1)); FLUSH;
 
     return run_trace;
   }

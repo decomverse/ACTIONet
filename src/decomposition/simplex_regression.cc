@@ -15,10 +15,6 @@ vec activeSet_arma(arma::mat& M, arma::vec& b, double lambda2 = double(1e-5),
   int p = M.n_cols;
   int L = min(m, p) + 1;
 
-  /*
-  mat Mt = trans(M);
-  arma::vec c0 = -Mt*b;
-  */
   arma::vec c(M.n_cols);
   cblas_dgemv(CblasColMajor, CblasTrans, M.n_rows, M.n_cols, -1, M.memptr(),
               M.n_rows, b.memptr(), 1, 0, c.memptr(), 1);
@@ -64,7 +60,6 @@ vec activeSet_arma(arma::mat& M, arma::vec& b, double lambda2 = double(1e-5),
   GRed(0, 0) = coeff;
   GRedinv(0, 0) = double(1.0) / GRed(0, 0);
 
-  // arma::vec Gplus = Mt*(M*x) + lam2sq*x + c;
   arma::vec Mx(M.n_rows);
   arma::vec Gplus(size(c));
   cblas_dgemv(CblasColMajor, CblasNoTrans, M.n_rows, M.n_cols, 1, M.memptr(),
