@@ -55,7 +55,7 @@ networkDiffusion <- function(
 
 #' @export
 networkCentrality <- function(
-  data,
+  data,#minor comment
   label_attr = NULL,
   algorithm = c("coreness", "pagerank", "personalized_coreness", "personalized_pagerank"),
   alpha = 0.9,
