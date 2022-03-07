@@ -40,7 +40,7 @@ namespace ACTIONet
     {
         int nV = G.n_rows;
         int scores_no = scores.n_cols;
-        stdout_printf("Normalizizing scores (method=%d) ... ", normalization_method);
+        stdout_printf("Normalizing scores (method=%d) ... ", normalization_method);
         mat normalized_scores = normalize_scores(scores, normalization_method, thread_no);
         stdout_printf("done\n"); FLUSH;
 
