@@ -1,3 +1,4 @@
+
 create_formula <- function(vars) {
     fml = Reduce(function(x, y) paste(x, y, sep = " + "), vars)
     fml = paste("~", fml)
@@ -19,6 +20,7 @@ make_design_mat <- function(design, data = NULL){
   return(design_mat)
 }
 
+#' @export
 get.pseudobulk.SE <- function(
   ace,
   sample_attr,
@@ -188,6 +190,7 @@ get.pseudobulk.SE <- function(
     return(mr_out)
 }
 
+#' @export
 run.ensemble.pseudobulk.DESeq <- function(
   se,
   design,
@@ -264,6 +267,7 @@ run.ensemble.pseudobulk.DESeq <- function(
     return(res)
 }
 
+#' @export
 run.ensemble.pseudobulk.Limma <- function(
   se,
   design,
@@ -349,7 +353,7 @@ run.ensemble.pseudobulk.Limma <- function(
     return(res)
 }
 
-
+#' @export
 variance.adjusted.limma <- function(
   se,
   design,
