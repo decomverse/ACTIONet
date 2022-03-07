@@ -258,7 +258,7 @@ namespace ACTIONet
 
     // Update
     sp_mat P = G;
-    if (norm_type == 0) // Row-normalize
+    if (norm_type == 0) // Column-normalize
     {
       for (it = P.begin(); it != P.end(); ++it)
       {
@@ -271,7 +271,7 @@ namespace ACTIONet
         P(j, j) = 1.0;
       }
     }
-    else if (norm_type == 1) // Column-normalize
+    else if (norm_type == 1) // Row-normalize
     {
       for (it = P.begin(); it != P.end(); ++it)
       {
