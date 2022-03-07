@@ -13,10 +13,6 @@ networkDiffusion <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  # if( is.null(scores) ){
-  #   err = sprintf("`scores` cannot be `NULL`.\n")
-  #   stop(err)
-  # }
   scores = Matrix::as.matrix(scores)
   if ( NROW(scores) != NCOL(data) ){
     err = sprintf("`length(scores)` must equal `NCOL(data)`.\n")
@@ -92,17 +88,6 @@ networkCentrality <- function(
   if (!is.null(label_attr)) {
     label_attr <- validate_attr(data, label_attr)
     assignments = as.numeric(factor(label_attr))
-
-    # if(!is.null(ace)){
-    #     assignments = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "levels")$index
-    # } else {
-    #     assignments = as.numeric(factor(label_attr))
-    #     if ( length(assignments) != NCOL(G) ){
-    #       err = sprintf("'length(label_attr)' must equal 'NCOL(G)'.\n")
-    #       stop(err)
-    #     }
-    # }
-
   }
 
   if (algorithm == "coreness") {

@@ -30,6 +30,7 @@ get.pseudobulk.SE <- function(
   with_S = FALSE,
   with_E = FALSE,
   with_V = FALSE,
+  trim_E0 = NULL,
   min_cells_per_batch = 3,
   BPPARAM = BiocParallel::SerialParam()
 ) {
@@ -56,7 +57,13 @@ get.pseudobulk.SE <- function(
     se_assays$counts = S0
 
     if (with_E == TRUE) {
-      E0 = do.call(cbind, bplapply(counts_list, ACTIONetExperiment:::fastRowMeans, BPPARAM = BPPARAM))
+      if(!is.null(trim_E0) && trim_E0 > 0){
+        E0 = do.call(cbind, bplapply(counts_list, function(mat){
+          apply(mat, 1, function(x) mean(x, trim = trim_E0))
+        }, BPPARAM = BPPARAM))
+      } else {
+        E0 = do.call(cbind, bplapply(counts_list, ACTIONetExperiment:::fastRowMeans, BPPARAM = BPPARAM))
+      }
       se_assays$mean = E0
     }
 
@@ -64,7 +71,7 @@ get.pseudobulk.SE <- function(
       V0 = do.call(cbind, bplapply(counts_list,  MatrixGenerics::rowVars, BPPARAM = BPPARAM))
       se_assays$var = V0
     }
-  
+
     if (ensemble == TRUE) {
         if (!any(with_S, with_E, with_V)) {
             err = sprintf("No ensemble assays to make.\n")
