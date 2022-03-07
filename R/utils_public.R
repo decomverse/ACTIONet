@@ -27,6 +27,10 @@ normalize.matrix <- function(
     err = sprintf("`scale_param` must be of length 1 or `NCOL(S)`.\n")
   }
 
+  if(ACTIONetExperiment:::is.sparseMatrix(S)) {
+    S = as("dgCMatrix", S)
+  }
+
   cs = Matrix::colSums(S)
   cs[cs == 0] = 1
   B = Matrix::t(Matrix::t(S) / cs)
