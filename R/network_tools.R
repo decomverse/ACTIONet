@@ -179,11 +179,12 @@ networkPropagation <- function(
 
   labels[is.na(labels)] <- -1
 
-  if (algorithm == "LPA") {
+  if (algorithm == "lpa") {
     new_labels <- run_LPA(G = G, labels = labels, lambda = lambda, iters = iters, sig_threshold = sig_th, fixed_labels_ = fixed_samples)
     new_labels[new_labels == -1] <- NA
     new_labels <- keys[new_labels]
   } else {
+    new_labels[new_labels == -1] <- NA
     new_labels <- keys[labels]
   }
 
@@ -206,7 +207,7 @@ correct.cell.labels <- function(
   labels <- networkPropagation(
     data = ace,
     label_attr = initial_labels,
-    fixed_samples = fixed_samples,
+    fixed_samples = NULL,
     algorithm = algorithm,
     lambda = lambda,
     iters = iters,
