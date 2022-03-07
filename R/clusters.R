@@ -364,7 +364,7 @@ HDBSCAN.clustering <- function(ace,
 
 
 #' @export
-clusterNetwork <- function(G, algorithm = "Leiden",
+clusterNetwork <- function(G, algorithm = "leiden",
                            resolution_parameter = 1.0,
                            initial_clustering = NULL,
                            seed = 0,
