@@ -998,8 +998,8 @@ NetEnh <- function(A) {
     .Call(`_ACTIONet_NetEnh`, A)
 }
 
-run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_labels_ = NULL) {
-    .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_)
+run_LPA <- function(G, labels, lambda = 1, iters = 3L, sig_threshold = 3, fixed_labels_ = NULL, thread_no = 0L) {
+    .Call(`_ACTIONet_run_LPA`, G, labels, lambda, iters, sig_threshold, fixed_labels_, thread_no)
 }
 
 run_AA_with_batch_correction <- function(Z, W0, batch, max_it = 100L, max_correction_rounds = 10L, lambda = 1, min_delta = 1e-6) {

@@ -55,7 +55,7 @@ networkDiffusion <- function(
 
 #' @export
 networkCentrality <- function(
-  data,
+  data,#minor comment
   label_attr = NULL,
   algorithm = c("coreness", "pagerank", "personalized_coreness", "personalized_pagerank"),
   alpha = 0.9,
@@ -179,11 +179,12 @@ networkPropagation <- function(
 
   labels[is.na(labels)] <- -1
 
-  if (algorithm == "LPA") {
+  if (algorithm == "lpa") {
     new_labels <- run_LPA(G = G, labels = labels, lambda = lambda, iters = iters, sig_threshold = sig_th, fixed_labels_ = fixed_samples)
     new_labels[new_labels == -1] <- NA
     new_labels <- keys[new_labels]
   } else {
+    new_labels[new_labels == -1] <- NA
     new_labels <- keys[labels]
   }
 
@@ -192,7 +193,7 @@ networkPropagation <- function(
 
 
 #' @export
-correct.cell.labels <- function(
+correct.cell.labels  <- function(
   ace,
   label_attr,
   algorithm = "LPA",
@@ -203,6 +204,34 @@ correct.cell.labels <- function(
 ) {
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
+  labels <- networkPropagation(
+    data = ace,
+    label_attr = initial_labels,
+    fixed_samples = NULL,
+    algorithm = algorithm,
+    lambda = lambda,
+    iters = iters,
+    sig_th = sig_th,
+    net_slot = net_slot
+  )
+
+  return(labels)
+}
+
+#' @export
+infer.missing.cell.labels  <- function(
+  ace,
+  label_attr,
+  algorithm = "LPA",
+  iters = 3,
+  lambda = 0,
+  sig_th = 3,
+  net_slot = "ACTIONet"
+) {
+
+  initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
+  fixed_samples <- which(!is.na(initial_labels))
+
   labels <- networkPropagation(
     data = ace,
     label_attr = initial_labels,
