@@ -11,8 +11,7 @@ multilevel_archetypal_decomposition prune_archetypes(
   multilevel_archetypal_decomposition results;
 
   // Vector contains an element for k==0, this have to -1
-  stdout_printf("Joining trace of C & H matrices (depth = %d) ... ",
-                depth - 1);  // fflush(stdout);
+  stdout_printf("Joining trace of C & H matrices (depth = %d) ... ", depth - 1);
   // Group H and C matrices for different values of k (#archs) into joint matrix
   for (int k = 0; k < depth; k++) {
     if (H_trace[k].n_rows == 0) continue;
@@ -27,13 +26,10 @@ multilevel_archetypal_decomposition prune_archetypes(
     }
   }
   int total_archs = H_stacked.n_rows;
-  stdout_printf("done (%d archetypes)\n", C_stacked.n_cols);
-  FLUSH;
 
-  stdout_printf("Pruning archetypes:\n");
+  stdout_printf("done (%d archetypes)\n", C_stacked.n_cols); FLUSH;
+  stdout_printf("Pruning archetypes:\n"); FLUSH;
 
-  // stdout_printf("Pruning non-specific archetypes (based on transitivity) ...
-  // "); Construct backbone
   mat backbone = cor(trans(H_stacked));
   backbone.diag().zeros();
   backbone.transform([](double val) { return (val < 0 ? 0 : val); });
@@ -65,8 +61,7 @@ multilevel_archetypal_decomposition prune_archetypes(
   vec transitivity_z = zscore(transitivity);
   uvec nonspecific_idx = find(transitivity_z < min_specificity_z_threshold);
   pruned(nonspecific_idx).ones();
-  // stdout_printf("done (%d archs pruned)\n", nonspecific_idx.n_elem);
-  stdout_printf("\tNon-specific archetypes: %d\n", nonspecific_idx.n_elem);
+  stdout_printf("\tNon-specific archetypes: %d\n", nonspecific_idx.n_elem); FLUSH;
 
   // Find landmark cells, i.e., closest cells to each multi-level archetype (its
   // projection on to the cell space, ish) stdout_printf("Removing unreliable
@@ -90,8 +85,7 @@ multilevel_archetypal_decomposition prune_archetypes(
     }
   }
 
-  // stdout_printf("done (%d archs removed)\n", bad_archs); //fflush(stdout);
-  stdout_printf("\tUnreliable archetypes: %d\n", bad_archs);
+  stdout_printf("\tUnreliable archetypes: %d\n", bad_archs); FLUSH;
 
   uvec idx = find(C_stacked > 1e-6);
   mat C_bin = C_stacked;
@@ -99,13 +93,7 @@ multilevel_archetypal_decomposition prune_archetypes(
   uvec trivial_idx = find(sum(C_bin) < min_cells);
   pruned(trivial_idx).ones();
 
-  // stdout_printf("Found (and removed) %d trivial archetypes\n",
-  // trivial_idx.n_elem);
-  // //fflush(stdout); string temp_str = (trivial_idx.n_elem == 1) ? "archetype"
-  // : "archetypes"; stdout_printf("Removed %d trivial %s.\n",
-  // trivial_idx.n_elem, temp_str.c_str()); //fflush(stdout);
-  stdout_printf("\tTrivial archetypes: %d\n", trivial_idx.n_elem);
-  FLUSH;
+  stdout_printf("\tTrivial archetypes: %d\n", trivial_idx.n_elem); FLUSH;
 
   uvec selected_archs = find(pruned == 0);
   results.selected_archs = selected_archs;

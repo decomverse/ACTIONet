@@ -68,19 +68,17 @@ namespace ACTIONet
 
     if (verbose)
     {
-      stdout_printf("IRLB_ (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
+      stdout_printf("IRLB (sparse) -- A: %d x %d\n", A.n_rows, A.n_cols);
       FLUSH;
     }
 
     cholmod_common chol_c;
     cholmod_start(&chol_c);
     chol_c.final_ll = 1; /* LL' form of simplicial factorization */
-    // chol_c.error_handler = irlba_R_cholmod_error;
 
     cholmod_sparse *AS = as_cholmod_sparse(A, AS, &chol_c);
 
     double eps = 3e-13;
-    // double eps = 2.22e-16;
     double tol = 1e-05, svtol = 1e-5;
 
     int work = dim + 7;
@@ -133,14 +131,6 @@ namespace ACTIONet
     for (int i = 0; i < n; i++)
       ss += V[i];
 
-    // Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
-
-    /*
-for ( int i = 0; i < n; i ++ ) {
-V[i]   = normDist(gen);;
-}
-  */
-
     /* Main iteration */
     while (iter < iters)
     {
@@ -158,10 +148,7 @@ V[i]   = normDist(gen);;
 
       // Compute Ax
       x = V + j * n;
-      /*v = vec(x, n, true);
-    y = A * v;
-    memcpy(W + j * m, y.memptr(), y.n_elem*sizeof(double));
-    */
+
       dsdmult('n', m, n, AS, x, W + j * m, &chol_c);
 
       if (iter > 0)
@@ -174,14 +161,7 @@ V[i]   = normDist(gen);;
       /* The Lanczos process */
       while (j < work)
       {
-        /*
-      v = vec(W + j * m, m, true);
-      y = At*v;
-      memcpy(F, y.memptr(), y.n_elem*sizeof(double));
-      */
         dsdmult('t', m, n, AS, W + j * m, F, &chol_c);
-        // v = vec(F, A.n_cols, true);
-        // v(span(0, 5)).print("F");
 
         SS = -S;
         cblas_daxpy(n, SS, V + j * n, inc, F, inc);
@@ -199,14 +179,7 @@ V[i]   = normDist(gen);;
             ss = 0;
             for (int i = 0; i < n; i++)
               ss += F[i];
-            // Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
-            /*
-          for (int i = 0; i < n; i++) {
-            F[i] = normDist(gen);
-            ;
-          }
-                */
             orthog(V, F, T, n, j + 1, 1);
             R_F = cblas_dnrm2(n, F, inc);
             R = 1.0 / R_F;
@@ -219,11 +192,7 @@ V[i]   = normDist(gen);;
           B[(j + 1) * work + j] = R_F;
 
           x = V + (j + 1) * n;
-          /*
-        v = vec(x, n, true);
-        y = A*v;
-        memcpy(W + (j + 1) * m, y.memptr(), y.n_elem*sizeof(double));
-        */
+
           dsdmult('n', m, n, AS, x, W + (j + 1) * m, &chol_c);
 
           /* One step of classical Gram-Schmidt */
@@ -242,14 +211,6 @@ V[i]   = normDist(gen);;
             for (int i = 0; i < n; i++)
               ss += W[(j + 1) * m + i];
 
-            // Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
-
-            /*
-          for (int i = 0; i < m; i++) {
-            W[jj + i] = normDist(gen);
-            ;
-          }
-                */
 
             orthog(W, W + (j + 1) * m, T, m, j + 1, 1);
             S = cblas_dnrm2(m, W + (j + 1) * m, inc);
@@ -270,32 +231,6 @@ V[i]   = normDist(gen);;
 
       arma::svd(BUmat, BSvec, BVmat, tmp, "dc");
       BVmat = trans(BVmat);
-
-      /*
-    BUmat(span(0, 5), span(0, 5)).print("U1");
-    BVmat(span(0, 5), span(0, 5)).print("V1");
-    *
-    BUmat(span(0, 5), span(0, 5)).print("tmp (after)");
-
-    for(int i = 0; i < 20; i++) {
-            printf("%d- %f\n", i, BU[i]);
-    }
-
-    memmove (BU, B, work * work * sizeof (double));   // Make a working copy of
-    B int *BI = (int *) T; F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS,
-    BU, &work, BV, &work, BW, &lwork, BI, &info);
-
-    mat BUmat2(BU, work, work, false);
-    mat BVmat2(BV, work, work, false);
-    BUmat2(span(0, 5), span(0, 5)).print("U2");
-    BVmat2(span(0, 5), span(0, 5)).print("V2");
-    */
-
-      /*
-    for(int i = 0; i < 20; i++) {
-            printf("%d, %d- %f\n", iter, i, BU[i]);
-    }
-    */
 
       R_F = cblas_dnrm2(n, F, inc);
       R = 1.0 / R_F;
@@ -382,7 +317,8 @@ V[i]   = normDist(gen);;
 
     if (converged != 1)
     {
-      stderr_printf("IRLB_SVD did NOT converge! Try increasing the number of iterations\n");
+      stderr_printf("IRLB did NOT converge! Try increasing the number of iterations\n");
+      FLUSH;
     }
 
     return (orient_SVD(out));
@@ -392,7 +328,6 @@ V[i]   = normDist(gen);;
   {
 
     double eps = 3e-13;
-    // double eps = 2.22e-16;
     double tol = 1e-05, svtol = 1e-5;
 
     int m = A.n_rows;
@@ -402,7 +337,7 @@ V[i]   = normDist(gen);;
 
     if (verbose)
     {
-      stdout_printf("IRLB_ (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
+      stdout_printf("IRLB (dense) -- A: %d x %d\n", A.n_rows, A.n_cols);
       FLUSH;
     }
 
@@ -448,7 +383,6 @@ V[i]   = normDist(gen);;
     pcg32 engine(seed);
 
     StdNorm(V, n, engine);
-    // Vmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
     /* Main iteration */
     while (iter < iters)
@@ -497,7 +431,6 @@ V[i]   = normDist(gen);;
           if (R_F < eps)
           { // near invariant subspace
             StdNorm(F, n, engine);
-            // Fmat.col(0) = stats::rnorm<arma::mat>(n, 1, 0, 1);
 
             orthog(V, F, T, n, j + 1, 1);
             R_F = cblas_dnrm2(n, F, inc);
@@ -528,8 +461,6 @@ V[i]   = normDist(gen);;
           {
             StdNorm(W + (j + 1) * m, m, engine);
 
-            // Wmat.col(j) = stats::rnorm<arma::mat>(m, 1, 0, 1);
-
             orthog(W, W + (j + 1) * m, T, m, j + 1, 1);
             S = cblas_dnrm2(m, W + (j + 1) * m, inc);
             SS = 1.0 / S;
@@ -549,26 +480,6 @@ V[i]   = normDist(gen);;
 
       arma::svd(BUmat, BSvec, BVmat, tmp, "dc");
       BVmat = trans(BVmat);
-
-      /*
-    BUmat(span(0, 5), span(0, 5)).print("U1");
-    BVmat(span(0, 5), span(0, 5)).print("V1");
-    *
-    BUmat(span(0, 5), span(0, 5)).print("tmp (after)");
-
-    for(int i = 0; i < 20; i++) {
-            printf("%d- %f\n", i, BU[i]);
-    }
-
-    memmove (BU, B, work * work * sizeof (double));   // Make a working copy of
-    B int *BI = (int *) T; F77_NAME (dgesdd) ("O", &work, &work, BU, &work, BS,
-    BU, &work, BV, &work, BW, &lwork, BI, &info);
-
-    mat BUmat2(BU, work, work, false);
-    mat BVmat2(BV, work, work, false);
-    BUmat2(span(0, 5), span(0, 5)).print("U2");
-    BVmat2(span(0, 5), span(0, 5)).print("V2");
-    */
 
       R_F = cblas_dnrm2(n, F, inc);
       R = 1.0 / R_F;
@@ -652,7 +563,7 @@ V[i]   = normDist(gen);;
 
     if (converged != 1)
     {
-      stderr_printf("IRLB_SVD did NOT converge! Try increasing the number of iterations\n");
+      stderr_printf("IRLB did NOT converge! Try increasing the number of iterations\n");
     }
 
     return (orient_SVD(out));
@@ -682,10 +593,6 @@ V[i]   = normDist(gen);;
 
     if (m < n)
     {
-      // arma_rng::set_seed(seed);
-      // Q = randn( n, dim+s );
-      // Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
-      // Q = stats::rnorm<arma::mat>(n, dim + s, 0, 1);
 
       randNorm(n, dim + s, seed);
       Q = A * Q;
@@ -731,9 +638,6 @@ V[i]   = normDist(gen);;
     }
     else
     {
-      // arma_rng::set_seed(seed);
-      // Q = randn( m, dim+s );
-      // Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
       Q = randNorm(m, dim + s, seed);
       Q = trans(A) * Q;
       if (iters == 0)
@@ -811,9 +715,6 @@ V[i]   = normDist(gen);;
 
     if (m < n)
     {
-      // arma_rng::set_seed(seed);
-      // Q = randn( n, dim+s );
-      // Q = sampleUnif(n, dim+s, 0.0, 1.0, seed);
       Q = randNorm(n, dim + s, seed);
 
       Q = A * Q;
@@ -865,9 +766,6 @@ V[i]   = normDist(gen);;
     }
     else
     {
-      // arma_rng::set_seed(seed);
-      // Q = randn( m, dim+s );
-      // Q = sampleUnif(m, dim+s, 0.0, 1.0, seed);
       Q = randNorm(m, dim + s, seed);
       Q = trans(A) * Q;
       if (iters == 0)
@@ -948,8 +846,6 @@ V[i]   = normDist(gen);;
 
     if (m < n)
     {
-      // R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
-      // R = sampleUnif(l, m, -1.0, 1.0, 0);
       R = randNorm(l, m, seed);
 
       sp_mat At = A.t();
@@ -957,8 +853,6 @@ V[i]   = normDist(gen);;
     }
     else
     {
-      // R = stats::runif<arma::mat>(n, l, -1.0, 1.0, seed);
-      // R = sampleUnif(n, l, -1.0, 1.0, 0);
       R = randNorm(n, l, seed);
 
       Q = A * R;
@@ -967,7 +861,6 @@ V[i]   = normDist(gen);;
     // Form a matrix Q whose columns constitute a well-conditioned basis for the
     // columns of the earlier Q.
     gram_schmidt(Q);
-    // Q = orth(Q);
 
     if (m < n)
     {
@@ -982,11 +875,9 @@ V[i]   = normDist(gen);;
 
         Q = A * Q;
         gram_schmidt(Q);
-        // Q = orth(Q);
 
         Q = A.t() * Q;
         gram_schmidt(Q);
-        // Q = orth(Q);
       }
       if (verbose)
       {
@@ -1011,11 +902,9 @@ V[i]   = normDist(gen);;
 
         Q = A.t() * Q;
         gram_schmidt(Q);
-        // Q = orth(Q);
 
         Q = A * Q; // Apply A to a random matrix, obtaining Q.
         gram_schmidt(Q);
-        // Q = orth(Q);
       }
       if (verbose)
       {
@@ -1062,8 +951,6 @@ V[i]   = normDist(gen);;
 
     if (m < n)
     {
-      // R = stats::runif<arma::mat>(l, m, -1.0, 1.0, seed);
-      // R = sampleUnif(l, m, -1.0, 1.0, 0);
       R = randNorm(l, m, seed);
 
       mat At = A.t();
@@ -1071,8 +958,6 @@ V[i]   = normDist(gen);;
     }
     else
     {
-      // R = stats::runif<arma::mat>(n, l, -1.0, 1.0, seed);
-      // R = sampleUnif(n, l, -1.0, 1.0, 0);
       R = randNorm(n, l, seed);
 
       Q = A * R;
@@ -1081,7 +966,6 @@ V[i]   = normDist(gen);;
     // Form a matrix Q whose columns constitute a well-conditioned basis for the
     // columns of the earlier Q.
     gram_schmidt(Q);
-    // Q = orth(Q);
 
     if (m < n)
     {
@@ -1097,11 +981,9 @@ V[i]   = normDist(gen);;
 
         Q = A * Q;
         gram_schmidt(Q);
-        // Q = orth(Q);
 
         Q = A.t() * Q;
         gram_schmidt(Q);
-        // Q = orth(Q);
       }
       if (verbose)
       {
@@ -1126,11 +1008,9 @@ V[i]   = normDist(gen);;
 
         Q = A.t() * Q;
         gram_schmidt(Q);
-        // Q = orth(Q);
 
         Q = A * Q; // Apply A to a random matrix, obtaining Q.
         gram_schmidt(Q);
-        // Q = orth(Q);
       }
       if (verbose)
       {
