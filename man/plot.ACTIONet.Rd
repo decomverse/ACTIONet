@@ -21,6 +21,7 @@
   text_size = 3,
   nudge_text_labels = FALSE,
   show_legend = FALSE,
+  legend_point_size = 3,
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
   point_order = NULL,
@@ -58,6 +59,8 @@
 \item{nudge_text_labels}{Slightly offset labels proportional to cluster size so as to not cover small clusters (default:'TRUE').}
 
 \item{show_legend}{Show legend based on labels. Ignored if 'label_attr=NULL' or 'color_attr!=NULL' (default:'FALSE').}
+
+\item{legend_point_size}{Size of legend label icons (default:3).}
 
 \item{coordinate_attr}{Name of entry in colMaps(data) containing the 2D plot coordinates if 'data' is an 'ACTIONetExperiment' object (default:'ACTIONet2D').}
 

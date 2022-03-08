@@ -117,6 +117,7 @@
   p,
   col_vals = NULL,
   grad_palette = NULL,
+  legend_point_size = 3,
   stroke_contrast_fac = 0.1,
   legend_labels = NULL,
   legend_fill_colors = NULL
@@ -144,7 +145,10 @@
       labels = legend_labels,
       breaks = legend_fill_colors
     ) +
-    scale_color_identity()
+    scale_color_identity() +
+    guides(
+      fill = guide_legend(override.aes = list(size = legend_point_size))
+    )
   }
 
   return(p_out)
