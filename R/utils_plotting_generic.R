@@ -102,7 +102,7 @@ CPal_default <- c(
 
     if (num_unique == 1) {
       if(startsWith(palette[1], "#")) {
-        plot_colors <- palette[1]
+        plot_colors <- .default_colors(n_dim, col = palette[1])
       } else {
         plot_colors <- .default_colors(n_dim)
       }
@@ -178,7 +178,14 @@ CPal_default <- c(
 }
 
 
-.default_colors <- function(l) {
-  plot_colors <- rep("#FF6347", l)
+.default_colors <- function(l, col = NULL) {
+  if(is.null(col)) {
+    col_use ="#FF6347"
+  } else if (startsWith(col, "#") && nchar(col) == 7) {
+    col_use = col
+  } else {
+    col_use ="#FF6347"
+  }
+  plot_colors <- rep(col_use, l)
   return(plot_colors)
 }
