@@ -272,7 +272,7 @@ plot.ACTIONet.gradient <- function(
     col_vals <- x
   }
 
-  idx <- order(x, decreasing = FALSE)
+  idx <- order(x, decreasing = TRUE)
 
   p_out <- plot.ACTIONet(
     data = ace,
