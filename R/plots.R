@@ -44,6 +44,7 @@ plot.ACTIONetExperiment <- function(ace, ...) {
 #' @param NA_color Color to use for fill and stroke of 'NA' label values. (default:"#cccccc")
 #' @param hide_NA If 'TRUE', points with 'NA' labels will be hidden. (default:'FALSE')
 #' @param show_legend Show legend based on labels. Ignored if 'label_attr=NULL' or 'color_attr!=NULL' (default:'FALSE').
+#' @param legend_point_size Size of legend label icons (default:3).
 #' @param add_text_labels Whether or not to add floating text labels on the top of annotated clusters. Ignored if 'label_attr=NULL'. (default:'TRUE').
 #' @param text_size Size of floating text. Passed to 'ggplot2::geom_label()' (default:3).
 #' @param nudge_text_labels Slightly offset labels proportional to cluster size so as to not cover small clusters (default:'TRUE').
@@ -77,6 +78,7 @@ plot.ACTIONet <- function(
   text_size = 3,
   nudge_text_labels = FALSE,
   show_legend = FALSE,
+  legend_point_size = 3,
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
   point_order = NULL,
@@ -157,6 +159,7 @@ plot.ACTIONet <- function(
       p_out,
       col_vals = plot_data$fill,
       grad_palette = palette,
+      legend_point_size = legend_point_size,
       stroke_contrast_fac = stroke_contrast_fac,
       legend_labels = legend_labels,
       legend_fill_colors = legend_fill_colors
