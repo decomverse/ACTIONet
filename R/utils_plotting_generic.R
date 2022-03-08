@@ -68,7 +68,7 @@ CPal_default <- c(
                              data,
                              color_slot = "denovo_color",
                              palette = CPal_default,
-                             NA_color = "#cccccc"
+                             NA_color = "#CCCCCC"
                            ) {
   if (is(data, "ACTIONetExperiment")) {
     n_dim <- NCOL(data)
@@ -99,7 +99,7 @@ CPal_default <- c(
     plot_labels <- as.character(plot_labels)
     label_names <- sort(unique(plot_labels[!is.na(plot_labels)]))
     num_unique <- length(label_names)
-    plot_labels[is.na(plot_labels)] <- "NA"
+    # plot_labels[is.na(plot_labels)] <- "NA"
 
     if (num_unique == 1) {
       plot_colors <- .default_colors(n_dim)
@@ -123,6 +123,7 @@ CPal_default <- c(
         }
       }
 
+      plot_labels[is.na(plot_labels)] <- "NA"
       names(plot_palette) <- label_names
       plot_palette = c(plot_palette, "NA" = NA_color)
       plot_colors <- plot_palette[match(plot_labels, names(plot_palette))]
@@ -175,6 +176,6 @@ CPal_default <- c(
 
 
 .default_colors <- function(l) {
-  plot_colors <- rep("tomato", l)
+  plot_colors <- rep("#FF6347", l)
   return(plot_colors)
 }
