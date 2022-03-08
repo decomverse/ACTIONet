@@ -55,7 +55,7 @@ networkDiffusion <- function(
 
 #' @export
 networkCentrality <- function(
-  data,#minor comment
+  data,
   label_attr = NULL,
   algorithm = c("coreness", "pagerank", "personalized_coreness", "personalized_pagerank"),
   alpha = 0.9,
@@ -156,27 +156,6 @@ networkPropagation <- function(
   lf <- factor(validate_attr(data, label_attr))
   labels = as.numeric(lf)
   keys = levels(lf)
-
-  # if( is.null(label_attr) ){
-  #   err = sprintf("`label_attr` cannot be 'NULL'.\n")
-  #   stop(err)
-  # }
-
-  # if ( length(label_attr) != NCOL(G) ){
-  #   err = sprintf("'length(label_attr)' must equal 'NCOL(G)'.\n")
-  #   stop(err)
-  # }
-
-  # if(!is(data, "ACTIONetExperiment")){
-  #   sa = ACTIONetExperiment::get.data.or.split(G, attr = label_attr, to_return = "levels")
-  #   labels = sa$index
-  #   keys = sa$keys
-  # } else {
-  #   lf = factor(label_attr)
-  #   labels = as.numeric(lf)
-  #   keys = levels(lf)
-  # }
-
   labels[is.na(labels)] <- -1
 
   if (algorithm == "lpa") {
