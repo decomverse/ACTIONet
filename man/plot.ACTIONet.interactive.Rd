@@ -16,6 +16,8 @@
   stroke_color = NULL,
   stroke_contrast_fac = 0.1,
   palette = CPal_default,
+  NA_color = "#cccccc",
+  hide_NA = FALSE,
   show_legend = NULL,
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
@@ -47,6 +49,10 @@
 \item{stroke_contrast_fac}{Factor by which to darken point outline for contrast if 'stroke_color=NULL'. (default:0.1)}
 
 \item{palette}{Color palette. character vector of hex colors or a palette name to pass to 'ggpubr::get_palette()'. (default:CPal_default)}
+
+\item{NA_color}{Color to use for fill and stroke of 'NA' label values. (default:"#cccccc")}
+
+\item{hide_NA}{If 'TRUE', points with 'NA' labels will be hidden. (default:'FALSE')}
 
 \item{show_legend}{Show legend based on labels. (default:'NULL')}
 
