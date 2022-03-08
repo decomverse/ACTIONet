@@ -103,6 +103,7 @@ CPal_default <- c(
 
     if (num_unique == 1) {
       plot_colors <- .default_colors(n_dim)
+      plot_colors[is.na(plot_labels)] = NA_color
     } else {
       if (length(palette) == 1) {
         plot_palette <- ggpubr::get_palette(palette, num_unique)
