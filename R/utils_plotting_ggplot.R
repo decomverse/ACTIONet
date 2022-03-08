@@ -117,24 +117,27 @@
   p,
   col_vals = NULL,
   grad_palette = NULL,
+  legend_point_size = 3,
+  legend_text_size = 10,
   stroke_contrast_fac = 0.1,
   legend_labels = NULL,
   legend_fill_colors = NULL
 ) {
 
-  NA_col <- "grey50"
+  # NA_col <- "grey50"
+  NA_color = "#CCCCCC"
 
   if (is.numeric(col_vals)) {
     p_out <- p +
     scale_fill_gradientn(
       colors = grad_palette,
-      na.value = NA_col,
+      na.value = NA_color,
       guide = "colourbar",
       aesthetics = "fill"
     ) +
     scale_colour_gradientn(
       colors = colorspace::darken(grad_palette, stroke_contrast_fac),
-      na.value = NA_col,
+      na.value = NA_color,
       guide = NULL,
       aesthetics = "colour"
     )
@@ -144,8 +147,11 @@
       labels = legend_labels,
       breaks = legend_fill_colors
     ) +
-    scale_color_identity()
+    scale_color_identity() +
+    guides(
+      fill = guide_legend(override.aes = list(size = legend_point_size))
+    )
   }
-
+  p_out <- p_out + theme(legend.text = element_text(size = legend_text_size))
   return(p_out)
 }

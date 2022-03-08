@@ -56,7 +56,7 @@ CPal_default <- c(
 
   if (!is.numeric(plot_labels)) {
     plot_labels <- as.character(plot_labels)
-    plot_labels[is.na(plot_labels)] <- "NA"
+    # plot_labels[is.na(plot_labels)] <- "NA"
   }
 
   return(plot_labels)
@@ -67,7 +67,9 @@ CPal_default <- c(
                              plot_labels,
                              data,
                              color_slot = "denovo_color",
-                             palette = CPal_default) {
+                             palette = CPal_default,
+                             NA_color = "#CCCCCC"
+                           ) {
   if (is(data, "ACTIONetExperiment")) {
     n_dim <- NCOL(data)
   } else {
@@ -95,18 +97,22 @@ CPal_default <- c(
     }
   } else if (!is.null(plot_labels)) {
     plot_labels <- as.character(plot_labels)
-    plot_labels[is.na(plot_labels)] <- "NA"
-    label_names <- sort(unique(plot_labels))
+    label_names <- sort(unique(plot_labels[!is.na(plot_labels)]))
     num_unique <- length(label_names)
 
     if (num_unique == 1) {
-      plot_colors <- .default_colors(n_dim)
+      if(startsWith(palette[1], "#")) {
+        plot_colors <- .default_colors(n_dim, col = palette[1])
+      } else {
+        plot_colors <- .default_colors(n_dim)
+      }
+      plot_colors[is.na(plot_labels)] = NA_color
     } else {
       if (length(palette) == 1) {
         plot_palette <- ggpubr::get_palette(palette, num_unique)
       } else if (length(palette) < num_unique) {
         plot_palette <- CPal_default[1:num_unique]
-        msg <- sprintf("Not enough colors in 'palette'. Using default palette.\n")
+        msg <- sprintf("Not enough colors in 'palette'.\n")
         message(msg)
       } else {
         if (!is.null(names(palette))) {
@@ -120,7 +126,9 @@ CPal_default <- c(
         }
       }
 
+      plot_labels[is.na(plot_labels)] <- "NA"
       names(plot_palette) <- label_names
+      plot_palette = c(plot_palette, "NA" = NA_color)
       plot_colors <- plot_palette[match(plot_labels, names(plot_palette))]
     }
   } else {
@@ -170,7 +178,14 @@ CPal_default <- c(
 }
 
 
-.default_colors <- function(l) {
-  plot_colors <- rep("tomato", l)
+.default_colors <- function(l, col = NULL) {
+  if(is.null(col)) {
+    col_use ="#FF6347"
+  } else if (startsWith(col, "#") && nchar(col) == 7) {
+    col_use = col
+  } else {
+    col_use ="#FF6347"
+  }
+  plot_colors <- rep(col_use, l)
   return(plot_colors)
 }
