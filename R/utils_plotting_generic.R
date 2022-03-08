@@ -99,10 +99,13 @@ CPal_default <- c(
     plot_labels <- as.character(plot_labels)
     label_names <- sort(unique(plot_labels[!is.na(plot_labels)]))
     num_unique <- length(label_names)
-    # plot_labels[is.na(plot_labels)] <- "NA"
 
     if (num_unique == 1) {
-      plot_colors <- .default_colors(n_dim)
+      if(startsWith(palette[1], "#")) {
+        plot_colors <- palette[1]
+      } else {
+        plot_colors <- .default_colors(n_dim)
+      }
       plot_colors[is.na(plot_labels)] = NA_color
     } else {
       if (length(palette) == 1) {
