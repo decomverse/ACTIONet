@@ -18,6 +18,11 @@ normalize.matrix <- function(
   scale_param = NULL
 ) {
 
+  if (!is.matrix(S) && !ACTIONetExperiment:::is.sparseMatrix(S)) {
+    err = sprintf("`S` must be `matrix` or `sparseMatrix`.\n")
+    stop(err)
+  }
+
   if (is.null(scale_param)) {
     scale_param = 1
   } else if ( !is.function(scale_param) && !is.numeric(scale_param) ) {
@@ -27,8 +32,8 @@ normalize.matrix <- function(
     err = sprintf("`scale_param` must be of length 1 or `NCOL(S)`.\n")
   }
 
-  if(ACTIONetExperiment:::is.sparseMatrix(S)) {
-    S = as("dgCMatrix", S)
+  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
+    S = as(S, "dgCMatrix")
   }
 
   cs = Matrix::colSums(S)
