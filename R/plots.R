@@ -46,7 +46,7 @@ plot.ACTIONetExperiment <- function(ace, ...) {
 #' @param show_legend Show legend based on labels. Ignored if 'label_attr=NULL' or 'color_attr!=NULL' (default:'FALSE').
 #' @param legend_point_size Size of legend label icons (default:3).
 #' @param add_text_labels Whether or not to add floating text labels on the top of annotated clusters. Ignored if 'label_attr=NULL'. (default:'TRUE').
-#' @param text_size Size of floating text. Passed to 'ggplot2::geom_label()' (default:3).
+#' @param label_text_size Size of floating text. Passed to 'ggplot2::geom_label()' (default:3).
 #' @param nudge_text_labels Slightly offset labels proportional to cluster size so as to not cover small clusters (default:'TRUE').
 #' @param show_legend Show legend based on labels. Ignored if 'label_attr=NULL' or 'color_attr!=NULL' (default:'FALSE').
 #' @param coordinate_attr Name of entry in colMaps(data) containing the 2D plot coordinates if 'data' is an 'ACTIONetExperiment' object (default:'ACTIONet2D').
@@ -75,10 +75,11 @@ plot.ACTIONet <- function(
   NA_color = "#cccccc",
   hide_NA = FALSE,
   add_text_labels = TRUE,
-  text_size = 3,
+  label_text_size = 3,
   nudge_text_labels = FALSE,
   show_legend = FALSE,
   legend_point_size = 3,
+  legend_text_size = 10,
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
   point_order = NULL,
@@ -161,6 +162,7 @@ plot.ACTIONet <- function(
       col_vals = plot_data$fill,
       grad_palette = palette,
       legend_point_size = legend_point_size,
+      legend_text_size = legend_text_size,
       stroke_contrast_fac = stroke_contrast_fac,
       legend_labels = legend_labels,
       legend_fill_colors = legend_fill_colors
@@ -173,7 +175,7 @@ plot.ACTIONet <- function(
       label_colors = legend_fill_colors,
       darken = TRUE,
       alpha_val = 0.5,
-      text_size = text_size,
+      text_size = label_text_size,
       constrast_fac = 0.5,
       nudge = nudge_text_labels,
       use_repel = use_repel,

@@ -118,6 +118,7 @@
   col_vals = NULL,
   grad_palette = NULL,
   legend_point_size = 3,
+  legend_text_size = 10,
   stroke_contrast_fac = 0.1,
   legend_labels = NULL,
   legend_fill_colors = NULL
@@ -151,6 +152,6 @@
       fill = guide_legend(override.aes = list(size = legend_point_size))
     )
   }
-
+  p_out <- p_out + theme(legend.text = element_text(size = legend_text_size))
   return(p_out)
 }
