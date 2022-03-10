@@ -54,5 +54,9 @@ normalize.matrix <- function(
     B = log1p(B)
   }
 
+  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
+    S = as(S, "dgCMatrix")
+  }
+
   return(B)
 }

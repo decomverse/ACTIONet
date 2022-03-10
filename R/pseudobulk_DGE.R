@@ -40,12 +40,16 @@ get.pseudobulk.SE <- function(
     IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
     good_batches = sapply(IDX, length) >= min_cells_per_batch
 
-    if(!all(good_batches)){
+    if(!any(good_batches)){
+      msg = sprintf("No samples remaining.")
+      warning(msg)
+      return(NULL)
+    } else if(!all(good_batches)) {
       old_batches = names(IDX)
       ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
       IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
       bad_batch_names = setdiff(old_batches, names(IDX))
-      msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
+      msg = sprintf("Samples Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)
     }
 
