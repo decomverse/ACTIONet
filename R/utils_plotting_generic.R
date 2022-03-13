@@ -18,7 +18,12 @@ CPal_default <- c(
                             scale_coors = TRUE) {
   if (is(X, "ACTIONetExperiment")) {
     if (!is.null(coordinate_attr)) {
-      coors <- as.matrix(colMaps(X)[[coordinate_attr]])
+      if(coordinate_attr %in% names(colMaps(X))) {
+        coors <- as.matrix(colMaps(X)[[coordinate_attr]])
+      } else {
+        err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", coordinate_attr)
+        stop(err)
+      }
     } else {
       err <- sprintf("'coordinate_attr' cannot be NULL if 'ace' is 'ACTIONetExperiment'.\n")
       stop(err)

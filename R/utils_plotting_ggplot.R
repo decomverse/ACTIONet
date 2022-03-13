@@ -124,7 +124,6 @@
   legend_fill_colors = NULL
 ) {
 
-  # NA_col <- "grey50"
   NA_color = "#CCCCCC"
 
   if (is.numeric(col_vals)) {
