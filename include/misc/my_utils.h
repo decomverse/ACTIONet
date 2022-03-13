@@ -13,6 +13,7 @@ namespace ACTIONet
     mat randNorm(int l, int m, int seed);
 
     mat zscore(mat A, int thread_no = 0);
+    mat tzscoret(mat A);
     mat robust_zscore(mat A, int thread_no = 0);
     mat RIN_transform(mat A, int thread_no = 0);
 

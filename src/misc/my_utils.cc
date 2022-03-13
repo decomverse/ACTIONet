@@ -1,4 +1,5 @@
 #include "ACTIONet.h"
+#include "my_utils.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -349,11 +350,21 @@ namespace ACTIONet
   {
     rowvec mu = mean(A, 0);
     rowvec sigma = stddev(A, 0);
-    int N = A.n_cols;
+
+    for (int j = 0; j < A.n_cols; j++)
+    {
+      A.col(j) = (A.col(j) - mu(j)) / sigma(j);
+    }
 
     A.replace(datum::nan, 0); // replace each NaN with 0
 
     return A;
+  }
+
+  mat tzscoret(mat A)
+  {
+    A = zscore(A.t());
+    return(A.t());
   }
 
   /* Rank a numeric vector giving ties their average rank */
