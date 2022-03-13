@@ -89,35 +89,6 @@ std::vector<float> optimize_layout_largevis(
     double gamma, double initial_alpha, double negative_sample_rate,
     std::size_t thread_no = 0, std::size_t grain_size = 1, int seed = 0);
 
-
-// mat zscore(mat A)
-// {
-//   rowvec mu = mean(A, 0);
-//   rowvec sigma = stddev(A, 0);
-//
-//   for (int j = 0; j < A.n_cols; j++)
-//   {
-//     A.col(j) = (A.col(j) - mu(j)) / sigma(j);
-//   }
-//
-//   return A;
-// }
-
-mat zscore(mat A)
-{
-  A = A.t();
-  rowvec mu = mean(A, 0);
-  mu.print(std::cout);
-  rowvec sigma = stddev(A, 0);
-
-  for (int j = 0; j < A.n_cols; j++)
-  {
-    A.col(j) = (A.col(j) - mu(j)) / sigma(j);
-  }
-
-  return A.t();
-}
-
 namespace ACTIONet
 {
 
@@ -200,8 +171,7 @@ namespace ACTIONet
 
     field<mat> res(3);
 
-    // mat init_coors = initial_position.rows(0, 2);
-    mat init_coors = zscore(initial_position.rows(0, 2));
+    mat init_coors = tzscoret(initial_position.rows(0, 2));
 
     sp_mat H = G;
     H.for_each([](sp_mat::elem_type &val)
@@ -289,9 +259,7 @@ namespace ACTIONet
    ***************************/
     head_vec.clear();
     head_vec.resize(init_coors.n_cols * 3);
-    // sub_coor = conv_to<fmat>::from(zscore(join_vert(trans(coordinates), init_coors.row(2))));
-    sub_coor = conv_to<fmat>::from(join_vert(trans(coordinates), init_coors.row(2)));
-    // sub_coor = conv_to<fmat>::from(init_coors.rows(0, 2));
+    sub_coor = conv_to<fmat>::from(tzscoret(join_vert(trans(coordinates), init_coors.row(2))));
     ptr = sub_coor.memptr();
     memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
     tail_vec = head_vec;
@@ -324,8 +292,7 @@ namespace ACTIONet
 
     fmat coordinates_3D_float(result.data(), 3, nV);
     mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
-    // coordinates_3D = trans(coordinates_3D);
-    coordinates_3D = zscore(trans(coordinates_3D));
+    coordinates_3D = trans(coordinates_3D);
 
     stdout_printf("done\n"); FLUSH;
 
