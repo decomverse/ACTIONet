@@ -53,7 +53,7 @@ runACTIONet <- function(
   layout_algorithm = c("tumap", "umap"),
   layout_in_parallel = TRUE,
   unification_th = 0,
-  footprint_alpha = 0.15,
+  footprint_alpha = 0.85,
   thread_no = 0,
   seed = 0
 ) {
