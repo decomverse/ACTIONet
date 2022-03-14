@@ -15,13 +15,14 @@
   stroke_size = point_size * 0.1,
   stroke_contrast_fac = 0.1,
   palette = CPal_default,
-  NA_color = "#cccccc",
+  NA_color = "#CCCCCC",
   hide_NA = FALSE,
   add_text_labels = TRUE,
-  text_size = 3,
+  label_text_size = 3,
   nudge_text_labels = FALSE,
   show_legend = FALSE,
   legend_point_size = 3,
+  legend_text_size = 10,
   coordinate_attr = "ACTIONet2D",
   color_slot = "denovo_color",
   point_order = NULL,
@@ -54,7 +55,7 @@
 
 \item{add_text_labels}{Whether or not to add floating text labels on the top of annotated clusters. Ignored if 'label_attr=NULL'. (default:'TRUE').}
 
-\item{text_size}{Size of floating text. Passed to 'ggplot2::geom_label()' (default:3).}
+\item{label_text_size}{Size of floating text. Passed to 'ggplot2::geom_label()' (default:3).}
 
 \item{nudge_text_labels}{Slightly offset labels proportional to cluster size so as to not cover small clusters (default:'TRUE').}
 
