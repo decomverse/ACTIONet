@@ -16,7 +16,7 @@
   stroke_color = NULL,
   stroke_contrast_fac = 0.1,
   palette = CPal_default,
-  NA_color = "#cccccc",
+  NA_color = "#CCCCCC",
   hide_NA = FALSE,
   show_legend = NULL,
   coordinate_attr = "ACTIONet2D",

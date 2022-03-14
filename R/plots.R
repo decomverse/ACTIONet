@@ -72,7 +72,7 @@ plot.ACTIONet <- function(
   stroke_size = point_size * 0.1,
   stroke_contrast_fac = 0.1,
   palette = CPal_default,
-  NA_color = "#cccccc",
+  NA_color = "#CCCCCC",
   hide_NA = FALSE,
   add_text_labels = TRUE,
   label_text_size = 3,
