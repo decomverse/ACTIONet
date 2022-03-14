@@ -56,9 +56,12 @@ vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
   H.diag().ones();
   H.diag() *= lambda;          // add "inertia"
   H = n * normalize_adj(H, 1); // row-normalize to n
+  
+  int it = 0;
+  for (it; it < iters; it++) {
+    stderr_printf("\r\tLPA iteration %d/%d", it+1, iters);
+    FLUSH;
 
-  for (int it = 0; it < iters; it++) {
-    printf("Iter %d\n", it);
     vec vals = unique(updated_labels);
     uvec idx = find(0 <= vals);
     vals = vals(idx);
@@ -77,43 +80,10 @@ vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
     // revert-back the vertices that need to be fixed
     updated_labels(fixed_labels) = labels(fixed_labels);
   }
+  stdout_printf("\r\tLPA iteration %d/%d", it, iters);
+  FLUSH;
 
   return (updated_labels);
 }
-
-/*
-vec Kappa(vec p, vec q) {
-    vec kl = ones(size(p));
-
-        vec a = p * log(p / q);
-        uvec zero_idx = find(p == 0);
-        a(zero_idx).zeros();
-
-        vec b = (1.0 - p) * log((1.0 - p)/(1.0 - q));
-        uvec one_idx = find(p == 1);
-        b(one_idx).zeros();
-
-    vec k = a + b;
-
-    return(k);
-}
-
-HGT_tail(vec success_counts, vec sample_size, observed.success, int
-population_size) { if (sum(success_count) == 0) {
-                return(zeros(size(success_counts)));
-        }
-
-    vec success_rate = success_count/population_size;
-    vec expected_success = sample.size % success.rate;
-
-    delta = (observed_success/expected.success) - 1
-
-    log.tail_bound = sample.size * Kappa((1 + delta) * success.rate,
-        success.rate)
-    log.tail_bound[delta < 0] = 0
-    log.tail_bound[is.na(log.tail_bound)] = 0
-    return(log.tail_bound)
-}
-*/
 
 }  // namespace ACTIONet
