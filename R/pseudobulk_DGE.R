@@ -32,7 +32,6 @@ get.pseudobulk.SE <- function(
   with_S = FALSE,
   with_E = FALSE,
   with_V = FALSE,
-  trim_E0 = NULL,
   min_cells_per_batch = 3,
   BPPARAM = BiocParallel::SerialParam()
 ) {
@@ -40,12 +39,16 @@ get.pseudobulk.SE <- function(
     IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
     good_batches = sapply(IDX, length) >= min_cells_per_batch
 
-    if(!all(good_batches)){
+    if(!any(good_batches)){
+      msg = sprintf("No samples remaining.")
+      warning(msg)
+      return(NULL)
+    } else if(!all(good_batches)) {
       old_batches = names(IDX)
       ace = ace[, ace[[sample_attr]] %in% names(good_batches[good_batches])]
       IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
       bad_batch_names = setdiff(old_batches, names(IDX))
-      msg = sprintf("Batches Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
+      msg = sprintf("Samples Dropped: %s\n", paste0(bad_batch_names, collapse = ", "))
       message(msg)
     }
 
@@ -59,13 +62,7 @@ get.pseudobulk.SE <- function(
     se_assays$counts = S0
 
     if (with_E == TRUE) {
-      if(!is.null(trim_E0) && trim_E0 > 0){
-        E0 = do.call(cbind, bplapply(counts_list, function(mat){
-          apply(mat, 1, function(x) mean(x, trim = trim_E0))
-        }, BPPARAM = BPPARAM))
-      } else {
-        E0 = do.call(cbind, bplapply(counts_list, ACTIONetExperiment:::fastRowMeans, BPPARAM = BPPARAM))
-      }
+      E0 = do.call(cbind, bplapply(counts_list, ACTIONetExperiment:::fastRowMeans, BPPARAM = BPPARAM))
       se_assays$mean = E0
     }
 

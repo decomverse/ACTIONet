@@ -1,6 +1,7 @@
 .axis_params <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
 
 
+#' @import plotly
 .set_default_layout_plotly <- function(
   p,
   show_legend = FALSE,
@@ -34,6 +35,7 @@
 }
 
 
+#' @import plotly
 .make_plotly_scatter_single_trace <- function(
   x,
   y,
@@ -133,6 +135,7 @@
 }
 
 
+#' @import plotly
 .make_plotly_scatter_split_trace <- function(
   x,
   y,
@@ -164,7 +167,7 @@
     plot_data$text <- hover_text
   }
 
-  trace_names <- sort(unique(plot_data$labels))
+  trace_names <- gtools::mixedsort(unique(plot_data$labels))
 
   if (plot_3d == TRUE) {
     p <- plot_ly(type = "scatter3d", mode = "markers")

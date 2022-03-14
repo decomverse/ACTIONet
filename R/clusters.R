@@ -325,7 +325,7 @@ Leiden.clustering <- function(ace,
   clusters <- cluster.graph(G, resolution_parameter, initial.clusters, seed)
   if (postprocess == T) {
     cc <- table(clusters)
-    clusters[clusters %in% as.numeric(names(cc)[cc < 30])] <- -1
+    clusters[clusters %in% as.numeric(names(cc)[cc < 30])] <- 0
     clusters <- c(run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold))
   }
   clusters <- as.numeric(clusters)
