@@ -145,7 +145,8 @@ networkPropagation <- function(
   lambda = 0,
   iters = 3,
   sig_th = 3,
-  net_slot = "ACTIONet"
+  net_slot = "ACTIONet",
+  thread_no = 0
 ) {
 
   algorithm <- tolower(algorithm)
@@ -159,10 +160,11 @@ networkPropagation <- function(
   labels[is.na(labels)] <- -1
 
   if (algorithm == "lpa") {
-    new_labels <- run_LPA(G = G, labels = labels, lambda = lambda, iters = iters, sig_threshold = sig_th, fixed_labels_ = fixed_samples)
+    new_labels <- run_LPA(G = G, labels = labels, lambda = lambda, iters = iters, sig_threshold = sig_th, fixed_labels_ = fixed_samples, thread_no = thread_no)
     new_labels[new_labels == -1] <- NA
     new_labels <- keys[new_labels]
   } else {
+    warning("No propagation was performed");
     new_labels[new_labels == -1] <- NA
     new_labels <- keys[labels]
   }
@@ -179,7 +181,8 @@ correct.cell.labels  <- function(
   iters = 3,
   lambda = 0,
   sig_th = 3,
-  net_slot = "ACTIONet"
+  net_slot = "ACTIONet",
+  thread_no = 0
 ) {
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
@@ -191,7 +194,8 @@ correct.cell.labels  <- function(
     lambda = lambda,
     iters = iters,
     sig_th = sig_th,
-    net_slot = net_slot
+    net_slot = net_slot,
+    thread_no = thread_no
   )
 
   return(labels)
@@ -205,7 +209,8 @@ infer.missing.cell.labels  <- function(
   iters = 3,
   lambda = 0,
   sig_th = 3,
-  net_slot = "ACTIONet"
+  net_slot = "ACTIONet",
+   thread_no = 0 
 ) {
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
@@ -219,7 +224,8 @@ infer.missing.cell.labels  <- function(
     lambda = lambda,
     iters = iters,
     sig_th = sig_th,
-    net_slot = net_slot
+    net_slot = net_slot,
+    thread_no = thread_no
   )
 
   return(labels)
