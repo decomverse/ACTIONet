@@ -6,6 +6,15 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
     H <- run_simplex_regression(A = W, B = B)
     extra <- list()
   } else if (method == "SVD") {
+
+    out <- decomp.SVD(
+      X = X,
+      reduced_dim = k,
+      max_iter = params$max_iter,
+      seed = params$seed
+    )
+
+    return(out)
     # if (is.matrix(X)) {
     #   reduction.out <- IRLB_SVD_full(
     #     A = X, dim = k,
@@ -134,23 +143,44 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
   return(out)
 }
 
-decomp.SVD <- function(){
+decomp.SVD <- function(
+  X,
+  reduced_dim = 50,
+  max_iter = 10,
+  seed = 0
+){
 
+  if (is.matrix(X)) {
+    reduction.out <- IRLB_SVD_full(
+      A = X,
+      dim = reduced_dim,
+      iter = max_iter,
+      seed = seed
+    )
+  } else if(ACTIONetExperiment:::is.sparseMatrix(X)) {
+    if(!is(X, "dgCMatrix")) {
+      X = as(X, "dgCMatrix")
+    }
+    reduction.out <- IRLB_SVD(
+      A = X,
+      dim = reduced_dim,
+      iter = max_iter,
+      seed = seed
+    )
+  } else {
+    err = sprintf("`X` must be `matrix` or `sparseMatrix`.\n")
+    stop(err)
+  }
+
+  W <- reduction.out$u
+  H <- as.matrix(Diagonal(length(reduction.out$d), reduction.out$d) %*% t(reduction.out$v))
+  extra <- list(d = reduction.out$d)
+
+  out <- list(W = W, H = H, extra = extra)
+
+  return(out)
 }
-if (is.matrix(X)) {
-  reduction.out <- IRLB_SVD_full(
-    A = X, dim = k,
-    iter = params$max_iter, seed = params$seed
-  )
-} else {
-  reduction.out <- IRLB_SVD(
-    A = X, dim = k,
-    iter = params$max_iter, seed = params$seed
-  )
-}
-W <- reduction.out$u
-H <- as.matrix(Diagonal(length(reduction.out$d), reduction.out$d) %*% t(reduction.out$v))
-extra <- list(d = reduction.out$d)
+
 
 #' Run ACTION_decomposition_MR
 decomp.ACTION_MR <- function(ace = NULL,
