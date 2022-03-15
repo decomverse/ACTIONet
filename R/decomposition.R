@@ -6,20 +6,20 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
     H <- run_simplex_regression(A = W, B = B)
     extra <- list()
   } else if (method == "SVD") {
-    if (is.matrix(X)) {
-      reduction.out <- IRLB_SVD_full(
-        A = X, dim = k,
-        iter = params$max_iter, seed = params$seed
-      )
-    } else {
-      reduction.out <- IRLB_SVD(
-        A = X, dim = k,
-        iter = params$max_iter, seed = params$seed
-      )
-    }
-    W <- reduction.out$u
-    H <- as.matrix(Diagonal(length(reduction.out$d), reduction.out$d) %*% t(reduction.out$v))
-    extra <- list(d = reduction.out$d)
+    # if (is.matrix(X)) {
+    #   reduction.out <- IRLB_SVD_full(
+    #     A = X, dim = k,
+    #     iter = params$max_iter, seed = params$seed
+    #   )
+    # } else {
+    #   reduction.out <- IRLB_SVD(
+    #     A = X, dim = k,
+    #     iter = params$max_iter, seed = params$seed
+    #   )
+    # }
+    # W <- reduction.out$u
+    # H <- as.matrix(Diagonal(length(reduction.out$d), reduction.out$d) %*% t(reduction.out$v))
+    # extra <- list(d = reduction.out$d)
   } else if (method == "PCA") {
     SVD.out <- decomp(X, k, "SVD", params = params)
     u <- as.matrix(SVD.out$W)
@@ -134,6 +134,23 @@ decomp <- function(X, k, method, W0 = NULL, H0 = NULL, params) {
   return(out)
 }
 
+decomp.SVD <- function(){
+
+}
+if (is.matrix(X)) {
+  reduction.out <- IRLB_SVD_full(
+    A = X, dim = k,
+    iter = params$max_iter, seed = params$seed
+  )
+} else {
+  reduction.out <- IRLB_SVD(
+    A = X, dim = k,
+    iter = params$max_iter, seed = params$seed
+  )
+}
+W <- reduction.out$u
+H <- as.matrix(Diagonal(length(reduction.out$d), reduction.out$d) %*% t(reduction.out$v))
+extra <- list(d = reduction.out$d)
 
 #' Run ACTION_decomposition_MR
 decomp.ACTION_MR <- function(ace = NULL,
@@ -148,18 +165,11 @@ decomp.ACTION_MR <- function(ace = NULL,
                              reduction_slot = "ACTION",
                              return_raw = FALSE,
                              seed = 0) {
-                               
+
   if (return_raw == FALSE && is.null(ace)) {
     err <- sprintf("'ace' cannot be null if 'return_raw=FALSE'")
     stop(err)
   }
-
-  # if (!is.null(ace)) {
-  #   if (class(ace) != "ACTIONetExperiment") {
-  #     err <- sprintf("'ace' must be 'ACTIONetExperiment'.\n")
-  #     stop(err)
-  #   }
-  # }
 
   ace <- .validate_ace(ace, allow_null = TRUE)
 
