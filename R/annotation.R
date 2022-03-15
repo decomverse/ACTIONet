@@ -347,7 +347,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
     S = assays(ace)[[assay_name]]
     sub_S = S[mask, ]
   } else {
-    sub_S <- imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm)
+    sub_S <- trans(imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm))
   }
   sub_S = as(sub_S, "sparseMatrix")
 
