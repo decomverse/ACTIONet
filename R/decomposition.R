@@ -407,7 +407,7 @@ decomp.ACTION <- function(
       iter = max_iter,
       seed = seed
     )
-
+  }
   return(out)
 }
 
