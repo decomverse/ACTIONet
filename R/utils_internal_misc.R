@@ -71,6 +71,45 @@
   return(ace)
 }
 
+
+.validate_map <- function(M, map_slot = NULL, row = FALSE){
+  if( is.null(M) ){
+    err = sprintf("`M` must be given.\n")
+    stop(err)
+  }
+
+  if (is(M, "ACTIONetExperiment")) {
+    if (row == TRUE) {
+
+      if (!(map_slot %in% names(rowMaps(M)))) {
+        err <- sprintf("`%s` is not an attribute of `rowMaps`.\n", map_slot)
+        stop(err)
+      }
+      M <- rowMaps(M)[[map_slot]]
+
+    } else {
+
+      if (!(map_slot %in% names(colMaps(M)))) {
+        err <- sprintf("`%s` is not an attribute of `colMaps`.\n", map_slot)
+        stop(err)
+      }
+      M <- colMaps(M)[[map_slot]]
+
+    }
+  } else {
+    if (!is.matrix(M) && !ACTIONetExperiment:::is.sparseMatrix(M)) {
+     err = sprintf("`M` must be `matrix` or `sparseMatrix`.\n")
+     stop(err)
+   }
+   if (ACTIONetExperiment:::is.sparseMatrix(M) && !is(M, "dgCMatrix")) {
+     M = as(M, "dgCMatrix")
+   }
+  }
+
+  return(M)
+}
+
+
 .validate_net <- function(G, net_slot = NULL, row = FALSE){
   if( is.null(G) ){
     err = sprintf("`G` must be given.\n")
@@ -96,13 +135,19 @@
 
     }
   } else {
-    G =  as(G, "dgCMatrix")
+    if (!is.matrix(G) && !ACTIONetExperiment:::is.sparseMatrix(G)) {
+      err = sprintf("`G` must be `matrix` or `sparseMatrix`.\n")
+      stop(err)
+    }
+    if(!is(G, "dgCMatrix")) {
+      G = as(G, "dgCMatrix")
+    }
   }
 
   return(G)
 }
 
-validate_attr <- function(data, attr, return_type = "data"){
+.validate_attr <- function(data, attr, return_type = "data"){
 
   if( is.null(data) ){
     err = sprintf("`data` cannot be `NULL`.\n")
@@ -129,4 +174,18 @@ validate_attr <- function(data, attr, return_type = "data"){
   }
 
   return(attr)
+}
+
+.checkSparse <- function(X){
+  
+  if(ACTIONetExperiment:::is.sparseMatrix(X)) {
+    if(!is(X, "dgCMatrix")) {
+      X = as(X, "dgCMatrix")
+    }
+  } else if (!is.matrix(X)) {
+    err = sprintf("`X` must be `matrix` or `sparseMatrix`.\n")
+    stop(err)
+  }
+
+  return(X)
 }
