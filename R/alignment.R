@@ -3,6 +3,7 @@ compute.pairwise.alignment <- function(reference_profile,
                                        reduced_dim = 50,
                                        log_transform = FALSE,
                                        deflate = TRUE,
+                                       sparse = F,
                                        seed = 0) {
   set.seed(seed)
 
@@ -53,13 +54,13 @@ compute.pairwise.alignment <- function(reference_profile,
   query_profile.red <- IRLB_SVD_full(
     A = Matrix::t(query_profile_centered),
     dim = reduced_dim,
-    iters = 100
+    iters = 1000
   )
 
   reference_profile.red <- IRLB_SVD_full(
     A = Matrix::t(reference_profile_centered),
     dim = reduced_dim,
-    iters = 100
+    iters = 1000
   )
 
   V.query <- query_profile.red$v[, 1:reduced_dim]
@@ -69,11 +70,14 @@ compute.pairwise.alignment <- function(reference_profile,
   S_r.query <- Matrix::t(V.alignment) %*% query_profile_centered
   S_r.reference <- Matrix::t(V.reference) %*% reference_profile_centered
 
-  X <- Matrix::t(run_simplex_regression(
-    A = S_r.query,
-    B = S_r.reference
-  ))
-
+  if(sparse == TRUE) { 
+    X <- Matrix::t(run_simplex_regression(
+      A = S_r.query,
+      B = S_r.reference
+    ))
+  } else {
+    X = cor (S_r.query, S_r.reference)
+  }
   return(X)
 }
 
