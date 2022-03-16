@@ -147,7 +147,7 @@
   return(G)
 }
 
-validate_attr <- function(data, attr, return_type = "data"){
+.validate_attr <- function(data, attr, return_type = "data"){
 
   if( is.null(data) ){
     err = sprintf("`data` cannot be `NULL`.\n")
@@ -174,4 +174,18 @@ validate_attr <- function(data, attr, return_type = "data"){
   }
 
   return(attr)
+}
+
+.checkSparse <- function(X){
+  
+  if(ACTIONetExperiment:::is.sparseMatrix(X)) {
+    if(!is(X, "dgCMatrix")) {
+      X = as(X, "dgCMatrix")
+    }
+  } else if (!is.matrix(X)) {
+    err = sprintf("`X` must be `matrix` or `sparseMatrix`.\n")
+    stop(err)
+  }
+
+  return(X)
 }
