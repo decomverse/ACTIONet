@@ -86,7 +86,7 @@ networkCentrality <- function(
   }
 
   if (!is.null(label_attr)) {
-    label_attr <- validate_attr(data, label_attr)
+    label_attr <- .validate_attr(data, label_attr)
     assignments = as.numeric(factor(label_attr))
   }
 
@@ -154,7 +154,7 @@ networkPropagation <- function(
 
   G <- .validate_net(data, net_slot)
 
-  lf <- factor(validate_attr(data, label_attr))
+  lf <- factor(.validate_attr(data, label_attr))
   labels = as.numeric(lf)
   keys = levels(lf)
   labels[is.na(labels)] <- -1
@@ -210,7 +210,7 @@ infer.missing.cell.labels  <- function(
   lambda = 0,
   sig_th = 3,
   net_slot = "ACTIONet",
-   thread_no = 0 
+   thread_no = 0
 ) {
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
