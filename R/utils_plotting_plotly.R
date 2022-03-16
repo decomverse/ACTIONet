@@ -168,6 +168,9 @@
   }
 
   trace_names <- gtools::mixedsort(unique(plot_data$labels))
+  if ("NA" %in% trace_names) {
+    trace_names = c("NA", trace_names[trace_names != "NA"])
+  }
 
   if (plot_3d == TRUE) {
     p <- plot_ly(type = "scatter3d", mode = "markers")
