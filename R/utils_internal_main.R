@@ -90,12 +90,19 @@
     }
   }
 
-  pruning.out <- prune_archetypes(
+  pruning.out <- .pruneArchetypes(
     C_trace = C_trace,
     H_trace = H_trace,
-    min_specificity_z_thresh = specificity_th,
-    min_cells = min_cells_per_arch
+    specificity_th = specificity_th,
+    min_cells_per_arch = min_cells_per_arch
   )
+
+  # pruning.out <- prune_archetypes(
+  #   C_trace = C_trace,
+  #   H_trace = H_trace,
+  #   min_specificity_z_thresh = specificity_th,
+  #   min_cells = min_cells_per_arch
+  # )
 
   if (return_raw == TRUE) {
     return(pruning.out)
@@ -159,13 +166,21 @@
     H_stacked <- Matrix::t(as.matrix(colMaps(ace)[[H_stacked_slot]]))
   }
 
-  unification.out <- unify_archetypes(
+  unification.out <- .unifyArchetypes(
     S_r = S_r,
     C_stacked = C_stacked,
     H_stacked = H_stacked,
     violation_threshold = violation_threshold,
     thread_no = thread_no
   )
+
+  # unification.out <- unify_archetypes(
+  #   S_r = S_r,
+  #   C_stacked = C_stacked,
+  #   H_stacked = H_stacked,
+  #   violation_threshold = violation_threshold,
+  #   thread_no = thread_no
+  # )
 
   if (return_raw == TRUE) {
     return(unification.out)

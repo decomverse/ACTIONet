@@ -176,8 +176,8 @@
   return(attr)
 }
 
-.checkSparse <- function(X){
-  
+.validate_matrix <- function(X){
+
   if(ACTIONetExperiment:::is.sparseMatrix(X)) {
     if(!is(X, "dgCMatrix")) {
       X = as(X, "dgCMatrix")

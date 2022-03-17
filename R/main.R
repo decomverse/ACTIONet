@@ -19,9 +19,10 @@
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
 #' @param layout_algorithm Algorithm for computing plot layout. can be "UMAP", "TUMAP" (faster), or "forced_atlas". (default="TUMAP")
-#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
+#' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
+#' @param compute_specificity_parallel Run feature specificity enrichment using multiple cores. Setting this to `TRUE` on large datasets may cause an out of memory crash. (default=FALSE)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param seed Seed for random initialization. (default=0)
 #'
@@ -51,9 +52,10 @@ runACTIONet <- function(
   layout_compactness = 50,
   layout_epochs = 1000,
   layout_algorithm = c("tumap", "umap"),
-  layout_in_parallel = TRUE,
+  layout_parallel = TRUE,
   unification_th = 0,
   footprint_alpha = 0.85,
+  compute_specificity_parallel = FALSE,
   thread_no = 0,
   seed = 0
 ) {
@@ -129,7 +131,7 @@ runACTIONet <- function(
     compactness_level = layout_compactness,
     n_epochs = layout_epochs,
     algorithm = layout_algorithm,
-    thread_no = ifelse(layout_in_parallel, thread_no, 1),
+    thread_no = ifelse(layout_parallel, thread_no, 1),
     reduction_slot = NULL,
     net_slot = NULL,
     seed = seed
@@ -155,7 +157,7 @@ runACTIONet <- function(
     H = Matrix::t(archetype_footprint),
     assay_name = NULL,
     footprint_slot = NULL,
-    thread_no = thread_no,
+    thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
     return_raw = FALSE
   )
 
@@ -191,10 +193,11 @@ runACTIONet <- function(
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
 #' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
-#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
+#' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
 #' @param thread_no Number of parallel threads. (default=0)
+#' @param compute_specificity_parallel Run feature specificity enrichment using multiple cores. Setting this to `TRUE` on large datasets may cause an out of memory crash. (default=FALSE)
 #' @param full_trace Return list of all intermediate output. Intended for debugging. (default=FALSE)
 #' @param seed Seed for random initialization. (default=0)
 #'
@@ -207,29 +210,32 @@ runACTIONet <- function(
 #' ace <- reduce.ace(ace)
 #' ace <- run.ACTIONet(ace)
 #' @export
-run.ACTIONet <- function(ace,
-                         k_min = 2,
-                         k_max = 30,
-                         assay_name = "logcounts",
-                         reduction_slot = "ACTION",
-                         net_slot_out = "ACTIONet",
-                         min_cells_per_arch = 2,
-                         max_iter_ACTION = 50,
-                         specificity_th = -3,
-                         network_metric = "jsd",
-                         network_algorithm = "k*nn",
-                         network_density = 1,
-                         mutual_edges_only = TRUE,
-                         layout_compactness = 50,
-                         layout_epochs = 1000,
-                         layout_algorithm = c("tumap", "umap"),
-                         layout_in_parallel = TRUE,
-                         unification_th = 0,
-                         footprint_alpha = 0.85,
-                         thread_no = 0,
-                         imputation_alpha = 0.9,
-                         full_trace = FALSE,
-                         seed = 0) {
+run.ACTIONet <- function(
+  ace,
+  k_min = 2,
+  k_max = 30,
+  assay_name = "logcounts",
+  reduction_slot = "ACTION",
+  net_slot_out = "ACTIONet",
+  min_cells_per_arch = 2,
+  max_iter_ACTION = 50,
+  specificity_th = -3,
+  network_metric = "jsd",
+  network_algorithm = "k*nn",
+  network_density = 1,
+  mutual_edges_only = TRUE,
+  imputation_alpha = 0.9,
+  layout_compactness = 50,
+  layout_epochs = 1000,
+  layout_algorithm = c("tumap", "umap"),
+  layout_parallel = TRUE,
+  unification_th = 0,
+  footprint_alpha = 0.85,
+  compute_specificity_parallel = FALSE,
+  thread_no = 0,
+  full_trace = FALSE,
+  seed = 0
+) {
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -255,14 +261,21 @@ run.ACTIONet <- function(ace,
   )
 
   # Prune nonspecific and/or unreliable archetypes
-  pruning.out <- .run.pruneArchetypes(
+  pruning.out <- .pruneArchetypes(
     C_trace = ACTION.out$C,
     H_trace = ACTION.out$H,
-    ace = NULL,
     specificity_th = specificity_th,
-    min_cells_per_arch = min_cells_per_arch,
-    return_raw = TRUE
+    min_cells_per_arch = min_cells_per_arch
   )
+
+  # pruning.out <- .run.pruneArchetypes(
+  #   C_trace = ACTION.out$C,
+  #   H_trace = ACTION.out$H,
+  #   ace = NULL,
+  #   specificity_th = specificity_th,
+  #   min_cells_per_arch = min_cells_per_arch,
+  #   return_raw = TRUE
+  # )
 
   colMaps(ace)[["H_stacked"]] <- Matrix::t(as(pruning.out$H_stacked, "sparseMatrix"))
   colMapTypes(ace)[["H_stacked"]] <- "internal"
@@ -305,7 +318,7 @@ run.ACTIONet <- function(ace,
     compactness_level = layout_compactness,
     n_epochs = layout_epochs,
     algorithm = layout_algorithm,
-    thread_no = ifelse(layout_in_parallel, thread_no, 1),
+    thread_no = ifelse(layout_parallel, thread_no, 1),
     reduction_slot = NULL,
     net_slot = NULL,
     seed = seed
@@ -348,7 +361,7 @@ run.ACTIONet <- function(ace,
     H = Matrix::t(archetype_footprint),
     assay_name = NULL,
     footprint_slot = NULL,
-    thread_no = thread_no,
+    thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
     return_raw = FALSE
   )
 
@@ -393,7 +406,7 @@ run.ACTIONet <- function(ace,
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
 #' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
-#' @param layout_in_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
+#' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param reduction_slot Slot in colMaps(ace) containing reduced kernel. (default='ACTION')
 #' @param new_net_slot Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')
@@ -414,7 +427,7 @@ rebuildACTIONet <- function(ace,
                                 layout_compactness = 50,
                                 layout_epochs = 1000,
                                 layout_algorithm = c("tumap", "umap"),
-                                layout_in_parallel = TRUE,
+                                layout_parallel = TRUE,
                                 thread_no = 0,
                                 reduction_slot = "ACTION",
                                 new_net_slot = "ACTIONet",
@@ -453,7 +466,7 @@ rebuildACTIONet <- function(ace,
     compactness = layout_compactness,
     epochs = layout_epochs,
     algorithm = layout_algorithm,
-    thread_no = ifelse(layout_in_parallel, thread_no, 1),
+    thread_no = ifelse(layout_parallel, thread_no, 1),
     network_density = network_density,
     mutual_edges_only = mutual_edges_only,
     reduction_slot = reduction_slot,
@@ -542,6 +555,7 @@ rerunArchAggr <- function(ace,
                           mutual_edges_only = TRUE,
                           layout_compactness = 50,
                           layout_epochs = 100,
+                          compute_specificity_parallel = FALSE,
                           thread_no = 0,
                           unification_th = 0) {
   if (!(assay_name %in% names(assays(ace)))) {
@@ -615,7 +629,7 @@ rerunArchAggr <- function(ace,
     H = Matrix::t(archetype_footprint),
     assay_name = NULL,
     footprint_slot = NULL,
-    thread_no = thread_no,
+    thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
     return_raw = FALSE
   )
 
