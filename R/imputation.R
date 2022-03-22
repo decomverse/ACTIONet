@@ -23,7 +23,12 @@ imputeGenes <- function(
 
     expr_raw = SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, , drop = FALSE]
 
-    G <- .validate_net(ace, net_slot)
+    G <- .validate_net(
+      ace = ace,
+      net_slot = net_slot,
+      matrix_type = "sparse",
+      force_type = TRUE
+    )
 
     if (algorithm == "pca") {
 
@@ -61,7 +66,7 @@ imputeGenes <- function(
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
 
             H <- networkDiffusion(
-              data = G,
+              obj = G,
               scores = colMaps(ace)[["H_unified"]],
               algorithm = diffusion_algorithm,
               alpha = alpha,
@@ -78,7 +83,7 @@ imputeGenes <- function(
 
     } else if (algorithm == "actionet") {
         expr_imp <- networkDiffusion(
-          data = G,
+          obj = G,
           scores = Matrix::t(expr_raw),
           algorithm = diffusion_algorithm,
           alpha = alpha,
@@ -97,7 +102,7 @@ imputeGenes <- function(
     m2 <- apply(expr_imp, 1, max)
     ratio <- m1 / m2
     ratio[m2 == 0] <- 1
-    D <- Diagonal(nrow(expr_imp), ratio)
+    D <- Matrix::Diagonal(nrow(expr_imp), ratio)
     expr_imp <- Matrix::t(as.matrix(D %*% expr_imp))
 
     return(expr_imp)
@@ -159,8 +164,7 @@ impute.specific.genes.using.archetypes <- function(ace, genes, features_use = NU
 
 #' Gene expression imputation using network diffusion.
 #'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
+#' @param ace ACTIONetExperiment object containing output of 'run.ACTIONet()'.
 #' @param genes The list of genes to perform imputation on.
 #' @param features_use A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'genes'.
 #' @param alpha Depth of diffusion between (0, 1).

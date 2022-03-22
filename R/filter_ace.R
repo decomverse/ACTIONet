@@ -13,16 +13,21 @@ filter.ace <- function(
   return_fil_ace = TRUE
 ) {
 
-    ## TODO: Dense matrix compatibility
     init_dim = dim(ace)
     init_dnames = dimnames(ace)
 
+    # if(is.null(assay_name)){
+    #   X = SummarizedExperiment::assays(ace)[[1]]
+    # } else {
+    #   X = SummarizedExperiment::assays(ace)[[assay_name]]
+    # }
+    # X = as(X, "dgCMatrix")
+
     if(is.null(assay_name)){
-      X = SummarizedExperiment::assays(ace)[[1]]
-    } else {
-      X = SummarizedExperiment::assays(ace)[[assay_name]]
+      assay_name = names(SummarizedExperiment::assays(ace))[1]
     }
-    X = as(X, "dgCMatrix")
+    X = .validate_assay(ace = ace, assay_name = assay_name)
+
     dimnames(X) = list(1:NROW(X), 1:NCOL(X))
 
     i = 0
@@ -41,7 +46,8 @@ filter.ace <- function(
         }
 
         if (!is.null(min_feats_per_cell)) {
-            feature_mask = Matrix::colSums(as(X > 0, "dgCMatrix")) >= min_feats_per_cell
+            feature_mask = Matrix::colSums(.validate_matrix(X > 0)) >= min_feats_per_cell
+            # feature_mask = Matrix::colSums(as(X > 0, "dgCMatrix")) >= min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
 
@@ -51,7 +57,8 @@ filter.ace <- function(
             } else {
                 min_fc = min_cells_per_feat
             }
-            cell_count_mask = ACTIONetExperiment:::fastRowSums(as(X > 0, "dgCMatrix")) >= min_fc
+            cell_count_mask = ACTIONetExperiment:::fastRowSums(.validate_matrix(X > 0)) >= min_fc
+            # cell_count_mask = ACTIONetExperiment:::fastRowSums(as(X > 0, "dgCMatrix")) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
 

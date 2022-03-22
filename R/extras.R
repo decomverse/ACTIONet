@@ -48,13 +48,13 @@ combine.logPvals <- function(
     kappa_val = 1/log(exp(1), base = base)
     logPvals = kappa_val * logPvals
 
-    combbined.log.pvals = -apply(logPvals, 2, function(lx) {
+    combined.log.pvals = -apply(logPvals, 2, function(lx) {
         perm = order(lx, decreasing = TRUE)
 
         return(log(top.len) - matrixStats::logSumExp(lx[perm[1:top.len]]))
     })
 
-    return(combbined.log.pvals)
+    return(combined.log.pvals)
 }
 
 

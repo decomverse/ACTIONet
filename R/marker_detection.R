@@ -16,12 +16,19 @@ findMarkers.ACTIONet <- function(
   sa = ACTIONetExperiment::get.data.or.split(ace, attr = cluster_attr, to_return = "levels")
   features_use = .get_feature_vec(ace, features_use = features_use)
 
+  # specificity <- clusterFeatureSpecificity(
+  #   ace = NULL,
+  #   S = SummarizedExperiment::assays(ace)[[assay_name]],
+  #   cluster_attr = sa$index,
+  #   output_prefix = NULL,
+  #   assay_name = NULL,
+  #   thread_no = thread_no,
+  #   return_raw = TRUE
+  # )
   specificity <- clusterFeatureSpecificity(
-    ace = NULL,
-    S = SummarizedExperiment::assays(ace)[[assay_name]],
+    obj = ace,
     cluster_attr = sa$index,
-    output_prefix = NULL,
-    assay_name = NULL,
+    assay_name = assay_name,
     thread_no = thread_no,
     return_raw = TRUE
   )
