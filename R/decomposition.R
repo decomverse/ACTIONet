@@ -305,7 +305,6 @@ decomp.ACTION <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  # S_r <- Matrix::t(scale(X))
   S_r <- Matrix::t(X)
 
   if(is.null(k_max) || k_max == k) {
