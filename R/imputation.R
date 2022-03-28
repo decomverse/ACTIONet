@@ -37,9 +37,10 @@ imputeGenes <- function(
             err <- sprintf("`%s` does not exist in rowMaps(ace). Run `reduce.ace()`.", V_slot)
             stop(err)
         }
-
-        if (!("SVD_V_smooth" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
-
+        
+        smooth_red_name = sprintf("%s_smooth", reduction_slot)
+        smooth_U_name = sprintf("%s_U", reduction_slot)
+        if ( !(smooth_red_name %in% names(colMaps(ace)) || smooth_U_name %in% names(rowMaps(ace)) || force_reimpute == TRUE) ){
             out <- .smoothPCs(
               ace = ace,
               G = G,
@@ -55,8 +56,8 @@ imputeGenes <- function(
             W <- out$SVD.out$u
             W <- W[idx_feat, , drop = FALSE]
         } else {
-            W <- rowMaps(ace)[["SVD_U"]][idx_feat, , drop = FALSE]
-            H <- colMaps(ace)[["SVD_V_smooth"]]
+            W <- rowMaps(ace)[[smooth_U_name]][idx_feat, , drop = FALSE]
+            H <- colMaps(ace)[[smooth_red_name]]
         }
 
         expr_imp <- W %*% Matrix::t(H)

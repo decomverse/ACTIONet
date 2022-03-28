@@ -148,7 +148,7 @@ archetypeFeatureSpecificity <- function(
 
   H <- .validate_map(
     ace = ace,
-    map_slot = "footprint_slot",
+    map_slot = footprint_slot,
     matrix_type = "dense",
     force_type = TRUE
   )

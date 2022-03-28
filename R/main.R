@@ -52,7 +52,7 @@ runACTIONet <- function(
   imputation_alpha = 0.9,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
+  layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   unification_th = 0,
   footprint_alpha = 0.85,
@@ -69,36 +69,8 @@ runACTIONet <- function(
 
   set.seed(seed)
 
-  # if (!(assay_name %in% names(assays(ace)))) {
-  #   err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
-  #   stop(err)
-  # }
-
   .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
-
-  # if (!(reduction_slot %in% names(colMaps(ace)))) {
-  #   err <- sprintf("Attribute '%s' is not in 'colMaps'/'reducedDims' of '%s' object.\n", assay_name, class(ace))
-  #   stop(err)
-  # }
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
-
-
-  # S <- SummarizedExperiment::assays(ace)[[assay_name]]
-  # S_r <- Matrix::t(colMaps(ace)[[reduction_slot]])
-
-  # ace <- decomp.ACTION_MR(
-  #   ace = ace,
-  #   S_r = S_r,
-  #   k_min = k_min,
-  #   k_max = k_max,
-  #   specificity_th = specificity_th,
-  #   min_cells_per_arch = min_cells_per_arch,
-  #   unification_th = unification_th,
-  #   max_iter = max_iter_ACTION,
-  #   thread_no = thread_no,
-  #   reduction_slot = reduction_slot,
-  #   seed = seed
-  # )
 
   ace <- .run.ACTION_MR.ace(
     ace = ace,
@@ -111,6 +83,7 @@ runACTIONet <- function(
     max_iter = max_iter_ACTION,
     thread_no = thread_no,
     unified_suffix = "unified",
+    footprint_slot_name = "assigned_archetype",
     reduction_slot = reduction_slot,
     seed = seed
   )
@@ -142,20 +115,6 @@ runACTIONet <- function(
     net_slot = net_slot_out,
     thread_no = thread_no
   )
-  #
-  # ace <- .smoothPCs(
-  #   ace = ace,
-  #   S_r = colMaps(ace)[[reduction_slot]],
-  #   V = rowMaps(ace)[[sprintf("%s_V", reduction_slot)]],
-  #   A = rowMaps(ace)[[sprintf("%s_A", reduction_slot)]],
-  #   B = colMaps(ace)[[sprintf("%s_B", reduction_slot)]],
-  #   sigma = S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]],
-  #   G = G,
-  #   reduction_slot = NULL,
-  #   net_slot = NULL,
-  #   thread_no = thread_no,
-  #   return_raw = FALSE
-  # )
 
   # Layout ACTIONet. Now it uses the smoothed S_r. TODO: the fuck is this?
   ace <- .run.layoutNetwork(
@@ -168,20 +127,6 @@ runACTIONet <- function(
     thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
   )
-  # ace <- .run.layoutNetwork(
-  #   ace,
-  #   G = G,
-  #   initial_coordinates = colMaps(ace)[[reduction_slot]],
-  #   compactness_level = layout_compactness,
-  #   n_epochs = layout_epochs,
-  #   algorithm = layout_algorithm,
-  #   thread_no = ifelse(layout_parallel, thread_no, 1),
-  #   reduction_slot = NULL,
-  #   net_slot = NULL,
-  #   seed = seed
-  # )
-
-
 
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(
@@ -204,15 +149,6 @@ runACTIONet <- function(
     thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
     return_raw = FALSE
   )
-  # ace <- archetypeFeatureSpecificity(
-  #   ace = ace,
-  #   S = SummarizedExperiment::assays(ace)[[assay_name]],
-  #   H = Matrix::t(archetype_footprint),
-  #   assay_name = NULL,
-  #   footprint_slot = NULL,
-  #   thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
-  #   return_raw = FALSE
-  # )
 
   return(ace)
 }
@@ -270,7 +206,7 @@ run.ACTIONet <- function(
   imputation_alpha = 0.9,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
+  layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   unification_th = 0,
   footprint_alpha = 0.85,
@@ -279,6 +215,7 @@ run.ACTIONet <- function(
   full_trace = FALSE,
   seed = 0
 ) {
+  
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)
@@ -356,29 +293,15 @@ run.ACTIONet <- function(
     thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
   )
-  # ace <- .run.layoutNetwork(
-  #   ace,
-  #   G = G,
-  #   initial_coordinates = ACTIONetExperiment:::.tscalet(S_r),
-  #   compactness_level = layout_compactness,
-  #   n_epochs = layout_epochs,
-  #   algorithm = layout_algorithm,
-  #   thread_no = ifelse(layout_parallel, thread_no, 1),
-  #   reduction_slot = NULL,
-  #   net_slot = NULL,
-  #   seed = seed
-  # )
 
   # Identiy equivalent classes of archetypes and group them together
   ace <- .run.unifyArchetypes(
     ace = ace,
-    S_r = S_r,
-    C_stacked = pruning.out$C_stacked,
-    H_stacked = pruning.out$H_stacked, ,
-    reduction_slot = NULL,
-    C_stacked_slot = NULL,
-    H_stacked_slot = NULL,
     unification_th = unification_th,
+    reduction_slot = reduction_slot,
+    C_stacked_slot = "C_stacked",
+    H_stacked_slot = "H_stacked",
+    footprint_slot_name = "assigned_archetype",
     thread_no = thread_no
   )
 
@@ -406,15 +329,6 @@ run.ACTIONet <- function(
     thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
     return_raw = FALSE
   )
-  # ace <- archetypeFeatureSpecificity(
-  #   ace = ace,
-  #   S = S,
-  #   H = Matrix::t(archetype_footprint),
-  #   assay_name = NULL,
-  #   footprint_slot = NULL,
-  #   thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
-  #   return_raw = FALSE
-  # )
 
   if (full_trace == TRUE) {
     trace <- list(
@@ -468,7 +382,7 @@ rebuildACTIONet <- function(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
+  layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
@@ -481,12 +395,6 @@ rebuildACTIONet <- function(
   layout_algorithm <- match.arg(layout_algorithm, several.ok = FALSE)
 
   .validate_ace(ace = ace, return_elem = FALSE)
-
-  # if (!(reduction_slot %in% names(colMaps(ace)))) {
-  #   err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", reduction_slot)
-  #   stop(err)
-  # }
-
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
 
   # re-Build ACTIONet
@@ -497,12 +405,6 @@ rebuildACTIONet <- function(
     force_type = TRUE
   )
   H_stacked <- Matrix::t(H_stacked)
-
-# if (!(H_stacked_slot %in% names(colMaps(ace)))) {
-#   err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", H_stacked_slot)
-#   stop(err)
-# }
-# H_stacked <- Matrix::t(as.matrix(colMaps(ace)[[H_stacked_slot]]))
 
   G <- buildNetwork(
     H = H_stacked,
@@ -556,7 +458,7 @@ rerunLayout <- function(
   ace,
   compactness = 50,
   epochs = 1000,
-  algorithm = c("tumap", "umap"),
+  algorithm = c("umap", "tumap"),
   network_density = 1,
   mutual_edges_only = TRUE,
   thread_no = 0,
@@ -570,19 +472,6 @@ rerunLayout <- function(
 
   .validate_ace(ace = ace, return_elem = FALSE)
 
-  # ace <- .run.layoutNetwork(
-  #   ace = ace,
-  #   G = NULL,
-  #   initial_coordinates = NULL,
-  #   compactness_level = compactness,
-  #   n_epochs = epochs,
-  #   algorithm = algorithm,
-  #   thread_no = thread_no,
-  #   reduction_slot = reduction_slot,
-  #   net_slot = net_slot,
-  #   seed = seed,
-  #   return_raw = FALSE
-  # )
   ace <- .run.layoutNetwork(
     ace = ace,
     compactness_level = compactness,
@@ -615,53 +504,6 @@ rerunArchAggr <- function(
 
   .validate_ace(ace = ace, return_elem = FALSE)
 
-  # if (!(assay_name %in% names(assays(ace)))) {
-  #   err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
-  #   stop(err)
-  # }
-  # S <- SummarizedExperiment::assays(ace)[[assay_name]]
-  # S <- .validate_assay(ace, assay_name = assay_name)
-
-  # if (!(reduction_slot %in% names(colMaps(ace)))) {
-  #   err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", reduction_slot)
-  #   stop(err)
-  # }
-  # S_r <- Matrix::t(scale(colMaps(ace)[[reduction_slot]]))
-  # S_r <- .validate_map(
-  #   ace = ace,
-  #   map_slot = reduction_slot,
-  #   matrix_type = "dense",
-  #   force_type = TRUE
-  # )
-  # S_r = Matrix::t(S_r)
-
-
-
-  # if (!(C_stacked_slot %in% names(colMaps(ace)))) {
-  #   err <- sprintf("Attribute '%s' is not in 'colMaps'.\n", C_stacked_slot)
-  #   stop(err)
-  # }
-  # C_stacked <- as.matrix(colMaps(ace)[[C_stacked_slot]])
-  # C_stacked <- .validate_map(
-  #   ace = ace,
-  #   map_slot = C_stacked_slot,
-  #   matrix_type = "dense",
-  #   force_type = TRUE
-  # )
-
-  # H_stacked <- .validate_map(
-  #   ace = ace,
-  #   map_slot = H_stacked_slot,
-  #   matrix_type = "dense",
-  #   force_type = TRUE
-  # )
-  # H_stacked <- Matrix::t(H_stacked)
-
-  # if (!(net_slot %in% names(colNets(ace)))) {
-  #   err <- sprintf("Attribute '%s' is not in 'colNets'.\n", net_slot)
-  #   stop(err)
-  # }
-  # G <- colNets(ace)[[net_slot]]
   G <- .validate_net(
     ace = ace,
     net_slot = net_slot,
@@ -705,26 +547,19 @@ rerunArchAggr <- function(
     thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
     return_raw = FALSE
   )
-  # ace <- archetypeFeatureSpecificity(
-  #   ace = ace,
-  #   S = S,
-  #   H = Matrix::t(archetype_footprint),
-  #   assay_name = NULL,
-  #   footprint_slot = NULL,
-  #   thread_no = ifelse(compute_specificity_parallel, thread_no, 1),
-  #   return_raw = FALSE
-  # )
 
   return(ace)
 }
 
-constructBackbone <- function(ace,
-                              network_density = 1,
-                              mutual_edges_only = TRUE,
-                              layout_algorithm = c("tumap", "umap"),
-                              layout_compactness = 50,
-                              layout_epochs = 100,
-                              net_slot = "ACTIONet") {
+constructBackbone <- function(
+  ace,
+  network_density = 1,
+  mutual_edges_only = TRUE,
+  layout_algorithm = c("tumap", "umap"),
+  layout_compactness = 50,
+  layout_epochs = 100,
+  net_slot = "ACTIONet"
+  ) {
 
   backbone <- list()
   metadata(ace)$backbone <- backbone
