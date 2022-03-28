@@ -150,7 +150,6 @@ namespace ACTIONet
 
     int sample_no = H.n_cols;
     int dim = H.n_rows;
-    // stdout_printf("sample # = %d, dim = %d\n", sample_no, dim);
 
     mat G = zeros(sample_no, sample_no);
     parallelFor(0, sample_no, [&] (size_t i) {
@@ -232,12 +231,6 @@ namespace ACTIONet
     hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
-    // std::unique_ptr<hnswlib::JSDSpace> space =
-    // std::unique_ptr<hnswlib::JSDSpace>(new hnswlib::JSDSpace(dim));
-    // std::unique_ptr<hnswlib::HierarchicalNSW<double>> appr_alg =
-    // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
-    // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
-    // ef_construction));
     int max_elements = H.n_cols;
     stdout_printf("\tBuilding index ... ");
     fmat X = conv_to<fmat>::from(H);
@@ -249,7 +242,6 @@ namespace ACTIONet
     stdout_printf("\tIdentifying nearest neighbors ... ");
     mat idx = zeros(sample_no, kNN + 1);
     mat dist = zeros(sample_no, kNN + 1);
-    //		for(int i = 0; i < sample_no; i++) {
     parallelFor(0, sample_no, [&] (size_t i)
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
@@ -257,10 +249,7 @@ namespace ACTIONet
 
                   if (result.size() != (kNN + 1))
                   {
-                    /*stdout_printf(
-          "Unable to find %d results. Probably ef (%f) or M (%f) is too "
-          "small\n",
-          kNN, ef, M);*/
+
                     stdout_printf("%f", result.size());
                   }
 
@@ -373,8 +362,8 @@ namespace ACTIONet
     }
 
     stdout_printf("Building adaptive network (%d threads):\n", thread_no);
-    stdout_printf("\tParameters: density = %0.2f, mutual_edges_only = %s\n",
-                  density, mutual_edges_only ? "TRUE" : "FALSE");
+    stdout_printf("\tParameters: metric = %s, density = %0.2f, mutual_edges_only = %s\n",
+                  distance_metric.c_str(), density, mutual_edges_only ? "TRUE" : "FALSE");
     FLUSH;
 
     if (distance_metric == "jsd")
@@ -393,12 +382,6 @@ namespace ACTIONet
     hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
-    // std::unique_ptr<hnswlib::JSDSpace> space =
-    // std::unique_ptr<hnswlib::JSDSpace>(new hnswlib::JSDSpace(dim));
-    // std::unique_ptr<hnswlib::HierarchicalNSW<double>> appr_alg =
-    // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
-    // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
-    // ef_construction));
     stdout_printf("\tBuilding index ... ");
     fmat X = conv_to<fmat>::from(H);
     int max_elements = X.n_cols;
@@ -412,8 +395,6 @@ namespace ACTIONet
     vector<vector<int>> jj(thread_no);
     vector<vector<double>> vv(thread_no);
 
-    //		for(int i = 0; i < sample_no; i++) {
-    //parallelFor(0, sample_no, [&] (size_t i)
     ParallelFor(0, sample_no, thread_no, [&](size_t i, size_t threadId)
 
                 {
@@ -516,13 +497,6 @@ namespace ACTIONet
     hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
-    // std::unique_ptr<hnswlib::JSDSpace> space =
-    // std::unique_ptr<hnswlib::JSDSpace>(new hnswlib::JSDSpace(dim));
-    // std::unique_ptr<hnswlib::HierarchicalNSW<double>> appr_alg =
-    // std::unique_ptr<hnswlib::HierarchicalNSW<double>>(new
-    // hnswlib::HierarchicalNSW<double>(space.get(), max_elements, M,
-    // ef_construction));
-
     stdout_printf("\tBuilding index ... ");
     int max_elements = H.n_cols;
     fmat X = conv_to<fmat>::from(H);
@@ -533,17 +507,10 @@ namespace ACTIONet
     sp_mat G(sample_no, sample_no);
 
     stdout_printf("\tConstructing k*-NN ... ");
-    //		for(int i = 0; i < sample_no; i++) {
     parallelFor(0, sample_no, [&] (size_t i)
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), k);
-
-                  // if (result.size() != (k))
-                  // {
-                  //   //X.col(i).print("X");
-                  //   printf("%d- %d\n", i, result.size());
-                  // }
 
                   for (size_t j = 0; j < result.size(); j++)
                   {
