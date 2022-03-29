@@ -369,7 +369,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
       normalize = TRUE,
       H.slot = H_slot
     ))
-    marker_stats = networkDiffusion(data = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
+    marker_stats = networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
 
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
@@ -427,7 +427,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
       normalize = TRUE,
       H.slot = H_slot
     ))
-    marker_stats = networkDiffusion(data = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
+    marker_stats = networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
 
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))

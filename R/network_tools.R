@@ -19,7 +19,6 @@ networkDiffusion <- function(
     stop(err)
   }
 
-  # G <- .validate_net(obj, net_slot)
   G <- .ace_or_net(
     obj = obj,
     net_slot = net_slot,
@@ -75,7 +74,6 @@ networkCentrality <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  # G <- .validate_net(obj, net_slot)
   G <- .ace_or_net(
     obj = obj,
     net_slot = net_slot,
@@ -100,7 +98,6 @@ networkCentrality <- function(
   }
 
   if (!is.null(label_attr)) {
-    # label_attr <- .validate_attr(obj, label_attr)
     label_attr <- .validate_attr(obj, attr = label_attr, obj_name = "obj", attr_name = "label_attr")
     assignments = as.numeric(factor(label_attr))
   }
@@ -167,7 +164,6 @@ networkPropagation <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  # G <- .validate_net(obj, net_slot)
   G <- .ace_or_net(
     obj = obj,
     net_slot = net_slot,
@@ -176,7 +172,6 @@ networkPropagation <- function(
     obj_name = "obj"
   )
 
-  # lf <- factor(.validate_attr(obj, label_attr))
   lf <- factor(.validate_attr(obj, attr = label_attr, obj_name = "obj", attr_name = "label_attr"))
   labels = as.numeric(lf)
   keys = levels(lf)
@@ -268,7 +263,6 @@ networkAutocorrelation <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  # G <- .validate_net(G, net_slot)
   G <- .ace_or_net(
     obj = obj,
     net_slot = net_slot,

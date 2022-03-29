@@ -224,7 +224,7 @@
       }
     }
   } else {
-    if(ACTIONetExperiment:::is.sparseMatrix(X)) {
+    if(ACTIONetExperiment:::is.sparseMatrix(x)) {
       if(!is(x, "dgCMatrix")) {
         x = as(x, "dgCMatrix")
       }
