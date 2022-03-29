@@ -201,6 +201,8 @@
   return_elem = TRUE
 ){
 
+  matrix_type = match.arg(matrix_type, several.ok = FALSE)
+
   if (matrix_type == "sparse") {
     if(ACTIONetExperiment:::is.sparseMatrix(x)) {
       if(!is(x, "dgCMatrix")) {
