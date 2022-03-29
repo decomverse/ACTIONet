@@ -1,5 +1,3 @@
-.layout_alg_choices = c("tumap", "umap")
-
 #' Run main ACTIONet pipeline
 #'
 #' @param ace `ACTIONetExperiment` containing an appropriate reduction in 'reduction_slot'.
@@ -65,7 +63,7 @@ runACTIONet <- function(
     ace <- as(ace, "ACTIONetExperiment")
 
   layout_algorithm = tolower(layout_algorithm)
-  layout_algorithm <- match.arg(layout_algorithm, choices = .layout_alg_choices, several.ok = FALSE)
+  layout_algorithm <- match.arg(layout_algorithm, several.ok = FALSE)
 
   set.seed(seed)
 
@@ -225,7 +223,7 @@ run.ACTIONet <- function(
     stop(err)
   }
   layout_algorithm = tolower(layout_algorithm)
-  layout_algorithm <- match.arg(layout_algorithm, choices = .layout_alg_choices, several.ok = FALSE)
+  layout_algorithm <- match.arg(layout_algorithm, several.ok = FALSE)
 
   ace <- as(ace, "ACTIONetExperiment")
   S <- SummarizedExperiment::assays(ace)[[assay_name]]
