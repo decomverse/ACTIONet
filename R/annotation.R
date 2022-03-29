@@ -476,7 +476,7 @@ annotateArchs <- function(ace, annotation_source, archetype_slot = "H_unified") 
 }
 
 
-annotateClusters <- function(ace, annotation_source, cluster_name = "Leiden") {
+annotateClusters <- function(ace, annotation_source, cluster_name = "leiden") {
   cluster_slot <- sprintf("%s_markers_ACTIONet", cluster_name)
 
   if (!is.list(annotation_source)) {

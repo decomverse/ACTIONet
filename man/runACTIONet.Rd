@@ -21,10 +21,11 @@ runACTIONet(
   imputation_alpha = 0.9,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
-  layout_in_parallel = TRUE,
+  layout_algorithm = c("umap", "tumap"),
+  layout_parallel = TRUE,
   unification_th = 0,
-  footprint_alpha = 0.15,
+  footprint_alpha = 0.85,
+  compute_specificity_parallel = FALSE,
   thread_no = 0,
   seed = 0
 )
@@ -65,11 +66,13 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{layout_algorithm}{Algorithm for computing plot layout. can be "UMAP", "TUMAP" (faster), or "forced_atlas". (default="TUMAP")}
 
-\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
+\item{layout_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
 \item{unification_th}{Archetype unification resolution parameter. (default=0)}
 
 \item{footprint_alpha}{Archetype smoothing parameter. (default=0.85)}
+
+\item{compute_specificity_parallel}{Run feature specificity enrichment using multiple cores. Setting this to `TRUE` on large datasets may cause an out of memory crash. (default=FALSE)}
 
 \item{thread_no}{Number of parallel threads. (default=0)}
 

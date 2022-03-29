@@ -15,6 +15,12 @@ using namespace arma;
 #define ARMA_USE_CXX11_RNG
 #define DYNSCHED
 
+// template <typename T>
+// Rcpp::NumericVector arma2vec(const T &x)
+// {
+//   return Rcpp::NumericVector(x.begin(), x.end());
+// }
+
 // [[Rcpp::export]]
 vec roll_var(vec &X) {
   const uword n_max = X.n_elem;

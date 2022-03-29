@@ -5,12 +5,11 @@
 \title{Prune nonspecific and/or unreliable archetypes}
 \usage{
 .run.pruneArchetypes(
+  ace,
   C_trace,
   H_trace,
-  ace = NULL,
   specificity_th = -3,
-  min_cells_per_arch = 2,
-  return_raw = FALSE
+  min_cells_per_arch = 2
 )
 }
 \description{

@@ -2760,7 +2760,7 @@ RcppExport SEXP _ACTIONet_NetEnh(SEXP ASEXP) {
     return rcpp_result_gen;
 }
 // run_LPA
-vec run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_, int thread_no);
+Rcpp::NumericVector run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_, int thread_no);
 static SEXP _ACTIONet_run_LPA_try(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -3864,7 +3864,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*orthogonalize_basal_full)(mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
         signatures.insert("umat(*MWM_rank1)(vec,vec,double,double)");
         signatures.insert("mat(*NetEnh)(mat)");
-        signatures.insert("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
+        signatures.insert("Rcpp::NumericVector(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
         signatures.insert("List(*run_AA_with_batch_correction)(mat&,mat&,vec,int,int,double,double)");
         signatures.insert("List(*run_ACTION_with_batch_correction)(mat&,vec,int,int,int,int,int,double,double)");
         signatures.insert("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");

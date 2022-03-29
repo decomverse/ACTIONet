@@ -1578,11 +1578,11 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline vec run_LPA(sp_mat& G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0) {
+    inline Rcpp::NumericVector run_LPA(sp_mat& G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0) {
         typedef SEXP(*Ptr_run_LPA)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_LPA p_run_LPA = NULL;
         if (p_run_LPA == NULL) {
-            validateSignature("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
+            validateSignature("Rcpp::NumericVector(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
             p_run_LPA = (Ptr_run_LPA)R_GetCCallable("ACTIONet", "_ACTIONet_run_LPA");
         }
         RObject rcpp_result_gen;
@@ -1596,7 +1596,7 @@ namespace ACTIONet {
             throw Rcpp::LongjumpException(rcpp_result_gen);
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<vec >(rcpp_result_gen);
+        return Rcpp::as<Rcpp::NumericVector >(rcpp_result_gen);
     }
 
     inline List run_AA_with_batch_correction(mat& Z, mat& W0, vec batch, int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {

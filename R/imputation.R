@@ -40,7 +40,7 @@ imputeGenes <- function(
               alpha = alpha,
               diffusion_it = diffusion_it,
               reduction_slot = reduction_slot,
-              net_slot = net_slot
+              net_slot = net_slot,
               thread_no = thread_no,
               return_raw = TRUE
             )

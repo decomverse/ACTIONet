@@ -159,6 +159,8 @@
   return_type = "data",
   obj_name = "obj",
   attr_name = "attr",
+  split_d = 2,
+  match_row = FALSE,
   return_elem = TRUE
 ){
 
@@ -174,16 +176,23 @@
 
   if (is(obj, "ACTIONetExperiment")) {
 
-    attr = ACTIONetExperiment::get.obj.or.split(obj, attr = attr, to_return = return_type)
+    attr = ACTIONetExperiment::get.data.or.split(obj, attr = attr, to_return = return_type, d = split_d)
 
   } else {
 
     attr = c(attr)
-    if ( !(length(attr) == NCOL(obj)) ){
-      err = sprintf("'length(%s)' must equal 'NCOL(%s)'.\n", attr_name, obj_name)
-      stop(err)
-    }
 
+    if (match_row == TRUE) {
+      if ( !(length(attr) == NROW(obj)) ){
+        err = sprintf("'length(%s)' must equal 'NROW(%s)'.\n", attr_name, obj_name)
+        stop(err)
+      }
+    } else {
+      if ( !(length(attr) == NCOL(obj)) ){
+        err = sprintf("'length(%s)' must equal 'NCOL(%s)'.\n", attr_name, obj_name)
+        stop(err)
+      }
+    }
   }
 
   if(return_elem == TRUE) {

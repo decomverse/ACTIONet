@@ -5,15 +5,13 @@
 \title{Identiy equivalent classes of archetypes and group them together}
 \usage{
 .run.unifyArchetypes(
-  ace = NULL,
-  S_r = NULL,
-  C_stacked = NULL,
-  H_stacked = NULL,
+  ace,
+  unification_th = 0,
   reduction_slot = "ACTION",
   C_stacked_slot = "C_stacked",
   H_stacked_slot = "H_stacked",
   unified_suffix = "unified",
-  violation_threshold = 0,
+  footprint_slot_name = "assigned_archetype",
   thread_no = 0,
   return_raw = FALSE
 )
