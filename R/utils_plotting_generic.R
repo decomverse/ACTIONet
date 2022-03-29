@@ -53,11 +53,19 @@ CPal_default <- c(
     return(NULL)
   }
 
-  if (is(data, "ACTIONetExperiment")) {
-    plot_labels <- ACTIONetExperiment::get.data.or.split(data, attr = label_attr, to_return = "data")
-  } else {
-    plot_labels <- label_attr
-  }
+  # if (is(data, "ACTIONetExperiment")) {
+  #   plot_labels <- ACTIONetExperiment::get.data.or.split(data, attr = label_attr, to_return = "data")
+  # } else {
+  #   plot_labels <- label_attr
+  # }
+
+  plot_labels <- .validate_attr(
+    obj = data,
+    attr = label_attr,
+    obj_name = "data",
+    attr_name = "label_attr",
+    match_row = TRUE
+  )
 
   plot_labels <- as.character(plot_labels)
 
@@ -91,11 +99,18 @@ CPal_default <- c(
         plot_colors <- c(color_attr)
       }
     } else if (is.character(color_attr)) {
-      if (length(color_attr) == 1) {
-        plot_colors <- ACTIONetExperiment::get.data.or.split(data, attr = color_attr, to_return = "data")
-      } else {
-        plot_colors <- color_attr
-      }
+        plot_colors <- .validate_attr(
+          obj = data,
+          attr = color_attr,
+          obj_name = "data",
+          attr_name = "color_attr",
+          match_row = TRUE
+        )
+      # if (length(color_attr) == 1) {
+      #   plot_colors <- ACTIONetExperiment::get.data.or.split(data, attr = color_attr, to_return = "data")
+      # } else {
+      #   plot_colors <- color_attr
+      # }
     } else if (is.numeric(color_attr) && length(color_attr) == n_dim) {
       plot_colors <- color_attr
     }else {
@@ -158,8 +173,8 @@ CPal_default <- c(
 
 
 .get_plot_transparency <- function(
-  trans_attr = NULL,
-  ace = NULL,
+  trans_attr,
+  data,
   trans_fac = 1.5,
   trans_th = -0.5,
   scale = TRUE
@@ -169,7 +184,15 @@ CPal_default <- c(
     return(1)
   }
 
-  alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
+  alpha_fac <- .validate_attr(
+    obj = data,
+    attr = trans_attr,
+    obj_name = "data",
+    attr_name = "trans_attr",
+    match_row = TRUE
+  )
+
+  # alpha_fac <- ACTIONetExperiment::get.data.or.split(ace, attr = trans_attr, to_return = "data")
 
   if (scale == TRUE) {
     z <- scale(alpha_fac)

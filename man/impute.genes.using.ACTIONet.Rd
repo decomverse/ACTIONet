@@ -15,8 +15,7 @@ impute.genes.using.ACTIONet(
 )
 }
 \arguments{
-\item{ace}{Input results to be clustered
-(alternatively it can be the ACTIONet igraph object)}
+\item{ace}{ACTIONetExperiment object containing output of 'run.ACTIONet()'.}
 
 \item{genes}{The list of genes to perform imputation on.}
 

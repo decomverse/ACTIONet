@@ -8,7 +8,7 @@ rerunLayout(
   ace,
   compactness = 50,
   epochs = 1000,
-  algorithm = c("tumap", "umap"),
+  algorithm = c("umap", "tumap"),
   network_density = 1,
   mutual_edges_only = TRUE,
   thread_no = 0,
