@@ -23,13 +23,6 @@ imputeGenes <- function(
 
     expr_raw = SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, , drop = FALSE]
 
-    G <- .validate_net(
-      ace = ace,
-      net_slot = net_slot,
-      matrix_type = "sparse",
-      force_type = TRUE
-    )
-
     if (algorithm == "pca") {
 
         V_slot <- sprintf("%s_V", reduction_slot)
@@ -43,11 +36,11 @@ imputeGenes <- function(
         if ( !(smooth_red_name %in% names(colMaps(ace)) || smooth_U_name %in% names(rowMaps(ace)) || force_reimpute == TRUE) ){
             out <- .smoothPCs(
               ace = ace,
-              G = G,
               diffusion_algorithm = diffusion_algorithm,
               alpha = alpha,
               diffusion_it = diffusion_it,
               reduction_slot = reduction_slot,
+              net_slot = net_slot
               thread_no = thread_no,
               return_raw = TRUE
             )
@@ -67,12 +60,13 @@ imputeGenes <- function(
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
 
             H <- networkDiffusion(
-              obj = G,
+              obj = ace,
               scores = colMaps(ace)[["H_unified"]],
               algorithm = diffusion_algorithm,
               alpha = alpha,
               thread_no = thread_no,
-              max_it = diffusion_it
+              max_it = diffusion_it,
+              net_slot = net_slot
             )
 
         } else {
@@ -84,14 +78,13 @@ imputeGenes <- function(
 
     } else if (algorithm == "actionet") {
         expr_imp <- networkDiffusion(
-          obj = G,
+          obj = ace,
           scores = Matrix::t(expr_raw),
           algorithm = diffusion_algorithm,
           alpha = alpha,
           thread_no = thread_no,
           max_it = diffusion_it,
-          res_threshold = 1e-8,
-          net_slot = NULL
+          net_slot = net_slot
         )
         expr_imp = Matrix::t(expr_imp)
     }
