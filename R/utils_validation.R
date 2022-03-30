@@ -256,15 +256,15 @@
   assay_name = NULL,
   matrix_type = c("either", "sparse", "dense"),
   force_type = FALSE,
-  obj_name = "obj",
+  obj_name = NULL,
   return_elem = TRUE
 ){
 
   if (is(obj, "ACTIONetExperiment")) {
     x <- .validate_assay(
-      ace = ace,
+      ace = obj,
       assay_name = assay_name,
-      ace_name = obj_name,
+      ace_name = ifelse(is.null(obj_name), "ace", obj_name),
       matrix_type = matrix_type,
       force_type = force_type,
       return_elem = return_elem
@@ -273,7 +273,7 @@
   } else {
     x <- .validate_matrix(
       x = obj,
-      var_name = obj_name,
+      var_name = ifelse(is.null(obj_name), "obj", obj_name),
       matrix_type = matrix_type,
       force_type = force_type,
       return_elem = return_elem
@@ -289,7 +289,7 @@
   map_slot = NULL,
   matrix_type = c("either", "sparse", "dense"),
   force_type = FALSE,
-  obj_name = "obj",
+  obj_name = NULL,
   row = FALSE,
   return_elem = TRUE
 ){
@@ -298,7 +298,7 @@
     x <- .validate_map(
       ace = obj,
       map_slot = map_slot,
-      ace_name = obj_name,
+      ace_name = ifelse(is.null(obj_name), "ace", obj_name),
       matrix_type = matrix_type,
       force_type = force_type,
       row = row,
@@ -307,7 +307,7 @@
   } else {
     x <- .validate_matrix(
       x = obj,
-      var_name = obj_name,
+      var_name = ifelse(is.null(obj_name), "obj", obj_name),,
       matrix_type = matrix_type,
       force_type = force_type,
       return_elem = return_elem
@@ -323,7 +323,7 @@
   net_slot = NULL,
   matrix_type = c("either", "sparse", "dense"),
   force_type = FALSE,
-  obj_name = "obj",
+  obj_name = NULL,
   row = FALSE,
   return_elem = TRUE
 ){
@@ -332,7 +332,7 @@
     x <- .validate_net(
       ace = obj,
       net_slot = net_slot,
-      ace_name = obj_name,
+      ace_name = ifelse(is.null(obj_name), "ace", obj_name),
       matrix_type = matrix_type,
       force_type = force_type,
       row = row,
@@ -341,7 +341,7 @@
   } else {
     x <- .validate_matrix(
       x = obj,
-      var_name = obj_name,
+      var_name = ifelse(is.null(obj_name), "obj", obj_name),
       matrix_type = matrix_type,
       force_type = force_type,
       return_elem = return_elem
