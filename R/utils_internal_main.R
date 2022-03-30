@@ -259,9 +259,15 @@
   )
 
   if (any(sapply(vars, is.null))) {
-    nullvars <- paste(names(vars)[which(sapply(vars, is.null))], collapse = ",")
-    err <- sprintf("'%s' missing from 'ace'. Perhaps re-run 'reduce.ace()'.\n", nullvars)
-    stop(err)
+    nullvars <- sprintf("%s_%s", reduction_slot, names(vars)[which(sapply(vars, is.null))])
+    if(return_raw == TRUE){
+      err <- sprintf("'%s' missing from 'ace'. Did you run 'reduce.ace()?'.\n", paste(nullvars, collapse = ","))
+      stop(err)
+    } else {
+      msg <- sprintf("'%s' missing from 'ace'. Did you run 'reduce.ace()'?\nSkipping PC smoothing.\n", paste(nullvars, collapse = ","))
+      warning(msg)
+      return(ace)
+    }
   }
 
   V <- vars$V

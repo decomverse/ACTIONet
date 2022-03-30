@@ -26,6 +26,7 @@ runACTIONet(
   unification_th = 0,
   footprint_alpha = 0.85,
   compute_specificity_parallel = FALSE,
+  smoothPC = TRUE,
   thread_no = 0,
   seed = 0
 )
@@ -74,15 +75,14 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{compute_specificity_parallel}{Run feature specificity enrichment using multiple cores. Setting this to `TRUE` on large datasets may cause an out of memory crash. (default=FALSE)}
 
+\item{smoothPC}{Whether to smooth output of 'reduce.ace()'. Performs diffusion smoothing on the components of the reduction. Skipped if 'TRUE' and output of 'reduce.ace()' is missing from object. (default=TRUE)}
+
 \item{thread_no}{Number of parallel threads. (default=0)}
 
 \item{seed}{Seed for random initialization. (default=0)}
 }
 \value{
-\itemize{
-\item If full_trace='FALSE'(default): ACTIONetExperiment object.
-\item If full_trace='TRUE': Named list containing an ACTIONetExperiment object and a log of ACTIONet function calls.
-}
+An ACTIONetExperiment object
 }
 \description{
 Run main ACTIONet pipeline

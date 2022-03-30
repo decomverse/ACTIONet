@@ -151,7 +151,7 @@ normalize.ace <- function(
         norm_method = "default"
     }
 
-    metadata(ace)$normalization.method = norm_method
+    metadata(ace)$norm_method = norm_method
 
     return(ace)
 }

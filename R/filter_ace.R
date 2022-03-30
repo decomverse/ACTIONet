@@ -16,17 +16,14 @@ filter.ace <- function(
     init_dim = dim(ace)
     init_dnames = dimnames(ace)
 
-    # if(is.null(assay_name)){
-    #   X = SummarizedExperiment::assays(ace)[[1]]
-    # } else {
-    #   X = SummarizedExperiment::assays(ace)[[assay_name]]
-    # }
-    # X = as(X, "dgCMatrix")
+    ace <- as(ace, "ACTIONetExperiment")
 
     if(is.null(assay_name)){
       assay_name = names(SummarizedExperiment::assays(ace))[1]
     }
-    X = .validate_assay(ace = ace, assay_name = assay_name)
+    X <- SummarizedExperiment::assays(ace)[[assay_name]]
+
+    # X = .validate_assay(ace = ace, assay_name = assay_name)
 
     dimnames(X) = list(1:NROW(X), 1:NCOL(X))
 
