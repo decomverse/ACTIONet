@@ -22,13 +22,11 @@
 #' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
 #' @param compute_specificity_parallel Run feature specificity enrichment using multiple cores. Setting this to `TRUE` on large datasets may cause an out of memory crash. (default=FALSE)
+#' @param smoothPC Whether to smooth output of 'reduce.ace()'. Performs diffusion smoothing on the components of the reduction. Skipped if 'TRUE' and output of 'reduce.ace()' is missing from object. (default=TRUE)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param seed Seed for random initialization. (default=0)
 #'
-#' @return \itemize{
-#' \item If full_trace='FALSE'(default): ACTIONetExperiment object.
-#' \item If full_trace='TRUE': Named list containing an ACTIONetExperiment object and a log of ACTIONet function calls.
-#' }
+#' @return An ACTIONetExperiment object
 #'
 #' @examples
 #' ace <- runACTIONet(ace)
@@ -55,6 +53,7 @@ runACTIONet <- function(
   unification_th = 0,
   footprint_alpha = 0.85,
   compute_specificity_parallel = FALSE,
+  smoothPC = TRUE,
   thread_no = 0,
   seed = 0
 ) {
@@ -104,15 +103,17 @@ runACTIONet <- function(
   )
 
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  ace <- .smoothPCs(
-    ace = ace,
-    diffusion_algorithm = "pagerank",
-    alpha = imputation_alpha,
-    diffusion_it = 5,
-    reduction_slot = reduction_slot,
-    net_slot = net_slot_out,
-    thread_no = thread_no
-  )
+  if (smoothPC == TRUE) {
+    ace <- .smoothPCs(
+      ace = ace,
+      diffusion_algorithm = "pagerank",
+      alpha = imputation_alpha,
+      diffusion_it = 5,
+      reduction_slot = reduction_slot,
+      net_slot = net_slot_out,
+      thread_no = thread_no
+    )
+  }
 
   # Layout ACTIONet. Now it uses the smoothed S_r. TODO: the fuck is this?
   ace <- .run.layoutNetwork(
