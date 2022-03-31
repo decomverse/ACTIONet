@@ -307,7 +307,7 @@
   } else {
     x <- .validate_matrix(
       x = obj,
-      var_name = ifelse(is.null(obj_name), "obj", obj_name),,
+      var_name = ifelse(is.null(obj_name), "obj", obj_name),
       matrix_type = matrix_type,
       force_type = force_type,
       return_elem = return_elem
