@@ -401,7 +401,7 @@ decomp.ACTION <- function(
 ){
 
   X <- .validate_matrix(X)
-
+  max_iter = max_iter * 100
   if (is.matrix(X)) {
     out <- IRLB_SVD_full(
       A = X,
