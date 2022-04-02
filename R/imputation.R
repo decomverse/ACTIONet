@@ -76,7 +76,7 @@ imputeGenes <- function(
         W <- as.matrix(expr_raw %*% C)
         expr_imp <- W %*% Matrix::t(H)
 
-    } else if (algorithm == "actionet") {
+    } else {
         expr_imp <- networkDiffusion(
           obj = ace,
           scores = Matrix::t(expr_raw),

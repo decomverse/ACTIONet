@@ -17,7 +17,7 @@
 #' @param imputation_alpha Network diffusion parameter to smooth PCs (S_r). (default=0.9)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
-#' @param layout_algorithm Algorithm for computing plot layout. can be "UMAP", "TUMAP" (faster), or "forced_atlas". (default="TUMAP")
+#' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
@@ -170,7 +170,7 @@ runACTIONet <- function(
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
-#' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
+#' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_th Archetype unification resolution parameter. (default=0)
 #' @param footprint_alpha Archetype smoothing parameter. (default=0.85)
@@ -359,7 +359,7 @@ run.ACTIONet <- function(
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
-#' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
+#' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param thread_no Number of parallel threads. (default=0)
 #' @param reduction_slot Slot in colMaps(ace) containing reduced kernel. (default='ACTION')
@@ -438,7 +438,7 @@ rebuildACTIONet <- function(
 #' @param ace ACTIONetExperiment object.
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
 #' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
-#' @param layout_algorithm Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")
+#' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
 #' @param thread_no Number of parallel threads (default=0).
