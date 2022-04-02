@@ -36,7 +36,7 @@ rebuildACTIONet(
 
 \item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
+\item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
 
 \item{layout_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
