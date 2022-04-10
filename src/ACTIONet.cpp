@@ -879,19 +879,19 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass)
 //' @param sample_assignments Any sample clustering/annotation (it has to be in
 //{1, ..., max_class_num})
 //'
-//' @return S matrix aggregated within each class of sample_assignments
+//' @return S matrix aggregated within each group of sample_assignments
 //'
 //' @examples
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = buildNetwork(prune.out$H_stacked)
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs = compute_pseudo_bulk(S, cell.clusters)
+// pbs = compute_grouped_rowsums(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk_per_cluster(sp_mat &S,
+mat compute_grouped_rowsums(sp_mat &S,
                                     arma::Col<unsigned long long> sample_assignments)
 {
-  mat pb = ACTIONet::compute_pseudo_bulk_per_cluster(S, sample_assignments);
+  mat pb = ACTIONet::compute_grouped_rowsums(S, sample_assignments);
 
   return pb;
 }
@@ -902,78 +902,69 @@ mat compute_pseudo_bulk_per_cluster(sp_mat &S,
 //' @param sample_assignments Any sample clustering/annotation (it has to be in
 //{1, ..., max_class_num})
 //'
-//' @return S matrix aggregated within each class of sample_assignments
+//' @return S matrix aggregated within each group of sample_assignments
 //'
 //' @examples
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = buildNetwork(prune.out$H_stacked)
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs = compute_pseudo_bulk(S, cell.clusters)
+// pbs = compute_grouped_rowsums_full(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk_per_cluster_full(mat &S,
+mat compute_grouped_rowsums_full(mat &S,
                                          arma::Col<unsigned long long> sample_assignments)
 {
-  mat pb = ACTIONet::compute_pseudo_bulk_per_cluster(S, sample_assignments);
+  mat pb = ACTIONet::compute_grouped_rowsums(S, sample_assignments);
 
   return pb;
 }
 
-//' Computes pseudobulk profiles (groups[k1] x individuals[k2])
+//' Computes pseudobulk profiles
 //'
 //' @param S Input matrix ("sparseMatrix")
-//' @param sample_assignments Any primary grouping - typically based on cell
-// type/state (it has to be in {1, ..., k1}) ' @param individuals Any Secondary
-// grouping - typically corresponds to individuals (it has to be in {1, ...,
-// k2})
+//' @param sample_assignments Any sample clustering/annotation (it has to be in
+//{1, ..., max_class_num})
 //'
-//' @return A list of pseudobulk profile, where each entry is matrix
-// corresponding to one cell type/state
+//' @return S matrix averaged within each group of sample_assignments
 //'
 //' @examples
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = buildNetwork(prune.out$H_stacked)
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
+// pbs = compute_grouped_rowmeans(S, cell.clusters)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_cluster_and_ind(
-    sp_mat &S, arma::Col<unsigned long long> sample_assignments,
-    arma::Col<unsigned long long> individuals)
+mat compute_grouped_rowmeans(sp_mat &S,
+                                    arma::Col<unsigned long long> sample_assignments)
 {
-  field<mat> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
+  mat pb = ACTIONet::compute_grouped_rowmeans(S, sample_assignments);
 
-  return pbs_list;
+  return pb;
 }
 
-//' Computes pseudobulk profiles (groups[k1] x individuals[k2])
+//' Computes pseudobulk profiles
 //'
 //' @param S Input matrix ("matrix")
-//' @param sample_assignments Any primary grouping - typically based on cell
-// type/state (it has to be in {1, ..., k1}) ' @param individuals Any Secondary
-// grouping - typically corresponds to individuals (it has to be in {1, ...,
-// k2})
+//' @param sample_assignments Any sample clustering/annotation (it has to be in
+//{1, ..., max_class_num})
 //'
-//' @return A list of pseudobulk profile, where each entry is matrix
-// corresponding to one cell type/state
+//' @return S matrix averaged within each group of sample_assignments
 //'
 //' @examples
 //' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 //'	G = buildNetwork(prune.out$H_stacked)
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
+// pbs = compute_grouped_rowmeans_full(S, cell.clusters)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(
-    mat &S, arma::Col<unsigned long long> sample_assignments,
-    arma::Col<unsigned long long> individuals)
+mat compute_grouped_rowmeans_full(mat &S,
+                                         arma::Col<unsigned long long> sample_assignments)
 {
-  field<mat> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
+  mat pb = ACTIONet::compute_grouped_rowmeans(S, sample_assignments);
 
-  return pbs_list;
+  return pb;
 }
+
 
 // [[Rcpp::export]]
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H)
