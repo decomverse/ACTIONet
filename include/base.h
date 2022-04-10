@@ -305,16 +305,15 @@ namespace ACTIONet
     field<mat> compute_pseudo_bulk_per_archetype_and_ind(
         mat &S, mat &H, arma::Col<unsigned long long> sample_assignments);
 
-    mat compute_pseudo_bulk_per_cluster(
+    mat compute_grouped_rowsums(
         sp_mat &S, arma::Col<unsigned long long> sample_assignments);
-    mat compute_pseudo_bulk_per_cluster(
+    mat compute_grouped_rowsums(
         mat &S, arma::Col<unsigned long long> sample_assignments);
-    field<mat> compute_pseudo_bulk_per_cluster_and_ind(
-        sp_mat &S, arma::Col<unsigned long long> sample_assignments,
-        arma::Col<unsigned long long> individuals);
-    field<mat> compute_pseudo_bulk_per_cluster_and_ind(
-        mat &S, arma::Col<unsigned long long> sample_assignments,
-        arma::Col<unsigned long long> individuals);
+
+    mat compute_grouped_rowmeans(
+        sp_mat &S, arma::Col<unsigned long long> sample_assignments);
+    mat compute_grouped_rowmeans(
+        mat &S, arma::Col<unsigned long long> sample_assignments);
 
     // Methods for renormalizing input matrix within and between each class
     mat renormalize_input_matrix(mat &S,

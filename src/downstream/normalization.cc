@@ -4,7 +4,7 @@ namespace ACTIONet {
 sp_mat renormalize_input_matrix(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments) {
   stdout_printf("Computing and normalizing pseudobulk profiles ... ");
-  mat pb = compute_pseudo_bulk_per_cluster(S, sample_assignments);
+  mat pb = compute_grouped_rowmeans(S, sample_assignments);
   rowvec mean_pb_t = trans(mean(pb, 1));
 
   // Aligns pseudo-bulk profiles with each other
@@ -40,7 +40,7 @@ sp_mat renormalize_input_matrix(
 mat renormalize_input_matrix(mat &S,
                              arma::Col<unsigned long long> sample_assignments) {
   stdout_printf("Computing and normalizing pseudobulk profiles ... ");
-  mat pb = compute_pseudo_bulk_per_cluster(S, sample_assignments);
+  mat pb = compute_grouped_rowmeans(S, sample_assignments);
   rowvec mean_pb_t = trans(mean(pb, 1));
 
   // Aligns pseudo-bulk profiles with each other
