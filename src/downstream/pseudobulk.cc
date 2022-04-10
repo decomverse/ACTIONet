@@ -3,7 +3,9 @@
 namespace ACTIONet {
 mat compute_pseudo_bulk_per_cluster(
     sp_mat &S, arma::Col<unsigned long long> sample_assignments) {
-  mat pb = zeros(S.n_rows, max(sample_assignments));
+
+  uvec lv_vec = conv_to<uvec>::from(unique(sample_assignments));
+  mat pb = zeros(S.n_rows, lv_vec.n_elem);
 
   sp_mat::const_iterator it = S.begin();
   sp_mat::const_iterator it_end = S.end();
@@ -23,7 +25,10 @@ mat compute_pseudo_bulk_per_cluster(
 
 mat compute_pseudo_bulk_per_cluster(
     mat &S, arma::Col<unsigned long long> sample_assignments) {
-  mat pb = zeros(S.n_rows, max(sample_assignments));
+
+  uvec lv_vec = conv_to<uvec>::from(unique(sample_assignments));
+  mat pb = zeros(S.n_rows, lv_vec.n_elem);
+  
 
   for (int j = 0; j < pb.n_cols; j++) {
     uvec idx = find(sample_assignments == (j + 1));
