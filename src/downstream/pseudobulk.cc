@@ -15,11 +15,6 @@ mat compute_grouped_rowsums(sp_mat &S, arma::Col<unsigned long long> sample_assi
     pb(i, j) += (*it);
   }
 
-  // for (int j = 0; j < pb.n_cols; j++) {
-  //   uvec idx = find(sample_assignments == (j + 1));
-  //   pb.col(j) /= max(1, (int)idx.n_elem);
-  // }
-
   return (pb);
 }
 
