@@ -160,7 +160,7 @@ NULL
 NULL
 
 #'
-#' @return S matrix aggregated within each class of sample_assignments
+#' @return S matrix aggregated within each group of sample_assignments
 #'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
@@ -175,7 +175,7 @@ NULL
 NULL
 
 #'
-#' @return S matrix aggregated within each class of sample_assignments
+#' @return S matrix aggregated within each group of sample_assignments
 #'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
@@ -183,16 +183,14 @@ NULL
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 NULL
 
-#' Computes pseudobulk profiles (groups[k1] x individuals[k2])
+#' Computes pseudobulk profiles
 #'
 #' @param S Input matrix ("sparseMatrix")
-#' @param sample_assignments Any primary grouping - typically based on cell
+#' @param sample_assignments Any sample clustering/annotation (it has to be in
 NULL
 
 #'
-#' @return A list of pseudobulk profile, where each entry is matrix
-NULL
-
+#' @return S matrix averaged within each group of sample_assignments
 #'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
@@ -200,16 +198,14 @@ NULL
 #' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 NULL
 
-#' Computes pseudobulk profiles (groups[k1] x individuals[k2])
+#' Computes pseudobulk profiles
 #'
 #' @param S Input matrix ("matrix")
-#' @param sample_assignments Any primary grouping - typically based on cell
+#' @param sample_assignments Any sample clustering/annotation (it has to be in
 NULL
 
 #'
-#' @return A list of pseudobulk profile, where each entry is matrix
-NULL
-
+#' @return S matrix averaged within each group of sample_assignments
 #'
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
@@ -722,20 +718,20 @@ decode_ids <- function(encoded_ids, pass) {
     .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
 }
 
-compute_pseudo_bulk_per_cluster <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster`, S, sample_assignments)
+compute_grouped_rowsums <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowsums`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_cluster_full <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_full`, S, sample_assignments)
+compute_grouped_rowsums_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowsums_full`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_cluster_and_ind <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind`, S, sample_assignments, individuals)
+compute_grouped_rowmeans <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowmeans`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_cluster_and_ind_full <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full`, S, sample_assignments, individuals)
+compute_grouped_rowmeans_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowmeans_full`, S, sample_assignments)
 }
 
 compute_pseudo_bulk_per_archetype <- function(S, H) {
