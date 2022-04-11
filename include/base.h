@@ -315,6 +315,9 @@ namespace ACTIONet
     mat compute_grouped_rowmeans(
         mat &S, arma::Col<unsigned long long> sample_assignments);
 
+    mat compute_grouped_rowvars(
+        sp_mat &S, arma::Col<unsigned long long> sample_assignments);
+
     // Methods for renormalizing input matrix within and between each class
     mat renormalize_input_matrix(mat &S,
                                  arma::Col<unsigned long long> sample_assignments);
