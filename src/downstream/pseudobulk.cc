@@ -4,8 +4,8 @@ namespace ACTIONet {
 
 mat compute_grouped_rowsums(sp_mat &S, arma::Col<unsigned long long> sample_assignments) {
 
-  uvec lv_vec = conv_to<uvec>::from(unique(sample_assignments));
-  mat pb = zeros(S.n_rows, lv_vec.n_elem);
+  uvec lv_vec = arma::conv_to<uvec>::from(unique(sample_assignments));
+  mat pb = arma::zeros(S.n_rows, lv_vec.n_elem);
 
   sp_mat::const_iterator it = S.begin();
   sp_mat::const_iterator it_end = S.end();
@@ -20,8 +20,8 @@ mat compute_grouped_rowsums(sp_mat &S, arma::Col<unsigned long long> sample_assi
 
 mat compute_grouped_rowsums(mat &S, arma::Col<unsigned long long> sample_assignments) {
 
-  uvec lv_vec = conv_to<uvec>::from(unique(sample_assignments));
-  mat pb = zeros(S.n_rows, lv_vec.n_elem);
+  uvec lv_vec = arma::conv_to<uvec>::from(unique(sample_assignments));
+  mat pb = arma::zeros(S.n_rows, lv_vec.n_elem);
   
   for (int j = 0; j < pb.n_cols; j++) {
     uvec idx = find(sample_assignments == (j + 1));
@@ -29,7 +29,7 @@ mat compute_grouped_rowsums(mat &S, arma::Col<unsigned long long> sample_assignm
 
     if (idx.n_elem > 1) {
       mat subS = S.cols(idx);
-      pb.col(j) = sum(subS, 1);
+      pb.col(j) = arma::sum(subS, 1);
     } else {
       pb.col(j) = S.col(idx(0));
     }
@@ -43,8 +43,8 @@ mat compute_grouped_rowmeans(sp_mat &S, arma::Col<unsigned long long> sample_ass
   mat pb = compute_grouped_rowsums(S, sample_assignments);
 
   for (int j = 0; j < pb.n_cols; j++) {
-    uvec idx = find(sample_assignments == (j + 1));
-    pb.col(j) /= max(1, (int)idx.n_elem);
+    uvec idx = arma::find(sample_assignments == (j + 1));
+    pb.col(j) /= std::max(1, (int)idx.n_elem);
   }
 
   return (pb);
@@ -56,7 +56,7 @@ mat compute_grouped_rowmeans(mat &S, arma::Col<unsigned long long> sample_assign
 
   for (int j = 0; j < pb.n_cols; j++) {
     uvec idx = find(sample_assignments == (j + 1));
-    pb.col(j) /= max(1, (int)idx.n_elem);
+    pb.col(j) /= std::max(1, (int)idx.n_elem);
   }
 
   return (pb);
@@ -64,38 +64,53 @@ mat compute_grouped_rowmeans(mat &S, arma::Col<unsigned long long> sample_assign
 
 mat compute_grouped_rowvars(sp_mat &S, arma::Col<unsigned long long> sample_assignments) {
 
-  uvec lv_vec = conv_to<uvec>::from(unique(sample_assignments));
-  mat pb = zeros(S.n_rows, lv_vec.n_elem);
+  mat pb_mu = compute_grouped_rowmeans(S, sample_assignments);
+  mat pb = arma::zeros(pb_mu.n_rows, pb_mu.n_cols);
+  mat pbz = arma::zeros(pb_mu.n_rows, pb_mu.n_cols);
 
-  // mat pb_mean = compute_grouped_rowmeans(S, sample_assignments);
-
-  for (int i = 0; i < S.n_rows; i++) {
-    // rowvec r = arma::conv_to<rowvec>::from(S.row(i));
-    sp_mat::const_row_iterator it = S.begin_row(i);
-    sp_mat::const_row_iterator it_end = S.end_row(i);
-    vec r = zeros(S.n_cols);
-
-    for (; it != it_end; ++it) {
-      // int k = sample_assignments[it.col()] - 1;
-      r(it.col()) = (*it);
-    }
-
-    for (int j = 0; j < pb.n_cols; j++){
-      uvec idx = find(sample_assignments == (j + 1));
-      pb(i, j) = var(r(idx));
-    }
+  sp_mat::const_iterator it = S.begin();
+  sp_mat::const_iterator it_end = S.end();
+  for (; it != it_end; ++it) {
+    int i = it.row();
+    int j = sample_assignments[it.col()] - 1;
+    double num = (*it) - pb_mu(i,j);
+    pb(i, j) += std::pow(num, 2);
+    pbz(i, j) += 1;
   }
 
-  // sp_mat::const_iterator it = S.begin();
-  // sp_mat::const_iterator it_end = S.end();
-  // for (; it != it_end; ++it) {
-  //   int i = it.row();
-  //   int j = sample_assignments[it.col()] - 1;
-  //   pb(i, j) += (*it);
-  // }
+  for (int j = 0; j < pb.n_cols; j++){
+    uvec idx = arma::find(sample_assignments == (j + 1));
+    int nnz = (int)idx.n_elem;
+    for (int i = 0; i < pb.n_rows; i++) {
+      int nz = (int)idx.n_elem - pbz(i, j);
+      pb(i, j) += nz*std::pow(-1*pb_mu(i,j), 2);
+    }
+    pb.col(j) /= std::max(1, nnz - 1);
+}
 
   return (pb);
 }
+
+mat compute_grouped_rowvars(mat &S, arma::Col<unsigned long long> sample_assignments) {
+
+  uvec lv_vec = arma::conv_to<uvec>::from(unique(sample_assignments));
+  mat pb = arma::zeros(S.n_rows, lv_vec.n_elem);
+  
+  for (int j = 0; j < pb.n_cols; j++) {
+    uvec idx = arma::find(sample_assignments == (j + 1));
+
+    if (idx.n_elem == 0) continue;
+
+    if (idx.n_elem > 1) {
+      mat subS = S.cols(idx);
+      pb.col(j) = arma::var(subS, 0, 1);
+    } else {
+      pb.col(j) = arma::zeros(pb.n_rows);
+    }
+  }
+  return (pb);
+}
+
 
 mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H) {
   mat H_norm = trans(H);
