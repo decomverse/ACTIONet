@@ -654,6 +654,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline mat compute_grouped_rowvars_full(mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowvars_full)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowvars_full p_compute_grouped_rowvars_full = NULL;
+        if (p_compute_grouped_rowvars_full == NULL) {
+            validateSignature("mat(*compute_grouped_rowvars_full)(mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowvars_full = (Ptr_compute_grouped_rowvars_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars_full");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_compute_grouped_rowvars_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
     inline mat compute_pseudo_bulk_per_archetype(sp_mat& S, mat& H) {
         typedef SEXP(*Ptr_compute_pseudo_bulk_per_archetype)(SEXP,SEXP);
         static Ptr_compute_pseudo_bulk_per_archetype p_compute_pseudo_bulk_per_archetype = NULL;

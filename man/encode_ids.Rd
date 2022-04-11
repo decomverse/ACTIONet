@@ -17,6 +17,3 @@ A string array of encoded ids
 \description{
 Encrypts a set of given input ids
 }
-\examples{
-encoded.ids = encode_ids(colnames(sce))
-}
