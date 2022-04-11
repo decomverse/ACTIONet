@@ -74,7 +74,7 @@ mat compute_grouped_rowvars(sp_mat &S, arma::Col<unsigned long long> sample_assi
     int i = it.row();
     int j = sample_assignments[it.col()] - 1;
     double num = (*it) - pb_mu(i,j);
-    pb(i, j) += std::pow(num, 2);
+    pb(i, j) += num*num;
     pbz(i, j) += 1;
   }
 
@@ -83,7 +83,7 @@ mat compute_grouped_rowvars(sp_mat &S, arma::Col<unsigned long long> sample_assi
     int nnz = (int)idx.n_elem;
     for (int i = 0; i < pb.n_rows; i++) {
       int nz = (int)idx.n_elem - pbz(i, j);
-      pb(i, j) += nz*std::pow(-1*pb_mu(i,j), 2);
+      pb(i, j) += nz*pb_mu(i,j)*pb_mu(i,j);
     }
     pb.col(j) /= std::max(1, nnz - 1);
 }
