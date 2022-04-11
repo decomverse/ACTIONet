@@ -702,6 +702,10 @@ compute_grouped_rowvars <- function(S, sample_assignments) {
     .Call(`_ACTIONet_compute_grouped_rowvars`, S, sample_assignments)
 }
 
+compute_grouped_rowvars_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowvars_full`, S, sample_assignments)
+}
+
 compute_pseudo_bulk_per_archetype <- function(S, H) {
     .Call(`_ACTIONet_compute_pseudo_bulk_per_archetype`, S, H)
 }

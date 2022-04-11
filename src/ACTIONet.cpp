@@ -924,17 +924,23 @@ mat compute_grouped_rowmeans(sp_mat &S, arma::Col<unsigned long long> sample_ass
 //' @return S matrix with columns of values average within each group of sample_assignments
 //'
 // [[Rcpp::export]]
-mat compute_grouped_rowmeans_full(mat &S,
-                                         arma::Col<unsigned long long> sample_assignments)
+mat compute_grouped_rowmeans_full(mat &S, arma::Col<unsigned long long> sample_assignments)
 {
   mat pb = ACTIONet::compute_grouped_rowmeans(S, sample_assignments);
 
   return pb;
 }
 
-
 // [[Rcpp::export]]
 mat compute_grouped_rowvars(sp_mat &S, arma::Col<unsigned long long> sample_assignments)
+{
+  mat pb = ACTIONet::compute_grouped_rowvars(S, sample_assignments);
+
+  return pb;
+}
+
+// [[Rcpp::export]]
+mat compute_grouped_rowvars_full(mat &S, arma::Col<unsigned long long> sample_assignments)
 {
   mat pb = ACTIONet::compute_grouped_rowvars(S, sample_assignments);
 

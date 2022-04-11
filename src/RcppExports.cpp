@@ -1133,6 +1133,41 @@ RcppExport SEXP _ACTIONet_compute_grouped_rowvars(SEXP SSEXP, SEXP sample_assign
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// compute_grouped_rowvars_full
+mat compute_grouped_rowvars_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowvars_full_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowvars_full(S, sample_assignments));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_compute_grouped_rowvars_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowvars_full_try(SSEXP, sample_assignmentsSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // compute_pseudo_bulk_per_archetype
 mat compute_pseudo_bulk_per_archetype(sp_mat& S, mat& H);
 static SEXP _ACTIONet_compute_pseudo_bulk_per_archetype_try(SEXP SSEXP, SEXP HSEXP) {
@@ -3853,6 +3888,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*compute_grouped_rowmeans)(sp_mat&,arma::Col<unsigned long long>)");
         signatures.insert("mat(*compute_grouped_rowmeans_full)(mat&,arma::Col<unsigned long long>)");
         signatures.insert("mat(*compute_grouped_rowvars)(sp_mat&,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowvars_full)(mat&,arma::Col<unsigned long long>)");
         signatures.insert("mat(*compute_pseudo_bulk_per_archetype)(sp_mat&,mat&)");
         signatures.insert("mat(*compute_pseudo_bulk_per_archetype_full)(mat&,mat&)");
         signatures.insert("field<mat>(*compute_pseudo_bulk_per_archetype_and_ind)(sp_mat&,mat&,arma::Col<unsigned long long>)");
@@ -3960,6 +3996,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans", (DL_FUNC)_ACTIONet_compute_grouped_rowmeans_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans_full", (DL_FUNC)_ACTIONet_compute_grouped_rowmeans_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars", (DL_FUNC)_ACTIONet_compute_grouped_rowvars_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars_full", (DL_FUNC)_ACTIONet_compute_grouped_rowvars_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_archetype", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_archetype_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_archetype_full", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_archetype_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_try);
@@ -4066,6 +4103,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_compute_grouped_rowmeans", (DL_FUNC) &_ACTIONet_compute_grouped_rowmeans, 2},
     {"_ACTIONet_compute_grouped_rowmeans_full", (DL_FUNC) &_ACTIONet_compute_grouped_rowmeans_full, 2},
     {"_ACTIONet_compute_grouped_rowvars", (DL_FUNC) &_ACTIONet_compute_grouped_rowvars, 2},
+    {"_ACTIONet_compute_grouped_rowvars_full", (DL_FUNC) &_ACTIONet_compute_grouped_rowvars_full, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_archetype", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_archetype_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_full, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind, 3},
