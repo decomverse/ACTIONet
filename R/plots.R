@@ -889,16 +889,14 @@ visualize.markers <- function(
     return(p_out)
   }, simplify = FALSE)
 
-  if (length(out) == 1) {
-    out <- out[[1]]
-  }
-
   if (single_plot == TRUE && length(out) > 1) {
     out <- ggpubr::ggarrange(
       plotlist = out,
       nrow = d[1],
       ncol = d[2]
     )
+  } else if (length(out) == 1) {
+    out <- out[[1]]
   }
 
   return(out)
