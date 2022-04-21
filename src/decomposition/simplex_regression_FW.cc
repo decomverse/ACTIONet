@@ -11,6 +11,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     if(max_iter == -1)
         max_iter = A.n_cols;
 
+    printf("Initializing ... ");
     //mat tmp = trans(A) * B;
     mat tmp = cor(A, B);
     
@@ -21,6 +22,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         //X(i, j) = 1;
         X(0, j) = 1;
     } 
+    printf("done\n");
 
     mat At = trans(A);
     mat AtA = At * A;
@@ -38,7 +40,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
             int i1, i2;
             int i1_val, i2_val;
             i1_val = i2_val = 1000;
-            i1 = i2 = -1;
+            i1 = i2 = 0;
             for(int i = 0; i < g.n_elem; i++) {
                 if(g(i) < i1_val) {
                     i1_val = g(i);
@@ -83,7 +85,10 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
             X.col(k) = x + alpha*d;
         }
 
+        printf("%d- ", it);
         double res = norm(abs(old_X - X), "fro") / norm(X, "fro");
+        printf("%e\n", res);
+
         if(res < min_diff) {
             break;
         }
