@@ -431,6 +431,8 @@ namespace ACTIONet
     mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.15, double post_alpha = 0.85, int thread_no = 0);
     mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.15, double post_alpha = 0.85, int thread_no = 0, int perm_no = 30);
 
+    mat run_simplex_regression_FW(mat &A, mat &B, int max_iter = -1, double min_diff = 0.01);
+
 } // namespace ACTIONet
 
 #endif
