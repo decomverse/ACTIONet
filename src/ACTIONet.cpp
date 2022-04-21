@@ -407,6 +407,14 @@ mat run_simplex_regression(mat &A, mat &B, bool computeXtX = false)
   return X;
 }
 
+// [[Rcpp::export]]
+mat run_simplex_regression_FW(mat &A, mat &B, int max_iter = -1, double min_diff = 0.01)
+{
+  mat X = ACTIONet::run_simplex_regression_FW(A, B, max_iter, min_diff);
+
+  return X;
+}
+
 //' Runs Successive Projection Algorithm (SPA) to solve separable NMF
 //'
 //' @param A Input matrix
