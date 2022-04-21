@@ -222,12 +222,12 @@ annotate.profile.using.markers <- function(profile, markers) {
   return(X)
 }
 
-#' A wrapper function For Leiden algorithm
+#' A wrapper function for the leiden algorithm
 #'
 #' @param G Adjacency matrix of the input graph
 #' @param resolution_parameter Resolution of the clustering.
 #' The higher the resolution, the more clusters we will get (default=0.5).
-#' @param initial.clustering Used as the inital clustering
+#' @param initial_clusters Used as the inital clustering
 #' @param seed Random seed
 #'
 #' @return ace with added annotation
@@ -237,7 +237,7 @@ annotate.profile.using.markers <- function(profile, markers) {
 #' @export
 cluster.graph <- function(G,
                           resolution_parameter = 0.5,
-                          initial.clustering = NULL,
+                          initial_clusters = NULL,
                           seed = 0) {
   if (is.matrix(G)) {
     G <- as(G, "sparseMatrix")
@@ -249,21 +249,21 @@ cluster.graph <- function(G,
     print("Graph is signed. Switching to signed graph clustering mode.")
   }
 
-  if (!is.null(initial.clustering)) {
+  if (!is.null(initial_clusters)) {
     print("Perform graph clustering with *prior* initialization")
 
     if (is.signed) {
       clusters <- as.numeric(signed_cluster(
         A = G,
         resolution_parameter = resolution_parameter,
-        initial_clusters_ = initial.clustering,
+        initial_clusters_ = initial_clusters,
         seed = seed
       ))
     } else {
       clusters <- as.numeric(unsigned_cluster(
         A = G,
         resolution_parameter = resolution_parameter,
-        initial_clusters_ = initial.clustering,
+        initial_clusters_ = initial_clusters,
         seed = seed
       ))
     }
@@ -289,44 +289,29 @@ cluster.graph <- function(G,
   return(clusters)
 }
 
-
-#' A wrapper function For Leiden algorithm applied to an ACE object
-#'
-#' @param ace Input results to be clustered
-
-#' @param resolution_parameter Resolution of the clustering.
-#' The higher the resolution, the more clusters we will get (default=0.5).
-#' @param arch.init Whether to use archetype-assignments to initialize clustering (default=TRUE)
-#' @param seed Random seed
-#'
-#' @return clusters
-#'
-#' @examples
-#' clusters <- Leiden.clustering(ace)
-#' plot.ACTIONet(ace, clusters)
 #' @export
-Leiden.clustering <- function(ace,
+leiden.clustering <- function(ace,
                               resolution_parameter = 1,
-                              net.slot = "ACTIONet",
-                              init.slot = "assigned_archetype",
+                              net_slot = "ACTIONet",
+                              init_slot = "assigned_archetype",
                               seed = 0,
                               postprocess = T,
-                              PP_lambda = 0,
-                              PP_iters = 3,
-                              PP_sig_threshold = 3) {
-  if (!is.null(init.slot)) {
-    initial.clusters <- ace[[init.slot]]
+                              pp_lambda = 0,
+                              pp_iters = 3,
+                              pp_sig_threshold = 3) {
+  if (!is.null(init_slot)) {
+    initial.clusters <- ace[[init_slot]]
   } else {
     initial.clusters <- NULL
   }
 
-  G <- colNets(ace)[[net.slot]]
+  G <- colNets(ace)[[net_slot]]
 
   clusters <- cluster.graph(G, resolution_parameter, initial.clusters, seed)
-  if (postprocess == T) {
+  if (postprocess == TRUE) {
     cc <- table(clusters)
     clusters[clusters %in% as.numeric(names(cc)[cc < 30])] <- 0
-    clusters <- c(run_LPA(ace$ACTIONet, clusters, lambda = PP_lambda, iters = PP_iters, sig_threshold = PP_sig_threshold))
+    clusters <- run_LPA(ace$ACTIONet, clusters, lambda = pp_lambda, iters = pp_iters, sig_threshold = pp_sig_threshold)
   }
   clusters <- as.numeric(clusters)
   names(clusters) <- paste("C", as.character(clusters), sep = "")
@@ -366,7 +351,7 @@ HDBSCAN.clustering <- function(ace,
 #' @export
 clusterNetwork <- function(G, algorithm = "leiden",
                            resolution_parameter = 1.0,
-                           initial_clustering = NULL,
+                           initial_clusters = NULL,
                            seed = 0,
                            net_slot = "ACTIONet") {
   algorithm <- tolower(algorithm)
@@ -385,21 +370,21 @@ clusterNetwork <- function(G, algorithm = "leiden",
       print("Graph is signed. Switching to signed graph clustering mode.")
     }
 
-    if (!is.null(initial_clustering)) {
+    if (!is.null(initial_clusters)) {
       print("Perform graph clustering with *prior* initialization")
 
       if (is.signed) {
         clusters <- as.numeric(signed_cluster(
           A = G,
           resolution_parameter = resolution_parameter,
-          initial_clusters_ = initial_clustering,
+          initial_clusters_ = initial_clusters,
           seed = seed
         ))
       } else {
         clusters <- as.numeric(unsigned_cluster(
           A = G,
           resolution_parameter = resolution_parameter,
-          initial_clusters_ = initial_clustering,
+          initial_clusters_ = initial_clusters,
           seed = seed
         ))
       }
@@ -428,34 +413,34 @@ clusterNetwork <- function(G, algorithm = "leiden",
 
 
 #' @export
-clusterCells <- function(ace, algorithm = "Leiden",
-                         cluster_name = "Leiden",
+clusterCells <- function(ace, algorithm = "leiden",
+                         cluster_name = "leiden",
                          resolution_parameter = 1.0,
-                         initial_clustering = NULL,
+                         initial_clusters = NULL,
                          seed = 0,
                          net_slot = "ACTIONet") {
-  if (!is.null(initial_clustering)) {
-    if (is.character(initial_clustering)) {
-      initial_clustering <- as.factor(initial_clustering)
+  if (!is.null(initial_clusters)) {
+    if (is.character(initial_clusters)) {
+      initial_clusters <- as.factor(initial_clusters)
     }
   }
   if (algorithm == "fix") {
-    cl <- initial_clustering
+    cl <- initial_clusters
   } else {
-    if (is.null(initial_clustering)) {
-      initial_clustering <- ace$assigned_archetype
+    if (is.null(initial_clusters)) {
+      initial_clusters <- ace$assigned_archetype
     }
     cl <- clusterNetwork(ace,
       algorithm = algorithm,
       resolution_parameter = resolution_parameter,
-      initial_clustering = initial_clustering,
+      initial_clusters = initial_clusters,
       seed = seed,
       net_slot = net_slot
     )
   }
 
   colData(ace)[[cluster_name]] <- cl
-  ace <- computeGeneSpecifity.ace(ace, cl, out.name = cluster_name)
+  ace <- computeGeneSpecifity.ace(ace, cl, out_name = cluster_name)
 
   return(ace)
 }

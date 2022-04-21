@@ -329,7 +329,7 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 #' @export
 annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none", gene_scaling_method = 0,
-pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 1, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
 
   if (!(net_slot %in% names(colNets(ace)))) {
       warning(sprintf("net_slot does not exist in colNets(ace)."))
@@ -369,7 +369,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
       normalize = TRUE,
       H.slot = H_slot
     ))
-    marker_stats = networkDiffusion(data = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
+    marker_stats = networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
 
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
@@ -388,7 +388,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
 
 #' @export
 scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", gene_scaling_method = 0,
-pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, L, force_reimpute = FALSE, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
       warning(sprintf("net_slot does not exist in colNets(ace)."))
       return()
@@ -427,7 +427,7 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
       normalize = TRUE,
       H.slot = H_slot
     ))
-    marker_stats = networkDiffusion(data = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
+    marker_stats = networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
 
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
@@ -476,7 +476,7 @@ annotateArchs <- function(ace, annotation_source, archetype_slot = "H_unified") 
 }
 
 
-annotateClusters <- function(ace, annotation_source, cluster_name = "Leiden") {
+annotateClusters <- function(ace, annotation_source, cluster_name = "leiden") {
   cluster_slot <- sprintf("%s_markers_ACTIONet", cluster_name)
 
   if (!is.list(annotation_source)) {

@@ -5,10 +5,9 @@
 \title{Computes feature specificity scores for each cluster.}
 \usage{
 clusterFeatureSpecificity(
-  ace = NULL,
-  S = NULL,
-  cluster_attr = NULL,
-  output_prefix = NULL,
+  obj,
+  cluster_attr,
+  output_prefix = "cluster_spec",
   assay_name = "logcounts",
   thread_no = 0,
   return_raw = FALSE

@@ -5,9 +5,7 @@
 \title{Computes feature specificity scores for each archetype.}
 \usage{
 archetypeFeatureSpecificity(
-  ace = NULL,
-  S = NULL,
-  H = NULL,
+  ace,
   assay_name = "logcounts",
   footprint_slot = "archetype_footprint",
   thread_no = 0,

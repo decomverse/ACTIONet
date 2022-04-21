@@ -1,6 +1,6 @@
 #' @export
 networkDiffusion <- function(
-  data,
+  obj,
   scores, ## `scores` can be a matrix
   algorithm = c("pagerank", "pagerank_sym"),
   alpha = 0.9,
@@ -14,12 +14,18 @@ networkDiffusion <- function(
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
   scores = Matrix::as.matrix(scores)
-  if ( NROW(scores) != NCOL(data) ){
-    err = sprintf("`length(scores)` must equal `NCOL(data)`.\n")
+  if ( NROW(scores) != NCOL(obj) ){
+    err = sprintf("`length(scores)` must equal `NCOL(obj)`.\n")
     stop(err)
   }
 
-  G <- .validate_net(data, net_slot)
+  G <- .ace_or_net(
+    obj = obj,
+    net_slot = net_slot,
+    matrix_type = "sparse",
+    force_type = TRUE,
+    obj_name = "obj"
+  )
 
   if(alpha >= 1){
     stop("`alpha` => 1")
@@ -55,9 +61,9 @@ networkDiffusion <- function(
 
 #' @export
 networkCentrality <- function(
-  data,
+  obj,
   label_attr = NULL,
-  algorithm = c("coreness", "pagerank", "personalized_coreness", "personalized_pagerank"),
+  algorithm = c("coreness", "pagerank", "local_coreness", "local_pagerank"),
   alpha = 0.9,
   net_slot = "ACTIONet",
   diffusion_it = 5,
@@ -68,9 +74,15 @@ networkCentrality <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  G <- .validate_net(data, net_slot)
+  G <- .ace_or_net(
+    obj = obj,
+    net_slot = net_slot,
+    matrix_type = "sparse",
+    force_type = TRUE,
+    obj_name = "obj"
+  )
 
-  if( algorithm %in% c("pagerank", "personalized_pagerank") ) {
+  if( algorithm %in% c("pagerank", "local_pagerank") ) {
     if( is.null(label_attr) ){
       err = sprintf("'label_attr' cannot be 'NULL' if 'algorithm=%s'.\n", algorithm)
       stop(err)
@@ -86,7 +98,7 @@ networkCentrality <- function(
   }
 
   if (!is.null(label_attr)) {
-    label_attr <- .validate_attr(data, label_attr)
+    label_attr <- .validate_attr(obj, attr = label_attr, obj_name = "obj", attr_name = "label_attr")
     assignments = as.numeric(factor(label_attr))
   }
 
@@ -97,7 +109,7 @@ networkCentrality <- function(
   } else if (algorithm == "pagerank") {
 
     centrality <- networkDiffusion(
-      data = G,
+      obj = G,
       scores = rep(1 / NCOL(G), NCOL(G)),
       algorithm = "pagerank",
       alpha = alpha,
@@ -107,16 +119,16 @@ networkCentrality <- function(
       net_slot = NULL
     )
 
-  } else if (algorithm == "personalized_coreness") {
+  } else if (algorithm == "local_coreness") {
 
     centrality <- compute_archetype_core_centrality(G, assignments)
 
-  } else if (algorithm == "personalized_pagerank") {
+  } else if (algorithm == "local_pagerank") {
 
     design.mat <- model.matrix(~ 0 + as.factor(assignments))
     design.mat <- scale(design.mat, center = FALSE, scale = colSums(design.mat))
     scores <- networkDiffusion(
-      data = G,
+      obj = G,
       scores = design.mat,
       algorithm = "pagerank",
       alpha = alpha,
@@ -138,7 +150,7 @@ networkCentrality <- function(
 
 #' @export
 networkPropagation <- function(
-  data,
+  obj,
   label_attr,
   fixed_samples = NULL,
   algorithm = c("lpa"),
@@ -152,9 +164,15 @@ networkPropagation <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  G <- .validate_net(data, net_slot)
+  G <- .ace_or_net(
+    obj = obj,
+    net_slot = net_slot,
+    matrix_type = "sparse",
+    force_type = TRUE,
+    obj_name = "obj"
+  )
 
-  lf <- factor(.validate_attr(data, label_attr))
+  lf <- factor(.validate_attr(obj, attr = label_attr, obj_name = "obj", attr_name = "label_attr"))
   labels = as.numeric(lf)
   keys = levels(lf)
   labels[is.na(labels)] <- -1
@@ -187,7 +205,7 @@ correct.cell.labels  <- function(
 
   initial_labels = ACTIONetExperiment::get.data.or.split(ace, attr = label_attr, to_return = "data")
   labels <- networkPropagation(
-    data = ace,
+    obj = ace,
     label_attr = initial_labels,
     fixed_samples = NULL,
     algorithm = algorithm,
@@ -217,7 +235,7 @@ infer.missing.cell.labels  <- function(
   fixed_samples <- which(!is.na(initial_labels))
 
   labels <- networkPropagation(
-    data = ace,
+    obj = ace,
     label_attr = initial_labels,
     fixed_samples = fixed_samples,
     algorithm = algorithm,
@@ -230,6 +248,57 @@ infer.missing.cell.labels  <- function(
 
   return(labels)
 }
+
+
+networkAutocorrelation <- function(
+  obj,
+  scores = NULL,
+  algorithm = c("geary", "moran", "categorical"),
+  score_normalization_method = 1L,
+  perm_no = 0,
+  thread_no = 0L,
+  net_slot = "ACTIONet"
+) {
+
+  algorithm <- tolower(algorithm)
+  algorithm <- match.arg(algorithm, several.ok = FALSE)
+
+  G <- .ace_or_net(
+    obj = obj,
+    net_slot = net_slot,
+    obj_name = "obj"
+  )
+
+  if (algorithm == "geary") {
+    if (is.sparseMatrix(G)) {
+      out <- ACTIONet::autocorrelation_Geary(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    } else {
+      out <- ACTIONet::autocorrelation_Geary_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    }
+  } else if (algorithm == "moran") {
+    if (is.sparseMatrix(G)) {
+      out <- ACTIONet::autocorrelation_Moran(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    } else {
+      out <- ACTIONet::autocorrelation_Moran_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
+    }
+  } else if (algorithm == "categorical") {
+    if (is.character(scores)) {
+      label_type <- "char"
+      annotations.factor <- factor(scores)
+      annotations <- as.numeric(annotations.factor)
+    } else if (is.factor(scores)) {
+      label_type <- "factor"
+      annotations.factor <- scores
+      annotations <- as.numeric(annotations.factor)
+    } else {
+      annotations <- scores
+    }
+    out <- assess.categorical.autocorrelation(A = G, labels = annotations, perm.no = perm_no)
+  }
+
+  return(out)
+}
+
 
 EnhAdj <- function(Adj) {
   Adj[is.na(Adj)] <- 0
@@ -297,50 +366,4 @@ construct.tspanner <- function(backbone,
   G <- as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
 
   return(G)
-}
-
-
-networkAutocorrelation <- function(
-  G,
-  scores = NULL,
-  algorithm = c("geary", "moran", "categorical"),
-  score_normalization_method = 1L,
-  perm_no = 0,
-  thread_no = 0L,
-  net_slot = "ACTIONet"
-) {
-
-  algorithm <- tolower(algorithm)
-  algorithm <- match.arg(algorithm, several.ok = FALSE)
-
-  G <- .validate_net(G, net_slot)
-
-  if (algorithm == "geary") {
-    if (is.sparseMatrix(G)) {
-      out <- ACTIONet::autocorrelation_Geary(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
-    } else {
-      out <- ACTIONet::autocorrelation_Geary_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
-    }
-  } else if (algorithm == "moran") {
-    if (is.sparseMatrix(G)) {
-      out <- ACTIONet::autocorrelation_Moran(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
-    } else {
-      out <- ACTIONet::autocorrelation_Moran_full(G = G, scores = scores, normalization_method = score_normalization_method, perm_no = perm_no, thread_no = thread_no)
-    }
-  } else if (algorithm == "categorical") {
-    if (is.character(scores)) {
-      label_type <- "char"
-      annotations.factor <- factor(scores)
-      annotations <- as.numeric(annotations.factor)
-    } else if (is.factor(scores)) {
-      label_type <- "factor"
-      annotations.factor <- scores
-      annotations <- as.numeric(annotations.factor)
-    } else {
-      annotations <- scores
-    }
-    out <- assess.categorical.autocorrelation(A = G, labels = annotations, perm.no = perm_no)
-  }
-
-  return(out)
 }

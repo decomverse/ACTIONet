@@ -26,6 +26,102 @@ get.pseudobulk.SE <- function(
   sample_attr,
   ensemble = FALSE,
   bins = 20,
+  assay_name = "counts",
+  col_data = NULL,
+  pseudocount = 0,
+  with_S = FALSE,
+  with_E = FALSE,
+  with_V = FALSE,
+  min_cells_per_batch = 3,
+  BPPARAM = BiocParallel::SerialParam()
+) {
+
+    group_vec = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "data")
+    sample_counts = table(group_vec)
+    good_samples = sample_counts >= min_cells_per_batch
+
+    if(!any(good_samples)){
+      msg = sprintf("No samples remaining.")
+      warning(msg)
+      return(NULL)
+    } else if(!all(good_samples)) {
+      old_samples = names(sample_counts)
+      sample_counts = sample_counts[good_samples]
+      ace = ace[, ace[[sample_attr]] %in% names(sample_counts)]
+      group_vec = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "data")
+      bad_sample_names = setdiff(old_samples, names(sample_counts))
+      msg = sprintf("Samples Dropped: %s\n", paste0(bad_sample_names, collapse = ", "))
+      message(msg)
+    }
+
+    counts_mat = SummarizedExperiment::assays(ace)[[assay_name]]
+    sample_names = levels(factor(group_vec))
+
+    se_assays = list()
+
+    se_assays$counts = aggregateMatrix(counts_mat, group_vec = group_vec, method = "sum") + pseudocount
+
+    if (with_E == TRUE) {
+      se_assays$mean = aggregateMatrix(counts_mat, group_vec = group_vec, method = "mean")
+    }
+
+    if (with_V == TRUE) {
+      se_assays$var = aggregateMatrix(counts_mat, group_vec = group_vec, method = "var")
+    }
+
+    if (ensemble == TRUE) {
+        if (!any(with_S, with_E, with_V)) {
+            err = sprintf("No ensemble assays to make.\n")
+            stop(err)
+        }
+
+        IDX = ACTIONetExperiment::get.data.or.split(ace, attr = sample_attr, to_return = "split")
+        counts_list = bplapply(IDX, function(idx) counts_mat[, idx, drop = FALSE], BPPARAM = BPPARAM)
+
+        mr_assays = .make_ensemble_assays(
+          counts_list = counts_list,
+          bins = bins,
+          pseudocount = pseudocount,
+          with_S = with_S,
+          with_E = with_E,
+          with_V = with_V,
+          BPPARAM = BPPARAM
+        )
+        se_assays = c(se_assays, mr_assays$assays)
+    }
+
+    cd = data.frame(
+      n_cells = c(sample_counts[sample_names]),
+      sample = sample_names
+    )
+
+    if (!is.null(col_data)) {
+        md = col_data[col_data[[sample_attr]] %in% sample_names, , drop = FALSE]
+        md = md[match(sample_names, md[[sample_attr]]), , drop = FALSE]
+        cd = data.frame(md, cd)
+    }
+    rownames(cd) = sample_names
+    cd = droplevels(cd)
+    se = SummarizedExperiment::SummarizedExperiment(
+      assays = se_assays,
+      colData = cd,
+      rowData = SummarizedExperiment::rowData(ace)
+    )
+
+    if (ensemble == TRUE) {
+        S4Vectors::metadata(se)[["bins"]] = bins
+    }
+
+    invisible(gc())
+    return(se)
+}
+
+#' @export
+get.pseudobulk.SE.old <- function(
+  ace,
+  sample_attr,
+  ensemble = FALSE,
+  bins = 20,
   assay = "counts",
   col_data = NULL,
   pseudocount = 0,

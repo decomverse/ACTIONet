@@ -16,7 +16,7 @@ sudo apt install libhdf5-dev libsuitesparse-dev
 Additionally, to install all R package dependencies (if they are not already installed), you need:
 
 ```bash
-sudo apt install  libcurl4-openssl-dev libssl-dev libxml2-dev
+sudo apt install cmake libcurl4-openssl-dev libssl-dev libxml2-dev
 ```
 
 For Mac-based systems use [brew](https://brew.sh/):

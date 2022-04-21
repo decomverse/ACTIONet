@@ -549,17 +549,17 @@ namespace ACTIONet {
         return Rcpp::as<vector<string> >(rcpp_result_gen);
     }
 
-    inline mat compute_pseudo_bulk_per_cluster(sp_mat& S, arma::Col<unsigned long long> sample_assignments) {
-        typedef SEXP(*Ptr_compute_pseudo_bulk_per_cluster)(SEXP,SEXP);
-        static Ptr_compute_pseudo_bulk_per_cluster p_compute_pseudo_bulk_per_cluster = NULL;
-        if (p_compute_pseudo_bulk_per_cluster == NULL) {
-            validateSignature("mat(*compute_pseudo_bulk_per_cluster)(sp_mat&,arma::Col<unsigned long long>)");
-            p_compute_pseudo_bulk_per_cluster = (Ptr_compute_pseudo_bulk_per_cluster)R_GetCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster");
+    inline mat compute_grouped_rowsums(sp_mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowsums)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowsums p_compute_grouped_rowsums = NULL;
+        if (p_compute_grouped_rowsums == NULL) {
+            validateSignature("mat(*compute_grouped_rowsums)(sp_mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowsums = (Ptr_compute_grouped_rowsums)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowsums");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_pseudo_bulk_per_cluster(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+            rcpp_result_gen = p_compute_grouped_rowsums(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -570,17 +570,17 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline mat compute_pseudo_bulk_per_cluster_full(mat& S, arma::Col<unsigned long long> sample_assignments) {
-        typedef SEXP(*Ptr_compute_pseudo_bulk_per_cluster_full)(SEXP,SEXP);
-        static Ptr_compute_pseudo_bulk_per_cluster_full p_compute_pseudo_bulk_per_cluster_full = NULL;
-        if (p_compute_pseudo_bulk_per_cluster_full == NULL) {
-            validateSignature("mat(*compute_pseudo_bulk_per_cluster_full)(mat&,arma::Col<unsigned long long>)");
-            p_compute_pseudo_bulk_per_cluster_full = (Ptr_compute_pseudo_bulk_per_cluster_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster_full");
+    inline mat compute_grouped_rowsums_full(mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowsums_full)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowsums_full p_compute_grouped_rowsums_full = NULL;
+        if (p_compute_grouped_rowsums_full == NULL) {
+            validateSignature("mat(*compute_grouped_rowsums_full)(mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowsums_full = (Ptr_compute_grouped_rowsums_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowsums_full");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_pseudo_bulk_per_cluster_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+            rcpp_result_gen = p_compute_grouped_rowsums_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -591,17 +591,17 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline field<mat> compute_pseudo_bulk_per_cluster_and_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals) {
-        typedef SEXP(*Ptr_compute_pseudo_bulk_per_cluster_and_ind)(SEXP,SEXP,SEXP);
-        static Ptr_compute_pseudo_bulk_per_cluster_and_ind p_compute_pseudo_bulk_per_cluster_and_ind = NULL;
-        if (p_compute_pseudo_bulk_per_cluster_and_ind == NULL) {
-            validateSignature("field<mat>(*compute_pseudo_bulk_per_cluster_and_ind)(sp_mat&,arma::Col<unsigned long long>,arma::Col<unsigned long long>)");
-            p_compute_pseudo_bulk_per_cluster_and_ind = (Ptr_compute_pseudo_bulk_per_cluster_and_ind)R_GetCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind");
+    inline mat compute_grouped_rowmeans(sp_mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowmeans)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowmeans p_compute_grouped_rowmeans = NULL;
+        if (p_compute_grouped_rowmeans == NULL) {
+            validateSignature("mat(*compute_grouped_rowmeans)(sp_mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowmeans = (Ptr_compute_grouped_rowmeans)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_pseudo_bulk_per_cluster_and_ind(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)), Shield<SEXP>(Rcpp::wrap(individuals)));
+            rcpp_result_gen = p_compute_grouped_rowmeans(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -609,20 +609,20 @@ namespace ACTIONet {
             throw Rcpp::LongjumpException(rcpp_result_gen);
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<field<mat> >(rcpp_result_gen);
+        return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals) {
-        typedef SEXP(*Ptr_compute_pseudo_bulk_per_cluster_and_ind_full)(SEXP,SEXP,SEXP);
-        static Ptr_compute_pseudo_bulk_per_cluster_and_ind_full p_compute_pseudo_bulk_per_cluster_and_ind_full = NULL;
-        if (p_compute_pseudo_bulk_per_cluster_and_ind_full == NULL) {
-            validateSignature("field<mat>(*compute_pseudo_bulk_per_cluster_and_ind_full)(mat&,arma::Col<unsigned long long>,arma::Col<unsigned long long>)");
-            p_compute_pseudo_bulk_per_cluster_and_ind_full = (Ptr_compute_pseudo_bulk_per_cluster_and_ind_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full");
+    inline mat compute_grouped_rowmeans_full(mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowmeans_full)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowmeans_full p_compute_grouped_rowmeans_full = NULL;
+        if (p_compute_grouped_rowmeans_full == NULL) {
+            validateSignature("mat(*compute_grouped_rowmeans_full)(mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowmeans_full = (Ptr_compute_grouped_rowmeans_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans_full");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_compute_pseudo_bulk_per_cluster_and_ind_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)), Shield<SEXP>(Rcpp::wrap(individuals)));
+            rcpp_result_gen = p_compute_grouped_rowmeans_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -630,7 +630,49 @@ namespace ACTIONet {
             throw Rcpp::LongjumpException(rcpp_result_gen);
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<field<mat> >(rcpp_result_gen);
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline mat compute_grouped_rowvars(sp_mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowvars)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowvars p_compute_grouped_rowvars = NULL;
+        if (p_compute_grouped_rowvars == NULL) {
+            validateSignature("mat(*compute_grouped_rowvars)(sp_mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowvars = (Ptr_compute_grouped_rowvars)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_compute_grouped_rowvars(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline mat compute_grouped_rowvars_full(mat& S, arma::Col<unsigned long long> sample_assignments) {
+        typedef SEXP(*Ptr_compute_grouped_rowvars_full)(SEXP,SEXP);
+        static Ptr_compute_grouped_rowvars_full p_compute_grouped_rowvars_full = NULL;
+        if (p_compute_grouped_rowvars_full == NULL) {
+            validateSignature("mat(*compute_grouped_rowvars_full)(mat&,arma::Col<unsigned long long>)");
+            p_compute_grouped_rowvars_full = (Ptr_compute_grouped_rowvars_full)R_GetCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars_full");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_compute_grouped_rowvars_full(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(sample_assignments)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
     }
 
     inline mat compute_pseudo_bulk_per_archetype(sp_mat& S, mat& H) {
@@ -1578,11 +1620,11 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline vec run_LPA(sp_mat& G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0) {
+    inline Rcpp::NumericVector run_LPA(sp_mat& G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0) {
         typedef SEXP(*Ptr_run_LPA)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_LPA p_run_LPA = NULL;
         if (p_run_LPA == NULL) {
-            validateSignature("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
+            validateSignature("Rcpp::NumericVector(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
             p_run_LPA = (Ptr_run_LPA)R_GetCCallable("ACTIONet", "_ACTIONet_run_LPA");
         }
         RObject rcpp_result_gen;
@@ -1596,7 +1638,7 @@ namespace ACTIONet {
             throw Rcpp::LongjumpException(rcpp_result_gen);
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<vec >(rcpp_result_gen);
+        return Rcpp::as<Rcpp::NumericVector >(rcpp_result_gen);
     }
 
     inline List run_AA_with_batch_correction(mat& Z, mat& W0, vec batch, int max_it = 100, int max_correction_rounds = 10, double lambda = 1, double min_delta = 1e-6) {

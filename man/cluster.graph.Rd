@@ -2,14 +2,9 @@
 % Please edit documentation in R/clusters.R
 \name{cluster.graph}
 \alias{cluster.graph}
-\title{A wrapper function For Leiden algorithm}
+\title{A wrapper function for the leiden algorithm}
 \usage{
-cluster.graph(
-  G,
-  resolution_parameter = 0.5,
-  initial.clustering = NULL,
-  seed = 0
-)
+cluster.graph(G, resolution_parameter = 0.5, initial_clusters = NULL, seed = 0)
 }
 \arguments{
 \item{G}{Adjacency matrix of the input graph}
@@ -17,7 +12,7 @@ cluster.graph(
 \item{resolution_parameter}{Resolution of the clustering.
 The higher the resolution, the more clusters we will get (default=0.5).}
 
-\item{initial.clustering}{Used as the inital clustering}
+\item{initial_clusters}{Used as the inital clustering}
 
 \item{seed}{Random seed}
 }
@@ -25,7 +20,7 @@ The higher the resolution, the more clusters we will get (default=0.5).}
 ace with added annotation
 }
 \description{
-A wrapper function For Leiden algorithm
+A wrapper function for the leiden algorithm
 }
 \examples{
 clusters <- cluster.graph(G, 1.0)

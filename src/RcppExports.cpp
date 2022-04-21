@@ -958,22 +958,22 @@ RcppExport SEXP _ACTIONet_decode_ids(SEXP encoded_idsSEXP, SEXP passSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// compute_pseudo_bulk_per_cluster
-mat compute_pseudo_bulk_per_cluster(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
-static SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+// compute_grouped_rowsums
+mat compute_grouped_rowsums(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowsums_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster(S, sample_assignments));
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowsums(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+RcppExport SEXP _ACTIONet_compute_grouped_rowsums(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_compute_pseudo_bulk_per_cluster_try(SSEXP, sample_assignmentsSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowsums_try(SSEXP, sample_assignmentsSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -993,22 +993,22 @@ RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster(SEXP SSEXP, SEXP sampl
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// compute_pseudo_bulk_per_cluster_full
-mat compute_pseudo_bulk_per_cluster_full(mat& S, arma::Col<unsigned long long> sample_assignments);
-static SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_full_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+// compute_grouped_rowsums_full
+mat compute_grouped_rowsums_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowsums_full_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_full(S, sample_assignments));
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowsums_full(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+RcppExport SEXP _ACTIONet_compute_grouped_rowsums_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_compute_pseudo_bulk_per_cluster_full_try(SSEXP, sample_assignmentsSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowsums_full_try(SSEXP, sample_assignmentsSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -1028,23 +1028,22 @@ RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_full(SEXP SSEXP, SEXP 
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// compute_pseudo_bulk_per_cluster_and_ind
-field<mat> compute_pseudo_bulk_per_cluster_and_ind(sp_mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
-static SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_try(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+// compute_grouped_rowmeans
+mat compute_grouped_rowmeans(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowmeans_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals));
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowmeans(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+RcppExport SEXP _ACTIONet_compute_grouped_rowmeans(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_try(SSEXP, sample_assignmentsSEXP, individualsSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowmeans_try(SSEXP, sample_assignmentsSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -1064,23 +1063,92 @@ RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind(SEXP SSEXP, SE
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// compute_pseudo_bulk_per_cluster_and_ind_full
-field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(mat& S, arma::Col<unsigned long long> sample_assignments, arma::Col<unsigned long long> individuals);
-static SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full_try(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+// compute_grouped_rowmeans_full
+mat compute_grouped_rowmeans_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowmeans_full_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
-    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type individuals(individualsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pseudo_bulk_per_cluster_and_ind_full(S, sample_assignments, individuals));
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowmeans_full(S, sample_assignments));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full(SEXP SSEXP, SEXP sample_assignmentsSEXP, SEXP individualsSEXP) {
+RcppExport SEXP _ACTIONet_compute_grouped_rowmeans_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full_try(SSEXP, sample_assignmentsSEXP, individualsSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowmeans_full_try(SSEXP, sample_assignmentsSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// compute_grouped_rowvars
+mat compute_grouped_rowvars(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowvars_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowvars(S, sample_assignments));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_compute_grouped_rowvars(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowvars_try(SSEXP, sample_assignmentsSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// compute_grouped_rowvars_full
+mat compute_grouped_rowvars_full(mat& S, arma::Col<unsigned long long> sample_assignments);
+static SEXP _ACTIONet_compute_grouped_rowvars_full_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::Col<unsigned long long> >::type sample_assignments(sample_assignmentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_grouped_rowvars_full(S, sample_assignments));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_compute_grouped_rowvars_full(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_compute_grouped_rowvars_full_try(SSEXP, sample_assignmentsSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -2760,7 +2828,7 @@ RcppExport SEXP _ACTIONet_NetEnh(SEXP ASEXP) {
     return rcpp_result_gen;
 }
 // run_LPA
-vec run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_, int thread_no);
+Rcpp::NumericVector run_LPA(sp_mat& G, vec labels, double lambda, int iters, double sig_threshold, Nullable<IntegerVector> fixed_labels_, int thread_no);
 static SEXP _ACTIONet_run_LPA_try(SEXP GSEXP, SEXP labelsSEXP, SEXP lambdaSEXP, SEXP itersSEXP, SEXP sig_thresholdSEXP, SEXP fixed_labels_SEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -3815,10 +3883,12 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*layoutNetwork)(sp_mat&,mat,string,int,unsigned int,int,int)");
         signatures.insert("vector<string>(*encode_ids)(vector<string>,string)");
         signatures.insert("vector<string>(*decode_ids)(vector<string>,string)");
-        signatures.insert("mat(*compute_pseudo_bulk_per_cluster)(sp_mat&,arma::Col<unsigned long long>)");
-        signatures.insert("mat(*compute_pseudo_bulk_per_cluster_full)(mat&,arma::Col<unsigned long long>)");
-        signatures.insert("field<mat>(*compute_pseudo_bulk_per_cluster_and_ind)(sp_mat&,arma::Col<unsigned long long>,arma::Col<unsigned long long>)");
-        signatures.insert("field<mat>(*compute_pseudo_bulk_per_cluster_and_ind_full)(mat&,arma::Col<unsigned long long>,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowsums)(sp_mat&,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowsums_full)(mat&,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowmeans)(sp_mat&,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowmeans_full)(mat&,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowvars)(sp_mat&,arma::Col<unsigned long long>)");
+        signatures.insert("mat(*compute_grouped_rowvars_full)(mat&,arma::Col<unsigned long long>)");
         signatures.insert("mat(*compute_pseudo_bulk_per_archetype)(sp_mat&,mat&)");
         signatures.insert("mat(*compute_pseudo_bulk_per_archetype_full)(mat&,mat&)");
         signatures.insert("field<mat>(*compute_pseudo_bulk_per_archetype_and_ind)(sp_mat&,mat&,arma::Col<unsigned long long>)");
@@ -3864,7 +3934,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*orthogonalize_basal_full)(mat&,mat&,mat&,mat&,mat&,vec&,mat&)");
         signatures.insert("umat(*MWM_rank1)(vec,vec,double,double)");
         signatures.insert("mat(*NetEnh)(mat)");
-        signatures.insert("vec(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
+        signatures.insert("Rcpp::NumericVector(*run_LPA)(sp_mat&,vec,double,int,double,Nullable<IntegerVector>,int)");
         signatures.insert("List(*run_AA_with_batch_correction)(mat&,mat&,vec,int,int,double,double)");
         signatures.insert("List(*run_ACTION_with_batch_correction)(mat&,vec,int,int,int,int,int,double,double)");
         signatures.insert("mat(*compute_marker_aggregate_stats)(sp_mat&,sp_mat&,sp_mat&,double,int,int,bool)");
@@ -3921,10 +3991,12 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_layoutNetwork", (DL_FUNC)_ACTIONet_layoutNetwork_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_encode_ids", (DL_FUNC)_ACTIONet_encode_ids_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_decode_ids", (DL_FUNC)_ACTIONet_decode_ids_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_cluster_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster_full", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_cluster_full_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowsums", (DL_FUNC)_ACTIONet_compute_grouped_rowsums_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowsums_full", (DL_FUNC)_ACTIONet_compute_grouped_rowsums_full_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans", (DL_FUNC)_ACTIONet_compute_grouped_rowmeans_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans_full", (DL_FUNC)_ACTIONet_compute_grouped_rowmeans_full_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars", (DL_FUNC)_ACTIONet_compute_grouped_rowvars_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowvars_full", (DL_FUNC)_ACTIONet_compute_grouped_rowvars_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_archetype", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_archetype_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_archetype_full", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_archetype_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind", (DL_FUNC)_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind_try);
@@ -4026,10 +4098,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_layoutNetwork", (DL_FUNC) &_ACTIONet_layoutNetwork, 7},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
     {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
-    {"_ACTIONet_compute_pseudo_bulk_per_cluster", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster, 2},
-    {"_ACTIONet_compute_pseudo_bulk_per_cluster_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_full, 2},
-    {"_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind, 3},
-    {"_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full, 3},
+    {"_ACTIONet_compute_grouped_rowsums", (DL_FUNC) &_ACTIONet_compute_grouped_rowsums, 2},
+    {"_ACTIONet_compute_grouped_rowsums_full", (DL_FUNC) &_ACTIONet_compute_grouped_rowsums_full, 2},
+    {"_ACTIONet_compute_grouped_rowmeans", (DL_FUNC) &_ACTIONet_compute_grouped_rowmeans, 2},
+    {"_ACTIONet_compute_grouped_rowmeans_full", (DL_FUNC) &_ACTIONet_compute_grouped_rowmeans_full, 2},
+    {"_ACTIONet_compute_grouped_rowvars", (DL_FUNC) &_ACTIONet_compute_grouped_rowvars, 2},
+    {"_ACTIONet_compute_grouped_rowvars_full", (DL_FUNC) &_ACTIONet_compute_grouped_rowvars_full, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_archetype", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_archetype_full", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_full, 2},
     {"_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind", (DL_FUNC) &_ACTIONet_compute_pseudo_bulk_per_archetype_and_ind, 3},

@@ -22,6 +22,13 @@ using namespace arma;
 #define ARMA_USE_CXX11_RNG
 #define DYNSCHED
 
+template <typename T>
+Rcpp::NumericVector arma2vec(const T &x)
+{
+  return Rcpp::NumericVector(x.begin(), x.end());
+}
+
+
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 List run_ACTION_muV(const List &S, int k_min, int k_max, vec alpha, double lambda = 1, int AA_iters = 50, int Opt_iters = 0, int thread_no = 0)
@@ -825,8 +832,6 @@ List layoutNetwork(sp_mat &G, mat initial_position, string algorithm, int compac
 //'
 //' @return A string array of encoded ids
 //'
-//' @examples
-//'	encoded.ids = encode_ids(colnames(sce))
 // [[Rcpp::export]]
 vector<string> encode_ids(vector<string> ids, string pass)
 {
@@ -849,8 +854,6 @@ vector<string> encode_ids(vector<string> ids, string pass)
 //'
 //' @return A string array of decrypted ids
 //'
-//' @examples
-//'	ids = decode_ids(encoded.ids)
 // [[Rcpp::export]]
 vector<string> decode_ids(vector<string> encoded_ids, string pass)
 {
@@ -866,106 +869,82 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass)
   return decoded_ids;
 }
 
-//' Computes pseudobulk profiles
+//' Aggregate matrix wiithin groups
 //'
-//' @param S Input matrix ("sparseMatrix")
-//' @param sample_assignments Any sample clustering/annotation (it has to be in
-//{1, ..., max_class_num})
+//' @param S matrix of type "dgCMatrix"
+//' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 //'
-//' @return S matrix aggregated within each class of sample_assignments
+//' @return S matrix with columns of values aggregated within each group of sample_assignments
 //'
-//' @examples
-//' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-//'	G = buildNetwork(prune.out$H_stacked)
-//' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-// prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs = compute_pseudo_bulk(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk_per_cluster(sp_mat &S,
+mat compute_grouped_rowsums(sp_mat &S,
                                     arma::Col<unsigned long long> sample_assignments)
 {
-  mat pb = ACTIONet::compute_pseudo_bulk_per_cluster(S, sample_assignments);
+  mat pb = ACTIONet::compute_grouped_rowsums(S, sample_assignments);
 
   return pb;
 }
 
-//' Computes pseudobulk profiles
+//' Aggregate matrix wiithin groups
 //'
-//' @param S Input matrix ("matrix")
-//' @param sample_assignments Any sample clustering/annotation (it has to be in
-//{1, ..., max_class_num})
+//' @param S matrix
+//' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 //'
-//' @return S matrix aggregated within each class of sample_assignments
+//' @return S matrix with columns of values aggregated within each group of sample_assignments
 //'
-//' @examples
-//' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-//'	G = buildNetwork(prune.out$H_stacked)
-//' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-// prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs = compute_pseudo_bulk(S, cell.clusters)
 // [[Rcpp::export]]
-mat compute_pseudo_bulk_per_cluster_full(mat &S,
+mat compute_grouped_rowsums_full(mat &S,
                                          arma::Col<unsigned long long> sample_assignments)
 {
-  mat pb = ACTIONet::compute_pseudo_bulk_per_cluster(S, sample_assignments);
+  mat pb = ACTIONet::compute_grouped_rowsums(S, sample_assignments);
 
   return pb;
 }
 
-//' Computes pseudobulk profiles (groups[k1] x individuals[k2])
+//' Average matrix wiithin groups
 //'
-//' @param S Input matrix ("sparseMatrix")
-//' @param sample_assignments Any primary grouping - typically based on cell
-// type/state (it has to be in {1, ..., k1}) ' @param individuals Any Secondary
-// grouping - typically corresponds to individuals (it has to be in {1, ...,
-// k2})
+//' @param S matrix of type "dgCMatrix"
+//' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 //'
-//' @return A list of pseudobulk profile, where each entry is matrix
-// corresponding to one cell type/state
+//' @return S matrix with columns of values average within each group of sample_assignments
 //'
-//' @examples
-//' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-//'	G = buildNetwork(prune.out$H_stacked)
-//' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-// prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_cluster_and_ind(
-    sp_mat &S, arma::Col<unsigned long long> sample_assignments,
-    arma::Col<unsigned long long> individuals)
+mat compute_grouped_rowmeans(sp_mat &S, arma::Col<unsigned long long> sample_assignments)
 {
-  field<mat> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
+  mat pb = ACTIONet::compute_grouped_rowmeans(S, sample_assignments);
 
-  return pbs_list;
+  return pb;
 }
 
-//' Computes pseudobulk profiles (groups[k1] x individuals[k2])
+//' Average matrix wiithin groups
 //'
-//' @param S Input matrix ("matrix")
-//' @param sample_assignments Any primary grouping - typically based on cell
-// type/state (it has to be in {1, ..., k1}) ' @param individuals Any Secondary
-// grouping - typically corresponds to individuals (it has to be in {1, ...,
-// k2})
+//' @param S matrix
+//' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 //'
-//' @return A list of pseudobulk profile, where each entry is matrix
-// corresponding to one cell type/state
+//' @return S matrix with columns of values average within each group of sample_assignments
 //'
-//' @examples
-//' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-//'	G = buildNetwork(prune.out$H_stacked)
-//' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-// prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments '
-// pbs.list = compute_pseudo_bulk(S, cell.clusters, sce$individuals)
 // [[Rcpp::export]]
-field<mat> compute_pseudo_bulk_per_cluster_and_ind_full(
-    mat &S, arma::Col<unsigned long long> sample_assignments,
-    arma::Col<unsigned long long> individuals)
+mat compute_grouped_rowmeans_full(mat &S, arma::Col<unsigned long long> sample_assignments)
 {
-  field<mat> pbs_list =
-      ACTIONet::compute_pseudo_bulk_per_cluster_and_ind(S, sample_assignments, individuals);
+  mat pb = ACTIONet::compute_grouped_rowmeans(S, sample_assignments);
 
-  return pbs_list;
+  return pb;
+}
+
+// [[Rcpp::export]]
+mat compute_grouped_rowvars(sp_mat &S, arma::Col<unsigned long long> sample_assignments)
+{
+  mat pb = ACTIONet::compute_grouped_rowvars(S, sample_assignments);
+
+  return pb;
+}
+
+// [[Rcpp::export]]
+mat compute_grouped_rowvars_full(mat &S, arma::Col<unsigned long long> sample_assignments)
+{
+  mat pb = ACTIONet::compute_grouped_rowvars(S, sample_assignments);
+
+  return pb;
 }
 
 // [[Rcpp::export]]
@@ -2227,7 +2206,7 @@ mat NetEnh(mat A)
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0)
+Rcpp::NumericVector run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_threshold = 3, Nullable<IntegerVector> fixed_labels_ = R_NilValue, int thread_no = 0)
 {
   uvec fixed_labels_vec;
   if (fixed_labels_.isNotNull())
@@ -2241,7 +2220,9 @@ vec run_LPA(sp_mat &G, vec labels, double lambda = 1, int iters = 3, double sig_
   }
 
   mat new_labels = ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec, thread_no);
-  return (new_labels);
+  // vec labels_out = arma::conv_to<arma::vec>::from(new_labels);
+
+  return (arma2vec(new_labels));
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]

@@ -60,3 +60,68 @@ normalize.matrix <- function(
 
   return(B)
 }
+
+
+.groupedRowSums <- function(S, group_vec) {
+
+  if(ACTIONetExperiment:::is.sparseMatrix(S)) {
+    mat = compute_grouped_rowsums(S, sample_assignments = group_vec)
+  } else {
+    mat = compute_grouped_rowsums_full(S, sample_assignments = group_vec)
+  }
+  return(mat)
+}
+
+
+.groupedRowMeans <- function(S, group_vec) {
+
+  if(ACTIONetExperiment:::is.sparseMatrix(S)) {
+    mat = compute_grouped_rowmeans(S, sample_assignments = group_vec)
+  } else {
+    mat = compute_grouped_rowmeans_full(S, sample_assignments = group_vec)
+  }
+  return(mat)
+}
+
+
+.groupedRowVars <- function(S, group_vec) {
+
+  if(ACTIONetExperiment:::is.sparseMatrix(S)) {
+    mat = compute_grouped_rowvars(S, sample_assignments = group_vec)
+  } else {
+    mat = compute_grouped_rowvars_full(S, sample_assignments = group_vec)
+  }
+  return(mat)
+}
+
+
+#' @export
+aggregateMatrix <- function(S, group_vec, method = c("sum", "mean", "var")) {
+
+  method = match.arg(method, several.ok = FALSE)
+
+  if(any(is.na(group_vec))) {
+    err = sprintf("'NA' values in 'group_vec'.\n")
+    stop(err)
+  }
+
+  lf <- factor(.validate_attr(S, attr = group_vec, obj_name = "S", attr_name = "group_vec"))
+  labels = as.numeric(lf)
+  keys = levels(lf)
+
+  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
+    S = as(S, "dgCMatrix")
+  } 
+
+  if (method == "sum") {
+    mat = .groupedRowSums(S, labels)
+  } else if (method == "mean") {
+    mat = .groupedRowMeans(S, labels)
+  } else if (method == "var") {
+    mat = .groupedRowVars(S, labels)
+  }
+
+  colnames(mat) <- keys
+  rownames(mat) = rownames(S)
+  return(mat)
+}

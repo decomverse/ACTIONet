@@ -43,7 +43,7 @@ get_mtRNA_stats <- function(ace, by = NULL, groups_use = NULL, features_use = NU
 
     if(metric == "pct"){
       frac.list = lapply(IDX, function(idx){
-        m = cs_mm[idx]/cs_mat[idx]
+        m = 100 * cs_mm[idx]/cs_mat[idx]
       })
     } else if(metric == "ratio"){
       frac.list = lapply(IDX, function(idx){
