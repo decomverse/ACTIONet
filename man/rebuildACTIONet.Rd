@@ -12,11 +12,11 @@ rebuildACTIONet(
   mutual_edges_only = TRUE,
   layout_compactness = 50,
   layout_epochs = 1000,
-  layout_algorithm = c("tumap", "umap"),
-  layout_in_parallel = TRUE,
+  layout_algorithm = c("umap", "tumap"),
+  layout_parallel = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
-  new_net_slot = "ACTIONet",
+  net_slot_out = "ACTIONet",
   H_stacked_slot = "H_stacked",
   seed = 0
 )
@@ -36,15 +36,15 @@ rebuildACTIONet(
 
 \item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
-\item{layout_algorithm}{Algorithm for computing plot layout. t-UMAP ("tumap") or UMAP ("umap"). Not case sensitive. (default="tumap")}
+\item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
 
-\item{layout_in_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
+\item{layout_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
 
 \item{thread_no}{Number of parallel threads. (default=0)}
 
 \item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel. (default='ACTION')}
 
-\item{new_net_slot}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
+\item{net_slot_out}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
 
 \item{seed}{Seed for random initialization. (default=0)}
 }

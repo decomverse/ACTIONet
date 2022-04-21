@@ -19,7 +19,8 @@
   grad_palette = "magma",
   show_legend = FALSE,
   net_slot = "ACTIONet",
-  coordinate_attr = "ACTIONet2D"
+  coordinate_attr = "ACTIONet2D",
+  scale_coors = TRUE
 )
 }
 \arguments{
@@ -47,9 +48,13 @@
 
 \item{grad_palette}{Gradient color palette. one of ("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral") or value to pass as 'colors' argument to 'grDevices::colorRampPalette()'.}
 
+\item{show_legend}{Show legend based on labels. Ignored if 'label_attr=NULL' or 'color_attr!=NULL' (default:'FALSE').}
+
 \item{net_slot}{Name of entry in colNets(ace) containing the ACTIONet adjacency matrix to use for value imputation if 'alpha>0' (default:'ACTIONet').}
 
 \item{coordinate_attr}{Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').}
+
+\item{scale_coors}{Scale and center plot coordinates. (default:'TRUE')}
 }
 \value{
 'ggplot' object.

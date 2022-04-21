@@ -17,11 +17,9 @@ findMarkers.ACTIONet <- function(
   features_use = .get_feature_vec(ace, features_use = features_use)
 
   specificity <- clusterFeatureSpecificity(
-    ace = NULL,
-    S = SummarizedExperiment::assays(ace)[[assay_name]],
+    obj = ace,
     cluster_attr = sa$index,
-    output_prefix = NULL,
-    assay_name = NULL,
+    assay_name = assay_name,
     thread_no = thread_no,
     return_raw = TRUE
   )
@@ -32,7 +30,7 @@ findMarkers.ACTIONet <- function(
   colnames(feat_spec) = sa$keys
 
   if(!is.null(feat_subset))
-    feat_spec = feat_spec[rownames(feat_spec) %in% feat_subset, ]
+    feat_spec = feat_spec[rownames(feat_spec) %in% feat_subset, , drop = FALSE]
 
   if(most_specific == TRUE){
     W = select.top.k.features(
@@ -57,7 +55,7 @@ findMarkers.ACTIONet <- function(
     return(df)
 }
 
-process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
+process.var.of.interest <- function(ace, var_of_interest, max_class = 100) {
   if(length(var_of_interest) == 1) {
     if(is.character(var_of_interest)) {
       if(var_of_interest %in% colnames(colData(ace))) {
@@ -76,8 +74,8 @@ process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
 
   if( (class(v) == "numeric") | (class(v) == "character"))  {
     uv = sort(unique(v))
-    if(max.class < length(uv)) {
-      warning(sprintf("Variable %s has %d unique values (max.class = %d)", var_of_interest, length(uv), max.class))
+    if(max_class < length(uv)) {
+      warning(sprintf("Variable %s has %d unique values (max_class = %d)", var_of_interest, length(uv), max_class))
       return(NULL)
     }
     f = factor(v, uv)
@@ -89,7 +87,7 @@ process.var.of.interest <- function(ace, var_of_interest, max.class = 100) {
   return(f)
 }
 
-computeGeneSpecifity.ACTIONet <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+computeGeneSpecifity.ACTIONet <- function(ace, f, out_name = "cond", pos_only = T, blacklist_pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(ACTIONet)
   print("Running computeGeneSpecifity.ACTIONet()")
 
@@ -100,25 +98,25 @@ computeGeneSpecifity.ACTIONet <- function(ace, f, out.name = "cond", pos.only = 
   f = droplevels(f)
 
   out = compute_cluster_feature_specificity(logcounts(ace), as.numeric(f))
-  metadata(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = out
+  metadata(ace)[[sprintf("%s_markers_ACTIONet", out_name)]] = out
 
   scores = as.matrix(out$upper_significance - out$lower_significance)
   colnames(scores) = levels(f)
   rownames(scores) = rownames(ace)
 
-  if(pos.only == T)
+  if(pos_only == T)
     scores[scores < 0] = 0 # Only "positive markers" [negative would be markers in other levels]
 
-  blacklisted.rows = grep(blacklist.pattern, rownames(ace), ignore.case = T)
+  blacklisted.rows = grep(blacklist_pattern, rownames(ace), ignore.case = T)
   scores[blacklisted.rows, ] = 0
 
-  rowMaps(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = scores
-  rowMapTypes(ace)[[sprintf("%s_markers_ACTIONet", out.name)]] = "reduction"
+  rowMaps(ace)[[sprintf("%s_markers_ACTIONet", out_name)]] = scores
+  rowMapTypes(ace)[[sprintf("%s_markers_ACTIONet", out_name)]] = "reduction"
 
   return(ace)
 }
 
-computeGeneSpecifity.wilcoxon <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+computeGeneSpecifity.wilcoxon <- function(ace, f, out_name = "cond", pos_only = T, blacklist_pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(presto)
   print("Running computeGeneSpecifity.wilcox()")
 
@@ -128,7 +126,7 @@ computeGeneSpecifity.wilcoxon <- function(ace, f, out.name = "cond", pos.only = 
   }
   f = droplevels(f)
   DF = presto::wilcoxauc(logcounts(ace), f)
-  metadata(ace)[[sprintf("%s_markers_wilcox", out.name)]] = DF
+  metadata(ace)[[sprintf("%s_markers_wilcox", out_name)]] = DF
   DFs = split(DF, DF$group)
   DFs = DFs[levels(f)]
   scores = do.call(cbind, lapply(DFs, function(subDF) {
@@ -138,19 +136,19 @@ computeGeneSpecifity.wilcoxon <- function(ace, f, out.name = "cond", pos.only = 
   colnames(scores) = levels(f)
   rownames(scores) = rownames(ace)
 
-  if(pos.only == T)
+  if(pos_only == T)
     scores[scores < 0] = 0 # Only "positive markers" [negative would be markers in other levels]
 
-  blacklisted.rows = grep(blacklist.pattern, rownames(ace), ignore.case = T)
+  blacklisted.rows = grep(blacklist_pattern, rownames(ace), ignore.case = T)
   scores[blacklisted.rows, ] = 0
 
-  rowMaps(ace)[[sprintf("%s_markers_wilcox", out.name)]] = scores
-  rowMapTypes(ace)[[sprintf("%s_markers_wilcox", out.name)]] = "reduction"
+  rowMaps(ace)[[sprintf("%s_markers_wilcox", out_name)]] = scores
+  rowMapTypes(ace)[[sprintf("%s_markers_wilcox", out_name)]] = "reduction"
 
   return(ace)
 }
 
-computeGeneSpecifity.scran <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
+computeGeneSpecifity.scran <- function(ace, f, out_name = "cond", pos_only = T, blacklist_pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT") {
   require(scran)
   print("Running computeGeneSpecifity.scran()")
 
@@ -161,7 +159,7 @@ computeGeneSpecifity.scran <- function(ace, f, out.name = "cond", pos.only = T, 
   f = droplevels(f)
 
   out = scran::findMarkers(logcounts(ace), f)
-  metadata(ace)[[sprintf("%s_markers_scran", out.name)]] = out
+  metadata(ace)[[sprintf("%s_markers_scran", out_name)]] = out
 
   scores = do.call(cbind, lapply(out, function(DF) {
     idx = match(rownames(ace), rownames(DF))
@@ -172,19 +170,19 @@ computeGeneSpecifity.scran <- function(ace, f, out.name = "cond", pos.only = T, 
   scores[scores == Inf] = max(scores[!is.infinite(scores)])
   scores[scores == -Inf] = min(scores[!is.infinite(scores)])
 
-  if(pos.only == T)
+  if(pos_only == T)
     scores[scores < 0] = 0 # Only "positive markers" [negative would be markers in other levels]
 
-  blacklisted.rows = grep(blacklist.pattern, rownames(ace), ignore.case = T)
+  blacklisted.rows = grep(blacklist_pattern, rownames(ace), ignore.case = T)
   scores[blacklisted.rows, ] = 0
 
-  rowMaps(ace)[[sprintf("%s_markers_scran", out.name)]] = scores
-  rowMapTypes(ace)[[sprintf("%s_markers_scran", out.name)]] = "reduction"
+  rowMaps(ace)[[sprintf("%s_markers_scran", out_name)]] = scores
+  rowMapTypes(ace)[[sprintf("%s_markers_scran", out_name)]] = "reduction"
 
   return(ace)
 }
 
-computeGeneSpecifity.limma <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
+computeGeneSpecifity.limma <- function(ace, f, out_name = "cond", pos_only = T, blacklist_pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", weight = NULL) {
   require(limma)
   print("Running computeGeneSpecifity.limma()")
 
@@ -213,7 +211,7 @@ computeGeneSpecifity.limma <- function(ace, f, out.name = "cond", pos.only = T, 
     rownames(contrast.mat) = colnames(design)
 
     fit <- limma::contrasts.fit(fit0, contrasts = contrast.mat)
-    fit <- limma::eBayes(fit, robust=TRUE, trend=TRUE)#, trend = TRUE, proportion = 0.05)
+    fit <- limma::eBayes(fit, robust=TRUE, trend=TRUE)
     DF = limma::topTable(
       fit = fit,
       number = Inf,
@@ -225,20 +223,20 @@ computeGeneSpecifity.limma <- function(ace, f, out.name = "cond", pos.only = T, 
     scores[rownames(DF), i] = DF$t
   }
 
-  if(pos.only == T)
+  if(pos_only == T)
     scores[scores < 0] = 0 # Only "positive markers" [negative would be markers in other levels]
 
-  blacklisted.rows = grep(blacklist.pattern, rownames(ace), ignore.case = T)
+  blacklisted.rows = grep(blacklist_pattern, rownames(ace), ignore.case = T)
   scores[blacklisted.rows, ] = 0
 
-  metadata(ace)[[sprintf("%s_markers_limma", out.name)]] = DFs
-  rowMaps(ace)[[sprintf("%s_markers_limma", out.name)]] = scores
-  rowMapTypes(ace)[[sprintf("%s_markers_limma", out.name)]] = "reduction"
+  metadata(ace)[[sprintf("%s_markers_limma", out_name)]] = DFs
+  rowMaps(ace)[[sprintf("%s_markers_limma", out_name)]] = scores
+  rowMapTypes(ace)[[sprintf("%s_markers_limma", out_name)]] = "reduction"
 
   return(ace)
 }
 
-computeGeneSpecifity.limma.pb <- function(ace, f, out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10) {
+computeGeneSpecifity.limma.pb <- function(ace, f, out_name = "cond", pos_only = T, blacklist_pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min_size = 10) {
   print("Running computeGeneSpecifity.limma.pb()")
 
   set.seed(0)
@@ -250,7 +248,7 @@ computeGeneSpecifity.limma.pb <- function(ace, f, out.name = "cond", pos.only = 
 
   f.prod=interaction(cl,f)
   IDX=split(1:ncol(ace),f.prod)
-  mask = sapply(IDX, length) > min.size
+  mask = sapply(IDX, length) > min_size
   S = logcounts(ace)
   ll = lapply(IDX[mask],function(idx){
     return(fast_row_sums(S[,idx, drop = F])/length(idx))
@@ -267,40 +265,29 @@ computeGeneSpecifity.limma.pb <- function(ace, f, out.name = "cond", pos.only = 
 
   z = (weight-median(weight))/mad(weight)
   mask = z > -1
-  pb.ace = computeGeneSpecifity.limma(pb.ace[, mask], pb.ace$condition[mask], out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, weight = weight[mask])
+  pb.ace = computeGeneSpecifity.limma(pb.ace[, mask], pb.ace$condition[mask], out_name = out_name, pos_only = pos_only, blacklist_pattern = blacklist_pattern, weight = weight[mask])
 
-  metadata(ace)[[sprintf("%s_markers_limma_pb", out.name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out.name)]]
-  rowMaps(ace)[[sprintf("%s_markers_limma_pb", out.name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out.name)]]
-  rowMapTypes(ace)[[sprintf("%s_markers_limmapb", out.name)]] = "reduction"
+  metadata(ace)[[sprintf("%s_markers_limma_pb", out_name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out_name)]]
+  rowMaps(ace)[[sprintf("%s_markers_limma_pb", out_name)]] = rowMaps(pb.ace)[[sprintf("%s_markers_limma", out_name)]]
+  rowMapTypes(ace)[[sprintf("%s_markers_limmapb", out_name)]] = "reduction"
 
   return(ace)
 }
 
-computeGeneSpecifity.ace <- function(ace, var_of_interest, method = "ACTIONet", out.name = "cond", pos.only = T, blacklist.pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min.size = 10, max.class = 100)  {
-  f = process.var.of.interest(ace, var_of_interest,max.class = max.class)
+computeGeneSpecifity.ace <- function(ace, var_of_interest, method = "ACTIONet", out_name = "cond", pos_only = T, blacklist_pattern = "^MT-|^MT[:.:]|^RPS|^RPL|^MALAT", resolution = 5, min_size = 10, max_class = 100)  {
+  f = process.var.of.interest(ace, var_of_interest,max_class = max_class)
 
   if (method == "ACTIONet") {
-    ace = computeGeneSpecifity.ACTIONet(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.ACTIONet(ace, f, out_name = out_name, pos_only = pos_only, blacklist_pattern = blacklist_pattern)
   } else if(method == "wilcox") {
-    ace = computeGeneSpecifity.wilcox(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.wilcox(ace, f, out_name = out_name, pos_only = pos_only, blacklist_pattern = blacklist_pattern)
   } else if(method == "scran") {
-    ace = computeGeneSpecifity.scran(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.scran(ace, f, out_name = out_name, pos_only = pos_only, blacklist_pattern = blacklist_pattern)
   } else if(method == "limma") {
-    ace = computeGeneSpecifity.limma(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern)
+    ace = computeGeneSpecifity.limma(ace, f, out_name = out_name, pos_only = pos_only, blacklist_pattern = blacklist_pattern)
   } else if(method == "limma_pseudobulk") {
-    ace = computeGeneSpecifity.limma.pb(ace, f, out.name = out.name, pos.only = pos.only, blacklist.pattern = blacklist.pattern, resolution = resolution, min.size = min.size)
+    ace = computeGeneSpecifity.limma.pb(ace, f, out_name = out_name, pos_only = pos_only, blacklist_pattern = blacklist_pattern, resolution = resolution, min_size = min_size)
   }
 
   return(ace)
-}
-
-
-clusterMarkers <- function(ace, clusters) {
-  ace <- computeGeneSpecifity.ace(ace, cl, out.name = "Leiden")
-  df <- ace$Leiden_markers_ACTIONet
-
-  markers <- apply(df, 2, function(x) rownames(df)[scale(x) > 10])
-
-  out <- list(markers = markers, gene_spec = df)
-  return(out)
 }

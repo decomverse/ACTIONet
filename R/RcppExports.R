@@ -153,70 +153,6 @@ NULL
 #' @param compactness_level A value between 0-100, indicating the compactness
 NULL
 
-#' Computes pseudobulk profiles
-#'
-#' @param S Input matrix ("sparseMatrix")
-#' @param sample_assignments Any sample clustering/annotation (it has to be in
-NULL
-
-#'
-#' @return S matrix aggregated within each class of sample_assignments
-#'
-#' @examples
-#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-#'	G = buildNetwork(prune.out$H_stacked)
-#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-NULL
-
-#' Computes pseudobulk profiles
-#'
-#' @param S Input matrix ("matrix")
-#' @param sample_assignments Any sample clustering/annotation (it has to be in
-NULL
-
-#'
-#' @return S matrix aggregated within each class of sample_assignments
-#'
-#' @examples
-#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-#'	G = buildNetwork(prune.out$H_stacked)
-#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-NULL
-
-#' Computes pseudobulk profiles (groups[k1] x individuals[k2])
-#'
-#' @param S Input matrix ("sparseMatrix")
-#' @param sample_assignments Any primary grouping - typically based on cell
-NULL
-
-#'
-#' @return A list of pseudobulk profile, where each entry is matrix
-NULL
-
-#'
-#' @examples
-#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-#'	G = buildNetwork(prune.out$H_stacked)
-#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-NULL
-
-#' Computes pseudobulk profiles (groups[k1] x individuals[k2])
-#'
-#' @param S Input matrix ("matrix")
-#' @param sample_assignments Any primary grouping - typically based on cell
-NULL
-
-#'
-#' @return A list of pseudobulk profile, where each entry is matrix
-NULL
-
-#'
-#' @examples
-#' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
-#'	G = buildNetwork(prune.out$H_stacked)
-#' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
-NULL
-
 #' Renormalized input matrix to minimize differences in means
 #'
 #' @param S Input matrix
@@ -703,8 +639,6 @@ layoutNetwork <- function(G, initial_position, algorithm, compactness_level = 50
 #'
 #' @return A string array of encoded ids
 #'
-#' @examples
-#'	encoded.ids = encode_ids(colnames(sce))
 encode_ids <- function(ids, pass) {
     .Call(`_ACTIONet_encode_ids`, ids, pass)
 }
@@ -716,26 +650,60 @@ encode_ids <- function(ids, pass) {
 #'
 #' @return A string array of decrypted ids
 #'
-#' @examples
-#'	ids = decode_ids(encoded.ids)
 decode_ids <- function(encoded_ids, pass) {
     .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
 }
 
-compute_pseudo_bulk_per_cluster <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster`, S, sample_assignments)
+#' Aggregate matrix wiithin groups
+#'
+#' @param S matrix of type "dgCMatrix"
+#' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
+#'
+#' @return S matrix with columns of values aggregated within each group of sample_assignments
+#'
+compute_grouped_rowsums <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowsums`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_cluster_full <- function(S, sample_assignments) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_full`, S, sample_assignments)
+#' Aggregate matrix wiithin groups
+#'
+#' @param S matrix
+#' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
+#'
+#' @return S matrix with columns of values aggregated within each group of sample_assignments
+#'
+compute_grouped_rowsums_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowsums_full`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_cluster_and_ind <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind`, S, sample_assignments, individuals)
+#' Average matrix wiithin groups
+#'
+#' @param S matrix of type "dgCMatrix"
+#' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
+#'
+#' @return S matrix with columns of values average within each group of sample_assignments
+#'
+compute_grouped_rowmeans <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowmeans`, S, sample_assignments)
 }
 
-compute_pseudo_bulk_per_cluster_and_ind_full <- function(S, sample_assignments, individuals) {
-    .Call(`_ACTIONet_compute_pseudo_bulk_per_cluster_and_ind_full`, S, sample_assignments, individuals)
+#' Average matrix wiithin groups
+#'
+#' @param S matrix
+#' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
+#'
+#' @return S matrix with columns of values average within each group of sample_assignments
+#'
+compute_grouped_rowmeans_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowmeans_full`, S, sample_assignments)
+}
+
+compute_grouped_rowvars <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowvars`, S, sample_assignments)
+}
+
+compute_grouped_rowvars_full <- function(S, sample_assignments) {
+    .Call(`_ACTIONet_compute_grouped_rowvars_full`, S, sample_assignments)
 }
 
 compute_pseudo_bulk_per_archetype <- function(S, H) {

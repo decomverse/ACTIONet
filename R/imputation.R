@@ -23,8 +23,6 @@ imputeGenes <- function(
 
     expr_raw = SummarizedExperiment::assays(ace)[[assay_name]][idx_feat, , drop = FALSE]
 
-    G <- .validate_net(ace, net_slot)
-
     if (algorithm == "pca") {
 
         V_slot <- sprintf("%s_V", reduction_slot)
@@ -32,16 +30,17 @@ imputeGenes <- function(
             err <- sprintf("`%s` does not exist in rowMaps(ace). Run `reduce.ace()`.", V_slot)
             stop(err)
         }
-
-        if (!("SVD_V_smooth" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
-
+        
+        smooth_red_name = sprintf("%s_smooth", reduction_slot)
+        smooth_U_name = sprintf("%s_U", reduction_slot)
+        if ( !(smooth_red_name %in% names(colMaps(ace)) || smooth_U_name %in% names(rowMaps(ace)) || force_reimpute == TRUE) ){
             out <- .smoothPCs(
               ace = ace,
-              G = G,
               diffusion_algorithm = diffusion_algorithm,
               alpha = alpha,
               diffusion_it = diffusion_it,
               reduction_slot = reduction_slot,
+              net_slot = net_slot,
               thread_no = thread_no,
               return_raw = TRUE
             )
@@ -50,8 +49,8 @@ imputeGenes <- function(
             W <- out$SVD.out$u
             W <- W[idx_feat, , drop = FALSE]
         } else {
-            W <- rowMaps(ace)[["SVD_U"]][idx_feat, , drop = FALSE]
-            H <- colMaps(ace)[["SVD_V_smooth"]]
+            W <- rowMaps(ace)[[smooth_U_name]][idx_feat, , drop = FALSE]
+            H <- colMaps(ace)[[smooth_red_name]]
         }
 
         expr_imp <- W %*% Matrix::t(H)
@@ -61,12 +60,13 @@ imputeGenes <- function(
         if (!("archetype_footprint" %in% names(colMaps(ace))) | (force_reimpute == TRUE)) {
 
             H <- networkDiffusion(
-              data = G,
+              obj = ace,
               scores = colMaps(ace)[["H_unified"]],
               algorithm = diffusion_algorithm,
               alpha = alpha,
               thread_no = thread_no,
-              max_it = diffusion_it
+              max_it = diffusion_it,
+              net_slot = net_slot
             )
 
         } else {
@@ -76,16 +76,15 @@ imputeGenes <- function(
         W <- as.matrix(expr_raw %*% C)
         expr_imp <- W %*% Matrix::t(H)
 
-    } else if (algorithm == "actionet") {
+    } else {
         expr_imp <- networkDiffusion(
-          data = G,
+          obj = ace,
           scores = Matrix::t(expr_raw),
           algorithm = diffusion_algorithm,
           alpha = alpha,
           thread_no = thread_no,
           max_it = diffusion_it,
-          res_threshold = 1e-8,
-          net_slot = NULL
+          net_slot = net_slot
         )
         expr_imp = Matrix::t(expr_imp)
     }
@@ -97,7 +96,7 @@ imputeGenes <- function(
     m2 <- apply(expr_imp, 1, max)
     ratio <- m1 / m2
     ratio[m2 == 0] <- 1
-    D <- Diagonal(nrow(expr_imp), ratio)
+    D <- Matrix::Diagonal(nrow(expr_imp), ratio)
     expr_imp <- Matrix::t(as.matrix(D %*% expr_imp))
 
     return(expr_imp)
@@ -159,8 +158,7 @@ impute.specific.genes.using.archetypes <- function(ace, genes, features_use = NU
 
 #' Gene expression imputation using network diffusion.
 #'
-#' @param ace Input results to be clustered
-#' (alternatively it can be the ACTIONet igraph object)
+#' @param ace ACTIONetExperiment object containing output of 'run.ACTIONet()'.
 #' @param genes The list of genes to perform imputation on.
 #' @param features_use A vector of features of length NROW(ace) or the name of a column of rowData(ace) containing the genes given in 'genes'.
 #' @param alpha Depth of diffusion between (0, 1).

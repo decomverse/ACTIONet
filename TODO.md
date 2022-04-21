@@ -15,7 +15,7 @@
 
 ## To be tested
 * `transform_layout()` for embedding datasets into ACTIONet plot
-* `compute_pseudo_bulk_per_archetype, compute_pseudo_bulk_per_cluster, compute_pseudo_bulk_per_ind` functions for pseudo-bulk.
+* `compute_pseudo_bulk_per_archetype` functions for pseudo-bulk.
 * `compute_AA_coreset()` for AA coreset construction + wAA for fast sketching
 * `sgd2_layout_weighted()` for [S_GD2 layout](https://github.com/jxz12/s_gd2) layout
 * weighted AA
