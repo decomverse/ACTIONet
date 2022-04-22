@@ -2,6 +2,11 @@
 //#include <mini_cblas.h>
 #include <cassert>
 
+#include <chrono>
+#define duration(a) std::chrono::duration_cast<std::chrono::nanoseconds>(a).count()
+#define now() std::chrono::high_resolution_clock::now()
+
+
 // Re-implemented from: Fast and Robust Archetypal Analysis for Representation
 // Learning
 namespace ACTIONet {
