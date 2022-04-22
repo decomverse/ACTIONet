@@ -1,9 +1,6 @@
 #include <ACTIONet.h>
 #include <RcppArmadillo.h>
 
-#include <chrono>
-#define duration(a) std::chrono::duration_cast<std::chrono::nanoseconds>(a).count()
-#define now() std::chrono::high_resolution_clock::now()
 
 /*
 #include "Rforceatlas_types.h"
@@ -25,11 +22,6 @@ using namespace arma;
 
 #define ARMA_USE_CXX11_RNG
 #define DYNSCHED
-
-//[[Rcpp::depends(RcppClock)]]
-#include <RcppClock.h>
-#include <thread>
-
 
 template <typename T>
 Rcpp::NumericVector arma2vec(const T &x)
