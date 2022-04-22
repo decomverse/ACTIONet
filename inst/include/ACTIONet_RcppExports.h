@@ -255,7 +255,7 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline mat run_simplex_regression_FW(mat& A, mat& B, int max_iter = -1, double min_diff = 0.01) {
+    inline mat run_simplex_regression_FW(mat& A, mat& B, int max_iter = 100, double min_diff = 1e-8) {
         typedef SEXP(*Ptr_run_simplex_regression_FW)(SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_simplex_regression_FW p_run_simplex_regression_FW = NULL;
         if (p_run_simplex_regression_FW == NULL) {
