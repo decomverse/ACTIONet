@@ -19,18 +19,18 @@ mat run_simplex_regression_FW_base(mat& A, mat& B, int max_iter, double min_diff
 
     for(int j = 0; j < X.n_cols; j++) {
         uword i = index_max(tmp.col(j));
-        //X(i, j) = 1;
-        X(0, j) = 1;
+        X(i, j) = 1;
+        //X(0, j) = 1;
     } 
     printf("done\n");
 
     mat At = trans(A);
     mat AtA = At * A;
-
+    mat AtB = At * B;
 
     mat old_X = X;
     for(int it = 0; it < max_iter; it++) {
-        mat grad = (AtA * X) - At * B;
+        mat grad = (AtA * X) - AtB;
         mat obj = A * X - B;
 
         for(int k = 0; k < X.n_cols; k++) {
@@ -59,7 +59,7 @@ mat run_simplex_regression_FW_base(mat& A, mat& B, int max_iter, double min_diff
 
             vec d_A = x;
             d_A(i2) = d_A(i2) - 1;
-        
+
             double alpha_max = 1;
             vec d;
             if( dot(g, d_FW) < dot(g, d_A)) {
@@ -70,6 +70,7 @@ mat run_simplex_regression_FW_base(mat& A, mat& B, int max_iter, double min_diff
                 alpha_max = x(i1) / (1 - x(i1));
             }
 
+            /*
             // Backtracking line-search
             vec Ad = A * d;
             double e1 = dot(Ad, Ad);
@@ -79,14 +80,14 @@ mat run_simplex_regression_FW_base(mat& A, mat& B, int max_iter, double min_diff
                 double e3 = 0.5* dot(g, d); // multiplier can be in (0, 0.5]
                 alpha = (e3 - e2) / e1;
             }
-            //double alpha = 2.0 / (it+ 2);
-            alpha = min(alpha, alpha_max);
-            
+            */
+            double alpha = 2.0 / (it+ 2);
+
             X.col(k) = x + alpha*d;
         }
 
         printf("%d- ", it);
-        double res = norm(abs(old_X - X), "fro") / norm(X, "fro");
+        double res = sum(sum(abs(old_X - X))) / X.n_cols;
         printf("%e\n", res);
 
         if(res < min_diff) {
@@ -103,7 +104,7 @@ mat run_simplex_regression_FW_base(mat& A, mat& B, int max_iter, double min_diff
 
 
 
-mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
+mat run_simplex_regression_FW_test1(mat& A, mat& B, int max_iter, double min_diff) {
     if(max_iter == -1)
         max_iter = A.n_cols;
 
@@ -160,7 +161,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         for(int k = 0; k < X.n_cols; k++) {
             vec g = grad.col(k);
             vec x = X.col(k);
-           
+            
             vec d_FW = D_FW.col(k);
             vec d_A = D_A.col(k);
         
@@ -208,6 +209,101 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     return (X);
 }
 
+
+
+mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
+    if(max_iter == -1)
+        max_iter = A.n_cols;
+
+    printf("Initializing ... ");
+    mat tmp = cor(A, B);    
+    mat X = zeros(size(tmp));
+
+    for(int j = 0; j < X.n_cols; j++) {
+        vec v = tmp.col(j);
+        int i = index_max(v);
+        X(i, j) = 1;
+    } 
+    printf("done\n");
+
+    mat At = trans(A);
+    mat AtA = At * A;
+    mat AtB = At * B;
+
+    mat old_X = X;
+    for(int it = 0; it < max_iter; it++) {
+        printf("\tPre ... ");
+        mat grad = (AtA * X) - AtB;
+        mat obj = A * X - B;
+        printf("done\n");
+        
+        for(int k = 0; k < X.n_cols; k++) {
+            vec g = grad.col(k);
+            vec x = X.col(k);
+            vec b = B.col(k);
+
+            int i1, i2;
+            int i1_val, i2_val;
+            i1_val = i2_val = 1000;
+            i1 = i2 = 0;
+            for(int i = 0; i < g.n_elem; i++) {
+                if(g(i) < i1_val) {
+                    i1_val = g(i);
+                    i1 = i;
+                }
+                if(x(i) > 0) {
+                    if(g(i) < i2_val) {
+                        i2_val = g(i);
+                        i2 = i;
+                    }
+                }
+            }
+                    
+            vec d_FW = -x;
+            d_FW(i1) = 1 + d_FW(i1);
+
+            vec d_A = x;
+            d_A(i2) = d_A(i2) - 1;
+            
+            double alpha_max = 1;
+            vec d;
+            if( dot(g, d_FW) < dot(g, d_A)) {
+                d = d_FW;
+                alpha_max = 1;
+            } else {
+                d = d_A;
+                alpha_max = x(i2) / (1 - x(i2));
+            }
+
+            double alpha = 0;
+
+            vec q = A * d;
+            double q_norm = dot(q, q);
+            if(q_norm > 0) {
+                alpha = dot(q, b - A*x) / q_norm;
+            }
+            alpha = min(alpha, alpha_max);
+            
+            X.col(k) = x + alpha*d;
+        }
+
+        printf("%d- ", it);
+        double res = mean(mean(abs(old_X - X)));
+        printf("%e\n", res);
+
+        if(res < min_diff) {
+            break;
+        }
+        old_X = X;
+    }
+    
+    /*
+    X = clamp(X, 0, 1);
+    X = normalise(X, 1);
+    */
+
+    return (X);
+}
 
 
 }  // namespace ACTIONet
