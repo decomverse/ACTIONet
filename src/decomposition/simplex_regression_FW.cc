@@ -303,5 +303,122 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     return (X);
 }
 */
+mat run_simplex_regression_FW(mat& A, mat& B, int max_iter = 100, double min_diff = 1e-8) {
 
+    double t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0;
+    std::chrono::duration<double> elapsed;
+    std::chrono::high_resolution_clock::time_point start, finish;
+
+    if(max_iter == -1)
+        max_iter = A.n_cols;
+
+    start = now();
+    printf("Initializing ... ");
+    mat tmp = cor(A, B);    
+    mat X = zeros(size(tmp));
+
+    for(int j = 0; j < X.n_cols; j++) {
+        vec v = tmp.col(j);
+        int i = index_max(v);
+        X(i, j) = 1;
+    } 
+    printf("done\n");
+
+    mat At = trans(A);
+    mat AtA = At * A;
+    mat AtB = At * B;
+    finish = now();
+    t1 += duration(finish - start);
+
+    mat old_X = X;
+    for(int it = 0; it < max_iter; it++) {
+
+        start = now();
+        mat grad = (AtA * X) - AtB;
+        mat obj = A * X - B;
+        finish = now();
+        t2 += duration(finish - start);
+
+        for(int k = 0; k < X.n_cols; k++) {
+
+            start = now();
+            vec g = grad.col(k);
+            vec x = X.col(k);
+            vec b = B.col(k);
+
+            int i1, i2;
+            int i1_val, i2_val;
+            i1_val = i2_val = 1000;
+            i1 = i2 = 0;
+            for(int i = 0; i < g.n_elem; i++) {
+                if(g(i) < i1_val) {
+                    i1_val = g(i);
+                    i1 = i;
+                }
+                if(x(i) > 0) {
+                    if(g(i) < i2_val) {
+                        i2_val = g(i);
+                        i2 = i;
+                    }
+                }
+            }
+            finish = now();
+            t3 += duration(finish - start);
+
+            start = now();
+            vec d_FW = -x;
+            d_FW(i1) = 1 + d_FW(i1);
+
+            vec d_A = x;
+            d_A(i2) = d_A(i2) - 1;
+            
+            double alpha_max = 1;
+            vec d;
+            if( dot(g, d_FW) < dot(g, d_A)) {
+                d = d_FW;
+                alpha_max = 1;
+            } else {
+                d = d_A;
+                alpha_max = x(i2) / (1 - x(i2));
+            }
+            finish = now();
+            t4 += duration(finish - start);
+
+            start = now();
+            double alpha = 0;
+
+            vec q = A * d;
+            double q_norm = dot(q, q);
+            if(q_norm > 0) {
+                alpha = dot(q, b - A*x) / q_norm;
+            }
+            alpha = min(alpha, alpha_max);
+            
+            X.col(k) = x + alpha*d;
+            finish = now();
+            t5 += duration(finish - start);
+
+        }
+
+        start = now();
+        printf("%d- ", it);
+        double res = mean(mean(abs(old_X - X)));
+        printf("%e\n", res);
+        finish = now();
+        t6 += duration(finish - start);
+
+        if(res < min_diff) {
+            break;
+        }
+        old_X = X;
+    }
+    
+    double total = t1 + t2 + t3 + t4 + t5 + t6;
+    printf("t1 = %3.f, t2 = %3.f, t3 = %3.f, t4 = %3.f, t5 = %3.f, t6 = %3.f\n", 100*t1/total, 100*t2/total, 100*t3/total, 100*t4/total, 100*t5/total, 100*t6/total);
+
+    X = clamp(X, 0, 1);
+    X = normalise(X, 1);
+    
+    return (X);
+}
 }  // namespace ACTIONet
