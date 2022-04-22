@@ -210,7 +210,7 @@ mat run_simplex_regression_FW_test1(mat& A, mat& B, int max_iter, double min_dif
 }
 
 
-
+/*
 mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     if(max_iter == -1)
         max_iter = A.n_cols;
@@ -232,12 +232,11 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
 
     mat old_X = X;
     for(int it = 0; it < max_iter; it++) {
-        printf("\tPre ... ");
+
         mat grad = (AtA * X) - AtB;
         mat obj = A * X - B;
-        printf("done\n");
-        
-        for(int k = 0; k < X.n_cols; k++) {
+
+        for(int k = 0; k < X.n_cols; k++) {            
             vec g = grad.col(k);
             vec x = X.col(k);
             vec b = B.col(k);
@@ -258,7 +257,6 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
                     }
                 }
             }
-                    
             vec d_FW = -x;
             d_FW(i1) = 1 + d_FW(i1);
 
@@ -297,13 +295,13 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         old_X = X;
     }
     
-    /*
+    
     X = clamp(X, 0, 1);
     X = normalise(X, 1);
-    */
+    
 
     return (X);
 }
-
+*/
 
 }  // namespace ACTIONet
