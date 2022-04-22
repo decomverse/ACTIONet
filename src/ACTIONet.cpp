@@ -1,6 +1,10 @@
 #include <ACTIONet.h>
 #include <RcppArmadillo.h>
 
+#include <chrono>
+#define duration(a) std::chrono::duration_cast<std::chrono::nanoseconds>(a).count()
+#define now() std::chrono::high_resolution_clock::now()
+
 /*
 #include "Rforceatlas_types.h"
 #include "params.hpp"
@@ -21,6 +25,11 @@ using namespace arma;
 
 #define ARMA_USE_CXX11_RNG
 #define DYNSCHED
+
+//[[Rcpp::depends(RcppClock)]]
+#include <RcppClock.h>
+#include <thread>
+
 
 template <typename T>
 Rcpp::NumericVector arma2vec(const T &x)
@@ -414,6 +423,7 @@ mat run_simplex_regression_FW(mat &A, mat &B, int max_iter = -1, double min_diff
 
   return X;
 }
+
 
 //' Runs Successive Projection Algorithm (SPA) to solve separable NMF
 //'
