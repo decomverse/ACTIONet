@@ -308,7 +308,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     return (X);
 }
 */
-mat run_simplex_regression_FW(mat& A, mat& B, int max_iter = 100, double min_diff = 1e-8) {
+mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
 
     double t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0;
     std::chrono::duration<double> elapsed;
