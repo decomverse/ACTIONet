@@ -1,4 +1,5 @@
 #' Perform batch correction on `ACTIONetExperiment` and `SingleCellExperiment` objects.
+
 #' @export
 reduce.and.batch.correct.ace.fastMNN <- function(
   ace,
@@ -7,7 +8,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(
   reduced_dim = 50,
   MNN_k = 20,
   return_V = FALSE,
-  reduction_slot = "MNN",
+  reduction_out = "MNN",
   V_slot = NULL,
   BPPARAM = SerialParam()
 ) {
@@ -43,14 +44,14 @@ reduce.and.batch.correct.ace.fastMNN <- function(
     rownames(S_r) = colnames(ace)
     colnames(S_r) = sapply(1:dim(S_r)[2], function(i) sprintf("PC%d", i))
 
-    colMaps(ace)[[reduction_slot]] <- S_r
-    colMapTypes(ace)[[reduction_slot]] = "reduction"
+    colMaps(ace)[[reduction_out]] <- S_r
+    colMapTypes(ace)[[reduction_out]] = "reduction"
 
     if (return_V) {
         V = rowData(mnn.out)[["rotation"]]
         colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
         if (is.null(V_slot) | length(V_slot) > 1) {
-            V_slot = paste(reduction_slot, "rotation", sep = "_")
+            V_slot = paste(reduction_out, "rotation", sep = "_")
         }
         rowMaps(ace)[[V_slot]] = V
     }
@@ -60,19 +61,7 @@ reduce.and.batch.correct.ace.fastMNN <- function(
     return(ace)
 }
 
-#' (It uses Harmony for batch-correction: https://github.com/immunogenomics/harmony)
-#'
-#' @param ace ACTIONetExperiment object
-#' @param batch_attr Vector of length NCOL(ace) or column name of colData(ace) containing batch labels.
-#' @param reduced_dim Dimension of SVD used for reducing kernel matrix
-#' @param max_iter Number of SVD iterations
-#'
-#' @return Reduced ace object with added colMaps(ace)
-#'
-#' @examples
-#' ace = import.ace.from.10X(input_path)
-#' batch_attr = ace$Batch # Assumes sample annotations are in the input_path with 'Batch' attribute being provided
-#' ace = reduce.and.batch.correct.ace.Harmony(ace)
+
 #' @export
 reduce.and.batch.correct.ace.Harmony <- function(
   ace,
@@ -80,13 +69,14 @@ reduce.and.batch.correct.ace.Harmony <- function(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  reduction_slot = "ACTION",
+  reduction_out = "ACTION",
+  harmony_out = "Harmony",
   seed = 0,
   SVD_algorithm = 0
 ) {
 
     if (!require(harmony)) {
-        err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
+        err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony).\n")
         stop(err)
     }
 
@@ -104,7 +94,7 @@ reduce.and.batch.correct.ace.Harmony <- function(
       reduced_dim = reduced_dim,
       max_iter = max_iter,
       assay_name = assay_name,
-      reduction_slot = reduction_slot,
+      reduction_out = reduction_out,
       seed = seed,
       SVD_algorithm = SVD_algorithm
     )
@@ -112,7 +102,8 @@ reduce.and.batch.correct.ace.Harmony <- function(
     ace = batch.correct.ace.Harmony(
       ace = ace,
       batch_attr = batch_attr,
-      reduction_slot = reduction_slot
+      reduction_slot = reduction_out,
+      harmony_out = harmony_out
     )
 
     return(ace)
@@ -122,11 +113,13 @@ reduce.and.batch.correct.ace.Harmony <- function(
 batch.correct.ace.Harmony <- function(
   ace,
   batch_attr = NULL,
-  reduction_slot = "ACTION"
+  reduction_slot = "ACTION",
+  harmony_out = "Harmony",
+
 ) {
 
     if (!require(harmony)) {
-        err = sprintf("You need to install harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
+        err = sprintf("You need to install Harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
         stop(err)
     }
 
@@ -138,7 +131,7 @@ batch.correct.ace.Harmony <- function(
     ace = as(ace, "ACTIONetExperiment")
     batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
 
-    colMaps(ace)[[reduction_slot]] = harmony::HarmonyMatrix(
+    colMaps(ace)[[harmony_out]] = harmony::HarmonyMatrix(
       data_mat = colMaps(ace)[[reduction_slot]],
       meta_data = batch_attr,
       do_pca = FALSE
@@ -153,6 +146,7 @@ orthogonalize.ace.batch <- function(
   ace,
   design_mat,
   reduction_slot = "ACTION",
+  ortho_out = "ACTION_ortho",
   assay_name = "logcounts"
 ) {
 
@@ -187,29 +181,29 @@ orthogonalize.ace.batch <- function(
     S_r = reduction.out$S_r
     colnames(S_r) = colnames(ace)
     rownames(S_r) = sapply(1:nrow(S_r), function(i) sprintf("Dim%d", i))
-    colMaps(ace)[[sprintf("%s", reduction_slot)]] <- Matrix::t(S_r)
-    colMapTypes(ace)[[sprintf("%s", reduction_slot)]] = "reduction"
+    colMaps(ace)[[sprintf("%s", ortho_out)]] <- Matrix::t(S_r)
+    colMapTypes(ace)[[sprintf("%s", ortho_out)]] = "reduction"
 
 
     V = reduction.out$V
     colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("V%d", i))
-    rowMaps(ace)[[sprintf("%s_V", reduction_slot)]] = V
-    rowMapTypes(ace)[[sprintf("%s_V", reduction_slot)]] = "internal"
+    rowMaps(ace)[[sprintf("%s_V", ortho_out)]] = V
+    rowMapTypes(ace)[[sprintf("%s_V", ortho_out)]] = "internal"
 
 
     A = reduction.out$A
     colnames(A) = sapply(1:dim(A)[2], function(i) sprintf("A%d", i))
-    rowMaps(ace)[[sprintf("%s_A", reduction_slot)]] = A
-    rowMapTypes(ace)[[sprintf("%s_A", reduction_slot)]] = "internal"
+    rowMaps(ace)[[sprintf("%s_A", ortho_out)]] = A
+    rowMapTypes(ace)[[sprintf("%s_A", ortho_out)]] = "internal"
 
 
     B = reduction.out$B
     colnames(B) = sapply(1:dim(B)[2], function(i) sprintf("B%d", i))
-    colMaps(ace)[[sprintf("%s_B", reduction_slot)]] = B
-    colMapTypes(ace)[[sprintf("%s_B", reduction_slot)]] = "internal"
+    colMaps(ace)[[sprintf("%s_B", ortho_out)]] = B
+    colMapTypes(ace)[[sprintf("%s_B", ortho_out)]] = "internal"
 
 
-    S4Vectors::metadata(ace)[[sprintf("%s_sigma", reduction_slot)]] = reduction.out$sigma
+    S4Vectors::metadata(ace)[[sprintf("%s_sigma", ortho_out)]] = reduction.out$sigma
 
     return(ace)
 }
@@ -219,7 +213,9 @@ orthogonalize.ace.batch <- function(
 orthogonalize.ace.batch.simple <- function(
   ace,
   batch_attr,
-  reduction_slot = "ACTION"
+  reduction_slot = "ACTION",
+  ortho_out = "ACTION_ortho",
+  assay_name = "logcounts"
 ) {
 
     batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
@@ -229,7 +225,9 @@ orthogonalize.ace.batch.simple <- function(
     ace = orthogonalize.ace.batch(
       ace,
       design_mat,
-      reduction_slot = reduction_slot
+      reduction_slot = reduction_slot,
+      ortho_out = ortho_out,
+      assay_name = assay_name
     )
 
     return(ace)
@@ -242,7 +240,8 @@ reduce.and.batch.orthogonalize.ace <- function(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  reduction_slot = "ACTION",
+  reduction_out = "ACTION",
+  ortho_out = "ACTION_ortho",
   seed = 0,
   SVD_algorithm = 0
 ) {
@@ -257,7 +256,7 @@ reduce.and.batch.orthogonalize.ace <- function(
       reduced_dim = reduced_dim,
       max_iter = max_iter,
       assay_name = assay_name,
-      reduction_slot = reduction_slot,
+      reduction_out = reduction_out,
       seed = seed,
       SVD_algorithm = SVD_algorithm
     )
@@ -265,7 +264,8 @@ reduce.and.batch.orthogonalize.ace <- function(
     ace = orthogonalize.ace.batch(
       ace = ace,
       design_mat = design_mat,
-      reduction_slot = reduction_slot,
+      reduction_slot = reduction_out,
+      ortho_out = ortho_out,
       assay_name = assay_name
     )
 
