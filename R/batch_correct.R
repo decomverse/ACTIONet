@@ -114,8 +114,7 @@ batch.correct.ace.Harmony <- function(
   ace,
   batch_attr = NULL,
   reduction_slot = "ACTION",
-  harmony_out = "Harmony",
-
+  harmony_out = "Harmony"
 ) {
 
     if (!require(harmony)) {
