@@ -97,7 +97,13 @@ computeGeneSpecifity.ACTIONet <- function(ace, f, out_name = "cond", pos_only = 
   }
   f = droplevels(f)
 
-  out = compute_cluster_feature_specificity(logcounts(ace), as.numeric(f))
+  S = logcounts(ace)
+
+  if(is.matrix(S)) {
+    out = compute_cluster_feature_specificity_full(X, as.numeric(f))  
+  } else {
+    out = compute_cluster_feature_specificity(X, as.numeric(f))
+  }  
   metadata(ace)[[sprintf("%s_markers_ACTIONet", out_name)]] = out
 
   scores = as.matrix(out$upper_significance - out$lower_significance)

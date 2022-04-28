@@ -516,11 +516,11 @@ annotateClusters <- function(ace, annotation_source, cluster_name = "leiden") {
 }
 
 
-projectArchs <- function(ace, archtype_scores, archetype_slot = "H_unified", normalize = FALSE) {
+projectArchs <- function(ace, archtype_scores, archetype_slot = "H_unified", normalize = TRUE) {
   cell.enrichment.mat <- map.cell.scores.from.archetype.enrichment(
     ace = ace,
     enrichment_mat = archtype_scores,
-    normalize = TRUE,
+    normalize = normalize,
     H.slot = archetype_slot
   )
   cell.annotations <- colnames(cell.enrichment.mat)[apply(

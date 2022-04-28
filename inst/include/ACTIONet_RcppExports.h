@@ -255,6 +255,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline mat run_simplex_regression_FW(mat& A, mat& B, int max_iter = -1, double min_diff = 0.01) {
+        typedef SEXP(*Ptr_run_simplex_regression_FW)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_run_simplex_regression_FW p_run_simplex_regression_FW = NULL;
+        if (p_run_simplex_regression_FW == NULL) {
+            validateSignature("mat(*run_simplex_regression_FW)(mat&,mat&,int,double)");
+            p_run_simplex_regression_FW = (Ptr_run_simplex_regression_FW)R_GetCCallable("ACTIONet", "_ACTIONet_run_simplex_regression_FW");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_run_simplex_regression_FW(Shield<SEXP>(Rcpp::wrap(A)), Shield<SEXP>(Rcpp::wrap(B)), Shield<SEXP>(Rcpp::wrap(max_iter)), Shield<SEXP>(Rcpp::wrap(min_diff)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
     inline List run_SPA(mat& A, int k) {
         typedef SEXP(*Ptr_run_SPA)(SEXP,SEXP);
         static Ptr_run_SPA p_run_SPA = NULL;
