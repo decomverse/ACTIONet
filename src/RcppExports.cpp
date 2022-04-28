@@ -432,6 +432,43 @@ RcppExport SEXP _ACTIONet_run_simplex_regression(SEXP ASEXP, SEXP BSEXP, SEXP co
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// run_simplex_regression_FW
+mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff);
+static SEXP _ACTIONet_run_simplex_regression_FW_try(SEXP ASEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP min_diffSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< mat& >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type min_diff(min_diffSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_simplex_regression_FW(A, B, max_iter, min_diff));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_run_simplex_regression_FW(SEXP ASEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP min_diffSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_run_simplex_regression_FW_try(ASEXP, BSEXP, max_iterSEXP, min_diffSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // run_SPA
 List run_SPA(mat& A, int k);
 static SEXP _ACTIONet_run_SPA_try(SEXP ASEXP, SEXP kSEXP) {
@@ -3869,6 +3906,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*reduce_kernel)(sp_mat&,int,int,int,int,bool,int)");
         signatures.insert("List(*reduce_kernel_full)(mat&,int,int,int,int,bool,int)");
         signatures.insert("mat(*run_simplex_regression)(mat&,mat&,bool)");
+        signatures.insert("mat(*run_simplex_regression_FW)(mat&,mat&,int,double)");
         signatures.insert("List(*run_SPA)(mat&,int)");
         signatures.insert("List(*run_SPA_rows_sparse)(sp_mat&,int)");
         signatures.insert("List(*run_ACTION)(mat&,int,int,int,int,double)");
@@ -3977,6 +4015,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_reduce_kernel", (DL_FUNC)_ACTIONet_reduce_kernel_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_reduce_kernel_full", (DL_FUNC)_ACTIONet_reduce_kernel_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_simplex_regression", (DL_FUNC)_ACTIONet_run_simplex_regression_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_run_simplex_regression_FW", (DL_FUNC)_ACTIONet_run_simplex_regression_FW_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_SPA", (DL_FUNC)_ACTIONet_run_SPA_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_SPA_rows_sparse", (DL_FUNC)_ACTIONet_run_SPA_rows_sparse_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_ACTION", (DL_FUNC)_ACTIONet_run_ACTION_try);
@@ -4084,6 +4123,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_reduce_kernel", (DL_FUNC) &_ACTIONet_reduce_kernel, 7},
     {"_ACTIONet_reduce_kernel_full", (DL_FUNC) &_ACTIONet_reduce_kernel_full, 7},
     {"_ACTIONet_run_simplex_regression", (DL_FUNC) &_ACTIONet_run_simplex_regression, 3},
+    {"_ACTIONet_run_simplex_regression_FW", (DL_FUNC) &_ACTIONet_run_simplex_regression_FW, 4},
     {"_ACTIONet_run_SPA", (DL_FUNC) &_ACTIONet_run_SPA, 2},
     {"_ACTIONet_run_SPA_rows_sparse", (DL_FUNC) &_ACTIONet_run_SPA_rows_sparse, 2},
     {"_ACTIONet_run_ACTION", (DL_FUNC) &_ACTIONet_run_ACTION, 6},

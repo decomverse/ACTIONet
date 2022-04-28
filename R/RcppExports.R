@@ -552,6 +552,10 @@ run_simplex_regression <- function(A, B, computeXtX = FALSE) {
     .Call(`_ACTIONet_run_simplex_regression`, A, B, computeXtX)
 }
 
+run_simplex_regression_FW <- function(A, B, max_iter = -1L, min_diff = 0.01) {
+    .Call(`_ACTIONet_run_simplex_regression_FW`, A, B, max_iter, min_diff)
+}
+
 #' Runs Successive Projection Algorithm (SPA) to solve separable NMF
 #'
 #' @param A Input matrix

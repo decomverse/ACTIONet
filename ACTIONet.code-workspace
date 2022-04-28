@@ -71,7 +71,10 @@
 			"thread": "cpp",
 			"typeinfo": "cpp",
 			"core": "cpp",
-			"*.ipp": "cpp"
+			"*.ipp": "cpp",
+			"__locale": "cpp",
+			"__nullptr": "cpp",
+			"variant": "cpp"
 		},
 		"jupyter.jupyterServerType": "local"
 	}
