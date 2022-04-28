@@ -4,7 +4,7 @@
 #' @param reduced_dim Dimension of SVD used for reducing kernel matrix
 #' @param max_iter Number of SVD iterations
 #' @param assay_name Name of assay to reduce.
-#' @param reduction_slot Name of slot to store reduction.
+#' @param reduction_out Name of slot to store reduction.
 #'
 #' @return ACTIONetExperiment object with reduction in colMaps(ace).
 #'
@@ -17,7 +17,7 @@ reduce.ace <- function(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  reduction_slot = "ACTION",
+  reduction_out = "ACTION",
   SVD_algorithm = 0,
   seed = 0
 ) {
@@ -68,25 +68,25 @@ reduce.ace <- function(
     S_r = reduction.out$S_r
     colnames(S_r) = colnames(ace)
     rownames(S_r) = paste0("dim_", 1:NROW(S_r))
-    colMaps(ace)[[reduction_slot]] <- Matrix::t(S_r)
-    colMapTypes(ace)[[reduction_slot]] = "reduction"
+    colMaps(ace)[[reduction_out]] <- Matrix::t(S_r)
+    colMapTypes(ace)[[reduction_out]] = "reduction"
 
     V = reduction.out$V
     colnames(V) = paste0("V", 1:NCOL(V))
-    rowMaps(ace)[[sprintf("%s_V", reduction_slot)]] = V
-    rowMapTypes(ace)[[sprintf("%s_V", reduction_slot)]] = "internal"
+    rowMaps(ace)[[sprintf("%s_V", reduction_out)]] = V
+    rowMapTypes(ace)[[sprintf("%s_V", reduction_out)]] = "internal"
 
     A = reduction.out$A
     colnames(A) = paste0("A", 1:NCOL(A))
-    rowMaps(ace)[[sprintf("%s_A", reduction_slot)]] = A
-    rowMapTypes(ace)[[sprintf("%s_A", reduction_slot)]] = "internal"
+    rowMaps(ace)[[sprintf("%s_A", reduction_out)]] = A
+    rowMapTypes(ace)[[sprintf("%s_A", reduction_out)]] = "internal"
 
     B = reduction.out$B
     colnames(B) = paste0("B", 1:NCOL(B))
-    colMaps(ace)[[sprintf("%s_B", reduction_slot)]] = B
-    colMapTypes(ace)[[sprintf("%s_B", reduction_slot)]] = "internal"
+    colMaps(ace)[[sprintf("%s_B", reduction_out)]] = B
+    colMapTypes(ace)[[sprintf("%s_B", reduction_out)]] = "internal"
 
-    metadata(ace)[[sprintf("%s_sigma", reduction_slot)]] = reduction.out$sigma
+    metadata(ace)[[sprintf("%s_sigma", reduction_out)]] = reduction.out$sigma
 
     return(ace)
 }
