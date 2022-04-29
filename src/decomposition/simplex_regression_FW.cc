@@ -340,7 +340,8 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
 
         start = now();
         mat grad = (AtA * X) - AtB;
-        mat obj = A * X - B;
+        mat AX = A*X;
+        mat obj = AX - B;        
         finish = now();
         t2 += duration(finish - start);
 
@@ -379,10 +380,13 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
             
             double alpha_max = 1;
             vec d;
+            int direction = 0;
             if( dot(g, d_FW) < dot(g, d_A)) {
+                direction = +1; // Adding element
                 d = d_FW;
                 alpha_max = 1;
             } else {
+                direction = -1; // Removing element
                 d = d_A;
                 alpha_max = x(i2) / (1 - x(i2));
             }
@@ -390,16 +394,28 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
             t4 += duration(finish - start);
 
             start = now();
-            double alpha = 0;
 
-            vec q = A * d;
-            double q_norm = dot(q, q);
-            if(q_norm > 0) {
-                alpha = dot(q, b - A*x) / q_norm;
+            vec q;
+            if(direction == +1) {
+                q = A.unsafe_col(i1) - AX.unsafe_col(k);
+            } else {
+                q = AX.unsafe_col(k) - A.unsafe_col(i2);
             }
+            //vec q = A * d;
+
+/*
+            double alpha = 0;
+            double q_norm = norm(q, 1);
+            if(q_norm > 0) {
+                double q_norm_sq = q_norm*q_norm;
+                vec delta = -obj.col(k);
+                alpha = dot(q, delta) / q_norm_sq;
+            }            
+*/          
+            double alpha = 2 / (it + 2);  
+
             alpha = min(alpha, alpha_max);
-            
-            X.col(k) = x + alpha*d;
+            //X.col(k) = x + alpha*d;
             finish = now();
             t5 += duration(finish - start);
 
@@ -411,10 +427,11 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         printf("%e\n", res);
         finish = now();
         t6 += duration(finish - start);
-
+/*
         if(res < min_diff) {
             break;
         }
+*/        
         old_X = X;
     }
     

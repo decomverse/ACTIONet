@@ -164,7 +164,7 @@ namespace ACTIONet
         return (res);
     }
 
-    mat spmat_mat_product_parallel(sp_mat &A, mat &B, int thread_no)
+    mat spmat_mat_product_parallel_leaky(sp_mat &A, mat &B, int thread_no)
     {
         if (thread_no <= 0)
         {
@@ -203,6 +203,67 @@ namespace ACTIONet
                         }, thread_no);
         }
 
+        return (res);
+    }
+
+    mat spmat_mat_product_parallel(sp_mat &A, mat &B, int thread_no)
+    {
+        if (A.n_cols != B.n_rows)
+        {
+            fprintf(stderr, "spmat_mat_product_parallel:: Inner dimension of matrices should match\n.");
+            return (mat());
+        }
+
+        cholmod_common chol_c;
+        cholmod_start(&chol_c);
+
+        cholmod_sparse *chol_A = as_cholmod_sparse(A, chol_A, &chol_c);
+
+        if (thread_no <= 0)
+        {
+            thread_no = SYS_THREADS_DEF;
+        }
+        int M = A.n_rows;
+        int N = B.n_cols;
+        mat res = zeros(M, N);
+
+        if (thread_no > N)
+        {
+            thread_no = N;
+        }
+        int slice_size = ceil((double)N / thread_no);
+
+        parallelFor(0, thread_no, [&] (unsigned int k) {
+                        int i = k * slice_size;
+                        if (i <= (N - 1))
+                        {
+                            int j = (k + 1) * slice_size - 1;
+                            if (j > (N - 1))
+                                j = N - 1;
+
+                            mat subB = B.cols(i, j);
+
+                            // Magic starts here!
+                            cholmod_dense *chol_B = cholmod_allocate_dense(subB.n_rows, subB.n_cols, subB.n_rows, CHOLMOD_REAL, &chol_c);
+                            chol_B->x = (void *)subB.memptr();
+                            chol_B->z = (void *)NULL;
+
+                            mat subC = zeros(A.n_rows, subB.n_cols);
+                            cholmod_dense *out = cholmod_allocate_dense(A.n_rows, subB.n_cols, A.n_rows, CHOLMOD_REAL, &chol_c);
+                            out->x = (void *)subC.memptr();
+                            out->z = (void *)NULL;
+
+                            double one[] = {1, 0}, zero[] = {0, 0};
+                            cholmod_sdmult(chol_A, 0, one, zero, chol_B, out, &chol_c);
+
+                            res.cols(i, j) = subC;
+                        }
+                    }, thread_no);
+
+
+
+        cholmod_free_sparse(&chol_A, &chol_c);
+        cholmod_finish(&chol_c);
         return (res);
     }
 
