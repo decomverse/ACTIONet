@@ -103,13 +103,20 @@ plot.mtRNA.dist.by.attr <- function(
   df = lapply(1:length(frac.list), function(l) data.frame(attr = names(frac.list)[l], frac = frac.list[[l]]))
   df = do.call(rbind, df)
 
-  if(log_scale){
-    df$frac[df$frac == 0] = 1
-    df$frac = log10(df$frac)
-    y_label = ifelse(is.null(y_label), ylab("frac (log10)"), y_label)
-  } else{
-    y_label = ifelse(is.null(y_label), ylab("frac"), y_label)
+  if(metric == "pct") {
+    y_label = ifelse(is.null(y_label), ylab("% mtRNA"), y_label)
+  } else if (metric == "ratio"){
+    y_label = ifelse(is.null(y_label), ylab("mtRNA:non-mtRNA"), y_label)
+  } else {
+    if(log_scale){
+      df$frac[df$frac == 0] = 1
+      df$frac = log10(df$frac)
+      y_label = ifelse(is.null(y_label), ylab("Fraction mtRNA (log10)"), y_label)
+    } else{
+      y_label = ifelse(is.null(y_label), ylab("Fraction mtRNA"), y_label)
+    }
   }
+
 
   if(to_return == "data")
     return(df)
