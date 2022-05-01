@@ -136,14 +136,14 @@ def runACTIONMR(
             ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
         return ACTIONMR_out
     else:
-        data.obsm[reduction_key + "_" + "C_stacked"] = ACTIONMR_out["C_stacked"]
-        data.obsm[reduction_key + "_" + "H_stacked"] = ACTIONMR_out["H_stacked"].T
-        data.obsm[reduction_key + "_" + "C_unified"] = ACTIONMR_out["C_unified"]
-        data.obsm[reduction_key + "_" + "H_unified"] = ACTIONMR_out["H_unified"].T
-        data.obs[reduction_key + "_" + "assigned_archetype"] = ACTIONMR_out["assigned_archetype"]
+        data.obsm["C_stacked"] = ACTIONMR_out["C_stacked"]
+        data.obsm["H_stacked"] = ACTIONMR_out["H_stacked"]
+        data.obsm["C_unified"] = ACTIONMR_out["C_unified"]
+        data.obsm["H_unified"] = ACTIONMR_out["H_unified"]
+        data.obs["assigned_archetype"] = ACTIONMR_out["assigned_archetype"]
         if return_W:
-            data.varm[reduction_key + "_" + "W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
-            data.varm[reduction_key + "_" + "W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
+            data.varm["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
+            data.varm["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
 
         return data if copy else None
 
