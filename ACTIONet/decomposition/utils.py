@@ -152,7 +152,7 @@ def unify_archetypes(
         if not isinstance(H_stacked, (np.ndarray, sparse.spmatrix)):
             raise ValueError("'H_stacked' must be numpy.ndarray or sparse.spmatrix.")
 
-    S_r = S_r.T.astype(dtype=np.float64)
+    S_r = S_r.astype(dtype=np.float64)
 
     if sparse.issparse(C_stacked):
         C_stacked = C_stacked.toarray()

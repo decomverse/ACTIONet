@@ -102,7 +102,7 @@ def run_ACTIONet(
     net.centrality(
             adata,
             algorithm="localized_coreness",
-            annotations_key="assigned_archetype",
+            labels = "assigned_archetype",
             copy=False,
             return_raw=False,
             )
