@@ -1014,7 +1014,7 @@ plot.ACTIONet.archetype.footprint <- function(
     err <- sprintf("`%s` is not in `colMaps(ace)`.\n", footprint_slot)
     stop(err)
   }
-  archetype_footprint <- Matrix::t(colMaps(ace)[[footprint_slot]])
+  archetype_footprint <- colMaps(ace)[[footprint_slot]]
 
   colnames(archetype_footprint) <- sapply(1:NCOL(archetype_footprint), function(i) sprintf("Archetype %d", i))
 
