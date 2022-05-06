@@ -4,21 +4,7 @@
 \alias{decomp.ACTION}
 \title{Run ACTION_decomposition}
 \usage{
-decomp.ACTION(
-  X,
-  k,
-  k_max = NULL,
-  batch_vec = NULL,
-  specificity_th = -3,
-  min_cells_per_arch = 2,
-  unification_th = 0,
-  max_iter = 50,
-  thread_no = 0,
-  algorithm = c("default", "batchcorr"),
-  min_delta = 1e-300,
-  seed = 0,
-  return_raw = FALSE
-)
+decomp.ACTION(X, k, max_iter = 50, min_delta = 1e-300, return_raw = FALSE)
 }
 \description{
 Run ACTION_decomposition

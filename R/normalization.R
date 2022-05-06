@@ -89,7 +89,7 @@ normalize.default <- function(
   assay_name = "counts",
   assay_out = "logcounts",
   log_transform = TRUE,
-  scale_param = stats::median
+  scale_param = 1000000
 ) {
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
@@ -146,7 +146,7 @@ normalize.ace <- function(
           assay_name = assay_name,
           assay_out = assay_out,
           log_transform = TRUE,
-          scale_param = stats::median
+          scale_param = 1000000
         )
         norm_method = "default"
     }

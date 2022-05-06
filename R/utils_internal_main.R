@@ -1,65 +1,50 @@
 #' Run ACTION_decomposition_MR
 .run.ACTION_MR.ace <- function(
   ace,
-  S_r = NULL,
   k_min = 2,
   k_max = 30,
   specificity_th = -3,
   min_cells_per_arch = 2,
   unification_th = 0,
   max_iter = 50,
+  min_delta = 1e-300,
   thread_no = 0,
   unified_suffix = "unified",
   footprint_slot_name = "assigned_archetype",
-  reduction_slot = "ACTION",
-  seed = 0,
-  return_raw = FALSE
-) {
+  reduction_slot = "ACTION") {
 
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
-  if (is.null(S_r)) {
-    S_r <- .validate_map(ace, map_slot = reduction_slot, ace_name = "ace")
-  } else if (NCOL(ace) != NROW(S_r)) {
-    err = sprint("'NCOL(ace)' must match 'NROW(S_r)'.\n")
-    stop(err)
-  }
+  S_r <- .validate_map(ace, map_slot = reduction_slot, ace_name = "ace")
 
-  out <- decomp.ACTION(
+  out <- decomp.ACTIONMR(
     X = S_r,
-    k = k_min,
+    k_min = k_min,
     k_max = k_max,
-    batch_vec = NULL,
     specificity_th = specificity_th,
     min_cells_per_arch = min_cells_per_arch,
     unification_th = unification_th,
     max_iter = max_iter,
     thread_no = thread_no,
-    algorithm = "default",
-    min_delta = 1e-300,
-    seed = seed,
+    min_delta = min_delta,
     return_raw = TRUE
   )
 
-  if(return_raw == TRUE) {
-    return(out)
-  } else {
-    colMaps(ace)[["H_stacked"]] <- Matrix::t(as(out$pruning$H_stacked, "sparseMatrix"))
-    colMapTypes(ace)[["H_stacked"]] <- "internal"
+  colMaps(ace)[["H_stacked"]] <- Matrix::t(as(out$pruning$H_stacked, "sparseMatrix"))
+  colMapTypes(ace)[["H_stacked"]] <- "internal"
 
-    colMaps(ace)[["C_stacked"]] <- as(out$pruning$C_stacked, "sparseMatrix")
-    colMapTypes(ace)[["C_stacked"]] <- "internal"
+  colMaps(ace)[["C_stacked"]] <- as(out$pruning$C_stacked, "sparseMatrix")
+  colMapTypes(ace)[["C_stacked"]] <- "internal"
 
-    colMaps(ace)[[sprintf("H_%s", unified_suffix)]] <- as(Matrix::t(out$unification$H_unified), "sparseMatrix")
-    colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] <- "internal"
+  colMaps(ace)[[sprintf("H_%s", unified_suffix)]] <- as(Matrix::t(out$unification$H_unified), "sparseMatrix")
+  colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] <- "internal"
 
-    colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(out$unification$C_unified, "sparseMatrix")
-    colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] <- "internal"
+  colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(out$unification$C_unified, "sparseMatrix")
+  colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] <- "internal"
 
-    colData(ace)[[footprint_slot_name]] <- c(out$unification$assigned_archetype)
+  colData(ace)[[footprint_slot_name]] <- c(out$unification$assigned_archetype)
 
-    return(ace)
-  }
+  return(ace)
 }
 
 

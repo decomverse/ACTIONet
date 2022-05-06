@@ -9,7 +9,7 @@ reduce.ace(
   reduced_dim = 50,
   max_iter = 10,
   assay_name = "logcounts",
-  reduction_slot = "ACTION",
+  reduction_out = "ACTION",
   SVD_algorithm = 0,
   seed = 0
 )
@@ -23,7 +23,7 @@ reduce.ace(
 
 \item{assay_name}{Name of assay to reduce.}
 
-\item{reduction_slot}{Name of slot to store reduction.}
+\item{reduction_out}{Name of slot to store reduction.}
 }
 \value{
 ACTIONetExperiment object with reduction in colMaps(ace).
