@@ -6,19 +6,17 @@
 \usage{
 .run.ACTION_MR.ace(
   ace,
-  S_r = NULL,
   k_min = 2,
   k_max = 30,
   specificity_th = -3,
   min_cells_per_arch = 2,
   unification_th = 0,
   max_iter = 50,
+  min_delta = 1e-300,
   thread_no = 0,
   unified_suffix = "unified",
   footprint_slot_name = "assigned_archetype",
-  reduction_slot = "ACTION",
-  seed = 0,
-  return_raw = FALSE
+  reduction_slot = "ACTION"
 )
 }
 \description{

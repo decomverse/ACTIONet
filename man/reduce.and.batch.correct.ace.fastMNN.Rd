@@ -11,7 +11,7 @@ reduce.and.batch.correct.ace.fastMNN(
   reduced_dim = 50,
   MNN_k = 20,
   return_V = FALSE,
-  reduction_slot = "MNN",
+  reduction_out = "MNN",
   V_slot = NULL,
   BPPARAM = SerialParam()
 )

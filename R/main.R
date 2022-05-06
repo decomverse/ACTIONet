@@ -69,9 +69,8 @@ runACTIONet <- function(
   .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
 
-  ace <- .run.ACTION_MR.ace(
+  ace <- .decomp.ACTIONMR.ace(
     ace = ace,
-    S_r = NULL,
     k_min = k_min,
     k_max = k_max,
     specificity_th = specificity_th,
@@ -82,7 +81,6 @@ runACTIONet <- function(
     unified_suffix = "unified",
     footprint_slot_name = "assigned_archetype",
     reduction_slot = reduction_slot,
-    seed = seed
   )
 
   # Build ACTIONet
