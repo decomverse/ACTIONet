@@ -739,9 +739,10 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 // [[Rcpp::export]]
 List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
                       double violation_threshold = 0.0,
+                      double backbone_density = 0.5, int outlier_threshold = 1,
                       int thread_no = 0)
 {
-  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, thread_no);
+  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, backbone_density, outlier_threshold, thread_no);
 
   List out_list;
 
@@ -780,10 +781,10 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
 //'	G = buildNetwork(prune.out$H_stacked)
 // [[Rcpp::export]]
 sp_mat buildNetwork(mat H, string algorithm = "k*nn", string distance_metric = "jsd", double density = 1.0, int thread_no = 0,
-                    bool mutual_edges_only = true, int k = 10)
+                    bool mutual_edges_only = true, int k = 10, int ef_construction = 200, int ef = 200)
 {
 
-  double M = 16, ef_construction = 200, ef = 50;
+  double M = 16;
   sp_mat G = ACTIONet::buildNetwork(H, algorithm, distance_metric, density, thread_no, M,
                                     ef_construction, ef, mutual_edges_only, k);
 
@@ -795,7 +796,7 @@ sp_mat build_knn(mat H, string distance_metric = "jsd", double k = 10, int threa
                  bool mutual_edges_only = true)
 {
 
-  double M = 16, ef_construction = 200, ef = 10;
+  double M = 16, ef_construction = 200, ef = 200;
 
   sp_mat G = ACTIONet::buildNetwork(H, "knn", distance_metric, 1, thread_no, M,
                                     ef_construction, ef, mutual_edges_only, k);
@@ -2536,4 +2537,31 @@ mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_
   mat stats = ACTIONet::aggregate_genesets_weighted_enrichment_permutation(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no, perm_no);
 
   return (stats);
+}
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+  field<mat> stats = ACTIONet::recursiveNMU(M, dim, max_SVD_iter, max_iter_inner);
+
+  List res;
+  res["W"] = stats[0];
+  res["H"] = trans(stats[1]);
+  res["factor_weights"] = stats[2];
+
+  return (res);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+  field<mat> stats = ACTIONet::recursiveNMU_mine(M, dim, max_SVD_iter, max_iter_inner);
+
+  List res;
+  res["W"] = stats[0];
+  res["H"] = trans(stats[1]);
+  res["factor_weights"] = stats[2];
+
+  return (res);
 }
