@@ -604,8 +604,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -3,
     .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
-unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, thread_no = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, thread_no)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, backbone_density = 0.5, outlier_threshold = 1L, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, backbone_density, outlier_threshold, thread_no)
 }
 
 #'
@@ -614,8 +614,8 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = buildNetwork(prune.out$H_stacked)
-buildNetwork <- function(H, algorithm = "k*nn", distance_metric = "jsd", density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, k = 10L) {
-    .Call(`_ACTIONet_buildNetwork`, H, algorithm, distance_metric, density, thread_no, mutual_edges_only, k)
+buildNetwork <- function(H, algorithm = "k*nn", distance_metric = "jsd", density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, k = 10L, ef_construction = 200L, ef = 200L) {
+    .Call(`_ACTIONet_buildNetwork`, H, algorithm, distance_metric, density, thread_no, mutual_edges_only, k, ef_construction, ef)
 }
 
 build_knn <- function(H, distance_metric = "jsd", k = 10, thread_no = 0L, mutual_edges_only = TRUE) {
@@ -1079,6 +1079,14 @@ aggregate_genesets_weighted_enrichment <- function(G, S, marker_mat, network_nor
 
 aggregate_genesets_weighted_enrichment_permutation <- function(G, S, marker_mat, network_normalization_method = 0L, expression_normalization_method = 0L, gene_scaling_method = 3L, pre_alpha = 0.85, post_alpha = 0.85, thread_no = 0L, perm_no = 30L) {
     .Call(`_ACTIONet_aggregate_genesets_weighted_enrichment_permutation`, G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no, perm_no)
+}
+
+recursiveNMU <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 100L) {
+    .Call(`_ACTIONet_recursiveNMU`, M, dim, max_SVD_iter, max_iter_inner)
+}
+
+recursiveNMU_mine <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 100L) {
+    .Call(`_ACTIONet_recursiveNMU_mine`, M, dim, max_SVD_iter, max_iter_inner)
 }
 
 roll_var <- function(X) {

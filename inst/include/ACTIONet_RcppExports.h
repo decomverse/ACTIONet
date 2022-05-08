@@ -444,17 +444,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold = 0.0, int thread_no = 0) {
-        typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold = 0.0, double backbone_density = 0.5, int outlier_threshold = 1, int thread_no = 0) {
+        typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_unify_archetypes p_unify_archetypes = NULL;
         if (p_unify_archetypes == NULL) {
-            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,int)");
+            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,double,int,int)");
             p_unify_archetypes = (Ptr_unify_archetypes)R_GetCCallable("ACTIONet", "_ACTIONet_unify_archetypes");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_unify_archetypes(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(C_stacked)), Shield<SEXP>(Rcpp::wrap(H_stacked)), Shield<SEXP>(Rcpp::wrap(violation_threshold)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+            rcpp_result_gen = p_unify_archetypes(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(C_stacked)), Shield<SEXP>(Rcpp::wrap(H_stacked)), Shield<SEXP>(Rcpp::wrap(violation_threshold)), Shield<SEXP>(Rcpp::wrap(backbone_density)), Shield<SEXP>(Rcpp::wrap(outlier_threshold)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -465,17 +465,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline sp_mat buildNetwork(mat H, string algorithm = "k*nn", string distance_metric = "jsd", double density = 1.0, int thread_no = 0, bool mutual_edges_only = true, int k = 10) {
-        typedef SEXP(*Ptr_buildNetwork)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline sp_mat buildNetwork(mat H, string algorithm = "k*nn", string distance_metric = "jsd", double density = 1.0, int thread_no = 0, bool mutual_edges_only = true, int k = 10, int ef_construction = 200, int ef = 200) {
+        typedef SEXP(*Ptr_buildNetwork)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_buildNetwork p_buildNetwork = NULL;
         if (p_buildNetwork == NULL) {
-            validateSignature("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int)");
+            validateSignature("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int,int,int)");
             p_buildNetwork = (Ptr_buildNetwork)R_GetCCallable("ACTIONet", "_ACTIONet_buildNetwork");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_buildNetwork(Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(algorithm)), Shield<SEXP>(Rcpp::wrap(distance_metric)), Shield<SEXP>(Rcpp::wrap(density)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(mutual_edges_only)), Shield<SEXP>(Rcpp::wrap(k)));
+            rcpp_result_gen = p_buildNetwork(Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(algorithm)), Shield<SEXP>(Rcpp::wrap(distance_metric)), Shield<SEXP>(Rcpp::wrap(density)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(mutual_edges_only)), Shield<SEXP>(Rcpp::wrap(k)), Shield<SEXP>(Rcpp::wrap(ef_construction)), Shield<SEXP>(Rcpp::wrap(ef)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -2185,6 +2185,48 @@ namespace ACTIONet {
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline List recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+        typedef SEXP(*Ptr_recursiveNMU)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_recursiveNMU p_recursiveNMU = NULL;
+        if (p_recursiveNMU == NULL) {
+            validateSignature("List(*recursiveNMU)(mat,int,int,int)");
+            p_recursiveNMU = (Ptr_recursiveNMU)R_GetCCallable("ACTIONet", "_ACTIONet_recursiveNMU");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_recursiveNMU(Shield<SEXP>(Rcpp::wrap(M)), Shield<SEXP>(Rcpp::wrap(dim)), Shield<SEXP>(Rcpp::wrap(max_SVD_iter)), Shield<SEXP>(Rcpp::wrap(max_iter_inner)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
+    inline List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+        typedef SEXP(*Ptr_recursiveNMU_mine)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_recursiveNMU_mine p_recursiveNMU_mine = NULL;
+        if (p_recursiveNMU_mine == NULL) {
+            validateSignature("List(*recursiveNMU_mine)(mat,int,int,int)");
+            p_recursiveNMU_mine = (Ptr_recursiveNMU_mine)R_GetCCallable("ACTIONet", "_ACTIONet_recursiveNMU_mine");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_recursiveNMU_mine(Shield<SEXP>(Rcpp::wrap(M)), Shield<SEXP>(Rcpp::wrap(dim)), Shield<SEXP>(Rcpp::wrap(max_SVD_iter)), Shield<SEXP>(Rcpp::wrap(max_iter_inner)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
     }
 
 }
