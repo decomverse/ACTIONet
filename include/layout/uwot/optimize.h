@@ -27,147 +27,88 @@
 #ifndef UWOT_OPTIMIZE_H
 #define UWOT_OPTIMIZE_H
 
-#include <limits>
-#include <utility>
-
-#include <pcg_random.hpp>
-
-#include "sampler.h"
-#include "tauprng.h"
+#include <vector>
 
 namespace uwot {
 
-// Function to decide whether to move both vertices in an edge
-// Default empty version does nothing: used in umap_transform when
-// some of the vertices should be held fixed
-template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
-
-// Specialization to move the vertex: used in umap when both
-// vertices in an edge should be moved
-template <>
-void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
-                             std::size_t i, std::size_t nrj) {
-  embedding[nrj + i] -= grad_d;
+float linear_decay(double val, std::size_t epoch, std::size_t n_epochs) {
+  return val *
+         (1.0 - (static_cast<float>(epoch) / static_cast<float>(n_epochs)));
 }
 
-inline auto clamp(float v, float lo, float hi) -> float {
-  float t = v < lo ? lo : v;
-  return t > hi ? hi : t;
+float linear_grow(double val, std::size_t epoch, std::size_t n_epochs) {
+  return val * (static_cast<float>(epoch) / static_cast<float>(n_epochs));
 }
 
-static thread_local pcg32 rng;
-// Gradient: the type of gradient used in the optimization
-// DoMoveVertex: true if both ends of a positive edge should be updated
-template <typename Gradient, bool DoMoveVertex>
-struct SgdWorker {
-  int n;  // epoch counter
+struct Sgd {
+  float initial_alpha;
   float alpha;
-  const Gradient gradient;
-  const std::vector<unsigned int> positive_head;
-  const std::vector<unsigned int> positive_tail;
-  uwot::Sampler sampler;
-  std::vector<float> &head_embedding;
-  std::vector<float> &tail_embedding;
-  std::size_t ndim;
-  std::size_t head_nvert;
-  std::size_t tail_nvert;
-  float dist_eps;
 
-  SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
-            std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
-            std::vector<float> &head_embedding,
-            std::vector<float> &tail_embedding, std::size_t ndim,
-            uint64_t seed = std::mt19937_64::default_seed)
-      :
+  Sgd(float alpha) : initial_alpha(alpha), alpha(alpha){};
 
-        n(0), alpha(0.0), gradient(gradient),
-        positive_head(std::move(positive_head)),
-        positive_tail(std::move(positive_tail)),
-
-        sampler(sampler),
-
-        head_embedding(head_embedding), tail_embedding(tail_embedding),
-        ndim(ndim), head_nvert(head_embedding.size() / ndim),
-        tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<float>::epsilon()) {
-    rng.seed(seed);
+  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
+    v[i] += alpha * grad[i];
   }
 
-  void operator()(std::size_t begin, std::size_t end) {
-    std::vector<float> dys(ndim);
-
-    std::uniform_int_distribution<int> uniform_dist(0, tail_nvert - 1);
-
-    for (auto i = begin; i < end; i++) {
-      if (!sampler.is_sample_edge(i, n)) {
-        continue;
-      }
-
-      std::size_t dj = ndim * positive_head[i];
-      std::size_t dk = ndim * positive_tail[i];
-
-      float dist_squared = 0.0;
-      for (std::size_t d = 0; d < ndim; d++) {
-        float diff = head_embedding[dj + d] - tail_embedding[dk + d];
-
-        dys[d] = diff;
-        dist_squared += diff * diff;
-      }
-      dist_squared = (std::max)(dist_eps, dist_squared);
-
-      float grad_coeff = gradient.grad_attr(dist_squared);
-      // float grad_coeff = 0.5; //gradient.grad_attr(0.5);;
-      // //gradient.grad_attr(dist_squared);
-
-      for (std::size_t d = 0; d < ndim; d++) {
-        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-                                     Gradient::clamp_hi);
-        ;  // alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-           // Gradient::clamp_hi);
-
-        head_embedding[dj + d] += grad_d;
-        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
-      }
-
-      std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
-      for (std::size_t p = 0; p < n_neg_samples; p++) {
-        int r = uniform_dist(rng);
-        std::size_t dkn = r * ndim;
-        if (dj == dkn) {
-          continue;
-        }
-        float dist_squared = 0.0;
-        for (std::size_t d = 0; d < ndim; d++) {
-          float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
-          dys[d] = diff;
-          dist_squared += diff * diff;
-        }
-        dist_squared = (std::max)(dist_eps, dist_squared);
-
-        float grad_coeff = gradient.grad_rep(dist_squared);
-        // float grad_coeff = 0.5; //gradient.grad_rep(0.5);;
-        // //gradient.grad_rep(dist_squared);
-
-        for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-                                       Gradient::clamp_hi);
-          ;  // alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-             // Gradient::clamp_hi);
-
-          head_embedding[dj + d] += grad_d;
-        }
-      }
-      sampler.next_sample(i, n_neg_samples);
-    }
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    alpha = linear_decay(initial_alpha, epoch, n_epochs);
   }
-
-  void set_n(int n) { this->n = n; }
-
-  void set_alpha(float alpha) { this->alpha = alpha; }
-
-  void reseed(int new_seed) { rng.seed(new_seed); }
 };
-}  // namespace uwot
 
-#endif  // UWOT_OPTIMIZE_H
+struct Adam {
+  float initial_alpha;
+  float alpha;
+  float beta1;
+  float beta2;
+
+  float beta11; // 1 - beta1
+  float beta1t; // beta1 ^ t
+
+  float beta21; // 1 - beta2
+  float beta2t; // beta2 ^ t
+
+  float eps;
+
+  // rather than calculate the debiased values for m and v (mhat and vhat)
+  // directly, fold them into a scaling factor for alpha as described at the
+  // end of the first paragraph of section 2 of the Adam paper
+  // technically you also need to rescale eps (given as eps-hat in the paper)
+  float epsc;     // scaled eps
+  float ad_scale; // scaled alpha
+
+  std::vector<float> mt;
+  std::vector<float> vt;
+
+  Adam(float alpha, float beta1, float beta2, float eps, std::size_t vec_size)
+      : initial_alpha(alpha), alpha(alpha), beta1(beta1), beta2(beta2),
+        beta11(1.0 - beta1), beta1t(beta1), beta21(1.0 - beta2), beta2t(beta2),
+        eps(eps), epsc(eps * sqrt(beta21)),
+        ad_scale(alpha * sqrt(beta21) / beta11), mt(vec_size), vt(vec_size) {}
+
+  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
+    // this takes advantage of updating in-place to give a more compact version
+    // of mt[i] = beta1 * mt[i] + beta11 * grad[i] etc.
+    vt[i] += beta21 * (grad[i] * grad[i] - vt[i]);
+    mt[i] += beta11 * (grad[i] - mt[i]);
+
+    // ad_scale and epsc handle the debiasing
+    v[i] += ad_scale * mt[i] / (sqrt(vt[i]) + epsc);
+  }
+
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    alpha = linear_decay(initial_alpha, epoch, n_epochs);
+
+    // update debiasing factors
+    beta1t *= beta1;
+    beta2t *= beta2;
+    float sqrt_b2t1 = sqrt(1.0 - beta2t);
+
+    // rescale alpha and eps to take account of debiasing
+    ad_scale = alpha * sqrt_b2t1 / (1.0 - beta1t);
+    epsc = sqrt_b2t1 * eps;
+  }
+};
+
+} // namespace uwot
+
+#endif // UWOT_OPTIMIZE_H

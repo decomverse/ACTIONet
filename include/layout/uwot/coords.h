@@ -1,6 +1,6 @@
 // BSD 2-Clause License
 //
-// Copyright 2020 James Melville
+// Copyright 2021 James Melville
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -24,29 +24,40 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // OF SUCH DAMAGE.
 
-#ifndef UWOT_MATRIX_H
-#define UWOT_MATRIX_H
+#ifndef UWOT_COORDS_H
+#define UWOT_COORDS_H
 
-#include <vector>
+#include <memory>
+#include <utility>
 
 namespace uwot {
 
-template <typename T>
-void get_row(const std::vector<float> &m, std::size_t nrow, std::size_t ncol,
-             std::size_t r, std::vector<T> &out) {
-  for (std::size_t j = 0; j < ncol; j++) {
-    out[j] = m[r + j * nrow];
+// For normal UMAP, tail_embedding is NULL and we want to pass
+// a shallow copy of head_embedding as tail_embedding.
+// When updating new values, tail_embedding is the new coordinate to optimize
+// and gets passed as normal.
+struct Coords {
+  std::vector<float> head_embedding;
+  std::unique_ptr<std::vector<float>> tail_vec_ptr;
+
+  Coords(std::vector<float> &head_embedding)
+      : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
+
+  Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
+      : head_embedding(head_embedding),
+        tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
+
+  auto get_tail_embedding() -> std::vector<float> & {
+    if (tail_vec_ptr) {
+      return *tail_vec_ptr;
+    } else {
+      return head_embedding;
+    }
   }
-}
 
-template <typename T>
-void set_row(std::vector<T> &m, std::size_t nrow, std::size_t ncol,
-             std::size_t r, const std::vector<T> &out) {
-  for (std::size_t j = 0; j < ncol; j++) {
-    m[r + j * nrow] = out[j];
-  }
-}
+  auto get_head_embedding() -> std::vector<float> & { return head_embedding; }
+};
 
-}  // namespace uwot
+} // namespace uwot
 
-#endif  // UWOT_MATRIX_H
+#endif

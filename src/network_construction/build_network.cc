@@ -9,6 +9,28 @@
 #include <space_js.h>
 #include <space_ip.h>
 #include <space_l2.h>
+#include <mutex>
+
+#include "RcppPerpendicular.h"
+
+  struct AddWorker {
+    hnswlib::HierarchicalNSW<float> *hnsw;
+    const fmat &data;
+
+    AddWorker(hnswlib::HierarchicalNSW<float> *hnsw,
+              const fmat &data) :
+      hnsw(hnsw), data(data)
+    {}
+
+    void operator()(std::size_t begin, std::size_t end) {
+      for (std::size_t i = begin; i < end; i++) {
+        hnsw->addPoint(data.colptr(i), i);
+      }
+    }
+  };
+
+
+std::mutex hnsw_mutex; 
 
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t numThreads,
@@ -194,7 +216,7 @@ namespace ACTIONet
   // k^{*}-Nearest Neighbors: From Global to Local (NIPS 2016)
   sp_mat buildNetwork_KstarNN(mat H, double density = 1.0,
                               int thread_no = 0, double M = 16,
-                              double ef_construction = 200, double ef = 10,
+                              double ef_construction = 200, double ef = 200,
                               bool mutual_edges_only = true,
                               string distance_metric = "jsd")
   {
@@ -342,7 +364,7 @@ namespace ACTIONet
   sp_mat buildNetwork_KstarNN_v2(mat H, double density = 1.0,
                                  int thread_no = 0, double M = 16,
                                  double ef_construction = 200,
-                                 double ef = 10,
+                                 double ef = 200,
                                  bool mutual_edges_only = true,
                                  string distance_metric = "jsd")
   {
@@ -382,11 +404,25 @@ namespace ACTIONet
     hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
-    stdout_printf("\tBuilding index ... ");
+    stdout_printf("\tBuilding index ... (updated) ");
     fmat X = conv_to<fmat>::from(H);
     int max_elements = X.n_cols;
-    parallelFor(0, max_elements, [&] (size_t j)
-                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
+
+/*
+    appr_alg->addPoint(X.colptr(0), (size_t) 0 ); // Critical for reproducibility!! :: https://github.com/nmslib/hnswlib/blob/master/sift_1b.cpp    
+    ParallelFor(1, max_elements, thread_no, [&](size_t j, size_t threadId) {
+         //const std::lock_guard<std::mutex> lock(hnsw_mutex); 
+         appr_alg->addPoint(X.colptr(j), j);
+    });
+*/
+    AddWorker worker(appr_alg, X);
+    RcppPerpendicular::parallel_for(0, max_elements, worker, thread_no, 1);
+
+
+//    int j2 = 1;
+/*    parallelFor(1, max_elements, [&] (size_t j)
+                { const std::lock_guard<std::mutex> lock(hnsw_mutex); appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
+*/                
     stdout_printf("done\n"); FLUSH;
 
     stdout_printf("\tConstructing k*-NN ... ");
@@ -467,7 +503,7 @@ namespace ACTIONet
 
   sp_mat buildNetwork_KNN(mat H, int k, int thread_no = 0,
                           double M = 16, double ef_construction = 200,
-                          double ef = 10, bool mutual_edges_only = true,
+                          double ef = 200, bool mutual_edges_only = true,
                           string distance_metric = "jsd")
   {
     //verify that a support distance metric has been specified
@@ -579,7 +615,7 @@ namespace ACTIONet
     sp_mat G;
     if (algorithm == "k*nn")
     {
-      G = buildNetwork_KstarNN_v2(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+      G = buildNetwork_KstarNN(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
     }
     else
     {

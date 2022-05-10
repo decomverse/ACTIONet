@@ -46,8 +46,8 @@ mat one_hot_encoding(vec labels) {
   return (M);
 }
 
-vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
-        double sig_threshold = 3, uvec fixed_labels = uvec(), int thread_no = 0) {
+vec LPA(sp_mat &G, vec labels, double lambda, int iters,
+        double sig_threshold, uvec fixed_labels, int thread_no) {
   int n = G.n_rows;
 
   vec updated_labels = labels;
@@ -59,9 +59,6 @@ vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
   
   int it = 0;
   for (it; it < iters; it++) {
-    stderr_printf("\r\tLPA iteration %d/%d", it+1, iters);
-    FLUSH;
-
     vec vals = unique(updated_labels);
     uvec idx = find(0 <= vals);
     vals = vals(idx);
