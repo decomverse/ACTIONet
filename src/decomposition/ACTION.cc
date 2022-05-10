@@ -265,7 +265,11 @@ namespace ACTIONet
     trace.C = field<mat>(k_max + 1);
     trace.selected_cols = field<uvec>(k_max + 1);
 
-    mat X_r = normalise(S_r, 1); // ATTENTION!
+    // ATTENTION!
+    
+    mat X_r = normalise(S_r, 1); 
+    //mat X_r = zscore(S_r);
+    //mat X_r = S_r;
 
     int current_k = 0;
     char status_msg[50];

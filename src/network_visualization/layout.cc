@@ -1,8 +1,5 @@
 #include <ACTIONet.h>
 
-#include <atomic>
-#include <cfloat>
-#include <thread>
 
 const double UMAP_A[101] = {
     1.93280839781719, 1.89560586588002, 1.85873666431227, 1.82221007490834,
@@ -59,35 +56,145 @@ const double UMAP_B[101] = {
     1.87816693701183, 1.89085711093115, 1.90359837758981, 1.91638829237987,
     1.92923479503841};
 
+
+#include <atomic>
+#include <cfloat>
+#include <thread>
+
+
 #define NEGATIVE_SAMPLE_RATE 5.0
 #define LEARNING_RATE 1.0
 #define UMAP_SEED 0
 #define GAMMA 1.0
+#define ADAM_ALPHA 1.0 /*same as learning_rate*/
+#define ADAM_BETA1 0.5 /*only adam: between 0 and 1*/
+#define ADAM_BETA2 0.9 /*only adam: between 0 and 1*/
+#define ADAM_EPS 1e-7 /*only adam: between 1e-8 and 1e-3*/
+#define SGD_ALPHA 1.0
 
-std::vector<float> optimize_layout_umap(
-    std::vector<float> head_vec, std::vector<float> tail_vec,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    double a, double b, double gamma, double initial_alpha,
-    double negative_sample_rate, bool approx_pow, std::size_t n_threads,
-    std::size_t grain_size, bool move_other, int seed);
+template<typename Float>
+std::pair<Float, Float> find_ab(Float spread, Float min_dist, Float grid = 300, Float limit = 0.5, int iter = 50, Float tol = 1e-6) {
+    Float x_half = std::log(limit) * -spread + min_dist;
+    Float d_half = limit / -spread;
 
-std::vector<float> optimize_layout_tumap(
-    std::vector<float> head_vec, std::vector<float> tail_vec,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    double initial_alpha, double negative_sample_rate,
-    std::size_t thread_no = 0, std::size_t grain_size = 1,
-    bool move_other = true, int seed = 0);
+    // Compute the x and y coordinates of the expected distance curve.
+    std::vector<Float> grid_x(grid), grid_y(grid), log_x(grid);
+    const Float delta = spread * 3 / grid;
+    for (int g = 0; g < grid; ++g) {
+        grid_x[g] = (g + 1) * delta; // +1 to avoid meaningless least squares result at x = 0, where both curves have y = 1 (and also the derivative w.r.t. b is not defined).
+        log_x[g] = std::log(grid_x[g]);
+        grid_y[g] = (grid_x[g] <= min_dist ? 1 : std::exp(- (grid_x[g] - min_dist) / spread));
+    }
 
-std::vector<float> optimize_layout_largevis(
-    std::vector<float> head_vec, const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    double gamma, double initial_alpha, double negative_sample_rate,
-    std::size_t thread_no = 0, std::size_t grain_size = 1, int seed = 0);
+    // Starting estimates.
+    Float b = - d_half * x_half / (1 / limit - 1) / (2 * limit * limit);
+    Float a = (1 / limit - 1) / std::pow(x_half, 2 * b);
+
+    std::vector<Float> observed_y(grid), xpow(grid);
+    auto compute_ss = [&](Float A, Float B) -> Float {
+        for (int g = 0; g < grid; ++g) {
+            xpow[g] = std::pow(grid_x[g], 2 * B);
+            observed_y[g] = 1 / (1 + A * xpow[g]);
+        }
+
+        Float ss = 0;
+        for (int g = 0; g < grid; ++g) {
+            ss += (grid_y[g] - observed_y[g]) * (grid_y[g] - observed_y[g]);
+        }
+
+        return ss;
+    };
+    Float ss = compute_ss(a, b);
+
+    for (int it = 0; it < iter; ++it) {
+        // Computing the first and second derivatives of the sum of squared differences.
+        Float da = 0, db = 0, daa = 0, dab = 0, dbb = 0;
+        for (int g = 0; g < grid; ++g) {
+            const Float& x = grid_x[g];
+            const Float& gy = grid_y[g];
+            const Float& oy = observed_y[g];
+
+            const Float& x2b = xpow[g];
+            const Float logx2 = log_x[g] * 2;
+            const Float delta = oy - gy;
+
+            // -(2 * (x^(2 * b)/(1 + a * x^(2 * b))^2 * (1/(1 + a * x^(2 * b)) - y)))
+            da += -2 * x2b * oy * oy * delta;
+
+            // -(2 * (a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 * (1/(1 + a * x^(2 * b)) - y)))
+            db += -2 * a * x2b * logx2 * oy * oy * delta;
+
+            // 2 * (
+            //     x^(2 * b)/(1 + a * x^(2 * b))^2 * (x^(2 * b)/(1 + a * x^(2 * b))^2) 
+            //     + x^(2 * b) * (2 * (x^(2 * b) * (1 + a * x^(2 * b))))/((1 + a * x^(2 * b))^2)^2 * (1/(1 + a * x^(2 * b)) - y)
+            // ) 
+            daa += 2 * (
+                x2b * oy * oy * x2b * oy * oy
+                + x2b * 2 * x2b * oy * oy * oy * delta
+            );
+
+            //-(2 * 
+            //    (
+            //        (
+            //            (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 
+            //            - a * (x^(2 * b) * (log(x) * 2)) * (2 * (x^(2 * b) * (1 + a * x^(2 * b))))/((1 + a * x^(2 * b))^2)^2
+            //        ) 
+            //        * (1/(1 + a * x^(2 * b)) - y) 
+            //        - a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 * (x^(2 * b)/(1 + a * x^(2 * b))^2)
+            //    )
+            //)
+            dab += -2 * (
+                (
+                    x2b * logx2 * oy * oy
+                    - a * x2b * logx2 * 2 * x2b * oy * oy * oy
+                ) * delta
+                - a * x2b * logx2 * oy * oy * x2b * oy * oy
+            );
+
+            // -(2 * 
+            //     (
+            //         (
+            //             a * (x^(2 * b) * (log(x) * 2) * (log(x) * 2))/(1 + a * x^(2 * b))^2 
+            //             - a * (x^(2 * b) * (log(x) * 2)) * (2 * (a * (x^(2 * b) * (log(x) * 2)) * (1 + a * x^(2 * b))))/((1 + a * x^(2 * b))^2)^2
+            //         ) 
+            //         * (1/(1 + a * x^(2 * b)) - y) 
+            //         - a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 * (a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2)
+            //     )
+            // ) 
+            dbb += -2 * (
+                (
+                    (a * x2b * logx2 * logx2 * oy * oy)
+                    - (a * x2b * logx2 * 2 * a * x2b * logx2 * oy * oy * oy)
+                ) * delta 
+                - a * x2b * logx2 * oy * oy * a * x2b * logx2 * oy * oy
+            );
+        }
+
+        // Applying the Newton iterations with damping.
+        Float determinant = daa * dbb - dab * dab;
+        const Float delta_a = (da * dbb - dab * db) / determinant;
+        const Float delta_b = (- da * dab + daa * db) / determinant; 
+
+        Float ss_next = 0;
+        Float factor = 1;
+        for (int inner = 0; inner < 10; ++inner, factor /= 2) {
+            ss_next = compute_ss(a - factor * delta_a, b - factor * delta_b);
+            if (ss_next < ss) {
+                break;
+            }
+        }
+
+        if (ss && 1 - ss_next/ss > tol) {
+            a -= factor * delta_a;
+            b -= factor * delta_b;
+            ss = ss_next;
+        } else {
+            break;
+        }
+    }
+
+    return std::make_pair(a, b);
+}
 
 namespace ACTIONet
 {
@@ -157,10 +264,9 @@ namespace ACTIONet
     return (G);
   }
 
-  field<mat> layoutNetwork_umap(sp_mat &G, mat initial_position, int compactness_level,
+  field<mat> layoutNetwork_xmap(sp_mat &G, mat initial_position, string alg_name, float spread, float min_dist, string opt_name, 
                                 unsigned int n_epochs,
-                                int layout_alg, int thread_no,
-                                int seed)
+                                int seed, int thread_no)
   {
     if (thread_no <= 0)
     {
@@ -175,25 +281,15 @@ namespace ACTIONet
 
     sp_mat H = G;
     H.for_each([](sp_mat::elem_type &val)
-               { val = 1.0 / val; });
+               { val = 1 / val; });
     H = smoothKNN(H, thread_no);
 
     unsigned int nV = H.n_rows;
 
-    if (layout_alg == UMAP_LAYOUT)
-    {
-      compactness_level = (compactness_level < 0) ? 0 : compactness_level;
-      compactness_level = (compactness_level > 100) ? 100 : compactness_level;
-      stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
-                    compactness_level, n_epochs); FLUSH;
-    }
-    else
-    {
-      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs); FLUSH;
-    }
-
-    double a_param = UMAP_A[compactness_level];
-    double b_param = UMAP_B[compactness_level];
+    auto found = find_ab(spread, min_dist);
+    double a_param = found.first;
+    double b_param = found.second;
+   
 
     // linearized list of edges (1-simplices)
     unsigned int nE = H.n_nonzero;
@@ -212,95 +308,73 @@ namespace ACTIONet
     }
 
     // Initial coordinates of vertices (0-simplices)
-    vector<float> head_vec(init_coors.n_cols * 2);
+    vector<float> head_embedding(init_coors.n_cols * 2);
     fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
     float *ptr = sub_coor.memptr();
-    memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
-    vector<float> tail_vec(head_vec);
+    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
+    vector<float> tail_embedding; //(head_embedding);
+
+    sp_mat H2 = trans(H);
+    H2.sync();
+    std::vector<unsigned int> positive_ptr(H2.n_cols + 1);
+    for (int k = 0; k < H2.n_cols + 1; k++)
+    {
+        positive_ptr[k] = H2.col_ptrs[k];
+    }
 
     stdout_printf("\tComputing 2D layout ... ");
 
     // Stores linearized coordinates [x1, y1, x2, y2, ...]
     vector<float> result;
-
-    switch (layout_alg)
-    {
-    case TUMAP_LAYOUT:
-      result = optimize_layout_tumap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-          true, seed);
-      break;
-    case UMAP_LAYOUT:
-      result = optimize_layout_umap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-          NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
-      break;
-    default:
-      stderr_printf(
-          "Unknown layout algorithm chosen (%d). Switching to TUMAP.\n",
-          layout_alg);
-      result = optimize_layout_tumap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-          true, seed);
-      break;
-    }
+    mat coordinates(nV, 2);
+  size_t grain_size = 1;
+  result = optimize_layout_interface(
+      head_embedding, tail_embedding,
+      positive_head,
+      positive_tail,
+      positive_ptr, n_epochs,
+      nV, nV, epochs_per_sample, alg_name,
+      1.0, a_param, b_param, GAMMA, false, 
+      NEGATIVE_SAMPLE_RATE,
+      true, true, thread_no,
+      grain_size, true, false,
+      ADAM_ALPHA, ADAM_BETA1, ADAM_BETA2, ADAM_EPS, SGD_ALPHA, opt_name, seed);
 
     fmat coordinates_float(result.data(), 2, nV);
-    mat coordinates = conv_to<mat>::from(coordinates_float);
-    coordinates = trans(coordinates);
+    coordinates = trans(conv_to<mat>::from(coordinates_float));
 
     stdout_printf("done\n"); FLUSH;
 
     /****************************
    *  Compute 3D Embedding	*
    ***************************/
-    head_vec.clear();
-    head_vec.resize(init_coors.n_cols * 3);
+  mat coordinates_3D(nV, 3);
+  stdout_printf("\tComputing 3D layout ... ");
+
+  /*
+    head_embedding.clear();
+    head_embedding.resize(init_coors.n_cols * 3);
     sub_coor = conv_to<fmat>::from(tzscoret(join_vert(trans(coordinates), init_coors.row(2))));
     ptr = sub_coor.memptr();
-    memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
-    tail_vec = head_vec;
+    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
+    tail_embedding = head_embedding;
 
-    stdout_printf("\tComputing 3D layout ... ");
 
     result.clear();
 
-    switch (layout_alg)
-    {
-    case TUMAP_LAYOUT:
-      result = optimize_layout_tumap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-          true, seed);
-      break;
-    case UMAP_LAYOUT:
-      result = optimize_layout_umap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-          NEGATIVE_SAMPLE_RATE, false, thread_no, 1, true, seed);
-      break;
-    default:
-      result = optimize_layout_tumap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-          true, seed);
-      break;
-    }
+    // RUN HERE!
 
     fmat coordinates_3D_float(result.data(), 3, nV);
-    mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
-    coordinates_3D = trans(coordinates_3D);
-
+    coordinates_3D = trans(conv_to<mat>::from(coordinates_3D_float));
+*/
     stdout_printf("done\n"); FLUSH;
 
     /****************************
    *  Now compute node colors *
    ***************************/
     stdout_printf("\tComputing node colors ... ");
-
+    mat RGB_colors = zeros(nV, 3);
+/*
     mat U;
     vec s;
     mat V;
@@ -315,7 +389,6 @@ namespace ACTIONet
     L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
 
     double r_channel, g_channel, b_channel;
-    mat RGB_colors = zeros(nV, 3);
     for (int i = 0; i < nV; i++)
     {
       Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
@@ -324,45 +397,12 @@ namespace ACTIONet
       RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
       RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
     }
-
+*/
     stdout_printf("done\n"); FLUSH;
 
     res(0) = coordinates;
     res(1) = coordinates_3D;
     res(2) = RGB_colors;
-    return res;
-  }
-
-  field<mat> layoutNetwork_forced_atlas(sp_mat &G, mat initial_position, int compactness_level,
-                                        unsigned int n_epochs, int thread_no,
-                                        int seed)
-  {
-    if (thread_no <= 0)
-    {
-      thread_no = SYS_THREADS_DEF;
-    }
-
-    stdout_printf("Computing layout (%d threads):\n", thread_no);
-    field<mat> res(3);
-
-    int D = initial_position.n_rows;
-    mat init_coors = initial_position.rows(0, min(2, D));
-
-    /****************************
-   *  Compute 3D Embedding	*
-   ***************************/
-    if (2 < D)
-    {
-      // Empty
-    }
-    else
-    {
-      // Empty
-    }
-    /****************************
-   *  Now compute node colors *
-   ***************************/
-
     return res;
   }
 
@@ -403,8 +443,8 @@ namespace ACTIONet
       stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs); FLUSH;
     }
 
-    double a_param = UMAP_A[compactness_level];
-    double b_param = UMAP_B[compactness_level];
+    double a_param;
+    double b_param;
 
     // linearized list of edges (1-simplices)
     unsigned int nE = H.n_nonzero;
@@ -422,31 +462,32 @@ namespace ACTIONet
       i++;
     }
 
-    vector<float> head_vec(interpolated_coordinates.n_cols * 2);
+    vector<float> head_embedding(interpolated_coordinates.n_cols * 2);
     fmat sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 1));
     float *ptr = sub_coor.memptr();
-    memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
+    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
 
-    vector<float> tail_vec(reference_coordinates.n_cols * 2);
+    vector<float> tail_embedding(reference_coordinates.n_cols * 2);
     sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 1));
     ptr = sub_coor.memptr();
-    memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
+    memcpy(tail_embedding.data(), ptr, sizeof(float) * tail_embedding.size());
 
     stdout_printf("\tComputing 2D layout ... ");
     // Stores linearized coordinates [x1, y1, x2, y2, ...]
     vector<float> result;
 
+/*
     switch (layout_alg)
     {
     case TUMAP_LAYOUT:
       result = optimize_layout_tumap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
           epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
           false, seed);
       break;
     case UMAP_LAYOUT:
       result = optimize_layout_umap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
           epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
           NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
       break;
@@ -455,12 +496,12 @@ namespace ACTIONet
           "Unknown layout algorithm chosen (%d). Switching to TUMAP.\n",
           layout_alg);
       result = optimize_layout_tumap(
-          head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+          head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
           epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
           true, seed);
       break;
     }
-
+*/
     fmat coordinates_float(result.data(), 2, nV);
     mat coordinates = conv_to<mat>::from(coordinates_float);
     coordinates = trans(coordinates);
@@ -476,40 +517,41 @@ namespace ACTIONet
       stdout_printf("\tComputing 3D layout ... ");
       result.clear();
 
-      head_vec.clear();
-      head_vec.resize(interpolated_coordinates.n_cols * 3);
+      head_embedding.clear();
+      head_embedding.resize(interpolated_coordinates.n_cols * 3);
       sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 2));
       ptr = sub_coor.memptr();
-      memcpy(head_vec.data(), ptr, sizeof(float) * head_vec.size());
+      memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
 
-      tail_vec.clear();
-      tail_vec.resize(reference_coordinates.n_cols * 3);
+      tail_embedding.clear();
+      tail_embedding.resize(reference_coordinates.n_cols * 3);
       sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 2));
       ptr = sub_coor.memptr();
-      memcpy(tail_vec.data(), ptr, sizeof(float) * tail_vec.size());
+      memcpy(tail_embedding.data(), ptr, sizeof(float) * tail_embedding.size());
 
+/*
       switch (layout_alg)
       {
       case TUMAP_LAYOUT:
         result = optimize_layout_tumap(
-            head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+            head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
             epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
             true, seed);
         break;
       case UMAP_LAYOUT:
         result = optimize_layout_umap(
-            head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+            head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
             epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
             NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
         break;
       default:
         result = optimize_layout_tumap(
-            head_vec, tail_vec, positive_head, positive_tail, n_epochs, nV,
+            head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
             epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
             false, seed);
         break;
       }
-
+*/
       fmat coordinates_3D_float(result.data(), 3, nV);
       mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
       coordinates_3D = trans(coordinates_3D);
@@ -552,29 +594,5 @@ namespace ACTIONet
     return res;
   }
 
-  field<mat> layoutNetwork(sp_mat &G, mat initial_position, string algorithm, int compactness_level,
-                           unsigned int n_epochs, int thread_no,
-                           int seed)
-  {
-    field<mat> res;
-    if (algorithm == "tumap")
-    {
-      res = layoutNetwork_umap(G, initial_position, compactness_level, n_epochs, TUMAP_LAYOUT, thread_no, seed);
-    }
-    else if (algorithm == "umap")
-    {
-      res = layoutNetwork_umap(G, initial_position, compactness_level, n_epochs, UMAP_LAYOUT, thread_no, seed);
-    }
-    else if (algorithm == "forced_atlas")
-    {
-      res = layoutNetwork_forced_atlas(G, initial_position, compactness_level, n_epochs, thread_no, seed);
-    }
-    else
-    { // Default to TUMAP
-      res = layoutNetwork_umap(G, initial_position, compactness_level, n_epochs, TUMAP_LAYOUT, thread_no, seed);
-    }
-
-    return (res);
-  }
 
 } // namespace ACTIONet

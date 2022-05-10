@@ -259,7 +259,7 @@ namespace ACTIONet
     // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
     // outlier_threshold, int reduced_dim);
     unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
-                                         double violation_threshold, int thread_no);
+                                         double backbone_density = 0.5, int outlier_threshold = 1, int thread_no = 1);
 
     // Main functions to build an interaction network from multi-level archetypal
     // decompositions
@@ -281,16 +281,16 @@ namespace ACTIONet
                         string distance_metric = "jsd",
                         double density = 1.0, int thread_no = 0,
                         double M = 16, double ef_construction = 200,
-                        double ef = 10, bool mutual_edges_only = true,
+                        double ef = 200, bool mutual_edges_only = true,
                         int k = 10);
 
     mat computeFullSim(mat &H, int thread_no);
 
     // SGD-based force-directed layout (adopted and modified from the UMAP
     // implementation)
-    field<mat> layoutNetwork(sp_mat &G, mat initial_position, string algorithm = "TUMAP", int compactness_level = 50,
-                             unsigned int n_epochs = 500, int thread_no = 0,
-                             int seed = 0);
+    field<mat> layoutNetwork_xmap(sp_mat &G, mat initial_position, string alg_name = "umap" /*umap,tumap,largevis,pacmap*/, float spread = 1.0, float min_dist = 0.01, string opt_name = "adam", 
+                                unsigned int n_epochs = 1000,
+                                int seed = 0, int thread_no = 0);
 
     field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level = 50,
                                 unsigned int n_epochs = 500,
@@ -368,8 +368,7 @@ namespace ACTIONet
     mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
                                int seed);
 
-    vec LPA(sp_mat &G, vec labels, double lambda, int iters, double sig_threshold,
-            uvec fixed_labels, int thread_no);
+    vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3, double sig_threshold = 3, uvec fixed_labels = uvec(), int thread_no = 0);
 
     mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat,
                                        double alpha, int max_it, int thread_no,
@@ -432,6 +431,26 @@ namespace ACTIONet
     mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.15, double post_alpha = 0.85, int thread_no = 0, int perm_no = 30);
 
     mat run_simplex_regression_FW(mat &A, mat &B, int max_iter = -1, double min_diff = 0.01);
+    field<mat> recursiveNMU_mine(mat M, int dim, int max_SVD_iter, int max_iter_inner);
+    field<mat> recursiveNMU(mat M, int dim, int max_SVD_iter, int max_iter_inner);
+
+    sp_mat smoothKNN(sp_mat D, int thread_no);
+
+
+    std::vector<float> optimize_layout_interface(
+        std::vector<float> & head_embedding, std::vector<float> &tail_embedding,
+        const std::vector<unsigned int> positive_head,
+        const std::vector<unsigned int> positive_tail,
+        const std::vector<unsigned int> positive_ptr, unsigned int n_epochs,
+        unsigned int n_head_vertices, unsigned int n_tail_vertices,
+        const std::vector<float> epochs_per_sample, const std::string &method,
+        float initial_alpha, float a, float b, float gamma, bool approx_pow, float negative_sample_rate,
+        bool pcg_rand, bool batch, std::size_t n_threads,
+        std::size_t grain_size, bool move_other, bool verbose,
+        float adam_alpha, float adam_beta1, float adam_beta2, float adam_eps,
+        float sgd_alpha, string opt_name, int seed);
+
+
 
 } // namespace ACTIONet
 
