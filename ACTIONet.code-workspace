@@ -75,8 +75,22 @@
 			"__locale": "cpp",
 			"__nullptr": "cpp",
 			"variant": "cpp",
+			"__bit_reference": "cpp",
+			"__bits": "cpp",
+			"__config": "cpp",
+			"__debug": "cpp",
+			"__errc": "cpp",
+			"__hash_table": "cpp",
+			"__mutex_base": "cpp",
+			"__node_handle": "cpp",
+			"__split_buffer": "cpp",
+			"__string": "cpp",
+			"__threading_support": "cpp",
+			"__tuple": "cpp",
+			"bitset": "cpp",
+			"ios": "cpp",
 			"locale": "cpp",
-			"__mutex_base": "cpp"
+			"filesystem": "cpp"
 		},
 		"jupyter.jupyterServerType": "local"
 	}

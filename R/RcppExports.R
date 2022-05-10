@@ -631,9 +631,9 @@ build_knn <- function(H, distance_metric = "jsd", k = 10, thread_no = 0L, mutual
 #'
 #' @examples
 #'	G = buildNetwork(prune.out$H_stacked)
-#'	vis.out = layoutNetwork(G, S_r)
-layoutNetwork <- function(G, initial_position, algorithm, compactness_level = 50L, n_epochs = 1000L, thread_no = 0L, seed = 0L) {
-    .Call(`_ACTIONet_layoutNetwork`, G, initial_position, algorithm, compactness_level, n_epochs, thread_no, seed)
+#'	vis.out = layoutNetwrok(G, S_r)
+layoutNetwrok <- function(G, initial_position, alg_name = "umap", spread = 1.0, min_dist = 0.01, opt_name = "adam", n_epochs = 1000L, seed = 0L, thread_no = 0L) {
+    .Call(`_ACTIONet_layoutNetwrok`, G, initial_position, alg_name, spread, min_dist, opt_name, n_epochs, seed, thread_no)
 }
 
 #' Encrypts a set of given input ids
@@ -869,10 +869,6 @@ unsigned_cluster <- function(A, resolution_parameter = 1.0, initial_clusters_ = 
     .Call(`_ACTIONet_unsigned_cluster`, A, resolution_parameter, initial_clusters_, seed)
 }
 
-Prune_PageRank <- function(U, density = 1.0) {
-    .Call(`_ACTIONet_Prune_PageRank`, U, density)
-}
-
 sgd2_layout_weighted <- function(G, S_r, t_max = 30L, eps = .01, seed = 0L) {
     .Call(`_ACTIONet_sgd2_layout_weighted`, G, S_r, t_max, eps, seed)
 }
@@ -1087,6 +1083,10 @@ recursiveNMU <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 1
 
 recursiveNMU_mine <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 100L) {
     .Call(`_ACTIONet_recursiveNMU_mine`, M, dim, max_SVD_iter, max_iter_inner)
+}
+
+decomp_G <- function(G, initial_position) {
+    .Call(`_ACTIONet_decomp_G`, G, initial_position)
 }
 
 roll_var <- function(X) {

@@ -820,13 +820,13 @@ sp_mat build_knn(mat H, string distance_metric = "jsd", double k = 10, int threa
 //'
 //' @examples
 //'	G = buildNetwork(prune.out$H_stacked)
-//'	vis.out = layoutNetwork(G, S_r)
+//'	vis.out = layoutNetwrok(G, S_r)
 // [[Rcpp::export]]
-List layoutNetwork(sp_mat &G, mat initial_position, string algorithm, int compactness_level = 50,
-                   unsigned int n_epochs = 1000, int thread_no = 0, int seed = 0)
-{
-  field<mat> res =
-      ACTIONet::layoutNetwork(G, initial_position, algorithm, compactness_level, n_epochs, thread_no, seed);
+List layoutNetwrok(sp_mat &G, mat initial_position, string alg_name = "umap", float spread = 1.0, float min_dist = 0.01, string opt_name = "adam", 
+                                unsigned int n_epochs = 1000,
+                                int seed = 0, int thread_no = 0) {
+
+  field<mat> res = ACTIONet::layoutNetwork_xmap(G, initial_position, alg_name, spread, min_dist, opt_name, n_epochs, seed, thread_no);
 
   List out_list;
   out_list["coordinates"] = res(0);
@@ -1485,14 +1485,6 @@ vec unsigned_cluster(sp_mat A, double resolution_parameter = 1.0,
                                             initial_clusters_uvec, seed);
 
   return clusters;
-}
-
-// [[Rcpp::export]]
-mat Prune_PageRank(mat &U, double density = 1.0)
-{
-  mat G_matched = ACTIONet::Prune_PageRank(U, density);
-
-  return G_matched;
 }
 
 // [[Rcpp::export]]
@@ -2565,3 +2557,58 @@ List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_it
 
   return (res);
 }
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List decomp_G(sp_mat &G, mat &initial_position) {
+    mat init_coors = initial_position.rows(0, 2);
+
+    sp_mat H = G;
+    H.for_each([](sp_mat::elem_type &val)
+               { val = 1 / val; });
+    H = ACTIONet::smoothKNN(H, 0);
+
+    unsigned int nV = H.n_rows;
+
+    // linearized list of edges (1-simplices)
+    unsigned int nE = H.n_nonzero;
+    vector<unsigned int> positive_head(nE);
+    vector<unsigned int> positive_tail(nE);
+    vector<float> epochs_per_sample(nE);
+
+    int i = 0;
+    double w_max = max(max(H));
+    for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
+    {
+      epochs_per_sample[i] = w_max / (*it);
+      positive_head[i] = it.row();
+      positive_tail[i] = it.col();
+      i++;
+    }
+
+    // Initial coordinates of vertices (0-simplices)
+    vector<float> head_embedding(init_coors.n_cols * 2);
+    fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
+    float *ptr = sub_coor.memptr();
+    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
+    vector<float> tail_embedding(head_embedding);
+
+    sp_mat H2 = trans(H);
+    H2.sync();
+    std::vector<unsigned int> positive_ptr(H2.n_cols + 1);
+    for (int k = 0; k < H2.n_cols + 1; k++)
+    {
+        positive_ptr[k] = H2.col_ptrs[k];
+    }
+
+  List res;
+  res["positive_head"] = positive_head;
+  res["positive_tail"] = positive_tail;
+  res["epochs_per_sample"] = epochs_per_sample;  
+  res["positive_ptr"] = positive_ptr;
+  res["head_embedding"] = head_embedding;
+  res["tail_embedding"] = tail_embedding;
+
+  return (res);
+}    

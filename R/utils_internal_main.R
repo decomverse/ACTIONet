@@ -52,7 +52,10 @@
   ace,
   compactness_level = 50,
   n_epochs = 1000,
-  algorithm = c("tumap", "umap"),
+  algorithm = "umap",
+  opt_method = "adam",
+  spread = 1.0,
+  min_dist = 0.01,
   init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
   thread_no = 0,
@@ -60,8 +63,10 @@
   return_raw = FALSE
 ) {
 
-  algorithm = tolower(algorithm)
-  algorithm <- match.arg(algorithm, several.ok = FALSE)
+  algorithm <- match.arg(tolower(algorithm), c("umap", "tumap", 
+    "largevis", "pacmap"))
+  
+  opt_method <- match.arg(tolower(opt_method), c("adam", "sgd"))
 
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
@@ -81,15 +86,9 @@
   initial_coordinates <- Matrix::t(scale(initial_coordinates))
 
 
-  vis.out <- layoutNetwork(
-    G = G,
-    initial_position = initial_coordinates,
-    algorithm = algorithm,
-    compactness_level = compactness_level,
-    n_epochs = n_epochs,
-    thread_no = thread_no,
-    seed = seed
-  )
+  vis.out <- layoutNetwrok(G = G, initial_position = initial_coordinates, alg_name = algorithm, spread = spread, min_dist = min_dist,
+  opt_name = opt_method, n_epochs = n_epochs, seed = seed, thread_no = thread_no);
+
 
   if (return_raw == TRUE) {
     return(vis.out)
