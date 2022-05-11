@@ -3910,22 +3910,81 @@ RcppExport SEXP _ACTIONet_recursiveNMU_mine(SEXP MSEXP, SEXP dimSEXP, SEXP max_S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// optimize_layout_interface
+NumericMatrix optimize_layout_interface(NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding, const std::vector<unsigned int> positive_head, const std::vector<unsigned int> positive_tail, const std::vector<unsigned int> positive_ptr, unsigned int n_epochs, unsigned int n_head_vertices, unsigned int n_tail_vertices, const std::vector<float> epochs_per_sample, const std::string& method, List method_args, float initial_alpha, List opt_args, Nullable<Function> epoch_callback, float negative_sample_rate, bool pcg_rand, bool batch, std::size_t n_threads, std::size_t grain_size, bool move_other, bool verbose, int seed);
+static SEXP _ACTIONet_optimize_layout_interface_try(SEXP head_embeddingSEXP, SEXP tail_embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP positive_ptrSEXP, SEXP n_epochsSEXP, SEXP n_head_verticesSEXP, SEXP n_tail_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP methodSEXP, SEXP method_argsSEXP, SEXP initial_alphaSEXP, SEXP opt_argsSEXP, SEXP epoch_callbackSEXP, SEXP negative_sample_rateSEXP, SEXP pcg_randSEXP, SEXP batchSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP move_otherSEXP, SEXP verboseSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type head_embedding(head_embeddingSEXP);
+    Rcpp::traits::input_parameter< Nullable<NumericMatrix> >::type tail_embedding(tail_embeddingSEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type positive_head(positive_headSEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type positive_tail(positive_tailSEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type positive_ptr(positive_ptrSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_head_vertices(n_head_verticesSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_tail_vertices(n_tail_verticesSEXP);
+    Rcpp::traits::input_parameter< const std::vector<float> >::type epochs_per_sample(epochs_per_sampleSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< List >::type method_args(method_argsSEXP);
+    Rcpp::traits::input_parameter< float >::type initial_alpha(initial_alphaSEXP);
+    Rcpp::traits::input_parameter< List >::type opt_args(opt_argsSEXP);
+    Rcpp::traits::input_parameter< Nullable<Function> >::type epoch_callback(epoch_callbackSEXP);
+    Rcpp::traits::input_parameter< float >::type negative_sample_rate(negative_sample_rateSEXP);
+    Rcpp::traits::input_parameter< bool >::type pcg_rand(pcg_randSEXP);
+    Rcpp::traits::input_parameter< bool >::type batch(batchSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type move_other(move_otherSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(optimize_layout_interface(head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, pcg_rand, batch, n_threads, grain_size, move_other, verbose, seed));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_optimize_layout_interface(SEXP head_embeddingSEXP, SEXP tail_embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP positive_ptrSEXP, SEXP n_epochsSEXP, SEXP n_head_verticesSEXP, SEXP n_tail_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP methodSEXP, SEXP method_argsSEXP, SEXP initial_alphaSEXP, SEXP opt_argsSEXP, SEXP epoch_callbackSEXP, SEXP negative_sample_rateSEXP, SEXP pcg_randSEXP, SEXP batchSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP move_otherSEXP, SEXP verboseSEXP, SEXP seedSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_optimize_layout_interface_try(head_embeddingSEXP, tail_embeddingSEXP, positive_headSEXP, positive_tailSEXP, positive_ptrSEXP, n_epochsSEXP, n_head_verticesSEXP, n_tail_verticesSEXP, epochs_per_sampleSEXP, methodSEXP, method_argsSEXP, initial_alphaSEXP, opt_argsSEXP, epoch_callbackSEXP, negative_sample_rateSEXP, pcg_randSEXP, batchSEXP, n_threadsSEXP, grain_sizeSEXP, move_otherSEXP, verboseSEXP, seedSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // decomp_G
-List decomp_G(sp_mat& G, mat& initial_position);
-static SEXP _ACTIONet_decomp_G_try(SEXP GSEXP, SEXP initial_positionSEXP) {
+List decomp_G(sp_mat& G, mat& initial_position, double a_param, double b_param, int n_epochs, int thread_no);
+static SEXP _ACTIONet_decomp_G_try(SEXP GSEXP, SEXP initial_positionSEXP, SEXP a_paramSEXP, SEXP b_paramSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< mat& >::type initial_position(initial_positionSEXP);
-    rcpp_result_gen = Rcpp::wrap(decomp_G(G, initial_position));
+    Rcpp::traits::input_parameter< double >::type a_param(a_paramSEXP);
+    Rcpp::traits::input_parameter< double >::type b_param(b_paramSEXP);
+    Rcpp::traits::input_parameter< int >::type n_epochs(n_epochsSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(decomp_G(G, initial_position, a_param, b_param, n_epochs, thread_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_decomp_G(SEXP GSEXP, SEXP initial_positionSEXP) {
+RcppExport SEXP _ACTIONet_decomp_G(SEXP GSEXP, SEXP initial_positionSEXP, SEXP a_paramSEXP, SEXP b_paramSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_decomp_G_try(GSEXP, initial_positionSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_decomp_G_try(GSEXP, initial_positionSEXP, a_paramSEXP, b_paramSEXP, n_epochsSEXP, thread_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -4079,7 +4138,8 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*aggregate_genesets_weighted_enrichment_permutation)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int,int)");
         signatures.insert("List(*recursiveNMU)(mat,int,int,int)");
         signatures.insert("List(*recursiveNMU_mine)(mat,int,int,int)");
-        signatures.insert("List(*decomp_G)(sp_mat&,mat&)");
+        signatures.insert("NumericMatrix(*optimize_layout_interface)(NumericMatrix,Nullable<NumericMatrix>,const std::vector<unsigned int>,const std::vector<unsigned int>,const std::vector<unsigned int>,unsigned int,unsigned int,unsigned int,const std::vector<float>,const std::string&,List,float,List,Nullable<Function>,float,bool,bool,std::size_t,std::size_t,bool,bool,int)");
+        signatures.insert("List(*decomp_G)(sp_mat&,mat&,double,double,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4190,6 +4250,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC)_ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU", (DL_FUNC)_ACTIONet_recursiveNMU_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU_mine", (DL_FUNC)_ACTIONet_recursiveNMU_mine_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_optimize_layout_interface", (DL_FUNC)_ACTIONet_optimize_layout_interface_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_decomp_G", (DL_FUNC)_ACTIONet_decomp_G_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
@@ -4300,7 +4361,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment_permutation, 10},
     {"_ACTIONet_recursiveNMU", (DL_FUNC) &_ACTIONet_recursiveNMU, 4},
     {"_ACTIONet_recursiveNMU_mine", (DL_FUNC) &_ACTIONet_recursiveNMU_mine, 4},
-    {"_ACTIONet_decomp_G", (DL_FUNC) &_ACTIONet_decomp_G, 2},
+    {"_ACTIONet_optimize_layout_interface", (DL_FUNC) &_ACTIONet_optimize_layout_interface, 22},
+    {"_ACTIONet_decomp_G", (DL_FUNC) &_ACTIONet_decomp_G, 6},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},
