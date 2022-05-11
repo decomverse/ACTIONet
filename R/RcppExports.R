@@ -632,8 +632,8 @@ build_knn <- function(H, distance_metric = "jsd", k = 10, thread_no = 0L, mutual
 #' @examples
 #'	G = buildNetwork(prune.out$H_stacked)
 #'	vis.out = layoutNetwrok(G, S_r)
-layoutNetwrok <- function(G, initial_position, alg_name = "umap", spread = 1.0, min_dist = 0.01, opt_name = "adam", n_epochs = 1000L, seed = 0L, thread_no = 0L) {
-    .Call(`_ACTIONet_layoutNetwrok`, G, initial_position, alg_name, spread, min_dist, opt_name, n_epochs, seed, thread_no)
+layoutNetwork_xmap <- function(G, initial_position, presmooth_network = FALSE, method = "umap", min_dist = 1, spread = 1, gamma = 1.0, n_epochs = 500L, thread_no = 0L, seed = 0L) {
+    .Call(`_ACTIONet_layoutNetwork_xmap`, G, initial_position, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed)
 }
 
 #' Encrypts a set of given input ids
@@ -1083,14 +1083,6 @@ recursiveNMU <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 1
 
 recursiveNMU_mine <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 100L) {
     .Call(`_ACTIONet_recursiveNMU_mine`, M, dim, max_SVD_iter, max_iter_inner)
-}
-
-optimize_layout_interface <- function(G, initial_position, min_dist, spread, n_epochs, method, initial_alpha, negative_sample_rate, pcg_rand = TRUE, batch = FALSE, thread_no = 0L, grain_size = 1L, gamma = 1.0, move_other = TRUE, verbose = FALSE, opt_name = "adam", alpha = 1.0, beta1 = 0.5, beta2 = 0.9, eps = 1e-7, approx_pow = FALSE, seed = 0L, presmooth_network = FALSE) {
-    .Call(`_ACTIONet_optimize_layout_interface`, G, initial_position, min_dist, spread, n_epochs, method, initial_alpha, negative_sample_rate, pcg_rand, batch, thread_no, grain_size, gamma, move_other, verbose, opt_name, alpha, beta1, beta2, eps, approx_pow, seed, presmooth_network)
-}
-
-decomp_G <- function(G, initial_position, a_param, b_param, n_epochs = 200L, thread_no = 0L) {
-    .Call(`_ACTIONet_decomp_G`, G, initial_position, a_param, b_param, n_epochs, thread_no)
 }
 
 roll_var <- function(X) {
