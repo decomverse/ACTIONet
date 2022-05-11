@@ -3910,35 +3910,43 @@ RcppExport SEXP _ACTIONet_recursiveNMU_mine(SEXP MSEXP, SEXP dimSEXP, SEXP max_S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// optimize_layout_interface_v2
-List optimize_layout_interface_v2(sp_mat& G, mat& initial_position, unsigned int n_epochs, const std::string& method, List method_args, float initial_alpha, List opt_args, float negative_sample_rate, bool pcg_rand, bool batch, std::size_t n_threads, std::size_t grain_size, bool move_other, bool verbose, int seed);
-static SEXP _ACTIONet_optimize_layout_interface_v2_try(SEXP GSEXP, SEXP initial_positionSEXP, SEXP n_epochsSEXP, SEXP methodSEXP, SEXP method_argsSEXP, SEXP initial_alphaSEXP, SEXP opt_argsSEXP, SEXP negative_sample_rateSEXP, SEXP pcg_randSEXP, SEXP batchSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP move_otherSEXP, SEXP verboseSEXP, SEXP seedSEXP) {
+// optimize_layout_interface
+field<mat> optimize_layout_interface(sp_mat& G, mat& initial_position, double min_dist, double spread, unsigned int n_epochs, const std::string& method, float initial_alpha, float negative_sample_rate, bool pcg_rand, bool batch, std::size_t thread_no, std::size_t grain_size, double gamma, bool move_other, bool verbose, string opt_name, double alpha, double beta1, double beta2, double eps, bool approx_pow, int seed, bool presmooth_network);
+static SEXP _ACTIONet_optimize_layout_interface_try(SEXP GSEXP, SEXP initial_positionSEXP, SEXP min_distSEXP, SEXP spreadSEXP, SEXP n_epochsSEXP, SEXP methodSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP pcg_randSEXP, SEXP batchSEXP, SEXP thread_noSEXP, SEXP grain_sizeSEXP, SEXP gammaSEXP, SEXP move_otherSEXP, SEXP verboseSEXP, SEXP opt_nameSEXP, SEXP alphaSEXP, SEXP beta1SEXP, SEXP beta2SEXP, SEXP epsSEXP, SEXP approx_powSEXP, SEXP seedSEXP, SEXP presmooth_networkSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< mat& >::type initial_position(initial_positionSEXP);
+    Rcpp::traits::input_parameter< double >::type min_dist(min_distSEXP);
+    Rcpp::traits::input_parameter< double >::type spread(spreadSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
-    Rcpp::traits::input_parameter< List >::type method_args(method_argsSEXP);
     Rcpp::traits::input_parameter< float >::type initial_alpha(initial_alphaSEXP);
-    Rcpp::traits::input_parameter< List >::type opt_args(opt_argsSEXP);
     Rcpp::traits::input_parameter< float >::type negative_sample_rate(negative_sample_rateSEXP);
     Rcpp::traits::input_parameter< bool >::type pcg_rand(pcg_randSEXP);
     Rcpp::traits::input_parameter< bool >::type batch(batchSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< bool >::type move_other(move_otherSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< string >::type opt_name(opt_nameSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type beta1(beta1SEXP);
+    Rcpp::traits::input_parameter< double >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< bool >::type approx_pow(approx_powSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(optimize_layout_interface_v2(G, initial_position, n_epochs, method, method_args, initial_alpha, opt_args, negative_sample_rate, pcg_rand, batch, n_threads, grain_size, move_other, verbose, seed));
+    Rcpp::traits::input_parameter< bool >::type presmooth_network(presmooth_networkSEXP);
+    rcpp_result_gen = Rcpp::wrap(optimize_layout_interface(G, initial_position, min_dist, spread, n_epochs, method, initial_alpha, negative_sample_rate, pcg_rand, batch, thread_no, grain_size, gamma, move_other, verbose, opt_name, alpha, beta1, beta2, eps, approx_pow, seed, presmooth_network));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_optimize_layout_interface_v2(SEXP GSEXP, SEXP initial_positionSEXP, SEXP n_epochsSEXP, SEXP methodSEXP, SEXP method_argsSEXP, SEXP initial_alphaSEXP, SEXP opt_argsSEXP, SEXP negative_sample_rateSEXP, SEXP pcg_randSEXP, SEXP batchSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP move_otherSEXP, SEXP verboseSEXP, SEXP seedSEXP) {
+RcppExport SEXP _ACTIONet_optimize_layout_interface(SEXP GSEXP, SEXP initial_positionSEXP, SEXP min_distSEXP, SEXP spreadSEXP, SEXP n_epochsSEXP, SEXP methodSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP pcg_randSEXP, SEXP batchSEXP, SEXP thread_noSEXP, SEXP grain_sizeSEXP, SEXP gammaSEXP, SEXP move_otherSEXP, SEXP verboseSEXP, SEXP opt_nameSEXP, SEXP alphaSEXP, SEXP beta1SEXP, SEXP beta2SEXP, SEXP epsSEXP, SEXP approx_powSEXP, SEXP seedSEXP, SEXP presmooth_networkSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_optimize_layout_interface_v2_try(GSEXP, initial_positionSEXP, n_epochsSEXP, methodSEXP, method_argsSEXP, initial_alphaSEXP, opt_argsSEXP, negative_sample_rateSEXP, pcg_randSEXP, batchSEXP, n_threadsSEXP, grain_sizeSEXP, move_otherSEXP, verboseSEXP, seedSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_optimize_layout_interface_try(GSEXP, initial_positionSEXP, min_distSEXP, spreadSEXP, n_epochsSEXP, methodSEXP, initial_alphaSEXP, negative_sample_rateSEXP, pcg_randSEXP, batchSEXP, thread_noSEXP, grain_sizeSEXP, gammaSEXP, move_otherSEXP, verboseSEXP, opt_nameSEXP, alphaSEXP, beta1SEXP, beta2SEXP, epsSEXP, approx_powSEXP, seedSEXP, presmooth_networkSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -4131,7 +4139,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*aggregate_genesets_weighted_enrichment_permutation)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int,int)");
         signatures.insert("List(*recursiveNMU)(mat,int,int,int)");
         signatures.insert("List(*recursiveNMU_mine)(mat,int,int,int)");
-        signatures.insert("List(*optimize_layout_interface_v2)(sp_mat&,mat&,unsigned int,const std::string&,List,float,List,float,bool,bool,std::size_t,std::size_t,bool,bool,int)");
+        signatures.insert("field<mat>(*optimize_layout_interface)(sp_mat&,mat&,double,double,unsigned int,const std::string&,float,float,bool,bool,std::size_t,std::size_t,double,bool,bool,string,double,double,double,double,bool,int,bool)");
         signatures.insert("List(*decomp_G)(sp_mat&,mat&,double,double,int,int)");
     }
     return signatures.find(sig) != signatures.end();
@@ -4243,7 +4251,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC)_ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU", (DL_FUNC)_ACTIONet_recursiveNMU_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU_mine", (DL_FUNC)_ACTIONet_recursiveNMU_mine_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_optimize_layout_interface_v2", (DL_FUNC)_ACTIONet_optimize_layout_interface_v2_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_optimize_layout_interface", (DL_FUNC)_ACTIONet_optimize_layout_interface_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_decomp_G", (DL_FUNC)_ACTIONet_decomp_G_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
@@ -4354,7 +4362,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment_permutation, 10},
     {"_ACTIONet_recursiveNMU", (DL_FUNC) &_ACTIONet_recursiveNMU, 4},
     {"_ACTIONet_recursiveNMU_mine", (DL_FUNC) &_ACTIONet_recursiveNMU_mine, 4},
-    {"_ACTIONet_optimize_layout_interface_v2", (DL_FUNC) &_ACTIONet_optimize_layout_interface_v2, 15},
+    {"_ACTIONet_optimize_layout_interface", (DL_FUNC) &_ACTIONet_optimize_layout_interface, 23},
     {"_ACTIONet_decomp_G", (DL_FUNC) &_ACTIONet_decomp_G, 6},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
