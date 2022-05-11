@@ -1085,8 +1085,8 @@ recursiveNMU_mine <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inne
     .Call(`_ACTIONet_recursiveNMU_mine`, M, dim, max_SVD_iter, max_iter_inner)
 }
 
-optimize_layout_interface <- function(head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, pcg_rand = TRUE, batch = FALSE, n_threads = 0L, grain_size = 1L, move_other = TRUE, verbose = FALSE, seed = 0L) {
-    .Call(`_ACTIONet_optimize_layout_interface`, head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, pcg_rand, batch, n_threads, grain_size, move_other, verbose, seed)
+optimize_layout_interface_v2 <- function(G, initial_position, n_epochs, method, method_args, initial_alpha, opt_args, negative_sample_rate, pcg_rand = TRUE, batch = FALSE, n_threads = 0L, grain_size = 1L, move_other = TRUE, verbose = FALSE, seed = 0L) {
+    .Call(`_ACTIONet_optimize_layout_interface_v2`, G, initial_position, n_epochs, method, method_args, initial_alpha, opt_args, negative_sample_rate, pcg_rand, batch, n_threads, grain_size, move_other, verbose, seed)
 }
 
 decomp_G <- function(G, initial_position, a_param, b_param, n_epochs = 200L, thread_no = 0L) {
