@@ -9,12 +9,15 @@
 #include "work.hpp"
 */
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include "uwot/coords.h"
+#include "uwot/epoch.h"
+#include "uwot/gradient.h"
+#include "uwot/optimize.h"
+#include "uwot/sampler.h"
+#include "uwot/rng.h"
+#include "uwot/rparallel.h"
 
 // [[Rcpp::interfaces(r, cpp)]]
-// [[Rcpp::plugins(openmp)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace Rcpp;
@@ -2559,10 +2562,447 @@ List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_it
 }
 
 
+template <typename T>
+auto lget(List list, const std::string &name, T default_value) -> T {
+  auto key = name.c_str();
+  if (!list.containsElementNamed(key)) {
+    return default_value;
+  } else {
+    return list[key];
+  }
+}
+
+// Template class specialization to handle different rng/batch combinations
+template <bool DoBatch = true> struct BatchRngFactory {
+  using PcgFactoryType = batch_pcg_factory;
+  using TauFactoryType = batch_tau_factory;
+};
+template <> struct BatchRngFactory<false> {
+  using PcgFactoryType = pcg_factory;
+  using TauFactoryType = tau_factory;
+};
+
+struct UmapFactory {
+  bool move_other;
+  bool pcg_rand;
+  std::vector<float> &head_embedding;
+  std::vector<float> &tail_embedding;
+  const std::vector<unsigned int> &positive_head;
+  const std::vector<unsigned int> &positive_tail;
+  const std::vector<unsigned int> &positive_ptr;
+  unsigned int n_epochs;
+  unsigned int n_head_vertices;
+  unsigned int n_tail_vertices;
+  const std::vector<float> &epochs_per_sample;
+  float initial_alpha;
+  List opt_args;
+  float negative_sample_rate;
+  bool batch;
+  std::size_t n_threads;
+  std::size_t grain_size;
+  bool verbose;
+  std::mt19937_64 engine;
+
+
+  UmapFactory(bool move_other, bool pcg_rand,
+              std::vector<float> &head_embedding,
+              std::vector<float> &tail_embedding,
+              const std::vector<unsigned int> &positive_head,
+              const std::vector<unsigned int> &positive_tail,
+              const std::vector<unsigned int> &positive_ptr,
+              unsigned int n_epochs, unsigned int n_head_vertices,
+              unsigned int n_tail_vertices,
+              const std::vector<float> &epochs_per_sample, float initial_alpha,
+              List opt_args, float negative_sample_rate, bool batch,
+              std::size_t n_threads, std::size_t grain_size, bool verbose, std::mt19937_64 &engine)
+      : move_other(move_other), pcg_rand(pcg_rand),
+        head_embedding(head_embedding), tail_embedding(tail_embedding),
+        positive_head(positive_head), positive_tail(positive_tail),
+        positive_ptr(positive_ptr), n_epochs(n_epochs),
+        n_head_vertices(n_head_vertices), n_tail_vertices(n_tail_vertices),
+        epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha),
+        opt_args(opt_args), negative_sample_rate(negative_sample_rate),
+        batch(batch), n_threads(n_threads), grain_size(grain_size),
+        verbose(verbose), engine(engine) {}
+
+  template <typename Gradient> void create(const Gradient &gradient) {
+    if (move_other) {
+      create_impl<true>(gradient, pcg_rand, batch);
+    } else {
+      create_impl<false>(gradient, pcg_rand, batch);
+    }
+  }
+
+  template <bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
+    if (batch) {
+      create_impl<BatchRngFactory<true>, DoMove>(gradient, pcg_rand, batch);
+    } else {
+      create_impl<BatchRngFactory<false>, DoMove>(gradient, pcg_rand, batch);
+    }
+  }
+
+  template <typename BatchRngFactory, bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
+    if (pcg_rand) {
+      create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(gradient,
+                                                                    batch);
+    } else {
+      create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(gradient,
+                                                                    batch);
+    }
+  }
+
+  auto create_adam(List opt_args) -> uwot::Adam {
+    float alpha = lget(opt_args, "alpha", 1.0);
+    float beta1 = lget(opt_args, "beta1", 0.9);
+    float beta2 = lget(opt_args, "beta2", 0.999);
+    float eps = lget(opt_args, "eps", 1e-7);
+    if (verbose) {
+      Rcerr << "Optimizing with Adam"
+            << " alpha = " << alpha << " beta1 = " << beta1
+            << " beta2 = " << beta2 << " eps = " << eps << std::endl;
+    }
+
+    return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size());
+  }
+
+  auto create_sgd(List opt_args) -> uwot::Sgd {
+    float alpha = lget(opt_args, "alpha", 1.0);
+    if (verbose) {
+      Rcerr << "Optimizing with SGD"
+            << " alpha = " << alpha << std::endl;
+    }
+
+    return uwot::Sgd(alpha);
+  }
+
+  template <typename RandFactory, bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, bool batch) {
+    if (batch) {
+      std::string opt_name = opt_args["method"];
+      if (opt_name == "adam") {
+        auto opt = create_adam(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, opt, batch);
+      } else if (opt_name == "sgd") {
+        auto opt = create_sgd(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, opt, batch);
+      } else {
+        stop("Unknown optimization method");
+      }
+    } else {
+      const std::size_t ndim = head_embedding.size() / n_head_vertices;
+      uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+      uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
+                                         initial_alpha);
+      uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
+          gradient, update, positive_head, positive_tail, sampler, ndim,
+          n_tail_vertices, n_threads, engine);
+      create_impl(worker, gradient);
+    }
+  }
+
+  template <typename Opt, typename RandFactory, bool DoMove, typename Gradient>
+  void create_impl_batch_opt(const Gradient &gradient, Opt &opt, bool batch) {
+    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+    const std::size_t ndim = head_embedding.size() / n_head_vertices;
+    uwot::BatchUpdate<DoMove, decltype(opt)> update(
+        head_embedding, tail_embedding, opt);
+    uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
+        gradient, update, positive_head, positive_tail, positive_ptr, sampler,
+        ndim, n_tail_vertices, engine);
+    create_impl(worker, gradient);
+  }
+
+  template <typename Worker, typename Gradient>
+  void create_impl(Worker &worker, const Gradient &gradient) {
+
+    if (n_threads > 0) {
+      RParallel parallel(n_threads, grain_size);
+      create_impl(worker, gradient, parallel);
+    } else {
+      RSerial serial;
+      create_impl(worker, gradient, serial);
+    }
+  }
+
+  template <typename Worker, typename Gradient,
+            typename Parallel>
+  void create_impl(Worker &worker, const Gradient &gradient,
+                   Parallel &parallel) {
+    uwot::optimize_layout(worker, n_epochs, parallel);
+  }
+};
+
+auto r_to_coords(NumericMatrix head_embedding,
+                 Nullable<NumericMatrix> tail_embedding) -> uwot::Coords {
+  auto head_vec = as<std::vector<float>>(head_embedding);
+  if (tail_embedding.isNull()) {
+    return uwot::Coords(head_vec);
+  } else {
+    auto tail_vec = as<std::vector<float>>(tail_embedding);
+    return uwot::Coords(head_vec, tail_vec);
+  }
+}
+
+auto r_to_coords(NumericMatrix head_embedding) -> uwot::Coords {
+  auto head_vec = as<std::vector<float>>(head_embedding);
+  return uwot::Coords(head_vec);
+}
+
+void validate_args(List method_args,
+                   const std::vector<std::string> &arg_names) {
+  for (auto &arg_name : arg_names) {
+    if (!method_args.containsElementNamed(arg_name.c_str())) {
+      stop("Missing embedding method argument: " + arg_name);
+    }
+  }
+}
+
+void create_umap(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"a", "b", "gamma", "approx_pow"};
+  validate_args(method_args, arg_names);
+
+  float a = method_args["a"];
+  float b = method_args["b"];
+  float gamma = method_args["gamma"];
+  bool approx_pow = method_args["approx_pow"];
+  if (approx_pow) {
+    const uwot::apumap_gradient gradient(a, b, gamma);
+    umap_factory.create(gradient);
+  } else {
+    const uwot::umap_gradient gradient(a, b, gamma);
+    umap_factory.create(gradient);
+  }
+}
+
+void create_tumap(UmapFactory &umap_factory, List) {
+  const uwot::tumap_gradient gradient;
+  umap_factory.create(gradient);
+}
+
+void create_umapai(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"ai", "b", "ndim"};
+  validate_args(method_args, arg_names);
+
+  std::vector<float> ai = method_args["ai"];
+  float b = method_args["b"];
+  std::size_t ndim = method_args["ndim"];
+  const uwot::umapai_gradient gradient(ai, b, ndim);
+  umap_factory.create(gradient);
+}
+
+void create_umapai2(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"ai", "aj", "b", "ndim"};
+  validate_args(method_args, arg_names);
+
+  std::vector<float> ai = method_args["ai"];
+  std::vector<float> aj = method_args["ai"];
+  float b = method_args["b"];
+  std::size_t ndim = method_args["ndim"];
+  const uwot::umapai2_gradient gradient(ai, aj, b, ndim);
+  umap_factory.create(gradient);
+}
+
+void create_pacmap(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"a", "b"};
+  validate_args(method_args, arg_names);
+
+  float a = method_args["a"];
+  float b = method_args["b"];
+  const uwot::pacmap_gradient gradient(a, b);
+  umap_factory.create(gradient);
+}
+
+void create_largevis(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"gamma"};
+  validate_args(method_args, arg_names);
+
+  float gamma = method_args["gamma"];
+  const uwot::largevis_gradient gradient(gamma);
+  umap_factory.create(gradient);
+}
+
+// [[Rcpp::export]]
+NumericMatrix optimize_layout_interface(
+    NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
+    const std::vector<unsigned int> positive_head,
+    const std::vector<unsigned int> positive_tail,
+    const std::vector<unsigned int> positive_ptr, unsigned int n_epochs,
+    unsigned int n_head_vertices, unsigned int n_tail_vertices,
+    const std::vector<float> epochs_per_sample, const std::string &method,
+    List method_args, float initial_alpha, List opt_args,
+    Nullable<Function> epoch_callback, float negative_sample_rate,
+    bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0,
+    std::size_t grain_size = 1, bool move_other = true, bool verbose = false, int seed = 0) {
+
+  std::mt19937_64 engine(seed);
+
+  auto coords = r_to_coords(head_embedding, tail_embedding);
+  const std::size_t ndim = head_embedding.size() / n_head_vertices;
+
+  UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
+                           coords.get_tail_embedding(), positive_head,
+                           positive_tail, positive_ptr, n_epochs,
+                           n_head_vertices, n_tail_vertices, epochs_per_sample,
+                           initial_alpha, opt_args, negative_sample_rate, batch,
+                           n_threads, grain_size, verbose, engine);
+  if (verbose) {
+    Rcerr << "Using method '" << method << "'" << std::endl;
+  }
+  if (method == "umap") {
+    create_umap(umap_factory, method_args);
+  } else if (method == "tumap") {
+    create_tumap(umap_factory, method_args);
+  } else if (method == "largevis") {
+    create_largevis(umap_factory, method_args);
+  } else if (method == "pacmap") {
+    create_pacmap(umap_factory, method_args);
+  } else if (method == "leopold") {
+    create_umapai(umap_factory, method_args);
+  } else if (method == "leopold2") {
+    create_umapai2(umap_factory, method_args);
+  } else {
+    stop("Unknown method: '" + method + "'");
+  }
+
+  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
+                       coords.get_head_embedding().begin());
+}
+
+
+template<typename Float>
+std::pair<Float, Float> find_ab(Float spread, Float min_dist, Float grid = 300, Float limit = 0.5, int iter = 50, Float tol = 1e-6) {
+    Float x_half = std::log(limit) * -spread + min_dist;
+    Float d_half = limit / -spread;
+
+    // Compute the x and y coordinates of the expected distance curve.
+    std::vector<Float> grid_x(grid), grid_y(grid), log_x(grid);
+    const Float delta = spread * 3 / grid;
+    for (int g = 0; g < grid; ++g) {
+        grid_x[g] = (g + 1) * delta; // +1 to avoid meaningless least squares result at x = 0, where both curves have y = 1 (and also the derivative w.r.t. b is not defined).
+        log_x[g] = std::log(grid_x[g]);
+        grid_y[g] = (grid_x[g] <= min_dist ? 1 : std::exp(- (grid_x[g] - min_dist) / spread));
+    }
+
+    // Starting estimates.
+    Float b = - d_half * x_half / (1 / limit - 1) / (2 * limit * limit);
+    Float a = (1 / limit - 1) / std::pow(x_half, 2 * b);
+
+    std::vector<Float> observed_y(grid), xpow(grid);
+    auto compute_ss = [&](Float A, Float B) -> Float {
+        for (int g = 0; g < grid; ++g) {
+            xpow[g] = std::pow(grid_x[g], 2 * B);
+            observed_y[g] = 1 / (1 + A * xpow[g]);
+        }
+
+        Float ss = 0;
+        for (int g = 0; g < grid; ++g) {
+            ss += (grid_y[g] - observed_y[g]) * (grid_y[g] - observed_y[g]);
+        }
+
+        return ss;
+    };
+    Float ss = compute_ss(a, b);
+
+    for (int it = 0; it < iter; ++it) {
+        // Computing the first and second derivatives of the sum of squared differences.
+        Float da = 0, db = 0, daa = 0, dab = 0, dbb = 0;
+        for (int g = 0; g < grid; ++g) {
+            const Float& x = grid_x[g];
+            const Float& gy = grid_y[g];
+            const Float& oy = observed_y[g];
+
+            const Float& x2b = xpow[g];
+            const Float logx2 = log_x[g] * 2;
+            const Float delta = oy - gy;
+
+            // -(2 * (x^(2 * b)/(1 + a * x^(2 * b))^2 * (1/(1 + a * x^(2 * b)) - y)))
+            da += -2 * x2b * oy * oy * delta;
+
+            // -(2 * (a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 * (1/(1 + a * x^(2 * b)) - y)))
+            db += -2 * a * x2b * logx2 * oy * oy * delta;
+
+            // 2 * (
+            //     x^(2 * b)/(1 + a * x^(2 * b))^2 * (x^(2 * b)/(1 + a * x^(2 * b))^2) 
+            //     + x^(2 * b) * (2 * (x^(2 * b) * (1 + a * x^(2 * b))))/((1 + a * x^(2 * b))^2)^2 * (1/(1 + a * x^(2 * b)) - y)
+            // ) 
+            daa += 2 * (
+                x2b * oy * oy * x2b * oy * oy
+                + x2b * 2 * x2b * oy * oy * oy * delta
+            );
+
+            //-(2 * 
+            //    (
+            //        (
+            //            (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 
+            //            - a * (x^(2 * b) * (log(x) * 2)) * (2 * (x^(2 * b) * (1 + a * x^(2 * b))))/((1 + a * x^(2 * b))^2)^2
+            //        ) 
+            //        * (1/(1 + a * x^(2 * b)) - y) 
+            //        - a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 * (x^(2 * b)/(1 + a * x^(2 * b))^2)
+            //    )
+            //)
+            dab += -2 * (
+                (
+                    x2b * logx2 * oy * oy
+                    - a * x2b * logx2 * 2 * x2b * oy * oy * oy
+                ) * delta
+                - a * x2b * logx2 * oy * oy * x2b * oy * oy
+            );
+
+            // -(2 * 
+            //     (
+            //         (
+            //             a * (x^(2 * b) * (log(x) * 2) * (log(x) * 2))/(1 + a * x^(2 * b))^2 
+            //             - a * (x^(2 * b) * (log(x) * 2)) * (2 * (a * (x^(2 * b) * (log(x) * 2)) * (1 + a * x^(2 * b))))/((1 + a * x^(2 * b))^2)^2
+            //         ) 
+            //         * (1/(1 + a * x^(2 * b)) - y) 
+            //         - a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2 * (a * (x^(2 * b) * (log(x) * 2))/(1 + a * x^(2 * b))^2)
+            //     )
+            // ) 
+            dbb += -2 * (
+                (
+                    (a * x2b * logx2 * logx2 * oy * oy)
+                    - (a * x2b * logx2 * 2 * a * x2b * logx2 * oy * oy * oy)
+                ) * delta 
+                - a * x2b * logx2 * oy * oy * a * x2b * logx2 * oy * oy
+            );
+        }
+
+        // Applying the Newton iterations with damping.
+        Float determinant = daa * dbb - dab * dab;
+        const Float delta_a = (da * dbb - dab * db) / determinant;
+        const Float delta_b = (- da * dab + daa * db) / determinant; 
+
+        Float ss_next = 0;
+        Float factor = 1;
+        for (int inner = 0; inner < 10; ++inner, factor /= 2) {
+            ss_next = compute_ss(a - factor * delta_a, b - factor * delta_b);
+            if (ss_next < ss) {
+                break;
+            }
+        }
+
+        if (ss && 1 - ss_next/ss > tol) {
+            a -= factor * delta_a;
+            b -= factor * delta_b;
+            ss = ss_next;
+        } else {
+            break;
+        }
+    }
+
+    return std::make_pair(a, b);
+}
+
+
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-List decomp_G(sp_mat &G, mat &initial_position) {
-    mat init_coors = initial_position.rows(0, 2);
+List decomp_G(sp_mat &G, mat &initial_position, double a_param, double b_param, int n_epochs = 200, int thread_no = 0) {
+
+    mat init_coors = initial_position.rows(0, 1);
 
     sp_mat H = G;
     H.for_each([](sp_mat::elem_type &val)
@@ -2602,7 +3042,27 @@ List decomp_G(sp_mat &G, mat &initial_position) {
         positive_ptr[k] = H2.col_ptrs[k];
     }
 
+/*
+  vector<float> result;
+  mat coordinates(nV, 2);
+  result = optimize_layout_interface(
+    head_embedding, tail_embedding,
+    positive_head,
+    positive_tail,
+    positive_ptr, n_epochs,
+    nV, nV,
+    epochs_per_sample, "umap",
+    1, a_param, b_param, 1, false, 5,
+    true, true, thread_no);
+
+  fmat coordinates_float(result.data(), 2, nV);
+  coordinates = trans(conv_to<mat>::from(coordinates_float));
+
+
+*/
+
   List res;
+  //res["coordinates"] = coordinates;
   res["positive_head"] = positive_head;
   res["positive_tail"] = positive_tail;
   res["epochs_per_sample"] = epochs_per_sample;  
