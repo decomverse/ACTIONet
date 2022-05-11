@@ -2660,14 +2660,14 @@ struct UmapFactory {
   unsigned int n_tail_vertices;
   const std::vector<float> &epochs_per_sample;
   float initial_alpha;
-  List opt_args;
   float negative_sample_rate;
   bool batch;
   std::size_t n_threads;
   std::size_t grain_size;
   bool verbose;
+  string opt_name;
+  double alpha, beta1, beta2, eps; 
   std::mt19937_64 engine;
-
 
   UmapFactory(bool move_other, bool pcg_rand,
               std::vector<float> &head_embedding,
@@ -2678,17 +2678,16 @@ struct UmapFactory {
               unsigned int n_epochs, unsigned int n_head_vertices,
               unsigned int n_tail_vertices,
               const std::vector<float> &epochs_per_sample, float initial_alpha,
-              List opt_args, float negative_sample_rate, bool batch,
-              std::size_t n_threads, std::size_t grain_size, bool verbose, std::mt19937_64 &engine)
+              float negative_sample_rate, bool batch,
+              std::size_t n_threads, std::size_t grain_size, bool verbose, string opt_name, double alpha, double beta1, double beta2, double eps, std::mt19937_64 &engine)
       : move_other(move_other), pcg_rand(pcg_rand),
         head_embedding(head_embedding), tail_embedding(tail_embedding),
         positive_head(positive_head), positive_tail(positive_tail),
         positive_ptr(positive_ptr), n_epochs(n_epochs),
         n_head_vertices(n_head_vertices), n_tail_vertices(n_tail_vertices),
-        epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha),
-        opt_args(opt_args), negative_sample_rate(negative_sample_rate),
+        epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha), negative_sample_rate(negative_sample_rate),
         batch(batch), n_threads(n_threads), grain_size(grain_size),
-        verbose(verbose), engine(engine) {}
+        verbose(verbose), alpha(alpha), beta1(beta1), beta2(beta2), eps(eps), engine(engine), opt_name(opt_name) {}
 
   template <typename Gradient> void create(const Gradient &gradient) {
     if (move_other) {
@@ -2718,40 +2717,23 @@ struct UmapFactory {
     }
   }
 
-  auto create_adam(List opt_args) -> uwot::Adam {
-    float alpha = lget(opt_args, "alpha", 1.0);
-    float beta1 = lget(opt_args, "beta1", 0.9);
-    float beta2 = lget(opt_args, "beta2", 0.999);
-    float eps = lget(opt_args, "eps", 1e-7);
-    if (verbose) {
-      Rcerr << "Optimizing with Adam"
-            << " alpha = " << alpha << " beta1 = " << beta1
-            << " beta2 = " << beta2 << " eps = " << eps << std::endl;
-    }
-
+  uwot::Adam create_adam() {
     return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size());
   }
 
-  auto create_sgd(List opt_args) -> uwot::Sgd {
-    float alpha = lget(opt_args, "alpha", 1.0);
-    if (verbose) {
-      Rcerr << "Optimizing with SGD"
-            << " alpha = " << alpha << std::endl;
-    }
-
+  uwot::Sgd create_sgd() {
     return uwot::Sgd(alpha);
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool batch) {
     if (batch) {
-      std::string opt_name = opt_args["method"];
       if (opt_name == "adam") {
-        auto opt = create_adam(opt_args);
+        auto opt = create_adam();
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, opt, batch);
       } else if (opt_name == "sgd") {
-        auto opt = create_sgd(opt_args);
+        auto opt = create_sgd();
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, opt, batch);
       } else {
@@ -2817,23 +2799,7 @@ auto r_to_coords(NumericMatrix head_embedding) -> uwot::Coords {
   return uwot::Coords(head_vec);
 }
 
-void validate_args(List method_args,
-                   const std::vector<std::string> &arg_names) {
-  for (auto &arg_name : arg_names) {
-    if (!method_args.containsElementNamed(arg_name.c_str())) {
-      stop("Missing embedding method argument: " + arg_name);
-    }
-  }
-}
-
-void create_umap(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"a", "b", "gamma", "approx_pow"};
-  validate_args(method_args, arg_names);
-
-  float a = method_args["a"];
-  float b = method_args["b"];
-  float gamma = method_args["gamma"];
-  bool approx_pow = method_args["approx_pow"];
+void create_umap(UmapFactory &umap_factory, double a, double b, double gamma, bool approx_pow) {
   if (approx_pow) {
     const uwot::apumap_gradient gradient(a, b, gamma);
     umap_factory.create(gradient);
@@ -2843,180 +2809,19 @@ void create_umap(UmapFactory &umap_factory, List method_args) {
   }
 }
 
-void create_tumap(UmapFactory &umap_factory, List) {
+void create_tumap(UmapFactory &umap_factory) {
   const uwot::tumap_gradient gradient;
   umap_factory.create(gradient);
 }
 
-void create_umapai(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"ai", "b", "ndim"};
-  validate_args(method_args, arg_names);
-
-  std::vector<float> ai = method_args["ai"];
-  float b = method_args["b"];
-  std::size_t ndim = method_args["ndim"];
-  const uwot::umapai_gradient gradient(ai, b, ndim);
-  umap_factory.create(gradient);
-}
-
-void create_umapai2(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"ai", "aj", "b", "ndim"};
-  validate_args(method_args, arg_names);
-
-  std::vector<float> ai = method_args["ai"];
-  std::vector<float> aj = method_args["ai"];
-  float b = method_args["b"];
-  std::size_t ndim = method_args["ndim"];
-  const uwot::umapai2_gradient gradient(ai, aj, b, ndim);
-  umap_factory.create(gradient);
-}
-
-void create_pacmap(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"a", "b"};
-  validate_args(method_args, arg_names);
-
-  float a = method_args["a"];
-  float b = method_args["b"];
+void create_pacmap(UmapFactory &umap_factory, double a, double b) {
   const uwot::pacmap_gradient gradient(a, b);
   umap_factory.create(gradient);
 }
 
-void create_largevis(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"gamma"};
-  validate_args(method_args, arg_names);
-
-  float gamma = method_args["gamma"];
+void create_largevis(UmapFactory &umap_factory, double gamma) {
   const uwot::largevis_gradient gradient(gamma);
   umap_factory.create(gradient);
-}
-
-// [[Rcpp::export]]
-List optimize_layout_interface_v2(sp_mat &G, mat &initial_position,
-    unsigned int n_epochs, const std::string &method,
-    List method_args, float initial_alpha, List opt_args, float negative_sample_rate,
-    bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0,
-    std::size_t grain_size = 1, bool move_other = true, bool verbose = false, int seed = 0) {
-
-    std::mt19937_64 engine(seed);
-
-    mat init_coors = initial_position.rows(0, 2);
-
-    sp_mat H = G;
-    /*
-    H.for_each([](sp_mat::elem_type &val)
-               { val = 1 / val; });
-    H = smoothKNN(H, n_threads);
-  */
-
-    sp_mat Ht = trans(H);
-    Ht.sync();
-
-    unsigned int nV = H.n_rows;
-    unsigned int nE = H.n_nonzero;
-    vector<unsigned int> positive_head(nE);
-    vector<unsigned int> positive_tail(nE);
-    vector<float> epochs_per_sample(nE);
-
-    std::vector<unsigned int> positive_ptr(Ht.n_cols + 1);
-
-    int i = 0;
-    double w_max = max(max(H));
-    if(batch == false ) {
-      for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
-      {
-        epochs_per_sample[i] = w_max / (*it);
-        positive_head[i] = it.row();
-        positive_tail[i] = it.col();
-        i++;
-      }
-    }
-    else {
-      for (sp_mat::iterator it = Ht.begin(); it != Ht.end(); ++it)
-      {
-        epochs_per_sample[i] = w_max / (*it);
-        positive_tail[i] = it.row();
-        positive_head[i] = it.col();
-        i++;
-      }      
-      for (int k = 0; k < Ht.n_cols + 1; k++)
-      {
-          positive_ptr[k] = Ht.col_ptrs[k];
-      }      
-    }
-
-    // Initial coordinates of vertices (0-simplices)
-    vector<float> head_embedding(init_coors.n_cols * 2);
-    fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
-    float *ptr = sub_coor.memptr();
-    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
-    vector<float> tail_embedding(head_embedding);
-
-    uwot::Coords coords = uwot::Coords(head_embedding);
-
-  //auto coords = r_to_coords(head_embedding, tail_embedding);
-  const std::size_t ndim = head_embedding.size() / nV;
-
-
-  UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
-                           coords.get_tail_embedding(), positive_head,
-                           positive_tail, positive_ptr, n_epochs,
-                           nV, nV, epochs_per_sample,
-                           initial_alpha, opt_args, negative_sample_rate, batch,
-                           n_threads, grain_size, verbose, engine);
-
-/*
-  UmapFactory umap_factory(move_other, pcg_rand, head_embedding,
-                           tail_embedding, positive_head,
-                           positive_tail, positive_ptr, n_epochs,
-                           nV, nV, epochs_per_sample,
-                           initial_alpha, opt_args, negative_sample_rate, batch,
-                           n_threads, grain_size, verbose, engine);
-*/
-
-  if (verbose) {
-    Rcerr << "Using method '" << method << "'" << std::endl;
-  }
-  if (method == "umap") {
-    create_umap(umap_factory, method_args);
-  } else if (method == "tumap") {
-    create_tumap(umap_factory, method_args);
-  } else if (method == "largevis") {
-    create_largevis(umap_factory, method_args);
-  } else if (method == "pacmap") {
-    create_pacmap(umap_factory, method_args);
-  } else if (method == "leopold") {
-    create_umapai(umap_factory, method_args);
-  } else if (method == "leopold2") {
-    create_umapai2(umap_factory, method_args);
-  } else {
-    stop("Unknown method: '" + method + "'");
-  }
-
-/*
-  
-
-  return NumericMatrix(ndim, nV,
-                       head_embedding.begin());
-*/
-
-/*
-  fmat coordinates_float(coords.get_head_embedding().begin(), ndim, nV);
-  mat coordinates = trans(conv_to<mat>::from(coordinates_float));
-  */
-
-  List res;
-  res["coordinates"] = NumericMatrix(ndim, nV, coords.get_head_embedding().begin());
-  res["positive_head"] = positive_head;
-  res["positive_tail"] = positive_tail;
-  res["epochs_per_sample"] = epochs_per_sample;  
-  res["positive_ptr"] = positive_ptr;
-  res["head_embedding"] = head_embedding;
-  res["tail_embedding"] = tail_embedding;
-
-  return (res);
-
-
-
 }
 
 
@@ -3142,6 +2947,171 @@ std::pair<Float, Float> find_ab(Float spread, Float min_dist, Float grid = 300, 
     }
 
     return std::make_pair(a, b);
+}
+
+
+// [[Rcpp::export]]
+field<mat> optimize_layout_interface(sp_mat &G, mat &initial_position, double min_dist, double spread,
+    unsigned int n_epochs, const std::string &method, float initial_alpha, float negative_sample_rate,
+    bool pcg_rand = true, bool batch = false, std::size_t thread_no = 0,
+    std::size_t grain_size = 1, double gamma = 1.0, bool move_other = true, bool verbose = false, 
+    string opt_name = "adam", double alpha = 1.0, double beta1 = 0.5, double beta2 = 0.9, double eps = 1e-7, 
+    bool approx_pow = false, int seed = 0, bool presmooth_network = false) {
+
+    field<mat> res(3);
+    std::mt19937_64 engine(seed);
+    
+    mat init_coors;    
+    if(initial_position.n_rows != G.n_rows) {
+      stderr_printf("Number of rows in the initial_position should match with the number of vertices in G\n");
+      FLUSH;
+      return (res);      
+    }
+
+    if(initial_position.n_cols > 2) { // 3D
+      init_coors = trans(ACTIONet::zscore(initial_position.cols(0, 2)));
+    } else if (initial_position.n_cols == 2) { // 2D
+      init_coors = trans(ACTIONet::zscore(initial_position));
+    } else {
+      stderr_printf("initial_position should have at least 2 columns\n");
+      FLUSH;
+      return (res);
+    }
+    printf("init_coors: %d x %d\n", init_coors.n_rows, init_coors.n_cols); FLUSH;
+
+    // Initial coordinates of vertices (0-simplices)
+    vector<float> head_embedding(init_coors.n_elem);
+    fmat sub_coor = conv_to<fmat>::from(init_coors);
+    memcpy(head_embedding.data(), sub_coor.memptr(), sizeof(float) * head_embedding.size());
+    //vector<float> tail_embedding(head_embedding);
+    uwot::Coords coords = uwot::Coords(head_embedding);
+    printf("intialized coors (%d elem)\n", coords.get_head_embedding().size()); FLUSH;
+
+
+    // Encode positive edges of the graph
+    sp_mat H = G;
+    if(presmooth_network == true) {
+      H.for_each([](sp_mat::elem_type &val)
+                { val = 1 / val; });
+      H = smoothKNN(H, thread_no);
+    }
+    sp_mat Ht = trans(H);
+    Ht.sync();
+
+    unsigned int nV = H.n_rows;
+    unsigned int nE = H.n_nonzero;
+    unsigned int nD = init_coors.n_rows;
+    printf("Preprocessed input network: nV = %d, nE = %d\n", nV, nE); FLUSH;
+
+    vector<unsigned int> positive_head(nE);
+    vector<unsigned int> positive_tail(nE);
+    vector<float> epochs_per_sample(nE);
+
+    std::vector<unsigned int> positive_ptr(Ht.n_cols + 1);
+
+    int i = 0;
+    double w_max = max(max(H));
+    if(batch == false ) {
+      for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
+      {
+        epochs_per_sample[i] = w_max / (*it);
+        positive_head[i] = it.row();
+        positive_tail[i] = it.col();
+        i++;
+      }
+    }
+    else {
+      for (sp_mat::iterator it = Ht.begin(); it != Ht.end(); ++it)
+      {
+        epochs_per_sample[i] = w_max / (*it);
+        positive_tail[i] = it.row();
+        positive_head[i] = it.col();
+        i++;
+      }      
+      for (int k = 0; k < Ht.n_cols + 1; k++)
+      {
+          positive_ptr[k] = Ht.col_ptrs[k];
+      }      
+    }
+
+
+  UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
+                           coords.get_tail_embedding(), positive_head,
+                           positive_tail, positive_ptr, n_epochs,
+                           nV, nV, epochs_per_sample,
+                           initial_alpha, negative_sample_rate, batch,
+                           thread_no, grain_size, verbose, opt_name, alpha, beta1, beta2, eps, engine);
+
+
+  auto found = find_ab(spread, min_dist);
+  double a = found.first;
+  double b = found.second;
+  printf("spread = %.3f, min_dist = %.3f -> a = %.3f, b = %.3f\n", spread, min_dist, a, b);
+
+
+  if (method == "umap") {
+    create_umap(umap_factory, a, b, gamma, approx_pow);
+  } else if (method == "tumap") {
+    create_tumap(umap_factory);
+  } else if (method == "largevis") {
+    create_largevis(umap_factory, gamma);
+  } else if (method == "pacmap") {
+    create_pacmap(umap_factory, a, b);
+  } else {
+      stderr_printf("Unknown method: %s\n", method.c_str());
+      FLUSH;
+      return (res);    
+  }
+  fmat coordinates_float(coords.get_head_embedding().data(), nD, nV);
+  mat coordinates = trans(conv_to<mat>::from(coordinates_float));
+
+  mat RGB_colors = zeros(nV, 3);
+  if(coordinates.n_cols > 2) {
+    stdout_printf("\tComputing node colors ... ");
+
+    mat U;
+    vec s;
+    mat V;
+    svd_econ(U, s, V, coordinates, "left", "std");
+
+    mat Z = ACTIONet::normalize_scores(U.cols(0, 2), 2, thread_no);
+
+    vec a = 75 * Z.col(0);
+    vec b = 75 * Z.col(1);
+
+    vec L = Z.col(2);
+    L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
+
+    double r_channel, g_channel, b_channel;
+    for (int i = 0; i < nV; i++)
+    {
+      Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
+
+      RGB_colors(i, 0) = min(1.0, max(0.0, r_channel));
+      RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
+      RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
+    }
+    stdout_printf("done\n"); FLUSH;
+  }
+
+  res(0) = coordinates.cols(0, 1);
+  res(1) = coordinates;
+  res(2) = RGB_colors;
+
+
+/*
+  return NumericMatrix(nD, nV,
+                       head_embedding.begin());
+
+  fmat coordinates_float(coords.get_head_embedding().begin(), nD, nV);
+  mat coordinates = trans(conv_to<mat>::from(coordinates_float));
+  res["coordinates"] = NumericMatrix(nD, nV, coords.get_head_embedding().begin());
+  */
+
+  return (res);
+
+
+
 }
 
 
