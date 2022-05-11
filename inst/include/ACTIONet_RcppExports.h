@@ -2208,17 +2208,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline NumericMatrix optimize_layout_interface(NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding, const std::vector<unsigned int> positive_head, const std::vector<unsigned int> positive_tail, const std::vector<unsigned int> positive_ptr, unsigned int n_epochs, unsigned int n_head_vertices, unsigned int n_tail_vertices, const std::vector<float> epochs_per_sample, const std::string& method, List method_args, float initial_alpha, List opt_args, Nullable<Function> epoch_callback, float negative_sample_rate, bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0, std::size_t grain_size = 1, bool move_other = true, bool verbose = false, int seed = 0) {
-        typedef SEXP(*Ptr_optimize_layout_interface)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_optimize_layout_interface p_optimize_layout_interface = NULL;
-        if (p_optimize_layout_interface == NULL) {
-            validateSignature("NumericMatrix(*optimize_layout_interface)(NumericMatrix,Nullable<NumericMatrix>,const std::vector<unsigned int>,const std::vector<unsigned int>,const std::vector<unsigned int>,unsigned int,unsigned int,unsigned int,const std::vector<float>,const std::string&,List,float,List,Nullable<Function>,float,bool,bool,std::size_t,std::size_t,bool,bool,int)");
-            p_optimize_layout_interface = (Ptr_optimize_layout_interface)R_GetCCallable("ACTIONet", "_ACTIONet_optimize_layout_interface");
+    inline List optimize_layout_interface_v2(sp_mat& G, mat& initial_position, unsigned int n_epochs, const std::string& method, List method_args, float initial_alpha, List opt_args, float negative_sample_rate, bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0, std::size_t grain_size = 1, bool move_other = true, bool verbose = false, int seed = 0) {
+        typedef SEXP(*Ptr_optimize_layout_interface_v2)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_optimize_layout_interface_v2 p_optimize_layout_interface_v2 = NULL;
+        if (p_optimize_layout_interface_v2 == NULL) {
+            validateSignature("List(*optimize_layout_interface_v2)(sp_mat&,mat&,unsigned int,const std::string&,List,float,List,float,bool,bool,std::size_t,std::size_t,bool,bool,int)");
+            p_optimize_layout_interface_v2 = (Ptr_optimize_layout_interface_v2)R_GetCCallable("ACTIONet", "_ACTIONet_optimize_layout_interface_v2");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_optimize_layout_interface(Shield<SEXP>(Rcpp::wrap(head_embedding)), Shield<SEXP>(Rcpp::wrap(tail_embedding)), Shield<SEXP>(Rcpp::wrap(positive_head)), Shield<SEXP>(Rcpp::wrap(positive_tail)), Shield<SEXP>(Rcpp::wrap(positive_ptr)), Shield<SEXP>(Rcpp::wrap(n_epochs)), Shield<SEXP>(Rcpp::wrap(n_head_vertices)), Shield<SEXP>(Rcpp::wrap(n_tail_vertices)), Shield<SEXP>(Rcpp::wrap(epochs_per_sample)), Shield<SEXP>(Rcpp::wrap(method)), Shield<SEXP>(Rcpp::wrap(method_args)), Shield<SEXP>(Rcpp::wrap(initial_alpha)), Shield<SEXP>(Rcpp::wrap(opt_args)), Shield<SEXP>(Rcpp::wrap(epoch_callback)), Shield<SEXP>(Rcpp::wrap(negative_sample_rate)), Shield<SEXP>(Rcpp::wrap(pcg_rand)), Shield<SEXP>(Rcpp::wrap(batch)), Shield<SEXP>(Rcpp::wrap(n_threads)), Shield<SEXP>(Rcpp::wrap(grain_size)), Shield<SEXP>(Rcpp::wrap(move_other)), Shield<SEXP>(Rcpp::wrap(verbose)), Shield<SEXP>(Rcpp::wrap(seed)));
+            rcpp_result_gen = p_optimize_layout_interface_v2(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(initial_position)), Shield<SEXP>(Rcpp::wrap(n_epochs)), Shield<SEXP>(Rcpp::wrap(method)), Shield<SEXP>(Rcpp::wrap(method_args)), Shield<SEXP>(Rcpp::wrap(initial_alpha)), Shield<SEXP>(Rcpp::wrap(opt_args)), Shield<SEXP>(Rcpp::wrap(negative_sample_rate)), Shield<SEXP>(Rcpp::wrap(pcg_rand)), Shield<SEXP>(Rcpp::wrap(batch)), Shield<SEXP>(Rcpp::wrap(n_threads)), Shield<SEXP>(Rcpp::wrap(grain_size)), Shield<SEXP>(Rcpp::wrap(move_other)), Shield<SEXP>(Rcpp::wrap(verbose)), Shield<SEXP>(Rcpp::wrap(seed)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -2226,7 +2226,7 @@ namespace ACTIONet {
             throw Rcpp::LongjumpException(rcpp_result_gen);
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<NumericMatrix >(rcpp_result_gen);
+        return Rcpp::as<List >(rcpp_result_gen);
     }
 
     inline List decomp_G(sp_mat& G, mat& initial_position, double a_param, double b_param, int n_epochs = 200, int thread_no = 0) {

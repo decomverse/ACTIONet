@@ -2562,6 +2562,71 @@ List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_it
 }
 
 
+  sp_mat smoothKNN(sp_mat D, int thread_no = -1)
+  {
+    double epsilon = 1e-6;
+
+    int nV = D.n_cols;
+    sp_mat G = D;
+
+    //#pragma omp parallel for num_threads(thread_no)
+    for (int i = 0; i < nV; i++)
+    {
+      //  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
+      sp_mat v = D.col(i);
+      vec vals = nonzeros(v);
+      if (vals.n_elem > 0)
+      {
+        double rho = min(vals);
+        vec negated_shifted_vals = -(vals - rho);
+        double target = log2(vals.n_elem);
+
+        // Binary search to find optimal sigma
+        double sigma = 1.0;
+        double lo = 0.0;
+        double hi = DBL_MAX;
+
+        int j;
+        for (j = 0; j < 64; j++)
+        {
+          double obj = sum(exp(negated_shifted_vals / sigma));
+
+          if (abs(obj - target) < epsilon)
+          {
+            break;
+          }
+
+          if (target < obj)
+          {
+            hi = sigma;
+            sigma = 0.5 * (lo + hi);
+          }
+          else
+          {
+            lo = sigma;
+            if (hi == DBL_MAX)
+            {
+              sigma *= 2;
+            }
+            else
+            {
+              sigma = 0.5 * (lo + hi);
+            }
+          }
+        }
+
+        double obj = sum(exp(negated_shifted_vals / sigma));
+
+        for (sp_mat::col_iterator it = G.begin_col(i); it != G.end_col(i); ++it)
+        {
+          *it = max(1e-16, exp(-max(0.0, (*it) - rho) / sigma));
+        }
+      }
+    }
+
+    return (G);
+  }
+
 template <typename T>
 auto lget(List list, const std::string &name, T default_value) -> T {
   auto key = name.c_str();
@@ -2826,29 +2891,88 @@ void create_largevis(UmapFactory &umap_factory, List method_args) {
 }
 
 // [[Rcpp::export]]
-NumericMatrix optimize_layout_interface(
-    NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail,
-    const std::vector<unsigned int> positive_ptr, unsigned int n_epochs,
-    unsigned int n_head_vertices, unsigned int n_tail_vertices,
-    const std::vector<float> epochs_per_sample, const std::string &method,
-    List method_args, float initial_alpha, List opt_args,
-    Nullable<Function> epoch_callback, float negative_sample_rate,
+List optimize_layout_interface_v2(sp_mat &G, mat &initial_position,
+    unsigned int n_epochs, const std::string &method,
+    List method_args, float initial_alpha, List opt_args, float negative_sample_rate,
     bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0,
     std::size_t grain_size = 1, bool move_other = true, bool verbose = false, int seed = 0) {
 
-  std::mt19937_64 engine(seed);
+    std::mt19937_64 engine(seed);
 
-  auto coords = r_to_coords(head_embedding, tail_embedding);
-  const std::size_t ndim = head_embedding.size() / n_head_vertices;
+    mat init_coors = initial_position.rows(0, 2);
+
+    sp_mat H = G;
+    /*
+    H.for_each([](sp_mat::elem_type &val)
+               { val = 1 / val; });
+    H = smoothKNN(H, n_threads);
+  */
+
+    sp_mat Ht = trans(H);
+    Ht.sync();
+
+    unsigned int nV = H.n_rows;
+    unsigned int nE = H.n_nonzero;
+    vector<unsigned int> positive_head(nE);
+    vector<unsigned int> positive_tail(nE);
+    vector<float> epochs_per_sample(nE);
+
+    std::vector<unsigned int> positive_ptr(Ht.n_cols + 1);
+
+    int i = 0;
+    double w_max = max(max(H));
+    if(batch == false ) {
+      for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
+      {
+        epochs_per_sample[i] = w_max / (*it);
+        positive_head[i] = it.row();
+        positive_tail[i] = it.col();
+        i++;
+      }
+    }
+    else {
+      for (sp_mat::iterator it = Ht.begin(); it != Ht.end(); ++it)
+      {
+        epochs_per_sample[i] = w_max / (*it);
+        positive_tail[i] = it.row();
+        positive_head[i] = it.col();
+        i++;
+      }      
+      for (int k = 0; k < Ht.n_cols + 1; k++)
+      {
+          positive_ptr[k] = Ht.col_ptrs[k];
+      }      
+    }
+
+    // Initial coordinates of vertices (0-simplices)
+    vector<float> head_embedding(init_coors.n_cols * 2);
+    fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
+    float *ptr = sub_coor.memptr();
+    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
+    vector<float> tail_embedding(head_embedding);
+
+    uwot::Coords coords = uwot::Coords(head_embedding);
+
+  //auto coords = r_to_coords(head_embedding, tail_embedding);
+  const std::size_t ndim = head_embedding.size() / nV;
+
 
   UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
                            coords.get_tail_embedding(), positive_head,
                            positive_tail, positive_ptr, n_epochs,
-                           n_head_vertices, n_tail_vertices, epochs_per_sample,
+                           nV, nV, epochs_per_sample,
                            initial_alpha, opt_args, negative_sample_rate, batch,
                            n_threads, grain_size, verbose, engine);
+
+/*
+  UmapFactory umap_factory(move_other, pcg_rand, head_embedding,
+                           tail_embedding, positive_head,
+                           positive_tail, positive_ptr, n_epochs,
+                           nV, nV, epochs_per_sample,
+                           initial_alpha, opt_args, negative_sample_rate, batch,
+                           n_threads, grain_size, verbose, engine);
+*/
+
   if (verbose) {
     Rcerr << "Using method '" << method << "'" << std::endl;
   }
@@ -2868,8 +2992,31 @@ NumericMatrix optimize_layout_interface(
     stop("Unknown method: '" + method + "'");
   }
 
-  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                       coords.get_head_embedding().begin());
+/*
+  
+
+  return NumericMatrix(ndim, nV,
+                       head_embedding.begin());
+*/
+
+/*
+  fmat coordinates_float(coords.get_head_embedding().begin(), ndim, nV);
+  mat coordinates = trans(conv_to<mat>::from(coordinates_float));
+  */
+
+  List res;
+  res["coordinates"] = NumericMatrix(ndim, nV, coords.get_head_embedding().begin());
+  res["positive_head"] = positive_head;
+  res["positive_tail"] = positive_tail;
+  res["epochs_per_sample"] = epochs_per_sample;  
+  res["positive_ptr"] = positive_ptr;
+  res["head_embedding"] = head_embedding;
+  res["tail_embedding"] = tail_embedding;
+
+  return (res);
+
+
+
 }
 
 
