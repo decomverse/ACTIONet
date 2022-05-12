@@ -19,11 +19,15 @@ runACTIONet(
   network_density = 1,
   mutual_edges_only = TRUE,
   imputation_alpha = 0.9,
-  layout_compactness = 50,
+  layout_spread = 1,
+  layout_min_dist = 1,
+  layout_gamma = 1,
   layout_epochs = 1000,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1,
+  unification_min_cluster_size = 3,
   footprint_alpha = 0.85,
   compute_specificity_parallel = FALSE,
   smoothPC = TRUE,
@@ -61,15 +65,11 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{imputation_alpha}{Network diffusion parameter to smooth PCs (S_r). (default=0.9)}
 
-\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)}
-
 \item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
 
 \item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
 
 \item{layout_parallel}{Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)}
-
-\item{unification_th}{Archetype unification resolution parameter. (default=0)}
 
 \item{footprint_alpha}{Archetype smoothing parameter. (default=0.85)}
 
@@ -80,6 +80,10 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 \item{thread_no}{Number of parallel threads. (default=0)}
 
 \item{seed}{Seed for random initialization. (default=0)}
+
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)}
+
+\item{unification_th}{Archetype unification resolution parameter. (default=0)}
 }
 \value{
 An ACTIONetExperiment object

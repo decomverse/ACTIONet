@@ -1,11 +1,13 @@
 #' Run ACTION_decomposition_MR
-.run.ACTION_MR.ace <- function(
+.run.ACTIONMR.ace <- function(
   ace,
   k_min = 2,
   k_max = 30,
   specificity_th = -3,
   min_cells_per_arch = 2,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1.0,
+  unification_min_cluster_size = 3,
   max_iter = 50,
   min_delta = 1e-300,
   thread_no = 0,
@@ -15,7 +17,7 @@
 
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
-  S_r <- .validate_map(ace, map_slot = reduction_slot, ace_name = "ace")
+  S_r <- Matrix::t(.validate_map(ace, map_slot = reduction_slot, ace_name = "ace"))
 
   out <- decomp.ACTIONMR(
     X = S_r,
@@ -23,39 +25,40 @@
     k_max = k_max,
     specificity_th = specificity_th,
     min_cells_per_arch = min_cells_per_arch,
-    unification_th = unification_th,
+    unification_backbone_density = unification_backbone_density,
+    unification_resolution = unification_resolution,
+    unification_min_cluster_size = unification_min_cluster_size,
     max_iter = max_iter,
     thread_no = thread_no,
     min_delta = min_delta,
     return_raw = TRUE
   )
 
-  colMaps(ace)[["H_stacked"]] <- Matrix::t(as(out$pruning$H_stacked, "sparseMatrix"))
+  colMaps(ace)[["H_stacked"]] <- Matrix::t(as(out$misc$H_stacked, "sparseMatrix"))
   colMapTypes(ace)[["H_stacked"]] <- "internal"
 
-  colMaps(ace)[["C_stacked"]] <- as(out$pruning$C_stacked, "sparseMatrix")
+  colMaps(ace)[["C_stacked"]] <- as(out$misc$C_stacked, "sparseMatrix")
   colMapTypes(ace)[["C_stacked"]] <- "internal"
 
-  colMaps(ace)[[sprintf("H_%s", unified_suffix)]] <- as(Matrix::t(out$unification$H_unified), "sparseMatrix")
+  colMaps(ace)[[sprintf("H_%s", unified_suffix)]] <- as(Matrix::t(out$misc$H_unified), "sparseMatrix")
   colMapTypes(ace)[[sprintf("H_%s", unified_suffix)]] <- "internal"
 
-  colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(out$unification$C_unified, "sparseMatrix")
+  colMaps(ace)[[sprintf("C_%s", unified_suffix)]] <- as(out$misc$C_unified, "sparseMatrix")
   colMapTypes(ace)[[sprintf("C_%s", unified_suffix)]] <- "internal"
 
-  colData(ace)[[footprint_slot_name]] <- c(out$unification$assigned_archetype)
+  colData(ace)[[footprint_slot_name]] <- c(out$misc$assigned_archetype)
 
   return(ace)
 }
 
-
 .run.layoutNetwork <- function(
   ace,
-  compactness_level = 50,
   n_epochs = 1000,
+  presmooth_network = FALSE,
   algorithm = "umap",
-  opt_method = "adam",
   spread = 1.0,
-  min_dist = 0.01,
+  min_dist = 1.0,
+  gamma = 1.0,
   init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
   thread_no = 0,
@@ -66,8 +69,6 @@
   algorithm <- match.arg(tolower(algorithm), c("umap", "tumap", 
     "largevis", "pacmap"))
   
-  opt_method <- match.arg(tolower(opt_method), c("adam", "sgd"))
-
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
   G <- .validate_net(
@@ -83,17 +84,14 @@
     matrix_type = "dense",
     force_type = TRUE,
   )
-  initial_coordinates <- Matrix::t(scale(initial_coordinates))
 
-
-  vis.out <- layoutNetwrok(G = G, initial_position = initial_coordinates, alg_name = algorithm, spread = spread, min_dist = min_dist,
-  opt_name = opt_method, n_epochs = n_epochs, seed = seed, thread_no = thread_no);
+  vis.out <- layoutNetwork(G = G, initial_position = initial_coordinates, method = algorithm, spread = spread, min_dist = min_dist, n_epochs = n_epochs, seed = seed, thread_no = thread_no, presmooth_network = presmooth_network);
 
 
   if (return_raw == TRUE) {
     return(vis.out)
   } else {
-    colMaps(ace)[["ACTIONred"]] <- Matrix::t(initial_coordinates[1:3, ])
+    colMaps(ace)[["ACTIONred"]] <- initial_coordinates[, 1:3]
     colMapTypes(ace)[["ACTIONred"]] <- "embedding"
 
     X <- vis.out$coordinates
@@ -150,7 +148,9 @@
 #' Identiy equivalent classes of archetypes and group them together
 .run.unifyArchetypes <- function(
   ace,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1.0,
+  unification_min_cluster_size = 3,
   reduction_slot = "ACTION",
   C_stacked_slot = "C_stacked",
   H_stacked_slot = "H_stacked",
@@ -189,7 +189,9 @@
     S_r = S_r,
     C_stacked = C_stacked,
     H_stacked = H_stacked,
-    unification_th = unification_th,
+    unification_backbone_density = unification_backbone_density,
+    unification_resolution = unification_resolution,
+    unification_min_cluster_size = unification_min_cluster_size,
     thread_no = thread_no
   )
 

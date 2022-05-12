@@ -6,11 +6,11 @@
 \usage{
 rerunLayout(
   ace,
-  compactness = 50,
+  spread = 1,
+  min_dist = 1,
+  gamma = 1,
   epochs = 1000,
   algorithm = c("umap", "tumap"),
-  network_density = 1,
-  mutual_edges_only = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
   net_slot = "ACTIONet",
@@ -19,10 +19,6 @@ rerunLayout(
 }
 \arguments{
 \item{ace}{ACTIONetExperiment object.}
-
-\item{network_density}{Density factor of ACTIONet graph (default=1).}
-
-\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 
 \item{thread_no}{Number of parallel threads (default=0).}
 
@@ -37,6 +33,10 @@ rerunLayout(
 \item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
 
 \item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
+
+\item{network_density}{Density factor of ACTIONet graph (default=1).}
+
+\item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
 }
 \value{
 ace Updated ace object

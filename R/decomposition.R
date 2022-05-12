@@ -236,7 +236,9 @@ decomp.ACTIONMR <- function(
   k_max,
   specificity_th = -3,
   min_cells_per_arch = 2,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1.0,
+  unification_min_cluster_size = 3,
   max_iter = 50,
   min_delta = 1e-100,
   thread_no = 1,
@@ -270,7 +272,9 @@ decomp.ACTIONMR <- function(
     S_r = X,
     C_stacked = pruning.out$C_stacked,
     H_stacked = pruning.out$H_stacked,
-    unification_th = unification_th,
+    unification_backbone_density = unification_backbone_density,
+    unification_resolution = unification_resolution,
+    unification_min_cluster_size = unification_min_cluster_size,
     thread_no = thread_no
   )
 
@@ -340,20 +344,24 @@ decomp.ACTIONMR <- function(
   S_r,
   C_stacked,
   H_stacked,
-  unification_th = 0,
-  thread_no = 0
-) {
+  unification_backbone_density = 0.5,
+  unification_resolution = 1.0,
+  unification_min_cluster_size = 3,
+  thread_no = 0) {
 
   if (!all(dim(C_stacked) == rev(dim(H_stacked)))) {
     err = sprintf("Dimensions of `C_stacked` and transposed `H_stacked` do not match.\n")
     stop(err)
   }
 
+
   out <- unify_archetypes(
     S_r = S_r,
     C_stacked = C_stacked,
     H_stacked = H_stacked,
-    violation_threshold = unification_th,
+    backbone_density = unification_backbone_density,
+    resolution = unification_resolution,
+    min_cluster_size = unification_min_cluster_size,
     thread_no = thread_no
   )
 
