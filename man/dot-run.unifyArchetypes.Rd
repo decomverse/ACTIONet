@@ -6,7 +6,9 @@
 \usage{
 .run.unifyArchetypes(
   ace,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1,
+  unification_min_cluster_size = 3,
   reduction_slot = "ACTION",
   C_stacked_slot = "C_stacked",
   H_stacked_slot = "H_stacked",

@@ -604,8 +604,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -3,
     .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
-unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, backbone_density = 0.5, outlier_threshold = 1L, thread_no = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, backbone_density, outlier_threshold, thread_no)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, backbone_density = 0.5, resolution = 1.0, min_cluster_size = 3L, thread_no = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, backbone_density, resolution, min_cluster_size, thread_no)
 }
 
 #'
@@ -632,8 +632,8 @@ build_knn <- function(H, distance_metric = "jsd", k = 10, thread_no = 0L, mutual
 #' @examples
 #'	G = buildNetwork(prune.out$H_stacked)
 #'	vis.out = layoutNetwrok(G, S_r)
-layoutNetwork_xmap <- function(G, initial_position, presmooth_network = FALSE, method = "umap", min_dist = 1, spread = 1, gamma = 1.0, n_epochs = 500L, thread_no = 0L, seed = 0L) {
-    .Call(`_ACTIONet_layoutNetwork_xmap`, G, initial_position, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed)
+layoutNetwork <- function(G, initial_position, method = "umap", presmooth_network = FALSE, min_dist = 1, spread = 1, gamma = 1.0, n_epochs = 500L, thread_no = 0L, seed = 0L, learning_rate = 1.0, sim2dist = 2L) {
+    .Call(`_ACTIONet_layoutNetwork`, G, initial_position, method, presmooth_network, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist)
 }
 
 #' Encrypts a set of given input ids

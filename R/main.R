@@ -46,11 +46,15 @@ runACTIONet <- function(
   network_density = 1,
   mutual_edges_only = TRUE,
   imputation_alpha = 0.9,
-  layout_compactness = 50,
+  layout_spread = 1.0,
+  layout_min_dist = 1.0,
+  layout_gamma = 1.0,
   layout_epochs = 1000,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1.0,
+  unification_min_cluster_size = 3,
   footprint_alpha = 0.85,
   compute_specificity_parallel = FALSE,
   smoothPC = TRUE,
@@ -69,13 +73,16 @@ runACTIONet <- function(
   .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
 
-  ace <- .decomp.ACTIONMR.ace(
+  # Calls "decomp.ACTIONMR" and fills in the appropriate slots in the ace object
+  ace <- .run.ACTIONMR.ace(
     ace = ace,
     k_min = k_min,
     k_max = k_max,
     specificity_th = specificity_th,
     min_cells_per_arch = min_cells_per_arch,
-    unification_th = unification_th,
+    unification_backbone_density = unification_backbone_density,
+    unification_resolution = unification_resolution,
+    unification_min_cluster_size = unification_min_cluster_size,
     max_iter = max_iter_ACTION,
     thread_no = thread_no,
     unified_suffix = "unified",
@@ -100,6 +107,21 @@ runACTIONet <- function(
     algorithm = "local_coreness"
   )
 
+  # Uses "layoutNetwork" to layout the network and fill in the appropriate slots in the ace object
+  ace <- .run.layoutNetwork(
+    ace = ace,
+    algorithm = layout_algorithm,
+    n_epochs = layout_epochs,
+    spread = layout_spread,
+    min_dist = layout_min_dist,
+    gamma = layout_gamma,
+    init_coor_slot = reduction_slot,
+    net_slot = net_slot_out,
+    thread_no = ifelse(layout_parallel, thread_no, 1),
+    seed = seed
+  )
+
+
   # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
   if (smoothPC == TRUE) {
     ace <- .smoothPCs(
@@ -112,18 +134,6 @@ runACTIONet <- function(
       thread_no = thread_no
     )
   }
-
-  # Layout ACTIONet. Now it uses the smoothed S_r. TODO: the fuck is this?
-  ace <- .run.layoutNetwork(
-    ace = ace,
-    compactness_level = layout_compactness,
-    n_epochs = layout_epochs,
-    algorithm = layout_algorithm,
-    init_coor_slot = reduction_slot,
-    net_slot = net_slot_out,
-    thread_no = ifelse(layout_parallel, thread_no, 1),
-    seed = seed
-  )
 
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(
@@ -201,11 +211,15 @@ run.ACTIONet <- function(
   network_density = 1,
   mutual_edges_only = TRUE,
   imputation_alpha = 0.9,
-  layout_compactness = 50,
+  layout_spread = 1.0,
+  layout_min_dist = 1.0,
+  layout_gamma = 1.0,
   layout_epochs = 1000,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
-  unification_th = 0,
+  unification_backbone_density = 0.5,
+  unification_resolution = 1.0,
+  unification_min_cluster_size = 3,
   footprint_alpha = 0.85,
   compute_specificity_parallel = FALSE,
   thread_no = 0,
@@ -282,9 +296,11 @@ run.ACTIONet <- function(
   # Layout ACTIONet
   ace <- .run.layoutNetwork(
     ace = ace,
-    compactness_level = layout_compactness,
-    n_epochs = layout_epochs,
     algorithm = layout_algorithm,
+    n_epochs = layout_epochs,
+    spread = layout_spread,
+    min_dist = layout_min_dist,
+    gamma = layout_gamma,
     init_coor_slot = reduction_slot,
     net_slot = net_slot_out,
     thread_no = ifelse(layout_parallel, thread_no, 1),
@@ -294,7 +310,9 @@ run.ACTIONet <- function(
   # Identiy equivalent classes of archetypes and group them together
   ace <- .run.unifyArchetypes(
     ace = ace,
-    unification_th = unification_th,
+    unification_backbone_density = unification_backbone_density,
+    unification_resolution = unification_resolution,
+    unification_min_cluster_size = unification_min_cluster_size,
     reduction_slot = reduction_slot,
     C_stacked_slot = "C_stacked",
     H_stacked_slot = "H_stacked",
@@ -453,11 +471,11 @@ rebuildACTIONet <- function(
 #' @export
 rerunLayout <- function(
   ace,
-  compactness = 50,
+  spread = 1.0,
+  min_dist = 1.0,
+  gamma = 1.0,  
   epochs = 1000,
   algorithm = c("umap", "tumap"),
-  network_density = 1,
-  mutual_edges_only = TRUE,
   thread_no = 0,
   reduction_slot = "ACTION",
   net_slot = "ACTIONet",
@@ -467,16 +485,16 @@ rerunLayout <- function(
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  .validate_ace(ace = ace, return_elem = FALSE)
-
   ace <- .run.layoutNetwork(
     ace = ace,
-    compactness_level = compactness,
-    n_epochs = epochs,
     algorithm = algorithm,
+    n_epochs = epochs,
+    spread = spread,
+    min_dist = min_dist,
+    gamma = gamma,
     init_coor_slot = reduction_slot,
-    net_slot = net_slot,
-    thread_no = thread_no,
+    net_slot = net_slot_out,
+    thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
   )
 
@@ -487,7 +505,9 @@ rerunLayout <- function(
 #' @export
 rerunArchAggr <- function(
   ace,
-  unification_th = 0,
+  backbone_density = 0.5,
+  resolution = 1.0,
+  min_cluster_size = 3,
   footprint_alpha = 0.85,
   compute_specificity_parallel = FALSE,
   assay_name = "logcounts",
@@ -510,7 +530,9 @@ rerunArchAggr <- function(
 
   ace <- .run.unifyArchetypes(
     ace = ace,
-    unification_th = unification_th,
+    backbone_density = backbone_density,
+    resolution = resolution,
+    min_cluster_size = min_cluster_size,
     reduction_slot = reduction_slot,
     C_stacked_slot = C_stacked_slot,
     H_stacked_slot = H_stacked_slot,

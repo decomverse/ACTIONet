@@ -735,10 +735,11 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 // [[Rcpp::export]]
 List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
                       double violation_threshold = 0.0,
-                      double backbone_density = 0.5, int outlier_threshold = 1,
+                      double backbone_density = 0.5, double resolution = 1.0,
+                      int min_cluster_size = 3,
                       int thread_no = 0)
 {
-  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, backbone_density, outlier_threshold, thread_no);
+  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, backbone_density, resolution, min_cluster_size, thread_no);
 
   List out_list;
 
@@ -752,7 +753,7 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
 
-  out_list["assigned_archetypes"] = results.assigned_archetypes;
+  out_list["assigned_archetypes"] = results.assigned_archetypes;  
   out_list["arch_membership_weights"] = results.arch_membership_weights;
 
   out_list["ontology"] = results.dag_adj;
@@ -818,10 +819,10 @@ sp_mat build_knn(mat H, string distance_metric = "jsd", double k = 10, int threa
 //'	G = buildNetwork(prune.out$H_stacked)
 //'	vis.out = layoutNetwrok(G, S_r)
 // [[Rcpp::export]]
-List layoutNetwork_xmap(sp_mat &G, mat &initial_position, bool presmooth_network = false, const std::string &method = "umap", 
-  double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0) {
+List layoutNetwork(sp_mat &G, mat &initial_position, const std::string &method = "umap", bool presmooth_network = false, 
+  double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2) {
 
-  field<mat> res = ACTIONet::layoutNetwork_xmap(G, initial_position, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed);
+  field<mat> res = ACTIONet::layoutNetwork_xmap(G, initial_position, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist);
 
   List out_list;
   out_list["coordinates"] = res(0);
