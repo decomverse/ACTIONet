@@ -30,6 +30,9 @@
 #include "gradient.h"
 #include "optimize.h"
 #include "sampler.h"
+#include <mutex>
+
+std::mutex update_mutex; 
 
 namespace uwot {
 
@@ -54,7 +57,7 @@ process_edge(Update &update, Gradient &gradient, Sampler &sampler, Prng &prng,
   std::size_t n_neg_samples = sampler.get_num_neg_samples(edge);
   for (std::size_t p = 0; p < n_neg_samples; p++) {
     const std::size_t dkn = prng(n_tail_vertices) * ndim;
-    //const std::size_t dkn = 1 * ndim;
+    //const std::size_t dkn = ((dj+p+1) % n_tail_vertices) * ndim;
     if (dj == dkn) {
       continue;
     }

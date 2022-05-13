@@ -139,20 +139,11 @@ struct NodeWorker {
     std::vector<float> disp(ndim);
     for (auto p = begin; p < end; p++) {
       auto prng = rng_factory.create(p);
-      int sum = 0;
       for (auto edge = positive_ptr[p]; edge < positive_ptr[p + 1]; edge++) {
-        if (sampler.is_sample_edge(edge)) {
-          sum++;
-        }
         process_edge(update, gradient, sampler, prng, positive_head,
                      positive_tail, ndim, n_tail_vertices, edge, thread_id,
                      disp);
       }
-      /*
-      if(p < begin + 30) {
-        printf("%d- %d\n", p, sum);
-      }
-      */
     }
   }
 };

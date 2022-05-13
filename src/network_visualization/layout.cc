@@ -1,5 +1,17 @@
 #include <ACTIONet.h>
 
+#include <atomic>
+#include <cfloat>
+#include <thread>
+
+
+#include "uwot/coords.h"
+#include "uwot/epoch.h"
+#include "uwot/gradient.h"
+#include "uwot/optimize.h"
+#include "uwot/sampler.h"
+#include "uwot/rng.h"
+#include "uwot/rparallel.h"
 
 const double UMAP_A[101] = {
     1.93280839781719, 1.89560586588002, 1.85873666431227, 1.82221007490834,
@@ -57,20 +69,262 @@ const double UMAP_B[101] = {
     1.92923479503841};
 
 
-#include <atomic>
-#include <cfloat>
-#include <thread>
-
-
 #define NEGATIVE_SAMPLE_RATE 5.0
-#define LEARNING_RATE 1.0
 #define UMAP_SEED 0
 #define GAMMA 1.0
 #define ADAM_ALPHA 1.0 /*same as learning_rate*/
 #define ADAM_BETA1 0.5 /*only adam: between 0 and 1*/
 #define ADAM_BETA2 0.9 /*only adam: between 0 and 1*/
 #define ADAM_EPS 1e-7 /*only adam: between 1e-8 and 1e-3*/
-#define SGD_ALPHA 1.0
+
+  sp_mat smoothKNN(sp_mat &D, int max_iter = 64, double epsilon = 1e-6, double bandwidth = 1.0, double local_connectivity = 1.0, double min_k_dist_scale = 1e-3, double min_sim = 1e-8, int thread_no = 0)
+  {
+    ;
+
+    int nV = D.n_cols;
+    sp_mat G = D;
+
+    //#pragma omp parallel for num_threads(thread_no)
+    for (int i = 0; i < nV; i++)
+    {
+      //  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
+      sp_mat v = D.col(i);
+      vec vals = nonzeros(v);
+      if (vals.n_elem > local_connectivity)      
+      {
+        double rho = min(vals);
+        vec negated_shifted_vals = -(vals - rho);
+        uvec deflate = find(vals <= rho);
+        negated_shifted_vals(deflate).zeros();
+
+        double target = log2(vals.n_elem+1);
+
+        // Binary search to find optimal sigma
+        double sigma = 1.0;
+        double lo = 0.0;
+        double hi = DBL_MAX;
+
+        int j;
+        for (j = 0; j < max_iter; j++)
+        {
+          double obj = sum(exp(negated_shifted_vals / sigma));
+
+          if (abs(obj - target) < epsilon)
+          {
+            break;
+          }
+
+          if (target < obj)
+          {
+            hi = sigma;
+            sigma = 0.5 * (lo + hi);
+          }
+          else
+          {
+            lo = sigma;
+            if (hi == DBL_MAX)
+            {
+              sigma *= 2;
+            }
+            else
+            {
+              sigma = 0.5 * (lo + hi);
+            }
+          }
+        }
+
+        //double obj = sum(exp(negated_shifted_vals / sigma));
+        double mean_dist = mean(mean_dist);
+        sigma = std::max(min_k_dist_scale * mean_dist, sigma);
+
+        for (sp_mat::col_iterator it = G.begin_col(i); it != G.end_col(i); ++it)
+        {
+          *it = max(min_sim, exp(-max(0.0, (*it) - rho) / (sigma * bandwidth)));
+        }
+      }
+      else {
+        for (sp_mat::col_iterator it = G.begin_col(i); it != G.end_col(i); ++it)
+        {
+          *it = 1.0;
+        }
+      }
+    }
+
+    return (G);
+  }
+
+// Template class specialization to handle different rng/batch combinations
+template <bool DoBatch = true> struct BatchRngFactory {
+  using PcgFactoryType = batch_pcg_factory;
+  using TauFactoryType = batch_tau_factory;
+};
+template <> struct BatchRngFactory<false> {
+  using PcgFactoryType = pcg_factory;
+  using TauFactoryType = tau_factory;
+};
+
+struct UmapFactory {
+  bool move_other;
+  bool pcg_rand;
+  std::vector<float> &head_embedding;
+  std::vector<float> &tail_embedding;
+  const std::vector<unsigned int> &positive_head;
+  const std::vector<unsigned int> &positive_tail;
+  const std::vector<unsigned int> &positive_ptr;
+  unsigned int n_epochs;
+  unsigned int n_head_vertices;
+  unsigned int n_tail_vertices;
+  const std::vector<float> &epochs_per_sample;
+  float initial_alpha;
+  float negative_sample_rate;
+  bool batch;
+  std::size_t n_threads;
+  std::size_t grain_size;
+  string opt_name;
+  double alpha, beta1, beta2, eps; 
+  std::mt19937_64 engine;
+
+  UmapFactory(bool move_other, bool pcg_rand,
+              std::vector<float> &head_embedding,
+              std::vector<float> &tail_embedding,
+              const std::vector<unsigned int> &positive_head,
+              const std::vector<unsigned int> &positive_tail,
+              const std::vector<unsigned int> &positive_ptr,
+              unsigned int n_epochs, unsigned int n_head_vertices,
+              unsigned int n_tail_vertices,
+              const std::vector<float> &epochs_per_sample, float initial_alpha,
+              float negative_sample_rate, bool batch,
+              std::size_t n_threads, std::size_t grain_size, string opt_name, double alpha, double beta1, double beta2, double eps, std::mt19937_64 &engine)
+      : move_other(move_other), pcg_rand(pcg_rand),
+        head_embedding(head_embedding), tail_embedding(tail_embedding),
+        positive_head(positive_head), positive_tail(positive_tail),
+        positive_ptr(positive_ptr), n_epochs(n_epochs),
+        n_head_vertices(n_head_vertices), n_tail_vertices(n_tail_vertices),
+        epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha), negative_sample_rate(negative_sample_rate),
+        batch(batch), n_threads(n_threads), grain_size(grain_size),
+        alpha(alpha), beta1(beta1), beta2(beta2), eps(eps), engine(engine), opt_name(opt_name) {}
+
+  template <typename Gradient> void create(const Gradient &gradient) {
+    if (move_other) {
+      create_impl<true>(gradient, pcg_rand, batch);
+    } else {
+      create_impl<false>(gradient, pcg_rand, batch);
+    }
+  }
+
+  template <bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
+    if (batch) {
+      create_impl<BatchRngFactory<true>, DoMove>(gradient, pcg_rand, batch);
+    } else {
+      create_impl<BatchRngFactory<false>, DoMove>(gradient, pcg_rand, batch);
+    }
+  }
+
+  template <typename BatchRngFactory, bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
+    if (pcg_rand) {
+      create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(gradient,
+                                                                    batch);
+    } else {
+      create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(gradient,
+                                                                    batch);
+    }
+  }
+
+  uwot::Adam create_adam() {
+    return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size());
+  }
+
+  uwot::Sgd create_sgd() {
+    return uwot::Sgd(alpha);
+  }
+
+  template <typename RandFactory, bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, bool batch) {
+    if (batch) {
+      if (opt_name == "adam") {
+        auto opt = create_adam();
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, opt, batch);
+      } else if (opt_name == "sgd") {
+        auto opt = create_sgd();
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, opt, batch);
+      } else {
+        stderr_printf("Unknown optimization method: %s\n", opt_name.c_str());
+        FLUSH;
+        return;          
+      }
+    } else {
+      const std::size_t ndim = head_embedding.size() / n_head_vertices;
+      uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+      uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
+                                         initial_alpha);
+      uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
+          gradient, update, positive_head, positive_tail, sampler, ndim,
+          n_tail_vertices, n_threads, engine);
+      create_impl(worker, gradient);
+    }
+  }
+
+  template <typename Opt, typename RandFactory, bool DoMove, typename Gradient>
+  void create_impl_batch_opt(const Gradient &gradient, Opt &opt, bool batch) {
+    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+    const std::size_t ndim = head_embedding.size() / n_head_vertices;
+    uwot::BatchUpdate<DoMove, decltype(opt)> update(
+        head_embedding, tail_embedding, opt);
+    uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
+        gradient, update, positive_head, positive_tail, positive_ptr, sampler,
+        ndim, n_tail_vertices, engine);
+    create_impl(worker, gradient);
+  }
+
+  template <typename Worker, typename Gradient>
+  void create_impl(Worker &worker, const Gradient &gradient) {
+
+    if (n_threads > 0) {
+      RParallel parallel(n_threads, grain_size);
+      create_impl(worker, gradient, parallel);
+    } else {
+      RSerial serial;
+      create_impl(worker, gradient, serial);
+    }
+  }
+
+  template <typename Worker, typename Gradient,
+            typename Parallel>
+  void create_impl(Worker &worker, const Gradient &gradient,
+                   Parallel &parallel) {
+    uwot::optimize_layout(worker, n_epochs, parallel);
+  }
+};
+
+void create_umap(UmapFactory &umap_factory, double a, double b, double gamma, bool approx_pow) {
+  if (approx_pow) {
+    const uwot::apumap_gradient gradient(a, b, gamma);
+    umap_factory.create(gradient);
+  } else {
+    const uwot::umap_gradient gradient(a, b, gamma);
+    umap_factory.create(gradient);
+  }
+}
+
+void create_tumap(UmapFactory &umap_factory) {
+  const uwot::tumap_gradient gradient;
+  umap_factory.create(gradient);
+}
+
+void create_pacmap(UmapFactory &umap_factory, double a, double b) {
+  const uwot::pacmap_gradient gradient(a, b);
+  umap_factory.create(gradient);
+}
+
+void create_largevis(UmapFactory &umap_factory, double gamma) {
+  const uwot::largevis_gradient gradient(gamma);
+  umap_factory.create(gradient);
+}
+
 
 template<typename Float>
 std::pair<Float, Float> find_ab(Float spread, Float min_dist, Float grid = 300, Float limit = 0.5, int iter = 50, Float tol = 1e-6) {
@@ -199,375 +453,194 @@ std::pair<Float, Float> find_ab(Float spread, Float min_dist, Float grid = 300, 
 namespace ACTIONet
 {
 
-  sp_mat smoothKNN(sp_mat D, int thread_no = -1)
-  {
-    double epsilon = 1e-6;
+  field<mat> layoutNetwork_xmap(sp_mat &G, mat &initial_position, bool presmooth_network, const std::string &method, 
+      double min_dist, double spread, double gamma, unsigned int n_epochs, int thread_no, int seed, double learning_rate, int sim2dist) {
 
-    int nV = D.n_cols;
-    sp_mat G = D;
-
-    //#pragma omp parallel for num_threads(thread_no)
-    for (int i = 0; i < nV; i++)
-    {
-      //  ParallelFor(0, nV, thread_no, [&](size_t i, size_t threadId) {
-      sp_mat v = D.col(i);
-      vec vals = nonzeros(v);
-      if (vals.n_elem > 0)
+      if (thread_no <= 0)
       {
-        double rho = min(vals);
-        vec negated_shifted_vals = -(vals - rho);
-        double target = log2(vals.n_elem);
+        thread_no = SYS_THREADS_DEF;
+      }
 
-        // Binary search to find optimal sigma
-        double sigma = 1.0;
-        double lo = 0.0;
-        double hi = DBL_MAX;
+      auto found = find_ab(spread, min_dist);
+      double a = found.first;
+      double b = found.second;
 
-        int j;
-        for (j = 0; j < 64; j++)
+      //a = UMAP_A[50];
+      //b = UMAP_B[50];
+
+      stdout_printf("Laying-out input network: method = %s, a = %.3f, b = %.3f (epochs = %d, threads=%d)\n", method.c_str(), a, b, n_epochs, thread_no);
+
+
+      bool move_other = true;
+      std::size_t grain_size = 1;
+      bool pcg_rand = true;
+      bool approx_pow = true;
+      bool batch = true;
+      string opt_name = "adam";
+      double alpha = ADAM_ALPHA, beta1 = ADAM_BETA1, beta2 = ADAM_BETA2, eps = ADAM_EPS, negative_sample_rate = NEGATIVE_SAMPLE_RATE;
+
+      field<mat> res(3);
+      std::mt19937_64 engine(seed);
+      
+      mat init_coors;    
+      if(initial_position.n_rows != G.n_rows) {
+        stderr_printf("Number of rows in the initial_position should match with the number of vertices in G\n");
+        FLUSH;
+        return (res);      
+      }
+
+      // Encode positive edges of the graph
+      sp_mat H = G;
+      if(presmooth_network == true) {
+        stdout_printf("%\tSmoothing similarities (sim2dist = %d) ... ", sim2dist);
+        if(sim2dist == 1) {
+          H.for_each([](sp_mat::elem_type &val) { val = 1 - val; });
+        } else if(sim2dist == 2) {
+          H.for_each([](sp_mat::elem_type &val) { val = (1 - val)*(1-val); });
+        }  else if(sim2dist == 3) {
+          H.for_each([](sp_mat::elem_type &val) { val = -log(val); });
+        }  else {
+          H.for_each([](sp_mat::elem_type &val) { val = 1 / val; });
+        } 
+        
+        int max_iter = 64;
+        double epsilon = 1e-6, bandwidth = 1.0, local_connectivity = 1.0, min_k_dist_scale = 1e-3, min_sim = 1e-8;
+
+        H = smoothKNN(H, max_iter, epsilon, bandwidth, local_connectivity, min_k_dist_scale, min_sim, thread_no);
+        stdout_printf("done\n");
+      }
+
+      double w_max = max(max(H));
+      H.clean(w_max/n_epochs);
+
+      sp_mat Ht = trans(H);
+      Ht.sync();
+
+      unsigned int nV = H.n_rows;
+      unsigned int nE = H.n_nonzero;
+      unsigned int nD = init_coors.n_rows;
+
+      vector<unsigned int> positive_head(nE);
+      vector<unsigned int> positive_tail(nE);
+      vector<float> epochs_per_sample(nE);
+
+      std::vector<unsigned int> positive_ptr(Ht.n_cols + 1);
+
+      int i = 0;
+      if(batch == false ) {
+        for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
         {
-          double obj = sum(exp(negated_shifted_vals / sigma));
-
-          if (abs(obj - target) < epsilon)
-          {
-            break;
-          }
-
-          if (target < obj)
-          {
-            hi = sigma;
-            sigma = 0.5 * (lo + hi);
-          }
-          else
-          {
-            lo = sigma;
-            if (hi == DBL_MAX)
-            {
-              sigma *= 2;
-            }
-            else
-            {
-              sigma = 0.5 * (lo + hi);
-            }
-          }
-        }
-
-        double obj = sum(exp(negated_shifted_vals / sigma));
-
-        for (sp_mat::col_iterator it = G.begin_col(i); it != G.end_col(i); ++it)
-        {
-          *it = max(1e-16, exp(-max(0.0, (*it) - rho) / sigma));
+          epochs_per_sample[i] = w_max / (*it);
+          positive_head[i] = it.row();
+          positive_tail[i] = it.col();
+          i++;
         }
       }
+      else {
+        for (sp_mat::iterator it = Ht.begin(); it != Ht.end(); ++it)
+        {
+          epochs_per_sample[i] = w_max / (*it);
+          positive_tail[i] = it.row();
+          positive_head[i] = it.col();
+          i++;
+        }      
+        for (int k = 0; k < Ht.n_cols + 1; k++)
+        {
+            positive_ptr[k] = Ht.col_ptrs[k];
+        }      
+      }
+
+
+      init_coors = trans(zscore(initial_position.cols(0, 1)));
+
+      // Initial coordinates of vertices (0-simplices)
+      vector<float> head_embedding(init_coors.n_elem);
+      fmat sub_coor = conv_to<fmat>::from(init_coors);
+      memcpy(head_embedding.data(), sub_coor.memptr(), sizeof(float) * head_embedding.size());
+      //vector<float> tail_embedding(head_embedding);
+      uwot::Coords coords = uwot::Coords(head_embedding);
+
+
+    UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
+                            coords.get_tail_embedding(), positive_head,
+                            positive_tail, positive_ptr, n_epochs,
+                            nV, nV, epochs_per_sample,
+                            learning_rate, negative_sample_rate, batch,
+                            thread_no, grain_size, opt_name, alpha, beta1, beta2, eps, engine);
+
+
+
+    stdout_printf("Computing 2D layout ... ");
+    FLUSH;
+    if (method == "umap") {
+      create_umap(umap_factory, a, b, gamma, approx_pow);
+    } else if (method == "tumap") {
+      create_tumap(umap_factory);
+    } else if (method == "largevis") {
+      create_largevis(umap_factory, gamma);
+    } else if (method == "pacmap") {
+      create_pacmap(umap_factory, a, b);
+    } else {
+        stderr_printf("Unknown method: %s\n", method.c_str());
+        FLUSH;
+        return (res);    
     }
-
-    return (G);
-  }
-
-  field<mat> layoutNetwork_xmap(sp_mat &G, mat initial_position, string alg_name, float spread, float min_dist, string opt_name, 
-                                unsigned int n_epochs,
-                                int seed, int thread_no)
-  {
-    if (thread_no <= 0)
-    {
-      thread_no = SYS_THREADS_DEF;
-    }
-
-    stdout_printf("Computing layout (%d threads):\n", thread_no); FLUSH;
-
-    field<mat> res(3);
-
-    mat init_coors = tzscoret(initial_position.rows(0, 2));
-
-    sp_mat H = G;
-    H.for_each([](sp_mat::elem_type &val)
-               { val = 1 / val; });
-    H = smoothKNN(H, thread_no);
-
-    unsigned int nV = H.n_rows;
-
-    auto found = find_ab(spread, min_dist);
-    double a_param = found.first;
-    double b_param = found.second;
-   
-
-    // linearized list of edges (1-simplices)
-    unsigned int nE = H.n_nonzero;
-    vector<unsigned int> positive_head(nE);
-    vector<unsigned int> positive_tail(nE);
-    vector<float> epochs_per_sample(nE);
-
-    int i = 0;
-    double w_max = max(max(H));
-    for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
-    {
-      epochs_per_sample[i] = w_max / (*it);
-      positive_head[i] = it.row();
-      positive_tail[i] = it.col();
-      i++;
-    }
-
-    // Initial coordinates of vertices (0-simplices)
-    vector<float> head_embedding(init_coors.n_cols * 2);
-    fmat sub_coor = conv_to<fmat>::from(init_coors.rows(0, 1));
-    float *ptr = sub_coor.memptr();
-    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
-    vector<float> tail_embedding; //(head_embedding);
-
-    sp_mat H2 = trans(H);
-    H2.sync();
-    std::vector<unsigned int> positive_ptr(H2.n_cols + 1);
-    for (int k = 0; k < H2.n_cols + 1; k++)
-    {
-        positive_ptr[k] = H2.col_ptrs[k];
-    }
-
-    stdout_printf("\tComputing 2D layout ... ");
-
-    // Stores linearized coordinates [x1, y1, x2, y2, ...]
-    vector<float> result;
-    mat coordinates(nV, 2);
-  size_t grain_size = 1;
-  result = optimize_layout_interface(
-      head_embedding, tail_embedding,
-      positive_head,
-      positive_tail,
-      positive_ptr, n_epochs,
-      nV, nV, epochs_per_sample, alg_name,
-      1.0, a_param, b_param, GAMMA, false, 
-      NEGATIVE_SAMPLE_RATE,
-      true, true, thread_no,
-      grain_size, true, false,
-      ADAM_ALPHA, ADAM_BETA1, ADAM_BETA2, ADAM_EPS, SGD_ALPHA, opt_name, seed);
-
-    fmat coordinates_float(result.data(), 2, nV);
-    coordinates = trans(conv_to<mat>::from(coordinates_float));
-
-    stdout_printf("done\n"); FLUSH;
-
-    /****************************
-   *  Compute 3D Embedding	*
-   ***************************/
-  mat coordinates_3D(nV, 3);
-  stdout_printf("\tComputing 3D layout ... ");
-
-  /*
-    head_embedding.clear();
-    head_embedding.resize(init_coors.n_cols * 3);
-    sub_coor = conv_to<fmat>::from(tzscoret(join_vert(trans(coordinates), init_coors.row(2))));
-    ptr = sub_coor.memptr();
-    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
-    tail_embedding = head_embedding;
+    fmat coordinates_float(coords.get_head_embedding().data(), 2, nV);
+    mat coordinates_2D = trans(conv_to<mat>::from(coordinates_float));
+    stdout_printf("done\n");
+    FLUSH;
 
 
-    result.clear();
 
-    // RUN HERE!
-
-    fmat coordinates_3D_float(result.data(), 3, nV);
-    coordinates_3D = trans(conv_to<mat>::from(coordinates_3D_float));
-*/
-    stdout_printf("done\n"); FLUSH;
-
-    /****************************
-   *  Now compute node colors *
-   ***************************/
-    stdout_printf("\tComputing node colors ... ");
-    mat RGB_colors = zeros(nV, 3);
-/*
-    mat U;
-    vec s;
-    mat V;
-    svd_econ(U, s, V, coordinates_3D, "left", "std");
-
-    mat Z = normalize_scores(U, 2, thread_no);
-
-    vec a = 75 * Z.col(0);
-    vec b = 75 * Z.col(1);
-
-    vec L = Z.col(2);
-    L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
-
-    double r_channel, g_channel, b_channel;
-    for (int i = 0; i < nV; i++)
-    {
-      Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
-
-      RGB_colors(i, 0) = min(1.0, max(0.0, r_channel));
-      RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
-      RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
-    }
-*/
-    stdout_printf("done\n"); FLUSH;
-
-    res(0) = coordinates;
-    res(1) = coordinates_3D;
-    res(2) = RGB_colors;
-    return res;
-  }
-
-  //G: MxM, inter_graph: MxN, reference_coordinates: DxN
-  field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level,
-                              unsigned int n_epochs,
-                              int layout_alg, int thread_no,
-                              int seed)
-  {
-    if (thread_no <= 0)
-    {
-      thread_no = SYS_THREADS_DEF;
-    }
-
-    int M = G.n_rows, N = inter_graph.n_cols, D = reference_coordinates.n_rows;
-    stdout_printf("Transforming graph G with %d vertices, using a reference of %d vertices, in a %dD dimensions (%d threads)\n", M, N, D, thread_no);
-
-    field<mat> res(3);
-
-    mat interpolated_coordinates = reference_coordinates * trans(inter_graph);
-
-    sp_mat H = G;
-    H.for_each([](sp_mat::elem_type &val)
-               { val = 1.0 / val; });
-    H = smoothKNN(H, thread_no);
-
-    unsigned int nV = H.n_rows;
-
-    if (layout_alg == UMAP_LAYOUT)
-    {
-      compactness_level = (compactness_level < 0) ? 0 : compactness_level;
-      compactness_level = (compactness_level > 100) ? 100 : compactness_level;
-      stdout_printf("\tParameters: compactness = %d, layout_epochs = %d\n",
-                    compactness_level, n_epochs); FLUSH;
-    }
-    else
-    {
-      stdout_printf("\tParameters: layout_epochs = %d\n", n_epochs); FLUSH;
-    }
-
-    double a_param;
-    double b_param;
-
-    // linearized list of edges (1-simplices)
-    unsigned int nE = H.n_nonzero;
-    vector<unsigned int> positive_head(nE);
-    vector<unsigned int> positive_tail(nE);
-    vector<float> epochs_per_sample(nE);
-
-    int i = 0;
-    double w_max = max(max(H));
-    for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
-    {
-      epochs_per_sample[i] = w_max / (*it);
-      positive_head[i] = it.row();
-      positive_tail[i] = it.col();
-      i++;
-    }
-
-    vector<float> head_embedding(interpolated_coordinates.n_cols * 2);
-    fmat sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 1));
-    float *ptr = sub_coor.memptr();
-    memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
-
-    vector<float> tail_embedding(reference_coordinates.n_cols * 2);
-    sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 1));
-    ptr = sub_coor.memptr();
-    memcpy(tail_embedding.data(), ptr, sizeof(float) * tail_embedding.size());
-
-    stdout_printf("\tComputing 2D layout ... ");
-    // Stores linearized coordinates [x1, y1, x2, y2, ...]
-    vector<float> result;
-
-/*
-    switch (layout_alg)
-    {
-    case TUMAP_LAYOUT:
-      result = optimize_layout_tumap(
-          head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-          false, seed);
-      break;
-    case UMAP_LAYOUT:
-      result = optimize_layout_umap(
-          head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-          NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
-      break;
-    default:
-      stderr_printf(
-          "Unknown layout algorithm chosen (%d). Switching to TUMAP.\n",
-          layout_alg);
-      result = optimize_layout_tumap(
-          head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
-          epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-          true, seed);
-      break;
-    }
-*/
-    fmat coordinates_float(result.data(), 2, nV);
-    mat coordinates = conv_to<mat>::from(coordinates_float);
-    coordinates = trans(coordinates);
-    res(0) = coordinates;
-
-    stdout_printf("done\n"); FLUSH;
-
-    if (D == 3)
-    {
-      /****************************
-     *  Compute 3D Embedding	*
-     ***************************/
-      stdout_printf("\tComputing 3D layout ... ");
-      result.clear();
-
+    mat coordinates_3D = zeros(nV, 3);
+    mat RGB_colors = zeros(nV, 3);    
+    if(initial_position.n_cols > 2) {
+      init_coors = trans(zscore(join_rows(coordinates_2D, initial_position.col(2))));
       head_embedding.clear();
-      head_embedding.resize(interpolated_coordinates.n_cols * 3);
-      sub_coor = conv_to<fmat>::from(interpolated_coordinates.rows(0, 2));
-      ptr = sub_coor.memptr();
-      memcpy(head_embedding.data(), ptr, sizeof(float) * head_embedding.size());
+      head_embedding.resize(nV * 3);
+      sub_coor = conv_to<fmat>::from(init_coors);
+      memcpy(head_embedding.data(), sub_coor.memptr(), sizeof(float) * head_embedding.size());
+      coords = uwot::Coords(head_embedding);
 
-      tail_embedding.clear();
-      tail_embedding.resize(reference_coordinates.n_cols * 3);
-      sub_coor = conv_to<fmat>::from(reference_coordinates.rows(0, 2));
-      ptr = sub_coor.memptr();
-      memcpy(tail_embedding.data(), ptr, sizeof(float) * tail_embedding.size());
 
-/*
-      switch (layout_alg)
-      {
-      case TUMAP_LAYOUT:
-        result = optimize_layout_tumap(
-            head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
-            epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-            true, seed);
-        break;
-      case UMAP_LAYOUT:
-        result = optimize_layout_umap(
-            head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
-            epochs_per_sample, a_param, b_param, GAMMA, LEARNING_RATE,
-            NEGATIVE_SAMPLE_RATE, false, thread_no, 1, false, seed);
-        break;
-      default:
-        result = optimize_layout_tumap(
-            head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, nV,
-            epochs_per_sample, LEARNING_RATE, NEGATIVE_SAMPLE_RATE, thread_no, 1,
-            false, seed);
-        break;
+      UmapFactory umap_factory_3D(move_other, pcg_rand, coords.get_head_embedding(),
+                              coords.get_tail_embedding(), positive_head,
+                              positive_tail, positive_ptr, n_epochs / 2,
+                              nV, nV, epochs_per_sample,
+                              learning_rate, negative_sample_rate, batch,
+                              thread_no, grain_size, opt_name, alpha, beta1, beta2, eps, engine);
+
+
+
+      stdout_printf("Computing 3D layout ... ");
+      FLUSH;
+      if (method == "umap") {
+        create_umap(umap_factory_3D, a, b, gamma, approx_pow);
+      } else if (method == "tumap") {
+        create_tumap(umap_factory_3D);
+      } else if (method == "largevis") {
+        create_largevis(umap_factory_3D, gamma);
+      } else if (method == "pacmap") {
+        create_pacmap(umap_factory_3D, a, b);
+      } else {
+          stderr_printf("Unknown method: %s\n", method.c_str());
+          FLUSH;
+          return (res);    
       }
-*/
-      fmat coordinates_3D_float(result.data(), 3, nV);
-      mat coordinates_3D = conv_to<mat>::from(coordinates_3D_float);
-      coordinates_3D = trans(coordinates_3D);
+      fmat coordinates_float(coords.get_head_embedding().data(), 3, nV);
+      coordinates_3D = trans(conv_to<mat>::from(coordinates_float));
+      stdout_printf("done\n");
+      FLUSH;
 
-      stdout_printf("done\n"); FLUSH;
 
-      /****************************
-     *  Now compute node colors *
-     ***************************/
-      stdout_printf("\tComputing node colors ... ");
-
+      stdout_printf("Computing de novo node colors ... ");
+      FLUSH;
       mat U;
       vec s;
       mat V;
-      svd_econ(U, s, V, coordinates_3D);
-      mat Z = zscore(U);
+      svd_econ(U, s, V, coordinates_3D, "left", "std");
+
+      mat Z = normalize_scores(U.cols(0, 2), 1, thread_no);
 
       vec a = 75 * Z.col(0);
       vec b = 75 * Z.col(1);
@@ -576,7 +649,6 @@ namespace ACTIONet
       L = 25.0 + 70.0 * (L - min(L)) / (max(L) - min(L));
 
       double r_channel, g_channel, b_channel;
-      mat RGB_colors = zeros(nV, 3);
       for (int i = 0; i < nV; i++)
       {
         Lab2Rgb(&r_channel, &g_channel, &b_channel, L(i), a(i), b(i));
@@ -585,14 +657,161 @@ namespace ACTIONet
         RGB_colors(i, 1) = min(1.0, max(0.0, g_channel));
         RGB_colors(i, 2) = min(1.0, max(0.0, b_channel));
       }
-
       stdout_printf("done\n");
       FLUSH;
-      res(1) = coordinates_3D;
-      res(2) = RGB_colors; //RGB_colors;
+
     }
-    return res;
+
+    res(0) = coordinates_2D;
+    res(1) = coordinates_3D;
+    res(2) = RGB_colors;
+
+    return (res);
   }
 
+ mat transform_layout(sp_mat &G, sp_mat &inter_graph, mat &reference_layout, bool presmooth_network, const std::string &method, 
+      double min_dist, double spread, double gamma, unsigned int n_epochs, int thread_no, int seed, double learning_rate, int sim2dist) {
+      
+      mat coordinates;
+      if (thread_no <= 0)
+      {
+        thread_no = SYS_THREADS_DEF;
+      }
+      
+      auto found = find_ab(spread, min_dist);
+      double a = found.first;
+      double b = found.second;
+
+      //a = UMAP_A[50];
+      //b = UMAP_B[50];
+
+      int Nr = inter_graph.n_rows, Nq = inter_graph.n_cols, D = reference_layout.n_cols;
+      stdout_printf("Transforming graph G with %d vertices, using a reference of %d vertices, in a %dD dimensions (%d threads)\n", Nq, Nr, D, thread_no);
+      stdout_printf("\tmethod = %s, a = %.3f, b = %.3f (epochs = %d, threads=%d)\n", method.c_str(), a, b, n_epochs, thread_no);
+
+      sp_mat W = trans(normalize_adj(inter_graph, 0));
+      mat query_layout = spmat_mat_product_parallel(W, reference_layout, thread_no);
+
+
+      bool move_other = false;
+      std::size_t grain_size = 1;
+      bool pcg_rand = true;
+      bool approx_pow = true;
+      bool batch = true;
+      string opt_name = "adam";
+      double alpha = ADAM_ALPHA, beta1 = ADAM_BETA1, beta2 = ADAM_BETA2, eps = ADAM_EPS, negative_sample_rate = NEGATIVE_SAMPLE_RATE;
+
+      field<mat> res(3);
+      std::mt19937_64 engine(seed);
+      /*
+      if(reference_layout.n_rows != G.n_rows) {
+        stderr_printf("Number of rows in the reference_layout should match with the number of vertices in G\n");
+        FLUSH;
+        return (coordinates);      
+      }
+      */
+
+      // Encode positive edges of the graph
+      sp_mat H = G;
+      if(presmooth_network == true) {
+        stdout_printf("%\tSmoothing similarities (sim2dist = %d) ... ", sim2dist);
+        if(sim2dist == 1) {
+          H.for_each([](sp_mat::elem_type &val) { val = 1 - val; });
+        } else if(sim2dist == 2) {
+          H.for_each([](sp_mat::elem_type &val) { val = (1 - val)*(1-val); });
+        }  else if(sim2dist == 3) {
+          H.for_each([](sp_mat::elem_type &val) { val = -log(val); });
+        }  else {
+          H.for_each([](sp_mat::elem_type &val) { val = 1 / val; });
+        } 
+        
+        int max_iter = 64;
+        double epsilon = 1e-6, bandwidth = 1.0, local_connectivity = 1.0, min_k_dist_scale = 1e-3, min_sim = 1e-8;
+
+        H = smoothKNN(H, max_iter, epsilon, bandwidth, local_connectivity, min_k_dist_scale, min_sim, thread_no);
+        stdout_printf("done\n");
+      }
+
+      double w_max = max(max(H));
+      H.clean(w_max/n_epochs);
+
+      sp_mat Ht = trans(H);
+      Ht.sync();
+
+      unsigned int nE = H.n_nonzero;
+      vector<unsigned int> positive_head(nE);
+      vector<unsigned int> positive_tail(nE);
+      vector<float> epochs_per_sample(nE);
+
+      std::vector<unsigned int> positive_ptr(Ht.n_cols + 1);
+
+      int i = 0;
+      if(batch == false ) {
+        for (sp_mat::iterator it = H.begin(); it != H.end(); ++it)
+        {
+          epochs_per_sample[i] = w_max / (*it);
+          positive_head[i] = it.row();
+          positive_tail[i] = it.col();
+          i++;
+        }
+      }
+      else {
+        for (sp_mat::iterator it = Ht.begin(); it != Ht.end(); ++it)
+        {
+          epochs_per_sample[i] = w_max / (*it);
+          positive_tail[i] = it.row();
+          positive_head[i] = it.col();
+          i++;
+        }      
+        for (int k = 0; k < Ht.n_cols + 1; k++)
+        {
+            positive_ptr[k] = Ht.col_ptrs[k];
+        }      
+      }
+
+
+      query_layout = trans(query_layout);
+      reference_layout = trans(reference_layout);
+
+      // Initial coordinates of vertices (0-simplices)
+      vector<float> head_embedding(query_layout.n_elem);
+      fmat sub_coor = conv_to<fmat>::from(query_layout);
+      memcpy(head_embedding.data(), sub_coor.memptr(), sizeof(float) * head_embedding.size());
+      vector<float> tail_embedding(reference_layout.n_elem);
+      sub_coor = conv_to<fmat>::from(reference_layout);
+      memcpy(tail_embedding.data(), sub_coor.memptr(), sizeof(float) * tail_embedding.size());
+      uwot::Coords coords = uwot::Coords(head_embedding, tail_embedding);
+
+
+    UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
+                            coords.get_tail_embedding(), positive_head,
+                            positive_tail, positive_ptr, n_epochs,
+                            Nq, Nr, epochs_per_sample,
+                            learning_rate, negative_sample_rate, batch,
+                            thread_no, grain_size, opt_name, alpha, beta1, beta2, eps, engine);
+
+    stdout_printf("Transforming layout ... ");
+    FLUSH;
+    if (method == "umap") {
+      create_umap(umap_factory, a, b, gamma, approx_pow);
+    } else if (method == "tumap") {
+      create_tumap(umap_factory);
+    } else if (method == "largevis") {
+      create_largevis(umap_factory, gamma);
+    } else if (method == "pacmap") {
+      create_pacmap(umap_factory, a, b);
+    } else {
+        stderr_printf("Unknown method: %s\n", method.c_str());
+        FLUSH;
+        return (coordinates);    
+    }
+    fmat coordinates_float(coords.get_head_embedding().data(), 2, Nq);
+    coordinates = trans(conv_to<mat>::from(coordinates_float));
+    stdout_printf("done\n");
+    FLUSH;
+
+
+    return (coordinates);
+  }
 
 } // namespace ACTIONet
