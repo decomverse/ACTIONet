@@ -259,7 +259,7 @@ namespace ACTIONet
     // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
     // outlier_threshold, int reduced_dim);
     unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
-                                         double backbone_density = 0.5, int outlier_threshold = 1, int thread_no = 1);
+                                         double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0);
 
     // Main functions to build an interaction network from multi-level archetypal
     // decompositions
@@ -286,16 +286,13 @@ namespace ACTIONet
 
     mat computeFullSim(mat &H, int thread_no);
 
-    // SGD-based force-directed layout (adopted and modified from the UMAP
-    // implementation)
-    field<mat> layoutNetwork_xmap(sp_mat &G, mat initial_position, string alg_name = "umap" /*umap,tumap,largevis,pacmap*/, float spread = 1.0, float min_dist = 0.01, string opt_name = "adam", 
-                                unsigned int n_epochs = 1000,
-                                int seed = 0, int thread_no = 0);
+    // SGD-based force-directed layout (adopted and modified from the UMAP (uwot)
+    field<mat> layoutNetwork_xmap(sp_mat &G, mat &initial_position, bool presmooth_network = false, const std::string &method = "umap", 
+      double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2);
 
-    field<mat> transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level = 50,
-                                unsigned int n_epochs = 500,
-                                int layout_alg = TUMAP_LAYOUT, int thread_no = 0,
-                                int seed = 0);
+     mat transform_layout(sp_mat &G, sp_mat &inter_graph, mat &reference_layout, bool presmooth_network, const std::string &method, 
+      double min_dist, double spread, double gamma, unsigned int n_epochs, int thread_no, int seed, double learning_rate, int sim2dist);
+
 
     // Methods for pseudo-bulk construction
     mat compute_pseudo_bulk_per_archetype(sp_mat &S, mat &H);
@@ -433,23 +430,6 @@ namespace ACTIONet
     mat run_simplex_regression_FW(mat &A, mat &B, int max_iter = -1, double min_diff = 0.01);
     field<mat> recursiveNMU_mine(mat M, int dim, int max_SVD_iter, int max_iter_inner);
     field<mat> recursiveNMU(mat M, int dim, int max_SVD_iter, int max_iter_inner);
-
-    sp_mat smoothKNN(sp_mat D, int thread_no);
-
-
-    std::vector<float> optimize_layout_interface(
-        std::vector<float> & head_embedding, std::vector<float> &tail_embedding,
-        const std::vector<unsigned int> positive_head,
-        const std::vector<unsigned int> positive_tail,
-        const std::vector<unsigned int> positive_ptr, unsigned int n_epochs,
-        unsigned int n_head_vertices, unsigned int n_tail_vertices,
-        const std::vector<float> epochs_per_sample, const std::string &method,
-        float initial_alpha, float a, float b, float gamma, bool approx_pow, float negative_sample_rate,
-        bool pcg_rand, bool batch, std::size_t n_threads,
-        std::size_t grain_size, bool move_other, bool verbose,
-        float adam_alpha, float adam_beta1, float adam_beta2, float adam_eps,
-        float sgd_alpha, string opt_name, int seed);
-
 
 
 } // namespace ACTIONet

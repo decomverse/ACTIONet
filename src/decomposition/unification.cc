@@ -124,6 +124,7 @@ namespace ACTIONet
     return (P2);
   }
 
+
   field<mat> nndsvd(mat &A, int dim = 100, int max_iter = 5)
   {
     dim = std::min(dim, (int)A.n_cols);
@@ -466,7 +467,8 @@ namespace ACTIONet
   unification_results unify_archetypes(mat &S_r, mat &C_stacked,
                                        mat &H_stacked,
                                        double backbone_density,
-                                       int outlier_threshold,
+                                       double resolution,
+                                       int min_cluster_size,
                                        int thread_no)
   {
     if (thread_no <= 0)
@@ -475,7 +477,7 @@ namespace ACTIONet
     }
 
     stdout_printf("Unifying %d archetypes (%d threads):\n", C_stacked.n_cols, thread_no);
-    stdout_printf("\tParameters: backbone density = %0.2f, outlier threshold (on core #) = %d\n", backbone_density, outlier_threshold);
+    //stdout_printf("\tParameters: backbone density = %0.2f, outlier threshold (on core #) = %d\n", backbone_density, outlier_threshold);
     FLUSH;
 
     unification_results output;
@@ -485,114 +487,47 @@ namespace ACTIONet
     mat H_arch = spmat_mat_product_parallel(H_stacked_sp, C_stacked, thread_no);
     H_arch.replace(datum::nan, 0); // replace each NaN with 0
 
-    int dim = min((int)H_arch.n_cols, 100);
-    field<mat> NMU_out = recursiveNMU(H_arch, dim, 1000, 100);
-
-    mat W_NMU = NMU_out(0);
-    mat H_NMU = NMU_out(1);
-    vec factor_weight1 = NMU_out(2);
-    vec obj = NMU_out(3);
-    vec factor_weight3 = NMU_out(4);
-
+    SPA_results SPA_out = run_SPA(H_arch, H_arch.n_cols);
+    uvec candidates = SPA_out.selected_columns;
 
     double M = 16, ef_construction = 200, ef = 200;
     sp_mat backbone = ACTIONet::buildNetwork(H_arch, "k*nn", "jsd", backbone_density, 1, M, ef_construction, ef, true, 10);
     output.dag_adj = backbone;
 
-    //uvec filtered_edges = find(backbone < 0.75);
-    //backbone(filtered_edges).zeros();
-    //mat backbone_full = mat(backbone);
-    //backbone = sp_mat(clamp(backbone_full, 0.75, 1.0));
-
-    // (solved maximum independent set approximately):
-    // picks maximum number of vertices in a graph such that no two selected vertices are neighbors
-    //vec stats = vec(sum(backbone,1));
-    //vec stats = sum(H_stacked, 1);
-    //stats = (stats - mean(stats)) / stddev(stats);
-
-    vec cn = conv_to<vec>::from(compute_core_number(backbone));    
-
-    int next_color = 1;  
-    vec arch_colors = zeros(backbone.n_rows);
-    vec blacklisted = zeros(backbone.n_rows);
-
-    uvec outlier_archs = find(cn < outlier_threshold);
-    blacklisted(outlier_archs).ones();
-    printf("Removing %d  outlier archetypes: %d (%d)\n", outlier_archs.n_elem, sum(blacklisted));
-
-    double sum_beta = 0, sum_beta_square = 0, lambda = datum::inf, cur_dist, old_dist;    
-    for (int i = 0; i < H_NMU.n_cols; i++)
-    {
-      if(i > 0) {
-        double cur_dist = -log(obj(i));
-
-        sum_beta = sum_beta + old_dist;
-        sum_beta_square = sum_beta_square + old_dist;
+    vec initial_clusters = zeros(backbone.n_rows);
+    for (int i = backbone.n_rows-1; i >= 0; i--) {
+        int v = candidates(i);
+        uvec N = find(vec(backbone.col(v)) > 0);
         
-        int k = next_color-1;
-        lambda = (1/k) * ( sum_beta + sqrt( k  + sum_beta*sum_beta - k * sum_beta_square ) ) ; 
-        
-        if(lambda < cur_dist) {
-          printf("** BoO!!\n");
-        }
-
-        old_dist = cur_dist;
-      }
-
-      int v = index_max(H_NMU.col(i));
-      if( blacklisted(v) != 0 ) /*outlier archetype*/
-        continue;
-
-      uvec N = find(vec(backbone.col(v)) > 0);
-
-      if( (arch_colors(v) != 0) || (sum(arch_colors(N)) > 0) /*v or one of its neighbors is already assigned*/ )
-        continue;
-      
-      
-      arch_colors(v) = next_color;
-      arch_colors(N) = ones(N.n_elem) * next_color;
-
-      arch_colors = LPA(backbone, arch_colors, 0, 5, 1);
-
-      // Re-inforce current neighborhood
-      /*
-      arch_colors(v) = next_color;
-      arch_colors(N) = ones(N.n_elem) * next_color;
-      */
-
-      printf("%d- %d LPA on %d (%d) -- w = %.2e, h = %.2e, weights = (%.2e, %.2e, %.2e)\n", i, v, sum(arch_colors == next_color), next_color, sum(W_NMU.col(i)), sum(H_NMU.col(i)), obj(i), factor_weight1(i), factor_weight3(i));
-
-      next_color ++;
-
-
+        initial_clusters(v) = i;
+        initial_clusters(N) = i*ones(N.n_elem);
     }
     
+    uvec initial_clusters_uvec = conv_to<uvec>::from(initial_clusters);
+    vec arch_clusters = ACTIONet::unsigned_cluster(backbone, resolution, initial_clusters_uvec, 0);
+    int idx = 1;
+    for (; idx <= max(arch_clusters); idx++) {
+      uvec selected_archs = find(arch_clusters == idx);
+      int cc = selected_archs.n_elem;
+      if(cc < min_cluster_size) {
+        break;
+      }
+    }
+    int arch_no = idx-1;
 
-
-
+    stdout_printf("# unified archetypes: %d\n", arch_no);
+    output.selected_archetypes = conv_to<uvec>::from(arch_clusters-1);  
 
     // Compute unified archetypes
-    int state_no = 0;
-    mat C_unified = zeros(C_stacked.n_rows, next_color-1); 
-    for(int i = 1; i <= next_color-1; i++) {
-      uvec cur_archs = find(arch_colors == i);
-      if(cur_archs.n_elem == 0) {
-        continue;
-      }
-      else if(cur_archs.n_elem == 1) {
-        C_unified.col(state_no) = C_stacked.col(cur_archs(0));
+    mat C_unified = zeros(C_stacked.n_rows, arch_no); 
+    for(idx = 1; idx <= arch_no; idx++) {
+      uvec cur_archs = find(arch_clusters == idx);
+      if(cur_archs.n_elem == 1) {
+        C_unified.col(idx-1) = C_stacked.col(cur_archs(0));
       } else {
-        C_unified.col(state_no) = mean(C_stacked.cols(cur_archs), 1);
+        C_unified.col(idx-1) = mean(C_stacked.cols(cur_archs), 1);
       }
-      arch_colors(cur_archs) = state_no*ones(cur_archs.n_elem);
-      state_no ++;
     }
-    C_unified = C_unified.cols(span(0, state_no-1));
-
-    stdout_printf("# unified archetypes: %d\n", state_no);
-    output.selected_archetypes = conv_to<uvec>::from(arch_colors);
-
-
     mat W_r_unified = S_r * C_unified;
 
     mat H_unified = run_simplex_regression(W_r_unified, S_r, false);
