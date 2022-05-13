@@ -69,7 +69,7 @@ const double UMAP_B[101] = {
     1.92923479503841};
 
 
-#define NEGATIVE_SAMPLE_RATE 5.0
+#define NEGATIVE_SAMPLE_RATE 3.0
 #define UMAP_SEED 0
 #define GAMMA 1.0
 #define ADAM_ALPHA 1.0 /*same as learning_rate*/
@@ -669,7 +669,7 @@ namespace ACTIONet
     return (res);
   }
 
- mat transform_layout(sp_mat &G, sp_mat &inter_graph, mat &reference_layout, bool presmooth_network, const std::string &method, 
+ mat transform_layout(sp_mat &G, mat &reference_layout, bool presmooth_network, const std::string &method, 
       double min_dist, double spread, double gamma, unsigned int n_epochs, int thread_no, int seed, double learning_rate, int sim2dist) {
       
       mat coordinates;
@@ -685,11 +685,18 @@ namespace ACTIONet
       //a = UMAP_A[50];
       //b = UMAP_B[50];
 
-      int Nr = inter_graph.n_rows, Nq = inter_graph.n_cols, D = reference_layout.n_cols;
+      if(reference_layout.n_rows != G.n_cols) {
+        stderr_printf("Number of rows in the reference_layout should match with the number of columns in G\n");
+        FLUSH;
+        return (coordinates);      
+      }
+     
+      int Nq = G.n_rows, Nr = G.n_cols, D = reference_layout.n_cols;
       stdout_printf("Transforming graph G with %d vertices, using a reference of %d vertices, in a %dD dimensions (%d threads)\n", Nq, Nr, D, thread_no);
       stdout_printf("\tmethod = %s, a = %.3f, b = %.3f (epochs = %d, threads=%d)\n", method.c_str(), a, b, n_epochs, thread_no);
 
-      sp_mat W = trans(normalize_adj(inter_graph, 0));
+      
+      sp_mat W = normalize_adj(G, 1);
       mat query_layout = spmat_mat_product_parallel(W, reference_layout, thread_no);
 
 
@@ -703,34 +710,10 @@ namespace ACTIONet
 
       field<mat> res(3);
       std::mt19937_64 engine(seed);
-      /*
-      if(reference_layout.n_rows != G.n_rows) {
-        stderr_printf("Number of rows in the reference_layout should match with the number of vertices in G\n");
-        FLUSH;
-        return (coordinates);      
-      }
-      */
+
 
       // Encode positive edges of the graph
       sp_mat H = G;
-      if(presmooth_network == true) {
-        stdout_printf("%\tSmoothing similarities (sim2dist = %d) ... ", sim2dist);
-        if(sim2dist == 1) {
-          H.for_each([](sp_mat::elem_type &val) { val = 1 - val; });
-        } else if(sim2dist == 2) {
-          H.for_each([](sp_mat::elem_type &val) { val = (1 - val)*(1-val); });
-        }  else if(sim2dist == 3) {
-          H.for_each([](sp_mat::elem_type &val) { val = -log(val); });
-        }  else {
-          H.for_each([](sp_mat::elem_type &val) { val = 1 / val; });
-        } 
-        
-        int max_iter = 64;
-        double epsilon = 1e-6, bandwidth = 1.0, local_connectivity = 1.0, min_k_dist_scale = 1e-3, min_sim = 1e-8;
-
-        H = smoothKNN(H, max_iter, epsilon, bandwidth, local_connectivity, min_k_dist_scale, min_sim, thread_no);
-        stdout_printf("done\n");
-      }
 
       double w_max = max(max(H));
       H.clean(w_max/n_epochs);
