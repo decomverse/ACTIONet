@@ -22,7 +22,7 @@ run.ACTIONet(
   layout_spread = 1,
   layout_min_dist = 1,
   layout_gamma = 1,
-  layout_epochs = 1000,
+  layout_epochs = 250,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   unification_backbone_density = 0.5,
@@ -32,6 +32,7 @@ run.ACTIONet(
   compute_specificity_parallel = FALSE,
   thread_no = 0,
   full_trace = FALSE,
+  backbone.density = 0.5,
   seed = 0
 )
 }
@@ -63,7 +64,7 @@ The larger the value, the more archetypes will be filtered out. (default=-3)}
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)}
 
-\item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
+\item{layout_epochs}{Number of epochs for SGD algorithm. (default=00)}
 
 \item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
 

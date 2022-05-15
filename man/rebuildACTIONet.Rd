@@ -10,8 +10,10 @@ rebuildACTIONet(
   network_metric = "jsd",
   algorithm = "k*nn",
   mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 1000,
+  layout_spread = 1,
+  layout_min_dist = 1,
+  layout_gamma = 1,
+  layout_epochs = 250,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   thread_no = 0,
@@ -32,9 +34,7 @@ rebuildACTIONet(
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)}
 
-\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
-
-\item{layout_epochs}{Number of epochs for SGD algorithm. (default=1000)}
+\item{layout_epochs}{Number of epochs for SGD algorithm. (default=250)}
 
 \item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
 
@@ -47,6 +47,8 @@ rebuildACTIONet(
 \item{net_slot_out}{Name of slot in colMaps(ace) to store ACTIONet adjacency matrix. (default='ACTIONet')}
 
 \item{seed}{Seed for random initialization. (default=0)}
+
+\item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
 }
 \value{
 ace Updated ace object

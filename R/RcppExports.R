@@ -1026,8 +1026,8 @@ mat_mat_product_parallel <- function(A, B, thread_no) {
     .Call(`_ACTIONet_mat_mat_product_parallel`, A, B, thread_no)
 }
 
-transform_layout <- function(G, inter_graph, reference_coordinates, compactness_level = 50L, n_epochs = 500L, layout_alg = 0L, thread_no = 0L, seed = 0L) {
-    .Call(`_ACTIONet_transform_layout`, G, inter_graph, reference_coordinates, compactness_level, n_epochs, layout_alg, thread_no, seed)
+transform_layout <- function(G, reference_coordinates, method = "umap", presmooth_network = FALSE, min_dist = 1, spread = 1, gamma = 1.0, n_epochs = 500L, thread_no = 0L, seed = 0L, learning_rate = 1.0, sim2dist = 2L) {
+    .Call(`_ACTIONet_transform_layout`, G, reference_coordinates, method, presmooth_network, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist)
 }
 
 normalize_adj <- function(G, norm_type = 0L) {

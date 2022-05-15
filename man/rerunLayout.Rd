@@ -9,10 +9,10 @@ rerunLayout(
   spread = 1,
   min_dist = 1,
   gamma = 1,
-  epochs = 1000,
+  n_epochs = 250,
   algorithm = c("umap", "tumap"),
   thread_no = 0,
-  reduction_slot = "ACTION",
+  init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
   seed = 0
 )
@@ -22,21 +22,21 @@ rerunLayout(
 
 \item{thread_no}{Number of parallel threads (default=0).}
 
-\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel (default='ACTION').}
-
 \item{net_slot}{Slot in colMaps(ace) containing ACTIONet adjacency matrix (default='ACTIONet').}
 
 \item{seed}{Seed for random initialization (default=0).}
 
 \item{layout_compactness}{A value between 0-100, indicating the compactness of ACTIONet layout (default=50).}
 
-\item{layout_epochs}{Number of epochs for SGD algorithm (default=1000).}
+\item{layout_epochs}{Number of epochs for SGD algorithm (default=250).}
 
 \item{layout_algorithm}{Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")}
 
 \item{network_density}{Density factor of ACTIONet graph (default=1).}
 
 \item{mutual_edges_only}{Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).}
+
+\item{reduction_slot}{Slot in colMaps(ace) containing reduced kernel (default='ACTION').}
 }
 \value{
 ace Updated ace object

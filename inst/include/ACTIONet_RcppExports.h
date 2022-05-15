@@ -1935,17 +1935,17 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline List transform_layout(sp_mat& G, sp_mat& inter_graph, mat reference_coordinates, int compactness_level = 50, unsigned int n_epochs = 500, int layout_alg = 0, int thread_no = 0, int seed = 0) {
-        typedef SEXP(*Ptr_transform_layout)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline mat transform_layout(sp_mat& G, mat reference_coordinates, const std::string& method = "umap", bool presmooth_network = false, double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2) {
+        typedef SEXP(*Ptr_transform_layout)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_transform_layout p_transform_layout = NULL;
         if (p_transform_layout == NULL) {
-            validateSignature("List(*transform_layout)(sp_mat&,sp_mat&,mat,int,unsigned int,int,int,int)");
+            validateSignature("mat(*transform_layout)(sp_mat&,mat,const std::string&,bool,double,double,double,unsigned int,int,int,double,int)");
             p_transform_layout = (Ptr_transform_layout)R_GetCCallable("ACTIONet", "_ACTIONet_transform_layout");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_transform_layout(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(inter_graph)), Shield<SEXP>(Rcpp::wrap(reference_coordinates)), Shield<SEXP>(Rcpp::wrap(compactness_level)), Shield<SEXP>(Rcpp::wrap(n_epochs)), Shield<SEXP>(Rcpp::wrap(layout_alg)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(seed)));
+            rcpp_result_gen = p_transform_layout(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(reference_coordinates)), Shield<SEXP>(Rcpp::wrap(method)), Shield<SEXP>(Rcpp::wrap(presmooth_network)), Shield<SEXP>(Rcpp::wrap(min_dist)), Shield<SEXP>(Rcpp::wrap(spread)), Shield<SEXP>(Rcpp::wrap(gamma)), Shield<SEXP>(Rcpp::wrap(n_epochs)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(seed)), Shield<SEXP>(Rcpp::wrap(learning_rate)), Shield<SEXP>(Rcpp::wrap(sim2dist)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -1953,7 +1953,7 @@ namespace ACTIONet {
             throw Rcpp::LongjumpException(rcpp_result_gen);
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<List >(rcpp_result_gen);
+        return Rcpp::as<mat >(rcpp_result_gen);
     }
 
     inline sp_mat normalize_adj(sp_mat& G, int norm_type = 0) {

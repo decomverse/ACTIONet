@@ -2401,20 +2401,12 @@ mat mat_mat_product_parallel(mat &A, mat &B, int thread_no)
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-List transform_layout(sp_mat &G, sp_mat &inter_graph, mat reference_coordinates, int compactness_level = 50,
-                      unsigned int n_epochs = 500,
-                      int layout_alg = 0, int thread_no = 0,
-                      int seed = 0)
-{
-  field<mat> res = ACTIONet::transform_layout(G, inter_graph, reference_coordinates, compactness_level,
-                                              n_epochs, layout_alg, thread_no, seed);
+mat transform_layout(sp_mat &G, mat reference_coordinates, const std::string &method = "umap", bool presmooth_network = false, 
+  double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2) {
 
-  List out_list;
-  out_list["coordinates"] = res(0);
-  out_list["coordinates_3D"] = res(1);
-  out_list["colors"] = res(2);
+  mat coors = ACTIONet::transform_layout(G, reference_coordinates, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist);
 
-  return (out_list);
+  return (coors);
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]
