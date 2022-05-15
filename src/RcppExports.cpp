@@ -3407,27 +3407,31 @@ RcppExport SEXP _ACTIONet_mat_mat_product_parallel(SEXP ASEXP, SEXP BSEXP, SEXP 
     return rcpp_result_gen;
 }
 // transform_layout
-List transform_layout(sp_mat& G, sp_mat& inter_graph, mat reference_coordinates, int compactness_level, unsigned int n_epochs, int layout_alg, int thread_no, int seed);
-static SEXP _ACTIONet_transform_layout_try(SEXP GSEXP, SEXP inter_graphSEXP, SEXP reference_coordinatesSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP layout_algSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
+mat transform_layout(sp_mat& G, mat reference_coordinates, const std::string& method, bool presmooth_network, double min_dist, double spread, double gamma, unsigned int n_epochs, int thread_no, int seed, double learning_rate, int sim2dist);
+static SEXP _ACTIONet_transform_layout_try(SEXP GSEXP, SEXP reference_coordinatesSEXP, SEXP methodSEXP, SEXP presmooth_networkSEXP, SEXP min_distSEXP, SEXP spreadSEXP, SEXP gammaSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP, SEXP seedSEXP, SEXP learning_rateSEXP, SEXP sim2distSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
-    Rcpp::traits::input_parameter< sp_mat& >::type inter_graph(inter_graphSEXP);
     Rcpp::traits::input_parameter< mat >::type reference_coordinates(reference_coordinatesSEXP);
-    Rcpp::traits::input_parameter< int >::type compactness_level(compactness_levelSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< bool >::type presmooth_network(presmooth_networkSEXP);
+    Rcpp::traits::input_parameter< double >::type min_dist(min_distSEXP);
+    Rcpp::traits::input_parameter< double >::type spread(spreadSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
-    Rcpp::traits::input_parameter< int >::type layout_alg(layout_algSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(transform_layout(G, inter_graph, reference_coordinates, compactness_level, n_epochs, layout_alg, thread_no, seed));
+    Rcpp::traits::input_parameter< double >::type learning_rate(learning_rateSEXP);
+    Rcpp::traits::input_parameter< int >::type sim2dist(sim2distSEXP);
+    rcpp_result_gen = Rcpp::wrap(transform_layout(G, reference_coordinates, method, presmooth_network, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_transform_layout(SEXP GSEXP, SEXP inter_graphSEXP, SEXP reference_coordinatesSEXP, SEXP compactness_levelSEXP, SEXP n_epochsSEXP, SEXP layout_algSEXP, SEXP thread_noSEXP, SEXP seedSEXP) {
+RcppExport SEXP _ACTIONet_transform_layout(SEXP GSEXP, SEXP reference_coordinatesSEXP, SEXP methodSEXP, SEXP presmooth_networkSEXP, SEXP min_distSEXP, SEXP spreadSEXP, SEXP gammaSEXP, SEXP n_epochsSEXP, SEXP thread_noSEXP, SEXP seedSEXP, SEXP learning_rateSEXP, SEXP sim2distSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_transform_layout_try(GSEXP, inter_graphSEXP, reference_coordinatesSEXP, compactness_levelSEXP, n_epochsSEXP, layout_algSEXP, thread_noSEXP, seedSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_transform_layout_try(GSEXP, reference_coordinatesSEXP, methodSEXP, presmooth_networkSEXP, min_distSEXP, spreadSEXP, gammaSEXP, n_epochsSEXP, thread_noSEXP, seedSEXP, learning_rateSEXP, sim2distSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -4035,7 +4039,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("sp_mat(*spmat_spmat_product)(sp_mat&,sp_mat&)");
         signatures.insert("mat(*spmat_mat_product_parallel)(sp_mat&,mat&,int)");
         signatures.insert("mat(*mat_mat_product_parallel)(mat&,mat&,int)");
-        signatures.insert("List(*transform_layout)(sp_mat&,sp_mat&,mat,int,unsigned int,int,int,int)");
+        signatures.insert("mat(*transform_layout)(sp_mat&,mat,const std::string&,bool,double,double,double,unsigned int,int,int,double,int)");
         signatures.insert("sp_mat(*normalize_adj)(sp_mat&,int)");
         signatures.insert("mat(*compute_network_diffusion_Chebyshev)(sp_mat&,mat&,int,double,int,double)");
         signatures.insert("mat(*compute_network_diffusion_approx)(sp_mat&,mat&,int,double,int,double,int)");
@@ -4254,7 +4258,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_spmat_spmat_product", (DL_FUNC) &_ACTIONet_spmat_spmat_product, 2},
     {"_ACTIONet_spmat_mat_product_parallel", (DL_FUNC) &_ACTIONet_spmat_mat_product_parallel, 3},
     {"_ACTIONet_mat_mat_product_parallel", (DL_FUNC) &_ACTIONet_mat_mat_product_parallel, 3},
-    {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 8},
+    {"_ACTIONet_transform_layout", (DL_FUNC) &_ACTIONet_transform_layout, 12},
     {"_ACTIONet_normalize_adj", (DL_FUNC) &_ACTIONet_normalize_adj, 2},
     {"_ACTIONet_compute_network_diffusion_Chebyshev", (DL_FUNC) &_ACTIONet_compute_network_diffusion_Chebyshev, 6},
     {"_ACTIONet_compute_network_diffusion_approx", (DL_FUNC) &_ACTIONet_compute_network_diffusion_approx, 7},

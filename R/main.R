@@ -16,7 +16,7 @@
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param imputation_alpha Network diffusion parameter to smooth PCs (S_r). (default=0.9)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
-#' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
+#' @param layout_epochs Number of epochs for SGD algorithm. (default=250)
 #' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_th Archetype unification resolution parameter. (default=0)
@@ -49,7 +49,7 @@ runACTIONet <- function(
   layout_spread = 1.0,
   layout_min_dist = 1.0,
   layout_gamma = 1.0,
-  layout_epochs = 1000,
+  layout_epochs = 250,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   unification_backbone_density = 0.5,
@@ -59,6 +59,7 @@ runACTIONet <- function(
   compute_specificity_parallel = FALSE,
   smoothPC = TRUE,
   thread_no = 0,
+  backbone.density = 0.5,
   seed = 0
 ) {
 
@@ -157,6 +158,7 @@ runACTIONet <- function(
     return_raw = FALSE
   )
 
+  ace = constructBackbone(ace, backbone.density = backbone.density)
   return(ace)
 }
 
@@ -177,7 +179,7 @@ runACTIONet <- function(
 #' @param network_density Density factor of ACTIONet graph. (default=1)
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout. (default=50)
-#' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
+#' @param layout_epochs Number of epochs for SGD algorithm. (default=00)
 #' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param unification_th Archetype unification resolution parameter. (default=0)
@@ -214,7 +216,7 @@ run.ACTIONet <- function(
   layout_spread = 1.0,
   layout_min_dist = 1.0,
   layout_gamma = 1.0,
-  layout_epochs = 1000,
+  layout_epochs = 250,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   unification_backbone_density = 0.5,
@@ -224,6 +226,7 @@ run.ACTIONet <- function(
   compute_specificity_parallel = FALSE,
   thread_no = 0,
   full_trace = FALSE,
+  backbone.density = 0.5,
   seed = 0
 ) {
   
@@ -345,6 +348,8 @@ run.ACTIONet <- function(
     return_raw = FALSE
   )
 
+  ace = constructBackbone(ace, backbone.density = backbone.density)
+
   if (full_trace == TRUE) {
     trace <- list(
       ACTION.out = ACTION.out,
@@ -374,7 +379,7 @@ run.ACTIONet <- function(
 #' @param algorithm Algorithm to use for network construction. Options are k-nearest neighbors ('knn') and k*-nearest neighbors ('k*nn'). (default='k*nn')
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors. (default=TRUE)
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
-#' @param layout_epochs Number of epochs for SGD algorithm. (default=1000)
+#' @param layout_epochs Number of epochs for SGD algorithm. (default=250)
 #' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param layout_parallel Run layout construction using multiple cores. May result in marginally different outputs across runs due to parallelization-induced randomization. (default=TRUE)
 #' @param thread_no Number of parallel threads. (default=0)
@@ -395,8 +400,10 @@ rebuildACTIONet <- function(
   network_metric = "jsd",
   algorithm = "k*nn",
   mutual_edges_only = TRUE,
-  layout_compactness = 50,
-  layout_epochs = 1000,
+  layout_spread = 1.0,
+  layout_min_dist = 1.0,
+  layout_gamma = 1.0,
+  layout_epochs = 250,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   thread_no = 0,
@@ -434,14 +441,14 @@ rebuildACTIONet <- function(
   # Layout ACTIONet
   ace <- rerunLayout(
     ace = ace,
-    compactness = layout_compactness,
-    epochs = layout_epochs,
     algorithm = layout_algorithm,
-    thread_no = ifelse(layout_parallel, thread_no, 1),
-    network_density = network_density,
-    mutual_edges_only = mutual_edges_only,
-    reduction_slot = reduction_slot,
+    n_epochs = layout_epochs,
+    spread = layout_spread,
+    min_dist = layout_min_dist,
+    gamma = layout_gamma,
+    init_coor_slot = reduction_slot,
     net_slot = net_slot_out,
+    thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
   )
 
@@ -453,7 +460,7 @@ rebuildACTIONet <- function(
 #'
 #' @param ace ACTIONetExperiment object.
 #' @param layout_compactness A value between 0-100, indicating the compactness of ACTIONet layout (default=50).
-#' @param layout_epochs Number of epochs for SGD algorithm (default=1000).
+#' @param layout_epochs Number of epochs for SGD algorithm (default=250).
 #' @param layout_algorithm Algorithm for computing plot layout. Options are UMAP ("umap") or t-UMAP ("tumap"). (default="umap")
 #' @param network_density Density factor of ACTIONet graph (default=1).
 #' @param mutual_edges_only Whether to enforce edges to be mutually-nearest-neighbors (default=TRUE).
@@ -474,10 +481,10 @@ rerunLayout <- function(
   spread = 1.0,
   min_dist = 1.0,
   gamma = 1.0,  
-  epochs = 1000,
+  n_epochs = 250,
   algorithm = c("umap", "tumap"),
   thread_no = 0,
-  reduction_slot = "ACTION",
+  init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
   seed = 0
 ) {
@@ -488,13 +495,13 @@ rerunLayout <- function(
   ace <- .run.layoutNetwork(
     ace = ace,
     algorithm = algorithm,
-    n_epochs = epochs,
+    n_epochs = n_epochs,
     spread = spread,
     min_dist = min_dist,
     gamma = gamma,
-    init_coor_slot = reduction_slot,
-    net_slot = net_slot_out,
-    thread_no = ifelse(layout_parallel, thread_no, 1),
+    init_coor_slot = init_coor_slot,
+    net_slot = net_slot,
+    thread_no = thread_no,
     seed = seed
   )
 
@@ -530,9 +537,9 @@ rerunArchAggr <- function(
 
   ace <- .run.unifyArchetypes(
     ace = ace,
-    backbone_density = backbone_density,
-    resolution = resolution,
-    min_cluster_size = min_cluster_size,
+    unification_backbone_density = backbone_density,
+    unification_resolution = resolution,
+    unification_min_cluster_size = min_cluster_size,
     reduction_slot = reduction_slot,
     C_stacked_slot = C_stacked_slot,
     H_stacked_slot = H_stacked_slot,
@@ -572,16 +579,18 @@ rerunArchAggr <- function(
 
 constructBackbone <- function(
   ace,
-  network_density = 1,
-  mutual_edges_only = TRUE,
-  layout_algorithm = c("tumap", "umap"),
-  layout_compactness = 50,
-  layout_epochs = 100,
-  net_slot = "ACTIONet"
-  ) {
+  backbone.density = 0.5) {
 
-  backbone <- list()
-  metadata(ace)$backbone <- backbone
+  footprint = ace$archetype_footprint
+  cs = colSums(footprint)
+  footprint = scale(footprint, scale = cs, center = F)
+  arch.graph = buildNetwork(footprint, density = backbone.density)
+  arch.coors = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet2D)
+  arch.coors_3D = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet3D)
+  arch.colors = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$denovo_color)
+  backbone = list(graph = arch.graph, coordinates = arch.coors, coordinates_3D = arch.coors_3D, colors = arch.colors)
+
+  metadata(ace)$backbone = backbone
 
   return(ace)
 }
