@@ -556,9 +556,6 @@ plot.ACTIONet.feature.view <- function(
   renormalize = FALSE,
   footprint_slot = "H_unified"
 ) {
-
-  M <- as(colMaps(ace)[[footprint_slot]], "sparseMatrix")
-
   if (ncol(feat_scores) != ncol(colMaps(ace)[["H_unified"]])) {
     feat_scores <- Matrix::t(feat_scores)
   }
@@ -575,13 +572,13 @@ plot.ACTIONet.feature.view <- function(
   ))
   selected.features <- colnames(X)
 
-  X <- exp(scale(X))
+  
 
-  core.coors <- Matrix::t(metadata(ace)$backbone$coordinates)
   cs <- Matrix::colSums(X)
   cs[cs == 0] <- 1
   X <- scale(X, center = FALSE, scale = cs)
 
+  core.coors <- Matrix::t(metadata(ace)$backbone$coordinates)
   feature.coors <- Matrix::t(core.coors %*% X)
 
   if (is.null(palette)) {
@@ -606,71 +603,10 @@ plot.ACTIONet.feature.view <- function(
     to = "sRGB"
   ))
   names(feature.colors) <- selected.features
-
-  x <- feature.coors[, 1]
-  y <- feature.coors[, 2]
-  x.min <- min(x)
-  x.max <- max(x)
-  y.min <- min(y)
-  y.max <- max(y)
-  x.min <- x.min - (x.max - x.min) / 4
-  x.max <- x.max + (x.max - x.min) / 4
-  y.min <- y.min - (y.max - y.min) / 4
-  y.max <- y.max + (y.max - y.min) / 4
-  XL <- c(x.min, x.max)
-  YL <- c(y.min, y.max)
-
-  graphics::plot(
-    x = x,
-    y = y,
-    type = "n",
-    col = feature.colors,
-    axes = FALSE,
-    xlab = "",
-    ylab = "",
-    main = title,
-    xlim = XL,
-    ylim = YL
-  )
-
-  words <- selected.features
-  lay <- wordcloud::wordlayout(x, y, words, label_size)
-
-  for (i in 1:length(x)) {
-    xl <- lay[i, 1]
-    yl <- lay[i, 2]
-    w <- lay[i, 3]
-    h <- lay[i, 4]
-    if (x[i] < xl || x[i] > xl + w || y[i] < yl || y[i] > yl + h) {
-      graphics::points(
-        x = x[i],
-        y = y[i],
-        pch = 16,
-        col = colorspace::darken(feature.colors[[i]], 0.6),
-        cex = 0.75 * label_size
-      )
-
-      nx <- xl + 0.5 * w
-      ny <- yl + 0.5 * h
-
-      graphics::lines(
-        x = c(x[i], nx),
-        y = c(y[i], ny),
-        col = colorspace::darken(feature.colors[[i]], 0.5)
-      )
-    }
-  }
-
-  loc.x <- lay[, 1] + 0.5 * lay[, 3]
-  loc.y <- lay[, 2] + 0.5 * lay[, 4]
-
-  graphics::text(
-    x = loc.x,
-    y = loc.y,
-    labels = words,
-    col = feature.colors,
-    cex = label_size
-  )
+  
+  
+  
+  plot.ACTIONet(feature.coors, selected.features, color_attr = feature.colors)
 }
 
 
