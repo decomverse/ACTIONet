@@ -519,14 +519,17 @@ namespace ACTIONet
     output.selected_archetypes = conv_to<uvec>::from(arch_clusters-1);  
 
     // Compute unified archetypes
+    vec c;
     mat C_unified = zeros(C_stacked.n_rows, arch_no); 
     for(idx = 1; idx <= arch_no; idx++) {
       uvec cur_archs = find(arch_clusters == idx);
       if(cur_archs.n_elem == 1) {
-        C_unified.col(idx-1) = C_stacked.col(cur_archs(0));
+        c = C_stacked.col(cur_archs(0));
       } else {
-        C_unified.col(idx-1) = mean(C_stacked.cols(cur_archs), 1);
+        c = mean(C_stacked.cols(cur_archs), 1);
       }
+      c = c / sum(c);
+      C_unified.col(idx-1) = c;
     }
     mat W_r_unified = S_r * C_unified;
 
