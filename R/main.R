@@ -574,6 +574,8 @@ rerunArchAggr <- function(
     return_raw = FALSE
   )
 
+  ace = constructBackbone(ace, backbone.density = backbone.density)
+
   return(ace)
 }
 
@@ -588,6 +590,7 @@ constructBackbone <- function(
   arch.coors = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet2D)
   arch.coors_3D = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet3D)
   arch.colors = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$denovo_color)
+  arch.colors[arch.colors > 1] = 1
   backbone = list(graph = arch.graph, coordinates = arch.coors, coordinates_3D = arch.coors_3D, colors = arch.colors)
 
   metadata(ace)$backbone = backbone
