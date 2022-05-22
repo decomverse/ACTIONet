@@ -249,6 +249,8 @@ run.ACTIONet <- function(
   seed = 0
 ) {
   
+  stop("run.ACTIONet() is deprecated. Please use runACTIONet() instead.")
+  
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of the input '%s' object.\n", assay_name, class(ace))
     stop(err)

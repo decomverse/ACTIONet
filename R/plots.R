@@ -86,7 +86,9 @@ plot.ACTIONet <- function(
   color_slot = "denovo_color",
   point_order = NULL,
   use_repel = TRUE,
-  repel_force = 0.05
+  repel_force = 0.05,
+  add_backbone = FALSE,
+  arch_labels = NULL
 ) {
 
   plot_coors <- .get_plot_coors(data, coordinate_attr, scale_coors)
@@ -170,7 +172,45 @@ plot.ACTIONet <- function(
       legend_fill_colors = legend_fill_colors
     )
 
-  if (!is.null(plot_labels) && add_text_labels == TRUE) {
+  if(add_backbone == TRUE) {
+    C = colMaps(ace)$C_unified
+    cs = Matrix::colSums(C)
+    cs[cs == 0] = 1
+    Ct = Matrix::t(scale(C, center = F, scale = cs))
+
+    arch_coors = as.matrix(Ct %*% as.matrix(plot_coors))    
+    archLab = Ct %*% convertColor(Matrix::t(grDevices::col2rgb(plot_fill_col) / 255), from = "sRGB", to = "Lab")
+    arch_colors <- colorspace::darken(rgb(convertColor(archLab, from = "Lab", to = "sRGB")), 0.25)
+    
+    if(is.null(arch_labels)) {
+      arch_labels = paste0("A",1:nrow(arch_coors))  
+    }
+
+    arch.df = data.frame(x = arch_coors[, 1], y = arch_coors[, 2], fill = arch_colors, color = "black", label = arch_labels)
+    backbone = as(metadata(ace)$backbone$graph, "dgTMatrix")
+    edge_aes <- list()
+    edge_aes$x = arch_coors[backbone@i+1, 1]
+    edge_aes$y = arch_coors[backbone@i+1, 2]
+    edge_aes$xend = arch_coors[backbone@j+1, 1]
+    edge_aes$yend = arch_coors[backbone@j+1, 2]
+    edge_args = list(color = "grey", alpha = 0.5)
+    edge_args$mapping = do.call(ggplot2::aes, edge_aes)
+    p_out <- p_out + do.call(ggplot2::geom_segment, edge_args)
+
+    p_out = p_out + ggplot2::geom_point(
+      data = arch.df,
+      mapping = ggplot2::aes(
+        x = x,
+        y = y,
+        color = color,
+        fill = fill
+      ),
+      shape = 21,
+      size = point_size*2,
+      stroke = stroke_size*2,
+      show.legend = F
+    ) +  ggrepel::geom_text_repel(data = arch.df, ggplot2::aes(x = x, y = y, label = label), box.padding = 0.5, max.overlaps = Inf)
+  } else if (!is.null(plot_labels) && add_text_labels == TRUE) {
     text_layer <- .layout_plot_labels(
       plot_data = plot_data,
       label_names = legend_labels,
@@ -185,8 +225,9 @@ plot.ACTIONet <- function(
     )
     p_out <- p_out + text_layer
   }
-
   p_out <- p_out + scale_alpha_identity() + .default_ggtheme + labs(fill="cat")
+
+
 
   p_out
 }
