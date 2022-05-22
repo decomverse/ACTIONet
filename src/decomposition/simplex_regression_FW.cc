@@ -308,7 +308,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     return (X);
 }
 */
-mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
+mat run_simplex_regression_FW_working(mat& A, mat& B, int max_iter, double min_diff) {
 
     double t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0;
     std::chrono::duration<double> elapsed;
@@ -318,7 +318,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         max_iter = A.n_cols;
 
     start = now();
-    printf("Initializing ... ");
+    //printf("Initializing ... ");
     mat tmp = cor(A, B);    
     mat X = zeros(size(tmp));
 
@@ -327,7 +327,7 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         int i = index_max(v);
         X(i, j) = 1;
     } 
-    printf("done\n");
+    //printf("done\n");
 
     mat At = trans(A);
     mat AtA = At * A;
@@ -422,9 +422,9 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
         }
 
         start = now();
-        printf("%d- ", it);
-        double res = mean(mean(abs(old_X - X)));
-        printf("%e\n", res);
+        //("%d- ", it);
+        double res = norm(old_X - X, "fro");
+        //printf("%e\n", res);
         finish = now();
         t6 += duration(finish - start);
 /*
@@ -436,10 +436,183 @@ mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
     }
     
     double total = t1 + t2 + t3 + t4 + t5 + t6;
-    printf("t1 = %3.f, t2 = %3.f, t3 = %3.f, t4 = %3.f, t5 = %3.f, t6 = %3.f\n", 100*t1/total, 100*t2/total, 100*t3/total, 100*t4/total, 100*t5/total, 100*t6/total);
+    //printf("t1 = %3.f, t2 = %3.f, t3 = %3.f, t4 = %3.f, t5 = %3.f, t6 = %3.f\n", 100*t1/total, 100*t2/total, 100*t3/total, 100*t4/total, 100*t5/total, 100*t6/total);
 
     X = clamp(X, 0, 1);
     X = normalise(X, 1);
+    
+    return (X);
+}
+
+
+
+
+mat run_simplex_regression_FW(mat& A, mat& B, int max_iter, double min_diff) {
+
+    double t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0;
+    std::chrono::duration<double> elapsed;
+    std::chrono::high_resolution_clock::time_point start, finish;
+
+    int m = A.n_rows, n = A.n_cols, k = B.n_cols;
+    bool compute_AtA = n < 1000; //(n*n*(m+k)) < (2*m*n*k);
+
+    if(max_iter == -1)
+        max_iter = A.n_cols;
+
+    start = now();
+    mat tmp = cor(A, B);    
+    mat X = zeros(size(tmp));
+    for(int j = 0; j < X.n_cols; j++) {
+        vec v = tmp.col(j);
+        int i = index_max(v);
+        X(i, j) = 1;
+    } 
+    mat mask = X;
+
+    mat At = trans(A);
+    mat AtB = At * B;
+
+    mat AtA;
+    if( compute_AtA ) {
+        AtA = At * A;
+    }    
+
+    finish = now();
+    t1 += duration(finish - start);
+
+    mat grad;
+    mat old_X = X;    
+    double min_grad_norm = 1e-3;
+    for(int it = 0; it < max_iter; it++) {
+
+        start = now();
+        mat AX = A*X;
+        mat obj = AX - B;
+
+        if(compute_AtA) {
+            grad = (AtA * X) - AtB;
+        } else {
+            grad = (At * (A*X)) - AtB;
+        }
+        rowvec grad_norms = sqrt(sum(square(grad)));
+        uvec unsaturated_cols = find(grad_norms > min_grad_norm);
+        if(unsaturated_cols.n_elem == 0) {
+            break;
+        }
+        //printf("%d- %d unsaturated (mean grad_norm = %2e)\n", it, unsaturated_cols.n_elem, mean(grad_norms));
+
+        urowvec s = index_min(grad.cols(unsaturated_cols), 0);
+        urowvec v = index_min(grad.cols(unsaturated_cols) % mask.cols(unsaturated_cols), 0);
+
+        mat S = mat(sp_mat(join_vert(s, regspace<urowvec>(0,  s.n_elem-1)), ones(s.n_elem), X.n_rows, unsaturated_cols.n_elem));
+        mat V = mat(sp_mat(join_vert(v, regspace<urowvec>(0,  v.n_elem-1)), ones(v.n_elem), X.n_rows, unsaturated_cols.n_elem));
+        mat D_FW = S - X.cols(unsaturated_cols);
+        mat D_A = X.cols(unsaturated_cols) - V;
+
+/*
+        mat Q_FW = A * D_FW;
+        mat Q_A = A * D_A;
+*/
+        rowvec delta = sum(D_FW % grad.cols(unsaturated_cols)) - sum(D_A % grad.cols(unsaturated_cols));
+
+/*
+        res(0) = X;
+        res(1) = grad;
+        res(2) = D_FW;
+        res(3) = D_A;
+        return(res);
+*/
+
+        finish = now();
+        t2 += duration(finish - start);
+
+        for(int k = 0; k < unsaturated_cols.n_elem; k++) {
+            int j = unsaturated_cols(k);
+
+            vec d;
+            double alpha_max = 1;            
+            if( (delta(k) <= 0) | (X(v(k), j) == 0) ) {
+                d = D_FW.col(k);
+                alpha_max = 1;
+                mask(s(k), j) = 1;
+            } else {
+                d = D_A.col(k);
+                alpha_max = X(v(k), j) / (1 - X(v(k), j));
+            }
+
+            start = now();
+
+/*
+            // From: https://thatdatatho.com/gradient-descent-line-search-linear-regression/
+            vec g = grad.col(j);
+            double num = dot(g, g), denom, alpha = 0;            
+            if( compute_AtA ) {
+                vec AtAg = AtA *  g;
+                denom = dot(g, AtAg);
+            } else {
+                vec Ag = A * g;
+                denom = dot(Ag, Ag);
+            }
+            alpha =  num / denom;
+            printf("\t%d- num = %.2e, denom = %.2e, Alpha = %.2e\n", it, num, denom, alpha);
+*/
+
+            double alpha = 2.0 / (it + 2.0);  
+
+/*
+            vec q = A * d;
+            double alpha = 0;
+            double q_norm = norm(q, 1);
+            if(q_norm > 0) {
+                double q_norm_sq = q_norm*q_norm;
+                vec delta = -obj.col(j);
+                alpha = dot(q, delta) / q_norm_sq;
+            }            
+*/
+
+            /*
+            // Backtracking line-search
+            vec g = grad.col(j);
+            vec Ad = A * d;
+            double e1 = dot(Ad, Ad);
+            double alpha = 0;
+            if(e1 != 0) {
+                double e2 = 2 * dot(obj.col(j), Ad);
+                double e3 = 0.5* dot(g, d); // multiplier can be in (0, 0.5]
+                alpha = (e3 - e2) / e1;
+            }
+            
+*/
+            alpha = min(alpha, alpha_max);
+            X.col(j) += alpha*d;
+            if(0 < delta(k)) {
+                if(X(v(k), j) < 1e-6)
+                    mask(v(k), j) = 0;
+            }
+            finish = now();
+            t5 += duration(finish - start);
+
+        }
+
+        start = now();
+        //("%d- ", it);
+        //double res = norm(old_X - X, "fro");
+        //printf("%e\n", res);
+        finish = now();
+        t6 += duration(finish - start);
+/*
+        if(res < min_diff) {
+            break;
+        }
+*/        
+        //old_X = X;
+    }
+    
+    double total = t1 + t2 + t3 + t4 + t5 + t6;
+    //printf("t1 = %3.f, t2 = %3.f, t3 = %3.f, t4 = %3.f, t5 = %3.f, t6 = %3.f\n", 100*t1/total, 100*t2/total, 100*t3/total, 100*t4/total, 100*t5/total, 100*t6/total);
+
+    //X = clamp(X, 0, 1);
+    //X = normalise(X, 1);
     
     return (X);
 }
