@@ -79,7 +79,7 @@
       fill = scales::alpha(c("white"), alpha_val),
       size = text_size,
       box.padding = 2,
-      max.overlaps = Inf,
+#      max.overlaps = Inf,
       min.segment.length = 0,
       force = repel_force
     )
