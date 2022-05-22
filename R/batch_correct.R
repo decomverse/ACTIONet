@@ -4,12 +4,10 @@
 reduce.and.batch.correct.ace.fastMNN <- function(
   ace,
   batch_attr = NULL,
-  assay_name = "logcounts",
+  assay_name = NULL,
   reduced_dim = 50,
   MNN_k = 20,
-  return_V = FALSE,
   reduction_out = "MNN",
-  V_slot = NULL,
   BPPARAM = SerialParam()
 ) {
 
@@ -22,6 +20,18 @@ reduce.and.batch.correct.ace.fastMNN <- function(
 
     ace = as(ace, "ACTIONetExperiment")
     m_data = metadata(ace)
+
+    if(is.null(assay_name)) {
+      if("default_assay" %in% names(metadata(ace))) {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to the metadata(ace)[['default_assay']]"))
+        assay_name = metadata(ace)[["default_assay"]]      
+      } else {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to logcounts"))
+        assay_name = "logcounts"
+      }
+    }
+    .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
+
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
     mnn_batch = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
@@ -47,14 +57,15 @@ reduce.and.batch.correct.ace.fastMNN <- function(
     colMaps(ace)[[reduction_out]] <- S_r
     colMapTypes(ace)[[reduction_out]] = "reduction"
 
-    if (return_V) {
-        V = rowData(mnn.out)[["rotation"]]
-        colnames(V) = sapply(1:dim(V)[2], function(i) sprintf("PC%d", i))
-        if (is.null(V_slot) | length(V_slot) > 1) {
-            V_slot = paste(reduction_out, "rotation", sep = "_")
-        }
-        rowMaps(ace)[[V_slot]] = V
-    }
+    metadata(ace)[["default_reduction"]] = reduction_out
+    metadata(ace)[["default_assay"]] = assay_name
+
+
+    V = rowData(mnn.out)[["rotation"]]
+    colnames(V) = paste0("V", 1:NCOL(V))
+    rowMaps(ace)[[sprintf("%s_V", reduction_out)]] = V
+    rowMapTypes(ace)[[sprintf("%s_V", reduction_out)]] = "internal"
+
     invisible(gc())
 
     metadata(ace) = m_data
@@ -68,7 +79,7 @@ reduce.and.batch.correct.ace.Harmony <- function(
   batch_attr,
   reduced_dim = 50,
   max_iter = 10,
-  assay_name = "logcounts",
+  assay_name = NULL,
   reduction_out = "ACTION",
   harmony_out = "Harmony",
   seed = 0,
@@ -87,6 +98,18 @@ reduce.and.batch.correct.ace.Harmony <- function(
 
     ace = as(ace, "ACTIONetExperiment")
 
+    if(is.null(assay_name)) {
+      if("default_assay" %in% names(metadata(ace))) {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to the metadata(ace)[['default_assay']]"))
+        assay_name = metadata(ace)[["default_assay"]]      
+      } else {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to logcounts"))
+        assay_name = "logcounts"
+      }
+    }
+    .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
+
+
     batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
 
     ace = reduce.ace(
@@ -98,6 +121,8 @@ reduce.and.batch.correct.ace.Harmony <- function(
       seed = seed,
       SVD_algorithm = SVD_algorithm
     )
+
+    metadata(ace)[["default_assay"]] = assay_name
 
     ace = batch.correct.ace.Harmony(
       ace = ace,
@@ -136,6 +161,8 @@ batch.correct.ace.Harmony <- function(
       do_pca = FALSE
     )
 
+    metadata(ace)[["default_reduction"]] = harmony_out
+
     return(ace)
 }
 
@@ -146,8 +173,22 @@ orthogonalize.ace.batch <- function(
   design_mat,
   reduction_slot = "ACTION",
   ortho_out = "ACTION_ortho",
-  assay_name = "logcounts"
+  assay_name = NULL
 ) {
+    
+    ace = as(ace, "ACTIONetExperiment")
+
+    if(is.null(assay_name)) {
+      if("default_assay" %in% names(metadata(ace))) {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to the metadata(ace)[['default_assay']]"))
+        assay_name = metadata(ace)[["default_assay"]]      
+      } else {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to logcounts"))
+        assay_name = "logcounts"
+      }
+    }
+    .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
+
 
     S = SummarizedExperiment::assays(ace)[[assay_name]]
     S_r = colMaps(ace)[[sprintf("%s", reduction_slot)]]
@@ -214,8 +255,22 @@ orthogonalize.ace.batch.simple <- function(
   batch_attr,
   reduction_slot = "ACTION",
   ortho_out = "ACTION_ortho",
-  assay_name = "logcounts"
+  assay_name = NULL
 ) {
+
+    ace = as(ace, "ACTIONetExperiment")
+
+    if(is.null(assay_name)) {
+      if("default_assay" %in% names(metadata(ace))) {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to the metadata(ace)[['default_assay']]"))
+        assay_name = metadata(ace)[["default_assay"]]      
+      } else {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to logcounts"))
+        assay_name = "logcounts"
+      }
+    }
+    .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
+
 
     batch_attr = ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
     batch_attr = as.factor(batch_attr)
@@ -238,12 +293,25 @@ reduce.and.batch.orthogonalize.ace <- function(
   design_mat,
   reduced_dim = 50,
   max_iter = 10,
-  assay_name = "logcounts",
+  assay_name = NULL,
   reduction_out = "ACTION",
   ortho_out = "ACTION_ortho",
   seed = 0,
   SVD_algorithm = 0
 ) {
+
+    ace = as(ace, "ACTIONetExperiment")
+
+    if(is.null(assay_name)) {
+      if("default_assay" %in% names(metadata(ace))) {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to the metadata(ace)[['default_assay']]"))
+        assay_name = metadata(ace)[["default_assay"]]      
+      } else {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to logcounts"))
+        assay_name = "logcounts"
+      }
+    }
+    .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
 
     if (!is.matrix(design_mat)) {
         err = sprintf("'design_mat' must be a matrix.\n")

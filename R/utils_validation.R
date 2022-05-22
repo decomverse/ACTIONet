@@ -33,7 +33,7 @@
 ){
 
   .validate_ace(ace, allow_null = FALSE, ace_name = ace_name, return_elem = FALSE)
-
+  
   if (!(assay_name %in% names(assays(ace)))) {
     err <- sprintf("'%s' is not an assay of '%s'.\n", assay_name, ace_name)
     stop(err)

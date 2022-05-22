@@ -16,17 +16,23 @@ reduce.ace <- function(
   ace,
   reduced_dim = 50,
   max_iter = 10,
-  assay_name = "logcounts",
+  assay_name = NULL,
   reduction_out = "ACTION",
   SVD_algorithm = 0,
   seed = 0
 ) {
 
-    ace <- as(ace, "ACTIONetExperiment")
-    if (!(assay_name %in% names(assays(ace)))) {
-        err = sprintf("Assay '%s' not found.\n", assay_name)
-        stop(err)
+    ace = as(ace, "ACTIONetExperiment")
+    if(is.null(assay_name)) {
+      if("default_assay" %in% names(metadata(ace))) {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to the metadata(ace)[['default_assay']]"))
+        assay_name = metadata(ace)[["default_assay"]]      
+      } else {
+        message(sprintf("Input assay_name is NULL. Setting assay_name to logcounts"))
+        assay_name = "logcounts"
+      }
     }
+    .validate_assay(ace, assay_name = assay_name, return_elem = FALSE)
 
     if (is.null(rownames(ace))) {
         rownames(ace) = ACTIONetExperiment:::.default_rownames(NROW(ace))
@@ -70,6 +76,9 @@ reduce.ace <- function(
     rownames(S_r) = paste0("dim_", 1:NROW(S_r))
     colMaps(ace)[[reduction_out]] <- Matrix::t(S_r)
     colMapTypes(ace)[[reduction_out]] = "reduction"
+
+    metadata(ace)[["default_reduction"]] = reduction_out
+    metadata(ace)[["default_assay"]] = assay_name
 
     V = reduction.out$V
     colnames(V) = paste0("V", 1:NCOL(V))

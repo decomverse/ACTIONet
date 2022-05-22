@@ -220,7 +220,7 @@ plot.ACTIONet <- function(
 #' @export
 
 plot.ACTIONet.gradient <- function(
-  ace,
+  data,
   x,
   alpha = 0,
   log_scale = FALSE,
@@ -238,7 +238,7 @@ plot.ACTIONet.gradient <- function(
   scale_coors = TRUE
 ) {
 
-  if (length(x) != ncol(ace)) {
+  if (length(x) != nrow(data)) {
     warning("Length of input vector doesn't match the number of cells.")
     return()
   }
@@ -265,7 +265,7 @@ plot.ACTIONet.gradient <- function(
     if (alpha > 1)
       alpha = 1
     x <- as.numeric(networkDiffusion(
-      obj = colNets(ace)[[net_slot]],
+      obj = colNets(data)[[net_slot]],
       scores = x,
       algorithm = "pagerank",
       alpha = alpha,
@@ -282,7 +282,7 @@ plot.ACTIONet.gradient <- function(
   idx <- order(x, decreasing = TRUE)
 
   p_out <- plot.ACTIONet(
-    data = ace,
+    data = data,
     label_attr = NULL,
     color_attr = col_vals,
     trans_attr = trans_attr,
