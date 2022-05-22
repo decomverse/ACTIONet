@@ -152,6 +152,7 @@ normalize.ace <- function(
     }
 
     metadata(ace)$norm_method = norm_method
+    metadata(ace)$default_assay = assay_out
 
     return(ace)
 }
