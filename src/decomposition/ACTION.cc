@@ -23,9 +23,10 @@ namespace ACTIONet
     {
       mat C_old = C;
       mat H_old = H;
-
       double A_norm = norm(A, "fro");
       H = run_simplex_regression(W, A, true);
+      //H = run_simplex_regression_FW(W, A, 30);
+
       mat R = A - W * H;
       mat Ht = trans(H);
       for (int i = 0; i < k; i++)
@@ -51,6 +52,7 @@ namespace ACTIONet
                       b.memptr(), 1);
 
           C.col(i) = run_simplex_regression(A, b, false);
+          //C.col(i) = run_simplex_regression_FW(A, b, 30);
 
           vec w_new = A * C.col(i);
           vec delta = (w - w_new);
