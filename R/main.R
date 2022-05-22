@@ -604,6 +604,7 @@ constructBackbone <- function(
 
   footprint = ace$archetype_footprint
   cs = colSums(footprint)
+  cs[cs == 0] = 1
   footprint = scale(footprint, scale = cs, center = F)
   arch.graph = buildNetwork(footprint, density = backbone.density)
   arch.coors = as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet2D)
