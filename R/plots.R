@@ -206,8 +206,8 @@ plot.ACTIONet <- function(
         fill = fill
       ),
       shape = 21,
-      size = point_size*2,
-      stroke = stroke_size*2,
+      size = point_size*3,
+      stroke = stroke_size*3,
       show.legend = F
     ) +  ggrepel::geom_text_repel(data = arch.df, ggplot2::aes(x = x, y = y, label = label), box.padding = 0.5, max.overlaps = Inf)
   } else if (!is.null(plot_labels) && add_text_labels == TRUE) {
@@ -278,10 +278,9 @@ plot.ACTIONet.gradient <- function(
   coordinate_attr = "ACTIONet2D",
   scale_coors = TRUE
 ) {
-
-  if (length(x) != nrow(data)) {
-    warning("Length of input vector doesn't match the number of cells.")
-    return()
+ 
+  if ( ((is(data, "ACTIONetExperiment")) & (length(x) != ncol(data))) | (nrow(data) != length(x)) )    
+    stop("Length of input vector doesn't match the number of cells.")
   }
   ## Create color gradient generator
   if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
