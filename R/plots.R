@@ -279,7 +279,7 @@ plot.ACTIONet.gradient <- function(
   scale_coors = TRUE
 ) {
  
-  if ( ((is(data, "ACTIONetExperiment")) & (length(x) != ncol(data))) | (nrow(data) != length(x)) )    
+  if ( ((is(data, "ACTIONetExperiment")) & (length(x) != ncol(data))) | ((!is(data, "ACTIONetExperiment")) & (nrow(data) != length(x))) ) {    
     stop("Length of input vector doesn't match the number of cells.")
   }
   ## Create color gradient generator
