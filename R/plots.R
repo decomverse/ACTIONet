@@ -843,7 +843,7 @@ visualize.markers <- function(
     x <- expr_profile[, feat_name]
 
     p_out <- plot.ACTIONet.gradient(
-      ace = ace,
+      data = ace,
       x = x,
       alpha = 0,
       log_scale = FALSE,
@@ -1013,7 +1013,7 @@ plot.ACTIONet.archetype.footprint <- function(
     }
 
     p_out <- plot.ACTIONet.gradient(
-      ace = ace,
+      data = ace,
       x = x,
       alpha = 0,
       log_scale = FALSE,

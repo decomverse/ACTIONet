@@ -481,10 +481,10 @@ List run_SPA_rows_sparse(sp_mat &A, int k)
 // ACTION.out$H[[8]] ' cell.assignments = apply(H8, 2, which.max)
 // [[Rcpp::export]]
 List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
-                int max_it = 100, double min_delta = 1e-6)
+                int max_it = 100, double min_delta = 1e-6, int normalization = 1)
 {
   ACTIONet::ACTION_results trace =
-      ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
+      ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta, normalization);
 
   List res;
 
@@ -737,9 +737,9 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
                       double violation_threshold = 0.0,
                       double backbone_density = 0.5, double resolution = 1.0,
                       int min_cluster_size = 3,
-                      int thread_no = 0)
+                      int thread_no = 0, int normalization = 0)
 {
-  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, backbone_density, resolution, min_cluster_size, thread_no);
+  ACTIONet::unification_results results = ACTIONet::unify_archetypes(S_r, C_stacked, H_stacked, backbone_density, resolution, min_cluster_size, thread_no, normalization);
 
   List out_list;
 

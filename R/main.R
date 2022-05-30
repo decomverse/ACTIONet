@@ -37,6 +37,7 @@ runACTIONet <- function(
   k_max = 30,
   assay_name = NULL,
   reduction_slot = NULL,
+  reduction_normalization = 1,
   net_slot_out = "ACTIONet",
   min_cells_per_arch = 2,
   max_iter_ACTION = 50,
@@ -93,6 +94,26 @@ runACTIONet <- function(
   }
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
 
+  Sr_T = Matrix::t(colMaps(ace)[[sprintf("%s", reduction_slot)]])
+  if(reduction_normalization == 0) {
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(Sr_T)
+  } else if(reduction_normalization == 1) {
+    cs = colSums(abs(Sr_T))
+    cs[cs == 0] = 1
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))
+  } else if(reduction_normalization == 2) {
+    cs = sqrt(colSums(Sr_T^2))
+    cs[cs == 0] = 1
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))
+  } else if(reduction_normalization == -1){
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T))
+  } else {
+    cs = colSums(abs(Sr_T))
+    cs[cs == 0] = 1
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))    
+  }
+  reduction_slot = sprintf("%s_normalized", reduction_slot)
+
   # Calls "decomp.ACTIONMR" and fills in the appropriate slots in the ace object
   ace <- .run.ACTIONMR.ace(
     ace = ace,
@@ -142,18 +163,19 @@ runACTIONet <- function(
   )
 
 
-  # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  if (smoothPC == TRUE) {
-    ace <- .smoothPCs(
-      ace = ace,
-      diffusion_algorithm = "pagerank",
-      alpha = imputation_alpha,
-      diffusion_it = 5,
-      reduction_slot = reduction_slot,
-      net_slot = net_slot_out,
-      thread_no = thread_no
-    )
-  }
+  # # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
+  # if (smoothPC == TRUE) {
+  #   ace <- .smoothPCs(
+  #     ace = ace,
+  #     diffusion_algorithm = "pagerank",
+  #     alpha = imputation_alpha,
+  #     diffusion_it = 5,
+  #     reduction_slot = reduction_slot,
+  #     net_slot = net_slot_out,
+  #     thread_no = thread_no
+  #   )
+  # }
+
 
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(

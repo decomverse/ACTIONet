@@ -318,17 +318,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List run_ACTION(mat& S_r, int k_min = 2, int k_max = 30, int thread_no = 0, int max_it = 100, double min_delta = 1e-6) {
-        typedef SEXP(*Ptr_run_ACTION)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline List run_ACTION(mat& S_r, int k_min = 2, int k_max = 30, int thread_no = 0, int max_it = 100, double min_delta = 1e-6, int normalization = 1) {
+        typedef SEXP(*Ptr_run_ACTION)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_run_ACTION p_run_ACTION = NULL;
         if (p_run_ACTION == NULL) {
-            validateSignature("List(*run_ACTION)(mat&,int,int,int,int,double)");
+            validateSignature("List(*run_ACTION)(mat&,int,int,int,int,double,int)");
             p_run_ACTION = (Ptr_run_ACTION)R_GetCCallable("ACTIONet", "_ACTIONet_run_ACTION");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_run_ACTION(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(k_min)), Shield<SEXP>(Rcpp::wrap(k_max)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(min_delta)));
+            rcpp_result_gen = p_run_ACTION(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(k_min)), Shield<SEXP>(Rcpp::wrap(k_max)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(max_it)), Shield<SEXP>(Rcpp::wrap(min_delta)), Shield<SEXP>(Rcpp::wrap(normalization)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -444,17 +444,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold = 0.0, double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0) {
-        typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold = 0.0, double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0, int normalization = 0) {
+        typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_unify_archetypes p_unify_archetypes = NULL;
         if (p_unify_archetypes == NULL) {
-            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,double,double,int,int)");
+            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,double,double,int,int,int)");
             p_unify_archetypes = (Ptr_unify_archetypes)R_GetCCallable("ACTIONet", "_ACTIONet_unify_archetypes");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_unify_archetypes(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(C_stacked)), Shield<SEXP>(Rcpp::wrap(H_stacked)), Shield<SEXP>(Rcpp::wrap(violation_threshold)), Shield<SEXP>(Rcpp::wrap(backbone_density)), Shield<SEXP>(Rcpp::wrap(resolution)), Shield<SEXP>(Rcpp::wrap(min_cluster_size)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+            rcpp_result_gen = p_unify_archetypes(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(C_stacked)), Shield<SEXP>(Rcpp::wrap(H_stacked)), Shield<SEXP>(Rcpp::wrap(violation_threshold)), Shield<SEXP>(Rcpp::wrap(backbone_density)), Shield<SEXP>(Rcpp::wrap(resolution)), Shield<SEXP>(Rcpp::wrap(min_cluster_size)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(normalization)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
