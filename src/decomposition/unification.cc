@@ -1,7 +1,7 @@
 #include "ACTIONet.h"
-// #include "dagConstruct.h"
+//#include "dagConstruct.h"
 
-// vector<double> Corrector::vals;
+//vector<double> Corrector::vals;
 
 
 namespace ACTIONet
@@ -469,7 +469,7 @@ namespace ACTIONet
                                        double backbone_density,
                                        double resolution,
                                        int min_cluster_size,
-                                       int thread_no)
+                                       int thread_no, int normalization)
   {
     if (thread_no <= 0)
     {
@@ -531,11 +531,107 @@ namespace ACTIONet
       c = c / sum(c);
       C_unified.col(idx-1) = c;
     }
-    mat W_r_unified = S_r * C_unified;
 
-    mat H_unified = run_simplex_regression(W_r_unified, S_r, false);
+    mat X_r;
+    if(normalization == 0) {
+      X_r = S_r;
+    } if(normalization == 1) {
+      X_r = normalise(S_r, 1); 
+    } if(normalization == 2) {
+      X_r = normalise(S_r, 2); 
+    } if(normalization == -1) {
+      X_r = zscore(S_r); 
+    }
+
+    mat W_r_unified = X_r * C_unified;
+
+    mat H_unified = run_simplex_regression(W_r_unified, X_r, false);
 
     uvec assigned_archetypes = trans(index_max(H_unified, 0));
+
+/*
+    // Construct Ontology!
+    mat Sim = 1+cor(W_r_unified);
+
+    graph_undirected inputNetwork(Sim);
+    DAGraph ontology;
+    ontology.setTerminalName("archetype");
+    nodeDistanceObject nodeDistances;
+
+    double threshold = 0.05;
+    double density = 0.5;
+
+    dagConstruct::constructDAG(inputNetwork, ontology, nodeDistances, threshold,
+                               density);
+
+    vector<vector<int>> dag_nodes;
+    vector<int> dag_nodes_type;
+
+    for (int k = 0; k < Sim.n_rows; k++) {
+      vector<int> v;
+      v.push_back(k);
+      dag_nodes.push_back(v);
+      dag_nodes_type.push_back(0);
+    }
+
+    for (map<pair<unsigned, unsigned>, string>::iterator edgesIt =
+             ontology.edgesBegin();
+         edgesIt != ontology.edgesEnd(); ++edgesIt) {
+      unsigned ii = edgesIt->first.first;
+      unsigned jj = edgesIt->first.second;
+
+      vector<int> v;
+      int tt;
+      if (edgesIt->second == "archetype") {
+        v.push_back(jj);
+        tt = 0;
+      } else {  // Internal node
+        for (int kk = 0; kk < dag_nodes[jj].size(); kk++) {
+          v.push_back(dag_nodes[jj][kk]);
+        }
+        tt = 1;
+      }
+
+      if (ii >= dag_nodes.size()) {
+        dag_nodes.push_back(v);
+        dag_nodes_type.push_back(tt);
+      } else {  // merge
+        for (int kk = 0; kk < v.size(); kk++) {
+          dag_nodes[ii].push_back(v[kk]);
+        }
+
+        if (edgesIt->second != "archetype") dag_nodes_type[ii] = 1;
+      }
+
+      // cout << ontology.getName(edgesIt->first.first) << "\t" <<
+      // ontology.getName(edgesIt->first.second) << "\t" << edgesIt->second <<
+      // "\t"
+      // << ontology.getWeight(edgesIt->first.first) << endl;
+    }
+
+    // Get internal adjacency matrix of DAGs
+    int dag_node_counts = dag_nodes.size();
+    mat dag_adj = zeros(dag_node_counts, dag_node_counts);
+    vec dag_node_annotations = zeros(dag_node_counts);
+    for (map<pair<unsigned, unsigned>, string>::iterator edgesIt =
+             ontology.edgesBegin();
+         edgesIt != ontology.edgesEnd(); ++edgesIt) {
+      unsigned ii = edgesIt->first.first;
+      unsigned jj = edgesIt->first.second;
+      double w = ontology.getWeight(edgesIt->first.first);
+
+      if (edgesIt->second == "archetype") {
+        dag_node_annotations(ii) = 1;
+      } else {
+        dag_node_annotations(ii) = 2;
+      }
+
+      dag_adj(ii, jj) = 1;
+    }
+
+    output.dag_adj = dag_adj;
+    output.dag_node_annotations = dag_node_annotations;
+*/
 
     output.C_unified = C_unified;
     output.H_unified = H_unified;

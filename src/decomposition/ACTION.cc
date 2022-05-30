@@ -244,7 +244,7 @@ namespace ACTIONet
   }
 
   ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no,
-                            int max_it = 100, double min_delta = 1e-6)
+                            int max_it = 100, double min_delta = 1e-6, int normalization = 0)
   {
     if (thread_no <= 0)
     {
@@ -268,10 +268,16 @@ namespace ACTIONet
     trace.selected_cols = field<uvec>(k_max + 1);
 
     // ATTENTION!
-    
-    mat X_r = normalise(S_r, 1); 
-    //mat X_r = zscore(S_r);
-    //mat X_r = S_r;
+    mat X_r;
+    if(normalization == 0) {
+      X_r = S_r;
+    } if(normalization == 1) {
+      X_r = normalise(S_r, 1); 
+    } if(normalization == 2) {
+      X_r = normalise(S_r, 2); 
+    } if(normalization == -1) {
+      X_r = zscore(S_r); 
+    }
 
     int current_k = 0;
     char status_msg[50];

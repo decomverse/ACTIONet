@@ -235,7 +235,7 @@ namespace ACTIONet
 
     // ACTION decomposition
     ACTION_results run_ACTION(mat &S_r, int k_min, int k_max, int thread_no,
-                              int max_it, double min_delta);
+                              int max_it, double min_delta, int normalization);
     ACTION_results run_subACTION(mat &S_r, mat &W_parent, mat &H_parent, int kk,
                                  int k_min, int k_max, int thread_no, int max_it,
                                  double min_delta);
@@ -259,7 +259,7 @@ namespace ACTIONet
     // mat &C_stacked, mat &H_stacked, int minPoints, int minClusterSize, double
     // outlier_threshold, int reduced_dim);
     unification_results unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
-                                         double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0);
+                                         double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0, int normalization = 0);
 
     // Main functions to build an interaction network from multi-level archetypal
     // decompositions
