@@ -580,8 +580,8 @@ run_SPA_rows_sparse <- function(A, k) {
     .Call(`_ACTIONet_run_SPA_rows_sparse`, A, k)
 }
 
-run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 100L, min_delta = 1e-6) {
-    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta)
+run_ACTION <- function(S_r, k_min = 2L, k_max = 30L, thread_no = 0L, max_it = 100L, min_delta = 1e-6, normalization = 1L) {
+    .Call(`_ACTIONet_run_ACTION`, S_r, k_min, k_max, thread_no, max_it, min_delta, normalization)
 }
 
 run_ACTION_plus <- function(S_r, k_min = 2L, k_max = 30L, max_it = 100L, min_delta = 1e-6, max_trial = 3L) {
@@ -604,8 +604,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -3,
     .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
-unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, backbone_density = 0.5, resolution = 1.0, min_cluster_size = 3L, thread_no = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, backbone_density, resolution, min_cluster_size, thread_no)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, backbone_density = 0.5, resolution = 1.0, min_cluster_size = 3L, thread_no = 0L, normalization = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, backbone_density, resolution, min_cluster_size, thread_no, normalization)
 }
 
 #'

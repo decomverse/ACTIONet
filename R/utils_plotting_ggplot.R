@@ -78,9 +78,9 @@
       ),
       fill = scales::alpha(c("white"), alpha_val),
       size = text_size,
-      box.padding = 2,
-#      max.overlaps = Inf,
-      min.segment.length = 0,
+      #box.padding = 0.5,
+      #max.overlaps = Inf,
+      #min.segment.length = 0.1,
       force = repel_force
     )
   } else {
