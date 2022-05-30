@@ -4,7 +4,6 @@ namespace ACTIONet
 {
   field<mat> perturbedSVD(field<mat> SVD_results, mat &A, mat &B)
   {
-    stdout_printf("\tComputing perturbed SVD ... ");
     int n = A.n_rows;
 
     mat U = SVD_results(0);
@@ -42,7 +41,6 @@ namespace ACTIONet
 
     mat U_updated = join_horiz(U, P) * U_prime;
     mat V_updated = join_horiz(V, Q) * V_prime;
-    stdout_printf("done\n"); FLUSH;
 
     field<mat> output(5);
     output(0) = U_updated.cols(0, dim - 1);
