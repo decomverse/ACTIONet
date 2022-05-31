@@ -81,8 +81,6 @@ annotate.archetypes.using.labels <- function(ace,
   }
   Annot <- names(Labels)[match(sort(unique(Labels)), Labels)]
 
-  Enrichment.Z
-
   if(algorithm == "wilcox") {
     wilcox.out = presto::wilcoxauc(profile, Annot[Labels])
     Enrichment = do.call(cbind, split(-log10(wilcox.out$pval) * sign(wilcox.out$auc - 0.5), wilcox.out$group))    
@@ -113,7 +111,7 @@ annotate.archetypes.using.labels <- function(ace,
     })
   }
 
-  Enrichment[is.na(Enrichment.Z)] <- 0
+  Enrichment[is.na(Enrichment)] <- 0
   archetypeLabels <- Annot[apply(Enrichment, 1, which.max)]
   Labels.confidence <- apply(Enrichment, 1, max)
 
