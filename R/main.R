@@ -112,7 +112,7 @@ runACTIONet <- function(
     cs[cs == 0] = 1
     colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))    
   }
-  metadata(ace)[["reduction_normalization"] = reduction_normalization
+  metadata(ace)[["reduction_normalization"]] = reduction_normalization
   reduction_slot = sprintf("%s_normalized", reduction_slot)
 
   # Calls "decomp.ACTIONMR" and fills in the appropriate slots in the ace object
