@@ -71,7 +71,7 @@
 #' @export
 annotate.archetypes.using.labels <- function(ace,
                                              labels,
-                                             archetype.slot = "H_unified") {
+                                             archetype.slot = "H_unified", algorithm = "ttest") {
   Labels <- .preprocess_annotation_labels(labels, ace)
 
   if (is.matrix(ace) | ACTIONetExperiment:::is.sparseMatrix(ace)) {
@@ -81,43 +81,50 @@ annotate.archetypes.using.labels <- function(ace,
   }
   Annot <- names(Labels)[match(sort(unique(Labels)), Labels)]
 
-  # Using t-statistics
-  Enrichment.Z <- sapply(Annot, function(label) {
-    mask <- names(Labels) == label
-    class.profile <- profile[, mask]
-    null.profile <- profile[, !mask]
+  Enrichment.Z
 
-    N.class <- sum(mask)
-    N.null <- sum(!mask)
+  if(algorithm == "wilcox") {
+    wilcox.out = presto::wilcoxauc(profile, Annot[Labels])
+    Enrichment = do.call(cbind, split(-log10(wilcox.out$pval) * sign(wilcox.out$auc - 0.5), wilcox.out$group))    
+  } else {
+    # Using t-statistics
+    Enrichment <- sapply(Annot, function(label) {
+      mask <- names(Labels) == label
+      class.profile <- profile[, mask]
+      null.profile <- profile[, !mask]
 
-    if ((N.class < 3) | (N.null < 3)) {
-      return(rep(0, nrow(profile)))
-    }
+      N.class <- sum(mask)
+      N.null <- sum(!mask)
 
-    mu.class <- ACTIONetExperiment:::fastRowMeans(class.profile)
-    mu.null <- ACTIONetExperiment:::fastRowMeans(null.profile)
+      if ((N.class < 3) | (N.null < 3)) {
+        return(rep(0, nrow(profile)))
+      }
 
-    sigma_sq.class <- apply(class.profile, 1, var)
-    sigma_sq.null <- apply(null.profile, 1, var)
+      mu.class <- ACTIONetExperiment:::fastRowMeans(class.profile)
+      mu.null <- ACTIONetExperiment:::fastRowMeans(null.profile)
+
+      sigma_sq.class <- apply(class.profile, 1, var)
+      sigma_sq.null <- apply(null.profile, 1, var)
 
 
-    delta.mean <- mu.class - mu.null
-    t.stat <- delta.mean / sqrt((sigma_sq.class / N.class) + (sigma_sq.null / N.null))
-    return(t.stat)
-  })
-  Enrichment.Z[is.na(Enrichment.Z)] <- 0
+      delta.mean <- mu.class - mu.null
+      t.stat <- delta.mean / sqrt((sigma_sq.class / N.class) + (sigma_sq.null / N.null))
+      return(t.stat)
+    })
+  }
 
-  archetypeLabels <- Annot[apply(Enrichment.Z, 1, which.max)]
-  Labels.confidence <- apply(Enrichment.Z, 1, max)
+  Enrichment[is.na(Enrichment.Z)] <- 0
+  archetypeLabels <- Annot[apply(Enrichment, 1, which.max)]
+  Labels.confidence <- apply(Enrichment, 1, max)
 
-  rownames(Enrichment.Z) <- paste("A", 1:nrow(Enrichment.Z), "-", archetypeLabels,
+  rownames(Enrichment) <- paste("A", 1:nrow(Enrichment), "-", archetypeLabels,
     sep = ""
   )
 
   out <- list(
     Label = archetypeLabels,
     Confidence = Labels.confidence,
-    Enrichment = Enrichment.Z
+    Enrichment = Enrichment
   )
 
   return(out)
