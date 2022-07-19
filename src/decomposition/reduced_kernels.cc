@@ -223,7 +223,9 @@ namespace ACTIONet
     stdout_printf("\tPerforming SVD on original matrix: "); FLUSH;
     vec s;
     mat U, V;
-    field<mat> SVD_results;
+    field<mat> SVD_results(3);
+
+
     switch (SVD_algorithm)
     {
     case FULL_SVD:
@@ -282,7 +284,7 @@ namespace ACTIONet
 
     vec s;
     mat U, V;
-    field<mat> SVD_results;
+    field<mat> SVD_results(3);
     switch (SVD_algorithm)
     {
     case FULL_SVD:
