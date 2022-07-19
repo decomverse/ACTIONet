@@ -94,25 +94,9 @@ runACTIONet <- function(
   }
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
 
-  Sr_T = Matrix::t(colMaps(ace)[[sprintf("%s", reduction_slot)]])
-  if(reduction_normalization == 0) {
-    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(Sr_T)
-  } else if(reduction_normalization == 1) {
-    cs = colSums(abs(Sr_T))
-    cs[cs == 0] = 1
-    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))
-  } else if(reduction_normalization == 2) {
-    cs = sqrt(colSums(Sr_T^2))
-    cs[cs == 0] = 1
-    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))
-  } else if(reduction_normalization == -1){
-    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T))
-  } else {
-    cs = colSums(abs(Sr_T))
-    cs[cs == 0] = 1
-    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))    
-  }
-  metadata(ace)[["reduction_normalization"]] = reduction_normalization
+  if( !(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace))) ) {
+    ace = normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
+  }  
   reduction_slot = sprintf("%s_normalized", reduction_slot)
 
   # Calls "decomp.ACTIONMR" and fills in the appropriate slots in the ace object
@@ -454,6 +438,7 @@ rebuildACTIONet <- function(
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   H_stacked_slot = "H_stacked",
+  reduction_normalization = 1,
   seed = 0
 ) {
   set.seed(seed)
@@ -462,6 +447,11 @@ rebuildACTIONet <- function(
 
   .validate_ace(ace = ace, return_elem = FALSE)
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
+
+  if( !(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace))) ) {
+    ace = normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
+  }  
+  reduction_slot = sprintf("%s_normalized", reduction_slot)
 
   # re-Build ACTIONet
   H_stacked <- .validate_map(
@@ -530,11 +520,17 @@ rerunLayout <- function(
   thread_no = 0,
   init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
+  reduction_normalization = 1,
   seed = 0
 ) {
 
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
+
+  if( !(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace))) ) {
+    ace = normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
+  }  
+  reduction_slot = sprintf("%s_normalized", reduction_slot)
 
   ace <- .run.layoutNetwork(
     ace = ace,
@@ -567,6 +563,8 @@ rerunArchAggr <- function(
   H_stacked_slot = "H_stacked",
   net_slot = "ACTIONet",
   unified_suffix = "unified",
+  backbone.density = 0.5,
+  reduction_normalization = 1,
   thread_no = 0
 ) {
 
@@ -579,6 +577,11 @@ rerunArchAggr <- function(
     force_type = FALSE
   )
 
+  if( !(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace))) ) {
+    ace = normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
+  }  
+  reduction_slot = sprintf("%s_normalized", reduction_slot)
+  
   ace <- .run.unifyArchetypes(
     ace = ace,
     unification_backbone_density = backbone_density,
@@ -639,6 +642,31 @@ constructBackbone <- function(
   backbone = list(graph = arch.graph, coordinates = arch.coors, coordinates_3D = arch.coors_3D, colors = arch.colors)
 
   metadata(ace)$backbone = backbone
+
+  return(ace)
+}
+
+
+normalize.reduction <- function(ace, reduction_slot = "ACTION", reduction_normalization = 1) {
+  Sr_T = Matrix::t(colMaps(ace)[[sprintf("%s", reduction_slot)]])
+  if(reduction_normalization == 0) {
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(Sr_T)
+  } else if(reduction_normalization == 1) {
+    cs = colSums(abs(Sr_T))
+    cs[cs == 0] = 1
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))
+  } else if(reduction_normalization == 2) {
+    cs = sqrt(colSums(Sr_T^2))
+    cs[cs == 0] = 1
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))
+  } else if(reduction_normalization == -1){
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T))
+  } else {
+    cs = colSums(abs(Sr_T))
+    cs[cs == 0] = 1
+    colMaps(ace)[[sprintf("%s_normalized", reduction_slot)]] = Matrix::t(scale(Sr_T, center = F, scale = cs))    
+  }
+  metadata(ace)[["reduction_normalization"]] = reduction_normalization
 
   return(ace)
 }
