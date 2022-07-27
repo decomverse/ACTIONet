@@ -550,7 +550,7 @@ rerunLayout <- function(
 
 
 #' @export
-rerunArchAggr <- function(
+rerun.archetype.unification <- function(
   ace,
   backbone_density = 0.5,
   resolution = 1.0,
@@ -621,7 +621,7 @@ rerunArchAggr <- function(
     return_raw = FALSE
   )
 
-  ace = constructBackbone(ace, backbone.density = backbone.density)
+  ace = constructBackbone(ace, backbone.density = backbone_density)
 
   return(ace)
 }

@@ -221,8 +221,8 @@ decomp.ACTION <- function(
     out <-  ACTION.out
   } else {
     out <- list(
-      W = ACTION.outt$W,
-      H = ACTION.outt$H,
+      W = ACTION.out$W,
+      H = ACTION.out$H,
       misc = list(C = ACTION.out$C)
     )
   }
