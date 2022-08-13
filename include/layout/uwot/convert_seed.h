@@ -111,7 +111,7 @@ T convert_seed(const int* seeds, size_t N) {
 }
 
 template<typename T>
-T convert_seed(Rcpp::IntegerVector seeds) {
+T convert_seed(vector<int> seeds) {
     return convert_seed<T>(seeds.begin(), seeds.size());
 }
 
