@@ -771,28 +771,27 @@ RcppExport SEXP _ACTIONet_prune_archetypes(SEXP C_traceSEXP, SEXP H_traceSEXP, S
     return rcpp_result_gen;
 }
 // unify_archetypes
-List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold, double backbone_density, double resolution, int min_cluster_size, int thread_no, int normalization);
-static SEXP _ACTIONet_unify_archetypes_try(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP violation_thresholdSEXP, SEXP backbone_densitySEXP, SEXP resolutionSEXP, SEXP min_cluster_sizeSEXP, SEXP thread_noSEXP, SEXP normalizationSEXP) {
+List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double backbone_density, double resolution, int min_cluster_size, int thread_no, int normalization);
+static SEXP _ACTIONet_unify_archetypes_try(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP backbone_densitySEXP, SEXP resolutionSEXP, SEXP min_cluster_sizeSEXP, SEXP thread_noSEXP, SEXP normalizationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
     Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
     Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
-    Rcpp::traits::input_parameter< double >::type violation_threshold(violation_thresholdSEXP);
     Rcpp::traits::input_parameter< double >::type backbone_density(backbone_densitySEXP);
     Rcpp::traits::input_parameter< double >::type resolution(resolutionSEXP);
     Rcpp::traits::input_parameter< int >::type min_cluster_size(min_cluster_sizeSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< int >::type normalization(normalizationSEXP);
-    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, violation_threshold, backbone_density, resolution, min_cluster_size, thread_no, normalization));
+    rcpp_result_gen = Rcpp::wrap(unify_archetypes(S_r, C_stacked, H_stacked, backbone_density, resolution, min_cluster_size, thread_no, normalization));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP violation_thresholdSEXP, SEXP backbone_densitySEXP, SEXP resolutionSEXP, SEXP min_cluster_sizeSEXP, SEXP thread_noSEXP, SEXP normalizationSEXP) {
+RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP backbone_densitySEXP, SEXP resolutionSEXP, SEXP min_cluster_sizeSEXP, SEXP thread_noSEXP, SEXP normalizationSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_unify_archetypes_try(S_rSEXP, C_stackedSEXP, H_stackedSEXP, violation_thresholdSEXP, backbone_densitySEXP, resolutionSEXP, min_cluster_sizeSEXP, thread_noSEXP, normalizationSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_unify_archetypes_try(S_rSEXP, C_stackedSEXP, H_stackedSEXP, backbone_densitySEXP, resolutionSEXP, min_cluster_sizeSEXP, thread_noSEXP, normalizationSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -3920,6 +3919,76 @@ RcppExport SEXP _ACTIONet_recursiveNMU_mine(SEXP MSEXP, SEXP dimSEXP, SEXP max_S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// normalize_mat
+mat normalize_mat(mat& X, int normalization);
+static SEXP _ACTIONet_normalize_mat_try(SEXP XSEXP, SEXP normalizationSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type normalization(normalizationSEXP);
+    rcpp_result_gen = Rcpp::wrap(normalize_mat(X, normalization));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_normalize_mat(SEXP XSEXP, SEXP normalizationSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_normalize_mat_try(XSEXP, normalizationSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// normalize_spmat
+sp_mat normalize_spmat(sp_mat& X, int normalization);
+static SEXP _ACTIONet_normalize_spmat_try(SEXP XSEXP, SEXP normalizationSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type normalization(normalizationSEXP);
+    rcpp_result_gen = Rcpp::wrap(normalize_spmat(X, normalization));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_normalize_spmat(SEXP XSEXP, SEXP normalizationSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_normalize_spmat_try(XSEXP, normalizationSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -3970,7 +4039,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*run_online_ACTION)(mat&,field<uvec>,int,int,int)");
         signatures.insert("List(*run_weighted_ACTION)(mat&,vec,int,int,int,int,double)");
         signatures.insert("List(*prune_archetypes)(const List&,const List&,double,int)");
-        signatures.insert("List(*unify_archetypes)(mat&,mat&,mat&,double,double,double,int,int,int)");
+        signatures.insert("List(*unify_archetypes)(mat&,mat&,mat&,double,double,int,int,int)");
         signatures.insert("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int,int,int)");
         signatures.insert("sp_mat(*build_knn)(mat,string,double,int,bool)");
         signatures.insert("List(*layoutNetwork)(sp_mat&,mat&,const std::string&,bool,double,double,double,unsigned int,int,int,double,int)");
@@ -4054,6 +4123,8 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*aggregate_genesets_weighted_enrichment_permutation)(sp_mat&,sp_mat&,sp_mat&,int,int,int,double,double,int,int)");
         signatures.insert("List(*recursiveNMU)(mat,int,int,int)");
         signatures.insert("List(*recursiveNMU_mine)(mat,int,int,int)");
+        signatures.insert("mat(*normalize_mat)(mat&,int)");
+        signatures.insert("sp_mat(*normalize_spmat)(sp_mat&,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4164,6 +4235,8 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC)_ACTIONet_aggregate_genesets_weighted_enrichment_permutation_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU", (DL_FUNC)_ACTIONet_recursiveNMU_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU_mine", (DL_FUNC)_ACTIONet_recursiveNMU_mine_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_normalize_mat", (DL_FUNC)_ACTIONet_normalize_mat_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_normalize_spmat", (DL_FUNC)_ACTIONet_normalize_spmat_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -4189,7 +4262,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_online_ACTION", (DL_FUNC) &_ACTIONet_run_online_ACTION, 5},
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
-    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 9},
+    {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 8},
     {"_ACTIONet_buildNetwork", (DL_FUNC) &_ACTIONet_buildNetwork, 9},
     {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 5},
     {"_ACTIONet_layoutNetwork", (DL_FUNC) &_ACTIONet_layoutNetwork, 12},
@@ -4273,6 +4346,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_aggregate_genesets_weighted_enrichment_permutation", (DL_FUNC) &_ACTIONet_aggregate_genesets_weighted_enrichment_permutation, 10},
     {"_ACTIONet_recursiveNMU", (DL_FUNC) &_ACTIONet_recursiveNMU, 4},
     {"_ACTIONet_recursiveNMU_mine", (DL_FUNC) &_ACTIONet_recursiveNMU_mine, 4},
+    {"_ACTIONet_normalize_mat", (DL_FUNC) &_ACTIONet_normalize_mat, 2},
+    {"_ACTIONet_normalize_spmat", (DL_FUNC) &_ACTIONet_normalize_spmat, 2},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},

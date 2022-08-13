@@ -1,14 +1,12 @@
 #include <ACTIONet.h>
 #include <RcppArmadillo.h>
 
-
 /*
 #include "Rforceatlas_types.h"
 #include "params.hpp"
 #include "graph.hpp"
 #include "work.hpp"
 */
-
 
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -24,7 +22,6 @@ Rcpp::NumericVector arma2vec(const T &x)
 {
   return Rcpp::NumericVector(x.begin(), x.end());
 }
-
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -412,7 +409,6 @@ mat run_simplex_regression_FW(mat &A, mat &B, int max_iter = -1, double min_diff
   return X;
 }
 
-
 //' Runs Successive Projection Algorithm (SPA) to solve separable NMF
 //'
 //' @param A Input matrix
@@ -492,9 +488,9 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
   for (int i = k_min; i <= k_max; i++)
   {
     mat cur_C = trace.C[i];
-    //cur_C.transform( [](double val) { return (val < 1e-5? 0:val); } );
-    //cur_C = round(cur_C*1e5)/1e-5;
-    //cur_C = normalise(cur_C, 1);
+    // cur_C.transform( [](double val) { return (val < 1e-5? 0:val); } );
+    // cur_C = round(cur_C*1e5)/1e-5;
+    // cur_C = normalise(cur_C, 1);
     C[i - 1] = cur_C;
   }
   res["C"] = C;
@@ -503,8 +499,8 @@ List run_ACTION(mat &S_r, int k_min = 2, int k_max = 30, int thread_no = 0,
   for (int i = k_min; i <= k_max; i++)
   {
     mat cur_H = trace.H[i];
-    //cur_H.transform( [](double val) { return (val < 1e-5? 0:val); } );
-    //cur_H = normalise(cur_H, 1);
+    // cur_H.transform( [](double val) { return (val < 1e-5? 0:val); } );
+    // cur_H = normalise(cur_H, 1);
     H[i - 1] = cur_H;
   }
   res["H"] = H;
@@ -734,7 +730,6 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
 List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
-                      double violation_threshold = 0.0,
                       double backbone_density = 0.5, double resolution = 1.0,
                       int min_cluster_size = 3,
                       int thread_no = 0, int normalization = 0)
@@ -753,7 +748,7 @@ List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
 
-  out_list["assigned_archetypes"] = results.assigned_archetypes;  
+  out_list["assigned_archetypes"] = results.assigned_archetypes;
   out_list["arch_membership_weights"] = results.arch_membership_weights;
 
   out_list["ontology"] = results.dag_adj;
@@ -819,8 +814,9 @@ sp_mat build_knn(mat H, string distance_metric = "jsd", double k = 10, int threa
 //'	G = buildNetwork(prune.out$H_stacked)
 //'	vis.out = layoutNetwrok(G, S_r)
 // [[Rcpp::export]]
-List layoutNetwork(sp_mat &G, mat &initial_position, const std::string &method = "umap", bool presmooth_network = false, 
-  double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2) {
+List layoutNetwork(sp_mat &G, mat &initial_position, const std::string &method = "umap", bool presmooth_network = false,
+                   double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2)
+{
 
   field<mat> res = ACTIONet::layoutNetwork_xmap(G, initial_position, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist);
 
@@ -885,7 +881,7 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass)
 //'
 // [[Rcpp::export]]
 mat compute_grouped_rowsums(sp_mat &S,
-                                    arma::Col<unsigned long long> sample_assignments)
+                            arma::Col<unsigned long long> sample_assignments)
 {
   mat pb = ACTIONet::compute_grouped_rowsums(S, sample_assignments);
 
@@ -901,7 +897,7 @@ mat compute_grouped_rowsums(sp_mat &S,
 //'
 // [[Rcpp::export]]
 mat compute_grouped_rowsums_full(mat &S,
-                                         arma::Col<unsigned long long> sample_assignments)
+                                 arma::Col<unsigned long long> sample_assignments)
 {
   mat pb = ACTIONet::compute_grouped_rowsums(S, sample_assignments);
 
@@ -2401,8 +2397,9 @@ mat mat_mat_product_parallel(mat &A, mat &B, int thread_no)
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat transform_layout(sp_mat &G, mat reference_coordinates, const std::string &method = "umap", bool presmooth_network = false, 
-  double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2) {
+mat transform_layout(sp_mat &G, mat reference_coordinates, const std::string &method = "umap", bool presmooth_network = false,
+                     double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2)
+{
 
   mat coors = ACTIONet::transform_layout(G, reference_coordinates, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist);
 
@@ -2489,7 +2486,8 @@ vec sweepcut(sp_mat &A, vec s, int min_size = 5, int max_size = -1)
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat aggregate_genesets_mahalanobis_2archs(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0) {
+mat aggregate_genesets_mahalanobis_2archs(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0)
+{
   mat stats = ACTIONet::aggregate_genesets_mahalanobis_2archs(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no);
 
   return (stats);
@@ -2497,7 +2495,8 @@ mat aggregate_genesets_mahalanobis_2archs(sp_mat &G, sp_mat &S, sp_mat &marker_m
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat aggregate_genesets_mahalanobis_2gmm(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0) {
+mat aggregate_genesets_mahalanobis_2gmm(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 0, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0)
+{
   mat stats = ACTIONet::aggregate_genesets_mahalanobis_2gmm(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no);
 
   return (stats);
@@ -2505,7 +2504,8 @@ mat aggregate_genesets_mahalanobis_2gmm(sp_mat &G, sp_mat &S, sp_mat &marker_mat
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0) {
+mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0)
+{
   mat stats = ACTIONet::aggregate_genesets_weighted_enrichment(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no);
 
   return (stats);
@@ -2513,16 +2513,17 @@ mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0, int perm_no = 30) {
+mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, int expression_normalization_method = 0, int gene_scaling_method = 3, double pre_alpha = 0.85, double post_alpha = 0.85, int thread_no = 0, int perm_no = 30)
+{
   mat stats = ACTIONet::aggregate_genesets_weighted_enrichment_permutation(G, S, marker_mat, network_normalization_method, expression_normalization_method, gene_scaling_method, pre_alpha, post_alpha, thread_no, perm_no);
 
   return (stats);
 }
 
-
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-List recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+List recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100)
+{
   field<mat> stats = ACTIONet::recursiveNMU(M, dim, max_SVD_iter, max_iter_inner);
 
   List res;
@@ -2535,7 +2536,8 @@ List recursiveNMU(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_in
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100) {
+List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_iter_inner = 100)
+{
   field<mat> stats = ACTIONet::recursiveNMU_mine(M, dim, max_SVD_iter, max_iter_inner);
 
   List res;
@@ -2544,4 +2546,22 @@ List recursiveNMU_mine(mat M, int dim = 100, int max_SVD_iter = 1000, int max_it
   res["factor_weights"] = stats[2];
 
   return (res);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat normalize_mat(mat &X, int normalization = 0)
+{
+  mat X_norm = ACTIONet::normalize_mat(X, normalization);
+
+  return (X_norm);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+sp_mat normalize_spmat(sp_mat &X, int normalization = 0)
+{
+  sp_mat X_norm = ACTIONet::normalize_mat(X, normalization);
+
+  return (X_norm);
 }

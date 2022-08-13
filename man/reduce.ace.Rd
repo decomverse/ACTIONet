@@ -8,7 +8,7 @@ reduce.ace(
   ace,
   reduced_dim = 50,
   max_iter = 10,
-  assay_name = "logcounts",
+  assay_name = NULL,
   reduction_out = "ACTION",
   SVD_algorithm = 0,
   seed = 0

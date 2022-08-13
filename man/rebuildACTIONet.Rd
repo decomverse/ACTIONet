@@ -20,6 +20,7 @@ rebuildACTIONet(
   reduction_slot = "ACTION",
   net_slot_out = "ACTIONet",
   H_stacked_slot = "H_stacked",
+  reduction_normalization = 1,
   seed = 0
 )
 }

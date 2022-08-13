@@ -444,17 +444,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double violation_threshold = 0.0, double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0, int normalization = 0) {
-        typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0, int normalization = 0) {
+        typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_unify_archetypes p_unify_archetypes = NULL;
         if (p_unify_archetypes == NULL) {
-            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,double,double,int,int,int)");
+            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,double,int,int,int)");
             p_unify_archetypes = (Ptr_unify_archetypes)R_GetCCallable("ACTIONet", "_ACTIONet_unify_archetypes");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_unify_archetypes(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(C_stacked)), Shield<SEXP>(Rcpp::wrap(H_stacked)), Shield<SEXP>(Rcpp::wrap(violation_threshold)), Shield<SEXP>(Rcpp::wrap(backbone_density)), Shield<SEXP>(Rcpp::wrap(resolution)), Shield<SEXP>(Rcpp::wrap(min_cluster_size)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(normalization)));
+            rcpp_result_gen = p_unify_archetypes(Shield<SEXP>(Rcpp::wrap(S_r)), Shield<SEXP>(Rcpp::wrap(C_stacked)), Shield<SEXP>(Rcpp::wrap(H_stacked)), Shield<SEXP>(Rcpp::wrap(backbone_density)), Shield<SEXP>(Rcpp::wrap(resolution)), Shield<SEXP>(Rcpp::wrap(min_cluster_size)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(normalization)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -2206,6 +2206,48 @@ namespace ACTIONet {
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<List >(rcpp_result_gen);
+    }
+
+    inline mat normalize_mat(mat& X, int normalization = 0) {
+        typedef SEXP(*Ptr_normalize_mat)(SEXP,SEXP);
+        static Ptr_normalize_mat p_normalize_mat = NULL;
+        if (p_normalize_mat == NULL) {
+            validateSignature("mat(*normalize_mat)(mat&,int)");
+            p_normalize_mat = (Ptr_normalize_mat)R_GetCCallable("ACTIONet", "_ACTIONet_normalize_mat");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_normalize_mat(Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(normalization)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
+    inline sp_mat normalize_spmat(sp_mat& X, int normalization = 0) {
+        typedef SEXP(*Ptr_normalize_spmat)(SEXP,SEXP);
+        static Ptr_normalize_spmat p_normalize_spmat = NULL;
+        if (p_normalize_spmat == NULL) {
+            validateSignature("sp_mat(*normalize_spmat)(sp_mat&,int)");
+            p_normalize_spmat = (Ptr_normalize_spmat)R_GetCCallable("ACTIONet", "_ACTIONet_normalize_spmat");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_normalize_spmat(Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(normalization)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<sp_mat >(rcpp_result_gen);
     }
 
 }

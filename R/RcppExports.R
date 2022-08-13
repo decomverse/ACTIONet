@@ -604,8 +604,8 @@ prune_archetypes <- function(C_trace, H_trace, min_specificity_z_threshold = -3,
     .Call(`_ACTIONet_prune_archetypes`, C_trace, H_trace, min_specificity_z_threshold, min_cells)
 }
 
-unify_archetypes <- function(S_r, C_stacked, H_stacked, violation_threshold = 0.0, backbone_density = 0.5, resolution = 1.0, min_cluster_size = 3L, thread_no = 0L, normalization = 0L) {
-    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, violation_threshold, backbone_density, resolution, min_cluster_size, thread_no, normalization)
+unify_archetypes <- function(S_r, C_stacked, H_stacked, backbone_density = 0.5, resolution = 1.0, min_cluster_size = 3L, thread_no = 0L, normalization = 0L) {
+    .Call(`_ACTIONet_unify_archetypes`, S_r, C_stacked, H_stacked, backbone_density, resolution, min_cluster_size, thread_no, normalization)
 }
 
 #'
@@ -1083,6 +1083,14 @@ recursiveNMU <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 1
 
 recursiveNMU_mine <- function(M, dim = 100L, max_SVD_iter = 1000L, max_iter_inner = 100L) {
     .Call(`_ACTIONet_recursiveNMU_mine`, M, dim, max_SVD_iter, max_iter_inner)
+}
+
+normalize_mat <- function(X, normalization = 0L) {
+    .Call(`_ACTIONet_normalize_mat`, X, normalization)
+}
+
+normalize_spmat <- function(X, normalization = 0L) {
+    .Call(`_ACTIONet_normalize_spmat`, X, normalization)
 }
 
 roll_var <- function(X) {

@@ -14,6 +14,7 @@ rerunLayout(
   thread_no = 0,
   init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
+  reduction_normalization = 1,
   seed = 0
 )
 }
