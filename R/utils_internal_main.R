@@ -1,20 +1,18 @@
 #' Run ACTION_decomposition_MR
-.run.ACTIONMR.ace <- function(
-  ace,
-  k_min = 2,
-  k_max = 30,
-  specificity_th = -3,
-  min_cells_per_arch = 2,
-  unification_backbone_density = 0.5,
-  unification_resolution = 1.0,
-  unification_min_cluster_size = 3,
-  max_iter = 50,
-  min_delta = 1e-300,
-  thread_no = 0,
-  unified_suffix = "unified",
-  footprint_slot_name = "assigned_archetype",
-  reduction_slot = "ACTION") {
-
+.run.ACTIONMR.ace <- function(ace,
+                              k_min = 2,
+                              k_max = 30,
+                              specificity_th = -3,
+                              min_cells_per_arch = 2,
+                              unification_backbone_density = 0.5,
+                              unification_resolution = 1.0,
+                              unification_min_cluster_size = 3,
+                              max_iter = 50,
+                              min_delta = 1e-300,
+                              thread_no = 0,
+                              unified_suffix = "unified",
+                              footprint_slot_name = "assigned_archetype",
+                              reduction_slot = "ACTION") {
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
   S_r <- Matrix::t(.validate_map(ace, map_slot = reduction_slot, ace_name = "ace"))
@@ -51,24 +49,23 @@
   return(ace)
 }
 
-.run.layoutNetwork <- function(
-  ace,
-  n_epochs = 1000,
-  presmooth_network = FALSE,
-  algorithm = "umap",
-  spread = 1.0,
-  min_dist = 1.0,
-  gamma = 1.0,
-  init_coor_slot = "ACTION",
-  net_slot = "ACTIONet",
-  thread_no = 0,
-  seed = 0,
-  return_raw = FALSE
-) {
+.run.layoutNetwork <- function(ace,
+                               n_epochs = 1000,
+                               presmooth_network = FALSE,
+                               algorithm = "umap",
+                               spread = 1.0,
+                               min_dist = 1.0,
+                               gamma = 1.0,
+                               initial_coordinates = "ACTION",
+                               net_slot = "ACTIONet",
+                               thread_no = 0,
+                               seed = 0,
+                               return_raw = FALSE) {
+  algorithm <- match.arg(tolower(algorithm), c(
+    "umap", "tumap",
+    "largevis", "pacmap"
+  ))
 
-  algorithm <- match.arg(tolower(algorithm), c("umap", "tumap", 
-    "largevis", "pacmap"))
-  
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
   G <- .validate_net(
@@ -80,12 +77,12 @@
 
   initial_coordinates <- .validate_map(
     ace,
-    map_slot = init_coor_slot,
+    map_slot = initial_coordinates,
     matrix_type = "dense",
     force_type = TRUE,
   )
 
-  vis.out <- layoutNetwork(G = G, initial_position = initial_coordinates, method = algorithm, spread = spread, min_dist = min_dist, n_epochs = n_epochs, seed = seed, thread_no = thread_no, presmooth_network = presmooth_network);
+  vis.out <- layoutNetwork(G = G, initial_position = initial_coordinates, method = algorithm, spread = spread, min_dist = min_dist, n_epochs = n_epochs, seed = seed, thread_no = thread_no, presmooth_network = presmooth_network)
 
 
   if (return_raw == TRUE) {
@@ -118,14 +115,11 @@
 
 
 #' Prune nonspecific and/or unreliable archetypes
-.run.pruneArchetypes <- function(
-  ace,
-  C_trace,
-  H_trace,
-  specificity_th = -3,
-  min_cells_per_arch = 2
-) {
-
+.run.pruneArchetypes <- function(ace,
+                                 C_trace,
+                                 H_trace,
+                                 specificity_th = -3,
+                                 min_cells_per_arch = 2) {
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
   pruning.out <- .pruneArchetypes(
@@ -146,20 +140,18 @@
 
 
 #' Identiy equivalent classes of archetypes and group them together
-.run.unifyArchetypes <- function(
-  ace,
-  unification_backbone_density = 0.5,
-  unification_resolution = 1.0,
-  unification_min_cluster_size = 3,
-  reduction_slot = "ACTION",
-  C_stacked_slot = "C_stacked",
-  H_stacked_slot = "H_stacked",
-  unified_suffix = "unified",
-  footprint_slot_name = "assigned_archetype",
-  thread_no = 0,
-  return_raw = FALSE
-) {
-
+.run.unifyArchetypes <- function(ace,
+                                 unification_backbone_density = 0.5,
+                                 unification_resolution = 1.0,
+                                 unification_min_cluster_size = 3,
+                                 unification_normalization = 0,
+                                 reduction_slot = "ACTION",
+                                 C_stacked_slot = "C_stacked",
+                                 H_stacked_slot = "H_stacked",
+                                 unified_suffix = "unified",
+                                 footprint_slot_name = "assigned_archetype",
+                                 thread_no = 0,
+                                 return_raw = FALSE) {
   .validate_ace(ace, allow_null = FALSE, return_elem = FALSE)
 
   S_r <- .validate_map(
@@ -168,7 +160,7 @@
     matrix_type = "dense",
     force_type = TRUE
   )
-  S_r = Matrix::t(S_r)
+  S_r <- Matrix::t(S_r)
 
   C_stacked <- .validate_map(
     ace = ace,
@@ -192,6 +184,7 @@
     unification_backbone_density = unification_backbone_density,
     unification_resolution = unification_resolution,
     unification_min_cluster_size = unification_min_cluster_size,
+    unification_normalization = unification_normalization,
     thread_no = thread_no
   )
 
@@ -212,17 +205,14 @@
 }
 
 
-.smoothPCs <- function(
-  ace,
-  diffusion_algorithm = "pagerank",
-  alpha = 0.9,
-  diffusion_it = 5,
-  reduction_slot = "ACTION",
-  net_slot = "ACTIONet",
-  thread_no = 0,
-  return_raw = FALSE
-) {
-
+.smoothPCs <- function(ace,
+                       diffusion_algorithm = "pagerank",
+                       alpha = 0.9,
+                       diffusion_it = 5,
+                       reduction_slot = "ACTION",
+                       net_slot = "ACTIONet",
+                       thread_no = 0,
+                       return_raw = FALSE) {
   S_r <- .validate_map(
     ace,
     map_slot = reduction_slot,
@@ -246,7 +236,7 @@
 
   if (any(sapply(vars, is.null))) {
     nullvars <- sprintf("%s_%s", reduction_slot, names(vars)[which(sapply(vars, is.null))])
-    if(return_raw == TRUE){
+    if (return_raw == TRUE) {
       err <- sprintf("'%s' missing from 'ace'. Did you run 'reduce.ace()?'.\n", paste(nullvars, collapse = ","))
       stop(err)
     } else {
@@ -280,8 +270,8 @@
   } else {
     W <- SVD.out$u
     rownames(W) <- rownames(ace)
-    smooth_red_name = sprintf("%s_smooth", reduction_slot)
-    smooth_U_name = sprintf("%s_U", reduction_slot)
+    smooth_red_name <- sprintf("%s_smooth", reduction_slot)
+    smooth_U_name <- sprintf("%s_U", reduction_slot)
     rowMaps(ace)[[smooth_U_name]] <- W
     colMaps(ace)[[smooth_red_name]] <- H
     rowMapTypes(ace)[[smooth_U_name]] <- colMapTypes(ace)[[smooth_red_name]] <- "internal"

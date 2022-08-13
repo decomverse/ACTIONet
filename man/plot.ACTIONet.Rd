@@ -28,7 +28,9 @@
   color_slot = "denovo_color",
   point_order = NULL,
   use_repel = TRUE,
-  repel_force = 0.05
+  repel_force = 0.05,
+  add_backbone = FALSE,
+  arch_labels = NULL
 )
 }
 \arguments{

@@ -5,7 +5,7 @@
 \title{Plots gradient of (imputed) values on ACTIONet scatter plot.}
 \usage{
 \method{plot}{ACTIONet.gradient}(
-  ace,
+  data,
   x,
   alpha = 0,
   log_scale = FALSE,
@@ -24,8 +24,6 @@
 )
 }
 \arguments{
-\item{ace}{'ACTIONetExperiment' object}
-
 \item{x}{Numeric vector of length NCOL(ace).}
 
 \item{alpha}{Smoothing parameter for PageRank imputation of 'x'. No imputation if 'alpha=0' (default:0.85).}
@@ -55,6 +53,8 @@
 \item{coordinate_attr}{Name of entry in colMaps(ace) containing the 2D plot coordinates (default:'ACTIONet2D').}
 
 \item{scale_coors}{Scale and center plot coordinates. (default:'TRUE')}
+
+\item{ace}{'ACTIONetExperiment' object}
 }
 \value{
 'ggplot' object.
