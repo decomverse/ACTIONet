@@ -81,9 +81,9 @@ annotate.archetypes.using.labels <- function(ace,
   }
   Annot <- names(Labels)[match(sort(unique(Labels)), Labels)]
 
-  if(algorithm == "wilcox") {
-    wilcox.out = presto::wilcoxauc(profile, Annot[Labels])
-    Enrichment = do.call(cbind, split(-log10(wilcox.out$pval) * sign(wilcox.out$auc - 0.5), wilcox.out$group))    
+  if (algorithm == "wilcox") {
+    wilcox.out <- presto::wilcoxauc(profile, Annot[Labels])
+    Enrichment <- do.call(cbind, split(-log10(wilcox.out$pval) * sign(wilcox.out$auc - 0.5), wilcox.out$group))
   } else {
     # Using t-statistics
     Enrichment <- sapply(Annot, function(label) {
@@ -333,37 +333,36 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "enrichment_permutation_test", pre_imputation_algorithm = "none", gene_scaling_method = 0,
-pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
-
+annotateCells <- function(ace, markers, algorithm = "parametric", pre_imputation_algorithm = "none", gene_scaling_method = 0,
+                          pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
-      warning(sprintf("net_slot does not exist in colNets(ace)."))
-      return()
+    warning(sprintf("net_slot does not exist in colNets(ace)."))
+    return()
   } else {
-      G <- colNets(ace)[[net_slot]]
+    G <- colNets(ace)[[net_slot]]
   }
 
   features_use <- .get_feature_vec(ace, features_use)
   marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
   mask <- Matrix::rowSums(abs(marker_mat_full)) != 0
-  marker_mat = marker_mat_full[mask, ]
+  marker_mat <- marker_mat_full[mask, ]
 
-  if(pre_imputation_algorithm == "none") {
-    S = assays(ace)[[assay_name]]
-    sub_S = S[mask, ]
+  if (pre_imputation_algorithm == "none") {
+    S <- assays(ace)[[assay_name]]
+    sub_S <- S[mask, ]
   } else {
     sub_S <- Matrix::t(imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm))
   }
-  sub_S = as(sub_S, "sparseMatrix")
+  sub_S <- as(sub_S, "sparseMatrix")
 
-  network_normalization_code = 0
-  if(network_normalization_method == "pagerank_sym") {
-    network_normalization_code = 2
+  network_normalization_code <- 0
+  if (network_normalization_method == "pagerank_sym") {
+    network_normalization_code <- 2
   }
-  if(algorithm == "enrichment_permutation_test") {
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
-  } else if(algorithm == "enrichment_parametric") {
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
+  if (algorithm == "nonparametric") {
+    marker_stats <- aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+  } else if (algorithm == "parametric") {
+    marker_stats <- aggregate_genesets_weighted_enrichment(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -374,11 +373,10 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
       normalize = TRUE,
       H.slot = H_slot
     ))
-    marker_stats = networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
-
+    marker_stats <- networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no = thread_no)
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
-    marker_stats = aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+    marker_stats <- aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)
@@ -392,51 +390,39 @@ pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym
 }
 
 #' @export
-scoreCells <- function(ace, markers, algorithm = "mahalanobis_2gmm", pre_imputation_algorithm = "none", gene_scaling_method = 0,
-pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+scoreCells <- function(ace, markers, algorithm = "gmm2", pre_imputation_algorithm = "none", gene_scaling_method = 0,
+                       pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
-      warning(sprintf("net_slot does not exist in colNets(ace)."))
-      return()
+    warning(sprintf("net_slot does not exist in colNets(ace)."))
+    return()
   } else {
-      G <- colNets(ace)[[net_slot]]
+    G <- colNets(ace)[[net_slot]]
   }
 
   features_use <- .get_feature_vec(ace, features_use)
   marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
   mask <- Matrix::rowSums(abs(marker_mat_full)) != 0
-  marker_mat = marker_mat_full[mask, ]
+  marker_mat <- marker_mat_full[mask, ]
 
-  if(pre_imputation_algorithm == "none") {
-    S = assays(ace)[[assay_name]]
-    sub_S = S[mask, ]
+  if (pre_imputation_algorithm == "none") {
+    S <- assays(ace)[[assay_name]]
+    sub_S <- S[mask, ]
   } else {
     sub_S <- Matrix::t(imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm))
   }
-  sub_S = as(sub_S, "sparseMatrix")
+  sub_S <- as(sub_S, "sparseMatrix")
 
-  network_normalization_code = 0
-  if(network_normalization_method == "pagerank_sym") {
-    network_normalization_code = 2
+  network_normalization_code <- 0
+  if (network_normalization_method == "pagerank_sym") {
+    network_normalization_code <- 2
   }
-  if(algorithm == "mahalanobis_2gmm") {
-    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
-  } else if(algorithm == "mahalanobis_2archs") {
-    marker_stats = aggregate_genesets_mahalanobis_2archs(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
-  } else if (algorithm == "archetypes") {
-    arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
-    arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
-
-    marker_stats <- as.matrix(map.cell.scores.from.archetype.enrichment(
-      ace = ace,
-      enrichment_mat = arch_enrichment_mat,
-      normalize = TRUE,
-      H.slot = H_slot
-    ))
-    marker_stats = networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no =  thread_no)
-
+  if (algorithm == "gmm2") {
+    marker_stats <- aggregate_genesets_mahalanobis_2gmm(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
+  } else if (algorithm == "arch2") {
+    marker_stats <- aggregate_genesets_mahalanobis_2archs(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   } else {
-    warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
-    marker_stats = aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
+    warning(sprintf("Algorithm %s not found. Reverting back to gmm2", algorithm))
+    marker_stats <- aggregate_genesets_mahalanobis_2gmm(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
   }
 
   colnames(marker_stats) <- colnames(marker_mat)

@@ -36,7 +36,11 @@ normalize.matrix <- function(S,
   # cs = Matrix::colSums(S)
   # cs[cs == 0] = 1
   # B = Matrix::t(Matrix::t(S) / cs)
-  B <- normalize_spmat(S, 1)
+  if (is.matrix(S)) {
+    B <- normalize_mat(S, 1)
+  } else {
+    B <- normalize_spmat(S, 1)
+  }
 
   if (is.function(scale_param)) {
     lib_sizes <- colSums(S)
