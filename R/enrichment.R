@@ -77,7 +77,7 @@ assess.geneset.enrichment.from.scores <- function(scores, associations) {
     }
     associations = as(associations, "sparseMatrix")
     common.features = intersect(rownames(associations), rownames(scores))
-    enrichment.out = assess_enrichment(scores[common.features, ], associations[common.features, ])
+    enrichment.out = assess_enrichment(scores[common.features, drop = F], associations[common.features, , drop = F])
 
     rownames(enrichment.out$logPvals) = colnames(associations)
     rownames(enrichment.out$thresholds) = colnames(associations)
