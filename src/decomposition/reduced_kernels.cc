@@ -223,8 +223,6 @@ namespace ACTIONet
                            int verbose = 1)
   {
     int n = S.n_rows;
-    int m = S.n_cols;
-    dim = min(dim, min(m, n));
 
     if (prenormalize)
       S = normalise(S, 2);
@@ -289,8 +287,6 @@ namespace ACTIONet
                            int verbose = 1)
   {
     int n = S.n_rows;
-    int m = S.n_cols;
-    dim = min(dim, min(m, n));
 
     if (prenormalize)
       S = normalise(S, 2);
