@@ -78,7 +78,7 @@ namespace ACTIONet
     int m = A.n_rows;
     int n = A.n_cols;
 
-    dim = min(dim, min(m, n));
+    dim = min(dim, min(m, n) - 1);
 
     if (verbose)
     {
@@ -349,7 +349,7 @@ namespace ACTIONet
     int m = A.n_rows;
     int n = A.n_cols;
 
-    dim = min(dim, min(m, n));
+    dim = min(dim, min(m, n) - 1);
 
     int work = dim + 7;
     int lwork = 7 * work * (1 + work);
@@ -603,7 +603,7 @@ namespace ACTIONet
     int m = A.n_rows;
     int n = A.n_cols;
 
-    dim = min(dim, min(m, n));
+    dim = min(dim, min(m, n) + s - 1);
 
     if (verbose)
     {
@@ -727,7 +727,7 @@ namespace ACTIONet
     int m = A.n_rows;
     int n = A.n_cols;
 
-    dim = min(dim, min(m, n));
+    dim = min(dim, min(m, n) + s - 1);
 
     if (verbose)
     {
@@ -860,7 +860,7 @@ namespace ACTIONet
     int m = A.n_rows;
     int n = A.n_cols;
 
-    dim = min(dim, min(m, n));
+    dim = min(dim, min(m, n) - 2);
 
     int l = dim + 2;
 
@@ -968,7 +968,7 @@ namespace ACTIONet
     int m = A.n_rows;
     int n = A.n_cols;
 
-    dim = min(dim, min(m, n));
+    dim = min(dim, min(m, n) - 2);
 
     int l = dim + 2;
 
