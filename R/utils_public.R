@@ -43,7 +43,7 @@ normalize.matrix <- function(S,
   }
 
   if (is.function(scale_param)) {
-    lib_sizes <- colSums(S)
+    lib_sizes <- Matrix::colSums(S)
     B <- B * scale_param(lib_sizes)
   } else {
     if (length(scale_param) > 1) {
