@@ -265,7 +265,7 @@ rebuildACTIONet <- function(ace,
     spread = layout_spread,
     min_dist = layout_min_dist,
     gamma = layout_gamma,
-    initial_coordinates = reduction_slot,
+    reduction_slot = reduction_slot,
     net_slot = net_slot_out,
     thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
