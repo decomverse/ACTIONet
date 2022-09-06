@@ -3989,6 +3989,81 @@ RcppExport SEXP _ACTIONet_normalize_spmat(SEXP XSEXP, SEXP normalizationSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// xicor
+vec xicor(vec xvec, vec yvec, bool compute_pval, int seed);
+static SEXP _ACTIONet_xicor_try(SEXP xvecSEXP, SEXP yvecSEXP, SEXP compute_pvalSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< vec >::type xvec(xvecSEXP);
+    Rcpp::traits::input_parameter< vec >::type yvec(yvecSEXP);
+    Rcpp::traits::input_parameter< bool >::type compute_pval(compute_pvalSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(xicor(xvec, yvec, compute_pval, seed));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_xicor(SEXP xvecSEXP, SEXP yvecSEXP, SEXP compute_pvalSEXP, SEXP seedSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_xicor_try(xvecSEXP, yvecSEXP, compute_pvalSEXP, seedSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// XICOR
+List XICOR(mat& X, mat& Y, bool compute_pval, int seed, int thread_no);
+static SEXP _ACTIONet_XICOR_try(SEXP XSEXP, SEXP YSEXP, SEXP compute_pvalSEXP, SEXP seedSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< bool >::type compute_pval(compute_pvalSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(XICOR(X, Y, compute_pval, seed, thread_no));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_XICOR(SEXP XSEXP, SEXP YSEXP, SEXP compute_pvalSEXP, SEXP seedSEXP, SEXP thread_noSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_XICOR_try(XSEXP, YSEXP, compute_pvalSEXP, seedSEXP, thread_noSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -4125,6 +4200,8 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*recursiveNMU_mine)(mat,int,int,int)");
         signatures.insert("mat(*normalize_mat)(mat&,int)");
         signatures.insert("sp_mat(*normalize_spmat)(sp_mat&,int)");
+        signatures.insert("vec(*xicor)(vec,vec,bool,int)");
+        signatures.insert("List(*XICOR)(mat&,mat&,bool,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4237,6 +4314,8 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_recursiveNMU_mine", (DL_FUNC)_ACTIONet_recursiveNMU_mine_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_normalize_mat", (DL_FUNC)_ACTIONet_normalize_mat_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_normalize_spmat", (DL_FUNC)_ACTIONet_normalize_spmat_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_xicor", (DL_FUNC)_ACTIONet_xicor_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_XICOR", (DL_FUNC)_ACTIONet_XICOR_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -4348,6 +4427,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_recursiveNMU_mine", (DL_FUNC) &_ACTIONet_recursiveNMU_mine, 4},
     {"_ACTIONet_normalize_mat", (DL_FUNC) &_ACTIONet_normalize_mat, 2},
     {"_ACTIONet_normalize_spmat", (DL_FUNC) &_ACTIONet_normalize_spmat, 2},
+    {"_ACTIONet_xicor", (DL_FUNC) &_ACTIONet_xicor, 4},
+    {"_ACTIONet_XICOR", (DL_FUNC) &_ACTIONet_XICOR, 5},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},

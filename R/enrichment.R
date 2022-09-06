@@ -6,32 +6,33 @@
 #' @return Matrix of TF x cell type/state indicating inferred TF activity scores
 #'
 #' @examples
-#' scores = rowMaps(ace)$unified_feature_specificity
-#' TF.scores = assess.TF.activities.from.scores(scores)
+#' scores <- rowMaps(ace)$unified_feature_specificity
+#' TF.scores <- assess.TF.activities.from.scores(scores)
 #' @export
 assess.TF.activities.from.scores <- function(scores) {
+  if (!exists("ChEA3plusDB")) {
+    data("ChEA3plusDB")
+  }
 
-    if (!exists("ChEA3plusDB")) {
-        data("ChEA3plusDB")
-    }
-
-    Enrichments = lapply(1:length(ChEA3plusDB), function(i) {
-        associations = ChEA3plusDB[[i]]
-        associations.mat = as(sapply(associations, function(gs) as.numeric(rownames(ace) %in%
-            gs)), "dgCMatrix")
-        Enrichment = assess_enrichment(scores, associations.mat)
-        Enrichment.mat = Matrix::t(Enrichment[[1]])
-    })
+  Enrichments <- lapply(1:length(ChEA3plusDB), function(i) {
+    associations <- ChEA3plusDB[[i]]
+    associations.mat <- as(sapply(associations, function(gs) {
+      as.numeric(rownames(ace) %in%
+        gs)
+    }), "dgCMatrix")
+    Enrichment <- assess_enrichment(scores, associations.mat)
+    Enrichment.mat <- Matrix::t(Enrichment[[1]])
+  })
 
 
-    TF.scores = Matrix::t(sapply(1:ncol(Enrichments[[1]]), function(j) {
-        X = t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[, j])))
-        meta.logPval = combine.logPvals(X)
-        return(meta.logPval)
-    }))
-    rownames(TF.scores) = names(ChEA3plusDB$Enrichr)
+  TF.scores <- Matrix::t(sapply(1:ncol(Enrichments[[1]]), function(j) {
+    X <- t(sapply(Enrichments, function(enrichment) as.numeric(enrichment[, j])))
+    meta.logPval <- combine.logPvals(X)
+    return(meta.logPval)
+  }))
+  rownames(TF.scores) <- names(ChEA3plusDB$Enrichr)
 
-    return(TF.scores)
+  return(TF.scores)
 }
 
 
@@ -43,14 +44,13 @@ assess.TF.activities.from.scores <- function(scores) {
 #' @return Matrix of TF x archetypes indicating inferred TF activity scores
 #'
 #' @examples
-#' TF.scores = assess.TF.activities.from.archetypes(ace)
+#' TF.scores <- assess.TF.activities.from.archetypes(ace)
 #' @export
 assess.TF.activities.from.archetypes <- function(ace) {
+  scores <- rowMaps(ace)$unified_feature_specificity
+  TF.scores <- assess.TF.activities.from.scores(scores)
 
-    scores = rowMaps(ace)$unified_feature_specificity
-    TF.scores = assess.TF.activities.from.scores(scores)
-
-    return(TF.scores)
+  return(TF.scores)
 }
 
 
@@ -63,27 +63,28 @@ assess.TF.activities.from.archetypes <- function(ace) {
 #' @return Matrix pathway x cell type/states
 #'
 #' @examples
-#' data('gProfilerDB_human')
-#' associations = gProfilerDB_human$SYMBOL$WP
-#' scores = rowMaps(ace)$unified_feature_specificity
-#' Geneset.enrichments = assess.geneset.enrichment.from.scores(scores, associations)
+#' data("gProfilerDB_human")
+#' associations <- gProfilerDB_human$SYMBOL$WP
+#' scores <- rowMaps(ace)$unified_feature_specificity
+#' Geneset.enrichments <- assess.geneset.enrichment.from.scores(scores, associations)
 #' @export
 assess.geneset.enrichment.from.scores <- function(scores, associations) {
+  if (is.list(associations)) {
+    associations <- sapply(associations, function(gs) {
+      as.numeric(rownames(scores) %in%
+        gs)
+    })
+    rownames(associations) <- rownames(scores)
+  }
+  associations <- as(associations, "sparseMatrix")
+  common.features <- intersect(rownames(associations), rownames(scores))
+  enrichment.out <- assess_enrichment(scores[common.features, , drop = F], associations[common.features, , drop = F])
 
-    if (is.list(associations)) {
-        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
-            gs))
-        rownames(associations) = rownames(scores)
-    }
-    associations = as(associations, "sparseMatrix")
-    common.features = intersect(rownames(associations), rownames(scores))
-    enrichment.out = assess_enrichment(scores[common.features, drop = F], associations[common.features, , drop = F])
+  rownames(enrichment.out$logPvals) <- colnames(associations)
+  rownames(enrichment.out$thresholds) <- colnames(associations)
+  enrichment.out$scores <- scores
 
-    rownames(enrichment.out$logPvals) = colnames(associations)
-    rownames(enrichment.out$thresholds) = colnames(associations)
-    enrichment.out$scores = scores
-
-    return(enrichment.out)
+  return(enrichment.out)
 }
 
 
@@ -96,40 +97,39 @@ assess.geneset.enrichment.from.scores <- function(scores, associations) {
 #' @return Matrix pathway x cell type/states
 #'
 #' @examples
-#' data('gProfilerDB_human')
-#' associations = gProfilerDB_human$SYMBOL$WP
-#' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
+#' data("gProfilerDB_human")
+#' associations <- gProfilerDB_human$SYMBOL$WP
+#' Geneset.enrichments <- assess.geneset.enrichment.from.archetypes(ace, associations)
 #' @export
-assess.geneset.enrichment.from.archetypes <- function(
-  ace,
-  associations,
-  min.counts = 0,
-  specificity.slot = "unified_feature_specificity"
-) {
+assess.geneset.enrichment.from.archetypes <- function(ace,
+                                                      associations,
+                                                      min.counts = 0,
+                                                      specificity.slot = "unified_feature_specificity") {
+  scores <- rowMaps(ace)[[specificity.slot]]
+  if (max(scores) > 100) {
+    scores <- log1p(scores)
+  }
 
-    scores = rowMaps(ace)[[specificity.slot]]
-    if (max(scores) > 100) {
-        scores = log1p(scores)
-    }
+  if (is.list(associations)) {
+    associations <- sapply(associations, function(gs) {
+      as.numeric(rownames(scores) %in%
+        gs)
+    })
+    rownames(associations) <- rownames(scores)
+  }
+  common.features <- intersect(rownames(associations), rownames(scores))
 
-    if (is.list(associations)) {
-        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
-            gs))
-        rownames(associations) = rownames(scores)
-    }
-    common.features = intersect(rownames(associations), rownames(scores))
+  rows <- match(common.features, rownames(associations))
+  associations <- as(associations[rows, ], "dgCMatrix")
+  scores <- scores[common.features, ]
 
-    rows = match(common.features, rownames(associations))
-    associations = as(associations[rows, ], "dgCMatrix")
-    scores = scores[common.features, ]
+  enrichment.out <- assess_enrichment(scores, associations)
 
-    enrichment.out = assess_enrichment(scores, associations)
+  rownames(enrichment.out$logPvals) <- colnames(associations)
+  rownames(enrichment.out$thresholds) <- colnames(associations)
+  enrichment.out$scores <- scores
 
-    rownames(enrichment.out$logPvals) = colnames(associations)
-    rownames(enrichment.out$thresholds) = colnames(associations)
-    enrichment.out$scores = scores
-
-    return(enrichment.out)
+  return(enrichment.out)
 }
 
 
@@ -142,48 +142,47 @@ assess.geneset.enrichment.from.archetypes <- function(
 #' @return Matrix pathway x cell type/states
 #'
 #' @examples
-#' data('gProfilerDB_human')
-#' associations = gProfilerDB_human$SYMBOL$WP
-#' Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
+#' data("gProfilerDB_human")
+#' associations <- gProfilerDB_human$SYMBOL$WP
+#' Geneset.enrichments <- assess.geneset.enrichment.from.archetypes(ace, associations)
 #' @export
-assess.peakset.enrichment.from.archetypes <- function(
-  ace,
-  associations,
-  min.counts = 0,
-  specificity.slot = "unified_feature_specificity"
-) {
+assess.peakset.enrichment.from.archetypes <- function(ace,
+                                                      associations,
+                                                      min.counts = 0,
+                                                      specificity.slot = "unified_feature_specificity") {
+  scores <- rowMaps(ace)[[specificity.slot]]
+  if (max(scores) > 100) {
+    scores <- log1p(scores)
+  }
+  rownames(scores) <- rownames(ace)
 
-    scores = rowMaps(ace)[[specificity.slot]]
-    if (max(scores) > 100) {
-        scores = log1p(scores)
-    }
-    rownames(scores) = rownames(ace)
+  if (is.list(associations)) {
+    associations <- sapply(associations, function(gs) {
+      as.numeric(rownames(scores) %in%
+        gs)
+    })
+    rownames(associations) <- rownames(scores)
+  }
+  common.features <- intersect(rownames(associations), rownames(ace))
 
-    if (is.list(associations)) {
-        associations = sapply(associations, function(gs) as.numeric(rownames(scores) %in%
-            gs))
-        rownames(associations) = rownames(scores)
-    }
-    common.features = intersect(rownames(associations), rownames(ace))
-
-    rows = match(common.features, rownames(associations))
-    associations = as(associations[rows, ], "dgCMatrix")
-    scores = scores[common.features, ]
-
-
-    associations = as(associations[common.genes, ], "sparseMatrix")
+  rows <- match(common.features, rownames(associations))
+  associations <- as(associations[rows, ], "dgCMatrix")
+  scores <- scores[common.features, ]
 
 
-    col.mask = (Matrix::colSums(associations) > min.counts)  #& (Matrix::colSums(associations) < nrow(associations)*0.1)
-    associations = associations[, col.mask]
-    associations = associations[, -1]
-    enrichment.out = assess_enrichment(scores, associations)
+  associations <- as(associations[common.genes, ], "sparseMatrix")
 
-    rownames(enrichment.out$logPvals) = colnames(associations)
-    rownames(enrichment.out$thresholds) = colnames(associations)
-    enrichment.out$scores = scores
 
-    return(enrichment.out)
+  col.mask <- (Matrix::colSums(associations) > min.counts) # & (Matrix::colSums(associations) < nrow(associations)*0.1)
+  associations <- associations[, col.mask]
+  associations <- associations[, -1]
+  enrichment.out <- assess_enrichment(scores, associations)
+
+  rownames(enrichment.out$logPvals) <- colnames(associations)
+  rownames(enrichment.out$thresholds) <- colnames(associations)
+  enrichment.out$scores <- scores
+
+  return(enrichment.out)
 }
 
 
@@ -201,312 +200,293 @@ assess.peakset.enrichment.from.archetypes <- function(
 #' @examples
 #' geneset.enrichment.gProfiler(my_genes)
 #' @export
-assess.geneset.enrichment.gProfiler <- function(
-  genes,
-  category = c("GO:BP", "REAC", "KEGG"),
-  organism = "hsapiens",
-  top.terms = 10,
-  col = "tomato"
-) {
+assess.geneset.enrichment.gProfiler <- function(genes,
+                                                category = c("GO:BP", "REAC", "KEGG"),
+                                                organism = "hsapiens",
+                                                top.terms = 10,
+                                                col = "tomato") {
+  ACTIONetExperiment:::.check_and_load_package(c("gprofiler2", "ggpubr"))
 
-    ACTIONetExperiment:::.check_and_load_package(c("gprofiler2", "ggpubr"))
+  gp.out <- gprofiler2::gost(
+    genes,
+    ordered_query = FALSE,
+    exclude_iea = FALSE,
+    correction_method = "fdr",
+    sources = category,
+    organism = organism
+  )
 
-    gp.out = gprofiler2::gost(
-      genes,
-      ordered_query = FALSE,
-      exclude_iea = FALSE,
-      correction_method = "fdr",
-      sources = category,
-      organism = organism
-    )
+  if (is.null(gp.out)) {
+    msg <- sprintf("'gprofiler2' returned no results for the given gene set.\n")
+    message(msg)
+    return(NULL)
+  }
 
-    if (is.null(gp.out)){
-      msg = sprintf("'gprofiler2' returned no results for the given gene set.\n")
-      message(msg)
-      return(NULL)
-    }
+  terms <- gp.out$result
 
-    terms = gp.out$result
-
-    terms$logPval = -log10(terms$p_value)
+  terms$logPval <- -log10(terms$p_value)
 
 
-    too.long = which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
-    terms = terms[-too.long, ]
+  too.long <- which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
+  terms <- terms[-too.long, ]
 
-    terms = terms[order(terms$logPval, decreasing = TRUE), ]
-    sub.terms = terms[1:min(top.terms, sum(terms$logPval > 1)), ]
+  terms <- terms[order(terms$logPval, decreasing = TRUE), ]
+  sub.terms <- terms[1:min(top.terms, sum(terms$logPval > 1)), ]
 
-    p = ggpubr::ggbarplot(
-      sub.terms,
-      x = "term_name",
-      y = "logPval",
-      sort.val = "asc",
-      orientation = "horiz",
-      fill = col,
-      xlab = "",
-      ylab = ""
-    ) +
+  p <- ggpubr::ggbarplot(
+    sub.terms,
+    x = "term_name",
+    y = "logPval",
+    sort.val = "asc",
+    orientation = "horiz",
+    fill = col,
+    xlab = "",
+    ylab = ""
+  ) +
     ggplot2::geom_hline(
       yintercept = -log10(0.05),
       col = "gray",
       lty = 2
     )
 
-    return(p)
+  return(p)
 }
 
 
 #' @export
-assess.genesets = function(
-  arch.gs,
-  terms.gs,
-  N,
-  min.pval = 1e-100,
-  correct = TRUE
-) {
-
-    shared = t(sapply(terms.gs, function(gs1) {
-        sapply(arch.gs, function(gs2) {
-            nn = intersect(gs1, gs2)
-        })
-    }))
-    colnames(shared) = names(arch.gs)
-
-    GS.sizes = sapply(terms.gs, length)
-    logPvals.out = sapply(1:ncol(shared), function(i) {
-        gg = shared[, i]
-        x = as.numeric(sapply(gg, length))
-
-        n.sample = length(arch.gs[[i]])
-        n.success = as.numeric(GS.sizes)
-
-        v = rep(0, length(x))
-
-        min.overlap = n.success * n.sample/N
-        idx = which(x >= min.overlap)
-        if (length(idx) == 0)
-            return(v)
-
-        v[idx] = HGT_tail(
-          population.size = N,
-          success.count = n.success[idx],
-          sample.size = n.sample,
-          observed.success = x[idx]
-        )
-
-        return(v)
+assess.genesets <- function(arch.gs,
+                            terms.gs,
+                            N,
+                            min.pval = 1e-100,
+                            correct = TRUE) {
+  shared <- t(sapply(terms.gs, function(gs1) {
+    sapply(arch.gs, function(gs2) {
+      nn <- intersect(gs1, gs2)
     })
+  }))
+  colnames(shared) <- names(arch.gs)
 
-    rownames(logPvals.out) = names(terms.gs)
-    colnames(logPvals.out) = names(arch.gs)
+  GS.sizes <- sapply(terms.gs, length)
+  logPvals.out <- sapply(1:ncol(shared), function(i) {
+    gg <- shared[, i]
+    x <- as.numeric(sapply(gg, length))
 
-    return(Matrix::t(logPvals.out))
-}
+    n.sample <- length(arch.gs[[i]])
+    n.success <- as.numeric(GS.sizes)
 
+    v <- rep(0, length(x))
 
-#' @export
-geneset.enrichment.gProfiler <- function(
-  genes,
-  top.terms = 10,
-  col = "tomato",
-  organism = "hsapiens",
-  category = c("GO:BP", "REAC", "KEGG")
-) {
-
-    ACTIONetExperiment:::.check_and_load_package(c("gprofiler2", "ggpubr"))
-
-    gp.out = gprofiler2::gost(
-      genes,
-      ordered_query = FALSE,
-      exclude_iea = FALSE,
-      correction_method = "fdr",
-      sources = category,
-      organism = organism
-    )
-
-    if (is.null(gp.out)){
-      msg = sprintf("'gprofiler2' returned no results for the given gene set.\n")
-      message(msg)
-      return(NULL)
+    min.overlap <- n.success * n.sample / N
+    idx <- which(x >= min.overlap)
+    if (length(idx) == 0) {
+      return(v)
     }
 
-    terms = gp.out$result
+    v[idx] <- HGT_tail(
+      population.size = N,
+      success.count = n.success[idx],
+      sample.size = n.sample,
+      observed.success = x[idx]
+    )
 
-    terms$logPval = -log10(terms$p_value)
+    return(v)
+  })
 
-    too.long = which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
-    terms = terms[-too.long, ]
+  rownames(logPvals.out) <- names(terms.gs)
+  colnames(logPvals.out) <- names(arch.gs)
 
-    terms = terms[order(terms$logPval, decreasing = TRUE), ]
-    sub.terms = terms[1:min(top.terms, sum(terms$logPval > 1)), ]
+  return(Matrix::t(logPvals.out))
+}
 
-    p = ggpubr::ggbarplot(
-      sub.terms,
-      x = "term_name",
-      y = "logPval",
-      sort.val = "asc",
-      orientation = "horiz",
-      fill = col,
-      xlab = "",
-      ylab = ""
-    ) +
-      ggplot2::geom_hline(
-        yintercept = -log10(0.05),
-        col = "gray",
-        lty = 2
-      )
 
-    return(p)
+#' @export
+geneset.enrichment.gProfiler <- function(genes,
+                                         top.terms = 10,
+                                         col = "tomato",
+                                         organism = "hsapiens",
+                                         category = c("GO:BP", "REAC", "KEGG")) {
+  ACTIONetExperiment:::.check_and_load_package(c("gprofiler2", "ggpubr"))
+
+  gp.out <- gprofiler2::gost(
+    genes,
+    ordered_query = FALSE,
+    exclude_iea = FALSE,
+    correction_method = "fdr",
+    sources = category,
+    organism = organism
+  )
+
+  if (is.null(gp.out)) {
+    msg <- sprintf("'gprofiler2' returned no results for the given gene set.\n")
+    message(msg)
+    return(NULL)
+  }
+
+  terms <- gp.out$result
+
+  terms$logPval <- -log10(terms$p_value)
+
+  too.long <- which(sapply(terms$term_name, function(x) stringr::str_length(x)) > 50)
+  terms <- terms[-too.long, ]
+
+  terms <- terms[order(terms$logPval, decreasing = TRUE), ]
+  sub.terms <- terms[1:min(top.terms, sum(terms$logPval > 1)), ]
+
+  p <- ggpubr::ggbarplot(
+    sub.terms,
+    x = "term_name",
+    y = "logPval",
+    sort.val = "asc",
+    orientation = "horiz",
+    fill = col,
+    xlab = "",
+    ylab = ""
+  ) +
+    ggplot2::geom_hline(
+      yintercept = -log10(0.05),
+      col = "gray",
+      lty = 2
+    )
+
+  return(p)
 }
 
 
 compute.Geary.C <- function(L, W, x) {
+  N <- ncol(L)
+  mu <- mean(x)
+  delta <- x - mu
+  denom <- as.numeric(2 * W * (Matrix::t(delta) %*% delta))
 
-    N = ncol(L)
-    mu = mean(x)
-    delta = x - mu
-    denom = as.numeric(2 * W * (Matrix::t(delta) %*% delta))
+  C <- as.numeric((N - 1) * Matrix::t(x) %*% L %*% x / denom)
 
-    C = as.numeric((N - 1) * Matrix::t(x) %*% L %*% x/denom)
-
-    return(1 - C/2)
+  return(1 - C / 2)
 }
 
 
-assess.continuous.autocorrelation <- function(
-  ace,
-  variables,
-  perm.no = 100
-) {
+assess.continuous.autocorrelation <- function(ace,
+                                              variables,
+                                              perm.no = 100) {
+  set.seed(0)
 
-    set.seed(0)
+  A <- ace$ACTIONet
+  degs <- Matrix::colSums(A)
+  L <- -A
+  diag(L) <- degs
+  W <- sum(A@x)
 
-    A = ace$ACTIONet
-    degs = Matrix::colSums(A)
-    L = -A
-    diag(L) = degs
-    W = sum(A@x)
+  Z <- apply(variables, 2, function(x) {
+    C <- compute.Geary.C(L, W, x)
 
-    Z = apply(variables, 2, function(x) {
-        C = compute.Geary.C(L, W, x)
-
-        rand.Cs = sapply(1:perm.no, function(j) {
-            rand.x = sample(x)
-            rand.C = compute.Geary.C(L, W, rand.x)
-
-        })
-
-        z = (C - mean(rand.Cs))/sd(rand.Cs)
+    rand.Cs <- sapply(1:perm.no, function(j) {
+      rand.x <- sample(x)
+      rand.C <- compute.Geary.C(L, W, rand.x)
     })
 
-    return(Z)
+    z <- (C - mean(rand.Cs)) / sd(rand.Cs)
+  })
+
+  return(Z)
 }
 
 
-compute.phi <- function(
-  A,
-  labels,
-  s0,
-  s1,
-  s2
-) {
+compute.phi <- function(A,
+                        labels,
+                        s0,
+                        s1,
+                        s2) {
+  n <- length(labels)
+  counts <- table(labels)
+  categoties <- as.numeric(names(counts))
 
-    n = length(labels)
-    counts = table(labels)
-    categoties = as.numeric(names(counts))
+  w <- A@x
 
-    w = A@x
+  pvec <- as.vector(counts) / n
 
-    pvec = as.vector(counts)/n
+  k <- length(pvec)
 
-    k = length(pvec)
+  m1.rawphi <- (s0 / (n * (n - 1))) * (n^2 * k * (2 - k) - n * sum(1 / pvec))
 
-    m1.rawphi = (s0/(n * (n - 1))) * (n^2 * k * (2 - k) - n * sum(1/pvec))
+  Q1 <- sum(1 / pvec)
 
-    Q1 = sum(1/pvec)
+  Q2 <- sum(1 / pvec^2)
 
-    Q2 = sum(1/pvec^2)
+  Q3 <- sum(1 / pvec^3)
 
-    Q3 = sum(1/pvec^3)
+  Q22 <- sum((1 / pvec) %*% Matrix::t(1 / pvec))
 
-    Q22 = sum((1/pvec) %*% Matrix::t(1/pvec))
+  E1 <- (n^2 * Q22 - n * Q3) / (n * (n - 1))
 
-    E1 = (n^2 * Q22 - n * Q3)/(n * (n - 1))
+  E2 <- 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - 2 * (2 * n^2 * Q2 - n^2 * k * Q2) + 2 * n * Q3 - n^2 * Q22
 
-    E2 = 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - 2 * (2 * n^2 * Q2 - n^2 * k * Q2) + 2 * n * Q3 - n^2 * Q22
+  E2 <- E2 / (n * (n - 1) * (n - 2))
 
-    E2 = E2/(n * (n - 1) * (n - 2))
+  A1 <- 4 * n^4 * k^2 - 4 * n^4 * k^3 + n^4 * k^4 - (2 * n^3 * k * Q1 - n^3 * k^2 *
+    Q1)
+  A2 <- 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - (2 * n^2 * Q2 - n^2 *
+    k * Q2)
+  Apart <- A1 - 2 * A2
 
-    A1 = 4 * n^4 * k^2 - 4 * n^4 * k^3 + n^4 * k^4 - (2 * n^3 * k * Q1 - n^3 * k^2 *
-        Q1)
-    A2 = 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - (2 * n^2 * Q2 - n^2 *
-        k * Q2)
-    Apart = A1 - 2 * A2
+  B1 <- 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - (2 * n^2 * Q2 - n^2 * k * Q2)
 
-    B1 = 4 * n^3 * Q1 - 4 * n^3 * k * Q1 + n^3 * k^2 * Q1 - (2 * n^2 * Q2 - n^2 * k * Q2)
+  B2 <- 2 * n^2 * Q2 - n^2 * k * Q2 - n * Q3
 
-    B2 = 2 * n^2 * Q2 - n^2 * k * Q2 - n * Q3
+  B3 <- n^2 * Q22 - n * Q3
 
-    B3 = n^2 * Q22 - n * Q3
+  Bpart <- B1 - B2 - B3
 
-    Bpart = B1 - B2 - B3
+  C1 <- 2 * n^3 * k * Q1 - n^3 * k^2 * Q1 - n^2 * Q22
 
-    C1 = 2 * n^3 * k * Q1 - n^3 * k^2 * Q1 - n^2 * Q22
+  C2 <- 2 * n^2 * Q2 - n^2 * k * Q2 - n * Q3
 
-    C2 = 2 * n^2 * Q2 - n^2 * k * Q2 - n * Q3
+  Cpart <- C1 - 2 * C2
 
-    Cpart = C1 - 2 * C2
+  E3 <- (Apart - 2 * Bpart - Cpart) / (n * (n - 1) * (n - 2) * (n - 3))
 
-    E3 = (Apart - 2 * Bpart - Cpart)/(n * (n - 1) * (n - 2) * (n - 3))
+  m2.rawphi <- s1 * E1 + (s2 - 2 * s1) * E2 + (s0^2 - s2 + s1) * E3
 
-    m2.rawphi = s1 * E1 + (s2 - 2 * s1) * E2 + (s0^2 - s2 + s1) * E3
+  v_i <- labels[A@i + 1]
 
-    v_i = labels[A@i + 1]
+  v_j <- labels[A@j + 1]
 
-    v_j = labels[A@j + 1]
+  p_i <- pvec[match(v_i, categoties)]
 
-    p_i = pvec[match(v_i, categoties)]
+  p_j <- pvec[match(v_j, categoties)]
 
-    p_j = pvec[match(v_j, categoties)]
+  rawphi <- sum(w * (2 * (v_i == v_j) - 1) / (p_i * p_j))
 
-    rawphi = sum(w * (2 * (v_i == v_j) - 1)/(p_i * p_j))
+  mean.rawphi <- m1.rawphi
 
-    mean.rawphi = m1.rawphi
+  var.rawphi <- m2.rawphi - mean.rawphi^2
 
-    var.rawphi = m2.rawphi - mean.rawphi^2
+  phi.z <- (rawphi - mean.rawphi) / sqrt(var.rawphi)
 
-    phi.z = (rawphi - mean.rawphi)/sqrt(var.rawphi)
+  phi.logPval <- -log10(pnorm(phi.z, lower.tail = FALSE))
 
-    phi.logPval = -log10(pnorm(phi.z, lower.tail = FALSE))
-
-    return(list(z = phi.z, logPval = phi.logPval, phi = rawphi))
+  return(list(z = phi.z, logPval = phi.logPval, phi = rawphi))
 }
 
 
-assess.categorical.autocorrelation <- function(
-  A,
-  labels,
-  perm.no = 100
-) {
+assess.categorical.autocorrelation <- function(A,
+                                               labels,
+                                               perm.no = 100) {
+  set.seed(0)
 
-    set.seed(0)
+  w <- A@x
+  s0 <- sum(w)
+  s1 <- sum(4 * w^2) / 2
+  s2 <- sum((Matrix::colSums(A) + ACTIONetExperiment:::fastRowSums(A))^2)
 
-    w = A@x
-    s0 = sum(w)
-    s1 = sum(4 * w^2)/2
-    s2 = sum((Matrix::colSums(A) + ACTIONetExperiment:::fastRowSums(A))^2)
+  A <- as(A, "dgTMatrix")
 
-    A = as(A, "dgTMatrix")
+  phi <- compute.phi(A, labels, s0, s1, s2)$phi
 
-    phi = compute.phi(A, labels, s0, s1, s2)$phi
+  rand.phis <- sapply(1:perm.no, function(j) {
+    rand.labels <- sample(labels)
+    rand.phi <- compute.phi(A, rand.labels, s0, s1, s2)$phi
+  })
 
-    rand.phis = sapply(1:perm.no, function(j) {
-        rand.labels = sample(labels)
-        rand.phi = compute.phi(A, rand.labels, s0, s1, s2)$phi
-    })
+  z <- (phi - mean(rand.phis)) / sd(rand.phis)
 
-    z = (phi - mean(rand.phis))/sd(rand.phis)
-
-    return(z)
+  return(z)
 }

@@ -2250,6 +2250,48 @@ namespace ACTIONet {
         return Rcpp::as<sp_mat >(rcpp_result_gen);
     }
 
+    inline vec xicor(vec xvec, vec yvec, bool compute_pval = true, int seed = 0) {
+        typedef SEXP(*Ptr_xicor)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_xicor p_xicor = NULL;
+        if (p_xicor == NULL) {
+            validateSignature("vec(*xicor)(vec,vec,bool,int)");
+            p_xicor = (Ptr_xicor)R_GetCCallable("ACTIONet", "_ACTIONet_xicor");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_xicor(Shield<SEXP>(Rcpp::wrap(xvec)), Shield<SEXP>(Rcpp::wrap(yvec)), Shield<SEXP>(Rcpp::wrap(compute_pval)), Shield<SEXP>(Rcpp::wrap(seed)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<vec >(rcpp_result_gen);
+    }
+
+    inline List XICOR(mat& X, mat& Y, bool compute_pval = true, int seed = 0, int thread_no = 0) {
+        typedef SEXP(*Ptr_XICOR)(SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_XICOR p_XICOR = NULL;
+        if (p_XICOR == NULL) {
+            validateSignature("List(*XICOR)(mat&,mat&,bool,int,int)");
+            p_XICOR = (Ptr_XICOR)R_GetCCallable("ACTIONet", "_ACTIONet_XICOR");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_XICOR(Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(Y)), Shield<SEXP>(Rcpp::wrap(compute_pval)), Shield<SEXP>(Rcpp::wrap(seed)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_
