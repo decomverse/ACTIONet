@@ -436,63 +436,119 @@ scoreCells <- function(ace, markers, algorithm = "gmm2", pre_imputation_algorith
 }
 
 
-annotateArchs <- function(ace, annotation_source, archetype_slot = "H_unified") {
-  if (!is.list(annotation_source)) {
-    f <- factor(annotation_source)
-    associations <- as(model.matrix(~ 0. + f), "sparseMatrix")
-    colnames(associations) <- levels(f)
-
-    scores <- as.matrix(colMaps(ace)[[archetype_slot]])
-    arch_enrichment <- Matrix::t(assess_enrichment(scores, associations)$logPvals)
-    colnames(arch_enrichment) <- levels(f)
-  } else {
-    features_use <- .get_feature_vec(ace, NULL)
-    marker_mat <- .preprocess_annotation_markers(annotation_source, features_use)
-    arch_enrichment <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat)$logPvals)
-    colnames(arch_enrichment) <- colnames(marker_mat)
+annotateArchetypes <- function(ace, markers = NULL, labels = NULL, scores = NULL, archetype_slot = "H_unified", archetype_specificity_slot = "unified_feature_specificity") {
+  annotations.count <- is.null(markers) + is.null(labels) + is.null(scores)
+  if (annotations.count != 2) {
+    stop("Exactly one of the `markers`, `labels`, or `scores` can be provided.")
   }
-  arch_enrichment <- apply(arch_enrichment, 2, function(x) x / sd(x))
 
-  arch_enrichment[!is.finite(arch_enrichment)] <- 0
-  annots <- colnames(arch_enrichment)[apply(arch_enrichment, 1, which.max)]
-  conf <- apply(arch_enrichment, 1, max)
+  if (!is.null(markers)) {
+    features_use <- ACTIONet:::.get_feature_vec(ace, NULL)
+    marker_mat <- as(ACTIONet:::.preprocess_annotation_markers(markers, features_use), "sparseMatrix")
+
+    archetype_feature_specificity <- as.matrix(rowMaps(ace)[[archetype_specificity_slot]])
+    colnames(archetype_feature_specificity) <- paste("A", 1:ncol(archetype_feature_specificity), sep = "")
+
+    archetype_enrichment <- Matrix::t(assess_enrichment(archetype_feature_specificity, marker_mat)$logPvals)
+    rownames(archetype_enrichment) <- colnames(archetype_feature_specificity)
+    colnames(archetype_enrichment) <- colnames(marker_mat)
+  } else if (!is.null(labels)) {
+    X1 <- as.matrix(colMaps(ace)[[archetype_slot]])
+    colnames(X1) <- paste("A", 1:ncol(X1), sep = "")
+
+    if (length(labels) == 1) {
+      l2 <- colData(ace)[[labels]]
+    } else {
+      l2 <- labels
+    }
+    f2 <- factor(l2)
+    X2 <- model.matrix(~ .0 + f2)
+
+    xi.out <- ACTIONet::XICOR(X1, X2)
+    archetype_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+
+    rownames(archetype_enrichment) <- colnames(X1)
+    colnames(archetype_enrichment) <- levels(f2)
+  } else if (!is.null(scores)) {
+    X1 <- as.matrix(colMaps(ace)[[archetype_slot]])
+    colnames(X1) <- paste("A", 1:ncol(X1), sep = "")
+
+    if (length(scores) == 1) {
+      X2 <- as.matrix(colMaps(ace)[[scores]])
+    } else {
+      X2 <- as.matrix(scores)
+    }
+
+    xi.out <- ACTIONet::XICOR(X1, X2)
+    archetype_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+
+    rownames(archetype_enrichment) <- colnames(X1)
+    colnames(archetype_enrichment) <- colnames(X2)
+  }
+  archetype_enrichment[!is.finite(archetype_enrichment)] <- 0
+  annots <- colnames(archetype_enrichment)[apply(archetype_enrichment, 1, which.max)]
+  conf <- apply(archetype_enrichment, 1, max)
 
   out <- list(
     Label = annots,
     Confidence = conf,
-    Enrichment = arch_enrichment
+    Enrichment = archetype_enrichment
   )
 
   return(out)
 }
 
 
-annotateClusters <- function(ace, annotation_source, cluster_name = "leiden") {
-  cluster_slot <- sprintf("%s_markers_ACTIONet", cluster_name)
-
-  if (!is.list(annotation_source)) {
-    f <- factor(annotation_source)
-    associations <- as(model.matrix(~ 0. + f), "sparseMatrix")
-    colnames(associations) <- levels(f)
-
-    f2 <- factor(colData(ace)[[cluster_name]])
-    scores <- as.matrix(model.matrix(~ 0. + f2))
-    colnames(scores) <- levels(f2)
-
-    cluster_enrichment <- Matrix::t(assess_enrichment(scores, associations)$logPvals)
-    colnames(cluster_enrichment) <- levels(f)
-    rownames(cluster_enrichment) <- levels(f2)
-  } else {
-    features_use <- .get_feature_vec(ace, NULL)
-    marker_mat <- as(.preprocess_annotation_markers(annotation_source, features_use), "sparseMatrix")
-
-    scores <- as.matrix(rowMaps(ace)[[cluster_slot]])
-    cluster_enrichment <- Matrix::t(assess_enrichment(scores, marker_mat)$logPvals)
-    colnames(cluster_enrichment) <- colnames(marker_mat)
-    rownames(cluster_enrichment) <- colnames(scores)
+annotateClusters <- function(ace, markers = NULL, labels = NULL, scores = NULL, cluster_name = "leiden") {
+  annotations.count <- is.null(markers) + is.null(labels) + is.null(scores)
+  if (annotations.count != 2) {
+    stop("Exactly one of the `markers`, `labels`, or `scores` can be provided.")
   }
-  cluster_enrichment <- apply(cluster_enrichment, 2, function(x) x / sd(x))
 
+  if (!is.null(markers)) {
+    features_use <- .get_feature_vec(ace, NULL)
+    marker_mat <- as(.preprocess_annotation_markers(markers, features_use), "sparseMatrix")
+
+    scores <- as.matrix(rowMaps(ace)[[sprintf("%s_feature_specificity", cluster_name)]])
+    cluster_enrichment <- Matrix::t(assess_enrichment(scores, marker_mat)$logPvals)
+    rownames(cluster_enrichment) <- colnames(scores)
+    colnames(cluster_enrichment) <- colnames(marker_mat)
+  } else if (!is.null(labels)) {
+    l1 <- colData(ace)[[cluster_name]]
+    if (length(labels) == 1) {
+      l2 <- colData(ace)[[labels]]
+    } else {
+      l2 <- labels
+    }
+
+    f1 <- factor(l1)
+    f2 <- factor(l2)
+
+    X1 <- model.matrix(~ .0 + f1)
+    X2 <- model.matrix(~ .0 + f2)
+
+    xi.out <- ACTIONet::XICOR(X1, X2)
+    cluster_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+
+    rownames(cluster_enrichment) <- levels(f1)
+    colnames(cluster_enrichment) <- levels(f2)
+  } else if (!is.null(scores)) {
+    if (length(scores) == 1) {
+      X2 <- as.matrix(colMaps(ace)[[scores]])
+    } else {
+      X2 <- as.matrix(scores)
+    }
+
+    l1 <- colData(ace)[[cluster_name]]
+    f1 <- factor(l1)
+    X1 <- model.matrix(~ .0 + f1)
+
+    xi.out <- ACTIONet::XICOR(X1, X2)
+    cluster_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+
+    rownames(cluster_enrichment) <- levels(l1)
+    colnames(cluster_enrichment) <- colnames(X2)
+  }
   cluster_enrichment[!is.finite(cluster_enrichment)] <- 0
   annots <- colnames(cluster_enrichment)[apply(cluster_enrichment, 1, which.max)]
   conf <- apply(cluster_enrichment, 1, max)
@@ -505,7 +561,6 @@ annotateClusters <- function(ace, annotation_source, cluster_name = "leiden") {
 
   return(out)
 }
-
 
 projectArchs <- function(ace, archtype_scores, archetype_slot = "H_unified", normalize = TRUE) {
   cell.enrichment.mat <- map.cell.scores.from.archetype.enrichment(

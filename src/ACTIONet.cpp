@@ -2565,3 +2565,25 @@ sp_mat normalize_spmat(sp_mat &X, int normalization = 0)
 
   return (X_norm);
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+vec xicor(vec xvec, vec yvec, bool compute_pval = true, int seed = 0)
+{
+  vec res = ACTIONet::xicor(xvec, yvec, compute_pval, seed);
+
+  return (res);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List XICOR(mat &X, mat &Y, bool compute_pval = true, int seed = 0, int thread_no = 0)
+{
+  field<mat> out = ACTIONet::XICOR(X, Y, compute_pval, seed, thread_no);
+
+  List res;
+  res["XI"] = out(0);
+  res["Z"] = out(1);
+
+  return (res);
+}

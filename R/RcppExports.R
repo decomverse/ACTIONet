@@ -1093,6 +1093,14 @@ normalize_spmat <- function(X, normalization = 0L) {
     .Call(`_ACTIONet_normalize_spmat`, X, normalization)
 }
 
+xicor <- function(xvec, yvec, compute_pval = TRUE, seed = 0L) {
+    .Call(`_ACTIONet_xicor`, xvec, yvec, compute_pval, seed)
+}
+
+XICOR <- function(X, Y, compute_pval = TRUE, seed = 0L, thread_no = 0L) {
+    .Call(`_ACTIONet_XICOR`, X, Y, compute_pval, seed, thread_no)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
