@@ -6,18 +6,65 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
+from sklearn import preprocessing
+
+import _ACTIONet as _an
+
+
+def normalize_reduction(
+    adata: AnnData,
+    reduction_key: Optional[str] = None,
+    normalization: Optional[int] = 1,
+    copy: Optional[bool] = False,
+):
+    if reduction_key not in adata.obsm.keys():
+        raise ValueError("Did not find adata.obsm['" + reduction_key + "']. ")
+    reduction_key_out = reduction_key + "_normalized"
+
+    adata = adata.copy() if copy else adata
+
+    Xr = np.array(adata.obsm[reduction_key])
+    Xr_norm = _an.normalize_mat(Xr, normalization=normalization, dim=1)
+
+    # if normalization == 0:
+    #     Xr_norm = Xr
+    # elif normalization == 1:
+    #     # denom = np.array(np.sum(abs(Xr), axis=1, keepdims=True))
+    #     # denom[denom == 0] = 1
+    #     # Xr_norm = Xr / denom
+    #     Xr_norm = preprocessing.normalize(Xr, norm="l1")
+    # elif normalization == 2:
+    #     # denom = np.array(np.sqrt(np.sum((Xr ** 2), axis=1, keepdims=True)))
+    #     # denom[denom == 0] = 1
+    #     # Xr_norm = Xr / denom
+    #     Xr_norm = preprocessing.normalize(Xr, norm="l2")
+    # elif normalization == -1:  # z-score
+    #     Xr_norm = scale_matrix(Xr)
+    # else:
+    #     raise ValueError(
+    #         "normalize_reduction: normalization" + normalization + "unknown"
+    #     )
+
+    adata.obsm[reduction_key_out] = Xr_norm
+    adata.uns["metadata"]["reduction_normalization"] = normalization
+
+    return adata if copy else None
 
 
 def get_data_or_split(
-        adata: AnnData,
-        attr: Union[str, list, pd.Series],
-        groups_use: Union[str, list, None] = None,
-        to_return: Optional[str] = "data",
-        d: Optional[int] = 0,
-        ) -> Union[list, dict]:
+    adata: AnnData,
+    attr: Union[str, list, pd.Series],
+    groups_use: Union[str, list, None] = None,
+    to_return: Optional[str] = "data",
+    d: Optional[int] = 0,
+) -> Union[list, dict]:
     to_return = to_return.lower()
     if to_return not in ["data", "levels", "split"]:
-        raise ValueError("'to_return={type}' must be 'data', 'levels', or 'split'.".format(type=to_return))
+        raise ValueError(
+            "'to_return={type}' must be 'data', 'levels', or 'split'.".format(
+                type=to_return
+            )
+        )
 
     if d not in [0, 1]:
         raise ValueError("d must be dim (0 or 1) of adata")
@@ -30,7 +77,9 @@ def get_data_or_split(
 
     else:
         if len(attr) != adata.shape[d]:
-            raise ValueError("len(attr) does not match .shape[{dim:d}] of adata".format(dim=d))
+            raise ValueError(
+                "len(attr) does not match .shape[{dim:d}] of adata".format(dim=d)
+            )
         data_vec = attr
 
     if data_vec is None:
@@ -69,18 +118,16 @@ def get_data_or_split(
 
 def rand_suffix(N):
     str_out = "".join(
-            random.choices(
-                    string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N
-                    )
-            )
+        random.choices(
+            string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N
+        )
+    )
     return str_out
 
 
 def scale_matrix(
-        X: np.ndarray,
-        center: Optional[bool] = True,
-        scale: Optional[bool] = True,
-        ):
+    X: np.ndarray, center: Optional[bool] = True, scale: Optional[bool] = True,
+):
     X = X.astype(dtype=np.float64)
     if center:
         X -= X.mean(axis=0)
@@ -90,29 +137,33 @@ def scale_matrix(
 
 
 def normalize_matrix(
-        X: Union[np.ndarray, sparse.spmatrix],
-        log_transform: Optional[bool] = False,
-        scale_factor: Union[str, float, int, None] = None
-        ) -> Union[np.ndarray, sparse.spmatrix]:
+    X: Union[np.ndarray, sparse.spmatrix],
+    log_transform: Optional[bool] = False,
+    scale_factor: Union[str, float, int, None] = None,
+) -> Union[np.ndarray, sparse.spmatrix]:
     X = X.astype(dtype=np.float64)
 
-    if scale_factor != "median" and not isinstance(scale_factor, (int, float)) and scale_factor is not None:
+    if (
+        scale_factor != "median"
+        and not isinstance(scale_factor, (int, float))
+        and scale_factor is not None
+    ):
         raise ValueError(f"'scale_factor' must be 'median' or numeric.")
 
     if sparse.issparse(X):
-        row_sums = np.array(np.sum(X, axis=1))
-        row_sums[row_sums == 0] = 1
-        # B = np.median(row_sums) * X.multiply(1 / row_sums)
-        B = X.multiply(1 / row_sums)
+        lib_sizes = np.array(np.sum(X, axis=1))
+        lib_sizes[lib_sizes == 0] = 1
+        B = X.multiply(1 / lib_sizes)
+        # B = _an.normalize_spmat(X=X, normalization=1, dim=1)
     else:
         X = np.array(X)
-        row_sums = np.sum(X, axis=1, keepdims=True)
-        row_sums[row_sums == 0] = 1
-        # B = np.median(row_sums) * (X / row_sums)
-        B = X / row_sums
-
+        lib_sizes = np.sum(X, axis=1, keepdims=True)
+        lib_sizes[lib_sizes == 0] = 1
+        B = X / lib_sizes
+        # B = _an.normalize_mat(X=X, normalization=1, dim=1)
     if scale_factor == "median":
-        B = B * np.median(row_sums)
+        lib_sizes = np.sum(X, axis=1, keepdims=True)
+        B = B * np.median(lib_sizes)
     elif isinstance(scale_factor, (int, float)):
         B = B * scale_factor
 
@@ -126,11 +177,11 @@ def normalize_matrix(
 
 
 def double_normalize(
-        X: np.ndarray,
-        log1p: Optional[bool] = True,
-        min_threshold: Optional[int] = 0,
-        copy: Optional[bool] = True,
-        ) -> np.ndarray:
+    X: np.ndarray,
+    log1p: Optional[bool] = True,
+    min_threshold: Optional[int] = 0,
+    copy: Optional[bool] = True,
+) -> np.ndarray:
     X = X.copy() if copy else X
 
     X[X < min_threshold] = 0
@@ -149,3 +200,4 @@ def double_normalize(
     X_scaled = D_r @ X @ D_c
     X_scaled = X_scaled / np.max(X_scaled)
     return X_scaled
+

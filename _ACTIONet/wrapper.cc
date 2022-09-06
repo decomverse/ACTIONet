@@ -167,9 +167,6 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
 
   for (int i = 0; i < V.n_cols; i++) {
     vec v = V.col(i) * sigma(i);
-    v = round(v * 1e5) / 1e5;
-    double cs = sum(v);
-    if (cs < 0) v = -v;
     V.col(i) = v;
   }
   V = trans(V);
@@ -197,9 +194,6 @@ py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50,
 
   for (int i = 0; i < V.n_cols; i++) {
     vec v = V.col(i) * sigma(i);
-    v = round(v * 1e5) / 1e5;
-    double cs = sum(v);
-    if (cs < 0) v = -v;
     V.col(i) = v;
   }
   V = trans(V);
@@ -269,7 +263,7 @@ py::dict run_AA(arma::Mat<npdouble> &A, arma::Mat<npdouble> &W0,
 
   py::dict out;
 
-  mat W = A * AA_res(0);
+  arma::Mat<npdouble> W = A * AA_res(0);
   out["C"] = AA_res(0);
   out["H"] = AA_res(1);
   out["W"] = W;
@@ -290,9 +284,9 @@ py::dict run_AA(arma::Mat<npdouble> &A, arma::Mat<npdouble> &W0,
 // values of k
 py::dict run_ACTION(arma::Mat<npdouble> &S_r, int k_min = 2, int k_max = 30,
                     int thread_no = 0, int max_it = 50,
-                    double min_delta = 1e-16) {
-  ACTIONet::ACTION_results trace =
-      ACTIONet::run_ACTION(S_r, k_min, k_max, thread_no, max_it, min_delta);
+                    double min_delta = 1e-16, int normalization = 0) {
+  ACTIONet::ACTION_results trace = ACTIONet::run_ACTION(
+      S_r, k_min, k_max, thread_no, max_it, min_delta, normalization);
 
   py::dict res;
 
@@ -366,13 +360,16 @@ py::dict prune_archetypes(vector<arma::Mat<npdouble>> &C_trace,
 
 // Identifies and aggregates redundant archetypes into equivalent classes
 // (Post-ACTIONet archetype processing)
+
 py::dict unify_archetypes(arma::Mat<npdouble> &S_r,
                           arma::Mat<npdouble> &C_stacked,
                           arma::Mat<npdouble> &H_stacked,
-                          double violation_threshold = 0.0, int thread_no = 0) {
+                          double backbone_density, double resolution,
+                          int min_cluster_size, int thread_no,
+                          int normalization) {
   ACTIONet::unification_results results = ACTIONet::unify_archetypes(
-      S_r, C_stacked, H_stacked, violation_threshold, thread_no);
-
+      S_r, C_stacked, H_stacked, backbone_density, resolution, min_cluster_size,
+      thread_no, normalization);
   py::dict out_list;
 
   for (int i = 0; i < results.selected_archetypes.n_elem; i++)
@@ -384,7 +381,9 @@ py::dict unify_archetypes(arma::Mat<npdouble> &S_r,
 
   for (int i = 0; i < results.assigned_archetypes.n_elem; i++)
     results.assigned_archetypes[i]++;
+
   out_list["assigned_archetype"] = results.assigned_archetypes;
+  out_list["arch_membership_weights"] = results.arch_membership_weights;
 
   out_list["ontology"] = results.dag_adj;
   out_list["ontology_node_attributes"] = results.dag_node_annotations;
@@ -456,12 +455,16 @@ arma::SpMat<npdouble> buildNetwork(arma::Mat<npdouble> &H,
 // \item colors De novo color of nodes inferred from their 3D embedding.
 // }
 py::dict layoutNetwork(arma::SpMat<npdouble> &G,
-                       arma::Mat<npdouble> initial_position, string algorithm,
-                       int compactness_level = 50, unsigned int n_epochs = 500,
-                       int thread_no = 0, int seed = 0) {
-  field<arma::Mat<npdouble>> res =
-      ACTIONet::layoutNetwork(G, initial_position, algorithm, compactness_level,
-                              n_epochs, thread_no, seed);
+                       arma::Mat<npdouble> &initial_position,
+                       const std::string &method = "umap",
+                       bool presmooth_network = false, double min_dist = 1,
+                       double spread = 1, double gamma = 1.0,
+                       unsigned int n_epochs = 500, int thread_no = 0,
+                       int seed = 0, double learning_rate = 1.0,
+                       int sim2dist = 2) {
+  field<arma::Mat<npdouble>> res = ACTIONet::layoutNetwork_xmap(
+      G, initial_position, presmooth_network, method, min_dist, spread, gamma,
+      n_epochs, thread_no, seed, learning_rate, sim2dist);
 
   py::dict out_list;
   out_list["coordinates"] = res(0);
@@ -545,10 +548,10 @@ arma::Mat<npdouble> compute_network_diffusion_approx(
     arma::SpMat<npdouble> &G, arma::Mat<npdouble> X0, int thread_no = 0,
     double alpha = 0.85, int max_it = 5, double res_threshold = 1e-8,
     int norm_type = 0) {
-
-   if (G.n_rows != X0.n_rows) {
-    stderr_printf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows, G.n_cols, X0.n_rows, X0.n_cols);
-    return (arma::mat());
+  if (G.n_rows != X0.n_rows) {
+    stderr_printf("Dimension mismatch: G (%dx%d) and X0 (%dx%d)\n", G.n_rows,
+                  G.n_cols, X0.n_rows, X0.n_cols);
+    return (arma::Mat<npdouble>());
   }
 
   arma::SpMat<npdouble> P = ACTIONet::normalize_adj(G, norm_type);
@@ -559,8 +562,8 @@ arma::Mat<npdouble> compute_network_diffusion_approx(
   return (X);
 }
 
-arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3,
-                  double sig_threshold = 3,
+arma::vec run_LPA(arma::SpMat<npdouble> &G, arma::vec labels, double lambda = 1,
+                  int iters = 3, double sig_threshold = 3,
                   arma::vec fixed_labels_ = arma::vec()) {
   arma::uvec fixed_labels_vec;
   if (!fixed_labels_.is_empty()) {
@@ -577,7 +580,8 @@ arma::vec run_LPA(sp_mat &G, arma::vec labels, double lambda = 1, int iters = 3,
 py::dict compute_archetype_feature_specificity_bin(arma::SpMat<npdouble> &S,
                                                    arma::Mat<npdouble> &H,
                                                    int thread_no = 0) {
-  field<mat> res = ACTIONet::compute_feature_specificity_bin(S, H, thread_no);
+  field<arma::Mat<npdouble>> res =
+      ACTIONet::compute_feature_specificity_bin(S, H, thread_no);
 
   py::dict out_list;
   out_list["archetypes"] = res(0);
@@ -587,9 +591,11 @@ py::dict compute_archetype_feature_specificity_bin(arma::SpMat<npdouble> &S,
   return (out_list);
 }
 
-py::dict compute_archetype_feature_specificity(arma::SpMat<npdouble> &S, arma::Mat<npdouble> &H, int thread_no = 0) {
-  
-  field<mat> res = ACTIONet::compute_feature_specificity(S, H, thread_no);
+py::dict compute_archetype_feature_specificity(arma::SpMat<npdouble> &S,
+                                               arma::Mat<npdouble> &H,
+                                               int thread_no = 0) {
+  field<arma::Mat<npdouble>> res =
+      ACTIONet::compute_feature_specificity(S, H, thread_no);
 
   py::dict out_list;
   out_list["archetypes"] = res(0);
@@ -599,22 +605,24 @@ py::dict compute_archetype_feature_specificity(arma::SpMat<npdouble> &S, arma::M
   return (out_list);
 }
 
-py::dict compute_archetype_feature_specificity_full(arma::Mat<npdouble> &S, arma::Mat<npdouble> &H, int thread_no = 0) {
+py::dict compute_archetype_feature_specificity_full(arma::Mat<npdouble> &S,
+                                                    arma::Mat<npdouble> &H,
+                                                    int thread_no = 0) {
+  field<arma::Mat<npdouble>> res =
+      ACTIONet::compute_feature_specificity(S, H, thread_no);
 
-    field<mat> res = ACTIONet::compute_feature_specificity(S, H, thread_no);
+  py::dict out_list;
+  out_list["archetypes"] = res(0);
+  out_list["upper_significance"] = res(1);
+  out_list["lower_significance"] = res(2);
 
-    py::dict out_list;
-    out_list["archetypes"] = res(0);
-    out_list["upper_significance"] = res(1);
-    out_list["lower_significance"] = res(2);
-
-    return (out_list);
+  return (out_list);
 }
 
 py::dict compute_cluster_feature_specificity(arma::SpMat<npdouble> &S,
                                              arma::uvec sample_assignments,
                                              int thread_no = 0) {
-  field<mat> res =
+  field<arma::Mat<npdouble>> res =
       ACTIONet::compute_feature_specificity(S, sample_assignments, thread_no);
 
   py::dict out_list;
@@ -628,7 +636,7 @@ py::dict compute_cluster_feature_specificity(arma::SpMat<npdouble> &S,
 py::dict compute_cluster_feature_specificity_full(arma::Mat<npdouble> &S,
                                                   arma::uvec sample_assignments,
                                                   int thread_no = 0) {
-  field<mat> res =
+  field<arma::Mat<npdouble>> res =
       ACTIONet::compute_feature_specificity(S, sample_assignments, thread_no);
 
   py::dict out_list;
@@ -703,6 +711,103 @@ py::dict autocorrelation_Moran_full(arma::Mat<npdouble> &G,
   return (res);
 }
 
+arma::Mat<npdouble> normalize_mat(arma::Mat<npdouble> &X, int normalization = 0,
+                                  int dim = 0) {
+  arma::Mat<npdouble> X_norm = ACTIONet::normalize_mat(X, normalization, dim);
+
+  return (X_norm);
+}
+
+arma::SpMat<npdouble> normalize_spmat(arma::SpMat<npdouble> &X,
+                                      int normalization = 0, int dim = 0) {
+  arma::SpMat<npdouble> X_norm = ACTIONet::normalize_mat(X, normalization, dim);
+
+  return (X_norm);
+}
+
+arma::Mat<npdouble> aggregate_genesets_mahalanobis_2archs(
+    arma::SpMat<npdouble> &G, arma::SpMat<npdouble> &S,
+    arma::SpMat<npdouble> &marker_mat, int network_normalization_method,
+    int expression_normalization_method, int gene_scaling_method,
+    double pre_alpha, double post_alpha, int thread_no) {
+  arma::Mat<npdouble> stats = ACTIONet::aggregate_genesets_mahalanobis_2archs(
+      G, S, marker_mat, network_normalization_method,
+      expression_normalization_method, gene_scaling_method, pre_alpha,
+      post_alpha, thread_no);
+
+  return (stats);
+}
+
+arma::Mat<npdouble> aggregate_genesets_mahalanobis_2gmm(
+    arma::SpMat<npdouble> &G, arma::SpMat<npdouble> &S,
+    arma::SpMat<npdouble> &marker_mat, int network_normalization_method,
+    int expression_normalization_method, int gene_scaling_method,
+    double pre_alpha, double post_alpha, int thread_no) {
+  arma::Mat<npdouble> stats = ACTIONet::aggregate_genesets_mahalanobis_2gmm(
+      G, S, marker_mat, network_normalization_method,
+      expression_normalization_method, gene_scaling_method, pre_alpha,
+      post_alpha, thread_no);
+
+  return (stats);
+}
+
+arma::Mat<npdouble> aggregate_genesets_weighted_enrichment(
+    arma::SpMat<npdouble> &G, arma::SpMat<npdouble> &S,
+    arma::SpMat<npdouble> &marker_mat, int network_normalization_method,
+    int expression_normalization_method, int gene_scaling_method,
+    double pre_alpha, double post_alpha, int thread_no) {
+  arma::Mat<npdouble> stats = ACTIONet::aggregate_genesets_weighted_enrichment(
+      G, S, marker_mat, network_normalization_method,
+      expression_normalization_method, gene_scaling_method, pre_alpha,
+      post_alpha, thread_no);
+
+  return (stats);
+}
+
+arma::Mat<npdouble> aggregate_genesets_weighted_enrichment_permutation(
+    arma::SpMat<npdouble> &G, arma::SpMat<npdouble> &S,
+    arma::SpMat<npdouble> &marker_mat, int network_normalization_method,
+    int expression_normalization_method, int gene_scaling_method,
+    double pre_alpha, double post_alpha, int thread_no, int perm_no) {
+  arma::Mat<npdouble> stats =
+      ACTIONet::aggregate_genesets_weighted_enrichment_permutation(
+          G, S, marker_mat, network_normalization_method,
+          expression_normalization_method, gene_scaling_method, pre_alpha,
+          post_alpha, thread_no, perm_no);
+
+  return (stats);
+}
+
+py::dict assess_enrichment(arma::Mat<npdouble> &scores,
+                           arma::SpMat<npdouble> &associations,
+                           int thread_no = 0) {
+  field<mat> res = ACTIONet::assess_enrichment(scores, associations, thread_no);
+
+  py::dict out_list;
+  out_list["logPvals"] = res[0];
+  out_list["thresholds"] = res[1];
+
+  return (out_list);
+}
+
+arma::vec xicor(arma::vec xvec, arma::vec yvec, bool compute_pval, int seed) {
+  arma::vec res = ACTIONet::xicor(xvec, yvec, compute_pval, seed);
+
+  return (res);
+}
+
+py::dict XICOR(arma::Mat<npdouble> &X, arma::Mat<npdouble> &Y,
+               bool compute_pval, int seed, int thread_no) {
+  field<arma::Mat<npdouble>> out =
+      ACTIONet::XICOR(X, Y, compute_pval, seed, thread_no);
+
+  py::dict res;
+  res["XI"] = out[0];
+  res["Z"] = out[1];
+
+  return (res);
+}
+
 PYBIND11_MODULE(_ACTIONet, m) {
   m.doc() = R"pbdoc(
         ACTIONet package
@@ -714,6 +819,14 @@ PYBIND11_MODULE(_ACTIONet, m) {
            :toctree: _generate
 
     )pbdoc";
+  // normalization
+  m.def("normalize_mat", &normalize_mat, "Normalize input matrix.",
+        py::arg("X"), py::arg("normalization") = 0, py::arg("dim") = 0);
+
+  // normalization
+  m.def("normalize_spmat", &normalize_spmat, "Normalize input matrix.",
+        py::arg("X"), py::arg("normalization") = 0, py::arg("dim") = 0);
+
   // SVD
   m.def("IRLB_SVD", &IRLB_SVD, "Computes SVD using IRLB algorithm.",
         py::arg("A"), py::arg("dim"), py::arg("iters") = 1000,
@@ -775,7 +888,8 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def("run_ACTION", &run_ACTION,
         "Runs multi-level ACTION decomposition method", py::arg("S_r"),
         py::arg("k_min") = 2, py::arg("k_max") = 30, py::arg("thread_no") = 0,
-        py::arg("max_it") = 50, py::arg("min_delta") = 0.01);
+        py::arg("max_it") = 50, py::arg("min_delta") = 0.01,
+        py::arg("normalization") = 1);
 
   // Archetypes
   m.def("prune_archetypes", &prune_archetypes,
@@ -787,7 +901,9 @@ PYBIND11_MODULE(_ACTIONet, m) {
       "unify_archetypes", &unify_archetypes,
       "Identifies and aggregates redundant archetypes into equivalent classes",
       py::arg("S_r"), py::arg("C_stacked"), py::arg("H_stacked"),
-      py::arg("violation_threshold") = 0.0, py::arg("thread_no") = 0);
+      py::arg("backbone_density") = 0.5, py::arg("resolution") = 1.0,
+      py::arg("min_cluster_size") = 3, py::arg("thread_no") = 0,
+      py::arg("normalization") = 0);
 
   m.def("compute_archetype_core_centrality", &compute_archetype_core_centrality,
         "Computes node centrality scores based on localized coreness",
@@ -807,13 +923,16 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
   m.def("layoutNetwork", &layoutNetwork,
         "Performs stochastic force-directed layout on the input graph",
-        py::arg("G"), py::arg("initial_position"),
-        py::arg("algorithm") = "tumap", py::arg("compactness_level") = 50,
-        py::arg("n_epochs") = 1000, py::arg("thread_no") = 0,
-        py::arg("seed") = 0);
+        py::arg("G"), py::arg("initial_position"), py::arg("method") = "umap",
+        py::arg("presmooth_network") = false, py::arg("min_dist") = 1.0,
+        py::arg("spread") = 1.0, py::arg("min_dist") = 1.0,
+        py ::arg("n_epochs") = 1000, py::arg("thread_no") = 0,
+        py::arg("seed") = 0, py::arg("learning_rate") = 1.0,
+        py::arg("sim2dist") = 2);
 
   m.def("signed_cluster", &unsigned_cluster,
-        "Computes graph clustering using Leiden algorith over signed graphs",
+        "Computes graph clustering using Leiden "
+        "algorith over signed graphs",
         py::arg("A"), py::arg("resolution_parameter") = 1.0,
         py::arg("initial_clusters") = uvec(), py::arg("seed") = 0);
 
@@ -832,10 +951,10 @@ PYBIND11_MODULE(_ACTIONet, m) {
         py::arg("alpha") = 0.85, py::arg("max_it") = 5);
 
   m.def("compute_network_diffusion_approx", &compute_network_diffusion_approx,
-        "Computes network diffusion using a given adjacency matrix", py::arg("G"),
-        py::arg("X0"), py::arg("thread_no") = 0, py::arg("alpha") = 0.85,
-        py::arg("max_it") = 5, py::arg("res_threshold") = 1e-8,
-        py::arg("norm_type") = 1);
+        "Computes network diffusion using a given adjacency matrix",
+        py::arg("G"), py::arg("X0"), py::arg("thread_no") = 0,
+        py::arg("alpha") = 0.85, py::arg("max_it") = 5,
+        py::arg("res_threshold") = 1e-8, py::arg("norm_type") = 1);
 
   m.def("run_LPA", &run_LPA,
         "Run label prepagation on a given set of known labels", py::arg("G"),
@@ -847,15 +966,15 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Computes feature specificity of genes for each archetype",
         py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
 
-   m.def("compute_archetype_feature_specificity",
-         &compute_archetype_feature_specificity,
-         "Computes feature specificity of genes for each archetype",
-         py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
+  m.def("compute_archetype_feature_specificity",
+        &compute_archetype_feature_specificity,
+        "Computes feature specificity of genes for each archetype",
+        py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
 
-   m.def("compute_archetype_feature_specificity_full",
-         &compute_archetype_feature_specificity_full,
-         "Computes feature specificity of genes for each archetype",
-         py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
+  m.def("compute_archetype_feature_specificity_full",
+        &compute_archetype_feature_specificity_full,
+        "Computes feature specificity of genes for each archetype",
+        py::arg("S"), py::arg("H"), py::arg("thread_no") = 0);
 
   m.def("compute_cluster_feature_specificity",
         &compute_cluster_feature_specificity,
@@ -886,6 +1005,55 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Computes spatial (network) autocorrelation (Moran)", py::arg("G"),
         py::arg("scores"), py::arg("normalization_method") = 1,
         py::arg("perm_no") = 30, py::arg("thread_no") = 0);
+
+  m.def("aggregate_genesets_mahalanobis_2archs",
+        &aggregate_genesets_mahalanobis_2archs,
+        "Scoring genesets using archetype mixture model approach", py::arg("G"),
+        py::arg("S"), py::arg("marker_mat"),
+        py::arg("network_normalization_method") = 2,
+        py::arg("expression_normalization_method") = 1,
+        py::arg("gene_scaling_method") = 0, py::arg("pre_alpha") = 0.15,
+        py::arg("post_alpha") = 0.9, py::arg("thread_no") = 0);
+
+  m.def("aggregate_genesets_mahalanobis_2gmm",
+        &aggregate_genesets_mahalanobis_2gmm,
+        "Scoring genesets using gaussian mixture model approach", py::arg("G"),
+        py::arg("S"), py::arg("marker_mat"),
+        py::arg("network_normalization_method") = 2,
+        py::arg("expression_normalization_method") = 1,
+        py::arg("gene_scaling_method") = 0, py::arg("pre_alpha") = 0.15,
+        py::arg("post_alpha") = 0.9, py::arg("thread_no") = 0);
+
+  m.def("aggregate_genesets_weighted_enrichment",
+        &aggregate_genesets_weighted_enrichment,
+        "Scoring genesets a parametric enrichment method", py::arg("G"),
+        py::arg("S"), py::arg("marker_mat"),
+        py::arg("network_normalization_method") = 2,
+        py::arg("expression_normalization_method") = 1,
+        py::arg("gene_scaling_method") = 0, py::arg("pre_alpha") = 0.15,
+        py::arg("post_alpha") = 0.9, py::arg("thread_no") = 0);
+
+  m.def("aggregate_genesets_weighted_enrichment_permutation",
+        &aggregate_genesets_weighted_enrichment_permutation,
+        "Scoring genesets a nonparametric enrichment method (permutation test)",
+        py::arg("G"), py::arg("S"), py::arg("marker_mat"),
+        py::arg("network_normalization_method") = 2,
+        py::arg("expression_normalization_method") = 1,
+        py::arg("gene_scaling_method") = 0, py::arg("pre_alpha") = 0.15,
+        py::arg("post_alpha") = 0.9, py::arg("thread_no") = 0,
+        py::arg("perm_no") = 30);
+
+  m.def("assess_enrichment", &assess_enrichment,
+        "Assess enrichment using a fast GSEA approach with sparsity "
+        "considerations",
+        py::arg("scores"), py::arg("associations"), py::arg("thread_no") = 0);
+
+  m.def("xicor", &xicor, "XI correlation measure", py::arg("x"), py::arg("y"),
+        py::arg("compute_pval") = true, py::arg("seed") = 0);
+
+  m.def("XICOR", &XICOR, "XI correlation measure", py::arg("X"), py::arg("Y"),
+        py::arg("compute_pval") = true, py::arg("seed") = 0,
+        py::arg("thread_no") = 0);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
