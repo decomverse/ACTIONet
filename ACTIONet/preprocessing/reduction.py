@@ -9,16 +9,16 @@ import _ACTIONet as _an
 
 
 def reduce_kernel(
-        data: Union[AnnData, np.ndarray, spmatrix],
-        dim: Optional[int] = 50,
-        max_iter: Optional[int] = 10,
-        layer_key: Optional[str] = None,
-        reduction_key: Optional[str] = "ACTION",
-        svd_solver: Literal[0, 1, 2] = 0,
-        seed: Optional[int] = 0,
-        return_raw: Optional[bool] = False,
-        copy: Optional[bool] = False,
-        ) -> Union[AnnData, np.ndarray, spmatrix, dict]:
+    data: Union[AnnData, np.ndarray, spmatrix],
+    dim: Optional[int] = 50,
+    max_iter: Optional[int] = 10,
+    layer_key: Optional[str] = None,
+    reduction_key: Optional[str] = "ACTION",
+    svd_solver: Literal[0, 1, 2] = 0,
+    seed: Optional[int] = 0,
+    return_raw: Optional[bool] = False,
+    copy: Optional[bool] = False,
+) -> Union[AnnData, np.ndarray, spmatrix, dict]:
     """Kernel Reduction Method [Mohammadi2020].  Computes SVD-reduced form of the kernel matrix.
     :param data: Matrix or AnnData object of shape `n_obs` × `n_vars`.
     :param dim: Target dimension. Defaults to 50, or 1 - minimum dimension size of selected representation.
@@ -71,6 +71,8 @@ def reduce_kernel(
     else:
         X = adata.X
 
+    adata.uns["metadata"]["default_reduction"] = reduction_key
+
     # See ACTIONet.h for definitions
     # irlb  = 0
     # halko = 1
@@ -80,7 +82,9 @@ def reduce_kernel(
 
     X = X.T.astype(dtype=np.float64)
     if issparse(X):
-        X = X.tocsc()
+        if X.getformat() != "csc":
+            X = X.tocsc()
+
         reduced = _an.reduce_kernel(X, dim, max_iter, seed, svd_solver, False)
     else:
         X = np.array(X)
@@ -100,17 +104,17 @@ def reduce_kernel(
         adata.varm[reduction_key + "_A"] = reduced["A"]
 
         adata.uns.setdefault("obsm_annot", {}).update(
-                {
-                    "ACTION": {"type": np.array([b"reduction"], dtype=object)},
-                    "ACTION_B": {"type": np.array([b"internal"], dtype=object)},
-                    }
-                )
+            {
+                reduction_key: {"type": np.array([b"reduction"], dtype=object)},
+                reduction_key + "_B": {"type": np.array([b"internal"], dtype=object)},
+            }
+        )
         adata.uns.setdefault("varm_annot", {}).update(
-                {
-                    "ACTION_A": {"type": np.array([b"internal"], dtype=object)},
-                    "ACTION_V": {"type": np.array([b"internal"], dtype=object)},
-                    }
-                )
+            {
+                reduction_key + "_A": {"type": np.array([b"internal"], dtype=object)},
+                reduction_key + "_V": {"type": np.array([b"internal"], dtype=object)},
+            }
+        )
 
         return adata if copy else None
     else:

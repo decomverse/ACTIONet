@@ -1,4 +1,16 @@
-from typing import Optional, Union
+import re
+from typing import (
+    Union,
+    Optional,
+    Sequence,
+    Any,
+    Mapping,
+    Tuple,
+)
+from cycler import Cycler
+from matplotlib.axes import Axes
+from matplotlib.colors import Colormap
+from matplotlib.figure import Figure
 import plotly as pl
 import plotly.io as pio
 import plotly.graph_objs as go
@@ -15,6 +27,8 @@ from .palettes import palette_default
 from ..tools import utils_public as ut
 from . import utils as pu
 import _ACTIONet as _an
+import ACTIONet.network as net
+import scanpy as sc
 
 pio.orca.config.use_xvfb = True
 pio.orca.config.save()
@@ -40,6 +54,122 @@ def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
 
 
 def plot_ACTIONet(
+    adata: AnnData,
+    annotation: Union[str, list, pd.Series, None] = None,
+    projection: sc._utils.Literal["2d", "3d"] = "2d",
+    palette: Union[str, Sequence[str], Cycler, None] = palette_default,
+    add_outline: Optional[bool] = False,
+    frameon: Optional[bool] = False,
+    size=5,
+    legend_fontsize="small",
+    legend_loc: str = "on data",
+    return_fig: Optional[bool] = True,
+    show: Optional[bool] = False,
+    **kwargs,
+) -> Union[Figure, Axes, None]:
+
+    if projection == "2d":
+        adata.obsm["X_actionet2d"] = adata.obsm["ACTIONet2D"]
+        basis = "actionet2d"
+    else:
+        adata.obsm["X_actionet3d"] = adata.obsm["ACTIONet3D"]
+        basis = "actionet3d"
+
+    tmp_key = "_tmp_annotation_"
+    if annotation is not None and len(annotation) == adata.shape[0]:
+        x = annotation
+        if isinstance(x, pd.Series):
+            adata.obs[tmp_key] = pd.Series(x.values.astype("str"))
+        else:
+            adata.obs[tmp_key] = x
+    else:
+        x = adata.obs[annotation]
+        if isinstance(x, pd.Series):
+            y = pd.Series(x.values.astype("str"), index=adata.obs.index)
+        else:
+            y = x
+        adata.obs[tmp_key] = y
+
+    p = sc.pl.embedding(
+        adata,
+        basis=basis,
+        color=tmp_key,
+        projection=projection,
+        size=size,
+        legend_fontsize=legend_fontsize,
+        add_outline=add_outline,
+        legend_loc=legend_loc,
+        frameon=frameon,
+        palette=palette,
+        return_fig=return_fig,
+        show=show,
+        **kwargs,
+    )
+
+    _ = adata.obsm.pop("X_actionet2d")
+    _ = adata.obs.pop(tmp_key)
+
+    return p
+
+
+def visualize_markers(
+    adata: AnnData,
+    genes: Union[str, list, pd.Series, None] = None,
+    color_map: Union[Colormap, str, None] = "YlOrRd",
+    alpha: float = 0.85,
+    **kwargs,
+) -> Union[Figure, Axes, None]:
+
+    feature_names = pd.Series(
+        [
+            x.decode() if isinstance(x, (bytes, bytearray)) else x
+            for x in list(adata.var.index)
+        ]
+    )
+    adata.var.index = feature_names
+
+    X = adata[:, genes].X
+    if alpha != 0:
+        X_smooth = net.diffusion(adata, X, return_raw=True, alpha_val=alpha)
+    else:
+        X_smooth = X
+
+    if isinstance(genes, str):
+        p = plot_ACTIONet(
+            adata, X_smooth[:, 0], color_map=color_map, title=genes, **kwargs
+        )
+    else:
+        p = [
+            plot_ACTIONet(
+                adata, X_smooth[:, k], color_map=color_map, title=genes[k], **kwargs
+            )
+            for k in range(X_smooth.shape[1])
+        ]
+
+    return p
+
+
+def archetype_footprint(
+    adata: AnnData, color_map: Union[Colormap, str, None] = "YlOrRd", **kwargs,
+) -> Union[Figure, Axes, None]:
+
+    X_smooth = adata.obsm["archetype_footprint"]
+
+    p = [
+        plot_ACTIONet(
+            adata,
+            X_smooth[:, k],
+            color_map=color_map,
+            title="Archetype %d" % (k + 1),
+            **kwargs,
+        )
+        for k in range(X_smooth.shape[1])
+    ]
+
+    return p
+
+
+def plot_ACTIONet_interactive(
     data: Union[AnnData, pd.DataFrame, np.ndarray],
     label_attr: Union[str, list, pd.Series, None] = None,
     color_attr: Union[str, list, pd.Series, pd.DataFrame, np.ndarray, None] = None,
@@ -225,137 +355,3 @@ def plot_ACTIONet(
 
     return p
 
-
-def plot_ACTIONet_gradient(
-    adata: AnnData,
-    x: Union[list, pd.Series, np.ndarray],
-    alpha_val: Optional[float] = 0,
-    log_scale: Optional[bool] = False,
-    use_rank: Optional[bool] = False,
-    trans_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
-    trans_fac: Optional[float] = 1.5,
-    trans_th: Optional[float] = -0.5,
-    point_size: Optional[float] = 3,
-    stroke_size: Optional[float] = 0.3,
-    stroke_contrast_fac: Optional[float] = 1.2,
-    grad_palette: Optional[str] = "magma",
-    net_key: Optional[str] = "ACTIONet",
-    coordinate_key: Optional[str] = "ACTIONet2D",
-) -> go.Figure:
-    """
-    Projects a given continuous score on the ACTIONet plot
-    Parameters
-    ----------
-    adata:
-        ACTIONet output object
-    x:
-        score vector
-    transparancey_key:
-        additional continuous attribute to project onto the transparency of nodes
-    transparency_z_threshold:
-        controls the effect of transparency mapping
-    transparancy_factor:
-        controls the effect of transparancy mapping
-    node_size:
-        Size of nodes in the ACTIONet plot
-    palette:
-        Color palette (named vector or a name for a given known palette)
-    coordinate_key:
-       Entry in colMaps(ace) containing the plot coordinates (default:'ACTIONet2D')
-    alpha_val:
-        alpha_val Between [0, 1]. If it is greater than 0, smoothing of scores would be performed
-    output_file:
-        filename to save plot (optional)
-    """
-
-    G = G.astype(dtype=np.float64)
-
-    np.amin(x)
-
-    if log_scale:
-        x = np.log1p(x)
-
-    if alpha_val > 0:
-        x = _an.compute_network_diffusion_fast(G=G, X0=sparse.csc_matrix(x))
-
-
-# plot.ACTIONet.gradient <- function(ace,
-#                                    x,
-#                                    alpha_val = 0.85,
-#                                    log_scale = FALSE,
-#                                    nonparameteric = FALSE,
-#                                    trans_attr = NULL,
-#                                    trans_fac = 1.5,
-#                                    trans_th = -0.5,
-#                                    point_size = 1,
-#                                    stroke_size = point_size * 0.1,
-#                                    stroke_contrast_fac = 0.1,
-#                                    grad_palette = "magma",
-#                                    net_attr = "ACTIONet",
-#                                    coordinate_key = "ACTIONet2D") {
-#   NA_col <- "#eeeeee"
-#
-#   if (length(x) != ncol(ace)) {
-#     warning("Length of input vector doesn't match the number of cells.")
-#     return()
-#   }
-#   ## Create color gradient generator
-#   if (grad_palette %in% c("greys", "inferno", "magma", "viridis", "BlGrRd", "RdYlBu", "Spectral")) {
-#     grad_palette <- switch(grad_palette,
-#       greys = grDevices::gray.colors(100),
-#       inferno = viridis::inferno(500, alpha = 0.8),
-#       magma = viridis::magma(500, alpha = 0.8),
-#       viridis = viridis::viridis(500, alpha = 0.8),
-#       BlGrRd = grDevices::colorRampPalette(c("blue", "grey", "red"))(500),
-#       Spectral = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "Spectral"))))(100),
-#       RdYlBu = (grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu"))))(100)
-#     )
-#   } else {
-#     # grad_palette = grDevices::colorRampPalette(c(NA_col, grad_palette))(500)
-#     grad_palette <- grDevices::colorRampPalette(grad_palette)(500)
-#   }
-#
-#   if (log_scale == TRUE) {
-#     x <- log1p(x)
-#   }
-#
-#   if (alpha_val > 0) {
-#     x <- as.numeric(propNetworkScores(
-#       G = colNets(ace)[[net_attr]],
-#       scores = as.matrix(x)
-#     ))
-#   }
-#
-#   col_func <- (scales::col_bin(
-#     palette = grad_palette,
-#     domain = NULL,
-#     na.color = NA_col,
-#     bins = 7
-#   ))
-#
-#   if (nonparameteric == TRUE) {
-#     plot_fill_col <- col_func(rank(x))
-#   } else {
-#     plot_fill_col <- col_func(x)
-#   }
-#
-#   idx <- order(x, decreasing = FALSE)
-#
-#   p_out <- plot.ACTIONet(
-#     ace = ace,
-#     label_attr = NULL,
-#     color_attr = plot_fill_col,
-#     trans_attr = trans_attr,
-#     trans_fac = trans_fac,
-#     trans_th = trans_th,
-#     point_size = point_size,
-#     stroke_size = stroke_size,
-#     stroke_contrast_fac = stroke_contrast_fac,
-#     palette = NULL,
-#     add_text_labels = FALSE,
-#     point_order = idx,
-#     coordinate_key = coordinate_key
-#   )
-#
-#   return(p_out)
-# }

@@ -9,18 +9,22 @@ from ..tools import utils_public as ut
 
 
 def layout(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        algorithm: Optional[str] = "tumap",
-        initial_coordinates: Union[np.ndarray, sparse.spmatrix] = None,
-        compactness_level: Optional[int] = 50,
-        n_epochs: Optional[int] = 1000,
-        seed: Optional[int] = 0,
-        reduction_key: Optional[str] = "ACTION",
-        net_key: Optional[str] = "ACTIONet",
-        thread_no: Optional[int] = 0,
-        copy: Optional[bool] = False,
-        return_raw: Optional[bool] = False,
-        ) -> Union[AnnData, sparse.spmatrix, None]:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    algorithm: Optional[str] = "umap",
+    initial_coordinates: Union[np.ndarray, sparse.spmatrix] = None,
+    presmooth_network: Optional[bool] = False,
+    sim2dist: Optional[int] = 2,
+    min_dist: Optional[float] = 1.0,
+    spread: Optional[float] = 1.0,
+    learning_rate: Optional[float] = 1.0,
+    n_epochs: Optional[int] = 250,
+    seed: Optional[int] = 0,
+    reduction_key: Optional[str] = "ACTION",
+    net_key: Optional[str] = "ACTIONet",
+    thread_no: Optional[int] = 0,
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
+) -> Union[AnnData, sparse.spmatrix, None]:
     """Computes knn/k*nn graphs from input data
 
     Parameters
@@ -80,37 +84,39 @@ def layout(
         raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
     if not isinstance(initial_coordinates, (np.ndarray, sparse.spmatrix)):
         raise ValueError(
-                "'initial_coordinates' must be numpy.ndarray or sparse.spmatrix."
-                )
+            "'initial_coordinates' must be numpy.ndarray or sparse.spmatrix."
+        )
 
     G = G.astype(dtype=np.float64)
-    initial_coordinates = ut.scale_matrix(initial_coordinates).T.astype(
-            dtype=np.float64
-            )
+    initial_coordinates = ut.scale_matrix(initial_coordinates).astype(dtype=np.float64)
 
     layout = _an.layoutNetwork(
-            G=G,
-            initial_position=initial_coordinates,
-            algorithm=alg_name,
-            compactness_level=compactness_level,
-            n_epochs=n_epochs,
-            thread_no=thread_no,
-            seed=seed,
-            )
+        G=G,
+        initial_position=initial_coordinates,
+        method=algorithm,
+        presmooth_network=presmooth_network,
+        sim2dist=sim2dist,
+        spread=spread,
+        min_dist=min_dist,
+        learning_rate=learning_rate,
+        n_epochs=n_epochs,
+        thread_no=thread_no,
+        seed=seed,
+    )
 
     if return_raw or not data_is_AnnData:
         return layout
     else:
-        adata.obsm["ACTIONred"] = initial_coordinates[0:3, :].T
+        adata.obsm["ACTIONred"] = initial_coordinates[:, 0:3]
         adata.obsm["ACTIONet2D"] = layout["coordinates"]
         adata.obsm["ACTIONet3D"] = layout["coordinates_3D"]
         adata.obsm["denovo_color"] = layout["colors"]
         adata.uns.setdefault("obsm_annot", {}).update(
-                {
-                    "ACTIONred": {"type": np.array([b"embedding"], dtype=object)},
-                    "ACTIONet2D": {"type": np.array([b"embedding"], dtype=object)},
-                    "ACTIONet3D": {"type": np.array([b"embedding"], dtype=object)},
-                    "denovo_color": {"type": np.array([b"embedding"], dtype=object)},
-                    }
-                )
+            {
+                "ACTIONred": {"type": np.array([b"embedding"], dtype=object)},
+                "ACTIONet2D": {"type": np.array([b"embedding"], dtype=object)},
+                "ACTIONet3D": {"type": np.array([b"embedding"], dtype=object)},
+                "denovo_color": {"type": np.array([b"embedding"], dtype=object)},
+            }
+        )
         return adata if copy else None

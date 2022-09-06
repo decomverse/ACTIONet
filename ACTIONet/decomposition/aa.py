@@ -43,7 +43,7 @@ def runAA(
     decomp_key_prefix : Optional[str], optional
         Prefix to be added to the reduction key stored in obsm/varm (only if return_raw == False), by default "AA"
     return_raw : Optional[bool], optional
-        Returns raw output of 'reduce_kernel()' as dict, by default False
+        Returns raw output as dict, by default False
     copy : Optional[bool], optional
         If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
 

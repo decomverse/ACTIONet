@@ -9,17 +9,17 @@ import _ACTIONet as _an
 
 
 def cluster(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        algorithm: str = "Leiden",
-        resolution: Optional[float] = 1.0,
-        initial_clusters: Optional[Union[np.ndarray, list, pd.Series]] = None,
-        initial_clusters_key: Optional[str] = "assigned_archetype",
-        final_clusters_key: Optional[str] = "Leiden",
-        seed: Optional[int] = 0,
-        net_key: Optional[str] = "ACTIONet",
-        copy: Optional[bool] = False,
-        return_raw: Optional[bool] = False,
-        ) -> Union[AnnData, np.ndarray, None]:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    algorithm: str = "Leiden",
+    resolution: Optional[float] = 1.0,
+    initial_clusters: Optional[Union[np.ndarray, list, pd.Series]] = None,
+    initial_clusters_key: Optional[str] = "assigned_archetype",
+    final_clusters_key: Optional[str] = "Leiden",
+    seed: Optional[int] = 0,
+    net_key: Optional[str] = "ACTIONet",
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
+) -> Union[AnnData, np.ndarray, None]:
     """Computes node centrality scores
 
     Compute node centralities using different measures
@@ -59,7 +59,7 @@ def cluster(
     if alg_name not in [
         "leiden",
         "fix",
-        ]:
+    ]:
         raise ValueError("'layout_algorithm' must be 'leiden or 'fix'")
 
     data_is_AnnData = isinstance(data, AnnData)
@@ -68,7 +68,7 @@ def cluster(
         initial_clusters = (
             initial_clusters
             if initial_clusters is not None
-            else adata.obsm[initial_clusters_key]
+            else adata.obs[initial_clusters_key]
         )
         if net_key in adata.obsp.keys():
             G = adata.obsp[net_key]
@@ -85,31 +85,33 @@ def cluster(
     if not sparse.issparse(G):
         G = sparse.csc_matrix(G)
 
-    if not initial_clusters is None:
-        if isinstance(initial_clusters, pd.Series):
-            annotations = np.array(initial_clusters.tolist())
-        else:
-            annotations = initial_clusters.toarray()
-
     if algorithm == "fix":
         final_clusters = initial_clusters
-    elif algorithm == "Leiden":
+    elif algorithm == "leiden":
         if initial_clusters is None:
             initial_clusters = np.arange(G.shape[0])
+        else:
+            if isinstance(initial_clusters, pd.Series):
+                initial_clusters = np.array(initial_clusters.tolist())
+            else:
+                initial_clusters = initial_clusters.toarray()
+
         if 0 <= G.min():
             final_clusters = _an.unsigned_cluster(
-                    A=G,
-                    resolution_parameter=resolution,
-                    initial_clusters=initial_clusters,
-                    seed=seed,
-                    )
+                A=G,
+                resolution_parameter=resolution,
+                initial_clusters=initial_clusters,
+                seed=seed,
+            )
         else:
             final_clusters = _an.signed_cluster(
-                    A=G,
-                    resolution_parameter=resolution,
-                    initial_clusters=initial_clusters,
-                    seed=seed,
-                    )
+                A=G,
+                resolution_parameter=resolution,
+                initial_clusters=initial_clusters,
+                seed=seed,
+            )
+    else:
+        raise ValueError("Clustering algorithm %s not found" % algorithm)
 
     if return_raw or not data_is_AnnData:
         return final_clusters

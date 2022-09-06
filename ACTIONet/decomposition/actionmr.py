@@ -14,20 +14,23 @@ from .utils import *
 
 
 def runACTIONMR(
-        data: Union[AnnData, np.ndarray, spmatrix],
-        k_min: int = 2,
-        k_max: int = 30,
-        max_iter: Optional[int] = 100,
-        min_delta: Optional[float] = 1e-100,
-        specificity_th: Optional[int] = -3,
-        min_cells_per_archetype: Optional[int] = 2,
-        unification_th: Optional[float] = 0,
-        thread_no: Optional[int] = 0,
-        reduction_key: Optional[str] = "ACTION",
-        return_W: Optional[bool] = False,
-        return_raw: Optional[bool] = False,
-        copy: Optional[bool] = False,
-        ) -> Union[AnnData, dict]:
+    data: Union[AnnData, np.ndarray, spmatrix],
+    k_min: int = 2,
+    k_max: int = 30,
+    normalization: Optional[int] = 0,
+    max_iter: Optional[int] = 50,
+    min_delta: Optional[float] = 1e-100,
+    specificity_th: Optional[int] = -3,
+    min_cells_per_archetype: Optional[int] = 2,
+    unification_backbone_density: Optional[float] = 0.5,
+    unification_resolution: Optional[float] = 1.0,
+    unification_min_cluster_size: Optional[int] = 3,
+    thread_no: Optional[int] = 0,
+    reduction_key: Optional[str] = "ACTION",
+    return_W: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
+    copy: Optional[bool] = False,
+) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
 
     Parameters
@@ -38,6 +41,8 @@ def runACTIONMR(
         Minimum number of components/archetypes to consider.
     k_max : int, default=None
         Maximum number of components/archetypes to consider.
+    normalization : int default pre-normalization for data matrix, default=1
+        It can be 0 (no normalization), or 1 or 2.
     max_iter : Optional[int], optional
         Maximum number of AA inner iterations, by default 50
     min_delta : Optional[float], optional
@@ -46,8 +51,12 @@ def runACTIONMR(
         Z-score threshold for filtering likely "mixed" archetypes
     min_cells_per_archetype: int, default=2
         Minimum number of cells that are used to define an archetype
-    unification_th : float between [0, 1], default=0
-        Amount of redundancy that is tolerated in the unified archetypes. Higher value results in larger number of archetypes
+    unification_backbone_density : float Density of the backbone graph, default=0.5
+        Higher the value, denser the backbone graph.
+    unification_resolution : float Leiden resolution to cluster backbone graph, default=1.0
+        Larger values result in potentially more unified archetypes.
+    unification_min_cluster_size : int Minimum number of archetypes in each archetype cluster, default=3
+        Smaller values allow higher sensitivity at the cost of noisy archetypes.
     thread_no
         Number of threads. Defaults to number of threads available - 2.
     reduction_key : Optional[str], optional
@@ -55,7 +64,7 @@ def runACTIONMR(
     return_W : Optional[bool], optional
         Returns 'W_stacked' and 'W_unified' as part of output.
     return_raw : Optional[bool], optional
-        Returns raw output of 'reduce_kernel()' as dict, by default False
+        Returns raw output as dict, by default False
     copy : Optional[bool], optional
         If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
 
@@ -76,8 +85,11 @@ def runACTIONMR(
     data_is_AnnData = isinstance(data, AnnData)
 
     if data_is_AnnData:
+        data = data.copy() if copy else data
+
         if reduction_key not in data.obsm.keys():
-            raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
+            # raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
+            X = data.X
         else:
             X = data.obsm[reduction_key]
     else:
@@ -89,35 +101,39 @@ def runACTIONMR(
     X = X.T.astype(dtype=np.float64)
 
     ACTION_out = _an.run_ACTION(
-            S_r=X,
-            k_min=k_min,
-            k_max=k_max,
-            thread_no=thread_no,
-            max_it=max_iter,
-            min_delta=min_delta
-            )
+        S_r=X,
+        k_min=k_min,
+        k_max=k_max,
+        thread_no=thread_no,
+        max_it=max_iter,
+        min_delta=min_delta,
+        normalization=normalization,
+    )
 
     pruned = prune_archetypes(
-            C_trace=ACTION_out["C"],
-            H_trace=ACTION_out["H"],
-            adata=None,
-            specificity_th=specificity_th,
-            min_cells=min_cells_per_archetype,
-            copy=False,
-            return_raw=True
-            )
+        C_trace=ACTION_out["C"],
+        H_trace=ACTION_out["H"],
+        adata=None,
+        specificity_th=specificity_th,
+        min_cells=min_cells_per_archetype,
+        copy=False,
+        return_raw=True,
+    )
 
     unified = unify_archetypes(
-            adata=None,
-            S_r=X,
-            C_stacked=pruned["C_stacked"],
-            H_stacked=pruned["H_stacked"],
-            reduction_key=None,
-            violation_threshold=unification_th,
-            thread_no=thread_no,
-            copy=False,
-            return_raw=True
-            )
+        adata=None,
+        S_r=X,
+        C_stacked=pruned["C_stacked"],
+        H_stacked=pruned["H_stacked"],
+        backbone_density=unification_backbone_density,
+        resolution=unification_resolution,
+        min_cluster_size=unification_min_cluster_size,
+        normalization=normalization,
+        reduction_key=None,
+        thread_no=thread_no,
+        copy=False,
+        return_raw=True,
+    )
 
     ACTIONMR_out = {
         "C_stacked": csc_matrix(pruned["C_stacked"]),
@@ -125,15 +141,19 @@ def runACTIONMR(
         "C_unified": csc_matrix(unified["C_unified"]),
         "H_unified": csc_matrix(unified["H_unified"]),
         "assigned_archetype": pd.Categorical(
-                values=unified["assigned_archetype"].astype(int),
-                categories=natsorted(map(int, np.unique(unified["assigned_archetype"]))),
-                ),
-        }
+            values=unified["assigned_archetype"].astype(int),
+            categories=natsorted(map(int, np.unique(unified["assigned_archetype"]))),
+        ),
+    }
 
     if return_raw or not data_is_AnnData:
         if return_W:
-            ACTIONMR_out["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
-            ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
+            ACTIONMR_out["W_stacked"] = np.matmul(
+                X, ACTIONMR_out["C_stacked"].toarray()
+            )
+            ACTIONMR_out["W_unified"] = np.matmul(
+                X, ACTIONMR_out["C_unified"].toarray()
+            )
         return ACTIONMR_out
     else:
         data.obsm["C_stacked"] = ACTIONMR_out["C_stacked"]
@@ -242,17 +262,17 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
     """
 
     def __init__(
-            self,
-            k_min=2,
-            k_max=None,
-            *,
-            max_iter=100,
-            min_delta=1e-16,
-            specificity_th=-3,
-            min_cells_per_archetype=2,
-            unification_th=0,
-            thread_no=0,
-            ):
+        self,
+        k_min=2,
+        k_max=None,
+        *,
+        max_iter=100,
+        min_delta=1e-16,
+        specificity_th=-3,
+        min_cells_per_archetype=2,
+        unification_th=0,
+        thread_no=0,
+    ):
         self.k_min = k_min
         self.k_max = k_max
         self.max_iter = max_iter
@@ -314,7 +334,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
                 stacked_coeffs,
                 stacked_loadings,
                 assigned_archetype,
-                ) = self._fit_transform(X)
+            ) = self._fit_transform(X)
 
         self.coeff_ = B
         self.components_ = Z
@@ -369,20 +389,20 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         """
 
         actionmr_out = runACTIONMR(
-                data=X,
-                k_min=self.k_min,
-                k_max=self.k_max,
-                max_iter=self.max_iter,
-                min_delta=self.min_delta,
-                specificity_th=self.specificity_th,
-                min_cells_per_archetype=self.min_cells_per_archetype,
-                unification_th=self.unification_th,
-                thread_no=self.thread_no,
-                reduction_key=None,
-                return_W=True,
-                return_raw=True,
-                copy=False,
-                )
+            data=X,
+            k_min=self.k_min,
+            k_max=self.k_max,
+            max_iter=self.max_iter,
+            min_delta=self.min_delta,
+            specificity_th=self.specificity_th,
+            min_cells_per_archetype=self.min_cells_per_archetype,
+            unification_th=self.unification_th,
+            thread_no=self.thread_no,
+            reduction_key=None,
+            return_W=True,
+            return_raw=True,
+            copy=False,
+        )
 
         stacked_coeffs = actionmr_out["C_stacked"].T
         stacked_loadings = actionmr_out["H_stacked"].T
@@ -412,8 +432,8 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
         check_is_fitted(self)
         X = self._validate_data(
-                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-                )
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         Z = self.components_
 
