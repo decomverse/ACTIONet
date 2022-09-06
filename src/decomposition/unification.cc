@@ -495,7 +495,7 @@ namespace ACTIONet
     double arch_no = round((x1 * x1) / x2);
     candidates = candidates(span(0, arch_no - 1));
 
-    stdout_printf("# unified archetypes: %d\n", arch_no);
+    stdout_printf("# unified archetypes: %d\n", (int)arch_no);
     output.selected_archetypes = candidates;
     /*
       double M = 16, ef_construction = 200, ef = 200;
