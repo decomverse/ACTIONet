@@ -171,3 +171,74 @@ def cluster(
 
     return adata if copy else None
 
+
+def infer_missing_labels(
+    adata: AnnData,
+    algorithm: str = "lpa",
+    initial_labels: Union[str, np.ndarray, list, pd.Series] = None,
+    lambda_param: int = 0,
+    iters: int = 3,
+    sig_threshold: float = 3,
+) -> pd.Series:
+
+    data_is_AnnData = isinstance(adata, AnnData)
+    if not data_is_AnnData:
+        raise Exception("adata must be an AnnData object")
+
+    if isinstance(initial_labels, str):
+        if initial_labels in adata.obs.keys():
+            labels = pd.DataFrame(adata.obs[initial_labels])
+        else:
+            raise ValueError("labels attribute %s not found" % initial_labels)
+    else:
+        labels = pd.Series(initial_labels)
+
+    fixed_samples = np.where(labels != None)
+
+    updated_labels = an.net.propagate(
+        data=adata,
+        labels=labels,
+        fixed_samples=fixed_samples,
+        return_raw=True,
+        algorithm=algorithm,
+        lambda_param=lambda_param,
+        iters=iters,
+        sig_threshold=sig_threshold,
+    )
+
+    return updated_labels
+
+
+def correct_labels(
+    adata: AnnData,
+    algorithm: str = "lpa",
+    initial_labels: Union[str, np.ndarray, list, pd.Series] = None,
+    lambda_param: int = 0,
+    iters: int = 3,
+    sig_threshold: float = 3,
+) -> pd.Series:
+
+    data_is_AnnData = isinstance(adata, AnnData)
+    if not data_is_AnnData:
+        raise Exception("adata must be an AnnData object")
+
+    if isinstance(initial_labels, str):
+        if initial_labels in adata.obs.keys():
+            labels = pd.DataFrame(adata.obs[initial_labels])
+        else:
+            raise ValueError("labels attribute %s not found" % initial_labels)
+    else:
+        labels = pd.Series(initial_labels)
+
+    updated_labels = an.net.propagate(
+        data=adata,
+        labels=labels,
+        fixed_samples=None,
+        return_raw=True,
+        algorithm=algorithm,
+        lambda_param=lambda_param,
+        iters=iters,
+        sig_threshold=sig_threshold,
+    )
+
+    return updated_labels

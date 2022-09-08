@@ -63,7 +63,7 @@ def plot_ACTIONet(
     size=5,
     legend_fontsize="small",
     legend_loc: str = "on data",
-    return_fig: Optional[bool] = True,
+    return_fig: Optional[bool] = False,
     show: Optional[bool] = False,
     **kwargs,
 ) -> Union[Figure, Axes, None]:
