@@ -444,11 +444,11 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0, int normalization = 0) {
+    inline List unify_archetypes(mat& S_r, mat C_stacked, mat H_stacked, double backbone_density = 0.5, double resolution = 1.0, int min_cluster_size = 3, int thread_no = 0, int normalization = 0) {
         typedef SEXP(*Ptr_unify_archetypes)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_unify_archetypes p_unify_archetypes = NULL;
         if (p_unify_archetypes == NULL) {
-            validateSignature("List(*unify_archetypes)(mat&,mat&,mat&,double,double,int,int,int)");
+            validateSignature("List(*unify_archetypes)(mat&,mat,mat,double,double,int,int,int)");
             p_unify_archetypes = (Ptr_unify_archetypes)R_GetCCallable("ACTIONet", "_ACTIONet_unify_archetypes");
         }
         RObject rcpp_result_gen;
