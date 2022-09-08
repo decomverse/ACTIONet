@@ -132,14 +132,21 @@ runACTIONet <- function(ace,
   )
 
   # Uses "layoutNetwork" to layout the network and fill in the appropriate slots in the ace object
+  Ht <- as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]]))
+  Ht <- normalize_mat(Ht, normalization = 2)
+
+  out <- reduce_kernel_full(Ht, reduced_dim = 3, iter = 1000)
+  X <- Matrix::t(out$S_r)
+  Z <- scale(X)
+
   ace <- .run.layoutNetwork(
     ace = ace,
+    initial_coordinates = Z,
     algorithm = layout_algorithm,
     n_epochs = layout_epochs,
     spread = layout_spread,
     min_dist = layout_min_dist,
     gamma = layout_gamma,
-    initial_coordinates = reduction_slot,
     net_slot = net_slot_out,
     thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
@@ -297,6 +304,7 @@ rebuildACTIONet <- function(ace,
 #' @export
 rerunLayout <- function(ace,
                         algorithm = c("umap", "tumap"),
+                        initial_coordinates = NULL,
                         spread = 1.0,
                         min_dist = 1.0,
                         gamma = 1.0,
@@ -314,14 +322,22 @@ rerunLayout <- function(ace,
   }
   reduction_slot <- sprintf("%s_normalized", reduction_slot)
 
+  if (is.null(initial_coordinates)) {
+    Ht <- scale(as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]])))
+
+    out <- reduce_kernel_full(Ht, reduced_dim = 3, iter = 1000)
+    X <- Matrix::t(out$S_r)
+    initial_coordinates <- scale(X)
+  }
+
   ace <- .run.layoutNetwork(
+    initial_coordinates = initial_coordinates,
     ace = ace,
     algorithm = algorithm,
     n_epochs = n_epochs,
     spread = spread,
     min_dist = min_dist,
     gamma = gamma,
-    initial_coordinates = reduction_slot,
     net_slot = net_slot,
     thread_no = thread_no,
     seed = seed

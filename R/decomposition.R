@@ -249,8 +249,10 @@ decomp.ACTIONMR <- function(X,
   )
 
   # Identiy equivalent classes of archetypes and group them together
+  C_stacked <- pruning.out$C_stacked
+  H_stacked <- pruning.out$H_stacked
   unification.out <- .unifyArchetypes(
-    S_r = X, C_stacked = pruning.out$C_stacked, H_stacked = pruning.out$H_stacked,
+    S_r = X, C_stacked = C_stacked, H_stacked = H_stacked,
     unification_backbone_density = unification_backbone_density,
     unification_resolution = unification_resolution,
     unification_min_cluster_size = unification_min_cluster_size,

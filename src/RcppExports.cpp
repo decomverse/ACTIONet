@@ -771,13 +771,13 @@ RcppExport SEXP _ACTIONet_prune_archetypes(SEXP C_traceSEXP, SEXP H_traceSEXP, S
     return rcpp_result_gen;
 }
 // unify_archetypes
-List unify_archetypes(mat& S_r, mat& C_stacked, mat& H_stacked, double backbone_density, double resolution, int min_cluster_size, int thread_no, int normalization);
+List unify_archetypes(mat& S_r, mat C_stacked, mat H_stacked, double backbone_density, double resolution, int min_cluster_size, int thread_no, int normalization);
 static SEXP _ACTIONet_unify_archetypes_try(SEXP S_rSEXP, SEXP C_stackedSEXP, SEXP H_stackedSEXP, SEXP backbone_densitySEXP, SEXP resolutionSEXP, SEXP min_cluster_sizeSEXP, SEXP thread_noSEXP, SEXP normalizationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< mat& >::type S_r(S_rSEXP);
-    Rcpp::traits::input_parameter< mat& >::type C_stacked(C_stackedSEXP);
-    Rcpp::traits::input_parameter< mat& >::type H_stacked(H_stackedSEXP);
+    Rcpp::traits::input_parameter< mat >::type C_stacked(C_stackedSEXP);
+    Rcpp::traits::input_parameter< mat >::type H_stacked(H_stackedSEXP);
     Rcpp::traits::input_parameter< double >::type backbone_density(backbone_densitySEXP);
     Rcpp::traits::input_parameter< double >::type resolution(resolutionSEXP);
     Rcpp::traits::input_parameter< int >::type min_cluster_size(min_cluster_sizeSEXP);
@@ -4114,7 +4114,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*run_online_ACTION)(mat&,field<uvec>,int,int,int)");
         signatures.insert("List(*run_weighted_ACTION)(mat&,vec,int,int,int,int,double)");
         signatures.insert("List(*prune_archetypes)(const List&,const List&,double,int)");
-        signatures.insert("List(*unify_archetypes)(mat&,mat&,mat&,double,double,int,int,int)");
+        signatures.insert("List(*unify_archetypes)(mat&,mat,mat,double,double,int,int,int)");
         signatures.insert("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int,int,int)");
         signatures.insert("sp_mat(*build_knn)(mat,string,double,int,bool)");
         signatures.insert("List(*layoutNetwork)(sp_mat&,mat&,const std::string&,bool,double,double,double,unsigned int,int,int,double,int)");

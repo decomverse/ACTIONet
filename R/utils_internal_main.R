@@ -50,13 +50,13 @@
 }
 
 .run.layoutNetwork <- function(ace,
-                               n_epochs = 1000,
+                               initial_coordinates,
+                               n_epochs = 250,
                                presmooth_network = FALSE,
                                algorithm = "umap",
                                spread = 1.0,
                                min_dist = 1.0,
                                gamma = 1.0,
-                               initial_coordinates = "ACTION",
                                net_slot = "ACTIONet",
                                thread_no = 0,
                                seed = 0,
@@ -72,13 +72,6 @@
     ace,
     net_slot = net_slot,
     matrix_type = "sparse",
-    force_type = TRUE,
-  )
-
-  initial_coordinates <- .validate_map(
-    ace,
-    map_slot = initial_coordinates,
-    matrix_type = "dense",
     force_type = TRUE,
   )
 

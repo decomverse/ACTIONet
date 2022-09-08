@@ -729,7 +729,7 @@ List prune_archetypes(const List &C_trace, const List &H_trace,
 //' unification.out = unify_archetypes(G, S_r, prune.out$C_stacked,
 // prune.out$H_stacked) ' cell.clusters = unification.out$sample_assignments
 // [[Rcpp::export]]
-List unify_archetypes(mat &S_r, mat &C_stacked, mat &H_stacked,
+List unify_archetypes(mat &S_r, mat C_stacked, mat H_stacked,
                       double backbone_density = 0.5, double resolution = 1.0,
                       int min_cluster_size = 3,
                       int thread_no = 0, int normalization = 0)
