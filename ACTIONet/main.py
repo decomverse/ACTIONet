@@ -47,6 +47,9 @@ def run_ACTIONet(
 ):
     adata = adata.copy() if copy else adata
 
+    if layer_key is None and "default_assay" in adata.uns["metadata"].keys():
+        layer_key = adata.uns["metadata"]["default_assay"]
+
     if layer_key is not None:
         if layer_key not in adata.layers.keys():
             raise ValueError("Did not find adata.layers['" + layer_key + "']. ")
@@ -111,10 +114,17 @@ def run_ACTIONet(
     )
 
     # Uses `reduction_key` for initialization of coordinates
+    Ht = adata.obsm["H_stacked"].toarray().T
+    Ht = utils.scale_matrix(Ht)
+
+    red_out = _an.reduce_kernel_full(Ht, reduced_dim=3, iters=1000, SVD_algorithm=0)
+    Z = utils.scale_matrix(red_out["S_r"].T)
+
+    adata.obsm["H_stacked"]
     net.layout(
         data=adata,
+        initial_coordinates=Z,
         algorithm=alg_name,
-        initial_coordinates=None,
         presmooth_network=layout_presmooth_network,
         sim2dist=layout_sim2dist,
         spread=layout_spread,
