@@ -163,7 +163,8 @@ py::dict reduce_kernel_full(arma::Mat<npdouble> &S, int reduced_dim = 50,
   vec sigma = reduction(1).col(0);
   res["sigma"] = sigma;
 
-  arma::Mat<npdouble> V = reduction(2);
+  double epsilon = 0.01 / sqrt(reduction(2).n_rows);
+  arma::Mat<npdouble> V = round(reduction(2) / epsilon) * epsilon;
 
   for (int i = 0; i < V.n_cols; i++) {
     vec v = V.col(i) * sigma(i);
@@ -190,7 +191,8 @@ py::dict reduce_kernel(arma::SpMat<npdouble> &S, int reduced_dim = 50,
   vec sigma = reduction(1).col(0);
   res["sigma"] = sigma;
 
-  arma::Mat<npdouble> V = reduction(2);
+  double epsilon = 0.01 / sqrt(reduction(2).n_rows);
+  arma::Mat<npdouble> V = round(reduction(2) / epsilon) * epsilon;
 
   for (int i = 0; i < V.n_cols; i++) {
     vec v = V.col(i) * sigma(i);
@@ -857,15 +859,15 @@ PYBIND11_MODULE(_ACTIONet, m) {
   // Kernel reduction
   m.def("reduce_kernel", &reduce_kernel,
         "Computes reduced kernel matrix for a given profile", py::arg("S"),
-        py::arg("reduced_dim") = 50, py::arg("iters") = 5, py::arg("seed") = 0,
-        py::arg("SVD_algorithm") = 1, py::arg("prenormalize") = false,
-        py::arg("verbose") = 1);
+        py::arg("reduced_dim") = 50, py::arg("iters") = 1000,
+        py::arg("seed") = 0, py::arg("SVD_algorithm") = 0,
+        py::arg("prenormalize") = false, py::arg("verbose") = 1);
 
   m.def("reduce_kernel_full", &reduce_kernel_full,
         "Computes reduced kernel matrix for a given profile", py::arg("S"),
-        py::arg("reduced_dim") = 50, py::arg("iters") = 5, py::arg("seed") = 0,
-        py::arg("SVD_algorithm") = 1, py::arg("prenormalize") = false,
-        py::arg("verbose") = 1);
+        py::arg("reduced_dim") = 50, py::arg("iters") = 1000,
+        py::arg("seed") = 0, py::arg("SVD_algorithm") = 0,
+        py::arg("prenormalize") = false, py::arg("verbose") = 1);
 
   // Lower-level functions
   m.def("run_simplex_regression", &run_simplex_regression,

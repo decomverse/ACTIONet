@@ -12,7 +12,7 @@ import _ACTIONet as _an
 def reduce_adata(
     data: Union[AnnData, np.ndarray, spmatrix],
     dim: Optional[int] = 50,
-    max_iter: Optional[int] = 10,
+    max_iter: Optional[int] = 1000,
     layer_key: Optional[str] = None,
     reduction_key: Optional[str] = "ACTION",
     svd_solver: Literal[0, 1, 2] = 0,
@@ -78,8 +78,8 @@ def reduce_adata(
     # irlb  = 0
     # halko = 1
     # feng  = 2
-    if svd_solver == 0:
-        max_iter = 100 * max_iter
+    if svd_solver != 0:
+        max_iter = 5
 
     X = X.T.astype(dtype=np.float64)
     if issparse(X):
