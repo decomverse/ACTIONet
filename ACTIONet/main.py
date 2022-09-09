@@ -27,7 +27,7 @@ def run_ACTIONet(
     network_density: Optional[int] = 1,
     network_k: Optional[int] = 30,
     mutual_edges_only: Optional[bool] = True,
-    layout_epochs: Optional[int] = 250,
+    layout_epochs: Optional[int] = 100,
     layout_algorithm: Optional[str] = "umap",
     layout_presmooth_network: Optional[bool] = False,
     layout_sim2dist: Optional[int] = 2,
@@ -113,17 +113,31 @@ def run_ACTIONet(
         return_raw=False,
     )
 
-    # Uses `reduction_key` for initialization of coordinates
-    Ht = adata.obsm["H_stacked"].toarray().T
-    Ht = utils.scale_matrix(Ht)
+    # Smooth archetype footprints
+    net.diffusion(
+        data=adata,
+        scores_key="H_unified",
+        smoothed_scores_key=footprint_key,
+        alpha_val=footprint_alpha,
+        thread_no=thread_no,
+        copy=False,
+        return_raw=False,
+    )
 
-    red_out = _an.reduce_kernel_full(Ht, reduced_dim=3, iters=1000, SVD_algorithm=0)
-    Z = utils.scale_matrix(red_out["S_r"].T)
+    # Uses `reduction_key` for initialization of coordinates
+    svd_out = _an.IRLB_SVD_full(
+        utils.scale_matrix(adata.obsm["archetype_footprint"]),
+        dim=3,
+        iters=1000,
+        seed=0,
+        verbose=0,
+    )
+    initial_coordinates = utils.scale_matrix(svd_out["u"][:, 0:3])
 
     adata.obsm["H_stacked"]
     net.layout(
         data=adata,
-        initial_coordinates=Z,
+        initial_coordinates=initial_coordinates,
         algorithm=alg_name,
         presmooth_network=layout_presmooth_network,
         sim2dist=layout_sim2dist,
@@ -148,17 +162,6 @@ def run_ACTIONet(
         return_raw=False,
     )
 
-    # Smooth archetype footprints
-    net.diffusion(
-        data=adata,
-        scores_key="H_unified",
-        smoothed_scores_key=footprint_key,
-        alpha_val=footprint_alpha,
-        thread_no=thread_no,
-        copy=False,
-        return_raw=False,
-    )
-
     # Compute gene specificity for each archetype
     po.archetypes.feature_specificity(
         adata=adata,
@@ -172,5 +175,47 @@ def run_ACTIONet(
 
     # Construct archetype graph (backbone)
     po.archetypes.construct_backbone(adata, density=backbbone_density)
+
+    return adata if copy else None
+
+
+def rerun_layout(
+    adata: AnnData,
+    layout_epochs: Optional[int] = 100,
+    layout_algorithm: Optional[str] = "umap",
+    layout_presmooth_network: Optional[bool] = False,
+    layout_sim2dist: Optional[int] = 2,
+    layout_min_dist: Optional[float] = 1.0,
+    layout_spread: Optional[float] = 1.0,
+    layout_learning_rate: Optional[float] = 1.0,
+    net_key: Optional[str] = "ACTIONet",
+    footprint_key: Optional[str] = "archetype_footprint",
+    thread_no: Optional[int] = 0,
+    seed: Optional[int] = 0,
+    copy: Optional[bool] = False,
+):
+    adata = adata.copy() if copy else adata
+
+    # Uses `reduction_key` for initialization of coordinates
+    svd_out = np.linalg.svd(utils.scale_matrix(adata.obsm[footprint_key]).T)
+    initial_coordinates = utils.scale_matrix(svd_out[2][:, 0:3])
+
+    adata.obsm["H_stacked"]
+    net.layout(
+        data=adata,
+        initial_coordinates=initial_coordinates,
+        algorithm=layout_algorithm,
+        presmooth_network=layout_presmooth_network,
+        sim2dist=layout_sim2dist,
+        spread=layout_spread,
+        min_dist=layout_min_dist,
+        learning_rate=layout_learning_rate,
+        n_epochs=layout_epochs,
+        thread_no=thread_no,
+        net_key=net_key,
+        seed=seed,
+        copy=False,
+        return_raw=False,
+    )
 
     return adata if copy else None
