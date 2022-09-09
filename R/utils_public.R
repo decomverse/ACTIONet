@@ -13,57 +13,68 @@ orthoProject <- function(A, S, prenorm = F, postnorm = F) {
 
 #' @export
 normalize.matrix <- function(S,
-                             log_transform = FALSE,
-                             scale_param = NULL) {
+                             top_features_frac = 1.0,
+                             scale_param = median,
+                             transformation = "log",
+                             anchor_features = NULL) {
   if (!is.matrix(S) && !ACTIONetExperiment:::is.sparseMatrix(S)) {
     err <- sprintf("`S` must be `matrix` or `sparseMatrix`.\n")
     stop(err)
   }
 
-  if (is.null(scale_param)) {
-    scale_param <- 1
-  } else if (!is.function(scale_param) && !is.numeric(scale_param)) {
-    err <- sprintf("`scale_param` must be `function` or `numeric`.\n")
-    stop(err)
-  } else if (!(length(scale_param) == NCOL(S)) && !(length(scale_param) == 1)) {
-    err <- sprintf("`scale_param` must be of length 1 or `NCOL(S)`.\n")
+  if (!is.null(anchor_features)) {
+    lib_sizes <- Matrix::colMeans(S[anchor_features, ])
+  } else if (top_features_frac < 1.0) {
+    universality <- Matrix::rowMeans(S != 0)
+    selected_features <- which(universality > (1.0 - top_features_frac))
+    lib_sizes <- Matrix::colMeans(S[selected_features, ])
+  } else {
+    lib_sizes <- Matrix::colMeans(S)
+  }
+
+  if (is.matrix(S)) {
+    S_scaled <- S %*% diag(1.0 / lib_sizes)
+  } else {
+    S_scaled <- S %*% Diagonal(n = length(lib_sizes), x = 1.0 / lib_sizes)
   }
 
   if (ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
     S <- as(S, "dgCMatrix")
-  }
-
-  # cs = Matrix::colSums(S)
-  # cs[cs == 0] = 1
-  # B = Matrix::t(Matrix::t(S) / cs)
-  if (is.matrix(S)) {
-    B <- normalize_mat(S, 1)
-  } else {
-    B <- normalize_spmat(S, 1)
   }
 
   if (is.function(scale_param)) {
-    lib_sizes <- Matrix::colSums(S)
-    B <- B * scale_param(lib_sizes)
+    kappa <- scale_param(Matrix::colSums(S) / Matrix::colSums(S_scaled))
+    S_scaled_norm <- S_scaled * kappa
+  } else if (length(scale_param) == 1) {
+    S_scaled_norm <- S_scaled * scale_param
   } else {
-    if (length(scale_param) > 1) {
-      B <- Matrix::t(Matrix::t(B) * scale_param)
+    if (is.matrix(S_scaled)) {
+      S_scaled_norm <- S_scaled %*% diag(lib_sizes)
     } else {
-      B <- B * scale_param
+      S_scaled_norm <- S_scaled %*% Diagonal(n = length(scale_param), x = scale_param)
     }
   }
 
-  if (log_transform == TRUE) {
-    B <- log1p(B)
+  if (transformation == "log") {
+    S_scaled_norm <- log1p(S_scaled_norm)
+  } else if (transformation == "tukey") {
+    if (is.matrix(S_scaled_norm)) {
+      idx <- which(S_scaled_norm > 0)
+      vv <- S_scaled_norm[idx]
+      vv_transformed <- sqrt(vv) + sqrt(1 + vv)
+      S_scaled_norm[idx] <- vv_transformed
+    } else {
+      S_scaled_norm@x <- sqrt(S_scaled_norm@x) + sqrt(S_scaled_norm@x + 1)
+    }
+  } else if (transformation == "lsi") {
+    if (is.matrix(S_scaled_norm)) {
+      S_scaled_norm <- as(S_scaled_norm, "dgCMatrix")
+    }
+    S_scaled_norm <- ACTIONet::LSI(S_sparse)
   }
 
-  if (ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
-    S <- as(S, "dgCMatrix")
-  }
-
-  return(B)
+  return(S_scaled_norm)
 }
-
 
 .groupedRowSums <- function(S, group_vec) {
   if (ACTIONetExperiment:::is.sparseMatrix(S)) {
@@ -125,7 +136,27 @@ aggregateMatrix <- function(S, group_vec, method = c("sum", "mean", "var")) {
   return(mat)
 }
 
+warnifnot <- function(cond) {
+  if (cond == TRUE) {
+    warning("PASSED")
+  } else {
+    warning("FAILED")
+  }
+}
+
 verify_aces <- function(ace1, ace2) {
+  ###############################################################
+  ###############################################################
+  ################ Check ACTION reduction #######################
+  ###############################################################
+  ###############################################################
+  A1 <- ace1$ACTION_normalized
+  A2 <- ace2$ACTION_normalized
+
+  deltaA <- sum(abs(A1 - A2)) / length(A1)
+  warnifnot(deltaA < 1e-5)
+  print(sprintf("Delta ACTION (reduction) = %.2e", deltaA))
+
   ###############################################################
   ###############################################################
   ############## Check ACTION decomposition #####################
@@ -140,16 +171,16 @@ verify_aces <- function(ace1, ace2) {
 
   n1 <- ncol(H1)
   n2 <- ncol(H2)
-  stopifnot(n1 == n2)
-  print(sprintf("Same number of multi-level archetypes [%d] (Passed)", n1))
+  warnifnot(n1 == n2)
+  print(sprintf("Same number of multi-level archetypes [%d]", n1))
 
   deltaH <- sum(abs(H1 - H2)) / length(H1)
-  stopifnot(deltaH < 1e-5)
-  print(sprintf("Delta H (multi-level) = %.2e (Passed)", deltaH))
+  warnifnot(deltaH < 1e-5)
+  print(sprintf("Delta H (multi-level) = %.2e", deltaH))
 
   deltaC <- sum(abs(C1 - C2)) / length(H1)
-  stopifnot(deltaC < 1e-5)
-  print(sprintf("Delta C (multi-level) = %.2e (Passed)", deltaC))
+  warnifnot(deltaC < 1e-5)
+  print(sprintf("Delta C (multi-level) = %.2e", deltaC))
 
   # check multi-level decomposition
   C1 <- colMaps(ace1)$C_unified
@@ -159,22 +190,22 @@ verify_aces <- function(ace1, ace2) {
 
   n1 <- ncol(H1)
   n2 <- ncol(H2)
-  stopifnot(n1 == n2)
-  print(sprintf("Same number of multi-resolution archetypes [%d] (Passed)", n1))
+  warnifnot(n1 == n2)
+  print(sprintf("Same number of multi-resolution archetypes [%d]", n1))
 
   deltaH <- sum(abs(H1 - H2)) / length(H1)
-  stopifnot(deltaH < 1e-5)
-  print(sprintf("Delta H (multi-resolution) = %.2e (Passed)", deltaH))
+  warnifnot(deltaH < 1e-5)
+  print(sprintf("Delta H (multi-resolution) = %.2e", deltaH))
 
   deltaC <- sum(abs(C1 - C2)) / length(H2)
-  stopifnot(deltaC < 1e-5)
-  print(sprintf("Delta C (multi-resolution) = %.2e (Passed)", deltaC))
+  warnifnot(deltaC < 1e-5)
+  print(sprintf("Delta C (multi-resolution) = %.2e", deltaC))
 
   archs1 <- ace1$assigned_archetype
   archs2 <- ace2$assigned_archetype
   mismatch_perc <- 100 * sum(archs1 != archs2) / ncol(ace)
-  stopifnot(mismatch_perc < 0.5)
-  sprintf("%.02d %% archetype assignment mismatch (Passed)", mismatch_perc)
+  warnifnot(mismatch_perc < 0.5)
+  sprintf("%.02d %% archetype assignment mismatch", mismatch_perc)
 
 
   ###############################################################
@@ -186,8 +217,8 @@ verify_aces <- function(ace1, ace2) {
   spec2 <- round(ace2$unified_feature_specificity, 3)
 
   deltaSpec <- sum(abs(spec1 - spec2)) / length(spec1)
-  stopifnot(deltaSpec < 1e-5)
-  print(sprintf("Delta archetype feature specificity = %.2e (Passed)", deltaSpec))
+  warnifnot(deltaSpec < 1e-3)
+  print(sprintf("Delta archetype feature specificity = %.2e", deltaSpec))
 
 
   ###############################################################
@@ -199,8 +230,8 @@ verify_aces <- function(ace1, ace2) {
   net2 <- round(ace2$ACTIONet, 3)
 
   mismatch.edges <- 100 * sum(net1 != net2) / length((net1@i))
-  stopifnot(mismatch.edges < 0.5)
-  print(sprintf("%.02f %% ACTIONet edges mismatch (Passed)", mismatch.edges))
+  warnifnot(mismatch.edges < 0.5)
+  print(sprintf("%.02f %% ACTIONet edges mismatch", mismatch.edges))
 
 
   ###############################################################
@@ -213,8 +244,8 @@ verify_aces <- function(ace1, ace2) {
   coor2D2 <- round(ace2$ACTIONet2D, 3)
 
   mismatch.2D <- 100 * sum(coor2D1 != coor2D2) / length(coor2D1)
-  stopifnot(mismatch.2D < 0.5)
-  print(sprintf("%.02f %% 2D mismatch (Passed)", mismatch.2D))
+  warnifnot(mismatch.2D < 0.5)
+  print(sprintf("%.02f %% 2D mismatch", mismatch.2D))
 
 
   ## 3D
@@ -222,16 +253,16 @@ verify_aces <- function(ace1, ace2) {
   coor3D2 <- round(ace2$ACTIONet3D, 3)
 
   mismatch.3D <- 100 * sum(coor3D1 != coor3D2) / length(coor3D1)
-  stopifnot(mismatch.3D < 0.5)
-  print(sprintf("%.02d %% 3D mismatch (Passed)", mismatch.3D))
+  warnifnot(mismatch.3D < 0.5)
+  print(sprintf("%.02f %% 3D mismatch", mismatch.3D))
 
   ## Colors
   colors1 <- round(ace1$denovo_color, 3)
   colors2 <- round(ace2$denovo_color, 3)
 
   mismatch.colors <- 100 * sum(colors1 != colors2) / length(colors1)
-  stopifnot(mismatch.colors < 0.5)
-  print(sprintf("%.02f %% colors mismatch (Passed)", mismatch.colors))
+  warnifnot(mismatch.colors < 0.5)
+  print(sprintf("%.02f %% colors mismatch", mismatch.colors))
 
   print("Congratulations! Your ace objects match perfectly!!")
 }
