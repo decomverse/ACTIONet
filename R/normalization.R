@@ -78,13 +78,17 @@ normalize.Linnorm <- function(ace,
 normalize.default <- function(ace,
                               assay_name = "counts",
                               assay_out = "logcounts",
-                              log_transform = TRUE,
-                              scale_param = 1000000) {
+                              top_features_frac = 1.0,
+                              scale_param = median,
+                              transformation = "log",
+                              anchor_features = NULL) {
   S <- SummarizedExperiment::assays(ace)[[assay_name]]
-  B <- normalize.matrix(S, log_transform, scale_param)
-  rownames(B) <- rownames(ace)
-  colnames(B) <- colnames(ace)
-  SummarizedExperiment::assays(ace)[[assay_out]] <- B
+
+  Snorm <- normalize.matrix(S, top_features_frac = top_features_frac, scale_param = scale_param, transformation = transformation, anchor_features = anchor_features)
+
+  rownames(Snorm) <- rownames(ace)
+  colnames(Snorm) <- colnames(ace)
+  SummarizedExperiment::assays(ace)[[assay_out]] <- Snorm
   return(ace)
 }
 
@@ -94,7 +98,10 @@ normalize.ace <- function(ace,
                           batch_attr = NULL,
                           assay_name = "counts",
                           assay_out = "logcounts",
-                          scale_param = 1e3,
+                          top_features_frac = 1.0,
+                          scale_param = median,
+                          transformation = "log",
+                          anchor_features = NULL,
                           BPPARAM = SerialParam(),
                           ...) {
   if (norm_method == "scran") {
@@ -124,12 +131,10 @@ normalize.ace <- function(ace,
       ace = ace,
       assay_name = assay_name,
       assay_out = assay_out,
-      log_transform = TRUE,
-      scale_param = scale_param
+      top_features_frac = top_features_frac, scale_param = scale_param, transformation = transformation, anchor_features = anchor_features
     )
-    norm_method <- "default"
+    norm_method <- sprintf("default_top5.2f_%s", top_features_frac, transformation)
   }
-
   metadata(ace)$norm_method <- norm_method
   metadata(ace)$default_assay <- assay_out
 

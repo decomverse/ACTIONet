@@ -49,7 +49,7 @@ runACTIONet <- function(ace,
                         layout_spread = 1.0,
                         layout_min_dist = 1.0,
                         layout_gamma = 1.0,
-                        layout_epochs = 250,
+                        layout_epochs = 100,
                         layout_algorithm = c("umap", "tumap"),
                         layout_parallel = TRUE,
                         unification_backbone_density = 0.5,
@@ -131,42 +131,6 @@ runACTIONet <- function(ace,
     algorithm = "local_coreness"
   )
 
-  # Uses "layoutNetwork" to layout the network and fill in the appropriate slots in the ace object
-  Ht <- as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]]))
-  Ht <- normalize_mat(Ht, normalization = 2)
-
-  out <- reduce_kernel_full(Ht, reduced_dim = 3, iter = 1000)
-  X <- Matrix::t(out$S_r)
-  Z <- scale(X)
-
-  ace <- .run.layoutNetwork(
-    ace = ace,
-    initial_coordinates = Z,
-    algorithm = layout_algorithm,
-    n_epochs = layout_epochs,
-    spread = layout_spread,
-    min_dist = layout_min_dist,
-    gamma = layout_gamma,
-    net_slot = net_slot_out,
-    thread_no = ifelse(layout_parallel, thread_no, 1),
-    seed = seed
-  )
-
-
-  # # Smooth PCs (S_r) for ease of future imputation (same as MAGIC algorithm)
-  # if (smoothPC == TRUE) {
-  #   ace <- .smoothPCs(
-  #     ace = ace,
-  #     diffusion_algorithm = "pagerank",
-  #     alpha = imputation_alpha,
-  #     diffusion_it = 5,
-  #     reduction_slot = reduction_slot,
-  #     net_slot = net_slot_out,
-  #     thread_no = thread_no
-  #   )
-  # }
-
-
   # Smooth archetype footprints
   archetype_footprint <- networkDiffusion(
     obj = G,
@@ -179,6 +143,23 @@ runACTIONet <- function(ace,
     net_slot = NULL
   )
   colMaps(ace)$archetype_footprint <- archetype_footprint
+
+  # Uses "layoutNetwork" to layout the network and fill in the appropriate slots in the ace object
+  red.out <- IRLB_SVD_full(scale(ace$archetype_footprint), dim = 3, iters = 1000, verbose = 0, seed = 0)
+  initial_coordinates <- scale(red.out$u[, 1:3])
+
+  ace <- .run.layoutNetwork(
+    ace = ace,
+    initial_coordinates = initial_coordinates,
+    algorithm = layout_algorithm,
+    n_epochs = layout_epochs,
+    spread = layout_spread,
+    min_dist = layout_min_dist,
+    gamma = layout_gamma,
+    net_slot = net_slot_out,
+    thread_no = ifelse(layout_parallel, thread_no, 1),
+    seed = seed
+  )
 
   # Compute gene specificity for each archetype
   ace <- archetypeFeatureSpecificity(
@@ -224,7 +205,7 @@ rebuildACTIONet <- function(ace,
                             layout_spread = 1.0,
                             layout_min_dist = 1.0,
                             layout_gamma = 1.0,
-                            layout_epochs = 250,
+                            layout_epochs = 100,
                             layout_algorithm = c("umap", "tumap"),
                             layout_parallel = TRUE,
                             thread_no = 0,
@@ -272,7 +253,6 @@ rebuildACTIONet <- function(ace,
     spread = layout_spread,
     min_dist = layout_min_dist,
     gamma = layout_gamma,
-    reduction_slot = reduction_slot,
     net_slot = net_slot_out,
     thread_no = ifelse(layout_parallel, thread_no, 1),
     seed = seed
@@ -308,26 +288,16 @@ rerunLayout <- function(ace,
                         spread = 1.0,
                         min_dist = 1.0,
                         gamma = 1.0,
-                        n_epochs = 250,
+                        n_epochs = 100,
                         thread_no = 0,
-                        reduction_slot = "ACTION",
                         net_slot = "ACTIONet",
-                        reduction_normalization = 1,
                         seed = 0) {
   algorithm <- tolower(algorithm)
   algorithm <- match.arg(algorithm, several.ok = FALSE)
 
-  if (!(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace)))) {
-    ace <- normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
-  }
-  reduction_slot <- sprintf("%s_normalized", reduction_slot)
-
   if (is.null(initial_coordinates)) {
-    Ht <- scale(as.matrix(Matrix::t(colMaps(ace)[["H_stacked"]])))
-
-    out <- reduce_kernel_full(Ht, reduced_dim = 3, iter = 1000)
-    X <- Matrix::t(out$S_r)
-    initial_coordinates <- scale(X)
+    red.out <- IRLB_SVD_full(scale(ace$archetype_footprint), dim = 3, iters = 1000, verbose = 0, seed = 0)
+    initial_coordinates <- scale(red.out$u[, 1:3])
   }
 
   ace <- .run.layoutNetwork(

@@ -315,7 +315,9 @@ List reduce_kernel(sp_mat &S, int reduced_dim = 50, int iter = 5, int seed = 0,
   vec sigma = reduction(1).col(0);
   res["sigma"] = sigma;
 
-  mat V = reduction(2);
+  double epsilon = 0.01 / sqrt(reduction(2).n_rows);
+  mat V = round(reduction(2) / epsilon) * epsilon;
+
   // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++)
   {
@@ -365,7 +367,9 @@ List reduce_kernel_full(mat &S, int reduced_dim = 50, int iter = 5,
   vec sigma = reduction(1).col(0);
   res["sigma"] = sigma;
 
-  mat V = reduction(2);
+  double epsilon = 0.01 / sqrt(reduction(2).n_rows);
+  mat V = round(reduction(2) / epsilon) * epsilon;
+
   // printf("%d x %d\n", V.n_rows, V.n_cols);
   for (int i = 0; i < V.n_cols; i++)
   {
