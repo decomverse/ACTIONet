@@ -33,4 +33,4 @@ jobs:
           file: ./mini_docker/Dockerfile
           push: true
           build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
-          tags: actionet/r_devel:mini
+          tags: actionet/r_devel

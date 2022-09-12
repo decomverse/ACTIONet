@@ -6,15 +6,14 @@
 \usage{
 rerunLayout(
   ace,
+  algorithm = c("umap", "tumap"),
+  initial_coordinates = NULL,
   spread = 1,
   min_dist = 1,
   gamma = 1,
-  n_epochs = 250,
-  algorithm = c("umap", "tumap"),
+  n_epochs = 100,
   thread_no = 0,
-  init_coor_slot = "ACTION",
   net_slot = "ACTIONet",
-  reduction_normalization = 1,
   seed = 0
 )
 }

@@ -7,7 +7,7 @@
 reduce.ace(
   ace,
   reduced_dim = 50,
-  max_iter = 10,
+  max_iter = 1000,
   assay_name = NULL,
   reduction_out = "ACTION",
   SVD_algorithm = 0,
@@ -32,6 +32,6 @@ ACTIONetExperiment object with reduction in colMaps(ace).
 Takes a `ACTIONetExperiment` object and adds the reduced kernel matrix
 }
 \examples{
-ace = import.ace.from.10X(input_path)
-ace = reduce.ace(ace)
+ace <- import.ace.from.10X(input_path)
+ace <- reduce.ace(ace)
 }

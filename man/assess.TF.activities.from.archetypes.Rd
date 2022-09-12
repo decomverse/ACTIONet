@@ -18,5 +18,5 @@ Compute the activity score of each TF based on the observed activity of its targ
 (Similar to ChEA3; it is based on a meta-analysis using 4 separate datasets)
 }
 \examples{
-TF.scores = assess.TF.activities.from.archetypes(ace)
+TF.scores <- assess.TF.activities.from.archetypes(ace)
 }
