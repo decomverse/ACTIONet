@@ -23,7 +23,7 @@ runACTIONet(
   layout_spread = 1,
   layout_min_dist = 1,
   layout_gamma = 1,
-  layout_epochs = 250,
+  layout_epochs = 100,
   layout_algorithm = c("umap", "tumap"),
   layout_parallel = TRUE,
   unification_backbone_density = 0.5,

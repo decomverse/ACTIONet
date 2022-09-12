@@ -25,7 +25,7 @@ Matrix pathway x cell type/states
 Performs geneset enrichment analysis on archetypes
 }
 \examples{
-data('gProfilerDB_human')
-associations = gProfilerDB_human$SYMBOL$WP
-Geneset.enrichments = assess.geneset.enrichment.from.archetypes(ace, associations)
+data("gProfilerDB_human")
+associations <- gProfilerDB_human$SYMBOL$WP
+Geneset.enrichments <- assess.geneset.enrichment.from.archetypes(ace, associations)
 }
