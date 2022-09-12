@@ -1,10 +1,9 @@
 #Installation
 
-
 ### Setting Up the Environment (Preinstallation)
+
 **For Linux Users**
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
-
 
 **Install library dependencies**
 To install the `ACTIONet` dependencies on debian-based linux machines, run:
@@ -24,12 +23,13 @@ For Mac-based systems use [brew](https://brew.sh/):
 ```bash
 brew install hdf5 suite-sparse
 ```
-Some of the dependent R packages also require [XQuartz](https://www.xquartz.org) to be installed.
 
+Some of the dependent R packages also require [XQuartz](https://www.xquartz.org) to be installed.
 
 ### Installing ACTIONet R Package
 
 #### Using `devtools`
+
 This is the easiest way to install the package, and it automatically installs all package dependencies (except optional packages described below):
 
 ```r
@@ -39,20 +39,20 @@ devtools::install_github("shmohammadi86/ACTIONet", ref = "R-devel")
 ```
 
 #### Directly from the cloned repository
+
 This is the more flexible approach and allows for easily pulling the latest updates/changes. This can be done as follows:
 
-* **Instaling dependencies**: Unlike devtools, `R` script does not automatically install dependencies. To install all dependencies, run:
-
+- **Instaling dependencies**: Unlike devtools, `R` script does not automatically install dependencies. To install all dependencies, run:
 
 ```r
 devtools::install_github("shmohammadi86/ACTIONetExperiment")
-BiocManager::install(c("Rcpp", "RcppArmadillo", "ACTIONetExperiment", "Matrix", "SingleCellExperiment", "hdf5r", "ggplot2", "ComplexHeatmap", "ggpubr", "ggrepel", "RColorBrewer", "pals", "seriation", "dplyr", "grid", "matrixStats", "gplots", "batchelor", "BiocParallel", "plotly", "scran", "scatter"))
+BiocManager::install(c("batchelor", "BiocParallel", "ComplexHeatmap", "ggplot2", "ggpubr", "ggrepel", "gplots", "grid", "hdf5r", "Matrix", "matrixStats", "pals", "plotly", "RColorBrewer", "Rcpp", "RcppArmadillo", "seriation", "SingleCellExperiment"),ask=F)
 ```
 
-* **Clone `ACTIONet` repository**:
-If you don't already have git, install it first.
+- **Clone `ACTIONet` repository**:
+  If you don't already have git, install it first.
 
-On (Debian) **Linux-based  machines**, run:
+On (Debian) **Linux-based machines**, run:
 
 ```bash
 sudo apt-get install git
@@ -70,13 +70,12 @@ Now clone a fresh copy of the repository:
 git clone https://github.com/shmohammadi86/ACTIONet.git
 ```
 
-
-* **Install `ACTIONet`**:
-ACTIONet contains many different branchs. For installing the stable version, switch to the `R-release` branch:
+- **Install `ACTIONet`**:
+  ACTIONet contains many different branchs. For installing the stable version, switch to the `R-devel` branch:
 
 ```bash
 cd ACTIONet
-git checkout R-release
+git checkout R-devel
 ```
 
 If you want to install the latest updates, switch to the `R-devel` branch:
@@ -87,6 +86,7 @@ git checkout R-devel
 ```
 
 Fetch all C/C++ codes:
+
 ```bash
 git submodule update --init
 ```
@@ -94,7 +94,7 @@ git submodule update --init
 OR, you can directly run:
 
 ```bash
-git clone --recurse-submodules --branch R-devel https://github.com/shmohammadi86/ACTIONet.git ACTIONet
+git clone --depth 1 --no-hardlinks --recurse-submodules --branch R-devel https://github.com/shmohammadi86/ACTIONet.git ACTIONet
 ```
 
 and now you can install ACTIONet using the following command in the `ACTIONet` directory:
@@ -104,15 +104,18 @@ and now you can install ACTIONet using the following command in the `ACTIONet` d
 R CMD INSTALL .
 ```
 
-* **Install `ACTIONet`**:
+- **Install `ACTIONet`**:
+
 ```bash
-cd ACTIONet_repo
+cd ACTIONet
 R CMD INSTALL .
 ```
 
 ### Install optional packages
+
 #### Batch correction
-* [Harmony](https://github.com/immunogenomics/harmony): Harmony is another popular batch-correction method that has direct interface implemented in the ACTIONet framework:
+
+- [Harmony](https://github.com/immunogenomics/harmony): Harmony is another popular batch-correction method that has direct interface implemented in the ACTIONet framework:
 
 ```r
 install.packages("devtools")
@@ -121,11 +124,12 @@ devtools::install_github("immunogenomics/harmony")
 
 ACTIONet includes interface to run harmony: `reduce.and.batch.correct.ace.Harmony()`.
 
-
 # Running ACTIONet
+
 **Note** If you are using `MKL`, make sure to properly [set the number of threads](https://software.intel.com/content/www/us/en/develop/documentation/mkl-macos-developer-guide/top/managing-performance-and-memory/improving-performance-with-threading/techniques-to-set-the-number-of-threads.html) used prior to running `ACTIONet`.
 
 ## Example Run
+
 Here is a simple example to get you started:
 
 ```r
@@ -151,6 +155,7 @@ plot.ACTIONet(ace, "celltypes", transparency.attr = ace$node_centrality)
 # Export results as AnnData
 ACE2AnnData(ace, fname = "pbmc_10k_v3.h5ad")
 ```
+
 ## Visualizing results using cellxgene
 
 ACTIONet framework introduces an extension of the `SingleCellExperiment` object that can be closely mapped to [AnnData](https://anndata.readthedocs.io/en/stable/index.html) object. In fact, output of ACTIONet in the python implementation is internally stored as as `AnnData` object, and R `ACE` objects can be imported from/exported to `AnnData` using functions `AnnData2ACE()` and `ACE2AnnData()` functions, respectively. `AnnData` objects can be directly loaded into [cellxgene](https://github.com/chanzuckerberg/cellxgene) package, an open-source viewer for interactive single-cell data visualization. `cellxgene` can be installed as:
@@ -161,24 +166,25 @@ pip install cellxgene
 ```
 
 Then to visualize the results of ACTIONet, run:
+
 ```bash
 cellxgene launch pbmc_10k_v3.h5ad
 ```
 
-where *pbmc_10k_v3.h5ad* is the name of the file we exported using `ACE2AnnData()` function.
-
+where _pbmc_10k_v3.h5ad_ is the name of the file we exported using `ACE2AnnData()` function.
 
 # Running `ACTIONet` with Docker
 
 With Docker, no installation is required and users can directly start experimenting with `ACTIONet` instantly! Sounds easy, right? Here is how it goes.
 
-* Download [Docker](https://store.docker.com/search?offering=community&type=edition) (if you don't already have, which in most linux distributions you do!)
+- Download [Docker](https://store.docker.com/search?offering=community&type=edition) (if you don't already have, which in most linux distributions you do!)
 
-* Run `ACTIONet` docker:
+- Run `ACTIONet` docker:
 
 ```bash
 $ docker run -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mini
 ```
+
 Replace `<USER>` and `<PASSWORD>` with a username and password of your choice.
 
 If you wish to access your local data inside the docker, modify the command as:
@@ -187,13 +193,14 @@ If you wish to access your local data inside the docker, modify the command as:
 $ docker run -v /your/data/file/path/:/data -w /data -e USER=<USER> -e PASSWORD=<PASSWORD> -p 8787:8787 actionet/actionet:mini
 ```
 
-* Connect to the `RStudio Server` through your desktops browser on `http://127.0.0.1:8787`, and then enter "rstudio" as the username and password when prompted. `ACTIONet` and all of its dependencies, as well as a few other packages for single-cell analysis,  are already installed in this environment for you.
+- Connect to the `RStudio Server` through your desktops browser on `http://127.0.0.1:8787`, and then enter "rstudio" as the username and password when prompted. `ACTIONet` and all of its dependencies, as well as a few other packages for single-cell analysis, are already installed in this environment for you.
 
-* Have a cup of coffee and enjoy running ACTIONet!
-
+- Have a cup of coffee and enjoy running ACTIONet!
 
 # Additional tutorials
+
 You can access ACTIONet tutorials from:
+
 1. [ACTIONet framework at a glance (human PBMC 3k dataset)](http://compbio.mit.edu/ACTIONet/tutorials/mini_intro.html)
 2. [Introduction to the ACTIONet framework (human PBMC Granja et al. dataset)](http://compbio.mit.edu/ACTIONet/tutorials/intro.html)
 3. [Introduction to cluster-centric analysis using the ACTIONet framework](http://compbio.mit.edu/ACTIONet/tutorials/clustering.html)
