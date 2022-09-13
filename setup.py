@@ -14,7 +14,7 @@ from setup_helpers import ParallelCompile, naive_recompile
 ParallelCompile("NPY_NUM_BUILD_JOBS", needs_recompile=naive_recompile).install()
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.2'
 
 def read(path):
     with open(path, 'r') as f:
