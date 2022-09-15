@@ -10,6 +10,11 @@ RUN conda config --system --set auto_update_conda false && \
     conda config --system --set show_channel_urls true && \
     conda update --quiet --yes conda && \
     conda env create -f environment.yaml
+
+# Make RUN commands use the new environment:
+RUN echo "conda activate actionet" >> ~/.bashrc
+SHELL ["/bin/bash", "--login", "-c"]
+
 RUN jupyter notebook --generate-config -y  && \
     conda clean --all -fy && \
     echo "conda activate actionet" >> ~/.bashrc && \
