@@ -136,46 +136,6 @@ def scale_matrix(
     return X
 
 
-def normalize_matrix(
-    X: Union[np.ndarray, sparse.spmatrix],
-    log_transform: Optional[bool] = False,
-    scale_factor: Union[str, float, int, None] = None,
-) -> Union[np.ndarray, sparse.spmatrix]:
-    X = X.astype(dtype=np.float64)
-
-    if (
-        scale_factor != "median"
-        and not isinstance(scale_factor, (int, float))
-        and scale_factor is not None
-    ):
-        raise ValueError(f"'scale_factor' must be 'median' or numeric.")
-
-    if sparse.issparse(X):
-        lib_sizes = np.array(np.sum(X, axis=1))
-        lib_sizes[lib_sizes == 0] = 1
-        B = X.multiply(1 / lib_sizes)
-        # B = _an.normalize_spmat(X=X, normalization=1, dim=1)
-    else:
-        X = np.array(X)
-        lib_sizes = np.sum(X, axis=1, keepdims=True)
-        lib_sizes[lib_sizes == 0] = 1
-        B = X / lib_sizes
-        # B = _an.normalize_mat(X=X, normalization=1, dim=1)
-    if scale_factor == "median":
-        lib_sizes = np.sum(X, axis=1, keepdims=True)
-        B = B * np.median(lib_sizes)
-    elif isinstance(scale_factor, (int, float)):
-        B = B * scale_factor
-
-    if log_transform:
-        B = np.log1p(B)
-
-    if sparse.issparse(B):
-        B = sparse.csc_matrix(B)
-
-    return B
-
-
 def double_normalize(
     X: np.ndarray,
     log1p: Optional[bool] = True,

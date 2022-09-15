@@ -61,7 +61,7 @@ def annotate(
 
     G = sparse.csc_matrix(adata.obsp[network_key])
 
-    if algorithm == "parametric":
+    if algorithm == "nonparametric":
         marker_stats = _an.aggregate_genesets_weighted_enrichment_permutation(
             G,
             sub_S,
@@ -73,7 +73,7 @@ def annotate(
             post_alpha=post_alpha,
             perm_no=perm_no,
         )
-    elif algorithm == "nonparametric":
+    elif algorithm == "parametric":
         marker_stats = _an.aggregate_genesets_weighted_enrichment(
             G,
             sub_S,
@@ -174,26 +174,37 @@ def cluster(
 
 def infer_missing_labels(
     adata: AnnData,
-    algorithm: str = "lpa",
     initial_labels: Union[str, np.ndarray, list, pd.Series] = None,
+    algorithm: str = "lpa",
     lambda_param: int = 0,
     iters: int = 3,
     sig_threshold: float = 3,
+    thread_no: int = 0,
+    output_key: str = "inferred_labels",
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
 ) -> pd.Series:
 
     data_is_AnnData = isinstance(adata, AnnData)
     if not data_is_AnnData:
         raise Exception("adata must be an AnnData object")
 
+    adata = adata.copy() if copy else adata
+
     if isinstance(initial_labels, str):
         if initial_labels in adata.obs.keys():
-            labels = pd.DataFrame(adata.obs[initial_labels])
+            labels = pd.Series(
+                adata.obs[initial_labels].astype("str"),
+                index=adata.obs.index.values.astype("str"),
+            )
         else:
             raise ValueError("labels attribute %s not found" % initial_labels)
     else:
-        labels = pd.Series(initial_labels)
+        labels = pd.Series(
+            initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+        )
 
-    fixed_samples = np.where(labels != None)
+    fixed_samples = np.where(labels != "nan")[0]
 
     updated_labels = an.net.propagate(
         data=adata,
@@ -204,41 +215,65 @@ def infer_missing_labels(
         lambda_param=lambda_param,
         iters=iters,
         sig_threshold=sig_threshold,
+        thread_no=thread_no,
     )
 
-    return updated_labels
+    if return_raw or not data_is_AnnData:
+        return updated_labels
+    else:
+        adata.obsm[output_key] = updated_labels
+        return adata if copy else None
 
 
 def correct_labels(
     adata: AnnData,
-    algorithm: str = "lpa",
     initial_labels: Union[str, np.ndarray, list, pd.Series] = None,
+    algorithm: str = "lpa",
     lambda_param: int = 0,
     iters: int = 3,
     sig_threshold: float = 3,
+    thread_no: int = 0,
+    output_key: str = "inferred_labels",
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
 ) -> pd.Series:
 
     data_is_AnnData = isinstance(adata, AnnData)
     if not data_is_AnnData:
         raise Exception("adata must be an AnnData object")
 
+    if initial_labels is None:
+        raise Exception("initial_labels must be provided")
+
+    adata = adata.copy() if copy else adata
+
     if isinstance(initial_labels, str):
         if initial_labels in adata.obs.keys():
-            labels = pd.DataFrame(adata.obs[initial_labels])
+            labels = pd.Series(
+                adata.obs[initial_labels].astype("str"),
+                index=adata.obs.index.values.astype("str"),
+            )
         else:
             raise ValueError("labels attribute %s not found" % initial_labels)
     else:
-        labels = pd.Series(initial_labels)
+        labels = pd.Series(
+            initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+        )
 
     updated_labels = an.net.propagate(
         data=adata,
         labels=labels,
-        fixed_samples=None,
+        fixed_samples=[],
         return_raw=True,
         algorithm=algorithm,
         lambda_param=lambda_param,
         iters=iters,
         sig_threshold=sig_threshold,
+        thread_no=thread_no,
     )
 
-    return updated_labels
+    if return_raw or not data_is_AnnData:
+        return updated_labels
+    else:
+        adata.obsm[output_key] = updated_labels
+        return adata if copy else None

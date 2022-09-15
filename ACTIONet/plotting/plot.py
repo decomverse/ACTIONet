@@ -75,20 +75,17 @@ def plot_ACTIONet(
         adata.obsm["X_actionet3d"] = adata.obsm["ACTIONet3D"]
         basis = "actionet3d"
 
-    tmp_key = "_tmp_annotation_"
-    if annotation is not None and len(annotation) == adata.shape[0]:
-        x = annotation
-        if isinstance(x, pd.Series):
-            adata.obs[tmp_key] = pd.Series(x.values.astype("str"))
+    tmp_key = "__annotations__"
+    if annotation is not None:
+        if len(annotation) == adata.shape[0]:
+            adata.obs[tmp_key] = pd.Series(
+                annotation.astype("str"), index=adata.obs.index.values.astype("str")
+            )
         else:
-            adata.obs[tmp_key] = x
-    else:
-        x = adata.obs[annotation]
-        if isinstance(x, pd.Series):
-            y = pd.Series(x.values.astype("str"), index=adata.obs.index)
-        else:
-            y = x
-        adata.obs[tmp_key] = y
+            adata.obs[tmp_key] = pd.Series(
+                adata.obs[annotation].astype("str"),
+                index=adata.obs.index.values.astype("str"),
+            )
 
     p = sc.pl.embedding(
         adata,
