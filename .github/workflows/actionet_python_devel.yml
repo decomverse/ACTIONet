@@ -1,4 +1,4 @@
-name: mini-ACTIONet
+name: ACTIONet
 on:
   push:
     branches:
@@ -29,8 +29,9 @@ jobs:
       - name: Build and push latest docker
         uses: docker/build-push-action@v2
         with:
-          context: ./mini_docker
-          file: ./mini_docker/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
-          tags: actionet/python_devel:mini
+          tags: actionet/python_devel:latest
+	  
