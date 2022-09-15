@@ -57,11 +57,7 @@ def filter_adata(
     while previous_dims != adata.shape:
         previous_dims = adata.shape
 
-        if (
-            min_umis_per_cell is not None
-            or max_umis_per_cell is not None
-            or min_features_per_cell is not None
-        ):
+        if min_umis_per_cell is not None or max_umis_per_cell is not None or min_features_per_cell is not None:
             sc.pp.filter_cells(
                 adata,
                 min_counts=min_umis_per_cell,

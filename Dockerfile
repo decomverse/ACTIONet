@@ -1,33 +1,58 @@
-FROM "jupyter/scipy-notebook"
+FROM ubuntu:18.04
 
-USER root
-
-RUN apt-get update && apt-get install -yq --no-install-recommends libhdf5-dev libsuitesparse-dev libnss3 xvfb make g++ libglpk40
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    DEBIAN_FRONTEND=noninteractive apt-get -yq install --no-install-recommends \
+    wget ca-certificates libpq-dev gcc gcc-multilib g++ libsnappy-dev libhdf5-dev libsuitesparse-dev libnss3 xvfb make g++ libglpk40 git
 
 COPY environment.yaml environment.yaml
 
-RUN conda config --system --set auto_update_conda false && \
+# Install Miniconda with Python 3.9 into /opt
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh
+
+# Attach Conda to PATH
+ENV PATH /opt/conda/bin:$PATH
+
+# Enable Conda
+RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    conda config --system --set auto_update_conda false && \
     conda config --system --set show_channel_urls true && \
-    conda update --quiet --yes conda && \
-    conda env create -f environment.yaml
+    conda update --quiet --yes conda
 
-# Make RUN commands use the new environment:
-RUN echo "conda activate actionet" >> ~/.bashrc
-SHELL ["/bin/bash", "--login", "-c"]
 
-RUN jupyter notebook --generate-config -y  && \
-    conda clean --all -fy && \
+# Install ACTIONet environment
+RUN conda env create -f environment.yaml && \
     echo "conda activate actionet" >> ~/.bashrc && \
+    conda clean --all -fy && \
     rm -rf ~/.cache/pip
 
-# need to upgrade pip for faster dependency resolution
+# Attach Conda to PATH
+ENV PATH /opt/conda/envs/actionet/bin:$PATH
+
+# Clean up after apt and conda
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN conda clean -tipy
+
+# Set environment variables for Python
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+# upgrade pip for faster dep resolution
 RUN pip install --upgrade pip
+
+
+RUN pip install jupyter && \
+    jupyter notebook --generate-config -y
 
 # Copy the entire repo & install ACTIONet
 RUN mkdir ACTIONet
 COPY . ACTIONet
 WORKDIR ACTIONet
 RUN git submodule update --init
+RUN rm -rf build
 RUN python setup.py build
 RUN python setup.py develop
 

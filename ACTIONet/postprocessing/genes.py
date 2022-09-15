@@ -9,9 +9,7 @@ from typing_extensions import Literal
 import _ACTIONet as _an
 
 
-def impute_using_archetypes(
-    adata: AnnData, genes: list, archetypes_key: Optional[str] = "H_unified"
-) -> AnnData:
+def impute_using_archetypes(adata: AnnData, genes: list, archetypes_key: Optional[str] = "H_unified") -> AnnData:
 
     """
     Impute expression of genes by interpolating over archetype profile
@@ -34,10 +32,7 @@ def impute_using_archetypes(
     if archetypes_key not in adata.obsm.keys():
         raise ValueError(f"Did not find adata.obsm['{archetypes_key}'].")
     if f"{archetypes_key}_profile" not in adata.varm.keys():
-        raise ValueError(
-            f"Did not find adata.varm['{archetypes_key}_profile']. "
-            "Please run pp.compute_archetype_feature_specificity() first."
-        )
+        raise ValueError(f"Did not find adata.varm['{archetypes_key}_profile']. " "Please run pp.compute_archetype_feature_specificity() first.")
 
     genes = adata.obs.index.intersection(genes)
     Z = adata[:, genes].varm[f"{archetypes_key}_profile"]
@@ -57,10 +52,7 @@ def impute_using_network(
     n_iters: Optional[int] = 5,
 ) -> AnnData:
     if "ACTIONet" not in adata.obsp.keys():
-        raise ValueError(
-            f"Did not find adata.obsp['ACTIONet']. "
-            "Please run nt.build_network() first."
-        )
+        raise ValueError(f"Did not find adata.obsp['ACTIONet']. " "Please run nt.build_network() first.")
 
     genes = adata.var.index.intersection(genes)
     mask = adata.var.index.isin(genes)
@@ -78,9 +70,7 @@ def impute_using_network(
 
     # Network diffusion
     G = adata.obsp["ACTIONet"]
-    imputed = _an.compute_network_diffusion_fast(
-        G, csc_matrix(U), thread_no, alpha, n_iters
-    )
+    imputed = _an.compute_network_diffusion_fast(G, csc_matrix(U), thread_no, alpha, n_iters)
     np.nan_to_num(imputed, copy=False, nan=0.0)
 
     # Rescale the baseline expression of each gene

@@ -27,9 +27,7 @@ def get_plot_coors(
     if isinstance(data, AnnData):
         coors = data.obsm[coordinate_key]
         if coors.shape[1] < coor_dims:
-            err = "data in 'coordinate_key' has < {dims} dimensions".format(
-                dims=coor_dims
-            )
+            err = "data in 'coordinate_key' has < {dims} dimensions".format(dims=coor_dims)
             raise Exception(err)
     else:
         if not isinstance(data, (np.ndarray, sparse.spmatrix)):
@@ -60,9 +58,7 @@ def get_plot_labels(
 
     if isinstance(data, AnnData):
         # plot_labels = tl.__get_attr_or_split_idx(data, attr=label_attr, return_vec=True)
-        plot_labels = tl.get_data_or_split(
-            adata=data, attr=label_attr, to_return="data"
-        )
+        plot_labels = tl.get_data_or_split(adata=data, attr=label_attr, to_return="data")
     else:
         plot_labels = label_attr
 
@@ -91,9 +87,7 @@ def get_plot_colors(
         if isinstance(color_attr, (np.ndarray, pd.DataFrame)):
 
             if color_attr.shape[1] >= 3:
-                plot_colors = [
-                    rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])
-                ]
+                plot_colors = [rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])]
                 plot_colors = pd.Series(plot_colors, dtype=str)
             else:
                 raise Exception("invalid color_attr")
@@ -113,9 +107,7 @@ def get_plot_colors(
                 # plot_colors = tl.__get_attr_or_split_idx(
                 #         data, attr=color_attr, return_vec=True
                 #         )
-                plot_colors = tl.get_data_or_split(
-                    adata=data, attr=color_attr, to_return="data"
-                )
+                plot_colors = tl.get_data_or_split(adata=data, attr=color_attr, to_return="data")
 
         else:
             raise Exception("invalid color_attr")

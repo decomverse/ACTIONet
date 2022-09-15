@@ -149,12 +149,8 @@ def runACTIONMR(
 
     if return_raw or not data_is_AnnData:
         if return_W:
-            ACTIONMR_out["W_stacked"] = np.matmul(
-                X, ACTIONMR_out["C_stacked"].toarray()
-            )
-            ACTIONMR_out["W_unified"] = np.matmul(
-                X, ACTIONMR_out["C_unified"].toarray()
-            )
+            ACTIONMR_out["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
+            ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
         return ACTIONMR_out
     else:
         data.obsm["C_stacked"] = ACTIONMR_out["C_stacked"]
@@ -432,9 +428,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
 
         Z = self.components_
 
