@@ -4,12 +4,13 @@
 from typing import Union
 
 from anndata import AnnData
-from scipy.sparse import issparse, spmatrix, csc_matrix
+from scipy.sparse import csc_matrix, issparse, spmatrix
 from sklearn._config import config_context
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
+
 from .utils import *
 
 
@@ -71,7 +72,7 @@ def runACTIONMR(
     Returns
     -------
     Union[AnnData, dict]
-        Result of archetypal analysis. 
+        Result of archetypal analysis.
         If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
             "W_unified": Multi-resolution Archetypal matrix,
             "H_unified": Multi-resolution Loading matrix,
@@ -205,9 +206,9 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
     unification_th : float between [0, 1], default=0
         Amount of redundancy that is tolerated in the unified archetypes. Higher value results in larger number of archetypes
-        
+
     thread_no: int, default=0
-        Number of threads to use  
+        Number of threads to use
 
     Attributes
     ----------
@@ -237,7 +238,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
     assigned_archetype: array of size n_samples
         Discretized sample to archetype assignments
 
-        
+
     See Also
     --------
     SPA : Successive Projection Algorithm to solve convex NMF
@@ -317,7 +318,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             and `n_features` is the number of features.
 
         y : Ignored
-            Not used, present for API consistency by convention.         
+            Not used, present for API consistency by convention.
 
         Returns
         -------
@@ -369,7 +370,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             Computed from stacked_loadings after the unification process to retain nonredundant archetypes.
 
         B: ndarray of shape (n_mr_components, n_samples)
-            Multi-resolution coefficient matrix. 
+            Multi-resolution coefficient matrix.
             n_mr_components is the estimated # of multi-resolution archetypes (based on unification_th)
             Computed from stacked_coeffs after the unification process to retain nonredundant archetypes.
 

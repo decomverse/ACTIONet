@@ -3,7 +3,6 @@ from typing import Optional, Union
 import pandas as pd
 from anndata import AnnData
 
-
 # def __get_attr_or_split_idx(
 #         adata: AnnData,
 #         attr: Union[str, list, pd.Series],
@@ -52,9 +51,9 @@ from anndata import AnnData
 
 
 def __get_feature_vec(
-        adata: AnnData,
-        features_use: Union[str, list, pd.Series, None] = None,
-        ) -> Union[list, dict]:
+    adata: AnnData,
+    features_use: Union[str, list, pd.Series, None] = None,
+) -> Union[list, dict]:
     if features_use is None:
         features_use = adata.var_names
     else:
@@ -65,10 +64,6 @@ def __get_feature_vec(
         #         d=1
         #         )
         features_use = get_data_or_split(
-                adata=adata,
-                attr=features_use,
-                groups_use=None,
-                to_return="data",
-                d=1
-                )
+            adata=adata, attr=features_use, groups_use=None, to_return="data", d=1
+        )
     return features_use

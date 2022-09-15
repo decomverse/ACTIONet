@@ -30,7 +30,7 @@
 #  BLA_STATIC  if set on this determines what kind of linkage we do (static)
 #  BLA_VENDOR  if set checks only the specified vendor, if not set checks
 #     all the possibilities
-#  BLAS_VENDOR_FOUND stores the BLAS vendor found 
+#  BLAS_VENDOR_FOUND stores the BLAS vendor found
 #  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 # The user can give specific paths where to find the libraries adding cmake
 # options at configure (ex: cmake path/to/project -DBLAS_DIR=path/to/blas):
@@ -832,7 +832,7 @@ if (BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
   if (BLAS_LIBRARIES AND NOT BLAS_VENDOR_FOUND)
       set (BLAS_VENDOR_FOUND "DXML")
   endif()
-  
+
 endif (BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
 # BLAS in Sun Performance library?
 if (BLA_VENDOR STREQUAL "SunPerf" OR BLA_VENDOR STREQUAL "All")

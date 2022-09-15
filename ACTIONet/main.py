@@ -2,13 +2,14 @@ from typing import Optional
 
 import numpy as np
 from anndata import AnnData
+from scipy import sparse
 
-from . import postprocessing as po
+import _ACTIONet as _an
+
 from . import decomposition as decomp
 from . import network as net
+from . import postprocessing as po
 from . import tools as utils
-from scipy import sparse
-import _ACTIONet as _an
 
 
 def run_ACTIONet(

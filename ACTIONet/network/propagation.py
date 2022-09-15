@@ -9,6 +9,7 @@ from scipy import sparse
 
 import _ACTIONet as _an
 
+
 def propagate(
     data: Union[AnnData, np.ndarray, sparse.spmatrix],
     labels: Optional[Union[np.ndarray, list, pd.Series]] = None,
@@ -39,7 +40,7 @@ def propagate(
     lambda_param: int
         LPA lambda parameter, default = 0
     iters: int
-        LPA number of iterations 
+        LPA number of iterations
     sig_threshold: float
         LPA significance threshold (z-score) for flipping labels, default = 3
     fixed_samples: Optional[Union[np.ndarray, list, pd.Series]]
@@ -123,4 +124,3 @@ def propagate(
     else:
         adata.obs[updated_labels_key] = updated_labels
         return adata if copy else None
-

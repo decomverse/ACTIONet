@@ -119,7 +119,7 @@ def unify_archetypes(
     resolution : float Leiden resolution to cluster backbone graph, default=1.0
         Larger values result in potentially more unified archetypes.
     min_cluster_size : int Minimum number of archetypes in each archetype cluster, default=3
-        Smaller values allow higher sensitivity at the cost of noisy archetypes.        
+        Smaller values allow higher sensitivity at the cost of noisy archetypes.
     thread_no:
         Number of threads. Defaults to number of threads available - 2.
     copy

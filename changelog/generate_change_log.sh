@@ -8,8 +8,7 @@ for i in `seq 1 $((num_elements-1))`
 do
     next_release=$i
     previous_release=$((i-1))
-    
+
     python release_notes.py ${releases[$previous_release]} ${releases[$next_release]} >> ../docs/CHANGELOG.rst
     echo "">> ../docs/CHANGELOG.rst
 done
-

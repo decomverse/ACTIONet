@@ -36,7 +36,9 @@ def main():
         if match:
             pr_num = match.group(1).lstrip("#")
             title = re.sub(r"\(#\d+\)", "", commit)
-            print(f"* `{pr_num} <https://github.com/insitro/TARDIS/pull/{pr_num}>`_ - {title}")
+            print(
+                f"* `{pr_num} <https://github.com/insitro/TARDIS/pull/{pr_num}>`_ - {title}"
+            )
         else:
             print(f"* {commit}")
 

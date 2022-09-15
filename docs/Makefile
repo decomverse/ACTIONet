@@ -17,4 +17,3 @@ help:
     sphinx-apidoc -o ACTIONet ../ACTIONet
     sphinx-apidoc -o Tutorials ../Tutorials
     @$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-

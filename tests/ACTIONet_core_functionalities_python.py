@@ -1,7 +1,7 @@
-from ACTIONet import *
-
 # Imports PBMC 3k dataset from scanpy
 import scanpy as sc
+
+from ACTIONet import *
 
 pbmc = sc.datasets.pbmc3k_processed()
 ACE = pbmc
