@@ -24,9 +24,7 @@ def main():
     today = date.today().strftime("%B %d, %Y")
     print(f":Date: {today}\n")
 
-    merge_base = subprocess.check_output(
-        f"git merge-base {args.current_release_tag} origin/master", shell=True
-    ).decode("utf8")
+    merge_base = subprocess.check_output(f"git merge-base {args.current_release_tag} origin/master", shell=True).decode("utf8")
     commits = subprocess.check_output(
         f"git --no-pager log --pretty='%s' --abbrev-commit {merge_base.strip()}..origin/master",
         shell=True,
@@ -36,9 +34,7 @@ def main():
         if match:
             pr_num = match.group(1).lstrip("#")
             title = re.sub(r"\(#\d+\)", "", commit)
-            print(
-                f"* `{pr_num} <https://github.com/insitro/TARDIS/pull/{pr_num}>`_ - {title}"
-            )
+            print(f"* `{pr_num} <https://github.com/insitro/TARDIS/pull/{pr_num}>`_ - {title}")
         else:
             print(f"* {commit}")
 

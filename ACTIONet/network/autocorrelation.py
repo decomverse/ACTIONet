@@ -135,42 +135,16 @@ def compute_phi(A, labels, s0, s1, s2):
     Q3 = sum(1 / np.power(pvec, 3))
     Q22 = np.sum(np.expand_dims(1 / pvec, axis=1) * np.expand_dims(1 / pvec, axis=0))
     E1 = (np.power(n, 2) * Q22 - n * Q3) / (n * (n - 1))
-    E2 = (
-        4 * np.power(n, 3) * Q1
-        - 4 * np.power(n, 3) * k * Q1
-        + np.power(n, 3) * np.power(k, 2) * Q1
-        - 2 * (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
-        + 2 * n * Q3
-        - np.power(n, 2) * Q22
-    )
+    E2 = 4 * np.power(n, 3) * Q1 - 4 * np.power(n, 3) * k * Q1 + np.power(n, 3) * np.power(k, 2) * Q1 - 2 * (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2) + 2 * n * Q3 - np.power(n, 2) * Q22
     E2 = E2 / (n * (n - 1) * (n - 2))
-    A1 = (
-        4 * np.power(n, 4) * np.power(k, 2)
-        - 4 * np.power(n, 4) * np.power(k, 3)
-        + np.power(n, 4) * np.power(k, 4)
-        - (2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1)
-    )
-    A2 = (
-        4 * np.power(n, 3) * Q1
-        - 4 * np.power(n, 3) * k * Q1
-        + np.power(n, 3) * np.power(k, 2) * Q1
-        - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
-    )
+    A1 = 4 * np.power(n, 4) * np.power(k, 2) - 4 * np.power(n, 4) * np.power(k, 3) + np.power(n, 4) * np.power(k, 4) - (2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1)
+    A2 = 4 * np.power(n, 3) * Q1 - 4 * np.power(n, 3) * k * Q1 + np.power(n, 3) * np.power(k, 2) * Q1 - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
     Apart = A1 - 2 * A2
-    B1 = (
-        4 * np.power(n, 3) * Q1
-        - 4 * np.power(n, 3) * k * Q1
-        + np.power(n, 3) * np.power(k, 2) * Q1
-        - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
-    )
+    B1 = 4 * np.power(n, 3) * Q1 - 4 * np.power(n, 3) * k * Q1 + np.power(n, 3) * np.power(k, 2) * Q1 - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
     B2 = 2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2 - n * Q3
     B3 = np.power(n, 2) * Q22 - n * Q3
     Bpart = B1 - B2 - B3
-    C1 = (
-        2 * np.power(n, 3) * k * Q1
-        - np.power(n, 3) * np.power(k, 2) * Q1
-        - np.power(n, 2) * Q22
-    )
+    C1 = 2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1 - np.power(n, 2) * Q22
     C2 = 2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2 - n * Q3
     Cpart = C1 - 2 * C2
     E3 = (Apart - 2 * Bpart - Cpart) / (n * (n - 1) * (n - 2) * (n - 3))
@@ -179,13 +153,7 @@ def compute_phi(A, labels, s0, s1, s2):
     v_j = labels[A.col]
     p_i = np.asarray(pvec[v_i])
     p_j = np.asarray(pvec[v_j])
-    rawphi = int(
-        sum(
-            w
-            * (2 * (v_i.reset_index(drop=True) == v_j.reset_index(drop=True)) - 1)
-            / (p_i * p_j)
-        )
-    )
+    rawphi = int(sum(w * (2 * (v_i.reset_index(drop=True) == v_j.reset_index(drop=True)) - 1) / (p_i * p_j)))
     mean_rawphi = m1_rawphi
     var_rawphi = m2_rawphi - np.power(mean_rawphi, 2)
     phi_z = (rawphi - mean_rawphi) / np.sqrt(var_rawphi)

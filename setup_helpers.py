@@ -331,10 +331,7 @@ def intree_extensions(paths, package_dir=None):
                         qualified_name = prefix + "." + qualified_name
                     exts.append(Pybind11Extension(qualified_name, [path]))
             if not found:
-                raise ValueError(
-                    "path {} is not a child of any of the directories listed "
-                    "in 'package_dir' ({})".format(path, package_dir)
-                )
+                raise ValueError("path {} is not a child of any of the directories listed " "in 'package_dir' ({})".format(path, package_dir))
     return exts
 
 
@@ -423,9 +420,7 @@ class ParallelCompile(object):
         ):
 
             # These lines are directly from distutils.ccompiler.CCompiler
-            macros, objects, extra_postargs, pp_opts, build = compiler._setup_compile(
-                output_dir, macros, include_dirs, sources, depends, extra_postargs
-            )
+            macros, objects, extra_postargs, pp_opts, build = compiler._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
             cc_args = compiler._get_cc_args(pp_opts, debug, extra_preargs)
 
             # The number of threads; start with default.

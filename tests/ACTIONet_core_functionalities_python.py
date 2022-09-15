@@ -39,6 +39,4 @@ from sklearn.metrics.cluster import normalized_mutual_info_score
 
 normalized_mutual_info_score(celltypes, ACE.obs["assigned_archetypes"])
 
-ACE.write(
-    "/home/shahin/Dropbox/Projects/SingleCell/repositories/ACTION/meta_repo_python/tests/ACTIONet_out_python.h5ad"
-)
+ACE.write("/home/shahin/Dropbox/Projects/SingleCell/repositories/ACTION/meta_repo_python/tests/ACTIONet_out_python.h5ad")

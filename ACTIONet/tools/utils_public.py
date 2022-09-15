@@ -60,11 +60,7 @@ def get_data_or_split(
 ) -> Union[list, dict]:
     to_return = to_return.lower()
     if to_return not in ["data", "levels", "split"]:
-        raise ValueError(
-            "'to_return={type}' must be 'data', 'levels', or 'split'.".format(
-                type=to_return
-            )
-        )
+        raise ValueError("'to_return={type}' must be 'data', 'levels', or 'split'.".format(type=to_return))
 
     if d not in [0, 1]:
         raise ValueError("d must be dim (0 or 1) of adata")
@@ -77,9 +73,7 @@ def get_data_or_split(
 
     else:
         if len(attr) != adata.shape[d]:
-            raise ValueError(
-                "len(attr) does not match .shape[{dim:d}] of adata".format(dim=d)
-            )
+            raise ValueError("len(attr) does not match .shape[{dim:d}] of adata".format(dim=d))
         data_vec = attr
 
     if data_vec is None:
@@ -117,11 +111,7 @@ def get_data_or_split(
 
 
 def rand_suffix(N):
-    str_out = "".join(
-        random.choices(
-            string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N
-        )
-    )
+    str_out = "".join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N))
     return str_out
 
 
@@ -145,11 +135,7 @@ def normalize_matrix(
 ) -> Union[np.ndarray, sparse.spmatrix]:
     X = X.astype(dtype=np.float64)
 
-    if (
-        scale_factor != "median"
-        and not isinstance(scale_factor, (int, float))
-        and scale_factor is not None
-    ):
+    if scale_factor != "median" and not isinstance(scale_factor, (int, float)) and scale_factor is not None:
         raise ValueError(f"'scale_factor' must be 'median' or numeric.")
 
     if sparse.issparse(X):

@@ -61,9 +61,7 @@ def centrality(
         "localized_coreness",
         "localized_pagerank",
     ]:
-        raise ValueError(
-            "'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'."
-        )
+        raise ValueError("'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'.")
 
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:

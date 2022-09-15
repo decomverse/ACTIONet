@@ -36,20 +36,20 @@ install_env:	source_conda
 	$(SOURCE_CONDA) && conda deactivate && conda env create -f environment.yaml
 
 install:	update_env
-	$(SOURCE_CONDA) && conda activate actionet
-	git submodule update --init
-	python setup.py build
+	$(SOURCE_CONDA) && conda activate actionet && \
+	git submodule update --init && \
+	python setup.py build && \
 	python setup.py develop
 
 develop:	update_env
-	$(SOURCE_CONDA) && conda activate actionet
-	git submodule update --init
-	python setup.py build
+	$(SOURCE_CONDA) && conda activate actionet && \
+	git submodule update --init && \
+	python setup.py build && \
 	python setup.py develop
 
 clean:
-	$(SOURCE_CONDA) && conda activate actionet
-	python setup.py clean --all
+	$(SOURCE_CONDA) && conda activate actionet && python setup.py clean --all
+	rm -rf build
 
 ## Testing
 .PHONY: pytest

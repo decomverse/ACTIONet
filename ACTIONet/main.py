@@ -63,17 +63,13 @@ def run_ACTIONet(
         if "default_reduction" in adata.uns["metadata"].keys():
             reduction_key = adata.uns["metadata"]["default_reduction"]
         else:
-            print(
-                "reduction_slot is None and 'default_reduction' does  not exist in adata.uns['metadata']. Reseting to `ACTION` as default"
-            )
+            print("reduction_slot is None and 'default_reduction' does  not exist in adata.uns['metadata']. Reseting to `ACTION` as default")
             reduction_key = "ACTION"
 
     if reduction_key not in adata.obsm.keys():
         raise ValueError("Did not find adata.obsm['" + reduction_key + "']. ")
 
-    utils.normalize_reduction(
-        adata=adata, reduction_key=reduction_key, normalization=normalization
-    )
+    utils.normalize_reduction(adata=adata, reduction_key=reduction_key, normalization=normalization)
 
     reduction_key = reduction_key + "_normalized"
 

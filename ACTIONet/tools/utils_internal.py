@@ -63,7 +63,5 @@ def __get_feature_vec(
         #         return_vec=True,
         #         d=1
         #         )
-        features_use = get_data_or_split(
-            adata=adata, attr=features_use, groups_use=None, to_return="data", d=1
-        )
+        features_use = get_data_or_split(adata=adata, attr=features_use, groups_use=None, to_return="data", d=1)
     return features_use
