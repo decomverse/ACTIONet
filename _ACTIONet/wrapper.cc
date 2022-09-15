@@ -564,18 +564,24 @@ arma::Mat<npdouble> compute_network_diffusion_approx(
   return (X);
 }
 
-arma::vec run_LPA(arma::SpMat<npdouble> &G, arma::vec labels, double lambda = 1,
-                  int iters = 3, double sig_threshold = 3,
-                  arma::vec fixed_labels_ = arma::vec()) {
-  arma::uvec fixed_labels_vec;
-  if (!fixed_labels_.is_empty()) {
-    arma::uvec fixed_labels_vec(fixed_labels_.size());
-    for (int i = 0; i < fixed_labels_.size(); i++) {
-      fixed_labels_vec(i) = fixed_labels_(i);
-    }
-  }
+arma::vec run_LPA(arma::SpMat<npdouble> &G, arma::vec labels,
+                  arma::vec fixed_labels, double lambda_param, int iters,
+                  double sig_threshold, int thread_no = 0) {
+  /*
+arma::uvec fixed_labels_vec;
+
+if (!fixed_labels.is_empty()) {
+arma::uvec fixed_labels_vec(fixed_labels_.size());
+for (int i = 0; i < fixed_labels_.size(); i++) {
+fixed_labels_vec(i) = fixed_labels_(i);
+}
+}
+*/
+  arma::uvec fixed_labels_uvec = conv_to<uvec>::from(fixed_labels);
+
   arma::vec new_labels =
-      ACTIONet::LPA(G, labels, lambda, iters, sig_threshold, fixed_labels_vec);
+      ACTIONet::LPA(G, labels, lambda_param, iters, sig_threshold,
+                    fixed_labels_uvec, thread_no);
   return (new_labels);
 }
 
@@ -960,8 +966,9 @@ PYBIND11_MODULE(_ACTIONet, m) {
 
   m.def("run_LPA", &run_LPA,
         "Run label prepagation on a given set of known labels", py::arg("G"),
-        py::arg("labels"), py::arg("lambda") = 1, py::arg("iters") = 3,
-        py::arg("sig_threshold") = 3, py::arg("fixed_labels_") = arma::vec());
+        py::arg("labels"), py::arg("fixed_labels") = arma::vec(),
+        py::arg("lambda_param") = 1, py::arg("iters") = 3,
+        py::arg("sig_threshold") = 3, py::arg("thread_no") = 0);
 
   m.def("compute_archetype_feature_specificity_bin",
         &compute_archetype_feature_specificity_bin,

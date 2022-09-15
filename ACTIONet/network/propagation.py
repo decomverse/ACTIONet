@@ -9,17 +9,19 @@ from scipy import sparse
 
 import _ACTIONet as _an
 
+
 def propagate(
     data: Union[AnnData, np.ndarray, sparse.spmatrix],
     labels: Optional[Union[np.ndarray, list, pd.Series]] = None,
     algorithm: str = "lpa",
-    lambda_param: int = 0,
+    lambda_param: float = 1.0,
     iters: int = 3,
-    sig_threshold: float = 3,
-    fixed_samples: Optional[Union[np.ndarray, list, pd.Series]] = None,
+    sig_threshold: float = 3.0,
+    fixed_samples: Optional[Union[np.ndarray, list, pd.Series]] = [],
     labels_key: Optional[str] = "assigned_archetype",
     net_key: Optional[str] = "ACTIONet",
     updated_labels_key: Optional[str] = None,
+    thread_no: int = 0,
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False,
 ) -> Union[AnnData, np.ndarray, None]:
@@ -107,12 +109,13 @@ def propagate(
             raise ValueError("'annotations' cannot be None for personalized_coreness")
 
         updated_labels_int = _an.run_LPA(
-            G,
-            labels_int,
+            G=G,
+            labels=labels_int,
             lambda_param=lambda_param,
             iters=iters,
             sig_threshold=sig_threshold,
-            fixed_labels_=fixed_samples,
+            fixed_labels=fixed_samples,
+            thread_no=thread_no,
         )
         updated_labels_int = updated_labels_int.astype(int)
         updated_labels = uniques.values[updated_labels_int]

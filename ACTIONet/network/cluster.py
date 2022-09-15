@@ -10,7 +10,7 @@ import _ACTIONet as _an
 
 def cluster(
     data: Union[AnnData, np.ndarray, sparse.spmatrix],
-    algorithm: str = "Leiden",
+    algorithm: str = "leiden",
     resolution: Optional[float] = 1.0,
     initial_clusters: Optional[Union[np.ndarray, list, pd.Series]] = None,
     initial_clusters_key: Optional[str] = "assigned_archetype",

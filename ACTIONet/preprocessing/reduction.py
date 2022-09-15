@@ -5,6 +5,7 @@ from anndata import AnnData
 from scipy.sparse import issparse, spmatrix
 from typing_extensions import Literal
 import scanpy as sc
+import harmonypy as hm
 
 import _ACTIONet as _an
 
@@ -126,7 +127,7 @@ def reduce_and_batch_correct_adata_Harmony(
     data: Union[AnnData, np.ndarray, spmatrix],
     batch_key: str,
     dim: Optional[int] = 50,
-    max_iter: Optional[int] = 10,
+    max_iter: Optional[int] = 1000,
     layer_key: Optional[str] = None,
     reduction_key: Optional[str] = "ACTION",
     batch_corrected_reduction_key: Optional[str] = "Harmony",
@@ -177,12 +178,17 @@ def reduce_and_batch_correct_adata_Harmony(
         return_raw=False,
         copy=False,
     )
-    sc.external.pp.harmony_integrate(
-        adata=data,
-        key=batch_key,
-        basis=reduction_key,
-        adjusted_basis=batch_corrected_reduction_key,
-    )
+
+    data_mat = data.obsm[reduction_key]
+    meta_data = data.obs
+    vars_use = batch_key
+    eps = 0.01 / np.sqrt(data.shape[1])
+    data_mat[data_mat == 0] = eps
+
+    hm_out = hm.run_harmony(data_mat, meta_data, vars_use)
+    Z_corr = hm_out.Z_corr.T
+
+    data.obsm[batch_corrected_reduction_key] = Z_corr
 
     data.uns["metadata"]["default_reduction"] = batch_corrected_reduction_key
 

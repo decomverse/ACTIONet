@@ -1,8 +1,8 @@
-python>=3.9
+#python>=3.9
 cmake
 anndata==0.8.0
 scanpy==1.9.1
-h5py==2.10.0
+h5py
 adjustText>=0.7.3
 natsort>=7.0.1
 numpy>=1.19.2
