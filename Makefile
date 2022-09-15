@@ -26,25 +26,23 @@ lint:	install_pre_commit
 	pre-commit run --all-files
 
 ## Installation
-.PHONY: update_env install_env install install_dev reinstall resintall_dev
+.PHONY: update_env install_env install
 update_env:
-	$(SOURCE_CONDA) && conda env update -f environment.yaml || conda env create -f environment.yaml
+	conda env update -f environment.yaml || conda env create -f environment.yaml
 
 install_env:
-	$(SOURCE_CONDA) && conda deactivate && conda env remove -n actionet
-	$(SOURCE_CONDA) && conda deactivate && conda env create -f environment.yaml
+	conda deactivate && conda env remove -n actionet
+	conda deactivate && conda env create -f environment.yaml
 
-install: install_env
-	$(SOURCE_CONDA) && conda activate actionet && pip install --find-links https://conda.aws.insitro.com/pypi/ actionet==$(CURR_VERSION)
+install:	update_env
+	$(SOURCE_CONDA) && conda activate actionet
+	python setup.py build
+	python setup.py develop
 
-install_dev:	install_env
-	$(SOURCE_CONDA) && conda activate actionet && pip install --find-links https://conda.aws.insitro.com/pypi/ -e .
-
-reinstall:	update_env
-	$(SOURCE_CONDA) && conda activate actionet && pip install --find-links https://conda.aws.insitro.com/pypi/ actionet==$(CURR_VERSION)
-
-reinstall_dev:	update_env
-	$(SOURCE_CONDA) && conda activate actionet && pip install --find-links https://conda.aws.insitro.com/pypi/ -e .
+develop:	update_env
+	$(SOURCE_CONDA) && conda activate actionet
+	python setup.py build
+	python setup.py develop
 
 ## Testing
 .PHONY: pytest

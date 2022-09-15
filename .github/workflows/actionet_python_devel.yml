@@ -34,4 +34,3 @@ jobs:
           push: true
           build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
           tags: actionet/python_devel:latest
-	  
