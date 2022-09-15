@@ -9,14 +9,11 @@ COPY environment.yaml environment.yaml
 RUN conda config --system --set auto_update_conda false && \
     conda config --system --set show_channel_urls true && \
     conda update --quiet --yes conda && \
-    conda env create -f environment.yml  && \
-    jupyter notebook --generate-config && \
+    conda env create -f environment.yaml
+RUN jupyter notebook --generate-config -y  && \
     conda clean --all -fy && \
     echo "conda activate actionet" >> ~/.bashrc && \
     rm -rf ~/.cache/pip
-    
-RUN python3 -m pip install types-setuptools
-RUN mypy --install-types
 
 # need to upgrade pip for faster dependency resolution
 RUN pip install --upgrade pip
