@@ -21,7 +21,10 @@ RUN pip install --upgrade pip
 # Copy the entire repo & install ACTIONet
 RUN mkdir ACTIONet
 COPY . ACTIONet
-RUN pip install -e ACTIONet
+WORKDIR ACTIONet
+RUN git submodule update --init
+RUN python setup.py build
+RUN python setup.py develop
 
 EXPOSE 8888
 CMD screen -d -m bash -c "jupyter-lab --ip=0.0.0.0 --no-browser --allow-root --LabApp.token='' --LabApp.disable_check_xsrf=True"
