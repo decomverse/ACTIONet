@@ -14,16 +14,16 @@ import _ACTIONet as _an
 
 
 def runAA(
-        data: Union[AnnData, np.ndarray, spmatrix],
-        dim: Optional[int] = 10,
-        max_iter: Optional[int] = 100,
-        min_delta: Optional[float] = 1e-100,
-        Z: Optional[np.ndarray] = None,
-        layer_key: Optional[str] = None,
-        decomp_key_prefix: Optional[str] = "AA",
-        return_raw: Optional[bool] = False,
-        copy: Optional[bool] = False,
-        ) -> Union[AnnData, dict]:
+    data: Union[AnnData, np.ndarray, spmatrix],
+    dim: Optional[int] = 10,
+    max_iter: Optional[int] = 100,
+    min_delta: Optional[float] = 1e-100,
+    Z: Optional[np.ndarray] = None,
+    layer_key: Optional[str] = None,
+    decomp_key_prefix: Optional[str] = "AA",
+    return_raw: Optional[bool] = False,
+    copy: Optional[bool] = False,
+) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
 
     Parameters
@@ -50,7 +50,7 @@ def runAA(
     Returns
     -------
     Union[AnnData, dict]
-        Result of archetypal analysis. 
+        Result of archetypal analysis.
         If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
             "W": Archetypal matrix,
             "H": Loading matrix,
@@ -248,13 +248,13 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
             Archetype Matrix
         """
         out = runAA(
-                data=X.T,
-                dim=self.n_components,
-                Z=Z,
-                max_iter=self.n_iter,
-                min_delta=self.tol,
-                return_raw=True,
-                )
+            data=X.T,
+            dim=self.n_components,
+            Z=Z,
+            max_iter=self.n_iter,
+            min_delta=self.tol,
+            return_raw=True,
+        )
 
         B, Z, A = out["C"].T, out["W"].T, out["H"].T
 
@@ -277,8 +277,8 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
 
         check_is_fitted(self)
         X = self._validate_data(
-                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-                )
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         Z = self.components_
 

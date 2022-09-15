@@ -1,10 +1,10 @@
 from typing import Optional
-from typing_extensions import Literal
 
 import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy.sparse import csc_matrix
+from typing_extensions import Literal
 
 import _ACTIONet as _an
 

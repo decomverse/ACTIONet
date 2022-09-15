@@ -14,15 +14,15 @@ import _ACTIONet as _an
 
 
 def runACTION(
-        data: Union[AnnData, np.ndarray, spmatrix],
-        reduction_key: Optional[str] = "ACTION",
-        depth: Optional[int] = 10,
-        thread_no: Optional[int] = 0,
-        max_it: Optional[int] = 50,
-        min_delta: Optional[float] = 1e-300,
-        return_raw: Optional[bool] = False,
-        copy: Optional[bool] = False,
-        ) -> Union[AnnData, dict]:
+    data: Union[AnnData, np.ndarray, spmatrix],
+    reduction_key: Optional[str] = "ACTION",
+    depth: Optional[int] = 10,
+    thread_no: Optional[int] = 0,
+    max_it: Optional[int] = 50,
+    min_delta: Optional[float] = 1e-300,
+    return_raw: Optional[bool] = False,
+    copy: Optional[bool] = False,
+) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
 
     Parameters
@@ -71,18 +71,18 @@ def runACTION(
     X = X.T.astype(dtype=np.float64)
 
     ACTION_out = _an.run_ACTION(
-            S_r=X,
-            k_min=depth,
-            k_max=depth,
-            thread_no=thread_no,
-            max_it=max_it,
-            min_delta=min_delta
-            )
+        S_r=X,
+        k_min=depth,
+        k_max=depth,
+        thread_no=thread_no,
+        max_it=max_it,
+        min_delta=min_delta,
+    )
 
     ACTION_out = {
         "C": ACTION_out["C"][depth - 1],
         "H": ACTION_out["H"][depth - 1],
-        }
+    }
     ACTION_out["W"] = np.matmul(X, ACTION_out["C"])
 
     if return_raw or not data_is_AnnData:
@@ -244,15 +244,15 @@ class ACTION(TransformerMixin, BaseEstimator):
         """
 
         out = runACTION(
-                data=X,
-                reduction_key=None,
-                depth=self.n_components,
-                thread_no=self.thread_no,
-                max_it=self.max_it,
-                min_delta=self.min_delta,
-                return_raw=True,
-                copy=False
-                )
+            data=X,
+            reduction_key=None,
+            depth=self.n_components,
+            thread_no=self.thread_no,
+            max_it=self.max_it,
+            min_delta=self.min_delta,
+            return_raw=True,
+            copy=False,
+        )
 
         B, A, Z = out["C"].T, out["H"].T, out["W"].T
 
@@ -275,8 +275,8 @@ class ACTION(TransformerMixin, BaseEstimator):
 
         check_is_fitted(self)
         X = self._validate_data(
-                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-                )
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         Z = self.components_
 

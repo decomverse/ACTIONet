@@ -1,11 +1,11 @@
 from pickle import TRUE
 from typing import Optional, Union
-from typing_extensions import Literal
 
 import numpy as np
 import pandas as pd
-from scipy import sparse
 from anndata import AnnData
+from scipy import sparse
+from typing_extensions import Literal
 
 import _ACTIONet as _an
 import ACTIONet as an

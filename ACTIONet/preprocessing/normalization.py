@@ -1,12 +1,13 @@
+import warnings
 from typing import Optional, Union
 
-from anndata import AnnData
 import numpy as np
+from anndata import AnnData
 from scipy import sparse
-import warnings
+
+import _ACTIONet as _an
 
 from .. import tools as tl
-import _ACTIONet as _an
 
 
 def normalize_matrix(

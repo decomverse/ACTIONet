@@ -126,7 +126,9 @@ def rand_suffix(N):
 
 
 def scale_matrix(
-    X: np.ndarray, center: Optional[bool] = True, scale: Optional[bool] = True,
+    X: np.ndarray,
+    center: Optional[bool] = True,
+    scale: Optional[bool] = True,
 ):
     X = X.astype(dtype=np.float64)
     if center:
@@ -200,4 +202,3 @@ def double_normalize(
     X_scaled = D_r @ X @ D_c
     X_scaled = X_scaled / np.max(X_scaled)
     return X_scaled
-

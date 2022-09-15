@@ -1,14 +1,14 @@
-from typing import Optional, Union, Literal, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from anndata import AnnData
 from scipy import sparse
-import pandas as pd
-
 
 import _ACTIONet as _an
-from .. import tools as tl
+
 from .. import network as net
+from .. import tools as tl
 
 
 def __compute_feature_specificity(S, H, thread_no=0):
@@ -34,7 +34,7 @@ def feature_specificity(
     return_raw: Optional[bool] = False,
 ) -> Union[AnnData, dict, None]:
     """Computes Feature (i.e., gene) specificity of archetypes \
-    Uses Archetype footprints to estimate markers (soft clustering) 
+    Uses Archetype footprints to estimate markers (soft clustering)
     :param adata: AnnData object possibly containing '.layers["layer_key"]' and '.obsm["footprint_key"]'.
     :param S: `n_obs` × `n_vars` gene expression matrix. \
         Required if 'adata=None', otherwise retrieved from '.layers["layer_key"]' or '.X' if 'layer_key=None'.
@@ -129,7 +129,9 @@ def annotate(
 
         logPvals = assessment_out["logPvals"].T
         Enrichment = pd.DataFrame(
-            logPvals, columns=markers.keys(), index=np.arange(1, logPvals.shape[0] + 1),
+            logPvals,
+            columns=markers.keys(),
+            index=np.arange(1, logPvals.shape[0] + 1),
         )
         annotations = pd.Series(markers.keys())
         idx = np.argmax(logPvals, axis=1)

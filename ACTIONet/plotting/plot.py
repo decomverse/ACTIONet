@@ -1,34 +1,30 @@
 import re
-from typing import (
-    Union,
-    Optional,
-    Sequence,
-    Any,
-    Mapping,
-    Tuple,
-)
+from random import sample
+from typing import Any, Mapping, Optional, Sequence, Tuple, Union
+
+import numpy as np
+import pandas as pd
+import plotly as pl
+import plotly.express as px
+import plotly.graph_objs as go
+import plotly.io as pio
+import scanpy as sc
+from adjustText import adjust_text
+from anndata import AnnData
 from cycler import Cycler
 from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from matplotlib.figure import Figure
-import plotly as pl
-import plotly.io as pio
-import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-import plotly.express as px
-import numpy as np
-from adjustText import adjust_text
-from anndata import AnnData
 from scipy import sparse
-import pandas as pd
-from random import sample
-from .color import *
-from .palettes import palette_default
-from ..tools import utils_public as ut
-from . import utils as pu
+
 import _ACTIONet as _an
 import ACTIONet.network as net
-import scanpy as sc
+
+from ..tools import utils_public as ut
+from . import utils as pu
+from .color import *
+from .palettes import palette_default
 
 pio.orca.config.use_xvfb = True
 pio.orca.config.save()
@@ -150,7 +146,9 @@ def visualize_markers(
 
 
 def archetype_footprint(
-    adata: AnnData, color_map: Union[Colormap, str, None] = "YlOrRd", **kwargs,
+    adata: AnnData,
+    color_map: Union[Colormap, str, None] = "YlOrRd",
+    **kwargs,
 ) -> Union[Figure, Axes, None]:
 
     X_smooth = adata.obsm["archetype_footprint"]
@@ -354,4 +352,3 @@ def plot_ACTIONet_interactive(
         )
 
     return p
-

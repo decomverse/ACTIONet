@@ -2,7 +2,7 @@
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users**
 
-Verify that the cmake version you are using is >=3.19.  
+Verify that the cmake version you are using is >=3.19.
 
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
@@ -25,12 +25,10 @@ Use `pip` to install ACTIONet directly from this repository:
 pip install git+https://github.com/shmohammadi86/ACTIONet@python-devel
 ```
 
-To install from source:  
+To install from source:
 ```
-git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git 
-git submodule update --init 
-python setup.py build  
-python setup.py develop 
+git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git
+make install
 ```
 
 # Running ACTIONet

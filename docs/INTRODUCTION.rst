@@ -4,7 +4,7 @@ Installation
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users**
 
-Verify that the cmake version you are using is >=3.19.  
+Verify that the cmake version you are using is >=3.19.
 
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
@@ -27,12 +27,12 @@ Use `pip` to install ACTIONet directly from this repository:
 pip install git+https://github.com/shmohammadi86/ACTIONet@python-devel
 ```
 
-To install from source:  
+To install from source:
 ```
-git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git 
-git submodule update --init 
-python setup.py build  
-python setup.py develop 
+git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git
+git submodule update --init
+python setup.py build
+python setup.py develop
 ```
 
 # Running ACTIONet
@@ -43,7 +43,7 @@ Here is a simple example to get you started:
 
 
 .. code-block:: python
-		
+
 		import urllib.request
 
 		import ACTIONet as an
@@ -82,12 +82,12 @@ Here is a simple example to get you started:
 The output of ACTIONet in the python implementation is internally stored as as `AnnData` object, and R `ACE` objects can be imported from/exported to `AnnData` using functions `AnnData2ACE()` and `ACE2AnnData()` functions, respectively. `AnnData` objects can be directly loaded into [cellxgene](https://github.com/chanzuckerberg/cellxgene) package, an open-source viewer for interactive single-cell data visualization. `cellxgene` can be installed as:
 
 .. code-block:: bash
-		
+
 		pip install cellxgene
 
 Then to visualize the results of ACTIONet, run:
 .. code-block:: bash
-		
+
 		cellxgene launch pbmc_10k_v3.h5ad
 
 

@@ -11,15 +11,15 @@ import _ACTIONet as _an
 
 
 def autocorrelation(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        scores: Optional[Union[np.ndarray, sparse.spmatrix, list, pd.Series]] = None,
-        algorithm: Optional[str] = "Moran",
-        normalization_method: Optional[int] = 1,
-        perm_no: Optional[int] = 0,
-        thread_no: Optional[int] = 0,
-        net_key: Optional[str] = "ACTIONet",
-        scores_key: Optional[str] = None,
-        ) -> np.ndarray:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    scores: Optional[Union[np.ndarray, sparse.spmatrix, list, pd.Series]] = None,
+    algorithm: Optional[str] = "Moran",
+    normalization_method: Optional[int] = 1,
+    perm_no: Optional[int] = 0,
+    thread_no: Optional[int] = 0,
+    net_key: Optional[str] = "ACTIONet",
+    scores_key: Optional[str] = None,
+) -> np.ndarray:
     """Computes spatial autocorrelation of scores
 
     Parameters
@@ -33,7 +33,7 @@ def autocorrelation(
     normalization_method: Optional[int]
         How to normalize scores for moran/geary methods.
     perm_no: Optional[int]
-        Number of permutations to compute significance of scores., default is 0 (no permutations).    
+        Number of permutations to compute significance of scores., default is 0 (no permutations).
     thread_no : Optional[int]
         Number of threads to use, by default 0
     net_key : Optional[str], optional
@@ -77,37 +77,37 @@ def autocorrelation(
     if algorithm == "geary":
         if not sparse.issparse(G):
             auto_out = _an.autocorrelation_Geary(
-                    G,
-                    scores,
-                    normalization_method=normalization_method,
-                    perm_no=perm_no,
-                    thread_no=thread_no,
-                    )
+                G,
+                scores,
+                normalization_method=normalization_method,
+                perm_no=perm_no,
+                thread_no=thread_no,
+            )
         else:
             auto_out = _an.autocorrelation_Geary_full(
-                    G,
-                    scores,
-                    normalization_method=normalization_method,
-                    perm_no=perm_no,
-                    thread_no=thread_no,
-                    )
+                G,
+                scores,
+                normalization_method=normalization_method,
+                perm_no=perm_no,
+                thread_no=thread_no,
+            )
     elif algorithm == "moran":
         if not sparse.issparse(G):
             auto_out = _an.autocorrelation_Moran(
-                    G,
-                    scores,
-                    normalization_method=normalization_method,
-                    perm_no=perm_no,
-                    thread_no=thread_no,
-                    )
+                G,
+                scores,
+                normalization_method=normalization_method,
+                perm_no=perm_no,
+                thread_no=thread_no,
+            )
         else:
             auto_out = _an.autocorrelation_Moran_full(
-                    G,
-                    scores,
-                    normalization_method=normalization_method,
-                    perm_no=perm_no,
-                    thread_no=thread_no,
-                    )
+                G,
+                scores,
+                normalization_method=normalization_method,
+                perm_no=perm_no,
+                thread_no=thread_no,
+            )
     elif algorithm == "categorical":
         if not scores is None:
             if isinstance(scores, pd.Series):
@@ -136,40 +136,40 @@ def compute_phi(A, labels, s0, s1, s2):
     Q22 = np.sum(np.expand_dims(1 / pvec, axis=1) * np.expand_dims(1 / pvec, axis=0))
     E1 = (np.power(n, 2) * Q22 - n * Q3) / (n * (n - 1))
     E2 = (
-            4 * np.power(n, 3) * Q1
-            - 4 * np.power(n, 3) * k * Q1
-            + np.power(n, 3) * np.power(k, 2) * Q1
-            - 2 * (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
-            + 2 * n * Q3
-            - np.power(n, 2) * Q22
+        4 * np.power(n, 3) * Q1
+        - 4 * np.power(n, 3) * k * Q1
+        + np.power(n, 3) * np.power(k, 2) * Q1
+        - 2 * (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+        + 2 * n * Q3
+        - np.power(n, 2) * Q22
     )
     E2 = E2 / (n * (n - 1) * (n - 2))
     A1 = (
-            4 * np.power(n, 4) * np.power(k, 2)
-            - 4 * np.power(n, 4) * np.power(k, 3)
-            + np.power(n, 4) * np.power(k, 4)
-            - (2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1)
+        4 * np.power(n, 4) * np.power(k, 2)
+        - 4 * np.power(n, 4) * np.power(k, 3)
+        + np.power(n, 4) * np.power(k, 4)
+        - (2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1)
     )
     A2 = (
-            4 * np.power(n, 3) * Q1
-            - 4 * np.power(n, 3) * k * Q1
-            + np.power(n, 3) * np.power(k, 2) * Q1
-            - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+        4 * np.power(n, 3) * Q1
+        - 4 * np.power(n, 3) * k * Q1
+        + np.power(n, 3) * np.power(k, 2) * Q1
+        - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
     )
     Apart = A1 - 2 * A2
     B1 = (
-            4 * np.power(n, 3) * Q1
-            - 4 * np.power(n, 3) * k * Q1
-            + np.power(n, 3) * np.power(k, 2) * Q1
-            - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+        4 * np.power(n, 3) * Q1
+        - 4 * np.power(n, 3) * k * Q1
+        + np.power(n, 3) * np.power(k, 2) * Q1
+        - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
     )
     B2 = 2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2 - n * Q3
     B3 = np.power(n, 2) * Q22 - n * Q3
     Bpart = B1 - B2 - B3
     C1 = (
-            2 * np.power(n, 3) * k * Q1
-            - np.power(n, 3) * np.power(k, 2) * Q1
-            - np.power(n, 2) * Q22
+        2 * np.power(n, 3) * k * Q1
+        - np.power(n, 3) * np.power(k, 2) * Q1
+        - np.power(n, 2) * Q22
     )
     C2 = 2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2 - n * Q3
     Cpart = C1 - 2 * C2
@@ -180,12 +180,12 @@ def compute_phi(A, labels, s0, s1, s2):
     p_i = np.asarray(pvec[v_i])
     p_j = np.asarray(pvec[v_j])
     rawphi = int(
-            sum(
-                    w
-                    * (2 * (v_i.reset_index(drop=True) == v_j.reset_index(drop=True)) - 1)
-                    / (p_i * p_j)
-                    )
-            )
+        sum(
+            w
+            * (2 * (v_i.reset_index(drop=True) == v_j.reset_index(drop=True)) - 1)
+            / (p_i * p_j)
+        )
+    )
     mean_rawphi = m1_rawphi
     var_rawphi = m2_rawphi - np.power(mean_rawphi, 2)
     phi_z = (rawphi - mean_rawphi) / np.sqrt(var_rawphi)

@@ -1,4 +1,4 @@
-from typing import Optional, Union, Literal, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -6,6 +6,7 @@ from anndata import AnnData
 from scipy import sparse
 
 import _ACTIONet as _an
+
 from .. import tools as tl
 
 
@@ -141,7 +142,9 @@ def annotate(
 
         logPvals = assessment_out["logPvals"].T
         Enrichment = pd.DataFrame(
-            logPvals, columns=markers.keys(), index=np.arange(1, logPvals.shape[0] + 1),
+            logPvals,
+            columns=markers.keys(),
+            index=np.arange(1, logPvals.shape[0] + 1),
         )
         annotations = pd.Series(markers.keys())
         idx = np.argmax(logPvals, axis=1)
@@ -218,4 +221,3 @@ def annotate(
         Confidence = np.max(Z, axis=1)
 
     return Label, Confidence, Enrichment
-
