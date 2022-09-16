@@ -333,8 +333,8 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "parametric", pre_imputation_algorithm = "none", gene_scaling_method = 0,
-                          pre_alpha = 0.15, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_method = 0,
+                          pre_alpha = 0, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 1, perm_no = 100, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
     warning(sprintf("net_slot does not exist in colNets(ace)."))
     return()
@@ -347,12 +347,9 @@ annotateCells <- function(ace, markers, algorithm = "parametric", pre_imputation
   mask <- Matrix::rowSums(abs(marker_mat_full)) != 0
   marker_mat <- marker_mat_full[mask, ]
 
-  if (pre_imputation_algorithm == "none") {
-    S <- assays(ace)[[assay_name]]
-    sub_S <- S[mask, ]
-  } else {
-    sub_S <- Matrix::t(imputeGenes(ace, rownames(marker_mat), assay_name = assay_name, thread_no = thread_no, alpha = pre_alpha, diffusion_it = diffusion_it, net_slot = net_slot, algorithm = pre_imputation_algorithm))
-  }
+
+  S <- assays(ace)[[assay_name]]
+  sub_S <- S[mask, ]
   sub_S <- as(sub_S, "sparseMatrix")
 
   network_normalization_code <- 0
