@@ -53,7 +53,7 @@ try:
     from setuptools import Extension as _Extension
     from setuptools.command.build_ext import build_ext as _build_ext
 except ImportError:
-    from distutils.command.build_ext import build_ext as _build_ext
+    from distutils.command import build_ext as _build_ext
     from distutils.extension import Extension as _Extension
 
 import distutils.ccompiler

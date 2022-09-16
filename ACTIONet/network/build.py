@@ -87,3 +87,5 @@ def build(
     elif data_is_AnnData:
         adata.obsp[net_key_out] = G
         return adata if copy else None
+    else:
+        raise Exception("invalid state encountered")
