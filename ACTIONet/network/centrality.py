@@ -64,7 +64,7 @@ def centrality(
             "'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'."
         )
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
         labels = adata.obs[labels] if type(labels) == str else labels
         if net_key in adata.obsp.keys():

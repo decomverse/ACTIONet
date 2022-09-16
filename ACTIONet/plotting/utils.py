@@ -292,7 +292,19 @@ def make_plotly_scatter_split_trace(
 
     axis_params = dict(showgrid=False, zeroline=False, visible=False)
 
-    if plot_3d:
+    if (
+        plot_3d
+        and (
+            isinstance(fill_dict, np.ndarray)
+            or isinstance(fill_dict, list)
+            or isinstance(fill_dict, pd.Series)
+        )
+        and (
+            isinstance(stroke_dict, np.ndarray)
+            or isinstance(stroke_dict, list)
+            or isinstance(stroke_dict, pd.Series)
+        )
+    ):
         p = go.Figure()
 
         for n in trace_names:
@@ -322,23 +334,32 @@ def make_plotly_scatter_split_trace(
     else:
         p = go.Figure()
 
-        for n in trace_names:
-            sub_data = plot_data[plot_data["labels"] == n]
-            p.add_trace(
-                go.Scattergl(
-                    x=sub_data["x"],
-                    y=sub_data["y"],
-                    marker=dict(
-                        color=fill_dict[n],
-                        size=point_size,
-                        line=dict(color=stroke_dict[n], width=stroke_size),
-                    ),
-                    text=sub_data["text"],
-                    hoverinfo="text",
-                    mode="markers",
-                    name=n,
+        if (
+            isinstance(fill_dict, np.ndarray)
+            or isinstance(fill_dict, list)
+            or isinstance(fill_dict, pd.Series)
+        ) and (
+            isinstance(stroke_dict, np.ndarray)
+            or isinstance(stroke_dict, list)
+            or isinstance(stroke_dict, pd.Series)
+        ):
+            for n in trace_names:
+                sub_data = plot_data[plot_data["labels"] == n]
+                p.add_trace(
+                    go.Scattergl(
+                        x=sub_data["x"],
+                        y=sub_data["y"],
+                        marker=dict(
+                            color=fill_dict[n],
+                            size=point_size,
+                            line=dict(color=stroke_dict[n], width=stroke_size),
+                        ),
+                        text=sub_data["text"],
+                        hoverinfo="text",
+                        mode="markers",
+                        name=n,
+                    )
                 )
-            )
 
         p.update_layout(
             xaxis=axis_params,
