@@ -109,7 +109,7 @@ def autocorrelation(
                 thread_no=thread_no,
             )
     elif algorithm == "categorical":
-        if not scores is None:
+        if scores is not None:
             if isinstance(scores, pd.Series):
                 scores = np.array(scores.tolist())
             elif sparse.issparse(scores):
@@ -122,10 +122,9 @@ def autocorrelation(
 def compute_phi(A, labels, s0, s1, s2):
     n = len(labels)
     # handle labels passed as list by wrapping them in a pandas series object
-    if type(labels) != type(pd.Series):
+    if type(labels).isinstance(type(pd.Series)) is False:
         labels = pd.Series(labels)
     counts = labels.value_counts()
-    categories = counts.index.tolist()
     w = A.data
     pvec = counts / n
     k = len(pvec)

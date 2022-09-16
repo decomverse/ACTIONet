@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
-from sklearn import preprocessing
 
 import _ACTIONet as _an
 
@@ -25,26 +24,6 @@ def normalize_reduction(
 
     Xr = np.array(adata.obsm[reduction_key])
     Xr_norm = _an.normalize_mat(Xr, normalization=normalization, dim=1)
-
-    # if normalization == 0:
-    #     Xr_norm = Xr
-    # elif normalization == 1:
-    #     # denom = np.array(np.sum(abs(Xr), axis=1, keepdims=True))
-    #     # denom[denom == 0] = 1
-    #     # Xr_norm = Xr / denom
-    #     Xr_norm = preprocessing.normalize(Xr, norm="l1")
-    # elif normalization == 2:
-    #     # denom = np.array(np.sqrt(np.sum((Xr ** 2), axis=1, keepdims=True)))
-    #     # denom[denom == 0] = 1
-    #     # Xr_norm = Xr / denom
-    #     Xr_norm = preprocessing.normalize(Xr, norm="l2")
-    # elif normalization == -1:  # z-score
-    #     Xr_norm = scale_matrix(Xr)
-    # else:
-    #     raise ValueError(
-    #         "normalize_reduction: normalization" + normalization + "unknown"
-    #     )
-
     adata.obsm[reduction_key_out] = Xr_norm
     adata.uns["metadata"]["reduction_normalization"] = normalization
 
@@ -135,8 +114,8 @@ def normalize_matrix(
 ) -> Union[np.ndarray, sparse.spmatrix]:
     X = X.astype(dtype=np.float64)
 
-    if scale_factor != "median" and not isinstance(scale_factor, (int, float)) and scale_factor is not None:
-        raise ValueError(f"'scale_factor' must be 'median' or numeric.")
+    if (scale_factor != "median") and (isinstance(scale_factor, (int, float)) is False) and (scale_factor is not None):
+        raise ValueError("'scale_factor' must be 'median' or numeric.")
 
     if sparse.issparse(X):
         lib_sizes = np.array(np.sum(X, axis=1))

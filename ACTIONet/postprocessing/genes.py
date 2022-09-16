@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy.sparse import csc_matrix
-from typing_extensions import Literal
 
 import _ACTIONet as _an
 
@@ -52,7 +51,7 @@ def impute_using_network(
     n_iters: Optional[int] = 5,
 ) -> AnnData:
     if "ACTIONet" not in adata.obsp.keys():
-        raise ValueError(f"Did not find adata.obsp['ACTIONet']. " "Please run nt.build_network() first.")
+        raise ValueError("Did not find adata.obsp['ACTIONet']. " "Please run nt.build_network() first.")
 
     genes = adata.var.index.intersection(genes)
     mask = adata.var.index.isin(genes)
@@ -62,11 +61,9 @@ def impute_using_network(
         cs = np.sum(U, axis=0)
         U = U / cs
         U = U[:, cs > 0]
-        gg = genes[cs > 0]
     else:
         U = adata.X[:, mask].copy()
         U = U / np.sum(U)
-        gg = genes
 
     # Network diffusion
     G = adata.obsp["ACTIONet"]

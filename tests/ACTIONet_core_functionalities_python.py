@@ -1,7 +1,8 @@
 # Imports PBMC 3k dataset from scanpy
 import scanpy as sc
+from sklearn.metrics.cluster import normalized_mutual_info_score
 
-from ACTIONet import *
+from ACTIONet import buildNetwork, compute_core_centrality, layoutNetwork, prune_archetypes, reduce_kernel, run_ACTION, unify_archetypes
 
 pbmc = sc.datasets.pbmc3k_processed()
 ACE = pbmc
@@ -35,7 +36,7 @@ sc.plotting.embedding(ACE, "ACTIONet2D", color="assigned_archetypes")
 
 # Evaluate clustering quality w.r.t. Leiden clusters (not the best, but just a sanity check)
 celltypes = pbmc.obs.louvain
-from sklearn.metrics.cluster import normalized_mutual_info_score
+
 
 normalized_mutual_info_score(celltypes, ACE.obs["assigned_archetypes"])
 

@@ -177,17 +177,6 @@ def get_plot_transparency(
     if trans_attr is None:
         return 1
 
-    data_is_AnnData = isinstance(adata, AnnData)
-    # if data_is_AnnData:
-    #     n_dim = adata.shape[0]
-
-    # if isinstance(trans_attr, str):
-    #     if not data_is_AnnData:
-    #         raise Exception("'adata' must be AnnData if 'trans_attr' is str")
-    #     alpha_fac = tl.__get_attr_or_split_idx(adata, attr=trans_attr, return_vec=True)
-    # else:
-    #     alpha_fac = pd.Series(trans_attr, dtype=float)
-
     if isinstance(trans_attr, str) and not isinstance(adata, AnnData):
         raise Exception("'adata' must be AnnData if 'trans_attr' is str")
 

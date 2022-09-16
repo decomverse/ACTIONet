@@ -1,11 +1,9 @@
-from pickle import TRUE
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
-from typing_extensions import Literal
 
 import _ACTIONet as _an
 import ACTIONet as an
@@ -184,7 +182,7 @@ def infer_missing_labels(
     else:
         labels = pd.Series(initial_labels)
 
-    fixed_samples = np.where(labels != None)
+    fixed_samples = np.where(labels is not None)
 
     updated_labels = an.net.propagate(
         data=adata,

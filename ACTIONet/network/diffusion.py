@@ -1,9 +1,6 @@
-import random
 from typing import Optional, Union
 
 import numpy as np
-import pandas as pd
-import scipy
 from anndata import AnnData
 from scipy import sparse
 

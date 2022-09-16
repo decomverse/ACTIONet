@@ -1,13 +1,12 @@
-import random
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-import scipy
 from anndata import AnnData
 from scipy import sparse
 
 import _ACTIONet as _an
+from ACTIONet.network.diffusion import diffusion
 
 
 def centrality(
@@ -82,7 +81,7 @@ def centrality(
     if not sparse.issparse(G):
         G = sparse.csc_matrix(G)
 
-    if not labels is None:
+    if labels is not None:
         if isinstance(labels, pd.Series):
             labels = np.array(labels.tolist())
         elif sparse.issparse(labels):

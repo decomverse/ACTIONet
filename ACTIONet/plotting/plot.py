@@ -1,30 +1,22 @@
-import re
 from random import sample
-from typing import Any, Mapping, Optional, Sequence, Tuple, Union
+from typing import Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
-import plotly as pl
-import plotly.express as px
 import plotly.graph_objs as go
 import plotly.io as pio
 import scanpy as sc
-from adjustText import adjust_text
 from anndata import AnnData
 from cycler import Cycler
 from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from matplotlib.figure import Figure
-from plotly.subplots import make_subplots
-from scipy import sparse
 
-import _ACTIONet as _an
 import ACTIONet.network as net
+from ACTIONet.plotting.color import append_alpha_to_rgb, lighten_color
+from ACTIONet.plotting.palettes import palette_default
 
-from ..tools import utils_public as ut
 from . import utils as pu
-from .color import *
-from .palettes import palette_default
 
 pio.orca.config.use_xvfb = True
 pio.orca.config.save()

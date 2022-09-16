@@ -103,8 +103,8 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
     Where:
         :math: Z = BX,
         :math: 0 <= B_ij, A_ij,
-        :math: \sum_{i} A_ij = 1,
-        :math: \sum_{i} B_ij = 1,
+        :math: sum_{i} A_ij = 1,
+        :math: sum_{i} B_ij = 1,
 
     Parameters
     ----------
