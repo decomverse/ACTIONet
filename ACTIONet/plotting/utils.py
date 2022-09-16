@@ -160,11 +160,11 @@ def get_plot_colors(
     else:
         if no_data:
             raise Exception("'data' required for given parameters")
-
-        if color_key is None or color_key not in data.obsm_keys():
-            plot_colors = _default_colors(n_dim)
-        else:
-            plot_colors = pd.Series([tuple(r) for r in data.obsm[color_key]])
+        if isinstance(data, AnnData):
+            if color_key is None or color_key not in data.obsm_keys():
+                plot_colors = _default_colors(n_dim)
+            else:
+                plot_colors = pd.Series([tuple(r) for r in data.obsm[color_key]])
 
     if not return_dict:
         plot_colors = [to_rgb(f) for f in plot_colors]
@@ -194,9 +194,10 @@ def get_plot_transparency(
     else:
         z = alpha_fac
 
-    alpha_val = 1 / (1 + np.exp(-trans_fac * (z - trans_th)))
-    alpha_val = np.where(z > trans_th, 1, alpha_val)
-    alpha_val = np.power(alpha_val, trans_fac)
+    if isinstance(trans_fac, float):
+        alpha_val = 1 / (1 + np.exp(-trans_fac * (z - trans_th)))
+        alpha_val = np.where(z > trans_th, 1, alpha_val)
+        alpha_val = np.power(alpha_val, trans_fac)
 
     return alpha_val
 
