@@ -63,7 +63,7 @@ def diffusion(
     smoothed_scores : np.ndarray
         If `adata=None` or `return_raw=True`, returns array of archetype footprint.
     """
-    alg_name = algorithm.lower()
+    alg_name = str(algorithm).lower()
     if alg_name not in ["pagerank", "pagerank_sym"]:
         raise ValueError("'algorithm' must be 'pagerank' or 'pagerank_sym'.")
 

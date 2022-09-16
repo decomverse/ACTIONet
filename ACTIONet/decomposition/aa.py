@@ -85,10 +85,10 @@ def runAA(
     if return_raw or not data_is_AnnData:
         return AA_out
     else:
-        adata.uns[decomp_key_prefix] = {}
-        adata.obsm[decomp_key_prefix + "_" + "C"] = AA_out["C"]
-        adata.obsm[decomp_key_prefix + "_" + "H"] = AA_out["H"].T
-        adata.varm[decomp_key_prefix + "_" + "W"] = AA_out["W"]
+        adata.uns[str(decomp_key_prefix)] = {}
+        adata.obsm[str(decomp_key_prefix) + "_" + "C"] = AA_out["C"]
+        adata.obsm[str(decomp_key_prefix) + "_" + "H"] = AA_out["H"].T
+        adata.varm[str(decomp_key_prefix) + "_" + "W"] = AA_out["W"]
 
         return adata if copy else None
 

@@ -59,14 +59,6 @@ def reduce_adata(
     else:
         adata = AnnData(data)
 
-    # adata_temp = adata
-    #
-    # # ACTIONet C++ library takes cells as columns
-    # if layer_key is not None:
-    #     X = adata_temp.layers[layer_key].T
-    # else:
-    #     X = adata_temp.X.T
-
     # ACTIONet C++ library takes cells as columns
     if layer_key is not None:
         X = adata.layers[layer_key]
@@ -101,20 +93,20 @@ def reduce_adata(
         adata.obsm[reduction_key] = reduced["S_r"]
         adata.uns[reduction_key] = {}
         adata.uns[reduction_key]["sigma"] = reduced["sigma"]
-        adata.obsm[reduction_key + "_B"] = reduced["B"]
-        adata.varm[reduction_key + "_V"] = reduced["V"]
-        adata.varm[reduction_key + "_A"] = reduced["A"]
+        adata.obsm[str(reduction_key) + "_B"] = reduced["B"]
+        adata.varm[str(reduction_key) + "_V"] = reduced["V"]
+        adata.varm[str(reduction_key) + "_A"] = reduced["A"]
 
         adata.uns.setdefault("obsm_annot", {}).update(
             {
-                reduction_key: {"type": np.array([b"reduction"], dtype=object)},
-                reduction_key + "_B": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key): {"type": np.array([b"reduction"], dtype=object)},
+                str(reduction_key) + "_B": {"type": np.array([b"internal"], dtype=object)},
             }
         )
         adata.uns.setdefault("varm_annot", {}).update(
             {
-                reduction_key + "_A": {"type": np.array([b"internal"], dtype=object)},
-                reduction_key + "_V": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_A": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_V": {"type": np.array([b"internal"], dtype=object)},
             }
         )
 
