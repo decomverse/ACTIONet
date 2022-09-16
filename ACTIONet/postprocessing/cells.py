@@ -7,6 +7,9 @@ from scipy import sparse
 
 import _ACTIONet as _an
 import ACTIONet as an
+from ACTIONet.network.cluster import cluster as anet_cluster
+from ACTIONet.network.propagation import propagate
+from ACTIONet.postprocessing.clusters import feature_specificity
 
 
 def filter(
@@ -139,7 +142,7 @@ def cluster(
 
     adata = adata.copy() if copy else adata
 
-    an.net.cluster(
+    anet_cluster(
         data=adata,
         algorithm=algorithm,
         resolution=resolution,
@@ -151,7 +154,7 @@ def cluster(
         copy=False,
     )
 
-    an.po.clusters.feature_specificity(
+    feature_specificity(
         data=adata,
         cluster_attr=final_clusters_key,
         output_prefix=final_clusters_key,
@@ -193,7 +196,7 @@ def infer_missing_labels(
 
     fixed_samples = np.where(labels != "nan")[0]
 
-    updated_labels = an.net.propagate(
+    updated_labels = propagate(
         data=adata,
         labels=labels,
         fixed_samples=fixed_samples,
