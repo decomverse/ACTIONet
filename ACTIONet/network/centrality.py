@@ -53,7 +53,7 @@ def centrality(
     node_centrality : np.ndarray
         If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
     """
-    alg_name = algorithm.lower()
+    alg_name = str(algorithm).lower()
     if alg_name not in [
         "coreness",
         "pagerank",
@@ -85,7 +85,7 @@ def centrality(
         if isinstance(labels, pd.Series):
             labels = np.array(labels.tolist())
         elif sparse.issparse(labels):
-            labels = labels.toarray()
+            labels = np.array(labels)
 
     if algorithm == "coreness":
         node_centrality = _an.compute_core_number(G)
