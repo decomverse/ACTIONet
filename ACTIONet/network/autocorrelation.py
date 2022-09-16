@@ -46,7 +46,7 @@ def autocorrelation(
     -------
     autocorrelations : dictionary
     """
-    alg_name = algorithm.lower()
+    alg_name = str(algorithm).lower()
     if alg_name not in ["moran", "geary", "categorical"]:
         raise ValueError("algorithm must be 'moran', 'geary', or 'categorical'.")
 
@@ -114,7 +114,7 @@ def autocorrelation(
                 scores = np.array(scores.tolist())
             elif sparse.issparse(scores):
                 scores = scores.toarray()
-        auto_out = assess_categorical_autocorrelation(G, scores, perm_no)
+        auto_out = assess_categorical_autocorrelation(G, scores, int(str(perm_no)))
 
     return auto_out
 
@@ -166,7 +166,7 @@ def compute_phi(A, labels, s0, s1, s2):
 def assess_categorical_autocorrelation(G, labels: list, perm_no: int = 100):
     # if labels is a list of strings, change them to a numerical encoding
     _, labels = np.unique(labels, return_inverse=True)
-    labels = labels + 1
+    labels = [i + 1 for i in labels]
 
     # labels=string_list_to_int_list(labels)
     w = G.data
@@ -180,7 +180,7 @@ def assess_categorical_autocorrelation(G, labels: list, perm_no: int = 100):
     np.random.seed(0)
     random.seed(0)
     for i in range(perm_no):
-        rand_labels = random.sample(labels.tolist(), labels.shape[0])
+        rand_labels = random.sample(labels, len(labels))
         _, _, rand_phi = compute_phi(G, rand_labels, s0, s1, s2)
         rand_phis.append(rand_phi)
     z = (phi - np.mean(rand_phis)) / np.std(rand_phis)
