@@ -57,6 +57,10 @@ def runACTION(
 
     data_is_AnnData = isinstance(data, AnnData)
 
+    # cast Optional types to the desired type
+    reduction_key = str(reduction_key)
+    depth = int(str(depth))
+
     if data_is_AnnData:
         if reduction_key not in data.obsm.keys():
             raise ValueError("Did not find data.obsm['" + reduction_key + "'].")

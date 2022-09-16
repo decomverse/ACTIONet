@@ -60,7 +60,7 @@ def layout(
         G :scipy.sparse.spmatrix. Sparse adjacency matrix encoding ACTIONet if 'return_raw=True'
     """
 
-    alg_name = algorithm.lower()
+    alg_name = str(algorithm).lower()
     if alg_name not in ["umap", "tumap"]:
         raise ValueError("'layout_algorithm' must be 'tumap' or 'umap'.")
 

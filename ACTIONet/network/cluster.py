@@ -90,7 +90,7 @@ def cluster(
             if isinstance(initial_clusters, pd.Series):
                 initial_clusters = np.array(initial_clusters.tolist())
             else:
-                initial_clusters = initial_clusters.toarray()
+                initial_clusters = np.array(initial_clusters)
 
         if 0 <= G.min():
             final_clusters = _an.unsigned_cluster(

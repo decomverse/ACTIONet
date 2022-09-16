@@ -4,10 +4,13 @@ import numpy as np
 from anndata import AnnData
 
 import _ACTIONet as _an
-from ACTIONet import decomposition as decomp
-from ACTIONet import network as net
 from ACTIONet import postprocessing as po
-from ACTIONet import tools as utils
+from ACTIONet.decomposition.actionmr import runACTIONMR
+from ACTIONet.network.build import build
+from ACTIONet.network.centrality import centrality
+from ACTIONet.network.diffusion import diffusion
+from ACTIONet.network.layout import layout
+from ACTIONet.tools.utils_public import normalize_reduction, scale_matrix
 
 
 def run_ACTIONet(
@@ -67,18 +70,18 @@ def run_ACTIONet(
     if reduction_key not in adata.obsm.keys():
         raise ValueError("Did not find adata.obsm['" + reduction_key + "']. ")
 
-    utils.normalize_reduction(adata=adata, reduction_key=reduction_key, normalization=normalization)
+    normalize_reduction(adata=adata, reduction_key=reduction_key, normalization=normalization)
 
     reduction_key = reduction_key + "_normalized"
 
-    alg_name = layout_algorithm.lower()
+    alg_name = str(layout_algorithm).lower()
     if alg_name not in ["umap", "tumap"]:
         raise ValueError("'layout_algorithm' must be 'tumap' or 'umap'.")
 
-    decomp.runACTIONMR(
+    runACTIONMR(
         data=adata,
-        k_min=k_min,
-        k_max=k_max,
+        k_min=int(str(k_min)),
+        k_max=int(str(k_max)),
         max_iter=max_iter_ACTION,
         min_delta=1e-300,
         specificity_th=specificity_th,
@@ -94,7 +97,7 @@ def run_ACTIONet(
     )
 
     # Build ACTIONet
-    net.build(
+    build(
         data=adata,
         algorithm=network_algorithm,
         distance_metric=network_metric,
@@ -109,7 +112,7 @@ def run_ACTIONet(
     )
 
     # Smooth archetype footprints
-    net.diffusion(
+    diffusion(
         data=adata,
         scores_key="H_unified",
         smoothed_scores_key=footprint_key,
@@ -121,16 +124,16 @@ def run_ACTIONet(
 
     # Uses `reduction_key` for initialization of coordinates
     svd_out = _an.IRLB_SVD_full(
-        utils.scale_matrix(adata.obsm["archetype_footprint"]),
+        scale_matrix(adata.obsm["archetype_footprint"]),
         dim=3,
         iters=1000,
         seed=0,
         verbose=0,
     )
-    initial_coordinates = utils.scale_matrix(svd_out["u"][:, 0:3])
+    initial_coordinates = scale_matrix(svd_out["u"][:, 0:3])
 
     adata.obsm["H_stacked"]
-    net.layout(
+    layout(
         data=adata,
         initial_coordinates=initial_coordinates,
         algorithm=alg_name,
@@ -149,7 +152,7 @@ def run_ACTIONet(
     )
 
     # Use graph core of global and induced subgraphs to infer centrality/quality of each cell
-    net.centrality(
+    centrality(
         adata,
         algorithm="localized_coreness",
         labels="assigned_archetype",
@@ -192,11 +195,11 @@ def rerun_layout(
     adata = adata.copy() if copy else adata
 
     # Uses `reduction_key` for initialization of coordinates
-    svd_out = np.linalg.svd(utils.scale_matrix(adata.obsm[footprint_key]).T)
-    initial_coordinates = utils.scale_matrix(svd_out[2][:, 0:3])
+    svd_out = np.linalg.svd(scale_matrix(adata.obsm[footprint_key]).T)
+    initial_coordinates = scale_matrix(svd_out[2][:, 0:3])
 
     adata.obsm["H_stacked"]
-    net.layout(
+    layout(
         data=adata,
         initial_coordinates=initial_coordinates,
         algorithm=layout_algorithm,
