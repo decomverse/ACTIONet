@@ -22,10 +22,10 @@ def __compute_feature_specificity(S, sample_assignments, thread_no=0):
 
 
 def feature_specificity(
-    data: Union[np.ndarray, sparse.spmatrix] = None,
-    cluster_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
-    output_prefix: Optional[str] = None,
-    layer_key: Optional[str] = None,
+    data: Optional[Union[np.ndarray, sparse.spmatrix]],
+    cluster_attr: Optional[Union[str, list, pd.Series, np.ndarray]],
+    output_prefix: Optional[str],
+    layer_key: Optional[str],
     thread_no: Optional[int] = 0,
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False,
