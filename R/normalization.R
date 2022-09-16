@@ -133,7 +133,7 @@ normalize.ace <- function(ace,
       assay_out = assay_out,
       top_features_frac = top_features_frac, scale_param = scale_param, transformation = transformation, anchor_features = anchor_features
     )
-    norm_method <- sprintf("default_top5.2f_%s", top_features_frac, transformation)
+    norm_method <- sprintf("default_top%0.2f_%s", top_features_frac, transformation)
   }
   metadata(ace)$norm_method <- norm_method
   metadata(ace)$default_assay <- assay_out
