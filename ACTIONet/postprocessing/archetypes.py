@@ -6,9 +6,8 @@ from anndata import AnnData
 from scipy import sparse
 
 import _ACTIONet as _an
-
-from ACTIONet import network as net
-from ACTIONet import tools as tl
+from ACTIONet.network.build import build
+from ACTIONet.tools.utils_public import double_normalize, get_data_or_split, scale_matrix
 
 
 def __compute_feature_specificity(S, H, thread_no=0):
@@ -127,11 +126,11 @@ def annotate(
     elif labels is not None:
         X1 = adata.obsm["H_unified"].toarray()
 
-        labels_dict = tl.utils_public.get_data_or_split(adata=adata, attr=labels, to_return="levels")
+        labels_dict = get_data_or_split(adata=adata, attr=labels, to_return="levels")
         X2 = np.array(pd.DataFrame([(labels_dict["index"] == k) * 1 for k in range(len(labels_dict["keys"]))]).T)
 
         XI = _an.XICOR(X1, X2)
-        Z = np.sign(tl.scale_matrix(X1).T @ tl.scale_matrix(X2)) * XI["Z"]
+        Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
         Enrichment = pd.DataFrame(Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_dict["keys"])
 
         annotations = pd.Series(labels_dict["keys"])
@@ -154,7 +153,7 @@ def annotate(
         X2 = np.array(scores)
 
         XI = _an.XICOR(X1, X2)
-        Z = np.sign(tl.scale_matrix(X1).T @ tl.scale_matrix(X2)) * XI["Z"]
+        Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
         Enrichment = pd.DataFrame(Z, index=np.arange(1, X1.shape[1] + 1), columns=scores.columns)
 
         annotations = scores.columns
@@ -182,7 +181,7 @@ def map_cell_scores(
         raise ValueError(f"The number of rows in matrix `enrichment` ({enrichment.shape[0]}) must equal " f"the number of columns in matrix adata.obsm['{archetypes_key}'] ({cell_scores_mat.shape[1]}).")
 
     if normalize:
-        enrichment_mat = tl.double_normalize(enrichment_mat)
+        enrichment_mat = double_normalize(enrichment_mat)
 
     cell_enrichment_mat = cell_scores_mat @ enrichment_mat
     Enrichment = pd.DataFrame(cell_enrichment_mat, index=adata.obs.index, columns=enrichment.columns)
@@ -206,7 +205,7 @@ def construct_backbone(
 
     footprint = adata.obsm["archetype_footprint"].T
     arch_features = sparse.csr_matrix(_an.normalize_mat(footprint, 1))
-    arch_graph = net.build(data=arch_features, density=density)
+    arch_graph = build(data=arch_features, density=density)
 
     C = adata.obsm["C_unified"]
     coors2D = adata.obsm["ACTIONet2D"]
