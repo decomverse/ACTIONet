@@ -1,9 +1,6 @@
-import random
 from typing import Optional, Union
 
 import numpy as np
-import pandas as pd
-import scipy
 from anndata import AnnData
 from scipy import sparse
 
@@ -11,19 +8,19 @@ import _ACTIONet as _an
 
 
 def diffusion(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        scores: Optional[Union[np.ndarray, sparse.spmatrix]] = None,
-        algorithm: Optional[str] = "pagerank",
-        alpha_val: Optional[float] = 0.85,
-        max_it: Optional[int] = 5,
-        threshold: Optional[float] = 1e-8,
-        thread_no: Optional[int] = 0,
-        net_key: Optional[str] = "ACTIONet",
-        scores_key: Optional[str] = "H_stacked",
-        smoothed_scores_key: Optional[str] = "archetype_footprint",
-        copy: Optional[bool] = False,
-        return_raw: Optional[bool] = False,
-        ) -> Union[AnnData, np.ndarray, None]:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    scores: Optional[Union[np.ndarray, sparse.spmatrix]] = None,
+    algorithm: Optional[str] = "pagerank",
+    alpha_val: Optional[float] = 0.85,
+    max_it: Optional[int] = 5,
+    threshold: Optional[float] = 1e-8,
+    thread_no: Optional[int] = 0,
+    net_key: Optional[str] = "ACTIONet",
+    scores_key: Optional[str] = "H_stacked",
+    smoothed_scores_key: Optional[str] = "archetype_footprint",
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
+) -> Union[AnnData, np.ndarray, None]:
     """Computes smoothed scores using network diffusion
 
     Parameters
@@ -99,24 +96,24 @@ def diffusion(
 
     if algorithm == "pagerank":
         smoothed_scores = _an.compute_network_diffusion_approx(
-                G=G,
-                X0=scores,
-                thread_no=thread_no,
-                alpha=alpha_val,
-                max_it=max_it,
-                res_threshold=threshold,
-                norm_type=0,
-                )
+            G=G,
+            X0=scores,
+            thread_no=thread_no,
+            alpha=alpha_val,
+            max_it=max_it,
+            res_threshold=threshold,
+            norm_type=0,
+        )
     elif algorithm == "pagerank_sym":
         smoothed_scores = _an.compute_network_diffusion_approx(
-                G=G,
-                X0=scores,
-                thread_no=thread_no,
-                alpha=alpha_val,
-                max_it=max_it,
-                res_threshold=threshold,
-                norm_type=2,
-                )
+            G=G,
+            X0=scores,
+            thread_no=thread_no,
+            alpha=alpha_val,
+            max_it=max_it,
+            res_threshold=threshold,
+            norm_type=2,
+        )
 
     smoothed_scores = np.array(smoothed_scores, dtype=np.float64)
 
@@ -125,4 +122,3 @@ def diffusion(
     else:
         adata.obsm[smoothed_scores_key] = smoothed_scores
         return adata if copy else None
-

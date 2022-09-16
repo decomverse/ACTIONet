@@ -8,14 +8,14 @@ from .. import tools as tl
 
 
 def filter_adata(
-        adata: AnnData,
-        layer_key: Optional[str] = None,
-        min_cells_per_feature: Optional[float] = None,
-        min_features_per_cell: Optional[int] = None,
-        min_umis_per_cell: Optional[int] = None,
-        max_umis_per_cell: Optional[int] = None,
-        copy: Optional[bool] = False
-        ) -> Optional[AnnData]:
+    adata: AnnData,
+    layer_key: Optional[str] = None,
+    min_cells_per_feature: Optional[float] = None,
+    min_features_per_cell: Optional[int] = None,
+    min_umis_per_cell: Optional[int] = None,
+    max_umis_per_cell: Optional[int] = None,
+    copy: Optional[bool] = False,
+) -> Optional[AnnData]:
     """Filter AnnData by cells or genes.
 
     Filtering is done iteratively until convergence.
@@ -57,27 +57,20 @@ def filter_adata(
     while previous_dims != adata.shape:
         previous_dims = adata.shape
 
-        if (
-                min_umis_per_cell is not None
-                or max_umis_per_cell is not None
-                or min_features_per_cell is not None
-        ):
+        if min_umis_per_cell is not None or max_umis_per_cell is not None or min_features_per_cell is not None:
             sc.pp.filter_cells(
-                    adata,
-                    min_counts=min_umis_per_cell,
-                    max_counts=max_umis_per_cell,
-                    min_genes=min_features_per_cell,
-                    )
+                adata,
+                min_counts=min_umis_per_cell,
+                max_counts=max_umis_per_cell,
+                min_genes=min_features_per_cell,
+            )
         if min_cells_per_feature is not None:
             if 0 < min_cells_per_feature < 1:
                 mn = min_cells_per_feature * original_dims[0]
             else:
                 mn = min_cells_per_feature
 
-            sc.pp.filter_genes(
-                    adata,
-                    min_cells=np.rint(mn)
-                    )
+            sc.pp.filter_genes(adata, min_cells=np.rint(mn))
 
     if layer_key is not None:
         adata.X = adata.layers[temp_layer]

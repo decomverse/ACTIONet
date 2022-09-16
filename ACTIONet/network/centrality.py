@@ -1,24 +1,23 @@
-import random
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-import scipy
 from anndata import AnnData
 from scipy import sparse
 
 import _ACTIONet as _an
+from ACTIONet.network.diffusion import diffusion
 
 
 def centrality(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        algorithm: Optional[str] = "coreness",
-        labels: Union[str, np.ndarray, list, pd.Series] = "assigned_archetype",
-        net_key: Optional[str] = "ACTIONet",
-        centrality_key: Optional[str] = "node_centrality",
-        copy: Optional[bool] = False,
-        return_raw: Optional[bool] = False,
-        ) -> Union[AnnData, np.ndarray, None]:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    algorithm: Optional[str] = "coreness",
+    labels: Union[str, np.ndarray, list, pd.Series] = "assigned_archetype",
+    net_key: Optional[str] = "ACTIONet",
+    centrality_key: Optional[str] = "node_centrality",
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
+) -> Union[AnnData, np.ndarray, None]:
     """Computes node centrality scores
 
     Compute node centralities using different measures
@@ -55,15 +54,18 @@ def centrality(
         If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
     """
     alg_name = algorithm.lower()
-    if alg_name not in ["coreness", "pagerank", "localized_coreness", "localized_pagerank"]:
+    if alg_name not in [
+        "coreness",
+        "pagerank",
+        "localized_coreness",
+        "localized_pagerank",
+    ]:
         raise ValueError("'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'.")
 
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
         adata = data.copy() if copy else data
-        labels = (
-            adata.obs[labels] if type(labels) == str else labels
-        )
+        labels = adata.obs[labels] if type(labels) == str else labels
         if net_key in adata.obsp.keys():
             G = adata.obsp[net_key]
         else:
@@ -79,7 +81,7 @@ def centrality(
     if not sparse.issparse(G):
         G = sparse.csc_matrix(G)
 
-    if not labels is None:
+    if labels is not None:
         if isinstance(labels, pd.Series):
             labels = np.array(labels.tolist())
         elif sparse.issparse(labels):
@@ -111,4 +113,3 @@ def centrality(
     else:
         adata.obs[centrality_key] = node_centrality
         return adata if copy else None
-

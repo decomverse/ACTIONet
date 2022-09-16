@@ -11,7 +11,10 @@ from sklearn.utils.validation import check_is_fitted
 import _ACTIONet as _an
 
 
-def runSPA(A: np.ndarray, k: int, ) -> Tuple[np.ndarray, np.ndarray]:
+def runSPA(
+    A: np.ndarray,
+    k: int,
+) -> Tuple[np.ndarray, np.ndarray]:
     """Successive Projection Algorithm (SPA).
     Runs SPA algorithm to solve separable NMF problem.
 
@@ -36,7 +39,7 @@ def runSPA(A: np.ndarray, k: int, ) -> Tuple[np.ndarray, np.ndarray]:
     return (
         result["selected_columns"],
         result["norms"],
-        )
+    )
 
 
 class SPA(TransformerMixin, BaseEstimator):
@@ -53,7 +56,7 @@ class SPA(TransformerMixin, BaseEstimator):
     Where:
         :math: H = X[k, ],
         :math: 0 <= W_ij,
-        :math: \sum_{i} W_ij = 1,
+        :math: sum_{i} W_ij = 1,
 
     Parameters
     ----------
@@ -209,9 +212,7 @@ class SPA(TransformerMixin, BaseEstimator):
         """
         check_is_fitted(self)
 
-        X = self._validate_data(
-                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-                )
+        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
 
         H = self.components_
         with config_context(assume_finite=True):

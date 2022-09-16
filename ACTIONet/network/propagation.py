@@ -1,9 +1,7 @@
-import random
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-import scipy
 from anndata import AnnData
 from scipy import sparse
 
@@ -41,7 +39,7 @@ def propagate(
     lambda_param: int
         LPA lambda parameter, default = 0
     iters: int
-        LPA number of iterations 
+        LPA number of iterations
     sig_threshold: float
         LPA significance threshold (z-score) for flipping labels, default = 3
     fixed_samples: Optional[Union[np.ndarray, list, pd.Series]]
@@ -96,10 +94,10 @@ def propagate(
     else:
         G = G.tocsc()
 
-    if labels is None and not labels_key is None:
+    if (labels is None) and (labels_key is not None):
         labels = adata.obs[labels_key]
 
-    if not labels is None:
+    if labels is not None:
         labels_int, uniques = pd.factorize(labels, sort=True)
     else:
         raise ValueError("labels and labels_key cannot both be None")
@@ -126,4 +124,3 @@ def propagate(
     else:
         adata.obs[updated_labels_key] = updated_labels
         return adata if copy else None
-
