@@ -7,8 +7,8 @@ from scipy import sparse
 
 import _ACTIONet as _an
 
-from .. import network as net
-from .. import tools as tl
+from ACTIONet import network as net
+from ACTIONet import tools as tl
 
 
 def __compute_feature_specificity(S, H, thread_no=0):
@@ -127,7 +127,7 @@ def annotate(
     elif labels is not None:
         X1 = adata.obsm["H_unified"].toarray()
 
-        labels_dict = tl.get_data_or_split(adata=adata, attr=labels, to_return="levels")
+        labels_dict = tl.utils_public.get_data_or_split(adata=adata, attr=labels, to_return="levels")
         X2 = np.array(pd.DataFrame([(labels_dict["index"] == k) * 1 for k in range(len(labels_dict["keys"]))]).T)
 
         XI = _an.XICOR(X1, X2)

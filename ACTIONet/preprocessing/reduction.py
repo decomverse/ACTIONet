@@ -1,11 +1,11 @@
 from typing import Optional, Union
 
+import harmonypy as hm
 import numpy as np
 import scanpy as sc
 from anndata import AnnData
 from scipy.sparse import issparse, spmatrix
 from typing_extensions import Literal
-import harmonypy as hm
 
 import _ACTIONet as _an
 
