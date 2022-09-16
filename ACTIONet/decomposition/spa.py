@@ -56,7 +56,7 @@ class SPA(TransformerMixin, BaseEstimator):
     Where:
         :math: H = X[k, ],
         :math: 0 <= W_ij,
-        :math: \sum_{i} W_ij = 1,
+        :math: sum_{i} W_ij = 1,
 
     Parameters
     ----------

@@ -1,5 +1,3 @@
-import pdb
-
 import scanpy as sc
 
 import ACTIONet as an

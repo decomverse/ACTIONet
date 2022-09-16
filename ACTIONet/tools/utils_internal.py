@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 import pandas as pd
 from anndata import AnnData

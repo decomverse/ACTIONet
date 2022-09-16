@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -64,7 +64,7 @@ def feature_specificity(
     data_is_AnnData = isinstance(data, AnnData)
 
     if cluster_attr is None:
-        raise ValueError(f"'cluster_attr' cannot be 'None.")
+        raise ValueError("'cluster_attr' cannot be 'None.")
 
     if data_is_AnnData:
         adata = data.copy() if copy else data
@@ -82,7 +82,7 @@ def feature_specificity(
     else:
         adata = None
         if len(cluster_attr) != data.shape[0]:
-            raise ValueError(f"'len(cluster_attr)' must equal 'data.shape[0]'.")
+            raise ValueError("'len(cluster_attr)' must equal 'data.shape[0]'.")
         S = data
         clusters = pd.factorize(list(cluster_attr), sort=True)[0]
 

@@ -7,8 +7,6 @@ from scipy import sparse
 
 import _ACTIONet as _an
 
-from .. import tools as tl
-
 
 def normalize_matrix(
     X: Union[np.ndarray, sparse.spmatrix],

@@ -1,17 +1,19 @@
 """Multi-resolution ACTION decomposition for dense matrices.
 """
 
-from typing import Union
+from typing import Optional, Union
 
+import numpy as np
+import pandas as pd
 from anndata import AnnData
+from natsort import natsorted
 from scipy.sparse import csc_matrix, issparse, spmatrix
 from sklearn._config import config_context
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
-
-from .utils import *
+from ACTIONet.decomposition.utils import prune_archetypes, unify_archetypes
 
 
 def runACTIONMR(
@@ -175,8 +177,8 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
     Where:
         :math: Z = BX,
         :math: 0 <= B_ij, A_ij,
-        :math: \sum_{i} A_ij = 1,
-        :math: \sum_{i} B_ij = 1,
+        :math: sum_{i} A_ij = 1,
+        :math: sum_{i} B_ij = 1,
 
     The problem is solved for multiple number of archetypes and results are aggregated in a multi-resolution decomposition.
 

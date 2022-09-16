@@ -1,9 +1,7 @@
-import random
 from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-import scipy
 from anndata import AnnData
 from scipy import sparse
 
@@ -95,10 +93,10 @@ def propagate(
     else:
         G = G.tocsc()
 
-    if labels is None and not labels_key is None:
+    if (labels is None) and (labels_key is not None):
         labels = adata.obs[labels_key]
 
-    if not labels is None:
+    if labels is not None:
         labels_int, uniques = pd.factorize(labels, sort=True)
     else:
         raise ValueError("labels and labels_key cannot both be None")
