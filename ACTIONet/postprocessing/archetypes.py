@@ -9,7 +9,6 @@ import _ACTIONet as _an
 from ACTIONet.network.build import build
 from ACTIONet.tools.utils_public import (
     double_normalize,
-    get_data_or_split,
     scale_matrix,
 )
 
@@ -143,29 +142,25 @@ def annotate(
     elif labels is not None:
         X1 = adata.obsm["H_unified"].toarray()
 
-        labels_dict = get_data_or_split(adata=adata, attr=labels, to_return="levels")
+        if isinstance(adata, AnnData) and isinstance(labels, str):
+            labels = adata.obs[labels]
 
-        if isinstance(labels_dict, dict):
-            X2 = np.array(
-                pd.DataFrame(
-                    [
-                        (labels_dict["index"] == k) * 1
-                        for k in range(len(labels_dict["keys"]))
-                    ]
-                ).T
-            )
+        labels_index, labels_keys = pd.factorize(labels, sort=True)
+        X2 = np.array(
+            pd.DataFrame([(labels_index == k) * 1 for k in range(len(labels_keys))]).T
+        )
 
-            XI = _an.XICOR(X1, X2)
-            Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
-            Enrichment = pd.DataFrame(
-                Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_dict["keys"]
-            )
+        XI = _an.XICOR(X1, X2)
+        Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
+        Enrichment = pd.DataFrame(
+            Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_keys
+        )
 
-            annotations = pd.Series(labels_dict["keys"])
-            idx = np.argmax(Z, axis=1)
-            Label = annotations[idx]
-            Label.index = np.arange(1, len(Label) + 1)
-            Confidence = np.max(Z, axis=1)
+        annotations = pd.Series(labels_keys)
+        idx = np.argmax(Z, axis=1)
+        Label = annotations[idx]
+        Label.index = np.arange(1, len(Label) + 1)
+        Confidence = np.max(Z, axis=1)
 
     elif scores is not None:
         X1 = adata.obsm["H_unified"].toarray()

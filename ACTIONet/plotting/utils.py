@@ -1,3 +1,4 @@
+from ast import Raise
 import warnings
 from typing import Optional, Union
 
@@ -10,7 +11,7 @@ from scipy import sparse
 
 from ACTIONet.plotting.color import rgb_to_hex
 from ACTIONet.plotting.palettes import palette_default
-from ACTIONet.tools.utils_public import get_data_or_split, scale_matrix
+from ACTIONet.tools.utils_public import scale_matrix
 
 
 def _default_colors(n) -> pd.Series:
@@ -58,14 +59,18 @@ def get_plot_labels(
     if label_attr is None:
         return None
 
-    if isinstance(data, AnnData):
-        plot_labels = get_data_or_split(adata=data, attr=label_attr, to_return="data")
-    else:
-        plot_labels = label_attr
+    if isinstance(data, AnnData) and isinstance(label_attr, str):
+        plot_labels = data.obs[label_attr]
+    elif (
+        isinstance(label_attr, list)
+        or isinstance(label_attr, np.ndarray)
+        or isinstance(label_attr, pd.Series)
+    ):
+        plot_labels = pd.Series(label_attr, dtype=str, name="labels")
 
-    plot_labels = pd.Series(plot_labels, dtype=str, name="labels")
     plot_labels = plot_labels.fillna("NA")
     plot_labels.reset_index(drop=True, inplace=True)
+
     return plot_labels
 
 
@@ -106,10 +111,8 @@ def get_plot_colors(
         elif isinstance(color_attr, str):
             if no_data:
                 raise Exception("'data' must not be None if 'color_attr' is str")
-            else:
-                plot_colors = get_data_or_split(
-                    adata=data, attr=color_attr, to_return="data"
-                )
+            elif isinstance(data, AnnData) and isinstance(color_attr, str):
+                plot_colors = data.obs[color_attr]
 
         else:
             raise Exception("invalid color_attr")
@@ -182,8 +185,9 @@ def get_plot_transparency(
     if isinstance(trans_attr, str) and not isinstance(adata, AnnData):
         raise Exception("'adata' must be AnnData if 'trans_attr' is str")
 
-    alpha_fac = get_data_or_split(adata=adata, attr=trans_attr, to_return="data")
-    alpha_fac = pd.Series(alpha_fac, dtype=float)
+    if isinstance(adata, AnnData) and isinstance(trans_attr, str):
+        alpha_fac = adata.obs[trans_attr]
+        alpha_fac = pd.Series(alpha_fac, dtype=float)
 
     if scale:
         z = scale_matrix(alpha_fac)
