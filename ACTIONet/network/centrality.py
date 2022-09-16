@@ -60,10 +60,11 @@ def centrality(
         "localized_coreness",
         "localized_pagerank",
     ]:
-        raise ValueError("'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'.")
+        raise ValueError(
+            "'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'."
+        )
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
         labels = adata.obs[labels] if type(labels) == str else labels
         if net_key in adata.obsp.keys():
@@ -108,7 +109,7 @@ def centrality(
 
     node_centrality = np.array(node_centrality, dtype=np.float64)
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return node_centrality
     else:
         adata.obs[centrality_key] = node_centrality

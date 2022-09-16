@@ -55,9 +55,7 @@ def build(
         None: Output in data.obsp[net_key_out] if 'data' is 'anndata.AnnData' and `copy=False`
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
-
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
         if H_key in adata.obsm.keys():
             H = adata.obsm[H_key]
@@ -82,9 +80,9 @@ def build(
     )
     G = sparse.spmatrix.tocsc(G)
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return G
-    elif data_is_AnnData:
+    elif isinstance(adata, AnnData):
         adata.obsp[net_key_out] = G
         return adata if copy else None
     else:

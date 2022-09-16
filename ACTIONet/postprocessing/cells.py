@@ -37,7 +37,7 @@ def annotate(
     algorithm: Optional[str] = "parametric",
     network_normalization_method: Optional[str] = "pagerank_sym",
     network_key: Optional[str] = "ACTIONet",
-    prenorm: Optional[str] = 0,
+    prenorm: Optional[int] = 0,
     gene_scaling_method: Optional[int] = 0,
     pre_alpha: Optional[float] = 0,
     post_alpha: Optional[float] = 0.9,
@@ -47,8 +47,15 @@ def annotate(
     if network_normalization_method == "pagerank_sym":
         network_normalization_code = 2
 
-    feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
-    masks = np.array(pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T)
+    feature_names = pd.Series(
+        [
+            x.decode() if isinstance(x, (bytes, bytearray)) else x
+            for x in list(adata.var.index)
+        ]
+    )
+    masks = np.array(
+        pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T
+    )
     selected_features_mask = np.sum(masks, axis=1) > 0
     sub_S = sparse.csc_matrix(adata.X[:, selected_features_mask].T)
     marker_mat = sparse.csc_matrix(masks[selected_features_mask, :])
@@ -79,7 +86,9 @@ def annotate(
             post_alpha=post_alpha,
         )
 
-    Enrichment = pd.DataFrame(marker_stats, index=adata.obs.index, columns=markers.keys())
+    Enrichment = pd.DataFrame(
+        marker_stats, index=adata.obs.index, columns=markers.keys()
+    )
     annotations = pd.Series(markers.keys())
     idx = np.argmax(marker_stats, axis=1)
     Label = annotations[idx]
@@ -136,8 +145,7 @@ def cluster(
         If 'adata=None' or 'return_raw=True', returns array of node centrality scores for each observation.
     """
 
-    data_is_AnnData = isinstance(adata, AnnData)
-    if not data_is_AnnData:
+    if not isinstance(adata, AnnData):
         raise Exception("adata must be an AnnData object")
 
     adata = adata.copy() if copy else adata
@@ -166,7 +174,7 @@ def cluster(
 
 def infer_missing_labels(
     adata: AnnData,
-    initial_labels: Union[str, np.ndarray, list, pd.Series] = None,
+    initial_labels: Union[str, np.ndarray, list, pd.Series],
     algorithm: str = "lpa",
     lambda_param: int = 0,
     iters: int = 3,
@@ -177,8 +185,7 @@ def infer_missing_labels(
     return_raw: Optional[bool] = False,
 ) -> pd.Series:
 
-    data_is_AnnData = isinstance(adata, AnnData)
-    if not data_is_AnnData:
+    if not isinstance(adata, AnnData):
         raise Exception("adata must be an AnnData object")
 
     adata = adata.copy() if copy else adata
@@ -192,7 +199,15 @@ def infer_missing_labels(
         else:
             raise ValueError("labels attribute %s not found" % initial_labels)
     else:
-        labels = pd.Series(initial_labels.astype("str"), index=adata.obs.index.values.astype("str"))
+        if isinstance(initial_labels, list):
+            labels = pd.Series(
+                [str(x) for x in initial_labels],
+                index=adata.obs.index.values.astype("str"),
+            )
+        elif isinstance(initial_labels, pd.Series):
+            labels = pd.Series(
+                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+            )
 
     fixed_samples = np.where(labels != "nan")[0]
 
@@ -208,7 +223,7 @@ def infer_missing_labels(
         thread_no=thread_no,
     )
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return updated_labels
     else:
         adata.obsm[output_key] = updated_labels
@@ -217,7 +232,7 @@ def infer_missing_labels(
 
 def correct_labels(
     adata: AnnData,
-    initial_labels: Union[str, np.ndarray, list, pd.Series] = None,
+    initial_labels: Union[str, np.ndarray, list, pd.Series],
     algorithm: str = "lpa",
     lambda_param: int = 0,
     iters: int = 3,
@@ -228,8 +243,7 @@ def correct_labels(
     return_raw: Optional[bool] = False,
 ) -> pd.Series:
 
-    data_is_AnnData = isinstance(adata, AnnData)
-    if not data_is_AnnData:
+    if not isinstance(adata, AnnData):
         raise Exception("adata must be an AnnData object")
 
     if initial_labels is None:
@@ -246,9 +260,17 @@ def correct_labels(
         else:
             raise ValueError("labels attribute %s not found" % initial_labels)
     else:
-        labels = pd.Series(initial_labels.astype("str"), index=adata.obs.index.values.astype("str"))
+        if isinstance(initial_labels, list):
+            labels = pd.Series(
+                [str(x) for x in initial_labels],
+                index=adata.obs.index.values.astype("str"),
+            )
+        elif isinstance(initial_labels, pd.Series):
+            labels = pd.Series(
+                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+            )
 
-    updated_labels = an.net.propagate(
+    updated_labels = an.nt.propagate(
         data=adata,
         labels=labels,
         fixed_samples=[],
@@ -260,7 +282,7 @@ def correct_labels(
         thread_no=thread_no,
     )
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return updated_labels
     else:
         adata.obsm[output_key] = updated_labels
