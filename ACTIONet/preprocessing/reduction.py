@@ -53,7 +53,7 @@ def reduce_adata(
     :return raw_output:If 'return_raw=True' returns dict with S_r, V, sigma, A, and B matrices.
     """
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
     else:
         adata = AnnData(data)
@@ -118,7 +118,7 @@ def reduce_adata(
 
 
 def reduce_and_batch_correct_adata_Harmony(
-    data: Union[AnnData, np.ndarray, spmatrix],
+    data: AnnData,
     batch_key: str,
     dim: Optional[int] = 50,
     max_iter: Optional[int] = 1000,

@@ -58,7 +58,7 @@ def runAA(
         Otherwise, these values are stored in the input AnnData object obsm/varm with `decomp_key_prefix` prefix.
     """
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
     else:
         adata = AnnData(data)

@@ -67,7 +67,7 @@ def diffusion(
     if alg_name not in ["pagerank", "pagerank_sym"]:
         raise ValueError("'algorithm' must be 'pagerank' or 'pagerank_sym'.")
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
         scores = scores if scores is not None else adata.obsm[scores_key]
         if net_key in adata.obsp.keys():
@@ -90,7 +90,7 @@ def diffusion(
     if not sparse.issparse(G):
         G = sparse.csc_matrix(G)
 
-    if sparse.issparse(scores):
+    if isinstance(scores, sparse.spmatrix):
         scores = scores.toarray()
 
     if algorithm == "pagerank":

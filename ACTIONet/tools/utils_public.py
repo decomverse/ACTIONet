@@ -133,7 +133,7 @@ def normalize_matrix(
     ):
         raise ValueError("'scale_factor' must be 'median' or numeric.")
 
-    if sparse.issparse(X):
+    if isinstance(X, sparse.spmatrix):
         lib_sizes = np.array(np.sum(X, axis=1))
         lib_sizes[lib_sizes == 0] = 1
         B = X.multiply(1 / lib_sizes)

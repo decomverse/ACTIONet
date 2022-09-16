@@ -50,7 +50,7 @@ def autocorrelation(
     if alg_name not in ["moran", "geary", "categorical"]:
         raise ValueError("algorithm must be 'moran', 'geary', or 'categorical'.")
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data
         scores = scores if scores is not None else adata.obsm[scores_key]
         if net_key in adata.obsp.keys():
@@ -70,7 +70,7 @@ def autocorrelation(
     G = G.astype(dtype=np.float64)
     scores = scores.astype(dtype=np.float64)
 
-    if sparse.issparse(scores):
+    if isinstance(scores, sparse.spmatrix):
         scores = scores.toarray()
 
     if algorithm == "geary":

@@ -59,7 +59,7 @@ def runACTION(
     reduction_key = str(reduction_key)
     depth = int(str(depth))
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         if reduction_key not in data.obsm.keys():
             raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
         else:
@@ -87,7 +87,7 @@ def runACTION(
     }
     ACTION_out["W"] = np.matmul(X, ACTION_out["C"])
 
-    if return_raw or not isinstance(adata, AnnData):
+    if return_raw or not isinstance(data, AnnData):
         return ACTION_out
     else:
         data.obsm[reduction_key + "_" + "C"] = ACTION_out["C"]
