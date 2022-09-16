@@ -34,9 +34,9 @@ def annotate(
     algorithm: Optional[str] = "parametric",
     network_normalization_method: Optional[str] = "pagerank_sym",
     network_key: Optional[str] = "ACTIONet",
-    prenorm: Optional[str] = 1,
+    prenorm: Optional[str] = 0,
     gene_scaling_method: Optional[int] = 0,
-    pre_alpha: Optional[float] = 0.15,
+    pre_alpha: Optional[float] = 0,
     post_alpha: Optional[float] = 0.9,
     perm_no: Optional[int] = 30,
 ):
