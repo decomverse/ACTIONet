@@ -12,12 +12,12 @@ import _ACTIONet as _an
 
 def normalize_reduction(
     adata: AnnData,
-    reduction_key: Optional[str] = None,
+    reduction_key: str,
     normalization: Optional[int] = 1,
     copy: Optional[bool] = False,
 ):
     if reduction_key not in adata.obsm.keys():
-        raise ValueError("Did not find adata.obsm['" + reduction_key + "']. ")
+        raise ValueError(f"Did not find adata.obsm[{reduction_key}]. ")
     reduction_key_out = reduction_key + "_normalized"
 
     adata = adata.copy() if copy else adata
@@ -26,8 +26,10 @@ def normalize_reduction(
     Xr_norm = _an.normalize_mat(Xr, normalization=normalization, dim=1)
     adata.obsm[reduction_key_out] = Xr_norm
     adata.uns["metadata"]["reduction_normalization"] = normalization
-
-    return adata if copy else None
+    if copy:
+        return adata
+    else:
+        return None
 
 
 def get_data_or_split(
@@ -37,7 +39,7 @@ def get_data_or_split(
     to_return: Optional[str] = "data",
     d: Optional[int] = 0,
 ) -> Union[list, dict]:
-    to_return = to_return.lower()
+    to_return = str(to_return).lower()
     if to_return not in ["data", "levels", "split"]:
         raise ValueError("'to_return={type}' must be 'data', 'levels', or 'split'.".format(type=to_return))
 
@@ -87,6 +89,8 @@ def get_data_or_split(
         return level_dict
     elif to_return == "split":
         return idx_dict
+    else:
+        raise Exception()
 
 
 def rand_suffix(N):

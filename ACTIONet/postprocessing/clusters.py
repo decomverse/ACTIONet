@@ -6,8 +6,7 @@ from anndata import AnnData
 from scipy import sparse
 
 import _ACTIONet as _an
-
-from .. import tools as tl
+from ACTIONet.tools.utils_public import get_data_or_split, scale_matrix
 
 
 def __compute_feature_specificity(S, sample_assignments, thread_no=0):
@@ -76,7 +75,7 @@ def feature_specificity(
         else:
             S = adata.X
 
-        sa = tl.get_data_or_split(adata=adata, attr=cluster_attr, to_return="levels")
+        sa = get_data_or_split(adata=adata, attr=cluster_attr, to_return="levels")
         clusters = sa["index"]
 
     else:
@@ -134,14 +133,14 @@ def annotate(
         Confidence = np.max(logPvals, axis=1)
 
     elif labels is not None:
-        cluster_dict = tl.get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
+        cluster_dict = get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
         X1 = np.array(pd.DataFrame([(cluster_dict["index"] == k) * 1 for k in range(len(cluster_dict["keys"]))]).T)
 
-        labels_dict = tl.get_data_or_split(adata=adata, attr=labels, to_return="levels")
+        labels_dict = get_data_or_split(adata=adata, attr=labels, to_return="levels")
         X2 = np.array(pd.DataFrame([(labels_dict["index"] == k) * 1 for k in range(len(labels_dict["keys"]))]).T)
 
         XI = _an.XICOR(X1, X2)
-        Z = np.sign(tl.scale_matrix(X1).T @ tl.scale_matrix(X2)) * XI["Z"]
+        Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
         Enrichment = pd.DataFrame(Z, index=cluster_dict["keys"], columns=labels_dict["keys"])
 
         annotations = pd.Series(labels_dict["keys"])
@@ -151,7 +150,7 @@ def annotate(
         Confidence = np.max(Z, axis=1)
 
     elif scores is not None:
-        cluster_dict = tl.get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
+        cluster_dict = get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
         X1 = np.array(pd.DataFrame([(cluster_dict["index"] == k) * 1 for k in range(len(cluster_dict["keys"]))]).T)
 
         if isinstance(scores, str) or len(scores) == 1:
@@ -165,7 +164,7 @@ def annotate(
         X2 = np.array(scores)
 
         XI = _an.XICOR(X1, X2)
-        Z = np.sign(tl.scale_matrix(X1).T @ tl.scale_matrix(X2)) * XI["Z"]
+        Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
         Enrichment = pd.DataFrame(Z, index=cluster_dict["keys"], columns=scores.columns)
 
         annotations = scores.columns
