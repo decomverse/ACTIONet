@@ -73,7 +73,7 @@ def propagate(
     ]:
         raise ValueError("'algorithm' must be 'lpa'")
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
         labels = labels if labels is not None else adata.obs[labels_key]
         if net_key in adata.obsp.keys():

@@ -159,10 +159,10 @@ def unify_archetypes(
 
     S_r = S_r.astype(dtype=np.float64)
 
-    if sparse.issparse(C_stacked):
+    if isinstance(C_stacked, sparse.spmatrix):
         C_stacked = C_stacked.toarray()
 
-    if sparse.issparse(H_stacked):
+    if isinstance(H_stacked, sparse.spmatrix):
         H_stacked = H_stacked.toarray()
 
     C_stacked = C_stacked.astype(dtype=np.float64)

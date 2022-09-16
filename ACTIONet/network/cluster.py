@@ -62,7 +62,7 @@ def cluster(
     ]:
         raise ValueError("'layout_algorithm' must be 'leiden or 'fix'")
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
         initial_clusters = (
             initial_clusters

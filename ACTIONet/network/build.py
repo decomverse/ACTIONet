@@ -55,7 +55,7 @@ def build(
         None: Output in data.obsp[net_key_out] if 'data' is 'anndata.AnnData' and `copy=False`
     """
 
-    if isinstance(adata, AnnData):
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
         if H_key in adata.obsm.keys():
             H = adata.obsm[H_key]

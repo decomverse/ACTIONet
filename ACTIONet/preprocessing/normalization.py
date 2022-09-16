@@ -13,7 +13,7 @@ def normalize_matrix(
     top_features_frac: float = 1.0,
     scale_factor: Union[str, float, int, np.ndarray, None] = "median",
     transformation: Union[str, None] = "log",
-    anchor_features: Union[str, None] = None,
+    anchor_features: Union[np.ndarray, None] = None,
 ) -> Union[np.ndarray, sparse.spmatrix]:
 
     X = X.astype(dtype=np.float64)
@@ -32,7 +32,7 @@ def normalize_matrix(
     # Note: mean as opposed to sum
 
     # Normalize library sizes
-    if sparse.issparse(X):
+    if isinstance(X, sparse.spmatrix):
         X_scaled = X.multiply(1 / lib_sizes)
     else:
         X_scaled == X / lib_sizes
@@ -43,7 +43,7 @@ def normalize_matrix(
         X_scaled_norm = X_scaled * kappa
     elif isinstance(scale_factor, (int, float)):
         X_scaled_norm = X_scaled * scale_factor
-    elif isinstance(scale_factor, (np.array)):
+    elif isinstance(scale_factor, np.ndarray):
         if sparse.issparse(X_scaled):
             X_scaled_norm = X_scaled.multiply(scale_factor)
         else:
@@ -88,14 +88,18 @@ def normalize(
     top_features_frac: float = 1.0,
     scale_factor: Union[str, float, int, np.ndarray, None] = "median",
     transformation: Union[str, None] = "log",
-    anchor_features: Union[str, None] = None,
+    anchor_features: Union[np.ndarray, None] = None,
     copy: Optional[bool] = False,
 ) -> Optional[AnnData]:
     adata = adata.copy() if copy else adata
 
-    if "norm_method" in adata.uns["metadata"].keys():  # Already normalized? leave it alone!
+    if (
+        "norm_method" in adata.uns["metadata"].keys()
+    ):  # Already normalized? leave it alone!
         # return adata if copy else None
-        warnings.warn("AnnData object is prenormalized. Please make sure to use the right assay.")
+        warnings.warn(
+            "AnnData object is prenormalized. Please make sure to use the right assay."
+        )
 
     adata = adata.copy() if copy else adata
 
