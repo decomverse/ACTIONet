@@ -58,8 +58,7 @@ def runAA(
         Otherwise, these values are stored in the input AnnData object obsm/varm with `decomp_key_prefix` prefix.
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
     else:
         adata = AnnData(data)
@@ -82,7 +81,7 @@ def runAA(
     AA_out = _an.run_AA(X, Z, max_iter, min_delta)
     AA_out["W"] = np.matmul(X, AA_out["C"])
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return AA_out
     else:
         adata.uns[str(decomp_key_prefix)] = {}
@@ -276,7 +275,9 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
+        X = self._validate_data(
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         Z = self.components_
 

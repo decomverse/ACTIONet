@@ -50,8 +50,7 @@ def autocorrelation(
     if alg_name not in ["moran", "geary", "categorical"]:
         raise ValueError("algorithm must be 'moran', 'geary', or 'categorical'.")
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data
         scores = scores if scores is not None else adata.obsm[scores_key]
         if net_key in adata.obsp.keys():
@@ -128,22 +127,48 @@ def compute_phi(A, labels, s0, s1, s2):
     w = A.data
     pvec = counts / n
     k = len(pvec)
-    m1_rawphi = s0 / (n * (n - 1)) * (n**2 * k * (2 - k) - n * sum(1 / pvec))
+    m1_rawphi = s0 / (n * (n - 1)) * (n ** 2 * k * (2 - k) - n * sum(1 / pvec))
     Q1 = sum(1 / pvec)
     Q2 = sum(1 / np.power(pvec, 2))
     Q3 = sum(1 / np.power(pvec, 3))
     Q22 = np.sum(np.expand_dims(1 / pvec, axis=1) * np.expand_dims(1 / pvec, axis=0))
     E1 = (np.power(n, 2) * Q22 - n * Q3) / (n * (n - 1))
-    E2 = 4 * np.power(n, 3) * Q1 - 4 * np.power(n, 3) * k * Q1 + np.power(n, 3) * np.power(k, 2) * Q1 - 2 * (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2) + 2 * n * Q3 - np.power(n, 2) * Q22
+    E2 = (
+        4 * np.power(n, 3) * Q1
+        - 4 * np.power(n, 3) * k * Q1
+        + np.power(n, 3) * np.power(k, 2) * Q1
+        - 2 * (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+        + 2 * n * Q3
+        - np.power(n, 2) * Q22
+    )
     E2 = E2 / (n * (n - 1) * (n - 2))
-    A1 = 4 * np.power(n, 4) * np.power(k, 2) - 4 * np.power(n, 4) * np.power(k, 3) + np.power(n, 4) * np.power(k, 4) - (2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1)
-    A2 = 4 * np.power(n, 3) * Q1 - 4 * np.power(n, 3) * k * Q1 + np.power(n, 3) * np.power(k, 2) * Q1 - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+    A1 = (
+        4 * np.power(n, 4) * np.power(k, 2)
+        - 4 * np.power(n, 4) * np.power(k, 3)
+        + np.power(n, 4) * np.power(k, 4)
+        - (2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1)
+    )
+    A2 = (
+        4 * np.power(n, 3) * Q1
+        - 4 * np.power(n, 3) * k * Q1
+        + np.power(n, 3) * np.power(k, 2) * Q1
+        - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+    )
     Apart = A1 - 2 * A2
-    B1 = 4 * np.power(n, 3) * Q1 - 4 * np.power(n, 3) * k * Q1 + np.power(n, 3) * np.power(k, 2) * Q1 - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+    B1 = (
+        4 * np.power(n, 3) * Q1
+        - 4 * np.power(n, 3) * k * Q1
+        + np.power(n, 3) * np.power(k, 2) * Q1
+        - (2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2)
+    )
     B2 = 2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2 - n * Q3
     B3 = np.power(n, 2) * Q22 - n * Q3
     Bpart = B1 - B2 - B3
-    C1 = 2 * np.power(n, 3) * k * Q1 - np.power(n, 3) * np.power(k, 2) * Q1 - np.power(n, 2) * Q22
+    C1 = (
+        2 * np.power(n, 3) * k * Q1
+        - np.power(n, 3) * np.power(k, 2) * Q1
+        - np.power(n, 2) * Q22
+    )
     C2 = 2 * np.power(n, 2) * Q2 - np.power(n, 2) * k * Q2 - n * Q3
     Cpart = C1 - 2 * C2
     E3 = (Apart - 2 * Bpart - Cpart) / (n * (n - 1) * (n - 2) * (n - 3))
@@ -152,7 +177,13 @@ def compute_phi(A, labels, s0, s1, s2):
     v_j = labels[A.col]
     p_i = np.asarray(pvec[v_i])
     p_j = np.asarray(pvec[v_j])
-    rawphi = int(sum(w * (2 * (v_i.reset_index(drop=True) == v_j.reset_index(drop=True)) - 1) / (p_i * p_j)))
+    rawphi = int(
+        sum(
+            w
+            * (2 * (v_i.reset_index(drop=True) == v_j.reset_index(drop=True)) - 1)
+            / (p_i * p_j)
+        )
+    )
     mean_rawphi = m1_rawphi
     var_rawphi = m2_rawphi - np.power(mean_rawphi, 2)
     phi_z = (rawphi - mean_rawphi) / np.sqrt(var_rawphi)
@@ -171,7 +202,7 @@ def assess_categorical_autocorrelation(G, labels: list, perm_no: int = 100):
     # labels=string_list_to_int_list(labels)
     w = G.data
     s0 = sum(w)
-    s1 = sum(4 * w**2) / 2
+    s1 = sum(4 * w ** 2) / 2
     s2 = int(sum(np.power(G.sum(axis=1) + G.sum(axis=0).transpose(), 2)))
     G = G.tocoo()
     dictz, logPval, phi = compute_phi(G, labels, s0, s1, s2)

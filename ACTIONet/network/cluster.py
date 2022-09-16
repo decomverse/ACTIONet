@@ -62,10 +62,13 @@ def cluster(
     ]:
         raise ValueError("'layout_algorithm' must be 'leiden or 'fix'")
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
-        initial_clusters = initial_clusters if initial_clusters is not None else adata.obs[initial_clusters_key]
+        initial_clusters = (
+            initial_clusters
+            if initial_clusters is not None
+            else adata.obs[initial_clusters_key]
+        )
         if net_key in adata.obsp.keys():
             G = adata.obsp[net_key]
         else:
@@ -109,7 +112,7 @@ def cluster(
     else:
         raise ValueError("Clustering algorithm %s not found" % algorithm)
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return final_clusters
     else:
         adata.obs[final_clusters_key] = final_clusters

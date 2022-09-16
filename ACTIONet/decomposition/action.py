@@ -55,13 +55,11 @@ def runACTION(
         Otherwise, these values are stored in the input AnnData object obsm/varm with `reduction_key` prefix.
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
-
     # cast Optional types to the desired type
     reduction_key = str(reduction_key)
     depth = int(str(depth))
 
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         if reduction_key not in data.obsm.keys():
             raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
         else:
@@ -89,7 +87,7 @@ def runACTION(
     }
     ACTION_out["W"] = np.matmul(X, ACTION_out["C"])
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return ACTION_out
     else:
         data.obsm[reduction_key + "_" + "C"] = ACTION_out["C"]
@@ -278,7 +276,9 @@ class ACTION(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
+        X = self._validate_data(
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         Z = self.components_
 

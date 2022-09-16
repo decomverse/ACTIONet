@@ -1,7 +1,7 @@
 """Multi-resolution ACTION decomposition for dense matrices.
 """
 
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 import numpy as np
 import pandas as pd
@@ -85,9 +85,7 @@ def runACTIONMR(
         Otherwise, these values are stored in the input AnnData object obsm/varm with `reduction_key` prefix.
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
-
-    if data_is_AnnData:
+    if isinstance(data, AnnData):
         data = data.copy() if copy else data
 
         if reduction_key not in data.obsm.keys():
@@ -123,36 +121,44 @@ def runACTIONMR(
         return_raw=True,
     )
 
-    unified = unify_archetypes(
-        adata=None,
-        S_r=X,
-        C_stacked=pruned["C_stacked"],
-        H_stacked=pruned["H_stacked"],
-        backbone_density=unification_backbone_density,
-        resolution=unification_resolution,
-        min_cluster_size=unification_min_cluster_size,
-        normalization=normalization,
-        reduction_key=None,
-        thread_no=thread_no,
-        copy=False,
-        return_raw=True,
-    )
+    if isinstance(pruned, Dict):
+        unified = unify_archetypes(
+            adata=None,
+            S_r=X,
+            C_stacked=pruned["C_stacked"],
+            H_stacked=pruned["H_stacked"],
+            backbone_density=unification_backbone_density,
+            resolution=unification_resolution,
+            min_cluster_size=unification_min_cluster_size,
+            normalization=normalization,
+            reduction_key=None,
+            thread_no=thread_no,
+            copy=False,
+            return_raw=True,
+        )
 
-    ACTIONMR_out = {
-        "C_stacked": csc_matrix(pruned["C_stacked"]),
-        "H_stacked": csc_matrix(pruned["H_stacked"]),
-        "C_unified": csc_matrix(unified["C_unified"]),
-        "H_unified": csc_matrix(unified["H_unified"]),
-        "assigned_archetype": pd.Categorical(
-            values=unified["assigned_archetype"].astype(int),
-            categories=natsorted(map(int, np.unique(unified["assigned_archetype"]))),
-        ),
-    }
+    if isinstance(pruned, Dict):
+        ACTIONMR_out = {
+            "C_stacked": csc_matrix(pruned["C_stacked"]),
+            "H_stacked": csc_matrix(pruned["H_stacked"]),
+            "C_unified": csc_matrix(unified["C_unified"]),
+            "H_unified": csc_matrix(unified["H_unified"]),
+            "assigned_archetype": pd.Categorical(
+                values=unified["assigned_archetype"].astype(int),
+                categories=natsorted(
+                    map(int, np.unique(unified["assigned_archetype"]))
+                ),
+            ),
+        }
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(data, AnnData):
         if return_W:
-            ACTIONMR_out["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
-            ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
+            ACTIONMR_out["W_stacked"] = np.matmul(
+                X, ACTIONMR_out["C_stacked"].toarray()
+            )
+            ACTIONMR_out["W_unified"] = np.matmul(
+                X, ACTIONMR_out["C_unified"].toarray()
+            )
         return ACTIONMR_out
     else:
         data.obsm["C_stacked"] = ACTIONMR_out["C_stacked"]
@@ -430,7 +436,9 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
+        X = self._validate_data(
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         Z = self.components_
 

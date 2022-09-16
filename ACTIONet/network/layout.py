@@ -64,10 +64,13 @@ def layout(
     if alg_name not in ["umap", "tumap"]:
         raise ValueError("'layout_algorithm' must be 'tumap' or 'umap'.")
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
-        initial_coordinates = initial_coordinates if initial_coordinates is not None else adata.obsm[reduction_key]
+        initial_coordinates = (
+            initial_coordinates
+            if initial_coordinates is not None
+            else adata.obsm[reduction_key]
+        )
         if net_key in adata.obsp.keys():
             G = adata.obsp[net_key]
         else:
@@ -80,7 +83,9 @@ def layout(
     if not isinstance(G, (np.ndarray, sparse.spmatrix)):
         raise ValueError("'G' must be numpy.ndarray or sparse.spmatrix.")
     if not isinstance(initial_coordinates, (np.ndarray, sparse.spmatrix)):
-        raise ValueError("'initial_coordinates' must be numpy.ndarray or sparse.spmatrix.")
+        raise ValueError(
+            "'initial_coordinates' must be numpy.ndarray or sparse.spmatrix."
+        )
 
     G = G.astype(dtype=np.float64)
     initial_coordinates = ut.scale_matrix(initial_coordinates).astype(dtype=np.float64)
@@ -99,7 +104,7 @@ def layout(
         seed=seed,
     )
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return layout
     else:
         adata.obsm["ACTIONred"] = initial_coordinates[:, 0:3]

@@ -67,8 +67,7 @@ def diffusion(
     if alg_name not in ["pagerank", "pagerank_sym"]:
         raise ValueError("'algorithm' must be 'pagerank' or 'pagerank_sym'.")
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
         scores = scores if scores is not None else adata.obsm[scores_key]
         if net_key in adata.obsp.keys():
@@ -117,7 +116,7 @@ def diffusion(
 
     smoothed_scores = np.array(smoothed_scores, dtype=np.float64)
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return smoothed_scores
     else:
         adata.obsm[smoothed_scores_key] = smoothed_scores

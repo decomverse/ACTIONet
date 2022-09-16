@@ -52,8 +52,8 @@ def reduce_adata(
         `.obsm['ACTION_B']` \
     :return raw_output:If 'return_raw=True' returns dict with S_r, V, sigma, A, and B matrices.
     """
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
     else:
         adata = AnnData(data)
@@ -88,7 +88,7 @@ def reduce_adata(
     if return_raw:
         reduced["V"] = reduced["V"].T
         return reduced
-    elif data_is_AnnData:
+    elif isinstance(adata, AnnData):
         adata.obsm[reduction_key] = reduced["S_r"]
         adata.uns[reduction_key] = {}
         adata.uns[reduction_key]["sigma"] = reduced["sigma"]
@@ -99,13 +99,16 @@ def reduce_adata(
         adata.uns.setdefault("obsm_annot", {}).update(
             {
                 str(reduction_key): {"type": np.array([b"reduction"], dtype=object)},
-                str(reduction_key) + "_B": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key)
+                + "_B": {"type": np.array([b"internal"], dtype=object)},
             }
         )
         adata.uns.setdefault("varm_annot", {}).update(
             {
-                str(reduction_key) + "_A": {"type": np.array([b"internal"], dtype=object)},
-                str(reduction_key) + "_V": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key)
+                + "_A": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key)
+                + "_V": {"type": np.array([b"internal"], dtype=object)},
             }
         )
 

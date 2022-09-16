@@ -73,8 +73,7 @@ def propagate(
     ]:
         raise ValueError("'algorithm' must be 'lpa'")
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(adata, AnnData):
         adata = data.copy() if copy else data
         labels = labels if labels is not None else adata.obs[labels_key]
         if net_key in adata.obsp.keys():
@@ -119,7 +118,7 @@ def propagate(
         updated_labels = uniques.values[updated_labels_int]
         updated_labels[updated_labels_int == -1] = None
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return updated_labels
     else:
         adata.obs[updated_labels_key] = updated_labels

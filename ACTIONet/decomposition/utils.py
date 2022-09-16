@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ def prune_archetypes(
     min_cells: Optional[int] = 2,
     copy: Optional[bool] = False,
     return_raw: Optional[bool] = False,
-) -> Union[dict, AnnData, None]:
+) -> Union[Dict, AnnData, None]:
     """\
     Archetype pruning
 
