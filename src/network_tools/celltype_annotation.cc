@@ -41,21 +41,22 @@ namespace ACTIONet
     marker_mat = normalise(marker_mat, 1, 0);
     mat X = trans(mat(marker_mat));
 
-    //S = scale_expression(S);
+    // S = scale_expression(S);
     mat stats = mat(trans(sp_mat(X * S)));
 
     int N = X.n_cols;
 
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    parallelFor(0, perm_no, [&] (size_t i)
-                {
+    parallelFor(
+        0, perm_no, [&](size_t i)
+        {
                   uvec perm = randperm(N);
                   mat rand_stats = mat(trans(sp_mat(X.cols(perm) * S)));
                   mat shifted_vals = (rand_stats - stats);
                   E += shifted_vals;
-                  Esq += square(shifted_vals);
-                }, thread_no);
+                  Esq += square(shifted_vals); },
+        thread_no);
     mat mu = E / perm_no + stats;
     mat sigma = sqrt((Esq - square(E) / perm_no) / (perm_no - 1));
     mat Z = (stats - mu) / sigma;
@@ -76,16 +77,17 @@ namespace ACTIONet
 
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    parallelFor(0, perm_no, [&] (size_t i)
-                {
+    parallelFor(
+        0, perm_no, [&](size_t i)
+        {
                   uvec perm = randperm(N);
                   sp_mat raw_rand_stats = trans(sp_mat(X.cols(perm) * S));
                   mat rand_stats = compute_network_diffusion_fast(G, raw_rand_stats, 1, alpha, max_it); // * diagmat(vec(trans(sum(raw_rand_stats))));
 
                   mat shifted_vals = (rand_stats - stats);
                   E += shifted_vals;
-                  Esq += square(shifted_vals);
-                }, thread_no);
+                  Esq += square(shifted_vals); },
+        thread_no);
     mat mu = E / perm_no + stats;
     mat sigma = sqrt((Esq - square(E) / perm_no) / (perm_no - 1));
     mat Z = (stats - mu) / sigma;
@@ -228,23 +230,23 @@ namespace ACTIONet
     int N = X.n_cols;
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    parallelFor(0, perm_no, [&] (size_t i)
-                {
+    parallelFor(
+        0, perm_no, [&](size_t i)
+        {
                   uvec perm = randperm(N);
 
                   sp_mat raw_rand_stats = sp_mat(raw_stats_mat.rows(perm));
                   mat rand_stats = compute_network_diffusion_fast(G, raw_rand_stats, 1, alpha, max_it) * diagmat(vec(trans(sum(raw_rand_stats))));
 
                   E += rand_stats;
-                  Esq += square(rand_stats);
-                }, thread_no);
+                  Esq += square(rand_stats); },
+        thread_no);
     mat mu = E / perm_no;
     mat sigma = sqrt(Esq / perm_no - square(mu));
     mat Z = (stats - mu) / sigma;
 
     return (Z);
   }
-
 
   mat compute_marker_aggregate_stats(sp_mat &G, sp_mat &S, sp_mat &marker_mat,
                                      double alpha = 0.85, int max_it = 5,
@@ -334,8 +336,9 @@ namespace ACTIONet
     }
 
     mat stats = zeros(Z.n_rows, marker_mat.n_cols);
-    parallelFor(0, marker_mat.n_cols, [&] (size_t i)
-                {
+    parallelFor(
+        0, marker_mat.n_cols, [&](size_t i)
+        {
                   vec v = vec(marker_mat.col(i));
                   uvec idx = find(v != 0);
                   vec w = v(idx);
@@ -353,14 +356,14 @@ namespace ACTIONet
 
                   u = u * stddev(z) / stddev(u);
 
-                  stats.col(i) = u;
-                }, thread_no);
+                  stats.col(i) = u; },
+        thread_no);
 
     return (stats);
   }
 
-
-  sp_mat normalize_expression_profile(sp_mat &S, int normalization = 1) {
+  sp_mat normalize_expression_profile(sp_mat &S, int normalization = 1)
+  {
     sp_mat T;
     if (normalization == 0)
     {
@@ -373,20 +376,22 @@ namespace ACTIONet
       T = LSI(S);
     }
 
-    return(T);
+    return (T);
   }
 
   mat aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double diffusion_alpha, int thread_no)
   {
-    if(S.n_rows != marker_mat.n_rows) {
+    if (S.n_rows != marker_mat.n_rows)
+    {
       stderr_printf("Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
-    if(S.n_cols != G.n_rows) {
+    if (S.n_cols != G.n_rows)
+    {
       stderr_printf("Number of cell in the expression matrix (S) and cell network (G) do not match\n");
-       FLUSH;
-      return(mat());
+      FLUSH;
+      return (mat());
     }
 
     sp_mat markers_mat_bin = spones(marker_mat);
@@ -399,17 +404,19 @@ namespace ACTIONet
     sp_mat P = normalize_adj(G, network_normalization_method);
 
     mat marker_stats(T.n_cols, marker_mat.n_cols);
-    for(int j = 0; j < marker_mat.n_cols; j++) {
+    for (int j = 0; j < marker_mat.n_cols; j++)
+    {
       mat marker_expr(T.n_cols, marker_counts(j));
 
       int idx = 0;
-      for (sp_mat::col_iterator it = marker_mat.begin_col(j); it != marker_mat.end_col(j); it++) {
+      for (sp_mat::col_iterator it = marker_mat.begin_col(j); it != marker_mat.end_col(j); it++)
+      {
         double w = (*it);
-        marker_expr.col(idx) = w*vec(trans(T.row(it.row())));
+        marker_expr.col(idx) = w * vec(trans(T.row(it.row())));
         idx++;
       }
 
-      //0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
+      // 0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
       mat marker_expr_scaled = normalize_scores(marker_expr, gene_scaling_method, thread_no);
       mat marker_expr_imputed = compute_network_diffusion_Chebyshev(P, marker_expr_scaled, thread_no);
 
@@ -422,47 +429,54 @@ namespace ACTIONet
     }
     mat marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats, thread_no);
 
-    return(marker_stats_smoothed);
+    return (marker_stats_smoothed);
   }
 
-  double F2z(double F, double d1, double d2) {
-    double mu = d2 / (d2 - 2); // Only valud if d2 > 2
-    double sigma_sq = (2*d2*d2*(d1+d2-2))/(d1*(d2-2)*(d2-2)*(d2-4)); // Only valid when d2 > 4
+  double F2z(double F, double d1, double d2)
+  {
+    double mu = d2 / (d2 - 2);                                                               // Only valud if d2 > 2
+    double sigma_sq = (2 * d2 * d2 * (d1 + d2 - 2)) / (d1 * (d2 - 2) * (d2 - 2) * (d2 - 4)); // Only valid when d2 > 4
 
     double z = (F - mu) / sqrt(sigma_sq);
-    return(z);
+    return (z);
   }
 
   mat aggregate_genesets_mahalanobis_2archs(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no)
   {
-    if(S.n_rows != marker_mat.n_rows) {
+    if (S.n_rows != marker_mat.n_rows)
+    {
       stderr_printf("Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
-    if(S.n_cols != G.n_rows) {
+    if (S.n_cols != G.n_rows)
+    {
       stderr_printf("Number of cell in the expression matrix (S) and cell network (G) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
 
     // 0: pagerank, 2: sym_pagerank
     sp_mat P;
-    if(pre_alpha != 0 || post_alpha != 0) {
+    if (pre_alpha != 0 || post_alpha != 0)
+    {
       P = normalize_adj(G, network_normalization_method);
     }
 
     // 0: no normalization, 1: TF/IDF
     mat T = mat(normalize_expression_profile(S, expression_normalization_method));
 
-    if(pre_alpha != 0) {
+    if (pre_alpha != 0)
+    {
       mat T_t = trans(T);
       T = compute_network_diffusion_Chebyshev(P, T_t, thread_no, pre_alpha);
       T = trans(T);
     }
 
     mat marker_stats(T.n_cols, marker_mat.n_cols);
-        parallelFor(0, marker_mat.n_cols, [&] (int j) {
+    parallelFor(
+        0, marker_mat.n_cols, [&](int j)
+        {
 
       vec w = vec(marker_mat.col(j));
       uvec nnz_idx = find(w != 0);
@@ -506,51 +520,59 @@ namespace ACTIONet
 
           marker_stats(k, j) = sign(mean(delta)) * z;
         }
-      }
-    }, thread_no);
+      } },
+        thread_no);
 
     marker_stats.replace(datum::nan, 0);
 
     mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
-    if(post_alpha != 0) {
+    if (post_alpha != 0)
+    {
       stdout_printf("Post-smoothing expression values ... ");
       marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, post_alpha);
-      stdout_printf("done\n"); FLUSH;
+      stdout_printf("done\n");
+      FLUSH;
     }
 
-    return(marker_stats_smoothed);
+    return (marker_stats_smoothed);
   }
 
   mat aggregate_genesets_mahalanobis_2gmm(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no)
   {
-    if(S.n_rows != marker_mat.n_rows) {
+    if (S.n_rows != marker_mat.n_rows)
+    {
       stderr_printf("Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
-    if(S.n_cols != G.n_rows) {
+    if (S.n_cols != G.n_rows)
+    {
       stderr_printf("Number of cell in the expression matrix (S) and cell network (G) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
 
     // 0: pagerank, 2: sym_pagerank
     sp_mat P;
-    if(pre_alpha != 0 || post_alpha != 0) {
+    if (pre_alpha != 0 || post_alpha != 0)
+    {
       P = normalize_adj(G, network_normalization_method);
     }
 
     // 0: no normalization, 1: TF/IDF
     mat T = mat(normalize_expression_profile(S, expression_normalization_method));
 
-    if(pre_alpha != 0) {
+    if (pre_alpha != 0)
+    {
       mat T_t = trans(T);
       T = compute_network_diffusion_Chebyshev(P, T_t, thread_no, pre_alpha);
       T = trans(T);
     }
 
     mat marker_stats(T.n_cols, marker_mat.n_cols);
-        parallelFor(0, marker_mat.n_cols, [&] (int j) {
+    parallelFor(
+        0, marker_mat.n_cols, [&](int j)
+        {
 
       vec w = vec(marker_mat.col(j));
       uvec nnz_idx = find(w != 0);
@@ -589,47 +611,80 @@ namespace ACTIONet
 
           marker_stats(k, j) = sign(mean(delta)) * z;
         }
-      }
-    }, thread_no);
+      } },
+        thread_no);
 
     marker_stats.replace(datum::nan, 0);
 
     mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
-    if(post_alpha != 0) {
+    if (post_alpha != 0)
+    {
       stdout_printf("Post-smoothing expression values ... ");
       marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, post_alpha);
-      stdout_printf("done\n"); FLUSH;
+      stdout_printf("done\n");
+      FLUSH;
     }
 
-    return(marker_stats_smoothed);
+    return (marker_stats_smoothed);
+  }
+
+  mat doubleNorm(mat &X)
+  {
+    vec rs = sum(X, 1);
+    vec cs = trans(sum(X, 0));
+
+    mat Dr = diagmat(1 / sqrt(rs));
+    mat Dc = diagmat(1 / sqrt(cs));
+
+    mat Y = Dr * X * Dc;
+
+    return (Y);
   }
 
   mat aggregate_genesets_weighted_enrichment(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no)
   {
-    if(S.n_rows != marker_mat.n_rows) {
+    if (S.n_rows != marker_mat.n_rows)
+    {
       stdout_printf("Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
-    if(S.n_cols != G.n_rows) {
+    if (S.n_cols != G.n_rows)
+    {
       stdout_printf("Number of cell in the expression matrix (S) and cell network (G) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
 
     // 0: pagerank, 2: sym_pagerank
     sp_mat P;
-    if(pre_alpha != 0 || post_alpha != 0) {
+    if (pre_alpha != 0 || post_alpha != 0)
+    {
       P = normalize_adj(G, network_normalization_method);
     }
 
     // 0: no normalization, 1: TF/IDF
     mat T = mat(normalize_expression_profile(S, expression_normalization_method));
 
-    if(pre_alpha != 0) {
+    if (pre_alpha != 0)
+    {
       mat T_t = trans(T);
       T = compute_network_diffusion_Chebyshev(P, T_t, thread_no, pre_alpha);
       T = trans(T);
+    }
+
+    if (gene_scaling_method != 0)
+    {
+      if (gene_scaling_method > 0)
+      {
+        T = normalise(T, gene_scaling_method, 1);
+      }
+      else
+      {
+        mat T_t = trans(T);
+        T = normalize_scores(T_t, -gene_scaling_method, thread_no);
+        T = trans(T);
+      }
     }
 
     field<mat> res = assess_enrichment(T, marker_mat, thread_no);
@@ -637,58 +692,83 @@ namespace ACTIONet
 
     marker_stats.replace(datum::nan, 0);
 
-    mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
-    if(post_alpha != 0) {
+    mat marker_stats_smoothed = zscore(marker_stats); // zscore(marker_stats, thread_no);
+    field<vec> auto_out = autocorrelation_Moran(G, marker_stats_smoothed, 0, 0, thread_no);
+    if (post_alpha != 0)
+    {
       stdout_printf("Post-smoothing expression values ... ");
       marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, post_alpha);
-      stdout_printf("done\n"); FLUSH;
+      stdout_printf("done\n");
+      FLUSH;
     }
+    vec locality = auto_out(0);
+    locality.replace(datum::nan, 0);
+    locality /= mean(locality);
+    marker_stats_smoothed = marker_stats_smoothed * diagmat(locality);
 
-    return(marker_stats_smoothed);
+    return (marker_stats_smoothed);
   }
-
 
   mat aggregate_genesets_weighted_enrichment_permutation(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, int expression_normalization_method, int gene_scaling_method, double pre_alpha, double post_alpha, int thread_no, int perm_no)
   {
-    if(S.n_rows != marker_mat.n_rows) {
+    if (S.n_rows != marker_mat.n_rows)
+    {
       stderr_printf("Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
-    if(S.n_cols != G.n_rows) {
+    if (S.n_cols != G.n_rows)
+    {
       stderr_printf("Number of cell in the expression matrix (S) and cell network (G) do not match\n");
       FLUSH;
-      return(mat());
+      return (mat());
     }
 
     // 0: pagerank, 2: sym_pagerank
     sp_mat P;
-    if(pre_alpha != 0 || post_alpha != 0) {
+    if (pre_alpha != 0 || post_alpha != 0)
+    {
       P = normalize_adj(G, network_normalization_method);
     }
 
     // 0: no normalization, 1: TF/IDF
     mat T = mat(normalize_expression_profile(S, expression_normalization_method));
 
-    if(pre_alpha != 0) {
+    if (pre_alpha != 0)
+    {
       mat T_t = trans(T);
       T = compute_network_diffusion_Chebyshev(P, T_t, thread_no, pre_alpha);
       T = trans(T);
     }
 
+    if (gene_scaling_method != 0)
+    {
+      if (gene_scaling_method > 0)
+      {
+        T = normalise(T, gene_scaling_method, 1);
+      }
+      else
+      {
+        mat T_t = trans(T);
+        T = normalize_scores(T_t, -gene_scaling_method, thread_no);
+        T = trans(T);
+      }
+    }
+
     sp_mat X = trans(marker_mat);
 
     mat Y = T;
-    //0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
-    if(gene_scaling_method != 0) {
+    // 0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
+    if (gene_scaling_method != 0)
+    {
       Y = normalize_scores(T, gene_scaling_method, thread_no);
     }
     mat stats = spmat_mat_product(X, Y);
 
-
     mat E = zeros(size(stats));
     mat Esq = zeros(size(stats));
-    for(int k = 0; k < perm_no; k++) {
+    for (int k = 0; k < perm_no; k++)
+    {
       uvec perm = randperm(Y.n_rows);
       mat Y_perm = Y.rows(perm);
       mat rand_stats = spmat_mat_product(X, Y_perm);
@@ -698,19 +778,26 @@ namespace ACTIONet
       Esq += square(delta);
     }
     mat mu = stats + E / perm_no;
-    mat sigma = sqrt ( (Esq - square(E) / perm_no) / (perm_no - 1) );
+    mat sigma = sqrt((Esq - square(E) / perm_no) / (perm_no - 1));
     mat marker_stats = trans((stats - mu) / sigma);
 
     marker_stats.replace(datum::nan, 0);
 
-    mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
-    if(post_alpha != 0) {
+    mat marker_stats_smoothed = zscore(marker_stats); // zscore(marker_stats, thread_no);
+    field<vec> auto_out = autocorrelation_Moran(G, marker_stats_smoothed, 0, 0, thread_no);
+    if (post_alpha != 0)
+    {
       stdout_printf("Post-smoothing expression values ... ");
       marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, post_alpha);
-      stdout_printf("done\n"); FLUSH;
+      stdout_printf("done\n");
+      FLUSH;
     }
+    vec locality = auto_out(0);
+    locality.replace(datum::nan, 0);
+    locality /= mean(locality);
+    marker_stats_smoothed = marker_stats_smoothed * diagmat(locality);
 
-    return(marker_stats_smoothed);
+    return (marker_stats_smoothed);
   }
 
 } // namespace ACTIONet
