@@ -619,7 +619,7 @@ font-size: 250%;
 margin-top: 0px;
 }
 .subtitle{
-font-size:95%; 
+font-size:95%;
 }
 h2{
 margin-top: 1em;
@@ -1243,11 +1243,11 @@ display: none !important;
 
 
 #table-of-contents ul.nav li ul li ul li ul li {
-display: none !important; 
+display: none !important;
 
 }
 #table-of-contents ul.nav li.active > a {
-border-bottom:solid 1px #c9c9c9 !important; 
+border-bottom:solid 1px #c9c9c9 !important;
 border-right:solid 1px #c9c9c9 !important;
 }
 #table-of-contents ul.nav li.active a {
@@ -1563,8 +1563,8 @@ $(document).ready(function () {
 <span id="cb2-2"><a href="#cb2-2"></a>sce =<span class="st"> </span><span class="kw">readRDS</span>(input.file)</span>
 <span id="cb2-3"><a href="#cb2-3"></a></span>
 <span id="cb2-4"><a href="#cb2-4"></a>sce</span></code></pre></div>
-<pre><code>class: SingleCellExperiment 
-dim: 13714 2638 
+<pre><code>class: SingleCellExperiment
+dim: 13714 2638
 metadata(0):
 assays(1): logcounts
 rownames(13714): AL627309.1 AP006222.2 ... PNRC2-1 SRSF10-1
@@ -1590,8 +1590,8 @@ spikeNames(0):</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>ace =<span class="st"> </span><span class="kw">as</span>(sce, <span class="st">&quot;ACTIONetExperiment&quot;</span>)</span>
 <span id="cb7-2"><a href="#cb7-2"></a></span>
 <span id="cb7-3"><a href="#cb7-3"></a>ace</span></code></pre></div>
-<pre><code>class: ACTIONetExperiment 
-dim: 13714 2638 
+<pre><code>class: ACTIONetExperiment
+dim: 13714 2638
 metadata(1): reduction.time
 assays(1): logcounts
 rownames(13714): AL627309.1 AP006222.2 ... PNRC2-1 SRSF10-1
@@ -1601,9 +1601,9 @@ colnames(2638): AAACATACAACCAC-1 AAACATTGAGCTAC-1 ... TTTGCATGAGAGGC-1
 colData names(5): nFeatures_RNA percent.mito nCount_RNA louvain ident
 reducedDimNames(4): PCA TSNE UMAP S_r
 spikeNames(0):
-rowNets(0): 
-colNets(0): 
-rowFactors(0): 
+rowNets(0):
+colNets(0):
+rowFactors(0):
 colFactors(0): </code></pre>
 <p>As it can be seen, the new slots are <code>rowNets</code>, <code>colNets</code>, <code>rowFactors</code>, and <code>colFactors</code>. Each slot has its on getter/setter functions, which we will use through out the rest of the tutorial to store results.</p>
 </div>

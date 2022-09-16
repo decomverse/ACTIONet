@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
-from sklearn import preprocessing
 
 import _ACTIONet as _an
 
@@ -25,26 +24,6 @@ def normalize_reduction(
 
     Xr = np.array(adata.obsm[reduction_key])
     Xr_norm = _an.normalize_mat(Xr, normalization=normalization, dim=1)
-
-    # if normalization == 0:
-    #     Xr_norm = Xr
-    # elif normalization == 1:
-    #     # denom = np.array(np.sum(abs(Xr), axis=1, keepdims=True))
-    #     # denom[denom == 0] = 1
-    #     # Xr_norm = Xr / denom
-    #     Xr_norm = preprocessing.normalize(Xr, norm="l1")
-    # elif normalization == 2:
-    #     # denom = np.array(np.sqrt(np.sum((Xr ** 2), axis=1, keepdims=True)))
-    #     # denom[denom == 0] = 1
-    #     # Xr_norm = Xr / denom
-    #     Xr_norm = preprocessing.normalize(Xr, norm="l2")
-    # elif normalization == -1:  # z-score
-    #     Xr_norm = scale_matrix(Xr)
-    # else:
-    #     raise ValueError(
-    #         "normalize_reduction: normalization" + normalization + "unknown"
-    #     )
-
     adata.obsm[reduction_key_out] = Xr_norm
     adata.uns["metadata"]["reduction_normalization"] = normalization
 
@@ -136,6 +115,46 @@ def scale_matrix(
     return X
 
 
+def normalize_matrix(
+    X: Union[np.ndarray, sparse.spmatrix],
+    log_transform: Optional[bool] = False,
+    scale_factor: Union[str, float, int, None] = None,
+) -> Union[np.ndarray, sparse.spmatrix]:
+    X = X.astype(dtype=np.float64)
+
+    if (
+        (scale_factor != "median")
+        and (isinstance(scale_factor, (int, float)) is False)
+        and (scale_factor is not None)
+    ):
+        raise ValueError("'scale_factor' must be 'median' or numeric.")
+
+    if sparse.issparse(X):
+        lib_sizes = np.array(np.sum(X, axis=1))
+        lib_sizes[lib_sizes == 0] = 1
+        B = X.multiply(1 / lib_sizes)
+        # B = _an.normalize_spmat(X=X, normalization=1, dim=1)
+    else:
+        X = np.array(X)
+        lib_sizes = np.sum(X, axis=1, keepdims=True)
+        lib_sizes[lib_sizes == 0] = 1
+        B = X / lib_sizes
+        # B = _an.normalize_mat(X=X, normalization=1, dim=1)
+    if scale_factor == "median":
+        lib_sizes = np.sum(X, axis=1, keepdims=True)
+        B = B * np.median(lib_sizes)
+    elif isinstance(scale_factor, (int, float)):
+        B = B * scale_factor
+
+    if log_transform:
+        B = np.log1p(B)
+
+    if sparse.issparse(B):
+        B = sparse.csc_matrix(B)
+
+    return B
+
+
 def double_normalize(
     X: np.ndarray,
     log1p: Optional[bool] = True,
@@ -160,4 +179,3 @@ def double_normalize(
     X_scaled = D_r @ X @ D_c
     X_scaled = X_scaled / np.max(X_scaled)
     return X_scaled
-

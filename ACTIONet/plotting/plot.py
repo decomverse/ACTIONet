@@ -1,34 +1,22 @@
-import re
-from typing import (
-    Union,
-    Optional,
-    Sequence,
-    Any,
-    Mapping,
-    Tuple,
-)
+from random import sample
+from typing import Optional, Sequence, Union
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objs as go
+import plotly.io as pio
+import scanpy as sc
+from anndata import AnnData
 from cycler import Cycler
 from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from matplotlib.figure import Figure
-import plotly as pl
-import plotly.io as pio
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
-import plotly.express as px
-import numpy as np
-from adjustText import adjust_text
-from anndata import AnnData
-from scipy import sparse
-import pandas as pd
-from random import sample
-from .color import *
-from .palettes import palette_default
-from ..tools import utils_public as ut
-from . import utils as pu
-import _ACTIONet as _an
+
 import ACTIONet.network as net
-import scanpy as sc
+from ACTIONet.plotting.color import append_alpha_to_rgb, lighten_color
+from ACTIONet.plotting.palettes import palette_default
+
+from . import utils as pu
 
 pio.orca.config.use_xvfb = True
 pio.orca.config.save()
@@ -36,21 +24,13 @@ pio.orca.config.save()
 
 def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
     if coordinate_key not in adata.obsm.keys():
-        raise ValueError(
-            f"Did not find adata.obsm['{coordinate_key}']. "
-            "Please run nt.layoutNetwork() first."
-        )
+        raise ValueError(f"Did not find adata.obsm['{coordinate_key}']. " "Please run nt.layoutNetwork() first.")
     if label_key is not None and label_key not in adata.obs.columns:
         raise ValueError(f"Did not find adata.obs['{label_key}'].")
     if transparency_key is not None and transparency_key not in adata.obs.columns:
         raise ValueError(f"Did not find adata.obs['{transparency_key}'].")
-    if (
-        transparency_key is not None
-        and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False
-    ):
-        raise ValueError(
-            f"transparency_key must refer to a numeric values, which is not the case for['{transparency_key}']."
-        )
+    if transparency_key is not None and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False:
+        raise ValueError(f"transparency_key must refer to a numeric values, which is not the case for['{transparency_key}'].")
 
 
 def plot_ACTIONet(
@@ -117,12 +97,7 @@ def visualize_markers(
     **kwargs,
 ) -> Union[Figure, Axes, None]:
 
-    feature_names = pd.Series(
-        [
-            x.decode() if isinstance(x, (bytes, bytearray)) else x
-            for x in list(adata.var.index)
-        ]
-    )
+    feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
     adata.var.index = feature_names
 
     X = adata[:, genes].X
@@ -132,22 +107,17 @@ def visualize_markers(
         X_smooth = X
 
     if isinstance(genes, str):
-        p = plot_ACTIONet(
-            adata, X_smooth[:, 0], color_map=color_map, title=genes, **kwargs
-        )
+        p = plot_ACTIONet(adata, X_smooth[:, 0], color_map=color_map, title=genes, **kwargs)
     else:
-        p = [
-            plot_ACTIONet(
-                adata, X_smooth[:, k], color_map=color_map, title=genes[k], **kwargs
-            )
-            for k in range(X_smooth.shape[1])
-        ]
+        p = [plot_ACTIONet(adata, X_smooth[:, k], color_map=color_map, title=genes[k], **kwargs) for k in range(X_smooth.shape[1])]
 
     return p
 
 
 def archetype_footprint(
-    adata: AnnData, color_map: Union[Colormap, str, None] = "YlOrRd", **kwargs,
+    adata: AnnData,
+    color_map: Union[Colormap, str, None] = "YlOrRd",
+    **kwargs,
 ) -> Union[Figure, Axes, None]:
 
     X_smooth = adata.obsm["archetype_footprint"]
@@ -224,15 +194,11 @@ def plot_ACTIONet_interactive(
         if isinstance(data, AnnData) and coordinate_key is None:
             coordinate_key = "ACTIONet2D"
 
-    plot_coors = pu.get_plot_coors(
-        data=data, coordinate_key=coordinate_key, scale_coors=True, coor_dims=coor_dims
-    )
+    plot_coors = pu.get_plot_coors(data=data, coordinate_key=coordinate_key, scale_coors=True, coor_dims=coor_dims)
     plot_labels = pu.get_plot_labels(label_attr=label_attr, data=data)
 
     if plot_labels is None:
-        plot_labels = pd.Series(
-            "NA", index=range(plot_coors.shape[0]), name="labels", dtype=str
-        )
+        plot_labels = pd.Series("NA", index=range(plot_coors.shape[0]), name="labels", dtype=str)
     else:
         plot_labels = pd.Series(plot_labels, name="labels", dtype=str)
 
@@ -276,12 +242,8 @@ def plot_ACTIONet_interactive(
             scale=True,
         )
 
-        plot_data["fill"] = append_alpha_to_rgb(
-            plot_data["fill"], plot_data["trans"], unzip_colors=True
-        )
-        plot_data["color"] = append_alpha_to_rgb(
-            plot_data["color"], plot_data["trans"], unzip_colors=True
-        )
+        plot_data["fill"] = append_alpha_to_rgb(plot_data["fill"], plot_data["trans"], unzip_colors=True)
+        plot_data["color"] = append_alpha_to_rgb(plot_data["color"], plot_data["trans"], unzip_colors=True)
 
         # if point_order is None:
         #     plot_data = plot_data.sample(frac=1).reset_index(drop=True)
@@ -323,9 +285,7 @@ def plot_ACTIONet_interactive(
             return_dict=True,
         )
 
-        stroke_dict = {
-            k: lighten_color(v, stroke_contrast_fac) for (k, v) in fill_dict.items()
-        }
+        stroke_dict = {k: lighten_color(v, stroke_contrast_fac) for (k, v) in fill_dict.items()}
 
         # if point_order is None:
         #     plot_data = plot_data.sample(frac=1).reset_index(drop=True)
@@ -351,4 +311,3 @@ def plot_ACTIONet_interactive(
         )
 
     return p
-

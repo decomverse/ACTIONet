@@ -1,16 +1,19 @@
 """Multi-resolution ACTION decomposition for dense matrices.
 """
 
-from typing import Union
+from typing import Optional, Union
 
+import numpy as np
+import pandas as pd
 from anndata import AnnData
-from scipy.sparse import issparse, spmatrix, csc_matrix
+from natsort import natsorted
+from scipy.sparse import csc_matrix, issparse, spmatrix
 from sklearn._config import config_context
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 import _ACTIONet as _an
-from .utils import *
+from ACTIONet.decomposition.utils import prune_archetypes, unify_archetypes
 
 
 def runACTIONMR(
@@ -71,7 +74,7 @@ def runACTIONMR(
     Returns
     -------
     Union[AnnData, dict]
-        Result of archetypal analysis. 
+        Result of archetypal analysis.
         If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
             "W_unified": Multi-resolution Archetypal matrix,
             "H_unified": Multi-resolution Loading matrix,
@@ -148,12 +151,8 @@ def runACTIONMR(
 
     if return_raw or not data_is_AnnData:
         if return_W:
-            ACTIONMR_out["W_stacked"] = np.matmul(
-                X, ACTIONMR_out["C_stacked"].toarray()
-            )
-            ACTIONMR_out["W_unified"] = np.matmul(
-                X, ACTIONMR_out["C_unified"].toarray()
-            )
+            ACTIONMR_out["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
+            ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
         return ACTIONMR_out
     else:
         data.obsm["C_stacked"] = ACTIONMR_out["C_stacked"]
@@ -178,8 +177,8 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
     Where:
         :math: Z = BX,
         :math: 0 <= B_ij, A_ij,
-        :math: \sum_{i} A_ij = 1,
-        :math: \sum_{i} B_ij = 1,
+        :math: sum_{i} A_ij = 1,
+        :math: sum_{i} B_ij = 1,
 
     The problem is solved for multiple number of archetypes and results are aggregated in a multi-resolution decomposition.
 
@@ -205,9 +204,9 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
 
     unification_th : float between [0, 1], default=0
         Amount of redundancy that is tolerated in the unified archetypes. Higher value results in larger number of archetypes
-        
+
     thread_no: int, default=0
-        Number of threads to use  
+        Number of threads to use
 
     Attributes
     ----------
@@ -237,7 +236,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
     assigned_archetype: array of size n_samples
         Discretized sample to archetype assignments
 
-        
+
     See Also
     --------
     SPA : Successive Projection Algorithm to solve convex NMF
@@ -317,7 +316,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             and `n_features` is the number of features.
 
         y : Ignored
-            Not used, present for API consistency by convention.         
+            Not used, present for API consistency by convention.
 
         Returns
         -------
@@ -369,7 +368,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
             Computed from stacked_loadings after the unification process to retain nonredundant archetypes.
 
         B: ndarray of shape (n_mr_components, n_samples)
-            Multi-resolution coefficient matrix. 
+            Multi-resolution coefficient matrix.
             n_mr_components is the estimated # of multi-resolution archetypes (based on unification_th)
             Computed from stacked_coeffs after the unification process to retain nonredundant archetypes.
 
@@ -431,9 +430,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
 
         Z = self.components_
 

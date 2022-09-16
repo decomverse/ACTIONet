@@ -8,9 +8,9 @@ from anndata import AnnData
 from matplotlib.colors import to_rgb
 from scipy import sparse
 
+from .. import tools as tl
 from .color import rgb_to_hex
 from .palettes import palette_default
-from .. import tools as tl
 
 
 def _default_colors(n) -> pd.Series:
@@ -19,17 +19,15 @@ def _default_colors(n) -> pd.Series:
 
 
 def get_plot_coors(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        coordinate_key: Optional[str],
-        scale_coors: Optional[bool] = True,
-        coor_dims: Optional[int] = 2,
-        ) -> pd.DataFrame:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    coordinate_key: Optional[str],
+    scale_coors: Optional[bool] = True,
+    coor_dims: Optional[int] = 2,
+) -> pd.DataFrame:
     if isinstance(data, AnnData):
         coors = data.obsm[coordinate_key]
         if coors.shape[1] < coor_dims:
-            err = "data in 'coordinate_key' has < {dims} dimensions".format(
-                    dims=coor_dims
-                    )
+            err = "data in 'coordinate_key' has < {dims} dimensions".format(dims=coor_dims)
             raise Exception(err)
     else:
         if not isinstance(data, (np.ndarray, sparse.spmatrix)):
@@ -52,9 +50,9 @@ def get_plot_coors(
 
 
 def get_plot_labels(
-        label_attr: Union[str, list, pd.Series, np.ndarray, None],
-        data: Union[AnnData, np.ndarray, sparse.spmatrix, None] = None,
-        ) -> Union[pd.Series, None]:
+    label_attr: Union[str, list, pd.Series, np.ndarray, None],
+    data: Union[AnnData, np.ndarray, sparse.spmatrix, None] = None,
+) -> Union[pd.Series, None]:
     if label_attr is None:
         return None
 
@@ -71,13 +69,13 @@ def get_plot_labels(
 
 
 def get_plot_colors(
-        color_attr: Union[str, list, pd.Series, pd.DataFrame, np.ndarray, None],
-        plot_labels: Union[list, pd.Series, None],
-        data: Union[AnnData, np.ndarray, sparse.spmatrix, None] = None,
-        color_key: Optional[str] = "denovo_color",
-        palette: Union[str, list, pd.Series, dict] = palette_default,
-        return_dict: Optional[bool] = False,
-        ) -> pd.Series:
+    color_attr: Union[str, list, pd.Series, pd.DataFrame, np.ndarray, None],
+    plot_labels: Union[list, pd.Series, None],
+    data: Union[AnnData, np.ndarray, sparse.spmatrix, None] = None,
+    color_key: Optional[str] = "denovo_color",
+    palette: Union[str, list, pd.Series, dict] = palette_default,
+    return_dict: Optional[bool] = False,
+) -> pd.Series:
     if data is not None:
         n_dim = data.shape[0]
         no_data = False
@@ -89,9 +87,7 @@ def get_plot_colors(
         if isinstance(color_attr, (np.ndarray, pd.DataFrame)):
 
             if color_attr.shape[1] >= 3:
-                plot_colors = [
-                    rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])
-                    ]
+                plot_colors = [rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])]
                 plot_colors = pd.Series(plot_colors, dtype=str)
             else:
                 raise Exception("invalid color_attr")
@@ -172,25 +168,14 @@ def get_plot_colors(
 
 
 def get_plot_transparency(
-        trans_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
-        adata: Union[AnnData, None] = None,
-        trans_fac: Optional[float] = 1.5,
-        trans_th: Optional[float] = -0.5,
-        scale: Optional[bool] = True,
-        ) -> Union[pd.Series, int]:
+    trans_attr: Union[str, list, pd.Series, np.ndarray, None] = None,
+    adata: Union[AnnData, None] = None,
+    trans_fac: Optional[float] = 1.5,
+    trans_th: Optional[float] = -0.5,
+    scale: Optional[bool] = True,
+) -> Union[pd.Series, int]:
     if trans_attr is None:
         return 1
-
-    data_is_AnnData = isinstance(adata, AnnData)
-    # if data_is_AnnData:
-    #     n_dim = adata.shape[0]
-
-    # if isinstance(trans_attr, str):
-    #     if not data_is_AnnData:
-    #         raise Exception("'adata' must be AnnData if 'trans_attr' is str")
-    #     alpha_fac = tl.__get_attr_or_split_idx(adata, attr=trans_attr, return_vec=True)
-    # else:
-    #     alpha_fac = pd.Series(trans_attr, dtype=float)
 
     if isinstance(trans_attr, str) and not isinstance(adata, AnnData):
         raise Exception("'adata' must be AnnData if 'trans_attr' is str")
@@ -212,18 +197,18 @@ def get_plot_transparency(
 
 
 def make_plotly_scatter_single_trace(
-        x: Union[list, np.ndarray, pd.Series],
-        y: Union[list, np.ndarray, pd.Series],
-        z: Union[list, np.ndarray, pd.Series, None] = None,
-        label_attr: Union[list, np.ndarray, pd.Series, None] = None,
-        cols_point: Union[str, list, np.ndarray, pd.Series, None] = None,
-        cols_stroke: Union[str, list, np.ndarray, pd.Series, None] = None,
-        point_size: Optional[float] = 3,
-        stroke_size: Optional[float] = 0.3,
-        show_legend: Optional[bool] = False,
-        hover_text: Union[list, pd.Series, np.ndarray] = None,
-        plot_3d: Optional[bool] = False,
-        ) -> go.Figure:
+    x: Union[list, np.ndarray, pd.Series],
+    y: Union[list, np.ndarray, pd.Series],
+    z: Union[list, np.ndarray, pd.Series, None] = None,
+    label_attr: Union[list, np.ndarray, pd.Series, None] = None,
+    cols_point: Union[str, list, np.ndarray, pd.Series, None] = None,
+    cols_stroke: Union[str, list, np.ndarray, pd.Series, None] = None,
+    point_size: Optional[float] = 3,
+    stroke_size: Optional[float] = 0.3,
+    show_legend: Optional[bool] = False,
+    hover_text: Union[list, pd.Series, np.ndarray] = None,
+    plot_3d: Optional[bool] = False,
+) -> go.Figure:
     if hover_text is None:
         if label_attr is None:
             hover_text = list(range(len(x)))
@@ -234,64 +219,71 @@ def make_plotly_scatter_single_trace(
 
     if plot_3d:
         p = go.Figure(
-                data=go.Scatter3d(
-                        x=x,
-                        y=y,
-                        z=z,
-                        marker=dict(
-                                color=cols_point,
-                                size=point_size,
-                                line=dict(color=cols_stroke, width=stroke_size),
-                                ),
-                        text=hover_text,
-                        hoverinfo="text",
-                        mode="markers",
-                        ),
-                layout=dict(
-                        scene=dict(xaxis=axis_params, yaxis=axis_params, zaxis=axis_params),
-                        showlegend=show_legend,
-                        ),
-                )
+            data=go.Scatter3d(
+                x=x,
+                y=y,
+                z=z,
+                marker=dict(
+                    color=cols_point,
+                    size=point_size,
+                    line=dict(color=cols_stroke, width=stroke_size),
+                ),
+                text=hover_text,
+                hoverinfo="text",
+                mode="markers",
+            ),
+            layout=dict(
+                scene=dict(xaxis=axis_params, yaxis=axis_params, zaxis=axis_params),
+                showlegend=show_legend,
+            ),
+        )
     else:
         p = go.Figure(
-                data=go.Scattergl(
-                        x=x,
-                        y=y,
-                        marker=dict(
-                                color=cols_point,
-                                size=point_size,
-                                line=dict(color=cols_stroke, width=stroke_size),
-                                ),
-                        text=hover_text,
-                        hoverinfo="text",
-                        mode="markers",
-                        ),
-                layout=dict(
-                        xaxis=axis_params,
-                        yaxis=axis_params,
-                        showlegend=show_legend,
-                        paper_bgcolor="white",
-                        plot_bgcolor="white",
-                        ),
-                )
+            data=go.Scattergl(
+                x=x,
+                y=y,
+                marker=dict(
+                    color=cols_point,
+                    size=point_size,
+                    line=dict(color=cols_stroke, width=stroke_size),
+                ),
+                text=hover_text,
+                hoverinfo="text",
+                mode="markers",
+            ),
+            layout=dict(
+                xaxis=axis_params,
+                yaxis=axis_params,
+                showlegend=show_legend,
+                paper_bgcolor="white",
+                plot_bgcolor="white",
+            ),
+        )
 
     return p
 
 
 def make_plotly_scatter_split_trace(
-        x: Union[list, np.ndarray, pd.Series],
-        y: Union[list, np.ndarray, pd.Series],
-        z: Union[list, np.ndarray, pd.Series, None] = None,
-        label_attr: Union[list, np.ndarray, pd.Series, None] = None,
-        fill_dict: Union[str, list, np.ndarray, pd.Series, None] = None,
-        stroke_dict: Union[str, list, np.ndarray, pd.Series, None] = None,
-        point_size: Optional[float] = 3,
-        stroke_size: Optional[float] = 0.3,
-        show_legend: Optional[bool] = True,
-        hover_text: Union[list, pd.Series, np.ndarray] = None,
-        plot_3d: Optional[bool] = False,
-        ) -> go.Figure:
-    plot_data = pd.DataFrame(dict(x=x, y=y, z=z, labels=label_attr, ))
+    x: Union[list, np.ndarray, pd.Series],
+    y: Union[list, np.ndarray, pd.Series],
+    z: Union[list, np.ndarray, pd.Series, None] = None,
+    label_attr: Union[list, np.ndarray, pd.Series, None] = None,
+    fill_dict: Union[str, list, np.ndarray, pd.Series, None] = None,
+    stroke_dict: Union[str, list, np.ndarray, pd.Series, None] = None,
+    point_size: Optional[float] = 3,
+    stroke_size: Optional[float] = 0.3,
+    show_legend: Optional[bool] = True,
+    hover_text: Union[list, pd.Series, np.ndarray] = None,
+    plot_3d: Optional[bool] = False,
+) -> go.Figure:
+    plot_data = pd.DataFrame(
+        dict(
+            x=x,
+            y=y,
+            z=z,
+            labels=label_attr,
+        )
+    )
 
     if hover_text is None:
         plot_data["text"] = plot_data["labels"]
@@ -308,26 +300,26 @@ def make_plotly_scatter_split_trace(
         for n in trace_names:
             sub_data = plot_data[plot_data["labels"] == n]
             p.add_trace(
-                    go.Scatter3d(
-                            x=sub_data["x"],
-                            y=sub_data["y"],
-                            z=sub_data["z"],
-                            marker=dict(
-                                    color=fill_dict[n],
-                                    size=point_size,
-                                    line=dict(color=stroke_dict[n], width=stroke_size),
-                                    ),
-                            text=sub_data["text"],
-                            hoverinfo="text",
-                            mode="markers",
-                            name=n,
-                            )
-                    )
+                go.Scatter3d(
+                    x=sub_data["x"],
+                    y=sub_data["y"],
+                    z=sub_data["z"],
+                    marker=dict(
+                        color=fill_dict[n],
+                        size=point_size,
+                        line=dict(color=stroke_dict[n], width=stroke_size),
+                    ),
+                    text=sub_data["text"],
+                    hoverinfo="text",
+                    mode="markers",
+                    name=n,
+                )
+            )
 
         p.update_layout(
-                scene=dict(xaxis=axis_params, yaxis=axis_params, zaxis=axis_params),
-                showlegend=show_legend,
-                )
+            scene=dict(xaxis=axis_params, yaxis=axis_params, zaxis=axis_params),
+            showlegend=show_legend,
+        )
 
     else:
         p = go.Figure()
@@ -335,27 +327,27 @@ def make_plotly_scatter_split_trace(
         for n in trace_names:
             sub_data = plot_data[plot_data["labels"] == n]
             p.add_trace(
-                    go.Scattergl(
-                            x=sub_data["x"],
-                            y=sub_data["y"],
-                            marker=dict(
-                                    color=fill_dict[n],
-                                    size=point_size,
-                                    line=dict(color=stroke_dict[n], width=stroke_size),
-                                    ),
-                            text=sub_data["text"],
-                            hoverinfo="text",
-                            mode="markers",
-                            name=n,
-                            )
-                    )
+                go.Scattergl(
+                    x=sub_data["x"],
+                    y=sub_data["y"],
+                    marker=dict(
+                        color=fill_dict[n],
+                        size=point_size,
+                        line=dict(color=stroke_dict[n], width=stroke_size),
+                    ),
+                    text=sub_data["text"],
+                    hoverinfo="text",
+                    mode="markers",
+                    name=n,
+                )
+            )
 
         p.update_layout(
-                xaxis=axis_params,
-                yaxis=axis_params,
-                showlegend=show_legend,
-                paper_bgcolor="white",
-                plot_bgcolor="white",
-                )
+            xaxis=axis_params,
+            yaxis=axis_params,
+            showlegend=show_legend,
+            paper_bgcolor="white",
+            plot_bgcolor="white",
+        )
 
     return p

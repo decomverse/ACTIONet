@@ -1,11 +1,10 @@
+import warnings
 from typing import Optional, Union
 
-from anndata import AnnData
 import numpy as np
+from anndata import AnnData
 from scipy import sparse
-import warnings
 
-from .. import tools as tl
 import _ACTIONet as _an
 
 
@@ -94,13 +93,9 @@ def normalize(
 ) -> Optional[AnnData]:
     adata = adata.copy() if copy else adata
 
-    if (
-        "norm_method" in adata.uns["metadata"].keys()
-    ):  # Already normalized? leave it alone!
+    if "norm_method" in adata.uns["metadata"].keys():  # Already normalized? leave it alone!
         # return adata if copy else None
-        warnings.warn(
-            "AnnData object is prenormalized. Please make sure to use the right assay."
-        )
+        warnings.warn("AnnData object is prenormalized. Please make sure to use the right assay.")
 
     adata = adata.copy() if copy else adata
 

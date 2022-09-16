@@ -41,24 +41,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import contextlib
 import os
+import platform
 import shutil
 import sys
+import sysconfig
 import tempfile
 import threading
-import platform
 import warnings
-import sysconfig
 
 try:
-    from setuptools.command.build_ext import build_ext as _build_ext
     from setuptools import Extension as _Extension
+    from setuptools.command.build_ext import build_ext as _build_ext
 except ImportError:
     from distutils.command.build_ext import build_ext as _build_ext
     from distutils.extension import Extension as _Extension
 
-import distutils.errors
 import distutils.ccompiler
-
+import distutils.errors
 
 WIN = sys.platform.startswith("win32") and sysconfig.get_platform() != "mingw"
 PY2 = sys.version_info[0] < 3
@@ -332,10 +331,7 @@ def intree_extensions(paths, package_dir=None):
                         qualified_name = prefix + "." + qualified_name
                     exts.append(Pybind11Extension(qualified_name, [path]))
             if not found:
-                raise ValueError(
-                    "path {} is not a child of any of the directories listed "
-                    "in 'package_dir' ({})".format(path, package_dir)
-                )
+                raise ValueError("path {} is not a child of any of the directories listed " "in 'package_dir' ({})".format(path, package_dir))
     return exts
 
 
@@ -424,9 +420,7 @@ class ParallelCompile(object):
         ):
 
             # These lines are directly from distutils.ccompiler.CCompiler
-            macros, objects, extra_postargs, pp_opts, build = compiler._setup_compile(
-                output_dir, macros, include_dirs, sources, depends, extra_postargs
-            )
+            macros, objects, extra_postargs, pp_opts, build = compiler._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
             cc_args = compiler._get_cc_args(pp_opts, debug, extra_preargs)
 
             # The number of threads; start with default.
