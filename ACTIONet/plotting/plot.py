@@ -6,13 +6,13 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.io as pio
 import scanpy as sc
+from ACTIONe.network.diffusion import diffusion
 from anndata import AnnData
 from cycler import Cycler
 from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from matplotlib.figure import Figure
 
-import ACTIONet.network as net
 from ACTIONet.plotting.color import append_alpha_to_rgb, lighten_color
 from ACTIONet.plotting.palettes import palette_default
 
@@ -35,7 +35,7 @@ def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
 
 def plot_ACTIONet(
     adata: AnnData,
-    annotation: Union[str, list, pd.Series, None] = None,
+    annotation: Optional[Union[str, list, pd.Series]],
     projection: sc._utils.Literal["2d", "3d"] = "2d",
     palette: Union[str, Sequence[str], Cycler, None] = palette_default,
     add_outline: Optional[bool] = False,
@@ -58,7 +58,7 @@ def plot_ACTIONet(
     tmp_key = "__annotations__"
     if annotation is not None:
         if len(annotation) == adata.shape[0]:
-            adata.obs[tmp_key] = pd.Series(annotation.astype("str"), index=adata.obs.index.values.astype("str"))
+            adata.obs[tmp_key] = pd.Series(annotation, index=adata.obs.index.values)
         else:
             adata.obs[tmp_key] = pd.Series(
                 adata.obs[annotation].astype("str"),
@@ -100,7 +100,7 @@ def visualize_markers(
 
     X = adata[:, genes].X
     if alpha != 0:
-        X_smooth = net.diffusion(adata, X, return_raw=True, alpha_val=alpha)
+        X_smooth = diffusion(adata, X, return_raw=True, alpha_val=alpha)
     else:
         X_smooth = X
 

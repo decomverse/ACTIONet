@@ -4,7 +4,7 @@ import numpy as np
 import scanpy as sc
 from anndata import AnnData
 
-from .. import tools as tl
+from ACTIONet.tools.utils_public import rand_suffix
 
 
 def filter_adata(
@@ -47,7 +47,7 @@ def filter_adata(
     previous_dims = None
 
     if layer_key is not None:
-        temp_layer = "X_fil_temp_" + tl.rand_suffix(10)
+        temp_layer = "X_fil_temp_" + rand_suffix(10)
         adata.layers[temp_layer] = adata.X
         adata.X = adata.layers[layer_key].astype(dtype=np.float64)
     else:

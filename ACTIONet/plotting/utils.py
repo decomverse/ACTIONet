@@ -8,9 +8,9 @@ from anndata import AnnData
 from matplotlib.colors import to_rgb
 from scipy import sparse
 
-from .. import tools as tl
-from .color import rgb_to_hex
-from .palettes import palette_default
+from ACTIONet.plotting.color import rgb_to_hex
+from ACTIONet.plotting.palettes import palette_default
+from ACTIONet.tools.utils_public import get_data_or_split, scale_matrix
 
 
 def _default_colors(n) -> pd.Series:
@@ -37,7 +37,7 @@ def get_plot_coors(
     coors = np.asarray(coors, dtype=np.float64)
 
     if scale_coors:
-        coors = tl.scale_matrix(coors)
+        coors = scale_matrix(coors)
 
     coors = pd.DataFrame(coors)
     if coors.shape[1] < 3:
@@ -57,8 +57,7 @@ def get_plot_labels(
         return None
 
     if isinstance(data, AnnData):
-        # plot_labels = tl.__get_attr_or_split_idx(data, attr=label_attr, return_vec=True)
-        plot_labels = tl.get_data_or_split(adata=data, attr=label_attr, to_return="data")
+        plot_labels = get_data_or_split(adata=data, attr=label_attr, to_return="data")
     else:
         plot_labels = label_attr
 
@@ -104,10 +103,7 @@ def get_plot_colors(
             if no_data:
                 raise Exception("'data' must not be None if 'color_attr' is str")
             else:
-                # plot_colors = tl.__get_attr_or_split_idx(
-                #         data, attr=color_attr, return_vec=True
-                #         )
-                plot_colors = tl.get_data_or_split(adata=data, attr=color_attr, to_return="data")
+                plot_colors = get_data_or_split(adata=data, attr=color_attr, to_return="data")
 
         else:
             raise Exception("invalid color_attr")
@@ -180,12 +176,11 @@ def get_plot_transparency(
     if isinstance(trans_attr, str) and not isinstance(adata, AnnData):
         raise Exception("'adata' must be AnnData if 'trans_attr' is str")
 
-    # alpha_fac = tl.utils_internal.__get_attr_or_split_idx(adata, attr=trans_attr, return_vec=True)
-    alpha_fac = tl.get_data_or_split(adata=adata, attr=trans_attr, to_return="data")
+    alpha_fac = get_data_or_split(adata=adata, attr=trans_attr, to_return="data")
     alpha_fac = pd.Series(alpha_fac, dtype=float)
 
     if scale:
-        z = tl.scale_matrix(alpha_fac)
+        z = scale_matrix(alpha_fac)
     else:
         z = alpha_fac
 
