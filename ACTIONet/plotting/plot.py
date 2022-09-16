@@ -58,9 +58,7 @@ def plot_ACTIONet(
     tmp_key = "__annotations__"
     if annotation is not None:
         if len(annotation) == adata.shape[0]:
-            adata.obs[tmp_key] = pd.Series(
-                annotation.astype("str"), index=adata.obs.index.values.astype("str")
-            )
+            adata.obs[tmp_key] = pd.Series(annotation.astype("str"), index=adata.obs.index.values.astype("str"))
         else:
             adata.obs[tmp_key] = pd.Series(
                 adata.obs[annotation].astype("str"),
