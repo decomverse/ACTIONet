@@ -2,7 +2,15 @@
 import scanpy as sc
 from sklearn.metrics.cluster import normalized_mutual_info_score
 
-from _ACTIONet import buildNetwork, compute_core_centrality, layoutNetwork, prune_archetypes, reduce_kernel, run_ACTION, unify_archetypes
+from _ACTIONet import (
+    buildNetwork,
+    compute_core_centrality,
+    layoutNetwork,
+    prune_archetypes,
+    reduce_kernel,
+    run_ACTION,
+    unify_archetypes,
+)
 
 pbmc = sc.datasets.pbmc3k_processed()
 ACE = pbmc

@@ -1,4 +1,3 @@
-from ast import Raise
 import warnings
 from typing import Optional, Union
 
@@ -59,11 +58,7 @@ def get_plot_labels(
 
     if isinstance(data, AnnData) and isinstance(label_attr, str):
         plot_labels = data.obs[label_attr]
-    elif (
-        isinstance(label_attr, list)
-        or isinstance(label_attr, np.ndarray)
-        or isinstance(label_attr, pd.Series)
-    ):
+    elif isinstance(label_attr, list) or isinstance(label_attr, np.ndarray) or isinstance(label_attr, pd.Series):
         plot_labels = pd.Series(label_attr, dtype=str, name="labels")
 
     plot_labels = plot_labels.fillna("NA")
@@ -72,10 +67,77 @@ def get_plot_labels(
     return plot_labels
 
 
+def get_plot_colors_from_plot_labels(plot_labels: Optional[Union[list, pd.Series]], n_dim: int, palette: Union[str, list, pd.Series, dict], return_dict: bool):
+    plot_labels = pd.Series(plot_labels, dtype=str)
+    plot_labels.fillna("NA")
+
+    label_names = sorted(plot_labels.unique())
+    num_unique = len(label_names)
+
+    if num_unique == 1:
+        plot_colors = _default_colors(n_dim)
+
+    elif isinstance(palette, dict):
+        if not all(k in label_names for k in palette.keys()):
+            missing_keys = list(set(palette.keys()) - set(label_names))
+            err = "keys for {keys} missing from palette".format(keys=missing_keys)
+            raise Exception(err)
+
+        if return_dict:
+            plot_colors = palette
+        else:
+            plot_colors = pd.Series(pd.NA, index=range(n_dim), dtype=str)
+            for it in palette.items():
+                plot_colors.loc[label_names == it[0]] = it[1]
+
+    else:
+        if len(palette) < num_unique:
+            warnings.warn("Not enough colors in 'palette'. Using default palette.")
+            plot_palette = palette_default[0:num_unique]
+        else:
+            plot_palette = list(palette)[0:num_unique]
+
+        palette_dict = dict(zip(label_names, plot_palette))
+
+        if return_dict:
+            plot_colors = palette_dict
+        else:
+            plot_colors = pd.Series(pd.NA, index=range(n_dim), dtype=str)
+            for it in palette_dict.items():
+                plot_colors.loc[plot_labels == it[0]] = it[1]
+    return plot_colors
+
+
+def get_plot_colors_from_color_attr(color_attr: Union[str, list, pd.Series, pd.DataFrame, np.ndarray], data: Optional[Union[AnnData, np.ndarray, sparse.spmatrix]], no_data: bool, n_dim: Optional[int]):
+    if isinstance(color_attr, (np.ndarray, pd.DataFrame)):
+        if color_attr.shape[1] >= 3:
+            plot_colors = [rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])]
+            plot_colors = pd.Series(plot_colors, dtype=str)
+        else:
+            raise Exception("invalid color_attr")
+
+    elif isinstance(color_attr, (list, pd.Series)):
+        if no_data:
+            raise Exception("'data' must not be None if 'color_attr' is str")
+        elif len(color_attr) != n_dim:
+            raise Exception("length of 'color_attr' must match 'data'")
+        else:
+            plot_colors = pd.Series(color_attr, dtype=str)
+
+    elif isinstance(color_attr, str):
+        if no_data:
+            raise Exception("'data' must not be None if 'color_attr' is str")
+        elif isinstance(data, AnnData) and isinstance(color_attr, str):
+            plot_colors = data.obs[color_attr]
+    else:
+        raise Exception("invalid color_attr")
+    return plot_colors
+
+
 def get_plot_colors(
-    color_attr: Union[str, list, pd.Series, pd.DataFrame, np.ndarray, None],
-    plot_labels: Union[list, pd.Series, None],
-    data: Union[AnnData, np.ndarray, sparse.spmatrix, None] = None,
+    color_attr: Optional[Union[str, list, pd.Series, pd.DataFrame, np.ndarray]],
+    plot_labels: Optional[Union[list, pd.Series]],
+    data: Optional[Union[AnnData, np.ndarray, sparse.spmatrix]],
     color_key: Optional[str] = "denovo_color",
     palette: Union[str, list, pd.Series, dict] = palette_default,
     return_dict: Optional[bool] = False,
@@ -88,76 +150,9 @@ def get_plot_colors(
         no_data = True
 
     if color_attr is not None:
-        if isinstance(color_attr, (np.ndarray, pd.DataFrame)):
-
-            if color_attr.shape[1] >= 3:
-                plot_colors = [rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])]
-                plot_colors = pd.Series(plot_colors, dtype=str)
-            else:
-                raise Exception("invalid color_attr")
-
-        elif isinstance(color_attr, (list, pd.Series)):
-            if no_data:
-                raise Exception("'data' must not be None if 'color_attr' is str")
-            elif len(color_attr) != n_dim:
-                raise Exception("length of 'color_attr' must match 'data'")
-            else:
-                plot_colors = pd.Series(color_attr, dtype=str)
-
-        elif isinstance(color_attr, str):
-            if no_data:
-                raise Exception("'data' must not be None if 'color_attr' is str")
-<<<<<<< HEAD
-            elif isinstance(data, AnnData) and isinstance(color_attr, str):
-                plot_colors = data.obs[color_attr]
-=======
-            else:
-                plot_colors = get_data_or_split(adata=data, attr=color_attr, to_return="data")
->>>>>>> mypy fixes
-
-        else:
-            raise Exception("invalid color_attr")
-
+        return get_plot_colors_from_color_attr(color_attr=color_attr, data=data, no_data=no_data, n_dim=n_dim)
     elif plot_labels is not None:
-
-        plot_labels = pd.Series(plot_labels, dtype=str)
-        plot_labels.fillna("NA")
-
-        label_names = sorted(plot_labels.unique())
-        num_unique = len(label_names)
-
-        if num_unique == 1:
-            plot_colors = _default_colors(n_dim)
-
-        elif isinstance(palette, dict):
-            if not all(k in label_names for k in palette.keys()):
-                missing_keys = list(set(palette.keys()) - set(label_names))
-                err = "keys for {keys} missing from palette".format(keys=missing_keys)
-                raise Exception(err)
-
-            if return_dict:
-                plot_colors = palette
-            else:
-                plot_colors = pd.Series(pd.NA, index=range(n_dim), dtype=str)
-                for it in palette.items():
-                    plot_colors.loc[label_names == it[0]] = it[1]
-
-        else:
-            if len(palette) < num_unique:
-                warnings.warn("Not enough colors in 'palette'. Using default palette.")
-                plot_palette = palette_default[0:num_unique]
-            else:
-                plot_palette = palette[0:num_unique]
-
-            palette_dict = dict(zip(label_names, plot_palette))
-
-            if return_dict:
-                plot_colors = palette_dict
-            else:
-                plot_colors = pd.Series(pd.NA, index=range(n_dim), dtype=str)
-                for it in palette_dict.items():
-                    plot_colors.loc[plot_labels == it[0]] = it[1]
-
+        return get_plot_colors_from_plot_labels(plot_labels=plot_labels, n_dim=n_dim, palette=palette, return_dict=bool(return_dict))
     else:
         if no_data:
             raise Exception("'data' required for given parameters")
@@ -169,7 +164,6 @@ def get_plot_colors(
 
     if not return_dict:
         plot_colors = [to_rgb(f) for f in plot_colors]
-
     return plot_colors
 
 
@@ -301,19 +295,7 @@ def make_plotly_scatter_split_trace(
 
     axis_params = dict(showgrid=False, zeroline=False, visible=False)
 
-    if (
-        plot_3d
-        and (
-            isinstance(fill_dict, np.ndarray)
-            or isinstance(fill_dict, list)
-            or isinstance(fill_dict, pd.Series)
-        )
-        and (
-            isinstance(stroke_dict, np.ndarray)
-            or isinstance(stroke_dict, list)
-            or isinstance(stroke_dict, pd.Series)
-        )
-    ):
+    if plot_3d and (isinstance(fill_dict, np.ndarray) or isinstance(fill_dict, list) or isinstance(fill_dict, pd.Series)) and (isinstance(stroke_dict, np.ndarray) or isinstance(stroke_dict, list) or isinstance(stroke_dict, pd.Series)):
         p = go.Figure()
 
         for n in trace_names:
@@ -343,15 +325,7 @@ def make_plotly_scatter_split_trace(
     else:
         p = go.Figure()
 
-        if (
-            isinstance(fill_dict, np.ndarray)
-            or isinstance(fill_dict, list)
-            or isinstance(fill_dict, pd.Series)
-        ) and (
-            isinstance(stroke_dict, np.ndarray)
-            or isinstance(stroke_dict, list)
-            or isinstance(stroke_dict, pd.Series)
-        ):
+        if (isinstance(fill_dict, np.ndarray) or isinstance(fill_dict, list) or isinstance(fill_dict, pd.Series)) and (isinstance(stroke_dict, np.ndarray) or isinstance(stroke_dict, list) or isinstance(stroke_dict, pd.Series)):
             for n in trace_names:
                 sub_data = plot_data[plot_data["labels"] == n]
                 p.add_trace(

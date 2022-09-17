@@ -7,14 +7,7 @@ from scipy import sparse
 
 import _ACTIONet as _an
 from ACTIONet.network.build import build
-<<<<<<< HEAD
-from ACTIONet.tools.utils_public import (
-    double_normalize,
-    scale_matrix,
-)
-=======
-from ACTIONet.tools.utils_public import double_normalize, get_data_or_split, scale_matrix
->>>>>>> mypy fixes
+from ACTIONet.tools.utils_public import double_normalize, scale_matrix
 
 
 def __compute_feature_specificity(S, H, thread_no=0):
@@ -133,42 +126,21 @@ def annotate(
     elif labels is not None:
         X1 = adata.obsm["H_unified"].toarray()
 
-<<<<<<< HEAD
         if isinstance(adata, AnnData) and isinstance(labels, str):
             labels = adata.obs[labels]
 
         labels_index, labels_keys = pd.factorize(labels, sort=True)
-        X2 = np.array(
-            pd.DataFrame([(labels_index == k) * 1 for k in range(len(labels_keys))]).T
-        )
+        X2 = np.array(pd.DataFrame([(labels_index == k) * 1 for k in range(len(labels_keys))]).T)
 
         XI = _an.XICOR(X1, X2)
         Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
-        Enrichment = pd.DataFrame(
-            Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_keys
-        )
+        Enrichment = pd.DataFrame(Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_keys)
 
         annotations = pd.Series(labels_keys)
         idx = np.argmax(Z, axis=1)
         Label = annotations[idx]
         Label.index = np.arange(1, len(Label) + 1)
         Confidence = np.max(Z, axis=1)
-=======
-        labels_dict = get_data_or_split(adata=adata, attr=labels, to_return="levels")
-
-        if isinstance(labels_dict, dict):
-            X2 = np.array(pd.DataFrame([(labels_dict["index"] == k) * 1 for k in range(len(labels_dict["keys"]))]).T)
-
-            XI = _an.XICOR(X1, X2)
-            Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
-            Enrichment = pd.DataFrame(Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_dict["keys"])
-
-            annotations = pd.Series(labels_dict["keys"])
-            idx = np.argmax(Z, axis=1)
-            Label = annotations[idx]
-            Label.index = np.arange(1, len(Label) + 1)
-            Confidence = np.max(Z, axis=1)
->>>>>>> mypy fixes
 
     elif scores is not None:
         X1 = adata.obsm["H_unified"].toarray()
