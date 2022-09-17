@@ -99,16 +99,13 @@ def reduce_adata(
         adata.uns.setdefault("obsm_annot", {}).update(
             {
                 str(reduction_key): {"type": np.array([b"reduction"], dtype=object)},
-                str(reduction_key)
-                + "_B": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_B": {"type": np.array([b"internal"], dtype=object)},
             }
         )
         adata.uns.setdefault("varm_annot", {}).update(
             {
-                str(reduction_key)
-                + "_A": {"type": np.array([b"internal"], dtype=object)},
-                str(reduction_key)
-                + "_V": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_A": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_V": {"type": np.array([b"internal"], dtype=object)},
             }
         )
 
