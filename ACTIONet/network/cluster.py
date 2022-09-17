@@ -64,11 +64,7 @@ def cluster(
 
     if isinstance(data, AnnData):
         adata = data.copy() if copy else data
-        initial_clusters = (
-            initial_clusters
-            if initial_clusters is not None
-            else adata.obs[initial_clusters_key]
-        )
+        initial_clusters = initial_clusters if initial_clusters is not None else adata.obs[initial_clusters_key]
         if net_key in adata.obsp.keys():
             G = adata.obsp[net_key]
         else:

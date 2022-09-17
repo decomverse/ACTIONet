@@ -7,10 +7,14 @@ from scipy import sparse
 
 import _ACTIONet as _an
 from ACTIONet.network.build import build
+<<<<<<< HEAD
 from ACTIONet.tools.utils_public import (
     double_normalize,
     scale_matrix,
 )
+=======
+from ACTIONet.tools.utils_public import double_normalize, get_data_or_split, scale_matrix
+>>>>>>> mypy fixes
 
 
 def __compute_feature_specificity(S, H, thread_no=0):
@@ -88,12 +92,8 @@ def feature_specificity(
 
         adata.uns.setdefault("varm_annot", {}).update(
             {
-                "unified_feature_profile": {
-                    "type": np.array([b"internal"], dtype=object)
-                },
-                "unified_feature_specificity": {
-                    "type": np.array([b"reduction"], dtype=object)
-                },
+                "unified_feature_profile": {"type": np.array([b"internal"], dtype=object)},
+                "unified_feature_specificity": {"type": np.array([b"reduction"], dtype=object)},
             }
         )
 
@@ -111,27 +111,18 @@ def annotate(
 ):
 
     if markers is not None:
-        feature_names = pd.Series(
-            [
-                x.decode() if isinstance(x, (bytes, bytearray)) else x
-                for x in list(adata.var.index)
-            ]
-        )
+        feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
 
-        marker_mat = sparse.csc_matrix(
-            pd.DataFrame(
-                [feature_names.isin(markers[key]) * 1 for key in markers.keys()]
-            ).T
-        )
+        marker_mat = sparse.csc_matrix(pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T)
         spec_mat = adata.varm[specificity_key]
 
-        assessment_out = _an.assess_enrichment(
-            scores=spec_mat, associations=marker_mat, thread_no=thread_no
-        )
+        assessment_out = _an.assess_enrichment(scores=spec_mat, associations=marker_mat, thread_no=thread_no)
 
         logPvals = assessment_out["logPvals"].T
         Enrichment = pd.DataFrame(
-            logPvals, columns=markers.keys(), index=np.arange(1, logPvals.shape[0] + 1),
+            logPvals,
+            columns=markers.keys(),
+            index=np.arange(1, logPvals.shape[0] + 1),
         )
         annotations = pd.Series(markers.keys())
         idx = np.argmax(logPvals, axis=1)
@@ -142,6 +133,7 @@ def annotate(
     elif labels is not None:
         X1 = adata.obsm["H_unified"].toarray()
 
+<<<<<<< HEAD
         if isinstance(adata, AnnData) and isinstance(labels, str):
             labels = adata.obs[labels]
 
@@ -161,6 +153,22 @@ def annotate(
         Label = annotations[idx]
         Label.index = np.arange(1, len(Label) + 1)
         Confidence = np.max(Z, axis=1)
+=======
+        labels_dict = get_data_or_split(adata=adata, attr=labels, to_return="levels")
+
+        if isinstance(labels_dict, dict):
+            X2 = np.array(pd.DataFrame([(labels_dict["index"] == k) * 1 for k in range(len(labels_dict["keys"]))]).T)
+
+            XI = _an.XICOR(X1, X2)
+            Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
+            Enrichment = pd.DataFrame(Z, index=np.arange(1, X1.shape[1] + 1), columns=labels_dict["keys"])
+
+            annotations = pd.Series(labels_dict["keys"])
+            idx = np.argmax(Z, axis=1)
+            Label = annotations[idx]
+            Label.index = np.arange(1, len(Label) + 1)
+            Confidence = np.max(Z, axis=1)
+>>>>>>> mypy fixes
 
     elif scores is not None:
         X1 = adata.obsm["H_unified"].toarray()
@@ -177,9 +185,7 @@ def annotate(
 
         XI = _an.XICOR(X1, X2)
         Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
-        Enrichment = pd.DataFrame(
-            Z, index=np.arange(1, X1.shape[1] + 1), columns=scores.columns
-        )
+        Enrichment = pd.DataFrame(Z, index=np.arange(1, X1.shape[1] + 1), columns=scores.columns)
 
         annotations = scores.columns
         idx = np.argmax(Z, axis=1)
@@ -203,18 +209,13 @@ def map_cell_scores(
     cell_scores_mat = adata.obsm[archetypes_key]
 
     if enrichment_mat.shape[0] != cell_scores_mat.shape[1]:
-        raise ValueError(
-            f"The number of rows in matrix `enrichment` ({enrichment.shape[0]}) must equal "
-            f"the number of columns in matrix adata.obsm['{archetypes_key}'] ({cell_scores_mat.shape[1]})."
-        )
+        raise ValueError(f"The number of rows in matrix `enrichment` ({enrichment.shape[0]}) must equal " f"the number of columns in matrix adata.obsm['{archetypes_key}'] ({cell_scores_mat.shape[1]}).")
 
     if normalize:
         enrichment_mat = double_normalize(enrichment_mat)
 
     cell_enrichment_mat = cell_scores_mat @ enrichment_mat
-    Enrichment = pd.DataFrame(
-        cell_enrichment_mat, index=adata.obs.index, columns=enrichment.columns
-    )
+    Enrichment = pd.DataFrame(cell_enrichment_mat, index=adata.obs.index, columns=enrichment.columns)
 
     annotations = enrichment.columns
     idx = np.argmax(cell_enrichment_mat, axis=1)

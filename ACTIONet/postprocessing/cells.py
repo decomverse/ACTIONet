@@ -47,15 +47,8 @@ def annotate(
     if network_normalization_method == "pagerank_sym":
         network_normalization_code = 2
 
-    feature_names = pd.Series(
-        [
-            x.decode() if isinstance(x, (bytes, bytearray)) else x
-            for x in list(adata.var.index)
-        ]
-    )
-    masks = np.array(
-        pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T
-    )
+    feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
+    masks = np.array(pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T)
     selected_features_mask = np.sum(masks, axis=1) > 0
     sub_S = sparse.csc_matrix(adata.X[:, selected_features_mask].T)
     marker_mat = sparse.csc_matrix(masks[selected_features_mask, :])
@@ -86,9 +79,7 @@ def annotate(
             post_alpha=post_alpha,
         )
 
-    Enrichment = pd.DataFrame(
-        marker_stats, index=adata.obs.index, columns=markers.keys()
-    )
+    Enrichment = pd.DataFrame(marker_stats, index=adata.obs.index, columns=markers.keys())
     annotations = pd.Series(markers.keys())
     idx = np.argmax(marker_stats, axis=1)
     Label = annotations[idx]
@@ -205,9 +196,7 @@ def infer_missing_labels(
                 index=adata.obs.index.values.astype("str"),
             )
         elif isinstance(initial_labels, pd.Series):
-            labels = pd.Series(
-                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
-            )
+            labels = pd.Series(initial_labels.astype("str"), index=adata.obs.index.values.astype("str"))
 
     fixed_samples = np.where(labels != "nan")[0]
 
@@ -266,9 +255,7 @@ def correct_labels(
                 index=adata.obs.index.values.astype("str"),
             )
         elif isinstance(initial_labels, pd.Series):
-            labels = pd.Series(
-                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
-            )
+            labels = pd.Series(initial_labels.astype("str"), index=adata.obs.index.values.astype("str"))
 
     updated_labels = an.nt.propagate(
         data=adata,
