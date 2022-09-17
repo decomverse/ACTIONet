@@ -131,31 +131,15 @@ def annotate(
         Confidence = np.max(logPvals, axis=1)
 
     elif labels is not None:
-<<<<<<< HEAD
         if isinstance(adata, AnnData) and isinstance(cluster_key, str):
             clusters = adata.obs[cluster_key]
         cluster_index, cluster_keys = pd.factorize(clusters)
-        X1 = np.array(
-            pd.DataFrame([(cluster_index == k) * 1 for k in range(len(cluster_keys))]).T
-        )
+        X1 = np.array(pd.DataFrame([(cluster_index == k) * 1 for k in range(len(cluster_keys))]).T)
 
         if isinstance(adata, AnnData) and isinstance(labels, str):
             labels = adata.obs[labels]
         labels_index, labels_keys = pd.factorize(labels)
-        X2 = np.array(
-            pd.DataFrame([(labels_index == k) * 1 for k in range(len(labels_keys))]).T
-        )
-=======
-        cluster_dict = get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
-        if isinstance(cluster_dict, dict):
-            cluster_keys = cluster_dict["keys"]
-            X1 = np.array(pd.DataFrame([(cluster_dict["index"] == k) * 1 for k in range(len(cluster_keys))]).T)
-
-        labels_dict = get_data_or_split(adata=adata, attr=labels, to_return="levels")
-        if isinstance(labels_dict, dict):
-            labels_keys = labels_dict["keys"]
-            X2 = np.array(pd.DataFrame([(labels_dict["index"] == k) * 1 for k in range(len(labels_keys))]).T)
->>>>>>> mypy fixes
+        X2 = np.array(pd.DataFrame([(labels_index == k) * 1 for k in range(len(labels_keys))]).T)
 
         XI = _an.XICOR(X1, X2)
         Z = np.sign(scale_matrix(X1).T @ scale_matrix(X2)) * XI["Z"]
@@ -168,19 +152,10 @@ def annotate(
         Confidence = np.max(Z, axis=1)
 
     elif scores is not None:
-<<<<<<< HEAD
         if isinstance(adata, AnnData) and isinstance(cluster_key, str):
             clusters = adata.obs[cluster_key]
         cluster_index, cluster_keys = pd.factorize(clusters)
-        X1 = np.array(
-            pd.DataFrame([(cluster_index == k) * 1 for k in range(len(cluster_keys))]).T
-        )
-=======
-        cluster_dict = get_data_or_split(adata=adata, attr=cluster_key, to_return="levels")
-        if isinstance(cluster_dict, dict):
-            cluster_keys = cluster_dict["keys"]
-            X1 = np.array(pd.DataFrame([(cluster_dict["index"] == k) * 1 for k in range(len(cluster_keys))]).T)
->>>>>>> mypy fixes
+        X1 = np.array(pd.DataFrame([(cluster_index == k) * 1 for k in range(len(cluster_keys))]).T)
 
         if isinstance(scores, str) or len(scores) == 1:
             if scores in adata.obs.keys():
