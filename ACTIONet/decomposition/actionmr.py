@@ -1,7 +1,7 @@
 """Multi-resolution ACTION decomposition for dense matrices.
 """
 
-from typing import Optional, Union, Dict
+from typing import Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -145,20 +145,14 @@ def runACTIONMR(
             "H_unified": csc_matrix(unified["H_unified"]),
             "assigned_archetype": pd.Categorical(
                 values=unified["assigned_archetype"].astype(int),
-                categories=natsorted(
-                    map(int, np.unique(unified["assigned_archetype"]))
-                ),
+                categories=natsorted(map(int, np.unique(unified["assigned_archetype"]))),
             ),
         }
 
     if return_raw or not isinstance(data, AnnData):
         if return_W:
-            ACTIONMR_out["W_stacked"] = np.matmul(
-                X, ACTIONMR_out["C_stacked"].toarray()
-            )
-            ACTIONMR_out["W_unified"] = np.matmul(
-                X, ACTIONMR_out["C_unified"].toarray()
-            )
+            ACTIONMR_out["W_stacked"] = np.matmul(X, ACTIONMR_out["C_stacked"].toarray())
+            ACTIONMR_out["W_unified"] = np.matmul(X, ACTIONMR_out["C_unified"].toarray())
         return ACTIONMR_out
     else:
         data.obsm["C_stacked"] = ACTIONMR_out["C_stacked"]
@@ -436,9 +430,7 @@ class ACTIONMR(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(
-            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-        )
+        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
 
         Z = self.components_
 

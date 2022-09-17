@@ -28,9 +28,7 @@ def get_plot_coors(
     if isinstance(data, AnnData):
         coors = data.obsm[coordinate_key]
         if coors.shape[1] < coor_dims:
-            err = "data in 'coordinate_key' has < {dims} dimensions".format(
-                dims=coor_dims
-            )
+            err = "data in 'coordinate_key' has < {dims} dimensions".format(dims=coor_dims)
             raise Exception(err)
     else:
         if not isinstance(data, (np.ndarray, sparse.spmatrix)):
@@ -93,9 +91,7 @@ def get_plot_colors(
         if isinstance(color_attr, (np.ndarray, pd.DataFrame)):
 
             if color_attr.shape[1] >= 3:
-                plot_colors = [
-                    rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])
-                ]
+                plot_colors = [rgb_to_hex(color_attr[i, :]) for i in range(color_attr.shape[0])]
                 plot_colors = pd.Series(plot_colors, dtype=str)
             else:
                 raise Exception("invalid color_attr")
@@ -111,8 +107,13 @@ def get_plot_colors(
         elif isinstance(color_attr, str):
             if no_data:
                 raise Exception("'data' must not be None if 'color_attr' is str")
+<<<<<<< HEAD
             elif isinstance(data, AnnData) and isinstance(color_attr, str):
                 plot_colors = data.obs[color_attr]
+=======
+            else:
+                plot_colors = get_data_or_split(adata=data, attr=color_attr, to_return="data")
+>>>>>>> mypy fixes
 
         else:
             raise Exception("invalid color_attr")
@@ -282,7 +283,14 @@ def make_plotly_scatter_split_trace(
     hover_text: Union[list, pd.Series, np.ndarray] = None,
     plot_3d: Optional[bool] = False,
 ) -> go.Figure:
-    plot_data = pd.DataFrame(dict(x=x, y=y, z=z, labels=label_attr,))
+    plot_data = pd.DataFrame(
+        dict(
+            x=x,
+            y=y,
+            z=z,
+            labels=label_attr,
+        )
+    )
 
     if hover_text is None:
         plot_data["text"] = plot_data["labels"]

@@ -60,9 +60,7 @@ def centrality(
         "localized_coreness",
         "localized_pagerank",
     ]:
-        raise ValueError(
-            "'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'."
-        )
+        raise ValueError("'algorithm' must be 'coreness', 'pagerank', 'localized_coreness', or 'localized_pagerank'.")
 
     if isinstance(data, AnnData):
         adata = data.copy() if copy else data
