@@ -27,7 +27,7 @@ lint:	install_pre_commit
 	pre-commit run --all-files
 
 ## Installation
-.PHONY: update_env install_env install
+.PHONY: update_env install_env install develop
 update_env:
 	$(SOURCE_CONDA) && conda env update -f environment.yaml || conda env create -f environment.yaml
 
@@ -39,7 +39,7 @@ install:	clean update_env
 	$(SOURCE_CONDA) && conda activate actionet && \
 	git submodule update --init && \
 	python setup.py build && \
-	python setup.py develop
+	python setup.py install
 
 develop:	clean update_env
 	$(SOURCE_CONDA) && conda activate actionet && \
