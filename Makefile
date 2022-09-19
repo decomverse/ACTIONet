@@ -35,13 +35,13 @@ install_env:	source_conda
 	$(SOURCE_CONDA) && conda deactivate && conda env remove -n actionet
 	$(SOURCE_CONDA) && conda deactivate && conda env create -f environment.yaml
 
-install:	update_env
+install:	clean update_env
 	$(SOURCE_CONDA) && conda activate actionet && \
 	git submodule update --init && \
 	python setup.py build && \
 	python setup.py develop
 
-develop:	update_env
+develop:	clean update_env
 	$(SOURCE_CONDA) && conda activate actionet && \
 	git submodule update --init && \
 	python setup.py build && \
