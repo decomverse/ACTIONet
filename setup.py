@@ -1,9 +1,11 @@
+import distutils.sysconfig as sysconfig
 import multiprocessing
 import os
 import platform
 import re
 import subprocess
 import sys
+from distutils.sysconfig import get_python_inc
 from distutils.version import LooseVersion
 
 from setuptools import Extension, find_packages, setup
@@ -55,12 +57,7 @@ class CMakeBuild(build_ext):
         # required for auto-detection of auxiliary "native" libs
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
-
-        cmake_args = [
-            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
-            "-DPYTHON_EXECUTABLE=" + sys.executable,
-            "-DNUMPY_INCLUDE_DIRS=" + get_numpy_include(),
-        ]
+        cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable, "-DNUMPY_INCLUDE_DIRS=" + get_numpy_include(), "-DPYTHON_INCLUDE_DIR=" + get_python_inc(), "-DPYTHON_LIBRARY=" + sysconfig.get_config_var("LIBDIR")]
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
