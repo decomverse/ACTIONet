@@ -13,12 +13,26 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-w)
 add_compile_options(-O3)
 
-############ Third-party dependencies
-#find_package(PythonLibs REQUIRED)
-#find_package(PythonPyEnv REQUIRED)
-# include_directories(${Python_INCLUDE_DIRS})
+# find python
+execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_SEARCH_PATH)
+string(REGEX REPLACE "\n$" "" PYTHON_SEARCH_PATH "${PYTHON_SEARCH_PATH}")
+file(GLOB_RECURSE PYTHON_DY_LIBS ${PYTHON_SEARCH_PATH}/lib/libpython*.dylib ${PYTHON_SEARCH_PATH}/lib/libpython*.so)
+if (PYTHON_DY_LIBS)
+    list(GET PYTHON_DY_LIBS 0 PYTHON_LIBRARY)
+    message("-- Find shared libpython: ${PYTHON_LIBRARY}")
+else()
+    message(WARNING "Cannot find shared libpython, try find_package")
+endif()
 
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(PythonInterp)
+find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+
+############ Third-party dependencies
+find_package(PythonLibs REQUIRED)
+find_package(PythonPyEnv REQUIRED)
+include_directories(${Python_INCLUDE_DIRS})
+
+#find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
 
 # Check for CHOLMOD
