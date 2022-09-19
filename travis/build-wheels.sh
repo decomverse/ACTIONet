@@ -1,7 +1,11 @@
 #!/bin/bash
-python_versions=( cp38-cp38 cp39-cp39 cp310-cp310 cp311-cp311 )
-cpython_versions=( cpython-3.8.14 cpython-3.9.14 cpython-3.10.7 cpython-3.11.0rc2 )
-python_major_versions=( 3.8 3.9 3.10 3.11 )
+yum -y install epel-release
+yum config-manager --enable epel
+yum -y install hdf5-devel
+yum -y install suitesparse-devel nss blas-devel lapack-devel xorg-x11-server-Xvfb
+python_versions=( cp38-cp38 cp39-cp39 cp310-cp310 )
+cpython_versions=( cpython-3.8.14 cpython-3.9.14 cpython-3.10.7 )
+python_major_versions=( 3.8 3.9 3.10 )
 total=${#python_versions[*]}
 for ((i=0; i<=$(( $total - 1 )); i++ ))
 do
@@ -39,7 +43,7 @@ do
     export LD_LIBRARY_PATH=/opt/_internal/${cur_cpython}/lib/python${cur_major_python}/site-packages/scipy.libs:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=/opt/_internal/${cur_cpython}/lib/python${cur_major_python}/site-packages/Pillow.libs:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=/opt/_internal/${cur_cpython}/lib/python${cur_major_python}/site-packages/pyzmq.libs:$LD_LIBRARY_PATH
-    for whl in wheelhouse/ACTIONet-0.1.2-${cur_python}-linux_x86_64.whl; do
+    for whl in wheelhouse/ACTIONet-0.3.0-${cur_python}-linux_x86_64.whl; do
 	repair_wheel "$whl"
     done
     # Install packages and test
