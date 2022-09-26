@@ -97,7 +97,7 @@ namespace ACTIONet
 
   vec xicor(vec xvec, vec yvec, bool compute_pval, int seed)
   {
-    vec out(3);
+    vec out(2);
 
     std::mt19937_64 engine(seed);
 
@@ -145,6 +145,8 @@ namespace ACTIONet
   field<mat> XICOR(mat &X, mat &Y, bool compute_pval, int seed, int thread_no)
   {
     field<mat> out(2);
+
+    arma_rng::set_seed(seed);
 
     uvec perm = randperm(X.n_rows);
 
