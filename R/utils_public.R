@@ -203,9 +203,9 @@ verify_aces <- function(ace1, ace2) {
 
   archs1 <- ace1$assigned_archetype
   archs2 <- ace2$assigned_archetype
-  mismatch_perc <- 100 * sum(archs1 != archs2) / ncol(ace)
+  mismatch_perc <- 100 * sum(archs1 != archs2) / ncol(ace1)
   warnifnot(mismatch_perc < 0.5)
-  sprintf("%.02d %% archetype assignment mismatch", mismatch_perc)
+  print(sprintf("%.02d %% archetype assignment mismatch", mismatch_perc))
 
 
   ###############################################################
@@ -263,8 +263,6 @@ verify_aces <- function(ace1, ace2) {
   mismatch.colors <- 100 * sum(colors1 != colors2) / length(colors1)
   warnifnot(mismatch.colors < 0.5)
   print(sprintf("%.02f %% colors mismatch", mismatch.colors))
-
-  print("Congratulations! Your ace objects match perfectly!!")
 }
 
 export_minimal_sce <- function(ace, export_logcounts = FALSE) {
