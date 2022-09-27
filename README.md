@@ -10,13 +10,13 @@ For the optimal performance on Intel-based architectures, installing [Intel Math
 To install the `ACTIONet` dependencie on debian-based linux machines, run:
 
 ```bash
-sudo apt-get install libhdf5-dev libsuitesparse-dev libnss3 xvfb
+sudo apt-get install libhdf5-dev libsuitesparse-dev libnss3 xvfb libblas-dev liblapack-dev
 ```
 
 For Mac-based systems, you can use [brew](https://brew.sh/) instead:
 
 ```bash
-brew install hdf5 suite-sparse c-blosc
+brew install hdf5 suite-sparse c-blosc blas lapack
 ```
 
 ### Installing ACTIONet Python Package
