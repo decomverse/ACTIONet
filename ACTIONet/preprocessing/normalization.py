@@ -93,11 +93,10 @@ def normalize(
 ) -> Optional[AnnData]:
     adata = adata.copy() if copy else adata
 
-
     if "norm_method" in adata.uns["metadata"].keys():  # Already normalized? leave it alone!
         # return adata if copy else None
         warnings.warn("AnnData object is prenormalized. Please make sure to use the right assay.")
-                 
+
     if layer_key is None and "input_assay" in adata.uns["metadata"].keys():
         layer_key = adata.uns["metadata"]["input_assay"]
 
@@ -108,17 +107,14 @@ def normalize(
     else:
         S = adata.X
 
-
     if sparse.issparse(S):
         UE = set(S.data)
     else:
-        UE = set(S.flatten())       
+        UE = set(S.flatten())
 
-
-    nonint_count = len(UE.difference(set(np.arange(0, max(UE)+1))))        
+    nonint_count = len(UE.difference(set(np.arange(0, max(UE) + 1))))
     if 0 < nonint_count:
         warnings.warn("Input [count] assay has non-integer values, which looks like a normalized matrix. Please make sure to use the right assay.")
-   
 
     S = normalize_matrix(
         S,

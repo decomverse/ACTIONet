@@ -67,6 +67,6 @@ pytest-integration:
 ## Publish docs
 .PHONY: build_docs
 build_docs:
-	cd docs && rm -r build
+	cd docs && rm -fr build
 	cd changelog && chmod +x *sh && bash ./generate_change_log.sh
 	cd docs && make html
