@@ -31,7 +31,7 @@ lint:	install_pre_commit
 update_env:
 	$(SOURCE_CONDA) && conda env update -f environment.yaml || conda env create -f environment.yaml
 
-install_env:	source_conda
+install_env:
 	$(SOURCE_CONDA) && conda deactivate && conda env remove -n actionet
 	$(SOURCE_CONDA) && conda deactivate && conda env create -f environment.yaml
 
