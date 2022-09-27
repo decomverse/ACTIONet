@@ -13,17 +13,7 @@ from sklearn.utils.validation import check_is_fitted
 import _ACTIONet as _an
 
 
-def runAA(
-    data: Union[AnnData, np.ndarray, spmatrix],
-    dim: Optional[int] = 10,
-    max_iter: Optional[int] = 100,
-    min_delta: Optional[float] = 1e-100,
-    Z: Optional[np.ndarray] = None,
-    layer_key: Optional[str] = None,
-    decomp_key_prefix: Optional[str] = "AA",
-    return_raw: Optional[bool] = False,
-    copy: Optional[bool] = False,
-) -> Union[AnnData, dict]:
+def runAA(data: Union[AnnData, np.ndarray, spmatrix], dim: Optional[int] = 10, max_iter: Optional[int] = 100, min_delta: Optional[float] = 1e-100, Z: Optional[np.ndarray] = None, layer_key: Optional[str] = None, decomp_key_prefix: Optional[str] = "AA", return_raw: Optional[bool] = False, copy: Optional[bool] = False) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
 
     Parameters
@@ -56,6 +46,7 @@ def runAA(
             "H": Loading matrix,
             "C": Coefficient matrix,
         Otherwise, these values are stored in the input AnnData object obsm/varm with `decomp_key_prefix` prefix.
+
     """
 
     if isinstance(data, AnnData):

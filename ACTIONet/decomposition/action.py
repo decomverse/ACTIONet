@@ -13,18 +13,8 @@ from sklearn.utils.validation import check_is_fitted
 import _ACTIONet as _an
 
 
-def runACTION(
-    data: Union[AnnData, np.ndarray, spmatrix],
-    reduction_key: Optional[str] = "ACTION",
-    depth: Optional[int] = 10,
-    thread_no: Optional[int] = 0,
-    max_it: Optional[int] = 50,
-    min_delta: Optional[float] = 1e-300,
-    return_raw: Optional[bool] = False,
-    copy: Optional[bool] = False,
-) -> Union[AnnData, dict]:
+def runACTION(data: Union[AnnData, np.ndarray, spmatrix], reduction_key: Optional[str] = "ACTION", depth: Optional[int] = 10, thread_no: Optional[int] = 0, max_it: Optional[int] = 50, min_delta: Optional[float] = 1e-300, return_raw: Optional[bool] = False, copy: Optional[bool] = False) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
-
     Parameters
     ----------
     data : Union[AnnData, np.ndarray, sparse.spmatrix]
@@ -49,9 +39,9 @@ def runACTION(
     Union[AnnData, dict]
         Result of archetypal analysis.
         If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
-            "W": Archetypal matrix,
-            "H": Loading matrix,
-            "C": Coefficient matrix,
+        "W": Archetypal matrix,
+        "H": Loading matrix,
+        "C": Coefficient matrix,
         Otherwise, these values are stored in the input AnnData object obsm/varm with `reduction_key` prefix.
     """
 
