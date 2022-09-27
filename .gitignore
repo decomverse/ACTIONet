@@ -19,3 +19,5 @@ __pycache__
 .idea/
 **/.DS_Store
 docker_insitro.txt
+tests/tmp
+tests/data
