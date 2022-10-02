@@ -687,13 +687,23 @@ namespace ACTIONet
       }
     }
 
-    field<mat> res = assess_enrichment(T, marker_mat, thread_no);
-    mat marker_stats = trans(res(0));
-
+    mat marker_stats;
+    if (gene_scaling_method > 0)
+    {
+      field<mat> res = assess_enrichment(T, marker_mat, thread_no);
+      marker_stats = trans(res(0));
+    }
+    else
+    {
+      vec w = vec(sqrt(trans(sum(square(marker_mat), 0))));
+      w.replace(0.0, 1.0);
+      mat w_mat = diagmat(1.0 / w);
+      sp_mat marker_mat_t = trans(marker_mat);
+      marker_stats = trans(spmat_mat_product_parallel(marker_mat_t, T, thread_no)) * w_mat;
+    }
     marker_stats.replace(datum::nan, 0);
 
-    mat marker_stats_smoothed = zscore(marker_stats); // zscore(marker_stats, thread_no);
-    field<vec> auto_out = autocorrelation_Moran(G, marker_stats_smoothed, 0, 0, thread_no);
+    mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
     if (post_alpha != 0)
     {
       stdout_printf("Post-smoothing expression values ... ");
@@ -701,10 +711,21 @@ namespace ACTIONet
       stdout_printf("done\n");
       FLUSH;
     }
-    vec locality = auto_out(0);
-    locality.replace(datum::nan, 0);
-    locality /= mean(locality);
-    marker_stats_smoothed = marker_stats_smoothed * diagmat(locality);
+    /*
+        mat marker_stats_smoothed = zscore(marker_stats); // zscore(marker_stats, thread_no);
+        field<vec> auto_out = autocorrelation_Moran(G, marker_stats_smoothed, 0, 0, thread_no);
+        if (post_alpha != 0)
+        {
+          stdout_printf("Post-smoothing expression values ... ");
+          marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, post_alpha);
+          stdout_printf("done\n");
+          FLUSH;
+        }
+        vec locality = auto_out(0);
+        locality.replace(datum::nan, 0);
+        locality /= mean(locality);
+        marker_stats_smoothed = marker_stats_smoothed * diagmat(locality);
+    */
 
     return (marker_stats_smoothed);
   }
@@ -758,11 +779,7 @@ namespace ACTIONet
     sp_mat X = trans(marker_mat);
 
     mat Y = T;
-    // 0: no normalization, 1: z-score, 2: RINT, 3: robust z-score
-    if (gene_scaling_method != 0)
-    {
-      Y = normalize_scores(T, gene_scaling_method, thread_no);
-    }
+
     mat stats = spmat_mat_product(X, Y);
 
     mat E = zeros(size(stats));
@@ -783,8 +800,7 @@ namespace ACTIONet
 
     marker_stats.replace(datum::nan, 0);
 
-    mat marker_stats_smoothed = zscore(marker_stats); // zscore(marker_stats, thread_no);
-    field<vec> auto_out = autocorrelation_Moran(G, marker_stats_smoothed, 0, 0, thread_no);
+    mat marker_stats_smoothed = marker_stats; // zscore(marker_stats, thread_no);
     if (post_alpha != 0)
     {
       stdout_printf("Post-smoothing expression values ... ");
@@ -792,10 +808,22 @@ namespace ACTIONet
       stdout_printf("done\n");
       FLUSH;
     }
-    vec locality = auto_out(0);
-    locality.replace(datum::nan, 0);
-    locality /= mean(locality);
-    marker_stats_smoothed = marker_stats_smoothed * diagmat(locality);
+
+    /*
+        mat marker_stats_smoothed = zscore(marker_stats); // zscore(marker_stats, thread_no);
+        field<vec> auto_out = autocorrelation_Moran(G, marker_stats_smoothed, 0, 0, thread_no);
+        if (post_alpha != 0)
+        {
+          stdout_printf("Post-smoothing expression values ... ");
+          marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, post_alpha);
+          stdout_printf("done\n");
+          FLUSH;
+        }
+        vec locality = auto_out(0);
+        locality.replace(datum::nan, 0);
+        locality /= mean(locality);
+        marker_stats_smoothed = marker_stats_smoothed * diagmat(locality);
+    */
 
     return (marker_stats_smoothed);
   }
