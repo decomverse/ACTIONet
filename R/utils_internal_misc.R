@@ -4,10 +4,10 @@
         features_use <- rownames(ace)
     } else {
         features_use <- ACTIONetExperiment::get.data.or.split(
-          ace = ace,
-          attr = features_use,
-          to_return = "data",
-          d = 1
+            ace = ace,
+            attr = features_use,
+            to_return = "data",
+            d = 1
         )
     }
     return(features_use)
@@ -37,7 +37,7 @@
         labels <- L
     }
 
-    if (is.null(names(labels)) | length(unique(names(labels))) > 100) {
+    if (is.null(names(labels)) | length(unique(names(labels))) > length(labels) / 2) {
         names(labels) <- as.character(labels)
     }
 

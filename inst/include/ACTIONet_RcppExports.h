@@ -2292,6 +2292,27 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
+    inline mat znormalize_mat(mat& A, int norm_method = 1, int thread_no = 0) {
+        typedef SEXP(*Ptr_znormalize_mat)(SEXP,SEXP,SEXP);
+        static Ptr_znormalize_mat p_znormalize_mat = NULL;
+        if (p_znormalize_mat == NULL) {
+            validateSignature("mat(*znormalize_mat)(mat&,int,int)");
+            p_znormalize_mat = (Ptr_znormalize_mat)R_GetCCallable("ACTIONet", "_ACTIONet_znormalize_mat");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_znormalize_mat(Shield<SEXP>(Rcpp::wrap(A)), Shield<SEXP>(Rcpp::wrap(norm_method)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_

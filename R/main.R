@@ -92,9 +92,9 @@ runACTIONet <- function(ace,
   }
   .validate_map(ace = ace, map_slot = reduction_slot, return_elem = FALSE)
 
-  if (!(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace)))) {
-    ace <- normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
-  }
+  # if (!(sprintf("%s_normalized", reduction_slot) %in% names(colMaps(ace)))) {
+  ace <- normalize.reduction(ace, reduction_slot = reduction_slot, reduction_normalization = reduction_normalization)
+  # }
   reduction_slot <- sprintf("%s_normalized", reduction_slot)
 
   # Calls "decomp.ACTIONMR" and fills in the appropriate slots in the ace object

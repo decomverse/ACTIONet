@@ -4064,6 +4064,42 @@ RcppExport SEXP _ACTIONet_XICOR(SEXP XSEXP, SEXP YSEXP, SEXP compute_pvalSEXP, S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// znormalize_mat
+mat znormalize_mat(mat& A, int norm_method, int thread_no);
+static SEXP _ACTIONet_znormalize_mat_try(SEXP ASEXP, SEXP norm_methodSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type norm_method(norm_methodSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(znormalize_mat(A, norm_method, thread_no));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_znormalize_mat(SEXP ASEXP, SEXP norm_methodSEXP, SEXP thread_noSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_znormalize_mat_try(ASEXP, norm_methodSEXP, thread_noSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -4202,6 +4238,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("sp_mat(*normalize_spmat)(sp_mat&,int)");
         signatures.insert("vec(*xicor)(vec,vec,bool,int)");
         signatures.insert("List(*XICOR)(mat&,mat&,bool,int,int)");
+        signatures.insert("mat(*znormalize_mat)(mat&,int,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4316,6 +4353,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_normalize_spmat", (DL_FUNC)_ACTIONet_normalize_spmat_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_xicor", (DL_FUNC)_ACTIONet_xicor_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_XICOR", (DL_FUNC)_ACTIONet_XICOR_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_znormalize_mat", (DL_FUNC)_ACTIONet_znormalize_mat_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -4429,6 +4467,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_normalize_spmat", (DL_FUNC) &_ACTIONet_normalize_spmat, 2},
     {"_ACTIONet_xicor", (DL_FUNC) &_ACTIONet_xicor, 4},
     {"_ACTIONet_XICOR", (DL_FUNC) &_ACTIONet_XICOR, 5},
+    {"_ACTIONet_znormalize_mat", (DL_FUNC) &_ACTIONet_znormalize_mat, 3},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},
