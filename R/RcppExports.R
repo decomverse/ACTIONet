@@ -1101,6 +1101,10 @@ XICOR <- function(X, Y, compute_pval = TRUE, seed = 0L, thread_no = 0L) {
     .Call(`_ACTIONet_XICOR`, X, Y, compute_pval, seed, thread_no)
 }
 
+znormalize_mat <- function(A, norm_method = 1L, thread_no = 0L) {
+    .Call(`_ACTIONet_znormalize_mat`, A, norm_method, thread_no)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }

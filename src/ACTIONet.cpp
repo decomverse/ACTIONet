@@ -2591,3 +2591,12 @@ List XICOR(mat &X, mat &Y, bool compute_pval = true, int seed = 0, int thread_no
 
   return (res);
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat znormalize_mat(mat &A, int norm_method = 1, int thread_no = 0)
+{
+  mat Z = ACTIONet::normalize_scores(A, norm_method, thread_no);
+
+  return (Z);
+}
