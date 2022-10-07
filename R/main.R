@@ -59,7 +59,7 @@ runACTIONet <- function(ace,
                         compute_specificity_parallel = FALSE,
                         smoothPC = TRUE,
                         thread_no = 0,
-                        backbone.density = 0.5,
+                        backbone_density = 0.5,
                         seed = 0) {
   if (!is(ace, "ACTIONetExperiment")) {
     ace <- as(ace, "ACTIONetExperiment")
@@ -170,7 +170,7 @@ runACTIONet <- function(ace,
     return_raw = FALSE
   )
 
-  ace <- constructBackbone(ace, backbone.density = backbone.density)
+  ace <- constructBackbone(ace, backbone_density = backbone_density)
   return(ace)
 }
 
@@ -330,7 +330,6 @@ rerun.archetype.unification <- function(ace,
                                         H_stacked_slot = "H_stacked",
                                         net_slot = "ACTIONet",
                                         unified_suffix = "unified",
-                                        backbone.density = 0.5,
                                         reduction_normalization = 1,
                                         thread_no = 0) {
   .validate_ace(ace = ace, return_elem = FALSE)
@@ -387,16 +386,16 @@ rerun.archetype.unification <- function(ace,
     return_raw = FALSE
   )
 
-  ace <- constructBackbone(ace, backbone.density = backbone_density)
+  ace <- constructBackbone(ace, backbone_density = backbone_density)
 
   return(ace)
 }
 
 constructBackbone <- function(ace,
-                              backbone.density = 0.5) {
+                              backbone_density = 0.5) {
   footprint <- ace$archetype_footprint
   footprint <- normalize_mat(footprint, 1)
-  arch.graph <- buildNetwork(footprint, density = backbone.density)
+  arch.graph <- buildNetwork(footprint, density = backbone_density)
   arch.coors <- as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet2D)
   arch.coors_3D <- as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$ACTIONet3D)
   arch.colors <- as.matrix(Matrix::t(colMaps(ace)$C_unified) %*% ace$denovo_color)
