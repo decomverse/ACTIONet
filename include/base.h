@@ -482,6 +482,12 @@ namespace ACTIONet
   vec xicor(vec xvec, vec yvec, bool compute_pval = true, int seed = 0);
   field<mat> XICOR(mat &X, mat &Y, bool compute_pval = true, int seed = 0, int thread_no = 0);
 
+  sp_mat buildNetwork_bipartite(mat H1, mat H2, double density = 1.0,
+                                int thread_no = 0, double M = 16,
+                                double ef_construction = 200,
+                                double ef = 200,
+                                string distance_metric = "jsd");
+
 } // namespace ACTIONet
 
 #endif
