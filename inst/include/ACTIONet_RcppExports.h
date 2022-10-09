@@ -2313,6 +2313,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline sp_mat buildNetwork_bipartite(mat H1, mat H2, double density = 1.0, int thread_no = 0, double M = 16, double ef_construction = 200, double ef = 200, string distance_metric = "jsd") {
+        typedef SEXP(*Ptr_buildNetwork_bipartite)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_buildNetwork_bipartite p_buildNetwork_bipartite = NULL;
+        if (p_buildNetwork_bipartite == NULL) {
+            validateSignature("sp_mat(*buildNetwork_bipartite)(mat,mat,double,int,double,double,double,string)");
+            p_buildNetwork_bipartite = (Ptr_buildNetwork_bipartite)R_GetCCallable("ACTIONet", "_ACTIONet_buildNetwork_bipartite");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_buildNetwork_bipartite(Shield<SEXP>(Rcpp::wrap(H1)), Shield<SEXP>(Rcpp::wrap(H2)), Shield<SEXP>(Rcpp::wrap(density)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(M)), Shield<SEXP>(Rcpp::wrap(ef_construction)), Shield<SEXP>(Rcpp::wrap(ef)), Shield<SEXP>(Rcpp::wrap(distance_metric)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<sp_mat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_

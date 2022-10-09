@@ -2600,3 +2600,20 @@ mat znormalize_mat(mat &A, int norm_method = 1, int thread_no = 0)
 
   return (Z);
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+sp_mat buildNetwork_bipartite(mat H1, mat H2, double density = 1.0,
+                              int thread_no = 0, double M = 16,
+                              double ef_construction = 200,
+                              double ef = 200,
+                              string distance_metric = "jsd")
+{
+  sp_mat G = ACTIONet::buildNetwork_bipartite(H1, H2, density,
+                                              thread_no, M,
+                                              ef_construction,
+                                              ef,
+                                              distance_metric);
+
+  return (G);
+}

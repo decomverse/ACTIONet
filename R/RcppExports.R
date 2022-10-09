@@ -1105,6 +1105,10 @@ znormalize_mat <- function(A, norm_method = 1L, thread_no = 0L) {
     .Call(`_ACTIONet_znormalize_mat`, A, norm_method, thread_no)
 }
 
+buildNetwork_bipartite <- function(H1, H2, density = 1.0, thread_no = 0L, M = 16, ef_construction = 200, ef = 200, distance_metric = "jsd") {
+    .Call(`_ACTIONet_buildNetwork_bipartite`, H1, H2, density, thread_no, M, ef_construction, ef, distance_metric)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
