@@ -704,7 +704,7 @@ namespace ACTIONet
     vector<vector<int>> jj(thread_no);
     vector<vector<double>> vv(thread_no);
 
-    ParallelFor(0, X1.n_cols, thread_no, [&](size_t j, size_t threadId)
+    ParallelFor(0, X2.n_cols, thread_no, [&](size_t j, size_t threadId)
 
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> results =
