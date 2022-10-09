@@ -13,24 +13,26 @@
 
 #include "RcppPerpendicular.h"
 
-  struct AddWorker {
-    hnswlib::HierarchicalNSW<float> *hnsw;
-    const fmat &data;
+struct AddWorker
+{
+  hnswlib::HierarchicalNSW<float> *hnsw;
+  const fmat &data;
 
-    AddWorker(hnswlib::HierarchicalNSW<float> *hnsw,
-              const fmat &data) :
-      hnsw(hnsw), data(data)
-    {}
+  AddWorker(hnswlib::HierarchicalNSW<float> *hnsw,
+            const fmat &data) : hnsw(hnsw), data(data)
+  {
+  }
 
-    void operator()(std::size_t begin, std::size_t end) {
-      for (std::size_t i = begin; i < end; i++) {
-        hnsw->addPoint(data.colptr(i), i);
-      }
+  void operator()(std::size_t begin, std::size_t end)
+  {
+    for (std::size_t i = begin; i < end; i++)
+    {
+      hnsw->addPoint(data.colptr(i), i);
     }
-  };
+  }
+};
 
-
-std::mutex hnsw_mutex; 
+std::mutex hnsw_mutex;
 
 template <class Function>
 inline void ParallelFor(size_t start, size_t end, size_t numThreads,
@@ -88,8 +90,7 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads,
                                           current = end;
                                           break;
                                         }
-                                      }
-                                    }));
+                                      } }));
     }
     for (auto &thread : threads)
     {
@@ -104,10 +105,10 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads,
 
 namespace ACTIONet
 {
-  //allowed distance metrics for hnswlib
+  // allowed distance metrics for hnswlib
   std::set<string> distance_metrics = {"jsd", "l2", "ip"};
 
-  //allowed nn approaches
+  // allowed nn approaches
   std::set<string> nn_approaches = {"k*nn", "knn"};
 
   // excption to throw if invalid distance metric has been specified
@@ -119,7 +120,7 @@ namespace ACTIONet
     }
   } distMetException;
 
-  //execption to throw if invalid nn approach has been specified
+  // execption to throw if invalid nn approach has been specified
   class invalidNNApproach : public exception
   {
     virtual const char *what() const throw()
@@ -128,7 +129,7 @@ namespace ACTIONet
     }
   } nnApproachException;
 
-  //Jensen-Shannon Divergence
+  // Jensen-Shannon Divergence
   double Sim(const double *pVect1, const double *pVect2, const double *log_vec,
              int N)
   {
@@ -174,20 +175,22 @@ namespace ACTIONet
     int dim = H.n_rows;
 
     mat G = zeros(sample_no, sample_no);
-    parallelFor(0, sample_no, [&] (size_t i) {
+    parallelFor(
+        0, sample_no, [&](size_t i)
+        {
                   for (int j = 0; j < sample_no; j++)
                   {
                     //use the JSD distance function here
                     G(i, j) = Sim(H.colptr(i), H.colptr(j), log_vec, dim);
-                  }
-                }, thread_no);
+                  } },
+        thread_no);
 
     G = clamp(G, 0.0, 1.0);
 
     return (G);
   }
 
-  //obtain approximation algorithm
+  // obtain approximation algorithm
   hnswlib::HierarchicalNSW<float> *getApproximationAlgo(string distance_metric,
                                                         mat H,
                                                         double M,
@@ -195,19 +198,19 @@ namespace ACTIONet
   {
     int max_elements = H.n_cols;
     int dim = H.n_rows;
-    //space to use determined by distance metric
+    // space to use determined by distance metric
     hnswlib::SpaceInterface<float> *space;
     if (distance_metric == "jsd")
     {
-      space = new hnswlib::JSDSpace(dim); //JSD
+      space = new hnswlib::JSDSpace(dim); // JSD
     }
-    else if (distance_metric == "l2") //l2
+    else if (distance_metric == "l2") // l2
     {
       space = new hnswlib::L2Space(dim);
     }
     else
     {
-      space = new hnswlib::InnerProductSpace(dim); //innerproduct
+      space = new hnswlib::InnerProductSpace(dim); // innerproduct
     }
     hnswlib::HierarchicalNSW<float> *appr_alg = new hnswlib::HierarchicalNSW<float>(space, max_elements, M, ef_construction);
     return (appr_alg);
@@ -222,11 +225,11 @@ namespace ACTIONet
   {
 
     double LC = 1.0 / density;
-    //verify that a support distance metric has been specified
-    // the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
+    // verify that a support distance metric has been specified
+    //  the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
     if (distance_metrics.find(distance_metric) == distance_metrics.end())
     {
-      //invalid distance metric was provided; exit
+      // invalid distance metric was provided; exit
       throw distMetException;
     }
 
@@ -235,7 +238,8 @@ namespace ACTIONet
       thread_no = SYS_THREADS_DEF; // std::thread::hardware_concurrency();
     }
 
-    stdout_printf("Building adaptive network (density = %.2f)\n", density); FLUSH;
+    stdout_printf("Building adaptive network (density = %.2f)\n", density);
+    FLUSH;
 
     if (distance_metric == "jsd")
     {
@@ -257,14 +261,17 @@ namespace ACTIONet
     stdout_printf("\tBuilding index ... ");
     fmat X = conv_to<fmat>::from(H);
 
-    parallelFor(0, max_elements, [&] (size_t j)
-                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
-    stdout_printf("done\n"); FLUSH;
+    parallelFor(
+        0, max_elements, [&](size_t j)
+        { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); },
+        thread_no);
+    stdout_printf("done\n");
+    FLUSH;
 
     stdout_printf("\tIdentifying nearest neighbors ... ");
     mat idx = zeros(sample_no, kNN + 1);
     mat dist = zeros(sample_no, kNN + 1);
-    parallelFor(0, sample_no, [&] (size_t i)
+    parallelFor(0, sample_no, [&](size_t i)
                 {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), kNN + 1);
@@ -282,9 +289,9 @@ namespace ACTIONet
                     idx(i, kNN - j) = result_tuple.second;
 
                     result.pop();
-                  }
-                });
-    stdout_printf("done\n"); FLUSH;
+                  } });
+    stdout_printf("done\n");
+    FLUSH;
 
     delete (appr_alg);
 
@@ -318,8 +325,9 @@ namespace ACTIONet
 
     sp_mat G(sample_no, sample_no);
 
-    parallelFor(0, sample_no, [&] (size_t v)
-                {
+    parallelFor(
+        0, sample_no, [&](size_t v)
+        {
                   vec delta = Delta.col(v);
 
                   // uvec rows = find(delta > 0, 1, "last");
@@ -333,9 +341,10 @@ namespace ACTIONet
                   {
                     int src = v_idx(i);
                     G(src, dst) = 1.0 - v_dist(i);
-                  }
-                }, thread_no);
-    stdout_printf("done\n"); FLUSH;
+                  } },
+        thread_no);
+    stdout_printf("done\n");
+    FLUSH;
 
     stdout_printf("\tFinalizing network ... ");
     G.replace(datum::nan, 0); // replace each NaN with 0
@@ -354,7 +363,8 @@ namespace ACTIONet
       stdout_printf("\n\t\tKeeping mutual nearest-neighbors only ... ");
       G_sym = sqrt(G % Gt);
     }
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     G_sym.diag().zeros();
 
@@ -370,11 +380,11 @@ namespace ACTIONet
   {
 
     double LC = 1.0 / density;
-    //verify that a support distance metric has been specified
-    // the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
+    // verify that a support distance metric has been specified
+    //  the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
     if (distance_metrics.find(distance_metric) == distance_metrics.end())
     {
-      //invalid distance metric was provided; exit
+      // invalid distance metric was provided; exit
       throw distMetException;
     }
 
@@ -399,8 +409,8 @@ namespace ACTIONet
     // int kNN = min(sample_no-1, (int)(kappa*round(sqrt(sample_no)))); // start
     // with uniform k=sqrt(N) ["Pattern Classification" book by Duda et al.]
 
-    //TODO, add cosine -- which is InnerProductSpace but with normalization; see here:
-    // https://github.com/hnswlib/hnswlib/blob/master/python_bindings/bindings.cpp#L97
+    // TODO, add cosine -- which is InnerProductSpace but with normalization; see here:
+    //  https://github.com/hnswlib/hnswlib/blob/master/python_bindings/bindings.cpp#L97
     hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
@@ -408,22 +418,22 @@ namespace ACTIONet
     fmat X = conv_to<fmat>::from(H);
     int max_elements = X.n_cols;
 
-/*
-    appr_alg->addPoint(X.colptr(0), (size_t) 0 ); // Critical for reproducibility!! :: https://github.com/nmslib/hnswlib/blob/master/sift_1b.cpp    
-    ParallelFor(1, max_elements, thread_no, [&](size_t j, size_t threadId) {
-         //const std::lock_guard<std::mutex> lock(hnsw_mutex); 
-         appr_alg->addPoint(X.colptr(j), j);
-    });
-*/
+    /*
+        appr_alg->addPoint(X.colptr(0), (size_t) 0 ); // Critical for reproducibility!! :: https://github.com/nmslib/hnswlib/blob/master/sift_1b.cpp
+        ParallelFor(1, max_elements, thread_no, [&](size_t j, size_t threadId) {
+             //const std::lock_guard<std::mutex> lock(hnsw_mutex);
+             appr_alg->addPoint(X.colptr(j), j);
+        });
+    */
     AddWorker worker(appr_alg, X);
     RcppPerpendicular::parallel_for(0, max_elements, worker, thread_no, 1);
 
-
-//    int j2 = 1;
-/*    parallelFor(1, max_elements, [&] (size_t j)
-                { const std::lock_guard<std::mutex> lock(hnsw_mutex); appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
-*/                
-    stdout_printf("done\n"); FLUSH;
+    //    int j2 = 1;
+    /*    parallelFor(1, max_elements, [&] (size_t j)
+                    { const std::lock_guard<std::mutex> lock(hnsw_mutex); appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
+    */
+    stdout_printf("done\n");
+    FLUSH;
 
     stdout_printf("\tConstructing k*-NN ... ");
 
@@ -447,8 +457,7 @@ namespace ACTIONet
                     vv[threadId].push_back(v);
 
                     results.pop();
-                  }
-                });
+                  } });
 
     vec values;
     umat locations;
@@ -473,7 +482,8 @@ namespace ACTIONet
     }
     sp_mat G(locations, values, sample_no, sample_no);
 
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     delete (appr_alg);
 
@@ -494,7 +504,8 @@ namespace ACTIONet
       // stdout_printf("\n\t\tKeeping mutual nearest-neighbors only ... ");
       G_sym = sqrt(G % Gt);
     }
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     G_sym.diag().zeros();
 
@@ -506,15 +517,16 @@ namespace ACTIONet
                           double ef = 200, bool mutual_edges_only = true,
                           string distance_metric = "jsd")
   {
-    //verify that a support distance metric has been specified
-    // the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
+    // verify that a support distance metric has been specified
+    //  the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
     if (distance_metrics.find(distance_metric) == distance_metrics.end())
     {
-      //invalid distance metric was provided; exit
+      // invalid distance metric was provided; exit
       throw distMetException;
     }
 
-    stdout_printf("Building fixed-degree network (k = %d)\n", (int)k); FLUSH;
+    stdout_printf("Building fixed-degree network (k = %d)\n", (int)k);
+    FLUSH;
     if (thread_no <= 0)
     {
       thread_no = SYS_THREADS_DEF; // std::thread::hardware_concurrency();
@@ -536,15 +548,19 @@ namespace ACTIONet
     stdout_printf("\tBuilding index ... ");
     int max_elements = H.n_cols;
     fmat X = conv_to<fmat>::from(H);
-    parallelFor(0, max_elements, [&] (size_t j)
-                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
-    stdout_printf("done\n"); FLUSH;
+    parallelFor(
+        0, max_elements, [&](size_t j)
+        { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); },
+        thread_no);
+    stdout_printf("done\n");
+    FLUSH;
 
     sp_mat G(sample_no, sample_no);
 
     stdout_printf("\tConstructing k*-NN ... ");
-    parallelFor(0, sample_no, [&] (size_t i)
-                {
+    parallelFor(
+        0, sample_no, [&](size_t i)
+        {
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), k);
 
@@ -554,9 +570,10 @@ namespace ACTIONet
 
                     G(i, result_tuple.second) = 1.0 - result_tuple.first;
                     result.pop();
-                  }
-                }, thread_no);
-    stdout_printf("done\n"); FLUSH;
+                  } },
+        thread_no);
+    stdout_printf("done\n");
+    FLUSH;
 
     delete (appr_alg);
 
@@ -577,7 +594,8 @@ namespace ACTIONet
       stdout_printf("\n\t\tKeeping mutual nearest-neighbors only ... ");
       G_sym = sqrt(G % Gt);
     }
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     G_sym.diag().zeros();
 
@@ -592,17 +610,17 @@ namespace ACTIONet
                       double ef, bool mutual_edges_only,
                       int k)
   {
-    //verify that valid distance metric has been specified
+    // verify that valid distance metric has been specified
     if (distance_metrics.find(distance_metric) == distance_metrics.end())
     {
-      //invalid distance metric was provided; exit
+      // invalid distance metric was provided; exit
       throw distMetException;
     }
 
-    //verify that valid nn approach has been specified
+    // verify that valid nn approach has been specified
     if (nn_approaches.find(algorithm) == nn_approaches.end())
     {
-      //invalid nn approach was provided; exit
+      // invalid nn approach was provided; exit
       throw nnApproachException;
     }
 
@@ -615,7 +633,7 @@ namespace ACTIONet
     sp_mat G;
     if (algorithm == "k*nn")
     {
-      G = buildNetwork_KstarNN(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+      G = buildNetwork_KstarNN_v2(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
     }
     else
     {
@@ -623,4 +641,117 @@ namespace ACTIONet
     }
     return (G);
   }
+
+  sp_mat buildNetwork_bipartite(mat H1, mat H2, double density,
+                                int thread_no, double M,
+                                double ef_construction,
+                                double ef,
+                                string distance_metric)
+  {
+
+    double LC = 1.0 / density;
+    // verify that a support distance metric has been specified
+    //  the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
+    if (distance_metrics.find(distance_metric) == distance_metrics.end())
+    {
+      // invalid distance metric was provided; exit
+      throw distMetException;
+    }
+
+    if (thread_no <= 0)
+    {
+      thread_no = SYS_THREADS_DEF; // std::thread::hardware_concurrency();
+    }
+
+    stdout_printf("Building adaptive bipartite network (%d threads):\n", thread_no);
+    stdout_printf("\tParameters: metric = %s, density = %0.2f\n",
+                  distance_metric.c_str(), density);
+    FLUSH;
+
+    if (distance_metric == "jsd")
+    {
+      H1 = clamp(H1, 0, 1);
+      H1 = normalise(H1, 1, 0);
+
+      H2 = clamp(H2, 0, 1);
+      H2 = normalise(H2, 1, 0);
+    }
+
+    double kappa = 5.0;
+    // TODO, add cosine -- which is InnerProductSpace but with normalization; see here:
+    //  https://github.com/hnswlib/hnswlib/blob/master/python_bindings/bindings.cpp#L97
+    hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H1, M, ef_construction);
+    appr_alg->setEf(ef);
+
+    stdout_printf("\tBuilding index ... (updated) ");
+    fmat X1 = conv_to<fmat>::from(H1);
+    fmat X2 = conv_to<fmat>::from(H2);
+
+    int max_elements = X1.n_cols;
+    AddWorker worker(appr_alg, X1);
+    RcppPerpendicular::parallel_for(0, max_elements, worker, thread_no, 1);
+
+    //    int j2 = 1;
+    /*    parallelFor(1, max_elements, [&] (size_t j)
+                    { const std::lock_guard<std::mutex> lock(hnsw_mutex); appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, thread_no);
+    */
+    stdout_printf("done\n");
+    FLUSH;
+
+    stdout_printf("\tConstructing k*-NN ... ");
+
+    vector<vector<int>> ii(thread_no);
+    vector<vector<int>> jj(thread_no);
+    vector<vector<double>> vv(thread_no);
+
+    ParallelFor(0, X1.n_cols, thread_no, [&](size_t j, size_t threadId)
+
+                {
+                  std::priority_queue<std::pair<float, hnswlib::labeltype>> results =
+                      appr_alg->searchKStarnn(X2.colptr(j), LC);
+
+                  while (!results.empty())
+                  {
+                    auto &res = results.top();
+                    int i = res.second;
+                    double v = 1.0 - res.first;
+                    ii[threadId].push_back(i);
+                    jj[threadId].push_back(j);
+                    vv[threadId].push_back(v);
+
+                    results.pop();
+                  } });
+
+    vec values;
+    umat locations;
+    for (int threadId = 0; threadId < thread_no; threadId++)
+    {
+      if (threadId == 0)
+      {
+        values = conv_to<vec>::from(vv[threadId]);
+
+        uvec iv = conv_to<uvec>::from(ii[threadId]);
+        uvec jv = conv_to<uvec>::from(jj[threadId]);
+        locations = trans(join_rows(iv, jv));
+      }
+      else
+      {
+        values = join_vert(values, conv_to<vec>::from(vv[threadId]));
+
+        uvec iv = conv_to<uvec>::from(ii[threadId]);
+        uvec jv = conv_to<uvec>::from(jj[threadId]);
+        locations = join_rows(locations, trans(join_rows(iv, jv)));
+      }
+    }
+    delete (appr_alg);
+
+    sp_mat G(locations, values, H1.n_cols, H2.n_cols);
+    G.replace(datum::nan, 0); // replace each NaN with 0
+
+    stdout_printf("done\n");
+    FLUSH;
+
+    return (G);
+  }
+
 } // namespace ACTIONet
