@@ -6,7 +6,7 @@
     rownames(X) <- common_features
   } else if (is.list(markers)) {
     if (is.null(names(markers))) {
-      names(marker_set) <- sapply(1:length(marker_set), function(i) {
+      names(markers) <- sapply(1:length(markers), function(i) {
         msg <- sprintf("Annotation %d", i)
         print(msg)
       })
