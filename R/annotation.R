@@ -333,8 +333,8 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_method = -2,
-                          pre_alpha = 0.85, post_alpha = 0.9, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 0, perm_no = 30, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_method = 0,
+                          pre_alpha = 0.85, post_alpha = 0.5, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 0, perm_no = 30, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified", post_LPA = T) {
   if (!(net_slot %in% names(colNets(ace)))) {
     warning(sprintf("net_slot does not exist in colNets(ace)."))
     return()
@@ -381,8 +381,12 @@ annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_m
   annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
   conf <- apply(marker_stats, 1, max)
 
+  if (post_LPA == TRUE) {
+    annots_corrected <- correct.cell.labels(ace, annots)
+  } else {
+    annots_corrected <- annots
+  }
 
-  annots_corrected <- correct.cell.labels(ace, annots)
   out <- list(Label = annots_corrected, Confidence = conf, Enrichment = marker_stats)
 
   return(out)
