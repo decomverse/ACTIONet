@@ -688,7 +688,7 @@ namespace ACTIONet
     }
 
     mat marker_stats;
-    if (gene_scaling_method > 0)
+    if (gene_scaling_method >= 0)
     {
       field<mat> res = assess_enrichment(T, marker_mat, thread_no);
       marker_stats = trans(res(0));
