@@ -333,8 +333,7 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_method = 0,
-                          pre_alpha = 0.85, post_alpha = 0.5, network_normalization_method = "pagerank_sym", diffusion_it = 5, thread_no = 0, features_use = NULL, TFIDF_prenorm = 0, perm_no = 30, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified", post_LPA = T) {
+annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, network_normalization_method = "pagerank_sym", post_correction = T, thread_no = 0, features_use = NULL, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
     warning(sprintf("net_slot does not exist in colNets(ace)."))
     return()
@@ -343,23 +342,18 @@ annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_m
   }
 
   features_use <- .get_feature_vec(ace, features_use)
-  marker_mat_full <- .preprocess_annotation_markers(markers, features_use)
-  mask <- Matrix::rowSums(abs(marker_mat_full)) != 0
-  marker_mat <- marker_mat_full[mask, ]
-
+  marker_mat <- .preprocess_annotation_markers(markers, features_use)
 
   S <- assays(ace)[[assay_name]]
-  sub_S <- S[mask, ]
-  sub_S <- as(sub_S, "sparseMatrix")
+  S <- as(S, "sparseMatrix")
 
   network_normalization_code <- 0
   if (network_normalization_method == "pagerank_sym") {
     network_normalization_code <- 2
   }
-  if (algorithm == "nonparametric") {
-    marker_stats <- aggregate_genesets_weighted_enrichment_permutation(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
-  } else if (algorithm == "parametric") {
-    marker_stats <- aggregate_genesets_weighted_enrichment(G, sub_S, marker_mat, network_normalization_method = network_normalization_code, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha)
+  if (algorithm == "parametric") {
+    out <- aggregate_genesets_vision(G, S, marker_mat, network_normalization_code, alpha, thread_no)
+    marker_stats <- out[["stats_norm_smoothed"]]
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -370,7 +364,7 @@ annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_m
       normalize = TRUE,
       H.slot = H_slot
     ))
-    marker_stats <- networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = post_alpha, thread_no = thread_no)
+    marker_stats <- networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = alpha, thread_no = thread_no)
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
     marker_stats <- aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
@@ -381,7 +375,7 @@ annotateCells <- function(ace, markers, algorithm = "parametric", gene_scaling_m
   annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
   conf <- apply(marker_stats, 1, max)
 
-  if (post_LPA == TRUE) {
+  if (post_correction == TRUE) {
     annots_corrected <- correct.cell.labels(ace, annots)
   } else {
     annots_corrected <- annots

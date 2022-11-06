@@ -1109,6 +1109,10 @@ buildNetwork_bipartite <- function(H1, H2, density = 1.0, thread_no = 0L, M = 16
     .Call(`_ACTIONet_buildNetwork_bipartite`, H1, H2, density, thread_no, M, ef_construction, ef, distance_metric)
 }
 
+aggregate_genesets_vision <- function(G, S, marker_mat, network_normalization_method = 0L, alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_aggregate_genesets_vision`, G, S, marker_mat, network_normalization_method, alpha, thread_no)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }
