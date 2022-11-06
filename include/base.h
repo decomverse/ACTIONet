@@ -488,6 +488,10 @@ namespace ACTIONet
                                 double ef = 200,
                                 string distance_metric = "jsd");
 
+  //  mat aggregate_genesets_weighted_enrichment_permutation_sparse(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int perm_no = 100, int network_normalization_method = 0, double post_alpha = 0.85, int thread_no = 0);
+
+  field<mat> aggregate_genesets_vision(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, double alpha = 0.85, int thread_no = 0);
+
 } // namespace ACTIONet
 
 #endif
