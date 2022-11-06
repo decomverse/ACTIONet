@@ -828,4 +828,78 @@ namespace ACTIONet
     return (marker_stats_smoothed);
   }
 
+  field<mat> aggregate_genesets_vision(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method, double alpha, int thread_no)
+  {
+    field<mat> out(3);
+
+    if (S.n_rows != marker_mat.n_rows)
+    {
+      stderr_printf("Number of genes in the expression matrix (S) and marker matrix (marker_mat) do not match\n");
+      FLUSH;
+      return (out);
+    }
+    if (S.n_cols != G.n_rows)
+    {
+      stderr_printf("Number of cell in the expression matrix (S) and cell network (G) do not match\n");
+      FLUSH;
+      return (out);
+    }
+
+    // 0: pagerank, 2: sym_pagerank
+    sp_mat P;
+    if (alpha != 0)
+    {
+      P = normalize_adj(G, network_normalization_method);
+    }
+
+    mat X = mat(marker_mat);
+    sp_mat St = trans(S);
+
+    mat stats = spmat_mat_product_parallel(St, X, thread_no);
+
+    // Compute cell-specific stats to adjust for depth, etc.
+    vec mu = zeros(S.n_cols);
+    vec nnz = zeros(S.n_cols);
+    for (sp_mat::const_iterator it = S.begin(); it != S.end(); ++it)
+    {
+      mu[it.col()] += (*it);
+      nnz[it.col()]++;
+    }
+    mu /= S.n_rows;
+    vec p_nnz = nnz / S.n_rows; // 1 - p_zero
+
+    vec sigma_sq = zeros(S.n_cols);
+    for (sp_mat::const_iterator it = S.begin(); it != S.end(); ++it)
+    {
+      float delta = mu[it.col()] - (*it);
+      sigma_sq[it.col()] += delta * delta;
+    }
+    sigma_sq += (S.n_rows * (1 - p_nnz)) % square(mu); // Adjust for nnzs
+    sigma_sq /= (S.n_rows - 1);
+
+    // Standardize using sampling mean (from Vision: https://www.nature.com/articles/s41467-019-12235-0)
+    rowvec k1 = rowvec(sum(marker_mat));
+    rowvec k2 = rowvec(sum(square(marker_mat)));
+
+    mat sampling_mu = mu * k1;
+    mat sampling_sigma_sq = sigma_sq * k2;
+    mat marker_stats = (stats - sampling_mu) / sqrt(sampling_sigma_sq);
+    marker_stats.replace(datum::nan, 0);
+
+    mat marker_stats_smoothed = marker_stats;
+    if (alpha != 0)
+    {
+      stdout_printf("Smoothing geneset scores ... ");
+      marker_stats_smoothed = compute_network_diffusion_Chebyshev(P, marker_stats_smoothed, thread_no, alpha);
+      stdout_printf("done\n");
+      FLUSH;
+    }
+
+    out(0) = marker_stats_smoothed;
+    out(1) = marker_stats;
+    out(2) = stats;
+
+    return (out);
+  }
+
 } // namespace ACTIONet
