@@ -462,7 +462,10 @@ annotateArchetypes <- function(ace, markers = NULL, labels = NULL, scores = NULL
     X2 <- model.matrix(~ .0 + f2)
 
     xi.out <- ACTIONet::XICOR(X1, X2)
-    archetype_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+    Z_pos <- xi.out$Z
+    Z_pos[Z_pos < 0] <- 0
+    dir <- sign(cor(X1, X2))
+    archetype_enrichment <- dir * Z_pos
 
     rownames(archetype_enrichment) <- colnames(X1)
     colnames(archetype_enrichment) <- levels(f2)
@@ -477,7 +480,10 @@ annotateArchetypes <- function(ace, markers = NULL, labels = NULL, scores = NULL
     }
 
     xi.out <- ACTIONet::XICOR(X1, X2)
-    archetype_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+    Z_pos <- xi.out$Z
+    Z_pos[Z_pos < 0] <- 0
+    dir <- sign(cor(X1, X2))
+    archetype_enrichment <- dir * Z_pos
 
     rownames(archetype_enrichment) <- colnames(X1)
     colnames(archetype_enrichment) <- colnames(X2)
@@ -525,7 +531,10 @@ annotateClusters <- function(ace, markers = NULL, labels = NULL, scores = NULL, 
     X2 <- model.matrix(~ .0 + f2)
 
     xi.out <- ACTIONet::XICOR(X1, X2)
-    cluster_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+    Z_pos <- xi.out$Z
+    Z_pos[Z_pos < 0] <- 0
+    dir <- sign(cor(X1, X2))
+    cluster_enrichment <- dir * Z_pos
 
     rownames(cluster_enrichment) <- levels(f1)
     colnames(cluster_enrichment) <- levels(f2)
@@ -541,7 +550,10 @@ annotateClusters <- function(ace, markers = NULL, labels = NULL, scores = NULL, 
     X1 <- model.matrix(~ .0 + f1)
 
     xi.out <- ACTIONet::XICOR(X1, X2)
-    cluster_enrichment <- sign(cor(X1, X2)) * xi.out$Z
+    Z_pos <- xi.out$Z
+    Z_pos[Z_pos < 0] <- 0
+    dir <- sign(cor(X1, X2))
+    cluster_enrichment <- dir * Z_pos
 
     rownames(cluster_enrichment) <- levels(l1)
     colnames(cluster_enrichment) <- colnames(X2)
