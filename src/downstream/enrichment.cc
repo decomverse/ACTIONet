@@ -101,6 +101,13 @@ namespace ACTIONet
 
     std::mt19937_64 engine(seed);
 
+    vec idx = regspace(0, xvec.n_elem - 1);
+    aarand::shuffle(idx.memptr(), idx.n_elem, engine);
+    uvec perm = conv_to<uvec>::from(idx);
+
+    xvec = xvec(perm);
+    yvec = yvec(perm);
+
     int n = xvec.n_elem;
 
     vec er = rank_vec(xvec);
@@ -146,12 +153,11 @@ namespace ACTIONet
   {
     field<mat> out(2);
 
-    arma_rng::set_seed(seed);
+    // arma_rng::set_seed(seed);
+    // uvec perm = randperm(X.n_rows);
 
-    uvec perm = randperm(X.n_rows);
-
-    X = X.rows(perm);
-    Y = Y.rows(perm);
+    // X = X.rows(perm);
+    // Y = Y.rows(perm);
 
     bool swapped = false;
     int n1 = X.n_cols, n2 = Y.n_cols;
