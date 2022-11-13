@@ -254,6 +254,9 @@ namespace ACTIONet
         (int)(kappa *
               round(sqrt(sample_no)))); // start with uniform k=sqrt(N) ["Pattern
                                         // Classification" book by Duda et al.]
+
+    ef_construction = ef = kNN;
+
     hnswlib::HierarchicalNSW<float> *appr_alg = getApproximationAlgo(distance_metric, H, M, ef_construction);
     appr_alg->setEf(ef);
 
