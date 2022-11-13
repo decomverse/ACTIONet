@@ -379,6 +379,8 @@ namespace ACTIONet
                                  string distance_metric = "jsd")
   {
 
+    ef_construction = ef = 5 * sqrt(H.n_cols);
+
     double LC = 1.0 / density;
     // verify that a support distance metric has been specified
     //  the following distance metrics are supported in hnswlib: https://github.com/hnswlib/hnswlib#supported-distances
@@ -633,7 +635,7 @@ namespace ACTIONet
     sp_mat G;
     if (algorithm == "k*nn")
     {
-      G = buildNetwork_KstarNN(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+      G = buildNetwork_KstarNN_v2(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
     }
     else
     {
