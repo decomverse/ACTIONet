@@ -635,7 +635,7 @@ namespace ACTIONet
     sp_mat G;
     if (algorithm == "k*nn")
     {
-      G = buildNetwork_KstarNN_v2(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
+      G = buildNetwork_KstarNN(H, density, thread_no, M, ef_construction, ef, mutual_edges_only, distance_metric);
     }
     else
     {
