@@ -240,8 +240,8 @@ verify_aces <- function(ace1, ace2) {
   ###############################################################
   ###############################################################
   ## 2D
-  coor2D1 <- round(ace1$ACTIONet2D, 3)
-  coor2D2 <- round(ace2$ACTIONet2D, 3)
+  coor2D1 <- round(ace1$ACTIONet2D, 1)
+  coor2D2 <- round(ace2$ACTIONet2D, 1)
 
   mismatch.2D <- 100 * sum(coor2D1 != coor2D2) / length(coor2D1)
   warnifnot(mismatch.2D < 0.5)
