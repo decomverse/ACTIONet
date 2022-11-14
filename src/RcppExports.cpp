@@ -4139,9 +4139,9 @@ RcppExport SEXP _ACTIONet_buildNetwork_bipartite(SEXP H1SEXP, SEXP H2SEXP, SEXP 
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// aggregate_genesets_vision
-List aggregate_genesets_vision(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, double alpha, int thread_no);
-static SEXP _ACTIONet_aggregate_genesets_vision_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP alphaSEXP, SEXP thread_noSEXP) {
+// aggregate_genesets
+List aggregate_genesets(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method, double alpha, int thread_no);
+static SEXP _ACTIONet_aggregate_genesets_try(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP alphaSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
@@ -4150,15 +4150,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type network_normalization_method(network_normalization_methodSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(aggregate_genesets_vision(G, S, marker_mat, network_normalization_method, alpha, thread_no));
+    rcpp_result_gen = Rcpp::wrap(aggregate_genesets(G, S, marker_mat, network_normalization_method, alpha, thread_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_aggregate_genesets_vision(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP alphaSEXP, SEXP thread_noSEXP) {
+RcppExport SEXP _ACTIONet_aggregate_genesets(SEXP GSEXP, SEXP SSEXP, SEXP marker_matSEXP, SEXP network_normalization_methodSEXP, SEXP alphaSEXP, SEXP thread_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_vision_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, alphaSEXP, thread_noSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_aggregate_genesets_try(GSEXP, SSEXP, marker_matSEXP, network_normalization_methodSEXP, alphaSEXP, thread_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -4366,7 +4366,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*XICOR)(mat&,mat&,bool,int,int)");
         signatures.insert("mat(*znormalize_mat)(mat&,int,int)");
         signatures.insert("sp_mat(*buildNetwork_bipartite)(mat,mat,double,int,double,double,double,string)");
-        signatures.insert("List(*aggregate_genesets_vision)(sp_mat&,sp_mat&,sp_mat&,int,double,int)");
+        signatures.insert("List(*aggregate_genesets)(sp_mat&,sp_mat&,sp_mat&,int,double,int)");
         signatures.insert("mat(*run_harmony)(mat&,mat&,vec,int,double,double,int,int,double,double,double,double,double,bool,int)");
     }
     return signatures.find(sig) != signatures.end();
@@ -4484,7 +4484,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_XICOR", (DL_FUNC)_ACTIONet_XICOR_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_znormalize_mat", (DL_FUNC)_ACTIONet_znormalize_mat_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_buildNetwork_bipartite", (DL_FUNC)_ACTIONet_buildNetwork_bipartite_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_vision", (DL_FUNC)_ACTIONet_aggregate_genesets_vision_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets", (DL_FUNC)_ACTIONet_aggregate_genesets_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_harmony", (DL_FUNC)_ACTIONet_run_harmony_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
@@ -4601,7 +4601,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_XICOR", (DL_FUNC) &_ACTIONet_XICOR, 5},
     {"_ACTIONet_znormalize_mat", (DL_FUNC) &_ACTIONet_znormalize_mat, 3},
     {"_ACTIONet_buildNetwork_bipartite", (DL_FUNC) &_ACTIONet_buildNetwork_bipartite, 8},
-    {"_ACTIONet_aggregate_genesets_vision", (DL_FUNC) &_ACTIONet_aggregate_genesets_vision, 6},
+    {"_ACTIONet_aggregate_genesets", (DL_FUNC) &_ACTIONet_aggregate_genesets, 6},
     {"_ACTIONet_run_harmony", (DL_FUNC) &_ACTIONet_run_harmony, 15},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},

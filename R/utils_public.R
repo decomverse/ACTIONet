@@ -150,8 +150,8 @@ verify_aces <- function(ace1, ace2) {
   ################ Check ACTION reduction #######################
   ###############################################################
   ###############################################################
-  A1 <- ace1$ACTION_normalized
-  A2 <- ace2$ACTION_normalized
+  A1 <- ace1$ACTION
+  A2 <- ace2$ACTION
 
   deltaA <- sum(abs(A1 - A2)) / length(A1)
   warnifnot(deltaA < 1e-5)

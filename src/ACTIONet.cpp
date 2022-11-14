@@ -2620,7 +2620,7 @@ sp_mat buildNetwork_bipartite(mat H1, mat H2, double density = 1.0,
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-List aggregate_genesets_vision(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, double alpha = 0.85, int thread_no = 0)
+List aggregate_genesets(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int network_normalization_method = 0, double alpha = 0.85, int thread_no = 0)
 {
   field<mat> stats = ACTIONet::aggregate_genesets_vision(G, S, marker_mat, network_normalization_method, alpha, thread_no);
 

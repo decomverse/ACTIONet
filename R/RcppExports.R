@@ -1109,8 +1109,8 @@ buildNetwork_bipartite <- function(H1, H2, density = 1.0, thread_no = 0L, M = 16
     .Call(`_ACTIONet_buildNetwork_bipartite`, H1, H2, density, thread_no, M, ef_construction, ef, distance_metric)
 }
 
-aggregate_genesets_vision <- function(G, S, marker_mat, network_normalization_method = 0L, alpha = 0.85, thread_no = 0L) {
-    .Call(`_ACTIONet_aggregate_genesets_vision`, G, S, marker_mat, network_normalization_method, alpha, thread_no)
+aggregate_genesets <- function(G, S, marker_mat, network_normalization_method = 0L, alpha = 0.85, thread_no = 0L) {
+    .Call(`_ACTIONet_aggregate_genesets`, G, S, marker_mat, network_normalization_method, alpha, thread_no)
 }
 
 run_harmony <- function(X, W0, batch, clustering_algorithm = 1L, sigma_val = 0.1, theta_val = 2.0, max_iter_cluster = 200L, max_iter_harmony = 10L, eps_cluster = 1e-5, eps_harmony = 1e-4, tau = 0, block_size = 0.05, lambda_val = 1.0, verbose = TRUE, seed = 0L) {
