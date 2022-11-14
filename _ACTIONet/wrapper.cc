@@ -816,6 +816,37 @@ py::dict XICOR(arma::Mat<npdouble> &X, arma::Mat<npdouble> &Y,
   return (res);
 }
 
+arma::Mat<npdouble> run_harmony(arma::Mat<npdouble> &X, arma::Mat<npdouble> &W0,
+                                arma::vec batch, int clustering_algorithm,
+                                double sigma_val, double theta_val,
+                                int max_iter_cluster, int max_iter_harmony,
+                                double eps_cluster, double eps_harmony,
+                                double tau, double block_size,
+                                double lambda_val, bool verbose, int seed) {
+  mat Z_corr = ACTIONet::run_harmony(
+      X, W0, batch, clustering_algorithm, sigma_val, theta_val,
+      max_iter_cluster, max_iter_harmony, eps_cluster, eps_harmony, tau,
+      block_size, lambda_val, verbose, seed);
+
+  return (Z_corr);
+}
+
+py::dict aggregate_genesets(arma::sp_mat &G, arma::sp_mat &S,
+                            arma::sp_mat &marker_mat,
+                            int network_normalization_method, double alpha,
+                            int thread_no) {
+  arma::field<arma::mat> stats = ACTIONet::aggregate_genesets_vision(
+      G, S, marker_mat, network_normalization_method, alpha, thread_no);
+
+  py::dict res;
+
+  res["stats_norm_smoothed"] = stats[0];
+  res["stats_norm"] = stats[1];
+  res["stats"] = stats[2];
+
+  return (res);
+}
+
 PYBIND11_MODULE(_ACTIONet, m) {
   m.doc() = R"pbdoc(
         ACTIONet package
@@ -1063,6 +1094,20 @@ PYBIND11_MODULE(_ACTIONet, m) {
   m.def("XICOR", &XICOR, "XI correlation measure", py::arg("X"), py::arg("Y"),
         py::arg("compute_pval") = true, py::arg("seed") = 0,
         py::arg("thread_no") = 0);
+
+  m.def("run_harmony", &run_harmony, "Run Harmony", py::arg("X"), py::arg("W0"),
+        py::arg("batch"), py::arg("clustering_algorithm") = 1,
+        py::arg("sigma_val") = 0.1, py::arg("theta_val") = 2.0,
+        py::arg("max_iter_cluster") = 200, py::arg("max_iter_harmony") = 10,
+        py::arg("eps_cluster") = 1e-5, py::arg("eps_harmony") = 1e-4,
+        py::arg("tau") = 0, py::arg("block_size") = 0.05,
+        py::arg("lambda_val") = 1.0, py::arg("verbose") = true,
+        py::arg("seed") = 0);
+
+  m.def("aggregate_genesets", &aggregate_genesets,
+        "Aggregates genesets per cell", py::arg("G"), py::arg("S"),
+        py::arg("marker_mat"), py::arg("network_normalization_method") = 0,
+        py::arg("alpha") = 0.85, py::arg("thread_no") = 0);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;

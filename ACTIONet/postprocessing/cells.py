@@ -37,54 +37,51 @@ def annotate(
     algorithm: Optional[str] = "parametric",
     network_normalization_method: Optional[str] = "pagerank_sym",
     network_key: Optional[str] = "ACTIONet",
-    prenorm: Optional[int] = 0,
-    gene_scaling_method: Optional[int] = 0,
-    pre_alpha: Optional[float] = 0,
-    post_alpha: Optional[float] = 0.9,
-    perm_no: Optional[int] = 30,
+    alpha: Optional[float] = 0.85,
+    post_correction: Optional[bool] = True,
+    thread_no: Optional[int] = 0,
 ):
     network_normalization_code = 0
     if network_normalization_method == "pagerank_sym":
         network_normalization_code = 2
 
-    feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
-    masks = np.array(pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T)
-    selected_features_mask = np.sum(masks, axis=1) > 0
-    sub_S = sparse.csc_matrix(adata.X[:, selected_features_mask].T)
-    marker_mat = sparse.csc_matrix(masks[selected_features_mask, :])
+    feature_names = pd.Series(
+        [
+            x.decode() if isinstance(x, (bytes, bytearray)) else x
+            for x in list(adata.var.index)
+        ]
+    )
+    masks = np.array(
+        pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T
+    )
+    S = sparse.csc_matrix(adata.X.T)
+    marker_mat = sparse.csc_matrix(masks)
 
     G = sparse.csc_matrix(adata.obsp[network_key])
 
-    if algorithm == "nonparametric":
-        marker_stats = _an.aggregate_genesets_weighted_enrichment_permutation(
-            G,
-            sub_S,
-            marker_mat,
-            network_normalization_method=network_normalization_code,
-            expression_normalization_method=prenorm,
-            gene_scaling_method=gene_scaling_method,
-            pre_alpha=pre_alpha,
-            post_alpha=post_alpha,
-            perm_no=perm_no,
+    if algorithm == "parametric":
+        out = _an.aggregate_genesets(
+            G, S, marker_mat, network_normalization_code, alpha, thread_no
         )
-    elif algorithm == "parametric":
-        marker_stats = _an.aggregate_genesets_weighted_enrichment(
-            G,
-            sub_S,
-            marker_mat,
-            network_normalization_method=network_normalization_code,
-            expression_normalization_method=prenorm,
-            gene_scaling_method=gene_scaling_method,
-            pre_alpha=pre_alpha,
-            post_alpha=post_alpha,
+        marker_stats = out["stats_norm_smoothed"]
+    else:  # Default
+        out = _an.aggregate_genesets(
+            G, S, marker_mat, network_normalization_code, alpha, thread_no
         )
+        marker_stats = out["stats_norm_smoothed"]
 
-    Enrichment = pd.DataFrame(marker_stats, index=adata.obs.index, columns=markers.keys())
+    Enrichment = pd.DataFrame(
+        marker_stats, index=adata.obs.index, columns=markers.keys()
+    )
     annotations = pd.Series(markers.keys())
     idx = np.argmax(marker_stats, axis=1)
     Label = annotations[idx]
     Label.index = adata.obs.index
     Confidence = np.max(marker_stats, axis=1)
+
+    if post_correction == True:
+        Label = correct_labels(adata=adata, initial_labels=Label, return_raw=True)
+
     return Label, Confidence, Enrichment
 
 
@@ -196,7 +193,9 @@ def infer_missing_labels(
                 index=adata.obs.index.values.astype("str"),
             )
         elif isinstance(initial_labels, pd.Series):
-            labels = pd.Series(initial_labels.astype("str"), index=adata.obs.index.values.astype("str"))
+            labels = pd.Series(
+                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+            )
 
     fixed_samples = np.where(labels != "nan")[0]
 
@@ -255,7 +254,13 @@ def correct_labels(
                 index=adata.obs.index.values.astype("str"),
             )
         elif isinstance(initial_labels, pd.Series):
-            labels = pd.Series(initial_labels.astype("str"), index=adata.obs.index.values.astype("str"))
+            labels = pd.Series(
+                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+            )
+        elif isinstance(initial_labels, np.ndarray):
+            labels = pd.Series(
+                initial_labels.astype("str"), index=adata.obs.index.values.astype("str")
+            )
 
     updated_labels = an.nt.propagate(
         data=adata,
@@ -272,5 +277,5 @@ def correct_labels(
     if return_raw or not isinstance(adata, AnnData):
         return updated_labels
     else:
-        adata.obsm[output_key] = updated_labels
+        adata.obs[output_key] = updated_labels
         return adata if copy else None

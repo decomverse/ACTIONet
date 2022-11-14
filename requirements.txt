@@ -14,4 +14,3 @@ orca
 sphinx
 nbsphinx
 mypy
-harmonypy
