@@ -614,8 +614,8 @@ unify_archetypes <- function(S_r, C_stacked, H_stacked, backbone_density = 0.5, 
 #' @examples
 #' prune.out = prune_archetypes(ACTION.out$C, ACTION.out$H)
 #'	G = buildNetwork(prune.out$H_stacked)
-buildNetwork <- function(H, algorithm = "k*nn", distance_metric = "jsd", density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, k = 10L, ef_construction = 200L, ef = 200L) {
-    .Call(`_ACTIONet_buildNetwork`, H, algorithm, distance_metric, density, thread_no, mutual_edges_only, k, ef_construction, ef)
+buildNetwork <- function(H, algorithm = "k*nn", distance_metric = "jsd", density = 1.0, thread_no = 0L, mutual_edges_only = TRUE, k = 10L) {
+    .Call(`_ACTIONet_buildNetwork`, H, algorithm, distance_metric, density, thread_no, mutual_edges_only, k)
 }
 
 build_knn <- function(H, distance_metric = "jsd", k = 10, thread_no = 0L, mutual_edges_only = TRUE) {
@@ -1111,6 +1111,10 @@ buildNetwork_bipartite <- function(H1, H2, density = 1.0, thread_no = 0L, M = 16
 
 aggregate_genesets_vision <- function(G, S, marker_mat, network_normalization_method = 0L, alpha = 0.85, thread_no = 0L) {
     .Call(`_ACTIONet_aggregate_genesets_vision`, G, S, marker_mat, network_normalization_method, alpha, thread_no)
+}
+
+run_harmony <- function(X, W0, batch, clustering_algorithm = 1L, sigma_val = 0.1, theta_val = 2.0, max_iter_cluster = 200L, max_iter_harmony = 10L, eps_cluster = 1e-5, eps_harmony = 1e-4, tau = 0, block_size = 0.05, lambda_val = 1.0, verbose = TRUE, seed = 0L) {
+    .Call(`_ACTIONet_run_harmony`, X, W0, batch, clustering_algorithm, sigma_val, theta_val, max_iter_cluster, max_iter_harmony, eps_cluster, eps_harmony, tau, block_size, lambda_val, verbose, seed)
 }
 
 roll_var <- function(X) {

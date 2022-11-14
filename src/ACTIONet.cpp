@@ -777,10 +777,10 @@ List unify_archetypes(mat &S_r, mat C_stacked, mat H_stacked,
 //'	G = buildNetwork(prune.out$H_stacked)
 // [[Rcpp::export]]
 sp_mat buildNetwork(mat H, string algorithm = "k*nn", string distance_metric = "jsd", double density = 1.0, int thread_no = 0,
-                    bool mutual_edges_only = true, int k = 10, int ef_construction = 200, int ef = 200)
+                    bool mutual_edges_only = true, int k = 10)
 {
 
-  double M = 16;
+  double M = 16, ef_construction = 200, ef = 50;
   sp_mat G = ACTIONet::buildNetwork(H, algorithm, distance_metric, density, thread_no, M,
                                     ef_construction, ef, mutual_edges_only, k);
 
@@ -818,7 +818,8 @@ sp_mat build_knn(mat H, string distance_metric = "jsd", double k = 10, int threa
 //'	G = buildNetwork(prune.out$H_stacked)
 //'	vis.out = layoutNetwrok(G, S_r)
 // [[Rcpp::export]]
-List layoutNetwork(sp_mat &G, mat &initial_position, const std::string &method = "umap", bool presmooth_network = false,
+List layoutNetwork(sp_mat &G, mat &initial_position,
+                   const std::string &method = "umap", bool presmooth_network = false,
                    double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2)
 {
 
@@ -2235,7 +2236,7 @@ List run_AA_with_batch_correction(mat &Z, mat &W0, vec batch, int max_it = 100, 
   out["C"] = res(0);
   out["H"] = res(1);
   out["Z_cor"] = res(2);
-  out["W"] = res(2) * res(0);
+  // out["W"] = res(2) * res(0);
 
   return (out);
 }
@@ -2404,7 +2405,6 @@ mat mat_mat_product_parallel(mat &A, mat &B, int thread_no)
 mat transform_layout(sp_mat &G, mat reference_coordinates, const std::string &method = "umap", bool presmooth_network = false,
                      double min_dist = 1, double spread = 1, double gamma = 1.0, unsigned int n_epochs = 500, int thread_no = 0, int seed = 0, double learning_rate = 1.0, int sim2dist = 2)
 {
-
   mat coors = ACTIONet::transform_layout(G, reference_coordinates, presmooth_network, method, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist);
 
   return (coors);
@@ -2631,4 +2631,13 @@ List aggregate_genesets_vision(sp_mat &G, sp_mat &S, sp_mat &marker_mat, int net
   res["stats"] = stats[2];
 
   return (res);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+mat run_harmony(mat &X, mat &W0, vec batch, int clustering_algorithm = 1, double sigma_val = 0.1, double theta_val = 2.0, int max_iter_cluster = 200, int max_iter_harmony = 10, double eps_cluster = 1e-5, double eps_harmony = 1e-4, double tau = 0, double block_size = 0.05, double lambda_val = 1.0, bool verbose = true, int seed = 0)
+{
+  mat Z_corr = ACTIONet::run_harmony(X, W0, batch, clustering_algorithm, sigma_val, theta_val, max_iter_cluster, max_iter_harmony, eps_cluster, eps_harmony, tau, block_size, lambda_val, verbose, seed);
+
+  return (Z_corr);
 }
