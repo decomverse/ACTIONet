@@ -23,4 +23,3 @@ dependencies:
     - seaborn
     - typing_extensions>=3.7.4
     - natsort>=7.0.1
-    - harmonypy

@@ -118,6 +118,8 @@ def propagate(
         updated_labels = uniques.values[updated_labels_int]
         updated_labels[updated_labels_int == -1] = None
 
+        updated_labels = pd.Series(updated_labels)
+
     if return_raw or not isinstance(adata, AnnData):
         return updated_labels
     else:
