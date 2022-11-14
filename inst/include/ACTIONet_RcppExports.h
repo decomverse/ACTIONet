@@ -2334,17 +2334,17 @@ namespace ACTIONet {
         return Rcpp::as<sp_mat >(rcpp_result_gen);
     }
 
-    inline List aggregate_genesets_vision(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method = 0, double alpha = 0.85, int thread_no = 0) {
-        typedef SEXP(*Ptr_aggregate_genesets_vision)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_aggregate_genesets_vision p_aggregate_genesets_vision = NULL;
-        if (p_aggregate_genesets_vision == NULL) {
-            validateSignature("List(*aggregate_genesets_vision)(sp_mat&,sp_mat&,sp_mat&,int,double,int)");
-            p_aggregate_genesets_vision = (Ptr_aggregate_genesets_vision)R_GetCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_vision");
+    inline List aggregate_genesets(sp_mat& G, sp_mat& S, sp_mat& marker_mat, int network_normalization_method = 0, double alpha = 0.85, int thread_no = 0) {
+        typedef SEXP(*Ptr_aggregate_genesets)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_aggregate_genesets p_aggregate_genesets = NULL;
+        if (p_aggregate_genesets == NULL) {
+            validateSignature("List(*aggregate_genesets)(sp_mat&,sp_mat&,sp_mat&,int,double,int)");
+            p_aggregate_genesets = (Ptr_aggregate_genesets)R_GetCCallable("ACTIONet", "_ACTIONet_aggregate_genesets");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_aggregate_genesets_vision(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(network_normalization_method)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+            rcpp_result_gen = p_aggregate_genesets(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(marker_mat)), Shield<SEXP>(Rcpp::wrap(network_normalization_method)), Shield<SEXP>(Rcpp::wrap(alpha)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();

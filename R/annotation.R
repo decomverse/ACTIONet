@@ -352,7 +352,7 @@ annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, 
     network_normalization_code <- 2
   }
   if (algorithm == "parametric") {
-    out <- aggregate_genesets_vision(G, S, marker_mat, network_normalization_code, alpha, thread_no)
+    out <- aggregate_genesets(G, S, marker_mat, network_normalization_code, alpha, thread_no)
     marker_stats <- out[["stats_norm_smoothed"]]
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
