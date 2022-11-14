@@ -812,8 +812,8 @@ RcppExport SEXP _ACTIONet_unify_archetypes(SEXP S_rSEXP, SEXP C_stackedSEXP, SEX
     return rcpp_result_gen;
 }
 // buildNetwork
-sp_mat buildNetwork(mat H, string algorithm, string distance_metric, double density, int thread_no, bool mutual_edges_only, int k, int ef_construction, int ef);
-static SEXP _ACTIONet_buildNetwork_try(SEXP HSEXP, SEXP algorithmSEXP, SEXP distance_metricSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP kSEXP, SEXP ef_constructionSEXP, SEXP efSEXP) {
+sp_mat buildNetwork(mat H, string algorithm, string distance_metric, double density, int thread_no, bool mutual_edges_only, int k);
+static SEXP _ACTIONet_buildNetwork_try(SEXP HSEXP, SEXP algorithmSEXP, SEXP distance_metricSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< mat >::type H(HSEXP);
@@ -823,17 +823,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
     Rcpp::traits::input_parameter< bool >::type mutual_edges_only(mutual_edges_onlySEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< int >::type ef_construction(ef_constructionSEXP);
-    Rcpp::traits::input_parameter< int >::type ef(efSEXP);
-    rcpp_result_gen = Rcpp::wrap(buildNetwork(H, algorithm, distance_metric, density, thread_no, mutual_edges_only, k, ef_construction, ef));
+    rcpp_result_gen = Rcpp::wrap(buildNetwork(H, algorithm, distance_metric, density, thread_no, mutual_edges_only, k));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_buildNetwork(SEXP HSEXP, SEXP algorithmSEXP, SEXP distance_metricSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP kSEXP, SEXP ef_constructionSEXP, SEXP efSEXP) {
+RcppExport SEXP _ACTIONet_buildNetwork(SEXP HSEXP, SEXP algorithmSEXP, SEXP distance_metricSEXP, SEXP densitySEXP, SEXP thread_noSEXP, SEXP mutual_edges_onlySEXP, SEXP kSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_buildNetwork_try(HSEXP, algorithmSEXP, distance_metricSEXP, densitySEXP, thread_noSEXP, mutual_edges_onlySEXP, kSEXP, ef_constructionSEXP, efSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_buildNetwork_try(HSEXP, algorithmSEXP, distance_metricSEXP, densitySEXP, thread_noSEXP, mutual_edges_onlySEXP, kSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -4180,6 +4178,54 @@ RcppExport SEXP _ACTIONet_aggregate_genesets_vision(SEXP GSEXP, SEXP SSEXP, SEXP
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// run_harmony
+mat run_harmony(mat& X, mat& W0, vec batch, int clustering_algorithm, double sigma_val, double theta_val, int max_iter_cluster, int max_iter_harmony, double eps_cluster, double eps_harmony, double tau, double block_size, double lambda_val, bool verbose, int seed);
+static SEXP _ACTIONet_run_harmony_try(SEXP XSEXP, SEXP W0SEXP, SEXP batchSEXP, SEXP clustering_algorithmSEXP, SEXP sigma_valSEXP, SEXP theta_valSEXP, SEXP max_iter_clusterSEXP, SEXP max_iter_harmonySEXP, SEXP eps_clusterSEXP, SEXP eps_harmonySEXP, SEXP tauSEXP, SEXP block_sizeSEXP, SEXP lambda_valSEXP, SEXP verboseSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< mat& >::type W0(W0SEXP);
+    Rcpp::traits::input_parameter< vec >::type batch(batchSEXP);
+    Rcpp::traits::input_parameter< int >::type clustering_algorithm(clustering_algorithmSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma_val(sigma_valSEXP);
+    Rcpp::traits::input_parameter< double >::type theta_val(theta_valSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter_cluster(max_iter_clusterSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter_harmony(max_iter_harmonySEXP);
+    Rcpp::traits::input_parameter< double >::type eps_cluster(eps_clusterSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_harmony(eps_harmonySEXP);
+    Rcpp::traits::input_parameter< double >::type tau(tauSEXP);
+    Rcpp::traits::input_parameter< double >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_val(lambda_valSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_harmony(X, W0, batch, clustering_algorithm, sigma_val, theta_val, max_iter_cluster, max_iter_harmony, eps_cluster, eps_harmony, tau, block_size, lambda_val, verbose, seed));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_run_harmony(SEXP XSEXP, SEXP W0SEXP, SEXP batchSEXP, SEXP clustering_algorithmSEXP, SEXP sigma_valSEXP, SEXP theta_valSEXP, SEXP max_iter_clusterSEXP, SEXP max_iter_harmonySEXP, SEXP eps_clusterSEXP, SEXP eps_harmonySEXP, SEXP tauSEXP, SEXP block_sizeSEXP, SEXP lambda_valSEXP, SEXP verboseSEXP, SEXP seedSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_run_harmony_try(XSEXP, W0SEXP, batchSEXP, clustering_algorithmSEXP, sigma_valSEXP, theta_valSEXP, max_iter_clusterSEXP, max_iter_harmonySEXP, eps_clusterSEXP, eps_harmonySEXP, tauSEXP, block_sizeSEXP, lambda_valSEXP, verboseSEXP, seedSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -4231,7 +4277,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("List(*run_weighted_ACTION)(mat&,vec,int,int,int,int,double)");
         signatures.insert("List(*prune_archetypes)(const List&,const List&,double,int)");
         signatures.insert("List(*unify_archetypes)(mat&,mat,mat,double,double,int,int,int)");
-        signatures.insert("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int,int,int)");
+        signatures.insert("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int)");
         signatures.insert("sp_mat(*build_knn)(mat,string,double,int,bool)");
         signatures.insert("List(*layoutNetwork)(sp_mat&,mat&,const std::string&,bool,double,double,double,unsigned int,int,int,double,int)");
         signatures.insert("vector<string>(*encode_ids)(vector<string>,string)");
@@ -4321,6 +4367,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("mat(*znormalize_mat)(mat&,int,int)");
         signatures.insert("sp_mat(*buildNetwork_bipartite)(mat,mat,double,int,double,double,double,string)");
         signatures.insert("List(*aggregate_genesets_vision)(sp_mat&,sp_mat&,sp_mat&,int,double,int)");
+        signatures.insert("mat(*run_harmony)(mat&,mat&,vec,int,double,double,int,int,double,double,double,double,double,bool,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4438,6 +4485,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_znormalize_mat", (DL_FUNC)_ACTIONet_znormalize_mat_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_buildNetwork_bipartite", (DL_FUNC)_ACTIONet_buildNetwork_bipartite_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets_vision", (DL_FUNC)_ACTIONet_aggregate_genesets_vision_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_run_harmony", (DL_FUNC)_ACTIONet_run_harmony_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -4464,7 +4512,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_run_weighted_ACTION", (DL_FUNC) &_ACTIONet_run_weighted_ACTION, 7},
     {"_ACTIONet_prune_archetypes", (DL_FUNC) &_ACTIONet_prune_archetypes, 4},
     {"_ACTIONet_unify_archetypes", (DL_FUNC) &_ACTIONet_unify_archetypes, 8},
-    {"_ACTIONet_buildNetwork", (DL_FUNC) &_ACTIONet_buildNetwork, 9},
+    {"_ACTIONet_buildNetwork", (DL_FUNC) &_ACTIONet_buildNetwork, 7},
     {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 5},
     {"_ACTIONet_layoutNetwork", (DL_FUNC) &_ACTIONet_layoutNetwork, 12},
     {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
@@ -4554,6 +4602,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_znormalize_mat", (DL_FUNC) &_ACTIONet_znormalize_mat, 3},
     {"_ACTIONet_buildNetwork_bipartite", (DL_FUNC) &_ACTIONet_buildNetwork_bipartite, 8},
     {"_ACTIONet_aggregate_genesets_vision", (DL_FUNC) &_ACTIONet_aggregate_genesets_vision, 6},
+    {"_ACTIONet_run_harmony", (DL_FUNC) &_ACTIONet_run_harmony, 15},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},

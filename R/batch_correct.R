@@ -79,7 +79,8 @@ reduce.and.batch.correct.ace.Harmony <- function(ace,
                                                  reduction_out = "ACTION",
                                                  harmony_out = "Harmony",
                                                  seed = 0,
-                                                 SVD_algorithm = 0) {
+                                                 SVD_algorithm = 0,
+                                                 harmony_clustering_algorithm = 2) {
   if (!require(harmony)) {
     err <- sprintf("You need to install harmony (https://github.com/immunogenomics/harmony).\n")
     stop(err)
@@ -122,7 +123,8 @@ reduce.and.batch.correct.ace.Harmony <- function(ace,
     ace = ace,
     batch_attr = batch_attr,
     reduction_slot = reduction_out,
-    harmony_out = harmony_out
+    harmony_out = harmony_out,
+    harmony_clustering_algorithm = harmony_clustering_algorithm
   )
 
   return(ace)
@@ -132,7 +134,8 @@ reduce.and.batch.correct.ace.Harmony <- function(ace,
 batch.correct.ace.Harmony <- function(ace,
                                       batch_attr = NULL,
                                       reduction_slot = "ACTION",
-                                      harmony_out = "Harmony") {
+                                      harmony_out = "Harmony",
+                                      harmony_clustering_algorithm = 2) {
   if (!require(harmony)) {
     err <- sprintf("You need to install Harmony (https://github.com/immunogenomics/harmony) first for batch-correction.\n")
     stop(err)
@@ -144,13 +147,16 @@ batch.correct.ace.Harmony <- function(ace,
   }
 
   ace <- as(ace, "ACTIONetExperiment")
-  batch_attr <- ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")
 
-  colMaps(ace)[[harmony_out]] <- harmony::HarmonyMatrix(
-    data_mat = colMaps(ace)[[reduction_slot]],
-    meta_data = batch_attr,
-    do_pca = FALSE
-  )
+  batch_vec <- as.numeric(factor(ACTIONetExperiment::get.data.or.split(ace, attr = batch_attr, to_return = "data")))
+
+  X <- Matrix::t(colMaps(ace)[[reduction_slot]])
+  X.norm <- normalize_mat(X, 2)
+  SPA_out <- run_SPA(X, k = min(ncol(X), nrow(X)))
+  W0 <- X.norm[, SPA_out$selected_columns]
+
+  X_corr <- run_harmony(X = X, W0 = W0, batch = batch_vec, clustering_algorithm = harmony_clustering_algorithm)
+  colMaps(ace)[[harmony_out]] <- Matrix::t(X_corr)
 
   metadata(ace)[["default_reduction"]] <- harmony_out
 

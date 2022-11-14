@@ -205,7 +205,7 @@ verify_aces <- function(ace1, ace2) {
   archs2 <- ace2$assigned_archetype
   mismatch_perc <- 100 * sum(archs1 != archs2) / ncol(ace1)
   warnifnot(mismatch_perc < 0.5)
-  print(sprintf("%.02d %% archetype assignment mismatch", mismatch_perc))
+  print(sprintf("%.02f %% archetype assignment mismatch", mismatch_perc))
 
 
   ###############################################################
@@ -249,16 +249,16 @@ verify_aces <- function(ace1, ace2) {
 
 
   ## 3D
-  coor3D1 <- round(ace1$ACTIONet3D, 3)
-  coor3D2 <- round(ace2$ACTIONet3D, 3)
+  coor3D1 <- round(ace1$ACTIONet3D, 1)
+  coor3D2 <- round(ace2$ACTIONet3D, 1)
 
   mismatch.3D <- 100 * sum(coor3D1 != coor3D2) / length(coor3D1)
   warnifnot(mismatch.3D < 0.5)
   print(sprintf("%.02f %% 3D mismatch", mismatch.3D))
 
   ## Colors
-  colors1 <- round(ace1$denovo_color, 3)
-  colors2 <- round(ace2$denovo_color, 3)
+  colors1 <- round(ace1$denovo_color, 1)
+  colors2 <- round(ace2$denovo_color, 1)
 
   mismatch.colors <- 100 * sum(colors1 != colors2) / length(colors1)
   warnifnot(mismatch.colors < 0.5)

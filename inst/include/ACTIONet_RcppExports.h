@@ -465,17 +465,17 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline sp_mat buildNetwork(mat H, string algorithm = "k*nn", string distance_metric = "jsd", double density = 1.0, int thread_no = 0, bool mutual_edges_only = true, int k = 10, int ef_construction = 200, int ef = 200) {
-        typedef SEXP(*Ptr_buildNetwork)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline sp_mat buildNetwork(mat H, string algorithm = "k*nn", string distance_metric = "jsd", double density = 1.0, int thread_no = 0, bool mutual_edges_only = true, int k = 10) {
+        typedef SEXP(*Ptr_buildNetwork)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_buildNetwork p_buildNetwork = NULL;
         if (p_buildNetwork == NULL) {
-            validateSignature("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int,int,int)");
+            validateSignature("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int)");
             p_buildNetwork = (Ptr_buildNetwork)R_GetCCallable("ACTIONet", "_ACTIONet_buildNetwork");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_buildNetwork(Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(algorithm)), Shield<SEXP>(Rcpp::wrap(distance_metric)), Shield<SEXP>(Rcpp::wrap(density)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(mutual_edges_only)), Shield<SEXP>(Rcpp::wrap(k)), Shield<SEXP>(Rcpp::wrap(ef_construction)), Shield<SEXP>(Rcpp::wrap(ef)));
+            rcpp_result_gen = p_buildNetwork(Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(algorithm)), Shield<SEXP>(Rcpp::wrap(distance_metric)), Shield<SEXP>(Rcpp::wrap(density)), Shield<SEXP>(Rcpp::wrap(thread_no)), Shield<SEXP>(Rcpp::wrap(mutual_edges_only)), Shield<SEXP>(Rcpp::wrap(k)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -2353,6 +2353,27 @@ namespace ACTIONet {
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<List >(rcpp_result_gen);
+    }
+
+    inline mat run_harmony(mat& X, mat& W0, vec batch, int clustering_algorithm = 1, double sigma_val = 0.1, double theta_val = 2.0, int max_iter_cluster = 200, int max_iter_harmony = 10, double eps_cluster = 1e-5, double eps_harmony = 1e-4, double tau = 0, double block_size = 0.05, double lambda_val = 1.0, bool verbose = true, int seed = 0) {
+        typedef SEXP(*Ptr_run_harmony)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_run_harmony p_run_harmony = NULL;
+        if (p_run_harmony == NULL) {
+            validateSignature("mat(*run_harmony)(mat&,mat&,vec,int,double,double,int,int,double,double,double,double,double,bool,int)");
+            p_run_harmony = (Ptr_run_harmony)R_GetCCallable("ACTIONet", "_ACTIONet_run_harmony");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_run_harmony(Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(W0)), Shield<SEXP>(Rcpp::wrap(batch)), Shield<SEXP>(Rcpp::wrap(clustering_algorithm)), Shield<SEXP>(Rcpp::wrap(sigma_val)), Shield<SEXP>(Rcpp::wrap(theta_val)), Shield<SEXP>(Rcpp::wrap(max_iter_cluster)), Shield<SEXP>(Rcpp::wrap(max_iter_harmony)), Shield<SEXP>(Rcpp::wrap(eps_cluster)), Shield<SEXP>(Rcpp::wrap(eps_harmony)), Shield<SEXP>(Rcpp::wrap(tau)), Shield<SEXP>(Rcpp::wrap(block_size)), Shield<SEXP>(Rcpp::wrap(lambda_val)), Shield<SEXP>(Rcpp::wrap(verbose)), Shield<SEXP>(Rcpp::wrap(seed)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
     }
 
 }
