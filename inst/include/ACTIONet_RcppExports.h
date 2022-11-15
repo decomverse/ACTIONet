@@ -2376,7 +2376,7 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
-    inline mat assess_label_enrichment(sp_mat& H, mat& M, int thread_no = 0) {
+    inline mat assess_label_enrichment(sp_mat& G, mat& M, int thread_no = 0) {
         typedef SEXP(*Ptr_assess_label_enrichment)(SEXP,SEXP,SEXP);
         static Ptr_assess_label_enrichment p_assess_label_enrichment = NULL;
         if (p_assess_label_enrichment == NULL) {
@@ -2386,7 +2386,7 @@ namespace ACTIONet {
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_assess_label_enrichment(Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(M)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+            rcpp_result_gen = p_assess_label_enrichment(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(M)), Shield<SEXP>(Rcpp::wrap(thread_no)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();

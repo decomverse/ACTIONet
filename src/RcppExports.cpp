@@ -4227,22 +4227,22 @@ RcppExport SEXP _ACTIONet_run_harmony(SEXP XSEXP, SEXP W0SEXP, SEXP batchSEXP, S
     return rcpp_result_gen;
 }
 // assess_label_enrichment
-mat assess_label_enrichment(sp_mat& H, mat& M, int thread_no);
-static SEXP _ACTIONet_assess_label_enrichment_try(SEXP HSEXP, SEXP MSEXP, SEXP thread_noSEXP) {
+mat assess_label_enrichment(sp_mat& G, mat& M, int thread_no);
+static SEXP _ACTIONet_assess_label_enrichment_try(SEXP GSEXP, SEXP MSEXP, SEXP thread_noSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< sp_mat& >::type H(HSEXP);
+    Rcpp::traits::input_parameter< sp_mat& >::type G(GSEXP);
     Rcpp::traits::input_parameter< mat& >::type M(MSEXP);
     Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
-    rcpp_result_gen = Rcpp::wrap(assess_label_enrichment(H, M, thread_no));
+    rcpp_result_gen = Rcpp::wrap(assess_label_enrichment(G, M, thread_no));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _ACTIONet_assess_label_enrichment(SEXP HSEXP, SEXP MSEXP, SEXP thread_noSEXP) {
+RcppExport SEXP _ACTIONet_assess_label_enrichment(SEXP GSEXP, SEXP MSEXP, SEXP thread_noSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_assess_label_enrichment_try(HSEXP, MSEXP, thread_noSEXP));
+        rcpp_result_gen = PROTECT(_ACTIONet_assess_label_enrichment_try(GSEXP, MSEXP, thread_noSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
