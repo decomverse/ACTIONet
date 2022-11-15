@@ -10,6 +10,7 @@ import ACTIONet as an
 from ACTIONet.network.cluster import cluster as anet_cluster
 from ACTIONet.network.propagation import propagate
 from ACTIONet.postprocessing.clusters import feature_specificity
+from scipy.sparse import csc_matrix
 
 
 def filter(
@@ -38,7 +39,7 @@ def annotate(
     network_normalization_method: Optional[str] = "pagerank_sym",
     network_key: Optional[str] = "ACTIONet",
     alpha: Optional[float] = 0.85,
-    post_correction: Optional[bool] = True,
+    post_correction: Optional[bool] = False,
     thread_no: Optional[int] = 0,
 ):
     network_normalization_code = 0
@@ -59,25 +60,27 @@ def annotate(
 
     G = sparse.csc_matrix(adata.obsp[network_key])
 
+    algorithm = "parametric"  # For now!
+
     if algorithm == "parametric":
         out = _an.aggregate_genesets(
             G, S, marker_mat, network_normalization_code, alpha, thread_no
         )
         marker_stats = out["stats_norm_smoothed"]
-    else:  # Default
-        out = _an.aggregate_genesets(
-            G, S, marker_mat, network_normalization_code, alpha, thread_no
+        Enrichment = pd.DataFrame(
+            marker_stats, index=adata.obs.index, columns=markers.keys()
         )
-        marker_stats = out["stats_norm_smoothed"]
 
-    Enrichment = pd.DataFrame(
-        marker_stats, index=adata.obs.index, columns=markers.keys()
-    )
-    annotations = pd.Series(markers.keys())
-    idx = np.argmax(marker_stats, axis=1)
-    Label = annotations[idx]
-    Label.index = adata.obs.index
-    Confidence = np.max(marker_stats, axis=1)
+        marker_stats_raw = out["stats_norm"]
+        marker_stats_raw[marker_stats_raw < 0] = 0
+        G_norm = csc_matrix(_an.normalize_spmat(G, 1).T)
+        logPvals = _an.assess_label_enrichment(G_norm, marker_stats_raw)
+
+        annotations = pd.Series(markers.keys())
+        idx = np.argmax(logPvals, axis=1)
+        Label = annotations[idx]
+        Label.index = adata.obs.index
+        Confidence = np.max(logPvals, axis=1)
 
     if post_correction == True:
         Label = correct_labels(adata=adata, initial_labels=Label, return_raw=True)
