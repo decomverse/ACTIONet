@@ -4226,6 +4226,42 @@ RcppExport SEXP _ACTIONet_run_harmony(SEXP XSEXP, SEXP W0SEXP, SEXP batchSEXP, S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// assess_label_enrichment
+mat assess_label_enrichment(sp_mat& H, mat& M, int thread_no);
+static SEXP _ACTIONet_assess_label_enrichment_try(SEXP HSEXP, SEXP MSEXP, SEXP thread_noSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< sp_mat& >::type H(HSEXP);
+    Rcpp::traits::input_parameter< mat& >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type thread_no(thread_noSEXP);
+    rcpp_result_gen = Rcpp::wrap(assess_label_enrichment(H, M, thread_no));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _ACTIONet_assess_label_enrichment(SEXP HSEXP, SEXP MSEXP, SEXP thread_noSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_ACTIONet_assess_label_enrichment_try(HSEXP, MSEXP, thread_noSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // roll_var
 vec roll_var(vec& X);
 RcppExport SEXP _ACTIONet_roll_var(SEXP XSEXP) {
@@ -4368,6 +4404,7 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("sp_mat(*buildNetwork_bipartite)(mat,mat,double,int,double,double,double,string)");
         signatures.insert("List(*aggregate_genesets)(sp_mat&,sp_mat&,sp_mat&,int,double,int)");
         signatures.insert("mat(*run_harmony)(mat&,mat&,vec,int,double,double,int,int,double,double,double,double,double,bool,int)");
+        signatures.insert("mat(*assess_label_enrichment)(sp_mat&,mat&,int)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -4486,6 +4523,7 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_buildNetwork_bipartite", (DL_FUNC)_ACTIONet_buildNetwork_bipartite_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_aggregate_genesets", (DL_FUNC)_ACTIONet_aggregate_genesets_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_run_harmony", (DL_FUNC)_ACTIONet_run_harmony_try);
+    R_RegisterCCallable("ACTIONet", "_ACTIONet_assess_label_enrichment", (DL_FUNC)_ACTIONet_assess_label_enrichment_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_RcppExport_validate", (DL_FUNC)_ACTIONet_RcppExport_validate);
     return R_NilValue;
 }
@@ -4603,6 +4641,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_buildNetwork_bipartite", (DL_FUNC) &_ACTIONet_buildNetwork_bipartite, 8},
     {"_ACTIONet_aggregate_genesets", (DL_FUNC) &_ACTIONet_aggregate_genesets, 6},
     {"_ACTIONet_run_harmony", (DL_FUNC) &_ACTIONet_run_harmony, 15},
+    {"_ACTIONet_assess_label_enrichment", (DL_FUNC) &_ACTIONet_assess_label_enrichment, 3},
     {"_ACTIONet_roll_var", (DL_FUNC) &_ACTIONet_roll_var, 1},
     {"_ACTIONet_computeSparseRowVariances", (DL_FUNC) &_ACTIONet_computeSparseRowVariances, 4},
     {"_ACTIONet_RcppExport_registerCCallable", (DL_FUNC) &_ACTIONet_RcppExport_registerCCallable, 0},
