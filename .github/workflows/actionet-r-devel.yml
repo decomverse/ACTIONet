@@ -1,4 +1,4 @@
-name: mini-ACTIONet
+name: ACTIONet-r-devel
 on:
   push:
     branches:
