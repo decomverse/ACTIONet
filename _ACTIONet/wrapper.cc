@@ -847,6 +847,13 @@ py::dict aggregate_genesets(arma::sp_mat &G, arma::sp_mat &S,
   return (res);
 }
 
+arma::mat assess_label_enrichment(arma::sp_mat &G, arma::mat &M,
+                                  int thread_no = 0) {
+  arma::mat logPvals = ACTIONet::assess_label_enrichment(G, M, thread_no);
+
+  return (logPvals);
+}
+
 PYBIND11_MODULE(_ACTIONet, m) {
   m.doc() = R"pbdoc(
         ACTIONet package
@@ -1108,6 +1115,10 @@ PYBIND11_MODULE(_ACTIONet, m) {
         "Aggregates genesets per cell", py::arg("G"), py::arg("S"),
         py::arg("marker_mat"), py::arg("network_normalization_method") = 0,
         py::arg("alpha") = 0.85, py::arg("thread_no") = 0);
+
+  m.def("assess_label_enrichment", &assess_label_enrichment,
+        "Assess enrichment of labels around each node in a network",
+        py::arg("G"), py::arg("M"), py::arg("thread_no") = 0);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
