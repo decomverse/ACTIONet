@@ -1,4 +1,4 @@
-name: ACTIONet
+name: ACTIONet-py-devel
 on:
   push:
     branches:
