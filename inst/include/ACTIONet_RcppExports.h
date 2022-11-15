@@ -2376,6 +2376,27 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline mat assess_label_enrichment(sp_mat& H, mat& M, int thread_no = 0) {
+        typedef SEXP(*Ptr_assess_label_enrichment)(SEXP,SEXP,SEXP);
+        static Ptr_assess_label_enrichment p_assess_label_enrichment = NULL;
+        if (p_assess_label_enrichment == NULL) {
+            validateSignature("mat(*assess_label_enrichment)(sp_mat&,mat&,int)");
+            p_assess_label_enrichment = (Ptr_assess_label_enrichment)R_GetCCallable("ACTIONet", "_ACTIONet_assess_label_enrichment");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_assess_label_enrichment(Shield<SEXP>(Rcpp::wrap(H)), Shield<SEXP>(Rcpp::wrap(M)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<mat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_

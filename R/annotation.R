@@ -353,7 +353,13 @@ annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, 
   }
   if (algorithm == "parametric") {
     out <- aggregate_genesets(G, S, marker_mat, network_normalization_code, alpha, thread_no)
-    marker_stats <- out[["stats_norm_smoothed"]]
+    # marker_stats <- out[["stats_norm_smoothed"]]
+
+    marker_stats_raw <- out[["stats_norm"]]
+    marker_stats_raw[marker_stats_raw < 0] <- 0
+    H <- Matrix::t(normalize_spmat(G, 1))
+
+    marker_stats <- assess_label_enrichment(H, marker_stats_raw)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
