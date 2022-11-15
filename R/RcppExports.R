@@ -1117,8 +1117,8 @@ run_harmony <- function(X, W0, batch, clustering_algorithm = 1L, sigma_val = 0.1
     .Call(`_ACTIONet_run_harmony`, X, W0, batch, clustering_algorithm, sigma_val, theta_val, max_iter_cluster, max_iter_harmony, eps_cluster, eps_harmony, tau, block_size, lambda_val, verbose, seed)
 }
 
-assess_label_enrichment <- function(H, M, thread_no = 0L) {
-    .Call(`_ACTIONet_assess_label_enrichment`, H, M, thread_no)
+assess_label_enrichment <- function(G, M, thread_no = 0L) {
+    .Call(`_ACTIONet_assess_label_enrichment`, G, M, thread_no)
 }
 
 roll_var <- function(X) {

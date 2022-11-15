@@ -2644,9 +2644,9 @@ mat run_harmony(mat &X, mat &W0, vec batch, int clustering_algorithm = 1, double
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-mat assess_label_enrichment(sp_mat &H, mat &M, int thread_no = 0)
+mat assess_label_enrichment(sp_mat &G, mat &M, int thread_no = 0)
 {
-  mat logPvals = ACTIONet::assess_label_enrichment(H, M, thread_no);
+  mat logPvals = ACTIONet::assess_label_enrichment(G, M, thread_no);
 
   return (logPvals);
 }
