@@ -1,8 +1,8 @@
-name: ACTIONet-py-devel
+name: ACTIONet-py-release
 on:
   push:
     branches:
-      - 'python-devel'
+      - 'python-release'
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -33,4 +33,4 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
-          tags: actionet/python_devel:latest
+          tags: actionet/python_release:latest
