@@ -494,6 +494,7 @@ namespace ACTIONet
 
   mat oneHot_encoding(vec batches);
   mat run_harmony(mat &X, mat &W0, vec batch, int clustering_algorithm = 1, double sigma_val = 0.1, double theta_val = 2.0, int max_iter_cluster = 200, int max_iter_harmony = 10, double eps_cluster = 1e-5, double eps_harmony = 1e-4, double tau = 0, double block_size = 0.05, double lambda_val = 1.0, bool verbose = true, int seed = 0);
+  mat assess_label_enrichment(sp_mat &H, mat &M, int thread_no = 0);
 
 } // namespace ACTIONet
 
