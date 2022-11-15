@@ -7,15 +7,39 @@ import pandas as pd
 from anndata import AnnData
 from scipy import sparse
 
+import _ACTIONet as _an
+
+
+def normalize_reduction(
+    adata: AnnData,
+    reduction_key: str,
+    normalization: Optional[int] = 1,
+    copy: Optional[bool] = False,
+):
+    if reduction_key not in adata.obsm.keys():
+        raise ValueError(f"Did not find adata.obsm[{reduction_key}]. ")
+    reduction_key_out = reduction_key + "_normalized"
+
+    adata = adata.copy() if copy else adata
+
+    Xr = np.array(adata.obsm[reduction_key])
+    Xr_norm = _an.normalize_mat(Xr, normalization=normalization, dim=1)
+    adata.obsm[reduction_key_out] = Xr_norm
+    adata.uns["metadata"]["reduction_normalization"] = normalization
+    if copy:
+        return adata
+    else:
+        return None
+
 
 def get_data_or_split(
-        adata: AnnData,
-        attr: Union[str, list, pd.Series],
-        groups_use: Union[str, list, None] = None,
-        to_return: Optional[str] = "data",
-        d: Optional[int] = 0,
-        ) -> Union[list, dict]:
-    to_return = to_return.lower()
+    adata: AnnData,
+    attr: Union[str, list, pd.Series],
+    groups_use: Union[str, list, None] = None,
+    to_return: Optional[str] = "data",
+    d: Optional[int] = 0,
+) -> Union[list, dict]:
+    to_return = str(to_return).lower()
     if to_return not in ["data", "levels", "split"]:
         raise ValueError("'to_return={type}' must be 'data', 'levels', or 'split'.".format(type=to_return))
 
@@ -65,22 +89,20 @@ def get_data_or_split(
         return level_dict
     elif to_return == "split":
         return idx_dict
+    else:
+        raise Exception()
 
 
 def rand_suffix(N):
-    str_out = "".join(
-            random.choices(
-                    string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N
-                    )
-            )
+    str_out = "".join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N))
     return str_out
 
 
 def scale_matrix(
-        X: np.ndarray,
-        center: Optional[bool] = True,
-        scale: Optional[bool] = True,
-        ):
+    X: np.ndarray,
+    center: Optional[bool] = True,
+    scale: Optional[bool] = True,
+):
     X = X.astype(dtype=np.float64)
     if center:
         X -= X.mean(axis=0)
@@ -90,29 +112,29 @@ def scale_matrix(
 
 
 def normalize_matrix(
-        X: Union[np.ndarray, sparse.spmatrix],
-        log_transform: Optional[bool] = False,
-        scale_factor: Union[str, float, int, None] = None
-        ) -> Union[np.ndarray, sparse.spmatrix]:
+    X: Union[np.ndarray, sparse.spmatrix],
+    log_transform: Optional[bool] = False,
+    scale_factor: Union[str, float, int, None] = None,
+) -> Union[np.ndarray, sparse.spmatrix]:
     X = X.astype(dtype=np.float64)
 
-    if scale_factor != "median" and not isinstance(scale_factor, (int, float)) and scale_factor is not None:
-        raise ValueError(f"'scale_factor' must be 'median' or numeric.")
+    if (scale_factor != "median") and (isinstance(scale_factor, (int, float)) is False) and (scale_factor is not None):
+        raise ValueError("'scale_factor' must be 'median' or numeric.")
 
-    if sparse.issparse(X):
-        row_sums = np.array(np.sum(X, axis=1))
-        row_sums[row_sums == 0] = 1
-        # B = np.median(row_sums) * X.multiply(1 / row_sums)
-        B = X.multiply(1 / row_sums)
+    if isinstance(X, sparse.spmatrix):
+        lib_sizes = np.array(np.sum(X, axis=1))
+        lib_sizes[lib_sizes == 0] = 1
+        B = X.multiply(1 / lib_sizes)
+        # B = _an.normalize_spmat(X=X, normalization=1, dim=1)
     else:
         X = np.array(X)
-        row_sums = np.sum(X, axis=1, keepdims=True)
-        row_sums[row_sums == 0] = 1
-        # B = np.median(row_sums) * (X / row_sums)
-        B = X / row_sums
-
+        lib_sizes = np.sum(X, axis=1, keepdims=True)
+        lib_sizes[lib_sizes == 0] = 1
+        B = X / lib_sizes
+        # B = _an.normalize_mat(X=X, normalization=1, dim=1)
     if scale_factor == "median":
-        B = B * np.median(row_sums)
+        lib_sizes = np.sum(X, axis=1, keepdims=True)
+        B = B * np.median(lib_sizes)
     elif isinstance(scale_factor, (int, float)):
         B = B * scale_factor
 
@@ -126,11 +148,11 @@ def normalize_matrix(
 
 
 def double_normalize(
-        X: np.ndarray,
-        log1p: Optional[bool] = True,
-        min_threshold: Optional[int] = 0,
-        copy: Optional[bool] = True,
-        ) -> np.ndarray:
+    X: np.ndarray,
+    log1p: Optional[bool] = True,
+    min_threshold: Optional[int] = 0,
+    copy: Optional[bool] = True,
+) -> np.ndarray:
     X = X.copy() if copy else X
 
     X[X < min_threshold] = 0

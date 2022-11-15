@@ -28,10 +28,10 @@ ACTIONet.plotting.plot module
    :undoc-members:
    :show-inheritance:
 
-ACTIONet.plotting.plot\_utils module
-------------------------------------
+ACTIONet.plotting.utils module
+------------------------------
 
-.. automodule:: ACTIONet.plotting.plot_utils
+.. automodule:: ACTIONet.plotting.utils
    :members:
    :undoc-members:
    :show-inheritance:

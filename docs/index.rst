@@ -16,7 +16,7 @@ Welcome to ACTIONet's documentation!
    Tutorials/modules.rst
    FAQ
    CHANGELOG
-   
+
 
 Indices and tables
 ==================

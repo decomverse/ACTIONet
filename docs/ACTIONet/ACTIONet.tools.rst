@@ -4,66 +4,18 @@ ACTIONet.tools package
 Submodules
 ----------
 
-ACTIONet.tools.aa module
-------------------------
+ACTIONet.tools.utils\_internal module
+-------------------------------------
 
-.. automodule:: ACTIONet.tools.aa
+.. automodule:: ACTIONet.tools.utils_internal
    :members:
    :undoc-members:
    :show-inheritance:
 
-ACTIONet.tools.annotation module
---------------------------------
+ACTIONet.tools.utils\_public module
+-----------------------------------
 
-.. automodule:: ACTIONet.tools.annotation
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.tools.enrichment module
---------------------------------
-
-.. automodule:: ACTIONet.tools.enrichment
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.tools.imputation module
---------------------------------
-
-.. automodule:: ACTIONet.tools.imputation
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.tools.networktools module
-----------------------------------
-
-.. automodule:: ACTIONet.tools.networktools
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.tools.regression module
---------------------------------
-
-.. automodule:: ACTIONet.tools.regression
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.tools.spa module
--------------------------
-
-.. automodule:: ACTIONet.tools.spa
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.tools.svd module
--------------------------
-
-.. automodule:: ACTIONet.tools.svd
+.. automodule:: ACTIONet.tools.utils_public
    :members:
    :undoc-members:
    :show-inheritance:

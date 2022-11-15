@@ -1,0 +1,25 @@
+name: actionet
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.8
+  - cmake
+  - plotly
+  - numpy>=1.19.2
+  - pandas>=1.1.5
+  - pip
+  - cython
+  - sphinx
+  - nbsphinx
+  - sphinx_rtd_theme
+  - scipy>=1.5.2
+  - pip:
+    - adjustText>=0.7.3
+    - anndata==0.8.0
+    - scanpy==1.9.1
+    - h5py>=3.0
+    - orca
+    - seaborn
+    - typing_extensions>=3.7.4
+    - natsort>=7.0.1
