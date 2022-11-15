@@ -333,7 +333,7 @@ map.cell.scores.from.archetype.enrichment <- function(ace,
 
 
 #' @export
-annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, network_normalization_method = "pagerank_sym", post_correction = T, thread_no = 0, features_use = NULL, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
+annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, network_normalization_method = "pagerank_sym", post_correction = F, thread_no = 0, features_use = NULL, assay_name = "logcounts", net_slot = "ACTIONet", specificity_slot = "unified_feature_specificity", H_slot = "H_unified") {
   if (!(net_slot %in% names(colNets(ace)))) {
     warning(sprintf("net_slot does not exist in colNets(ace)."))
     return()
@@ -353,13 +353,18 @@ annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, 
   }
   if (algorithm == "parametric") {
     out <- aggregate_genesets(G, S, marker_mat, network_normalization_code, alpha, thread_no)
-    # marker_stats <- out[["stats_norm_smoothed"]]
+
+    marker_stats <- out[["stats_norm_smoothed"]]
+    colnames(marker_stats) <- colnames(marker_mat)
+    marker_stats[!is.finite(marker_stats)] <- 0
 
     marker_stats_raw <- out[["stats_norm"]]
     marker_stats_raw[marker_stats_raw < 0] <- 0
-    H <- Matrix::t(normalize_spmat(G, 1))
+    G.norm <- Matrix::t(normalize_spmat(G, 1))
 
-    marker_stats <- assess_label_enrichment(H, marker_stats_raw)
+    logPvals <- assess_label_enrichment(G.norm, marker_stats_raw)
+    annots <- colnames(marker_mat)[apply(logPvals, 1, which.max)]
+    conf <- apply(logPvals, 1, max)
   } else if (algorithm == "archetypes") {
     arch_enrichment_mat <- Matrix::t(assess.geneset.enrichment.from.archetypes(ace, marker_mat, specificity.slot = specificity_slot)$logPvals)
     arch_enrichment_mat[!is.finite(arch_enrichment_mat)] <- 0
@@ -371,15 +376,13 @@ annotateCells <- function(ace, markers, algorithm = "parametric", alpha = 0.85, 
       H.slot = H_slot
     ))
     marker_stats <- networkDiffusion(obj = G, scores = marker_stats, algorithm = network_normalization_method, alpha = alpha, thread_no = thread_no)
+
+    annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
+    conf <- apply(marker_stats, 1, max)
   } else {
     warning(sprintf("Algorithm %s not found. Reverting back to aggregate_genesets_weighted_enrichment_permutation", algorithm))
-    marker_stats <- aggregate_genesets_weighted_enrichment_permutation(G, sub_S, sub_marker_mat, network_normalization_method = network_normalization_method, expression_normalization_method = TFIDF_prenorm, gene_scaling_method = gene_scaling_method, pre_alpha = pre_alpha, post_alpha = post_alpha, perm_no = perm_no)
+    return
   }
-
-  colnames(marker_stats) <- colnames(marker_mat)
-  marker_stats[!is.finite(marker_stats)] <- 0
-  annots <- colnames(marker_mat)[apply(marker_stats, 1, which.max)]
-  conf <- apply(marker_stats, 1, max)
 
   if (post_correction == TRUE) {
     annots_corrected <- correct.cell.labels(ace, annots)
