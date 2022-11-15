@@ -1,8 +1,8 @@
-name: mini-ACTIONet
+name: ACTIONet-r-release
 on:
   push:
     branches:
-      - 'R-devel'
+      - 'R-release'
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -33,4 +33,4 @@ jobs:
           file: ./mini_docker/Dockerfile
           push: true
           build-args: GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
-          tags: actionet/r_devel
+          tags: actionet/r_release
