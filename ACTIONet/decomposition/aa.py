@@ -13,17 +13,7 @@ from sklearn.utils.validation import check_is_fitted
 import _ACTIONet as _an
 
 
-def runAA(
-        data: Union[AnnData, np.ndarray, spmatrix],
-        dim: Optional[int] = 10,
-        max_iter: Optional[int] = 100,
-        min_delta: Optional[float] = 1e-100,
-        Z: Optional[np.ndarray] = None,
-        layer_key: Optional[str] = None,
-        decomp_key_prefix: Optional[str] = "AA",
-        return_raw: Optional[bool] = False,
-        copy: Optional[bool] = False,
-        ) -> Union[AnnData, dict]:
+def runAA(data: Union[AnnData, np.ndarray, spmatrix], dim: Optional[int] = 10, max_iter: Optional[int] = 100, min_delta: Optional[float] = 1e-100, Z: Optional[np.ndarray] = None, layer_key: Optional[str] = None, decomp_key_prefix: Optional[str] = "AA", return_raw: Optional[bool] = False, copy: Optional[bool] = False) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
 
     Parameters
@@ -43,23 +33,23 @@ def runAA(
     decomp_key_prefix : Optional[str], optional
         Prefix to be added to the reduction key stored in obsm/varm (only if return_raw == False), by default "AA"
     return_raw : Optional[bool], optional
-        Returns raw output of 'reduce_kernel()' as dict, by default False
+        Returns raw output as dict, by default False
     copy : Optional[bool], optional
         If an :class:`~anndata.AnnData` is passed, determines whether a copy is returned. Is ignored otherwise, by default False
 
     Returns
     -------
     Union[AnnData, dict]
-        Result of archetypal analysis. 
+        Result of archetypal analysis.
         If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
             "W": Archetypal matrix,
             "H": Loading matrix,
             "C": Coefficient matrix,
         Otherwise, these values are stored in the input AnnData object obsm/varm with `decomp_key_prefix` prefix.
+
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
-    if data_is_AnnData:
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
     else:
         adata = AnnData(data)
@@ -82,13 +72,13 @@ def runAA(
     AA_out = _an.run_AA(X, Z, max_iter, min_delta)
     AA_out["W"] = np.matmul(X, AA_out["C"])
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return AA_out
     else:
-        adata.uns[decomp_key_prefix] = {}
-        adata.obsm[decomp_key_prefix + "_" + "C"] = AA_out["C"]
-        adata.obsm[decomp_key_prefix + "_" + "H"] = AA_out["H"].T
-        adata.varm[decomp_key_prefix + "_" + "W"] = AA_out["W"]
+        adata.uns[str(decomp_key_prefix)] = {}
+        adata.obsm[str(decomp_key_prefix) + "_" + "C"] = AA_out["C"]
+        adata.obsm[str(decomp_key_prefix) + "_" + "H"] = AA_out["H"].T
+        adata.varm[str(decomp_key_prefix) + "_" + "W"] = AA_out["W"]
 
         return adata if copy else None
 
@@ -103,8 +93,8 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
     Where:
         :math: Z = BX,
         :math: 0 <= B_ij, A_ij,
-        :math: \sum_{i} A_ij = 1,
-        :math: \sum_{i} B_ij = 1,
+        :math: sum_{i} A_ij = 1,
+        :math: sum_{i} B_ij = 1,
 
     Parameters
     ----------
@@ -248,13 +238,13 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
             Archetype Matrix
         """
         out = runAA(
-                data=X.T,
-                dim=self.n_components,
-                Z=Z,
-                max_iter=self.n_iter,
-                min_delta=self.tol,
-                return_raw=True,
-                )
+            data=X.T,
+            dim=self.n_components,
+            Z=Z,
+            max_iter=self.n_iter,
+            min_delta=self.tol,
+            return_raw=True,
+        )
 
         B, Z, A = out["C"].T, out["W"].T, out["H"].T
 
@@ -276,9 +266,7 @@ class ArchetypalAnalysis(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(
-                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-                )
+        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
 
         Z = self.components_
 

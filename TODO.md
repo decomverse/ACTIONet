@@ -1,4 +1,4 @@
-## TODO 
+## TODO
 
 * Python plotting
 
@@ -8,10 +8,9 @@
 
 * Adding interfaces to C code, sync C code across R-devel & Python-devel
 
-* Unit tests  
+* Unit tests
 
 * Import test datasetes in json format
    ** markers
    ** enrichment datasets
    ** TF
-  

@@ -2,7 +2,7 @@
 ### Setting Up the Environment (Preinstallation)
 **For Linux Users**
 
-Verify that the cmake version you are using is >=3.19.  
+Verify that the cmake version you are using is >=3.19.
 
 For the optimal performance on Intel-based architectures, installing [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/articles/intel-math-kernel-library-intel-mkl-2020-install-guide.html) is **highly** recommended. After installing, make sure `MKLROOT` is defined by running the [setvars](https://software.intel.com/content/www/us/en/develop/documentation/using-configuration-file-for-setvars-sh/top.html) script.
 
@@ -10,13 +10,13 @@ For the optimal performance on Intel-based architectures, installing [Intel Math
 To install the `ACTIONet` dependencie on debian-based linux machines, run:
 
 ```bash
-sudo apt-get install libhdf5-dev libsuitesparse-dev libnss3 xvfb
+sudo apt-get install libhdf5-dev libsuitesparse-dev libnss3 xvfb libblas-dev liblapack-dev
 ```
 
 For Mac-based systems, you can use [brew](https://brew.sh/) instead:
 
 ```bash
-brew install hdf5 suite-sparse c-blosc
+brew install hdf5 suite-sparse c-blosc blas lapack
 ```
 
 ### Installing ACTIONet Python Package
@@ -25,14 +25,9 @@ Use `pip` to install ACTIONet directly from this repository:
 pip install git+https://github.com/shmohammadi86/ACTIONet@python-devel
 ```
 
-To install from source:  
-```
-git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git 
-cd ACTIONet
-git submodule update --init 
-python setup.py build  
-python setup.py develop 
-```
+To install from source:
+git clone --recurse-submodules https://github.com/shmohammadi86/ACTIONet.git
+make install
 
 # Running ACTIONet
 **Note** If you are using `MKL`, make sure to properly [set the number of threads](https://software.intel.com/content/www/us/en/develop/documentation/mkl-macos-developer-guide/top/managing-performance-and-memory/improving-performance-with-threading/techniques-to-set-the-number-of-threads.html) used prior to running `ACTIONet`.

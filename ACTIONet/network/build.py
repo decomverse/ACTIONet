@@ -8,18 +8,18 @@ import _ACTIONet as _an
 
 
 def build(
-        data: Union[AnnData, np.ndarray, sparse.spmatrix],
-        algorithm: Optional[str] = "k*nn",
-        distance_metric: Optional[str] = "jsd",
-        density: Optional[float] = 1.0,
-        mutual_edges_only: Optional[bool] = True,
-        k: Optional[int] = 10,
-        H_key: Optional[str] = "H_stacked",
-        net_key_out: Optional[str] = "ACTIONet",
-        thread_no: Optional[int] = 0,
-        copy: Optional[bool] = False,
-        return_raw: Optional[bool] = False,
-        ) -> Union[AnnData, sparse.spmatrix, None]:
+    data: Union[AnnData, np.ndarray, sparse.spmatrix],
+    algorithm: Optional[str] = "k*nn",
+    distance_metric: Optional[str] = "jsd",
+    density: Optional[float] = 1.0,
+    mutual_edges_only: Optional[bool] = True,
+    k: Optional[int] = 10,
+    H_key: Optional[str] = "H_stacked",
+    net_key_out: Optional[str] = "ACTIONet",
+    thread_no: Optional[int] = 0,
+    copy: Optional[bool] = False,
+    return_raw: Optional[bool] = False,
+) -> Union[AnnData, sparse.spmatrix, None]:
     """Computes knn/k*nn graphs from input data
 
     Parameters
@@ -55,9 +55,7 @@ def build(
         None: Output in data.obsp[net_key_out] if 'data' is 'anndata.AnnData' and `copy=False`
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
-
-    if data_is_AnnData:
+    if isinstance(data, AnnData):
         adata = data.copy() if copy else data
         if H_key in adata.obsm.keys():
             H = adata.obsm[H_key]
@@ -72,18 +70,20 @@ def build(
         H = H.toarray()
 
     G = _an.buildNetwork(
-            H=H,
-            algorithm=algorithm,
-            distance_metric=distance_metric,
-            density=density,
-            thread_no=thread_no,
-            mutual_edges_only=mutual_edges_only,
-            k=k
-            )
+        H=H,
+        algorithm=algorithm,
+        distance_metric=distance_metric,
+        density=density,
+        thread_no=thread_no,
+        mutual_edges_only=mutual_edges_only,
+        k=k,
+    )
     G = sparse.spmatrix.tocsc(G)
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(adata, AnnData):
         return G
-    elif data_is_AnnData:
+    elif isinstance(adata, AnnData):
         adata.obsp[net_key_out] = G
         return adata if copy else None
+    else:
+        raise Exception("invalid state encountered")

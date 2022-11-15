@@ -1,0 +1,39 @@
+repos:
+# YAML linting and general cleanups
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  # Flake8: Python linter
+  - repo: https://github.com/pycqa/flake8
+    rev: "3.9.2"
+    hooks:
+      - id: flake8
+        exclude: (ACTIONet/plotting/__init__.py|ACTIONet/__init__.py|ACTIONet/decomposition/__init__.py|ACTIONet/preprocessing/__init__.py|ACTIONet/tools/__init__.py|ACTIONet/network/__init__.py|ACTIONet/postprocessing/__init__.py)
+        args:
+          - "--max-line-length=500"
+          - "--ignore=E203"
+
+  # Isort: Python import linter/formatter
+  - repo: https://github.com/pycqa/isort
+    rev: 5.8.0
+    hooks:
+      - id: isort
+        name: isort (python)
+        types: [ python ]
+        args: ["--profile", "black"]
+  # Black: Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args:
+          -  --line-length=500
+  # Mypy: Python type-checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.910
+    hooks:
+      - id: mypy
+        additional_dependencies: [ types-toml==0.1.5 ]

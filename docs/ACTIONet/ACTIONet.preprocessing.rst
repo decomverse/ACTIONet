@@ -4,22 +4,6 @@ ACTIONet.preprocessing package
 Submodules
 ----------
 
-ACTIONet.preprocessing.action module
-------------------------------------
-
-.. automodule:: ACTIONet.preprocessing.action
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.preprocessing.archetypes module
-----------------------------------------
-
-.. automodule:: ACTIONet.preprocessing.archetypes
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ACTIONet.preprocessing.filter module
 ------------------------------------
 
@@ -40,14 +24,6 @@ ACTIONet.preprocessing.reduction module
 ---------------------------------------
 
 .. automodule:: ACTIONet.preprocessing.reduction
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ACTIONet.preprocessing.specificity module
------------------------------------------
-
-.. automodule:: ACTIONet.preprocessing.specificity
    :members:
    :undoc-members:
    :show-inheritance:

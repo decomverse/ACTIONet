@@ -13,18 +13,8 @@ from sklearn.utils.validation import check_is_fitted
 import _ACTIONet as _an
 
 
-def runACTION(
-        data: Union[AnnData, np.ndarray, spmatrix],
-        reduction_key: Optional[str] = "ACTION",
-        depth: Optional[int] = 10,
-        thread_no: Optional[int] = 0,
-        max_it: Optional[int] = 50,
-        min_delta: Optional[float] = 1e-300,
-        return_raw: Optional[bool] = False,
-        copy: Optional[bool] = False,
-        ) -> Union[AnnData, dict]:
+def runACTION(data: Union[AnnData, np.ndarray, spmatrix], reduction_key: Optional[str] = "ACTION", depth: Optional[int] = 10, thread_no: Optional[int] = 0, max_it: Optional[int] = 50, min_delta: Optional[float] = 1e-300, return_raw: Optional[bool] = False, copy: Optional[bool] = False) -> Union[AnnData, dict]:
     """Run Archetypal Analysis
-
     Parameters
     ----------
     data : Union[AnnData, np.ndarray, sparse.spmatrix]
@@ -49,15 +39,17 @@ def runACTION(
     Union[AnnData, dict]
         Result of archetypal analysis.
         If return_raw is False or the input data is not an AnnData object, the output is a dictionary:
-            "W": Archetypal matrix,
-            "H": Loading matrix,
-            "C": Coefficient matrix,
+        "W": Archetypal matrix,
+        "H": Loading matrix,
+        "C": Coefficient matrix,
         Otherwise, these values are stored in the input AnnData object obsm/varm with `reduction_key` prefix.
     """
 
-    data_is_AnnData = isinstance(data, AnnData)
+    # cast Optional types to the desired type
+    reduction_key = str(reduction_key)
+    depth = int(str(depth))
 
-    if data_is_AnnData:
+    if isinstance(data, AnnData):
         if reduction_key not in data.obsm.keys():
             raise ValueError("Did not find data.obsm['" + reduction_key + "'].")
         else:
@@ -71,21 +63,21 @@ def runACTION(
     X = X.T.astype(dtype=np.float64)
 
     ACTION_out = _an.run_ACTION(
-            S_r=X,
-            k_min=depth,
-            k_max=depth,
-            thread_no=thread_no,
-            max_it=max_it,
-            min_delta=min_delta
-            )
+        S_r=X,
+        k_min=depth,
+        k_max=depth,
+        thread_no=thread_no,
+        max_it=max_it,
+        min_delta=min_delta,
+    )
 
     ACTION_out = {
         "C": ACTION_out["C"][depth - 1],
         "H": ACTION_out["H"][depth - 1],
-        }
+    }
     ACTION_out["W"] = np.matmul(X, ACTION_out["C"])
 
-    if return_raw or not data_is_AnnData:
+    if return_raw or not isinstance(data, AnnData):
         return ACTION_out
     else:
         data.obsm[reduction_key + "_" + "C"] = ACTION_out["C"]
@@ -105,8 +97,8 @@ class ACTION(TransformerMixin, BaseEstimator):
     Where:
         :math: Z = BX,
         :math: 0 <= B_ij, A_ij,
-        :math: \sum_{i} A_ij = 1,
-        :math: \sum_{i} B_ij = 1,
+        :math: sum_{i} A_ij = 1,
+        :math: sum_{i} B_ij = 1,
 
     Parameters
     ----------
@@ -244,15 +236,15 @@ class ACTION(TransformerMixin, BaseEstimator):
         """
 
         out = runACTION(
-                data=X,
-                reduction_key=None,
-                depth=self.n_components,
-                thread_no=self.thread_no,
-                max_it=self.max_it,
-                min_delta=self.min_delta,
-                return_raw=True,
-                copy=False
-                )
+            data=X,
+            reduction_key=None,
+            depth=self.n_components,
+            thread_no=self.thread_no,
+            max_it=self.max_it,
+            min_delta=self.min_delta,
+            return_raw=True,
+            copy=False,
+        )
 
         B, A, Z = out["C"].T, out["H"].T, out["W"].T
 
@@ -274,9 +266,7 @@ class ACTION(TransformerMixin, BaseEstimator):
         """
 
         check_is_fitted(self)
-        X = self._validate_data(
-                X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
-                )
+        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
 
         Z = self.components_
 
