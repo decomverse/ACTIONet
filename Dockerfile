@@ -15,6 +15,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linu
 # Attach Conda to PATH
 ENV PATH /opt/conda/bin:$PATH
 
+
 # Enable Conda
 RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
@@ -22,11 +23,13 @@ RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     conda config --system --set show_channel_urls true && \
     conda update --quiet --yes conda
 
+# upgrade pip for faster dep resolution
+RUN pip install --upgrade pip
 
 # Install ACTIONet environment
-RUN conda env create -f environment.yaml && \
+RUN /opt/conda/bin/conda env create -f environment.yaml && \
     echo "conda activate actionet" >> ~/.bashrc && \
-    conda clean --all -fy && \
+    /opt/conda/bin/conda clean --all -fy && \
     rm -rf ~/.cache/pip
 
 # Attach Conda to PATH
@@ -40,8 +43,6 @@ RUN conda clean -tipy
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-# upgrade pip for faster dep resolution
-RUN pip install --upgrade pip
 
 
 RUN pip install jupyter && \
