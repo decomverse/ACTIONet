@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:.github/workflows/actionet-r-release.yml
 name: ACTIONet-r-release
-========
-name: ACTIONet-r-devel
->>>>>>>> R-devel:.github/workflows/actionet-r-devel.yml
 on:
   push:
     branches:
