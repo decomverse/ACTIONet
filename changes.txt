@@ -1,0 +1,15 @@
+1) No normalization of S_r in ACTION decomposition
+2) Fixing unification for reproducibility (issue: network construction)
+3) FW-Simplex regression
+3) Fixing umap algorithm (https://github.com/LTLA/umappp) for reproducibility under parallel execution -- Issue: 
+    parallelFor(0, max_elements, [&] (size_t j)
+                { appr_alg->addPoint(X.colptr(j), static_cast<size_t>(j)); }, 1);
+                
+	The Eigen library for matrix operations.
+	The irlba library for singular value decomposition (or in this case, an eigendecomposition).
+	The knncolle library for nearest neighbor search. If you are instead supplying your own neighbor search, this dependency can be eliminated by defining the UMAPPP_CUSTOM_NEIGHBORS macro.
+	The aarand library for random distribution functions.
+	
+
+Old for loops:
+https://cran.r-project.org/web/packages/RcppThread/vignettes/RcppThread-vignette.pdf
