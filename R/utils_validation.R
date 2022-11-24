@@ -214,11 +214,11 @@
 
   if (matrix_type == "sparse") {
     if(ACTIONetExperiment:::is.sparseMatrix(x)) {
-      if(!is(x, "dMatrix")) {
-        x = as(x, "dMatrix")
+      if(!is(x, "CsparseMatrix")) {
+        x = as(x, "CsparseMatrix")
       }
     } else if (force_type == TRUE) {
-      x = as(x, "dMatrix")
+      x = as(x, "CsparseMatrix")
     } else {
       err = sprintf("'%s' must be 'sparseMatrix'.\n", var_name)
       stop(err)
@@ -234,8 +234,8 @@
     }
   } else {
     if(ACTIONetExperiment:::is.sparseMatrix(x)) {
-      if(!is(x, "dMatrix")) {
-        x = as(x, "dMatrix")
+      if(!is(x, "CsparseMatrix")) {
+        x = as(x, "CsparseMatrix")
       }
     } else if (!is.matrix(x)) {
       err = sprintf("'%s' must be 'matrix' or 'sparseMatrix'.\n", var_name)
