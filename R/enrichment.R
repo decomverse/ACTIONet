@@ -19,7 +19,7 @@ assess.TF.activities.from.scores <- function(scores) {
     associations.mat <- as(sapply(associations, function(gs) {
       as.numeric(rownames(ace) %in%
         gs)
-    }), "dMatrix")
+    }), "CsparseMatrix")
     Enrichment <- assess_enrichment(scores, associations.mat)
     Enrichment.mat <- Matrix::t(Enrichment[[1]])
   })
@@ -120,7 +120,7 @@ assess.geneset.enrichment.from.archetypes <- function(ace,
   common.features <- intersect(rownames(associations), rownames(scores))
 
   rows <- match(common.features, rownames(associations))
-  associations <- as(associations[rows, ], "dMatrix")
+  associations <- as(associations[rows, ], "CsparseMatrix")
   scores <- scores[common.features, ]
 
   enrichment.out <- assess_enrichment(scores, associations)
@@ -166,7 +166,7 @@ assess.peakset.enrichment.from.archetypes <- function(ace,
   common.features <- intersect(rownames(associations), rownames(ace))
 
   rows <- match(common.features, rownames(associations))
-  associations <- as(associations[rows, ], "dMatrix")
+  associations <- as(associations[rows, ], "CsparseMatrix")
   scores <- scores[common.features, ]
 
 
