@@ -38,8 +38,8 @@ normalize.matrix <- function(S,
     S_scaled <- S %*% Diagonal(n = length(lib_sizes), x = 1.0 / lib_sizes)
   }
 
-  if (ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "CsparseMatrix")) {
-    S <- as(S, "CsparseMatrix")
+  if (ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dMatrix")) {
+    S <- as(S, "dMatrix")
   }
 
   if (is.function(scale_param)) {
@@ -68,7 +68,7 @@ normalize.matrix <- function(S,
     }
   } else if (transformation == "lsi") {
     if (is.matrix(S_scaled_norm)) {
-      S_scaled_norm <- as(S_scaled_norm, "CsparseMatrix")
+      S_scaled_norm <- as(S_scaled_norm, "dMatrix")
     }
     S_scaled_norm <- ACTIONet::LSI(S_sparse)
   }
@@ -119,8 +119,8 @@ aggregateMatrix <- function(S, group_vec, method = c("sum", "mean", "var")) {
   labels <- as.numeric(lf)
   keys <- levels(lf)
 
-  if (ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "CsparseMatrix")) {
-    S <- as(S, "CsparseMatrix")
+  if (ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dMatrix")) {
+    S <- as(S, "dMatrix")
   }
 
   if (method == "sum") {

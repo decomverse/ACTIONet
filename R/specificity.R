@@ -40,7 +40,7 @@ clusterFeatureSpecificity <- function(
   #   }
   #   S <- SummarizedExperiment::assays(ace)[[assay_name]]
   # } else {
-  #   S =  as(S, "CsparseMatrix")
+  #   S =  as(S, "dMatrix")
   # }
 
   if ( length(cluster_attr) != NCOL(S) ){

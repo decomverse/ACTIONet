@@ -7,7 +7,7 @@
 compute_grouped_rowsums(S, sample_assignments)
 }
 \arguments{
-\item{S}{matrix of type "CsparseMatrix"}
+\item{S}{matrix of type "dMatrix"}
 
 \item{sample_assignments}{Vector of column groupings. Group labels must be continuous integers or coercible to such.}
 }
