@@ -3,12 +3,23 @@
 #include <atomic>
 #include <thread>
 
+#include <cholmod.h>
+
+sp_mat &as_arma_sparse(cholmod_sparse *chol_A, sp_mat &A,
+                       cholmod_common *chol_c);
+
+void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
+             cholmod_common *chol_cp);
+
+cholmod_sparse *as_cholmod_sparse(sp_mat &A, cholmod_sparse *chol_A,
+                                  cholmod_common *chol_c);
+
+arma::vec diffusion_solve_FISTA(arma::sp_mat &adj_mat, arma::vec &prob_dist,
+                                double alpha, double rho, double epsilon,
+                                int max_iter);
+
 namespace ACTIONet
 {
-  arma::vec diffusion_solve_FISTA(arma::sp_mat &adj_mat, arma::vec &prob_dist,
-                                  double alpha, double rho, double epsilon,
-                                  int max_iter);
-
   mat PR_linsys(sp_mat &G, sp_mat &X, double alpha = 0.85, int thread_no = -1)
   {
     X = normalise(X, 1, 0);
@@ -44,8 +55,10 @@ namespace ACTIONet
     for (int it = 0; it < max_it; it++)
     {
 
-      parallelFor(0, X.n_cols, [&] (size_t i)
-                  { X.col(i) = P * X.col(i) + X0.col(i) * (zt * X.col(i)); }, thread_no);
+      parallelFor(
+          0, X.n_cols, [&](size_t i)
+          { X.col(i) = P * X.col(i) + X0.col(i) * (zt * X.col(i)); },
+          thread_no);
     }
 
     return (X);
@@ -208,11 +221,12 @@ namespace ACTIONet
     for (int it = 0; it < max_it; it++)
     {
       mat Y = X;
-      parallelFor(0, X.n_cols, [&] (size_t i)
-                  {
+      parallelFor(
+          0, X.n_cols, [&](size_t i)
+          {
                     dsdmult('n', n, n, AS, X.colptr(i), Y.colptr(i), &chol_c);
-                    X.col(i) = Y.col(i) + X0.col(i) * (zt * X.col(i));
-                  }, thread_no);
+                    X.col(i) = Y.col(i) + X0.col(i) * (zt * X.col(i)); },
+          thread_no);
     }
 
     // Free up matrices
@@ -286,16 +300,19 @@ namespace ACTIONet
   mat compute_network_diffusion_Chebyshev(sp_mat &P, mat &X0, int thread_no,
                                           double alpha, int max_it, double res_threshold)
   {
-    if(alpha == 1) {
+    if (alpha == 1)
+    {
       fprintf(stderr, "alpha should be in (0, 1). Value of %.2f was provided.\n", alpha);
-      return(X0);
-    } else if(alpha == 0) {
-      return(X0);
+      return (X0);
+    }
+    else if (alpha == 0)
+    {
+      return (X0);
     }
 
     alpha = 1 - alpha; // Traditional defitition is to have alpha as weight of prior. Here, alpha is depth of difffusion
 
-    mat mPPreviousScore = X0; //zeros(size(X0));
+    mat mPPreviousScore = X0; // zeros(size(X0));
     mat mPreviousScore = (1 - alpha) * spmat_mat_product_parallel(P, mPPreviousScore, thread_no) + alpha * X0;
     double mu = 0.0, muPPrevious = 1.0, muPrevious = 1 / (1 - alpha);
 
@@ -324,7 +341,8 @@ namespace ACTIONet
 
     // Temporarty fix. Sometimes diffusion values become small negative numbers
     double m0 = min(min(X0));
-    if(0 <= m0) {
+    if (0 <= m0)
+    {
       mScore = clamp(mScore, 0, max(max(mScore)));
     }
 

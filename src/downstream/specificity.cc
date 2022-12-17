@@ -1,5 +1,5 @@
 #include <ACTIONet.h>
-#include "cholmod.h"
+#include <cholmod.h>
 
 #include <atomic>
 #include <thread>
@@ -15,8 +15,7 @@ namespace ACTIONet
     Ht.each_col([](vec &h)
                 {
                   double mu = mean(h);
-                  h /= (mu == 0) ? 1 : mu;
-                }); // For numerical stability
+                  h /= (mu == 0) ? 1 : mu; }); // For numerical stability
 
     // Heuristic optimization! Shall add parallel for later on
     vec row_p = zeros(Sb.n_rows);
@@ -64,7 +63,8 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
@@ -82,8 +82,7 @@ namespace ACTIONet
     Ht.each_col([](vec &h)
                 {
                   double mu = mean(h);
-                  h /= (mu == 0) ? 1 : mu;
-                }); // For numerical stability
+                  h /= (mu == 0) ? 1 : mu; }); // For numerical stability
 
     // make sure all values are positive
     double min_val = S.min();
@@ -136,7 +135,8 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;
@@ -158,8 +158,7 @@ namespace ACTIONet
     Ht.each_col([](vec &h)
                 {
                   double mu = mean(h);
-                  h /= (mu == 0) ? 1 : mu;
-                }); // For numerical stability
+                  h /= (mu == 0) ? 1 : mu; }); // For numerical stability
 
     vec row_p = vec(sum(Sb, 1));
     vec row_factor = vec(sum(S, 1)) / row_p; // mean of nonzero elements
@@ -195,7 +194,8 @@ namespace ACTIONet
 
     logPvals_lower /= log(10);
     logPvals_upper /= log(10);
-    stdout_printf("done\n"); FLUSH;
+    stdout_printf("done\n");
+    FLUSH;
 
     res(0) = Obs / Ht.n_rows;
     res(1) = logPvals_upper;

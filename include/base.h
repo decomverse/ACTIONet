@@ -22,22 +22,21 @@
 #include <unordered_map>
 #include <vector>
 
-#include <layout/uwot/gradient.h>
-#include <layout/uwot/sampler.h>
-#include <layout/uwot/tauprng.h>
+#include <gradient.h>
+#include <sampler.h>
+#include <tauprng.h>
 #include <mini_thread/mini_thread.h>
-#include <misc/colorspace.h>
-#include <misc/my_utils.h>
-#include <aarand/aarand.hpp>
-#include <clustering/HDBSCAN/hdbscan.hpp>
-#include <math/cryptor.hpp>
-#include <math/pcg/pcg_random.hpp>
+#include <colorspace.h>
+#include <my_utils.h>
+#include <aarand.hpp>
+#include <hdbscan.hpp>
+#include <pcg_random.hpp>
 
 using namespace mini_thread;
 
 #define STATS_GO_INLINE
 #define STATS_ENABLE_ARMA_WRAPPERS
-#include <math/StatsLib/stats.hpp>
+#include <stats.hpp>
 
 // SVD algorithms
 #define FULL_SVD -1
