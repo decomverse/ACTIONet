@@ -4,6 +4,16 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <cholmod.h>
+
+sp_mat &as_arma_sparse(cholmod_sparse *chol_A, sp_mat &A,
+                       cholmod_common *chol_c);
+
+void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
+             cholmod_common *chol_cp);
+
+cholmod_sparse *as_cholmod_sparse(sp_mat &A, cholmod_sparse *chol_A,
+                                  cholmod_common *chol_c);
 
 double r8_normal_01_cdf_inverse(double p);
 
@@ -258,9 +268,9 @@ namespace ACTIONet
     std::normal_distribution<double> normDist(0.0, 1.0);
 
     mat R(l, m);
-    for (register int j = 0; j < m; j++)
+    for (int j = 0; j < m; j++)
     {
-      for (register int i = 0; i < l; i++)
+      for (int i = 0; i < l; i++)
       {
         R(i, j) = normDist(gen);
       }

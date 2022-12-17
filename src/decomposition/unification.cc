@@ -116,7 +116,7 @@ namespace ACTIONet
     A.diag().zeros();
     mat P = normalise(A, 1, 1);
 
-    mat D = diagmat(sqrt(sum(P) + 1e-16));
+    mat D = diagmat(1.0 / (sqrt(sum(P) + 1e-16)));
     mat W = P * D;
     mat P2 = W * trans(W);
 
@@ -436,7 +436,7 @@ namespace ACTIONet
       }
     }
 
-    for (register int i = min_size; i <= max_size - 1; i++)
+    for (int i = min_size; i <= max_size - 1; i++)
     {
       int u = perm(i);
       vol += w[u];

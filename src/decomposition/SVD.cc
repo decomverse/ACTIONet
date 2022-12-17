@@ -1,10 +1,20 @@
 #include "ACTIONet.h"
 
+#include <cholmod.h>
+sp_mat &as_arma_sparse(cholmod_sparse *chol_A, sp_mat &A,
+                       cholmod_common *chol_c);
+
+void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
+             cholmod_common *chol_cp);
+
+cholmod_sparse *as_cholmod_sparse(sp_mat &A, cholmod_sparse *chol_A,
+                                  cholmod_common *chol_c);
+
 // #define StdNorm(v, n, engine) randN_Marsaglia(v, n, engine)
 
 inline void StdNorm(double *v, int n, std::mt19937_64 engine)
 {
-  for (register int ii = 0; ii < n - 1; ii += 2)
+  for (int ii = 0; ii < n - 1; ii += 2)
   {
     auto paired = aarand::standard_normal(engine);
     v[ii] = paired.first;

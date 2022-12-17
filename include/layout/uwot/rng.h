@@ -7,7 +7,7 @@
 #include "convert_seed.h"
 #include "pcg_random.hpp"
 
-#include "uwot/tauprng.h"
+#include "tauprng.h"
 
 #include <math/StatsLib/stats.hpp>
 
