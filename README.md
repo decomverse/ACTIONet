@@ -10,9 +10,9 @@ For the optimal performance on Intel-based architectures, installing [Intel Math
 To install the `ACTIONet` dependencie on debian-based linux machines, run:
 
 ```bash
-sudo apt-get install libhdf5-dev libsuitesparse-dev libnss3 xvfb libblas-dev liblapack-dev
+sudo apt-get install libhdf5-dev libsuitesparse-dev libnss3 xvfb libblas-dev liblapack-dev cmake
 ```
-
+Note: please use cmake>3.2
 For Mac-based systems, you can use [brew](https://brew.sh/) instead:
 
 ```bash
