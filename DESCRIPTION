@@ -1,8 +1,8 @@
 Package: ACTIONet
 Type: Package
 Title: Robust multi-resolution analysis of single-cell datasets
-Version: 3.0.1
-Date: 2022-11-20
+Version: 1.0.0
+Date: 2023-01-01
 Authors@R: c(
     person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com",
         role = c("cre", "aut"), comment = c(ORCID = "0000-0001-8734-2326")),
@@ -14,11 +14,13 @@ Authors@R: c(
         role = "aut", comment = c(ORCID = ""))
     )
 Maintainer: Shahin Mohammadi <shahin.mohammadi@gmail.com>
-Description:
+Description: A comprehensive package for single-cell analysis
 License: GPL (>= 2)
 URL: https://github.com/shmohammadi86/ACTIONet
-Depends: R (>= 4.0.0), Rcpp, RcppArmadillo (<= 0.11.2), ACTIONetExperiment, Matrix, SingleCellExperiment, hdf5r, BiocParallel, ComplexHeatmap
-Imports: gtools, ggplot2, ggpubr, ggrepel, gplots, plotly, RColorBrewer, pals, seriation, grid, matrixStats, batchelor
+SystemRequirements: C++11
+LazyLoad: yes
+Depends: R (>= 4.0.0), Rcpp, RcppArmadillo, ACTIONetExperiment, Matrix, SingleCellExperiment, BiocParallel, ComplexHeatmap, ggplot2
+Imports: ggrepel, gplots, plotly, pals, seriation, grid, matrixStats
 Suggests: 
 LinkingTo: Rcpp,RcppArmadillo
 biocViews: ACTION, ACTIONet, ArchetypalAnalysis, GeneExpression, RNASeq, SingleCell, Transcriptomics
