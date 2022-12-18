@@ -33,7 +33,7 @@ runACTIONet(
   compute_specificity_parallel = FALSE,
   smoothPC = TRUE,
   thread_no = 0,
-  backbone.density = 0.5,
+  backbone_density = 0.5,
   seed = 0
 )
 }
