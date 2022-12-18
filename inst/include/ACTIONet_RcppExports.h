@@ -528,48 +528,6 @@ namespace ACTIONet {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline vector<string> encode_ids(vector<string> ids, string pass) {
-        typedef SEXP(*Ptr_encode_ids)(SEXP,SEXP);
-        static Ptr_encode_ids p_encode_ids = NULL;
-        if (p_encode_ids == NULL) {
-            validateSignature("vector<string>(*encode_ids)(vector<string>,string)");
-            p_encode_ids = (Ptr_encode_ids)R_GetCCallable("ACTIONet", "_ACTIONet_encode_ids");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_encode_ids(Shield<SEXP>(Rcpp::wrap(ids)), Shield<SEXP>(Rcpp::wrap(pass)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<vector<string> >(rcpp_result_gen);
-    }
-
-    inline vector<string> decode_ids(vector<string> encoded_ids, string pass) {
-        typedef SEXP(*Ptr_decode_ids)(SEXP,SEXP);
-        static Ptr_decode_ids p_decode_ids = NULL;
-        if (p_decode_ids == NULL) {
-            validateSignature("vector<string>(*decode_ids)(vector<string>,string)");
-            p_decode_ids = (Ptr_decode_ids)R_GetCCallable("ACTIONet", "_ACTIONet_decode_ids");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_decode_ids(Shield<SEXP>(Rcpp::wrap(encoded_ids)), Shield<SEXP>(Rcpp::wrap(pass)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<vector<string> >(rcpp_result_gen);
-    }
-
     inline mat compute_grouped_rowsums(sp_mat& S, arma::Col<unsigned long long> sample_assignments) {
         typedef SEXP(*Ptr_compute_grouped_rowsums)(SEXP,SEXP);
         static Ptr_compute_grouped_rowsums p_compute_grouped_rowsums = NULL;
