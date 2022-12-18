@@ -30,7 +30,7 @@ imputeGenes <- function(
             err <- sprintf("`%s` does not exist in rowMaps(ace). Run `reduce.ace()`.", V_slot)
             stop(err)
         }
-        
+
         smooth_red_name = sprintf("%s_smooth", reduction_slot)
         smooth_U_name = sprintf("%s_U", reduction_slot)
         if ( !(smooth_red_name %in% names(colMaps(ace)) || smooth_U_name %in% names(rowMaps(ace)) || force_reimpute == TRUE) ){
@@ -89,8 +89,6 @@ imputeGenes <- function(
         expr_imp = Matrix::t(expr_imp)
     }
 
-    rownames(expr_imp) <- matched_feat
-
     # Re-scale expression of genes
     m1 <- apply(expr_raw, 1, max)
     m2 <- apply(expr_imp, 1, max)
@@ -99,6 +97,7 @@ imputeGenes <- function(
     D <- Matrix::Diagonal(nrow(expr_imp), ratio)
     expr_imp <- Matrix::t(as.matrix(D %*% expr_imp))
 
+    colnames(expr_imp) <- matched_feat
     return(expr_imp)
 }
 

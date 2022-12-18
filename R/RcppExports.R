@@ -636,31 +636,9 @@ layoutNetwork <- function(G, initial_position, method = "umap", presmooth_networ
     .Call(`_ACTIONet_layoutNetwork`, G, initial_position, method, presmooth_network, min_dist, spread, gamma, n_epochs, thread_no, seed, learning_rate, sim2dist)
 }
 
-#' Encrypts a set of given input ids
-#'
-#' @param ids List of input string ids
-#' @param pass Pass phrase to use for encryption
-#'
-#' @return A string array of encoded ids
-#'
-encode_ids <- function(ids, pass) {
-    .Call(`_ACTIONet_encode_ids`, ids, pass)
-}
-
-#' Decrypts a set of given encrypted ids
-#'
-#' @param encoded_ids List of encrypted string ids
-#' @param pass Pass phrase to use for decryption
-#'
-#' @return A string array of decrypted ids
-#'
-decode_ids <- function(encoded_ids, pass) {
-    .Call(`_ACTIONet_decode_ids`, encoded_ids, pass)
-}
-
 #' Aggregate matrix wiithin groups
 #'
-#' @param S matrix of type "dgCMatrix"
+#' @param S matrix of type "dMatrix"
 #' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 #'
 #' @return S matrix with columns of values aggregated within each group of sample_assignments
@@ -682,7 +660,7 @@ compute_grouped_rowsums_full <- function(S, sample_assignments) {
 
 #' Average matrix wiithin groups
 #'
-#' @param S matrix of type "dgCMatrix"
+#' @param S matrix of type "dMatrix"
 #' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 #'
 #' @return S matrix with columns of values average within each group of sample_assignments

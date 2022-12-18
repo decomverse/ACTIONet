@@ -934,76 +934,6 @@ RcppExport SEXP _ACTIONet_layoutNetwork(SEXP GSEXP, SEXP initial_positionSEXP, S
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// encode_ids
-vector<string> encode_ids(vector<string> ids, string pass);
-static SEXP _ACTIONet_encode_ids_try(SEXP idsSEXP, SEXP passSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< vector<string> >::type ids(idsSEXP);
-    Rcpp::traits::input_parameter< string >::type pass(passSEXP);
-    rcpp_result_gen = Rcpp::wrap(encode_ids(ids, pass));
-    return rcpp_result_gen;
-END_RCPP_RETURN_ERROR
-}
-RcppExport SEXP _ACTIONet_encode_ids(SEXP idsSEXP, SEXP passSEXP) {
-    SEXP rcpp_result_gen;
-    {
-        Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_encode_ids_try(idsSEXP, passSEXP));
-    }
-    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
-    if (rcpp_isInterrupt_gen) {
-        UNPROTECT(1);
-        Rf_onintr();
-    }
-    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
-    if (rcpp_isLongjump_gen) {
-        Rcpp::internal::resumeJump(rcpp_result_gen);
-    }
-    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
-    if (rcpp_isError_gen) {
-        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
-        UNPROTECT(1);
-        Rf_error(CHAR(rcpp_msgSEXP_gen));
-    }
-    UNPROTECT(1);
-    return rcpp_result_gen;
-}
-// decode_ids
-vector<string> decode_ids(vector<string> encoded_ids, string pass);
-static SEXP _ACTIONet_decode_ids_try(SEXP encoded_idsSEXP, SEXP passSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< vector<string> >::type encoded_ids(encoded_idsSEXP);
-    Rcpp::traits::input_parameter< string >::type pass(passSEXP);
-    rcpp_result_gen = Rcpp::wrap(decode_ids(encoded_ids, pass));
-    return rcpp_result_gen;
-END_RCPP_RETURN_ERROR
-}
-RcppExport SEXP _ACTIONet_decode_ids(SEXP encoded_idsSEXP, SEXP passSEXP) {
-    SEXP rcpp_result_gen;
-    {
-        Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_ACTIONet_decode_ids_try(encoded_idsSEXP, passSEXP));
-    }
-    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
-    if (rcpp_isInterrupt_gen) {
-        UNPROTECT(1);
-        Rf_onintr();
-    }
-    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
-    if (rcpp_isLongjump_gen) {
-        Rcpp::internal::resumeJump(rcpp_result_gen);
-    }
-    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
-    if (rcpp_isError_gen) {
-        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
-        UNPROTECT(1);
-        Rf_error(CHAR(rcpp_msgSEXP_gen));
-    }
-    UNPROTECT(1);
-    return rcpp_result_gen;
-}
 // compute_grouped_rowsums
 mat compute_grouped_rowsums(sp_mat& S, arma::Col<unsigned long long> sample_assignments);
 static SEXP _ACTIONet_compute_grouped_rowsums_try(SEXP SSEXP, SEXP sample_assignmentsSEXP) {
@@ -4316,8 +4246,6 @@ static int _ACTIONet_RcppExport_validate(const char* sig) {
         signatures.insert("sp_mat(*buildNetwork)(mat,string,string,double,int,bool,int)");
         signatures.insert("sp_mat(*build_knn)(mat,string,double,int,bool)");
         signatures.insert("List(*layoutNetwork)(sp_mat&,mat&,const std::string&,bool,double,double,double,unsigned int,int,int,double,int)");
-        signatures.insert("vector<string>(*encode_ids)(vector<string>,string)");
-        signatures.insert("vector<string>(*decode_ids)(vector<string>,string)");
         signatures.insert("mat(*compute_grouped_rowsums)(sp_mat&,arma::Col<unsigned long long>)");
         signatures.insert("mat(*compute_grouped_rowsums_full)(mat&,arma::Col<unsigned long long>)");
         signatures.insert("mat(*compute_grouped_rowmeans)(sp_mat&,arma::Col<unsigned long long>)");
@@ -4435,8 +4363,6 @@ RcppExport SEXP _ACTIONet_RcppExport_registerCCallable() {
     R_RegisterCCallable("ACTIONet", "_ACTIONet_buildNetwork", (DL_FUNC)_ACTIONet_buildNetwork_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_build_knn", (DL_FUNC)_ACTIONet_build_knn_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_layoutNetwork", (DL_FUNC)_ACTIONet_layoutNetwork_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_encode_ids", (DL_FUNC)_ACTIONet_encode_ids_try);
-    R_RegisterCCallable("ACTIONet", "_ACTIONet_decode_ids", (DL_FUNC)_ACTIONet_decode_ids_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowsums", (DL_FUNC)_ACTIONet_compute_grouped_rowsums_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowsums_full", (DL_FUNC)_ACTIONet_compute_grouped_rowsums_full_try);
     R_RegisterCCallable("ACTIONet", "_ACTIONet_compute_grouped_rowmeans", (DL_FUNC)_ACTIONet_compute_grouped_rowmeans_try);
@@ -4553,8 +4479,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ACTIONet_buildNetwork", (DL_FUNC) &_ACTIONet_buildNetwork, 7},
     {"_ACTIONet_build_knn", (DL_FUNC) &_ACTIONet_build_knn, 5},
     {"_ACTIONet_layoutNetwork", (DL_FUNC) &_ACTIONet_layoutNetwork, 12},
-    {"_ACTIONet_encode_ids", (DL_FUNC) &_ACTIONet_encode_ids, 2},
-    {"_ACTIONet_decode_ids", (DL_FUNC) &_ACTIONet_decode_ids, 2},
     {"_ACTIONet_compute_grouped_rowsums", (DL_FUNC) &_ACTIONet_compute_grouped_rowsums, 2},
     {"_ACTIONet_compute_grouped_rowsums_full", (DL_FUNC) &_ACTIONet_compute_grouped_rowsums_full, 2},
     {"_ACTIONet_compute_grouped_rowmeans", (DL_FUNC) &_ACTIONet_compute_grouped_rowmeans, 2},
