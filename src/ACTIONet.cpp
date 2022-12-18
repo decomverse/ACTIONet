@@ -833,50 +833,6 @@ List layoutNetwork(sp_mat &G, mat &initial_position,
   return out_list;
 }
 
-//' Encrypts a set of given input ids
-//'
-//' @param ids List of input string ids
-//' @param pass Pass phrase to use for encryption
-//'
-//' @return A string array of encoded ids
-//'
-// [[Rcpp::export]]
-vector<string> encode_ids(vector<string> ids, string pass)
-{
-  vector<string> encoded_ids(ids.size());
-
-  cryptor::set_key(pass);
-  for (int i = 0; i < ids.size(); i++)
-  {
-    auto enc = cryptor::encrypt(ids[i]);
-    encoded_ids[i] = enc;
-  }
-
-  return encoded_ids;
-}
-
-//' Decrypts a set of given encrypted ids
-//'
-//' @param encoded_ids List of encrypted string ids
-//' @param pass Pass phrase to use for decryption
-//'
-//' @return A string array of decrypted ids
-//'
-// [[Rcpp::export]]
-vector<string> decode_ids(vector<string> encoded_ids, string pass)
-{
-  vector<string> decoded_ids(encoded_ids.size());
-
-  cryptor::set_key(pass);
-  for (int i = 0; i < encoded_ids.size(); i++)
-  {
-    auto dec = cryptor::decrypt(encoded_ids[i]);
-    decoded_ids[i] = dec;
-  }
-
-  return decoded_ids;
-}
-
 //' Aggregate matrix wiithin groups
 //'
 //' @param S matrix of type "dMatrix"
