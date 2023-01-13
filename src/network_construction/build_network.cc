@@ -279,11 +279,6 @@ namespace ACTIONet
                   std::priority_queue<std::pair<float, hnswlib::labeltype>> result =
                       appr_alg->searchKnn(X.colptr(i), kNN + 1);
 
-                  if (result.size() != (kNN + 1))
-                  {
-
-                    stdout_printf("%f", result.size());
-                  }
 
                   for (size_t j = 0; j <= kNN; j++)
                   {
@@ -298,8 +293,11 @@ namespace ACTIONet
 
     delete (appr_alg);
 
-    dist = clamp(dist, 0.0, 1.0);
-    idx = clamp(idx, 0, sample_no - 1);
+    if (distance_metric == "jsd")
+    {
+      dist = clamp(dist, 0.0, 1.0);
+    }
+    // idx = clamp(idx, 0, sample_no - 1);
 
     stdout_printf("\tConstructing adaptive-nearest neighbor graph ... ");
     mat Delta;
@@ -340,18 +338,36 @@ namespace ACTIONet
                   int dst = v;
                   rowvec v_dist = dist.row(v);
                   rowvec v_idx = idx.row(v);
+
                   for (int i = 1; i < neighbor_no; i++)
                   {
                     int src = v_idx(i);
-                    G(src, dst) = 1.0 - v_dist(i);
+                    G(src, dst) = v_dist(i);                   
                   } },
         thread_no);
     stdout_printf("done\n");
     FLUSH;
 
-    stdout_printf("\tFinalizing network ... ");
-    G.replace(datum::nan, 0); // replace each NaN with 0
+    /*
+    double max_dist = 1.0;
+    if (distance_metric != "jsd") {
+      max_dist = max(v_dist(span(1, neighbor_no)));
+    }
+*/
 
+    G.replace(datum::nan, 0); // replace each NaN with 0
+    vec max_dist = vec(trans(max(G)));
+    sp_mat::iterator it = G.begin();
+    sp_mat::const_iterator it_end = G.end();
+
+    double epsilon = 1e-7;
+    for (; it != it_end; ++it)
+    {
+      double upper_bound = (distance_metric == "jsd") ? 1.0 : max_dist(it.col());
+      *it = max(epsilon, upper_bound - (*it));
+    }
+
+    stdout_printf("\tFinalizing network ... ");
     sp_mat Gt = trans(G);
 
     sp_mat G_sym;
@@ -456,7 +472,9 @@ namespace ACTIONet
                   {
                     auto &res = results.top();
                     int j = res.second;
-                    double v = 1.0 - res.first;
+
+                    
+                    double v = res.first;
                     ii[threadId].push_back(i);
                     jj[threadId].push_back(j);
                     vv[threadId].push_back(v);
@@ -487,14 +505,24 @@ namespace ACTIONet
     }
     sp_mat G(locations, values, sample_no, sample_no);
 
+    G.replace(datum::nan, 0); // replace each NaN with 0
+    vec max_dist = vec(trans(max(G)));
+    sp_mat::iterator it = G.begin();
+    sp_mat::const_iterator it_end = G.end();
+
+    double epsilon = 1e-7;
+    for (; it != it_end; ++it)
+    {
+      double upper_bound = (distance_metric == "jsd") ? 1.0 : max_dist(it.col());
+      *it = max(epsilon, upper_bound - (*it));
+    }
+
     stdout_printf("done\n");
     FLUSH;
 
     delete (appr_alg);
 
     stdout_printf("\tFinalizing network ... ");
-    G.replace(datum::nan, 0); // replace each NaN with 0
-
     sp_mat Gt = trans(G);
 
     sp_mat G_sym;
@@ -573,7 +601,7 @@ namespace ACTIONet
                   {
                     auto &result_tuple = result.top();
 
-                    G(i, result_tuple.second) = 1.0 - result_tuple.first;
+                    G(i, result_tuple.second) = result_tuple.first;
                     result.pop();
                   } },
         thread_no);
@@ -582,8 +610,19 @@ namespace ACTIONet
 
     delete (appr_alg);
 
-    stdout_printf("\tFinalizing network ... ");
     G.replace(datum::nan, 0); // replace each NaN with 0
+    vec max_dist = vec(trans(max(G)));
+    sp_mat::iterator it = G.begin();
+    sp_mat::const_iterator it_end = G.end();
+
+    double epsilon = 1e-7;
+    for (; it != it_end; ++it)
+    {
+      double upper_bound = (distance_metric == "jsd") ? 1.0 : max_dist(it.col());
+      *it = max(epsilon, upper_bound - (*it));
+    }
+
+    stdout_printf("\tFinalizing network ... ");
 
     sp_mat Gt = trans(G);
 
@@ -719,7 +758,7 @@ namespace ACTIONet
                   {
                     auto &res = results.top();
                     int i = res.second;
-                    double v = 1.0 - res.first;
+                    double v = res.first;
                     ii[threadId].push_back(i);
                     jj[threadId].push_back(j);
                     vv[threadId].push_back(v);
@@ -751,7 +790,18 @@ namespace ACTIONet
     delete (appr_alg);
 
     sp_mat G(locations, values, H1.n_cols, H2.n_cols);
+
     G.replace(datum::nan, 0); // replace each NaN with 0
+    vec max_dist = vec(trans(max(G)));
+    sp_mat::iterator it = G.begin();
+    sp_mat::const_iterator it_end = G.end();
+
+    double epsilon = 1e-7;
+    for (; it != it_end; ++it)
+    {
+      double upper_bound = (distance_metric == "jsd") ? 1.0 : max_dist(it.col());
+      *it = max(epsilon, upper_bound - (*it));
+    }
 
     stdout_printf("done\n");
     FLUSH;
