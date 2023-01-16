@@ -28,20 +28,22 @@ lint:	install_pre_commit
 
 ## Installation
 .PHONY: update_env install_env install develop
+remove_env:
+	$(SOURCE_CONDA) && conda deactivate && conda env remove -n actionet
+
 update_env:
 	$(SOURCE_CONDA) && conda env update -f environment.yaml || conda env create -f environment.yaml
 
 install_env:
-	$(SOURCE_CONDA) && conda deactivate && conda env remove -n actionet
 	$(SOURCE_CONDA) && conda deactivate && conda env create -f environment.yaml
 
-install:	clean update_env
+install:	 update_env
 	$(SOURCE_CONDA) && conda activate actionet && \
 	git submodule update --init && \
 	python setup.py build && \
 	python setup.py install
 
-develop:	clean update_env
+develop:	update_env
 	$(SOURCE_CONDA) && conda activate actionet && \
 	git submodule update --init && \
 	python setup.py build && \
