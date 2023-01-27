@@ -15,6 +15,7 @@ namespace ACTIONet
     mat tzscoret(mat &A);
     mat robust_zscore(mat &A, int dim = 0, int thread_no = 1);
     mat RIN_transform(mat &A, int thread_no = 1);
+    mat mean_center(mat &A);
 
     // Used in IRLB
     void randNorm_inplace(int n, double *out, int seed);

@@ -410,6 +410,14 @@ namespace ACTIONet
 
   sp_mat LSI(sp_mat &X, double size_factor);
 
+  field<vec> autocorrelation_Moran_parametric(mat G, mat scores,
+                                              int normalization_method = 4,
+                                              int thread_no = 0);
+
+  field<vec> autocorrelation_Moran_parametric(sp_mat G, mat scores,
+                                              int normalization_method = 4,
+                                              int thread_no = 0);
+
   field<vec> autocorrelation_Moran(mat G, mat scores,
                                    int normalization_method = 1, int perm_no = 30,
                                    int thread_no = 0);
@@ -494,6 +502,9 @@ namespace ACTIONet
   mat oneHot_encoding(vec batches);
   mat run_harmony(mat &X, mat &W0, vec batch, int clustering_algorithm = 1, double sigma_val = 0.1, double theta_val = 2.0, int max_iter_cluster = 200, int max_iter_harmony = 10, double eps_cluster = 1e-5, double eps_harmony = 1e-4, double tau = 0, double block_size = 0.05, double lambda_val = 1.0, bool verbose = true, int seed = 0);
   mat assess_label_enrichment(sp_mat &H, mat &M, int thread_no = 0);
+
+  field<mat> compute_fourier_basis(mat &G, int n_basis = -1);
+  field<mat> compute_fourier_basis(sp_mat &G, int n_basis = -1);
 
 } // namespace ACTIONet
 

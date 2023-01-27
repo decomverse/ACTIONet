@@ -28,12 +28,159 @@ namespace ACTIONet
       normalized_scores = robust_zscore(scores, 0, thread_no);
       break;
     }
+    case 4: // mean centering
+    {
+      normalized_scores = mean_center(scores);
+      break;
+    }
     default:
       stderr_printf("Unknown normalization method\n");
       FLUSH;
       normalized_scores = scores;
     }
     return (normalized_scores);
+  }
+
+  // G is the cell-cell network, scores is a cell x geneset matrix
+  field<vec> autocorrelation_Moran_parametric(mat G, mat scores, int normalization_method, int thread_no)
+  {
+    // G.each_row() -= sum(G, 1); // Make row-sum == 1
+
+    double nV = G.n_rows;
+    int scores_no = scores.n_cols;
+    stdout_printf("Normalizing scores (method=%d) ... ", normalization_method);
+    mat normalized_scores =
+        normalize_scores(scores, normalization_method, thread_no);
+    stdout_printf("done\n");
+    FLUSH;
+
+    stdout_printf("Computing auto-correlation over network ... ", nV, scores_no);
+
+    double W = sum(sum(G));
+    double Wsq = W * W;
+
+    vec norm_sq = vec(trans(sum(square(normalized_scores))));
+    vec norm_factors = nV / (W * norm_sq);
+    norm_factors.replace(datum::nan, 0); // replace each NaN with 0
+
+    vec stat = zeros(scores_no);
+    parallelFor(
+        0, scores_no,
+        [&](unsigned int i)
+        {
+          vec x = normalized_scores.col(i);
+          double y = dot(x, G * x);
+          stat(i) = y;
+        },
+        thread_no);
+
+    stat = stat % norm_factors;
+
+    stdout_printf("done\n");
+    FLUSH;
+
+    vec mu = -ones(scores_no) / (nV - 1);
+
+    mat Gsym = (G + trans(G));
+    double S1 = 0.5 * sum(sum(square(Gsym)));
+
+    vec rs = vec(sum(G, 1));
+    vec cs = vec(trans(sum(G, 0)));
+    vec sg = rs + cs;
+    double S2 = sum(square(sg));
+
+    mat normalized_scores_sq = square(normalized_scores);
+    vec S3_vec = (sum(square(normalized_scores_sq), 0) / nV) / (square(sum(normalized_scores_sq, 0) / nV));
+    double S4 = (nV * (nV - 3) + 3) * S1 - nV * S2 + 3 * Wsq;
+    double S5 = (nV * (nV - 1)) * S1 - 2 * nV * S2 + 6 * Wsq;
+
+    double k1 = (nV * S4) / ((nV - 1) * (nV - 2) * (nV - 3) * Wsq);
+    double k2 = S5 / ((nV - 1) * (nV - 2) * (nV - 3) * Wsq);
+
+    vec sigma_sq = k1 - k2 * S3_vec - square(mu);
+    vec sigma = sqrt(sigma_sq);
+
+    vec zscores = (stat - mu) / sigma;
+
+    // Summary stats
+    field<vec> results(4);
+    results(0) = stat;
+    results(1) = zscores;
+    results(2) = mu;
+    results(3) = sigma;
+
+    return (results);
+  }
+
+  // G is the cell-cell network, scores is a cell x geneset matrix
+  field<vec> autocorrelation_Moran_parametric(sp_mat G, mat scores, int normalization_method, int thread_no)
+  {
+    // G.each_row() -= sum(G, 1); // Make row-sum == 1
+
+    double nV = G.n_rows;
+    int scores_no = scores.n_cols;
+    stdout_printf("Normalizing scores (method=%d) ... ", normalization_method);
+    mat normalized_scores =
+        normalize_scores(scores, normalization_method, thread_no);
+    stdout_printf("done\n");
+    FLUSH;
+
+    stdout_printf("Computing auto-correlation over network ... ", nV, scores_no);
+
+    double W = sum(sum(G));
+    double Wsq = W * W;
+
+    vec norm_sq = vec(trans(sum(square(normalized_scores))));
+    vec norm_factors = nV / (W * norm_sq);
+    norm_factors.replace(datum::nan, 0); // replace each NaN with 0
+
+    vec stat = zeros(scores_no);
+    parallelFor(
+        0, scores_no,
+        [&](unsigned int i)
+        {
+          vec x = normalized_scores.col(i);
+          double y = dot(x, spmat_vec_product(G, x));
+          stat(i) = y;
+        },
+        thread_no);
+
+    stat = stat % norm_factors;
+
+    stdout_printf("done\n");
+    FLUSH;
+
+    vec mu = -ones(scores_no) / (nV - 1);
+
+    sp_mat Gsym = (G + trans(G));
+    double S1 = 0.5 * sum(sum(square(Gsym)));
+
+    vec rs = vec(sum(G, 1));
+    vec cs = vec(trans(sum(G, 0)));
+    vec sg = rs + cs;
+    double S2 = sum(square(sg));
+
+    mat normalized_scores_sq = square(normalized_scores);
+    vec S3_vec = (sum(square(normalized_scores_sq), 0) / nV) / (square(sum(normalized_scores_sq, 0) / nV));
+    double S4 = (nV * (nV - 3) + 3) * S1 - nV * S2 + 3 * Wsq;
+    double S5 = (nV * (nV - 1)) * S1 - 2 * nV * S2 + 6 * Wsq;
+
+    double k1 = (nV * S4) / ((nV - 1) * (nV - 2) * (nV - 3) * Wsq);
+    double k2 = S5 / ((nV - 1) * (nV - 2) * (nV - 3) * Wsq);
+
+    vec sigma_sq = k1 - k2 * S3_vec - square(mu);
+    vec sigma = sqrt(sigma_sq);
+
+    vec zscores = (stat - mu) / sigma;
+
+    // Summary stats
+    field<vec> results(4);
+    results(0) = stat;
+    results(1) = zscores;
+    results(2) = mu;
+    results(3) = sigma;
+
+    return (results);
   }
 
   // G is the cell-cell network, scores is a cell x geneset matrix

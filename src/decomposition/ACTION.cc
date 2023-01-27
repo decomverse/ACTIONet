@@ -3,10 +3,10 @@
 sp_mat &as_arma_sparse(cholmod_sparse *chol_A, sp_mat &A,
                        cholmod_common *chol_c);
 
-void dsdmult(char transpose, int m, int n, void *a, double *b, double *c,
+void dsdmult(char transpose, int m, int n, const void *a, const double *b, double *c,
              cholmod_common *chol_cp);
 
-cholmod_sparse *as_cholmod_sparse(sp_mat &A, cholmod_sparse *chol_A,
+cholmod_sparse *as_cholmod_sparse(const sp_mat &A, cholmod_sparse *chol_A,
                                   cholmod_common *chol_c);
 
 namespace ACTIONet
