@@ -27,8 +27,7 @@ find_package(SuiteSparse REQUIRED)
 include_directories(${SUITESPARSE_INCLUDE_DIRS})
 
 # ########### Headers
-HEADER_DIRECTORIES(ACTIONET_HEADER_DIRS ${ACTIONet_SOURCE_DIR}/include)
-include_directories(${ACTIONET_HEADER_DIRS})
+include_directories(${ACTIONET_HEADER_DIRS} ${ACTIONet_SOURCE_DIR}/include ${ACTIONet_SOURCE_DIR}/include/math/aarand )
 
 # ########### Compile
 file(GLOB_RECURSE SOURCES *.cpp *.cc *.c)
