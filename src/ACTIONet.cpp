@@ -2606,3 +2606,37 @@ mat assess_label_enrichment(sp_mat &G, mat &M, int thread_no = 0)
 
   return (logPvals);
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List autocorrelation_Moran_parametric_full(mat G, mat scores,
+                                           int normalization_method = 4,
+                                           int thread_no = 0)
+{
+  field<vec> out = ACTIONet::autocorrelation_Moran_parametric(G, scores, normalization_method, thread_no);
+
+  List res;
+  res["stat"] = out[0];
+  res["zscore"] = out[1];
+  res["mu"] = out[2];
+  res["sigma"] = out[3];
+
+  return (res);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+List autocorrelation_Moran_parametric(sp_mat G, mat scores,
+                                      int normalization_method = 4,
+                                      int thread_no = 0)
+{
+  field<vec> out = ACTIONet::autocorrelation_Moran_parametric(G, scores, normalization_method, thread_no);
+
+  List res;
+  res["stat"] = out[0];
+  res["zscore"] = out[1];
+  res["mu"] = out[2];
+  res["sigma"] = out[3];
+
+  return (res);
+}
