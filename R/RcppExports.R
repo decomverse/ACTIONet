@@ -1099,6 +1099,14 @@ assess_label_enrichment <- function(G, M, thread_no = 0L) {
     .Call(`_ACTIONet_assess_label_enrichment`, G, M, thread_no)
 }
 
+autocorrelation_Moran_parametric_full <- function(G, scores, normalization_method = 4L, thread_no = 0L) {
+    .Call(`_ACTIONet_autocorrelation_Moran_parametric_full`, G, scores, normalization_method, thread_no)
+}
+
+autocorrelation_Moran_parametric <- function(G, scores, normalization_method = 4L, thread_no = 0L) {
+    .Call(`_ACTIONet_autocorrelation_Moran_parametric`, G, scores, normalization_method, thread_no)
+}
+
 roll_var <- function(X) {
     .Call(`_ACTIONet_roll_var`, X)
 }

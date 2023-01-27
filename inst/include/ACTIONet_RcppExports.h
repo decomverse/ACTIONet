@@ -2355,6 +2355,48 @@ namespace ACTIONet {
         return Rcpp::as<mat >(rcpp_result_gen);
     }
 
+    inline List autocorrelation_Moran_parametric_full(mat G, mat scores, int normalization_method = 4, int thread_no = 0) {
+        typedef SEXP(*Ptr_autocorrelation_Moran_parametric_full)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_autocorrelation_Moran_parametric_full p_autocorrelation_Moran_parametric_full = NULL;
+        if (p_autocorrelation_Moran_parametric_full == NULL) {
+            validateSignature("List(*autocorrelation_Moran_parametric_full)(mat,mat,int,int)");
+            p_autocorrelation_Moran_parametric_full = (Ptr_autocorrelation_Moran_parametric_full)R_GetCCallable("ACTIONet", "_ACTIONet_autocorrelation_Moran_parametric_full");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_autocorrelation_Moran_parametric_full(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(scores)), Shield<SEXP>(Rcpp::wrap(normalization_method)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
+    inline List autocorrelation_Moran_parametric(sp_mat G, mat scores, int normalization_method = 4, int thread_no = 0) {
+        typedef SEXP(*Ptr_autocorrelation_Moran_parametric)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_autocorrelation_Moran_parametric p_autocorrelation_Moran_parametric = NULL;
+        if (p_autocorrelation_Moran_parametric == NULL) {
+            validateSignature("List(*autocorrelation_Moran_parametric)(sp_mat,mat,int,int)");
+            p_autocorrelation_Moran_parametric = (Ptr_autocorrelation_Moran_parametric)R_GetCCallable("ACTIONet", "_ACTIONet_autocorrelation_Moran_parametric");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_autocorrelation_Moran_parametric(Shield<SEXP>(Rcpp::wrap(G)), Shield<SEXP>(Rcpp::wrap(scores)), Shield<SEXP>(Rcpp::wrap(normalization_method)), Shield<SEXP>(Rcpp::wrap(thread_no)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_ACTIONet_RCPPEXPORTS_H_GEN_
