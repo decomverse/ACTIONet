@@ -3,7 +3,7 @@
 
 // Mat-vec product (Ax)
 // dsdmult('n', A.n_rows, A.n_cols, A_as_cholmod, x.memptr(), out.memptr(), &chol_c);
-void dsdmult(char transpose, int n_rows, int n_cols, void *A, double *x, double *out,
+void dsdmult(char transpose, int n_rows, int n_cols, const void *A, const double *x, double *out,
              cholmod_common *chol_cp)
 {
     int t = transpose == 't' ? 1 : 0; // 'n': computes Ax, 't': computes A'x
@@ -36,7 +36,7 @@ void dsdmult(char transpose, int n_rows, int n_cols, void *A, double *x, double 
     cholmod_sdmult(cha, t, one, zero, &chb, &chc, chol_cp);
 }
 
-cholmod_sparse *as_cholmod_sparse(arma::sp_mat &A, cholmod_sparse *chol_A,
+cholmod_sparse *as_cholmod_sparse(const arma::sp_mat &A, cholmod_sparse *chol_A,
                                   cholmod_common *chol_c)
 {
     int nrow = A.n_rows, ncol = A.n_cols, nz = A.n_nonzero;
