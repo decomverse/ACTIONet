@@ -2630,6 +2630,7 @@ List autocorrelation_Moran_parametric(sp_mat G, mat scores,
                                       int normalization_method = 4,
                                       int thread_no = 0)
 {
+
   field<vec> out = ACTIONet::autocorrelation_Moran_parametric(G, scores, normalization_method, thread_no);
 
   List res;
