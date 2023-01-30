@@ -90,7 +90,7 @@ namespace ACTIONet
     double S2 = sum(square(sg));
 
     mat normalized_scores_sq = square(normalized_scores);
-    vec S3_vec = (sum(square(normalized_scores_sq), 0) / nV) / (square(sum(normalized_scores_sq, 0) / nV));
+    vec S3_vec = trans((sum(square(normalized_scores_sq), 0) / nV) / (square(sum(normalized_scores_sq, 0) / nV)));
     double S4 = (nV * (nV - 3) + 3) * S1 - nV * S2 + 3 * Wsq;
     double S5 = (nV * (nV - 1)) * S1 - 2 * nV * S2 + 6 * Wsq;
 
@@ -161,7 +161,7 @@ namespace ACTIONet
     double S2 = sum(square(sg));
 
     mat normalized_scores_sq = square(normalized_scores);
-    vec S3_vec = (sum(square(normalized_scores_sq), 0) / nV) / (square(sum(normalized_scores_sq, 0) / nV));
+    vec S3_vec = trans((sum(square(normalized_scores_sq), 0) / nV) / (square(sum(normalized_scores_sq, 0) / nV)));
     double S4 = (nV * (nV - 3) + 3) * S1 - nV * S2 + 3 * Wsq;
     double S5 = (nV * (nV - 1)) * S1 - 2 * nV * S2 + 6 * Wsq;
 
