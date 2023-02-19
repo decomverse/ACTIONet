@@ -1,7 +1,7 @@
 Package: ACTIONet
 Type: Package
 Title: Robust multi-resolution analysis of single-cell datasets
-Version: 1.0.0
+Version: 3.0.2
 Date: 2023-01-01
 Authors@R: c(
     person("Shahin", "Mohammadi", email = "shahin.mohammadi@gmail.com",
