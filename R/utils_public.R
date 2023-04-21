@@ -16,20 +16,21 @@ normalize.matrix <- function(S,
                              top_features_frac = 1.0,
                              scale_param = median,
                              transformation = "log",
-                             anchor_features = NULL) {
+                             anchor_features = NULL,
+                             post_rescale = FALSE) {
   if (!is.matrix(S) && !ACTIONetExperiment:::is.sparseMatrix(S)) {
     err <- sprintf("`S` must be `matrix` or `sparseMatrix`.\n")
     stop(err)
   }
 
   if (!is.null(anchor_features)) {
-    lib_sizes <- Matrix::colMeans(S[anchor_features, ])
+    lib_sizes <- Matrix::colSums(S[anchor_features, ])
   } else if (top_features_frac < 1.0) {
     universality <- Matrix::rowMeans(S != 0)
     selected_features <- which(universality > (1.0 - top_features_frac))
-    lib_sizes <- Matrix::colMeans(S[selected_features, ])
+    lib_sizes <- Matrix::colSums(S[selected_features, ])
   } else {
-    lib_sizes <- Matrix::colMeans(S)
+    lib_sizes <- Matrix::colSums(S)
   }
 
   if (is.matrix(S)) {
@@ -47,34 +48,50 @@ normalize.matrix <- function(S,
     S_scaled_norm <- S_scaled * kappa
   } else if (length(scale_param) == 1) {
     S_scaled_norm <- S_scaled * scale_param
-  } else {
+  } else if (length(scale_param) == ncol(S)) {
     if (is.matrix(S_scaled)) {
-      S_scaled_norm <- S_scaled %*% diag(lib_sizes)
+      S_scaled_norm <- S_scaled %*% diag(x = scale_param)
     } else {
       S_scaled_norm <- S_scaled %*% Diagonal(n = length(scale_param), x = scale_param)
     }
+  } else {
+    stop(sprintf("invalid scale_param in the normalize.matrix() function."))
   }
 
   if (transformation == "log") {
-    S_scaled_norm <- log1p(S_scaled_norm)
+    S_scaled_norm_trans <- log1p(S_scaled_norm)
   } else if (transformation == "tukey") {
     if (is.matrix(S_scaled_norm)) {
-      idx <- which(S_scaled_norm > 0)
-      vv <- S_scaled_norm[idx]
+      S_scaled_norm_trans <- S_scaled_norm
+      idx <- which(S_scaled_norm_trans > 0)
+      vv <- S_scaled_norm_trans[idx]
       vv_transformed <- sqrt(vv) + sqrt(1 + vv)
-      S_scaled_norm[idx] <- vv_transformed
+      S_scaled_norm_trans[idx] <- vv_transformed
     } else {
-      S_scaled_norm@x <- sqrt(S_scaled_norm@x) + sqrt(S_scaled_norm@x + 1)
+      S_scaled_norm_trans@x <- sqrt(S_scaled_norm_trans@x) + sqrt(S_scaled_norm_trans@x + 1)
     }
   } else if (transformation == "lsi") {
     if (is.matrix(S_scaled_norm)) {
       S_scaled_norm <- as(S_scaled_norm, "dMatrix")
     }
-    S_scaled_norm <- ACTIONet::LSI(S_sparse)
+    S_scaled_norm_trans <- ACTIONet::LSI(S_scaled_norm)
   }
 
-  return(S_scaled_norm)
+  if (post_rescale == TRUE) {
+    cs <- Matrix::colSums(S_scaled_norm_trans)
+    kappa <- median(cs) / cs
+
+    if (is.matrix(S_scaled_norm_trans)) {
+      S_scaled_norm_trans <- S_scaled_norm_trans %*% diag(x = kappa)
+    } else {
+      S_scaled_norm_trans <- S_scaled_norm_trans %*% Diagonal(n = length(kappa), x = kappa)
+    }
+  }
+
+  return(S_scaled_norm_trans)
 }
+
+
 
 .groupedRowSums <- function(S, group_vec) {
   if (ACTIONetExperiment:::is.sparseMatrix(S)) {
