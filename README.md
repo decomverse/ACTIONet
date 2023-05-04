@@ -141,7 +141,7 @@ require(ACTIONet)
 ace = import.ace.from.10X.h5('pbmc_10k_v3.h5', prefilter = T, min_cells_per_feat = 0.01, min_feats_per_cell = 1000)
 ace = normalize.ace(ace)
 ace = reduce.ace(ace)
-ace = run.ACTIONet(ace)
+ace = runACTIONet(ace)
 
 # Annotate cell-types
 data("curatedMarkers_human")
