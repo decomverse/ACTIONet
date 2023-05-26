@@ -32,8 +32,8 @@ normalize.matrix <- function(
     err = sprintf("`scale_param` must be of length 1 or `NCOL(S)`.\n")
   }
 
-  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
-    S = as(S, "dgCMatrix")
+  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "CsparseMatrix")) {
+    S = as(S, "CsparseMatrix")
   }
 
   cs = Matrix::colSums(S)
@@ -54,8 +54,8 @@ normalize.matrix <- function(
     B = log1p(B)
   }
 
-  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
-    S = as(S, "dgCMatrix")
+  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "CsparseMatrix")) {
+    S = as(S, "CsparseMatrix")
   }
 
   return(B)
@@ -109,8 +109,8 @@ aggregateMatrix <- function(S, group_vec, method = c("sum", "mean", "var")) {
   labels = as.numeric(lf)
   keys = levels(lf)
 
-  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "dgCMatrix")) {
-    S = as(S, "dgCMatrix")
+  if(ACTIONetExperiment:::is.sparseMatrix(S) && !is(S, "CsparseMatrix")) {
+    S = as(S, "CsparseMatrix")
   } 
 
   if (method == "sum") {

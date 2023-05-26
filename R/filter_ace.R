@@ -44,7 +44,7 @@ filter.ace <- function(
 
         if (!is.null(min_feats_per_cell)) {
             feature_mask = Matrix::colSums(.validate_matrix(X > 0)) >= min_feats_per_cell
-            # feature_mask = Matrix::colSums(as(X > 0, "dgCMatrix")) >= min_feats_per_cell
+            # feature_mask = Matrix::colSums(as(X > 0, "CsparseMatrix")) >= min_feats_per_cell
             cols_mask = cols_mask & feature_mask
         }
 
@@ -55,7 +55,7 @@ filter.ace <- function(
                 min_fc = min_cells_per_feat
             }
             cell_count_mask = ACTIONetExperiment:::fastRowSums(.validate_matrix(X > 0)) >= min_fc
-            # cell_count_mask = ACTIONetExperiment:::fastRowSums(as(X > 0, "dgCMatrix")) >= min_fc
+            # cell_count_mask = ACTIONetExperiment:::fastRowSums(as(X > 0, "CsparseMatrix")) >= min_fc
             rows_mask = rows_mask & cell_count_mask
         }
 

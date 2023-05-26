@@ -89,8 +89,6 @@ imputeGenes <- function(
         expr_imp = Matrix::t(expr_imp)
     }
 
-    rownames(expr_imp) <- matched_feat
-
     # Re-scale expression of genes
     m1 <- apply(expr_raw, 1, max)
     m2 <- apply(expr_imp, 1, max)
@@ -98,6 +96,8 @@ imputeGenes <- function(
     ratio[m2 == 0] <- 1
     D <- Matrix::Diagonal(nrow(expr_imp), ratio)
     expr_imp <- Matrix::t(as.matrix(D %*% expr_imp))
+
+    colnames(expr_imp) <- matched_feat
 
     return(expr_imp)
 }

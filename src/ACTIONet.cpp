@@ -881,7 +881,7 @@ vector<string> decode_ids(vector<string> encoded_ids, string pass)
 
 //' Aggregate matrix wiithin groups
 //'
-//' @param S matrix of type "dgCMatrix"
+//' @param S matrix of type "CsparseMatrix"
 //' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 //'
 //' @return S matrix with columns of values aggregated within each group of sample_assignments
@@ -913,7 +913,7 @@ mat compute_grouped_rowsums_full(mat &S,
 
 //' Average matrix wiithin groups
 //'
-//' @param S matrix of type "dgCMatrix"
+//' @param S matrix of type "CsparseMatrix"
 //' @param sample_assignments Vector of column groupings. Group labels must be continuous integers or coercible to such.
 //'
 //' @return S matrix with columns of values average within each group of sample_assignments

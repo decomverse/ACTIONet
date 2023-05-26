@@ -363,7 +363,7 @@ construct.tspanner <- function(backbone,
     }
   }
 
-  G <- as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "dgCMatrix")
+  G <- as(igraph::get.adjacency(backbone.graph.sparse, attr = "weight"), "CsparseMatrix")
 
   return(G)
 }
