@@ -7,7 +7,7 @@
 compute_grouped_rowmeans(S, sample_assignments)
 }
 \arguments{
-\item{S}{matrix of type "dgCMatrix"}
+\item{S}{matrix of type "CsparseMatrix"}
 
 \item{sample_assignments}{Vector of column groupings. Group labels must be continuous integers or coercible to such.}
 }
