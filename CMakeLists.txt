@@ -24,6 +24,10 @@ else()
     message(WARNING "Cannot find shared libpython, try find_package")
 endif()
 
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python REQUIRED Development)
+find_package(Python REQUIRED Interpreter)
+
 find_package(PythonInterp)
 find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
 
@@ -32,7 +36,6 @@ find_package(PythonLibs REQUIRED)
 find_package(PythonPyEnv REQUIRED)
 include_directories(${Python_INCLUDE_DIRS})
 
-#find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
 
 # Check for CHOLMOD
