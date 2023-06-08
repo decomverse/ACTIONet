@@ -1,2 +1,4 @@
 include README.md
+include setup_helpers.py
+include requirements.txt
 global-include CMakeLists.txt *.cmake

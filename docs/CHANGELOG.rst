@@ -3,8 +3,10 @@ Changelog
 *********
 v2.0.4
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -44,8 +46,10 @@ v2.0.4
 
 v2.0.5
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -85,8 +89,10 @@ v2.0.5
 
 v2.0.6b
 =======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -126,8 +132,10 @@ v2.0.6b
 
 v2.0.7
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -167,8 +175,10 @@ v2.0.7
 
 v2.0.8b
 =======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -208,8 +218,10 @@ v2.0.8b
 
 v2.0.9
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -249,8 +261,10 @@ v2.0.9
 
 v2.0.10
 =======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -290,8 +304,10 @@ v2.0.10
 
 v2.0.12
 =======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -331,8 +347,10 @@ v2.0.12
 
 v2.0.15
 =======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -372,8 +390,10 @@ v2.0.15
 
 v2.0.18
 =======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -413,8 +433,10 @@ v2.0.18
 
 v2.1.2
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -454,8 +476,10 @@ v2.1.2
 
 v2.1.5
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -495,8 +519,10 @@ v2.1.5
 
 v2.1.7
 ======
-:Date: September 27, 2022
+:Date: June 07, 2023
 
+* Update README.md
+* Update README.md
 * Update .gitignore
 * moving docker folder to R-release & Python-release branches so can be triggered with actions
 * updates to make rmkl work with r-base 4.0.5 in conda
@@ -531,3 +557,4 @@ v2.1.7
 * Update README.md
 * Update README.md
 * Update README.md
+
