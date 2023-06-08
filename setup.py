@@ -98,4 +98,5 @@ setup(
     zip_safe=False,
     include_package_data=True,
     classifiers=[],
+    options={"bdist_wheel":{"universal": True}}
 )
