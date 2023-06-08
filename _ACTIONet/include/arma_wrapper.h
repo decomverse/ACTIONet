@@ -849,7 +849,6 @@ struct type_caster<Type, enable_if_t<aw::is_SpMat<Type>::value>> {
                        _("scipy.sparse.csc_matrix[") +
                            npy_format_descriptor<std::decay_t<Scalar>>::name +
                            _("]"));
-};
-
-NAMESPACE_END(detail)
-NAMESPACE_END(pybind11)
+ };
+}
+}
