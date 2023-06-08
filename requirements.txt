@@ -13,3 +13,4 @@ orca
 sphinx
 nbsphinx
 mypy
+setuphelpers
