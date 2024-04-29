@@ -4,6 +4,7 @@ import numpy as np
 from anndata import AnnData
 from scipy import sparse
 from scipy.spatial.distance import pdist, squareform
+from scipy.sparse import csc_matrix
 
 import _ACTIONet as _an
 
@@ -79,7 +80,8 @@ def build(
         mutual_edges_only=mutual_edges_only,
         k=k,
     )
-    G = sparse.spmatrix.tocsc(G)
+
+    G = csc_matrix(G)
 
     if return_raw or not isinstance(adata, AnnData):
         return G

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
+from scipy.sparse import csc_matrix
 
 import _ACTIONet as _an
 
@@ -91,7 +92,7 @@ def propagate(
     if not sparse.issparse(G):
         G = sparse.csc_matrix(G)
     else:
-        G = G.tocsc()
+        G = csc_matrix(G)
 
     if (labels is None) and (labels_key is not None):
         labels = adata.obs[labels_key]

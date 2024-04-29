@@ -49,6 +49,9 @@ def run_ACTIONet(
 ):
     adata = adata.copy() if copy else adata
 
+    if "metadata" not in adata.uns.keys():
+        adata.uns["metadata"] = {}
+
     if layer_key is None and "default_assay" in adata.uns["metadata"].keys():
         layer_key = adata.uns["metadata"]["default_assay"]
 

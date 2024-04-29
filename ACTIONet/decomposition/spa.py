@@ -7,6 +7,7 @@ import numpy as np
 from sklearn._config import config_context
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
+from scipy.sparse import diags
 
 import _ACTIONet as _an
 
@@ -212,10 +213,113 @@ class SPA(TransformerMixin, BaseEstimator):
         """
         check_is_fitted(self)
 
-        X = self._validate_data(X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False)
+        X = self._validate_data(
+            X, accept_sparse=False, dtype=[np.float64, np.float32], reset=False
+        )
 
         H = self.components_
         with config_context(assume_finite=True):
             W = _an.run_simplex_regression(H.T, X.T).T
 
         return W
+
+
+# From: Successive Projection Algorithm Robust to Outliers
+# Ref: https://arxiv.org/abs/1908.04109
+def diversification_RSPA(R, options=None):
+    """
+    Selection step for the robust successive projection algorithm (RSPA); see
+    Successive Projection Algorithm Robust to Outliers, N. Gillis, June 2019.
+    """  # noqa: D205
+    # Default options
+    if options is None:
+        options = {}
+    d = options.get("d", 10)
+    p = options.get("p", 1)
+    beta = options.get("beta", 4)
+
+    Kfin = []  # Will keep in memory the candidate indices
+    Y = R
+    err = np.zeros(d)
+    alpha = np.zeros(d)
+
+    for i in range(d):
+        normY = np.sum(Y**2, axis=0)
+        b = np.argmax(normY)
+        # Error computation
+        Kfin.append(b)
+        if d == 1:  # SPA
+            err[i] = 0
+        else:
+            ui = R[:, Kfin[i]] / np.linalg.norm(R[:, Kfin[i]])
+            Ri = R - np.outer(ui, ui.T @ R)
+            # Criterion to evaluate the error of the residual
+            err[i] = np.sum(np.sum(Ri**2, axis=0) ** (p / 2))
+            if i < d - 1:  # At the last step, it is useless to update Y
+                uyi = Y[:, Kfin[i]] / np.linalg.norm(Y[:, Kfin[i]])
+                Yi = Y - np.outer(uyi, uyi.T @ Y)
+                normYi = np.sum(Yi**2, axis=0)
+                ap, bp = np.max(normYi), np.argmax(normYi)
+                if ap < 1e-12:  # this may happen if X has rank one
+                    break
+                else:
+                    # Diversification
+                    x = Y[:, Kfin[i]]
+                    u = x / np.linalg.norm(x)
+                    y = Y[:, bp]
+                    alpha[i] = 1 - np.sqrt(
+                        1
+                        - (beta * np.linalg.norm(x) ** 2 - np.linalg.norm(y) ** 2)
+                        / (beta * (u.T @ x) ** 2 - (u.T @ y) ** 2)
+                    )
+                    if alpha[i] >= 1 or alpha[i] <= 0:
+                        # This should in theory not happen ~ safety procedure
+                        raise ValueError("alpha should be between 0 and 1")
+                    Y = Y - alpha[i] * np.outer(u, u.T @ Y)
+
+    # Keep the best candidate index w.r.t. err
+    b = np.argmin(err[0 : len(Kfin)])
+    k = Kfin[b]
+
+    return k
+
+
+def RSPA(X, r, options=None):
+    """
+    Robust successive projection algorithm for separable NMF; see
+    Successive Projection Algorithm Robust to Outliers, N. Gillis, July 2019.
+    """  # noqa: D205
+    # Default options
+    if options is None:
+        options = {}
+    options["d"] = options.get("d", 10)
+    options["p"] = options.get("p", 1)
+    options["beta"] = options.get("beta", 4)
+    options["normalize"] = options.get("normalize", 0)
+
+    if options["normalize"] == 1:
+        # Normalization of the columns of X so that they sum to one
+        D = diags(((np.sum(X, axis=0) + 1e-16) ** -1), 0)
+        X = X @ D
+
+    R = X
+    normX = np.sum(X**2)
+    normR = normX
+    i = 0
+    K = np.zeros(r, dtype=int)
+    norms = np.zeros(r, dtype=float)
+
+    # Perform r steps (unless the approximation error <= 10^-12)
+    while i < r and np.max(normR) > 1e-12:
+        # Select the column of R with the diversification procedure
+        b = diversification_RSPA(R, options)
+        # Update the index set, and the residual
+        K[i] = b
+        u = R[:, b] / np.linalg.norm(R[:, b])
+        R = R - np.outer(u, u.T @ R)
+        normR = np.sum(R**2)
+        norms[i] = normR
+        i += 1
+
+    var_expl = (normX - norms) / normX
+    return K, var_expl

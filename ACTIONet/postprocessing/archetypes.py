@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
+from scipy.sparse import csc_matrix
 
 import _ACTIONet as _an
 from ACTIONet.network.build import build
@@ -13,7 +14,7 @@ from ACTIONet.tools.utils_public import double_normalize, scale_matrix
 def __compute_feature_specificity(S, H, thread_no=0):
     H = np.array(H, dtype=np.float64)
     if sparse.issparse(S):
-        S = S.tocsc().astype(dtype=np.float64)
+        S = csc_matrix(S, dtype=np.float64)
         out = _an.compute_archetype_feature_specificity(S, H, thread_no)
     else:
         S = np.array(S, dtype=np.float64)
@@ -104,12 +105,18 @@ def annotate(
 ):
 
     if markers is not None:
-        feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
+        feature_names = pd.Series(
+            [x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)]
+        )
 
-        marker_mat = sparse.csc_matrix(pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T)
+        marker_mat = sparse.csc_matrix(
+            pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T
+        )
         spec_mat = adata.varm[specificity_key]
 
-        assessment_out = _an.assess_enrichment(scores=spec_mat, associations=marker_mat, thread_no=thread_no)
+        assessment_out = _an.assess_enrichment(
+            scores=spec_mat, associations=marker_mat, thread_no=thread_no
+        )
 
         logPvals = assessment_out["logPvals"].T
         Enrichment = pd.DataFrame(
@@ -181,13 +188,18 @@ def map_cell_scores(
     cell_scores_mat = adata.obsm[archetypes_key]
 
     if enrichment_mat.shape[0] != cell_scores_mat.shape[1]:
-        raise ValueError(f"The number of rows in matrix `enrichment` ({enrichment.shape[0]}) must equal " f"the number of columns in matrix adata.obsm['{archetypes_key}'] ({cell_scores_mat.shape[1]}).")
+        raise ValueError(
+            f"The number of rows in matrix `enrichment` ({enrichment.shape[0]}) must equal "
+            f"the number of columns in matrix adata.obsm['{archetypes_key}'] ({cell_scores_mat.shape[1]})."
+        )
 
     if normalize:
         enrichment_mat = double_normalize(enrichment_mat)
 
     cell_enrichment_mat = cell_scores_mat @ enrichment_mat
-    Enrichment = pd.DataFrame(cell_enrichment_mat, index=adata.obs.index, columns=enrichment.columns)
+    Enrichment = pd.DataFrame(
+        cell_enrichment_mat, index=adata.obs.index, columns=enrichment.columns
+    )
 
     annotations = enrichment.columns
     idx = np.argmax(cell_enrichment_mat, axis=1)
@@ -205,6 +217,8 @@ def construct_backbone(
     return_raw: Optional[bool] = False,
 ):
     adata = adata.copy() if copy else adata
+    if "metadata" not in adata.uns.keys():
+        adata.uns["metadata"] = {}
 
     footprint = adata.obsm["archetype_footprint"].T
     arch_features = sparse.csr_matrix(_an.normalize_mat(footprint, 1))

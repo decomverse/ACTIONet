@@ -24,13 +24,20 @@ pio.orca.config.save()
 
 def validate_plot_params(adata, coordinate_key, label_key, transparency_key):
     if coordinate_key not in adata.obsm.keys():
-        raise ValueError(f"Did not find adata.obsm['{coordinate_key}']. " "Please run nt.layoutNetwork() first.")
+        raise ValueError(
+            f"Did not find adata.obsm['{coordinate_key}']. " "Please run nt.layoutNetwork() first."
+        )
     if label_key is not None and label_key not in adata.obs.columns:
         raise ValueError(f"Did not find adata.obs['{label_key}'].")
     if transparency_key is not None and transparency_key not in adata.obs.columns:
         raise ValueError(f"Did not find adata.obs['{transparency_key}'].")
-    if transparency_key is not None and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False:
-        raise ValueError(f"transparency_key must refer to a numeric values, which is not the case for['{transparency_key}'].")
+    if (
+        transparency_key is not None
+        and pd.api.types.is_numeric_dtype(adata.obs[transparency_key].dtype) is False
+    ):
+        raise ValueError(
+            f"transparency_key must refer to a numeric values, which is not the case for['{transparency_key}']."
+        )
 
 
 def plot_ACTIONet(
@@ -55,20 +62,14 @@ def plot_ACTIONet(
         adata.obsm["X_actionet3d"] = adata.obsm["ACTIONet3D"]
         basis = "actionet3d"
 
-    tmp_key = "__annotations__"
-    if annotation is not None:
-        if len(annotation) == adata.shape[0]:
-            adata.obs[tmp_key] = pd.Series(annotation, index=adata.obs.index.values)
-        else:
-            adata.obs[tmp_key] = pd.Series(
-                adata.obs[annotation].astype("str"),
-                index=adata.obs.index.values.astype("str"),
-            )
+    if (annotation is not None) and (len(annotation) == adata.shape[0]):
+        annotation = "__annotations__"
+        adata.obs[annotation] = pd.Series(annotation, index=adata.obs.index.values)
 
     p = sc.pl.embedding(
         adata,
         basis=basis,
-        color=tmp_key,
+        color=annotation,
         projection=projection,
         size=size,
         legend_fontsize=legend_fontsize,
@@ -81,8 +82,12 @@ def plot_ACTIONet(
         **kwargs,
     )
 
-    _ = adata.obsm.pop("X_actionet2d")
-    _ = adata.obs.pop(tmp_key)
+    if projection == "2d":
+        _ = adata.obsm.pop("X_actionet2d")
+    else:
+        _ = adata.obsm.pop("X_actionet3d")
+    if annotation == "__annotations__":
+        _ = adata.obs.pop(annotation)
 
     return p
 
@@ -95,7 +100,9 @@ def visualize_markers(
     **kwargs,
 ) -> Union[Figure, Axes, None]:
 
-    feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
+    feature_names = pd.Series(
+        [x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)]
+    )
     adata.var.index = feature_names
 
     X = adata[:, genes].X
@@ -108,7 +115,10 @@ def visualize_markers(
         if isinstance(genes, str):
             p = plot_ACTIONet(adata, X_smooth[:, 0], color_map=color_map, title=genes, **kwargs)
         elif isinstance(genes, list):
-            p = [plot_ACTIONet(adata, X_smooth[:, k], color_map=color_map, title=genes[k], **kwargs) for k in range(X_smooth.shape[1])]
+            p = [
+                plot_ACTIONet(adata, X_smooth[:, k], color_map=color_map, title=genes[k], **kwargs)
+                for k in range(X_smooth.shape[1])
+            ]
 
     return p
 
@@ -193,7 +203,9 @@ def plot_ACTIONet_interactive(
         if isinstance(data, AnnData) and coordinate_key is None:
             coordinate_key = "ACTIONet2D"
 
-    plot_coors = pu.get_plot_coors(data=data, coordinate_key=coordinate_key, scale_coors=True, coor_dims=coor_dims)
+    plot_coors = pu.get_plot_coors(
+        data=data, coordinate_key=coordinate_key, scale_coors=True, coor_dims=coor_dims
+    )
     plot_labels = pu.get_plot_labels(label_attr=label_attr, data=data)
 
     if plot_labels is None:
@@ -241,8 +253,12 @@ def plot_ACTIONet_interactive(
             scale=True,
         )
 
-        plot_data["fill"] = append_alpha_to_rgb(plot_data["fill"], plot_data["trans"], unzip_colors=True)
-        plot_data["color"] = append_alpha_to_rgb(plot_data["color"], plot_data["trans"], unzip_colors=True)
+        plot_data["fill"] = append_alpha_to_rgb(
+            plot_data["fill"], plot_data["trans"], unzip_colors=True
+        )
+        plot_data["color"] = append_alpha_to_rgb(
+            plot_data["color"], plot_data["trans"], unzip_colors=True
+        )
 
         # if point_order is None:
         #     plot_data = plot_data.sample(frac=1).reset_index(drop=True)

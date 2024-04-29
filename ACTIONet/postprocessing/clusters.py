@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
+from scipy.sparse import csc_matrix
 
 import _ACTIONet as _an
 from ACTIONet.tools.utils_public import scale_matrix
@@ -11,7 +12,7 @@ from ACTIONet.tools.utils_public import scale_matrix
 
 def __compute_feature_specificity(S, sample_assignments, thread_no=0):
     if sparse.issparse(S):
-        S = S.tocsc().astype(dtype=np.float64)
+        S = csc_matrix(S, dtype=np.float64)
         out = _an.compute_cluster_feature_specificity(S, sample_assignments, thread_no)
     else:
         S = np.array(S, dtype=np.float64)
@@ -85,7 +86,9 @@ def feature_specificity(
 
     S = S.T.astype(dtype=np.float64)
 
-    specificity_out = __compute_feature_specificity(S=S, sample_assignments=clusters + 1, thread_no=thread_no)
+    specificity_out = __compute_feature_specificity(
+        S=S, sample_assignments=clusters + 1, thread_no=thread_no
+    )
 
     if return_raw or not isinstance(adata, AnnData):
         return specificity_out
@@ -93,7 +96,9 @@ def feature_specificity(
         adata.varm[f"{output_prefix}_feature_specificity"] = specificity_out["upper_significance"]
         adata.uns.setdefault("varm_annot", {}).update(
             {
-                f"{output_prefix}_feature_specificity": {"type": np.array([b"reduction"], dtype=object)},
+                f"{output_prefix}_feature_specificity": {
+                    "type": np.array([b"reduction"], dtype=object)
+                },
             }
         )
 
@@ -111,12 +116,18 @@ def annotate(
 ):
 
     if markers is not None:
-        feature_names = pd.Series([x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)])
+        feature_names = pd.Series(
+            [x.decode() if isinstance(x, (bytes, bytearray)) else x for x in list(adata.var.index)]
+        )
 
-        marker_mat = sparse.csc_matrix(pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T)
+        marker_mat = sparse.csc_matrix(
+            pd.DataFrame([feature_names.isin(markers[key]) * 1 for key in markers.keys()]).T
+        )
         spec_mat = adata.varm[specificity_key]
 
-        assessment_out = _an.assess_enrichment(scores=spec_mat, associations=marker_mat, thread_no=thread_no)
+        assessment_out = _an.assess_enrichment(
+            scores=spec_mat, associations=marker_mat, thread_no=thread_no
+        )
 
         logPvals = assessment_out["logPvals"].T
         Enrichment = pd.DataFrame(

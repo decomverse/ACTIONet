@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 import numpy as np
 from anndata import AnnData
-from scipy.sparse import issparse, spmatrix
+from scipy.sparse import issparse, spmatrix, csc_matrix
 from typing_extensions import Literal
 import pandas as pd
 
@@ -58,6 +58,9 @@ def reduce_adata(
     else:
         adata = AnnData(data)
 
+    if "metadata" not in adata.uns.keys():
+        adata.uns["metadata"] = {}
+
     # ACTIONet C++ library takes cells as columns
     if layer_key is not None:
         X = adata.layers[layer_key]
@@ -75,8 +78,7 @@ def reduce_adata(
 
     X = X.T.astype(dtype=np.float64)
     if issparse(X):
-        if X.getformat() != "csc":
-            X = X.tocsc()
+        X = csc_matrix(X, dtype=np.float64)
 
         reduced = _an.reduce_kernel(X, dim, max_iter, seed, svd_solver, False)
     else:
@@ -99,16 +101,13 @@ def reduce_adata(
         adata.uns.setdefault("obsm_annot", {}).update(
             {
                 str(reduction_key): {"type": np.array([b"reduction"], dtype=object)},
-                str(reduction_key)
-                + "_B": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_B": {"type": np.array([b"internal"], dtype=object)},
             }
         )
         adata.uns.setdefault("varm_annot", {}).update(
             {
-                str(reduction_key)
-                + "_A": {"type": np.array([b"internal"], dtype=object)},
-                str(reduction_key)
-                + "_V": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_A": {"type": np.array([b"internal"], dtype=object)},
+                str(reduction_key) + "_V": {"type": np.array([b"internal"], dtype=object)},
             }
         )
 

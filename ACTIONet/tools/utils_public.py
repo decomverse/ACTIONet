@@ -21,6 +21,8 @@ def normalize_reduction(
     reduction_key_out = reduction_key + "_normalized"
 
     adata = adata.copy() if copy else adata
+    if "metadata" not in adata.uns.keys():
+        adata.uns["metadata"] = {}
 
     Xr = np.array(adata.obsm[reduction_key])
     Xr_norm = _an.normalize_mat(Xr, normalization=normalization, dim=1)
