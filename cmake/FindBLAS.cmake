@@ -1,13 +1,3 @@
-###
-#
-# @copyright (c) 2009-2014 The University of Tennessee and The University
-#                          of Tennessee Research Foundation.
-#                          All rights reserved.
-# @copyright (c) 2012-2016 Inria. All rights reserved.
-# @copyright (c) 2012-2014 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria, Univ. Bordeaux. All rights reserved.
-#
-###
-#
 # - Find BLAS library
 # This module finds an installed fortran library that implements the BLAS
 # linear-algebra interface (see http://www.netlib.org/blas/).

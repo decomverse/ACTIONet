@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5...3.29)
 project (ACTIONet)
 list(APPEND CMAKE_MODULE_PATH "${ACTIONet_SOURCE_DIR}/cmake")
 
@@ -13,20 +13,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-w)
 add_compile_options(-O3)
 
-# find python
-execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_SEARCH_PATH)
-string(REGEX REPLACE "\n$" "" PYTHON_SEARCH_PATH "${PYTHON_SEARCH_PATH}")
-file(GLOB_RECURSE PYTHON_DY_LIBS ${PYTHON_SEARCH_PATH}/lib/libpython*.dylib ${PYTHON_SEARCH_PATH}/lib/libpython*.so)
-if (PYTHON_DY_LIBS)
-    list(GET PYTHON_DY_LIBS 0 PYTHON_LIBRARY)
-    message("-- Find shared libpython: ${PYTHON_LIBRARY}")
-else()
-    message(WARNING "Cannot find shared libpython, try find_package")
-endif()
 
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
-find_package(Python REQUIRED Development)
-find_package(Python REQUIRED Interpreter)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python3 REQUIRED Development)
+find_package(Python3 REQUIRED Interpreter)
 
 find_package(PythonInterp)
 find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
