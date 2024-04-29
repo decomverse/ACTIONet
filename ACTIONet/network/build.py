@@ -3,6 +3,7 @@ from typing import Optional, Union
 import numpy as np
 from anndata import AnnData
 from scipy import sparse
+from scipy.spatial.distance import pdist, squareform
 
 import _ACTIONet as _an
 
@@ -87,3 +88,105 @@ def build(
         return adata if copy else None
     else:
         raise Exception("invalid state encountered")
+
+
+# Adopted from https://github.com/ldv1/kstar-NN and https://github.com/kfirkfir/k-Star-Nearest-Neighbors
+def kStarNN_from_samples(
+    X: np.ndarray,
+    metric: str = "euclidean",
+    L_C: float = 1.0,
+    symmetrization: int = 1,
+    post_normalize: bool = False,
+) -> np.ndarray:
+    """
+    Computes k*NN graph from input samples.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        Input samples.
+    metric : str, optional
+        Distance metric to use, by default "euclidean".
+    L_C : float, optional
+        Scaling factor for the distances, by default 1.0.
+    symmetrization : int, optional
+        Symmetrization strategy. 1 for OR (either node points to each other), 2 for AND (both nodes point to each other), by default 1.
+    post_normalize : bool, optional
+        Whether to perform post-normalization, by default False.
+
+    Returns
+    -------
+    np.ndarray
+        Adjacency matrix of the k*NN graph.
+    """
+    D = squareform(pdist(X, metric=metric))
+
+    adj_mat = kStarNN_from_dists(
+        D=D,
+        L_C=L_C,
+        symmetrization=symmetrization,
+        post_normalize=post_normalize,
+    )
+
+    return adj_mat
+
+
+def kStarNN_from_dists(
+    D: np.ndarray,
+    L_C: float = 1.0,
+    symmetrization: int = 1,
+    post_normalize: bool = False,
+) -> np.ndarray:
+    """
+    Computes k*NN graph from input distance matrix.
+
+    Parameters
+    ----------
+    D : np.ndarray
+        Input distance matrix.
+    L_C : float, optional
+        Scaling factor for the distances, by default 1.0.
+    symmetrization : int, optional
+        Symmetrization strategy. 1 for OR (either node points to each other), 2 for AND (both nodes point to each other), by default 1.
+    post_normalize : bool, optional
+        Whether to perform post-normalization, by default False.
+
+    Returns
+    -------
+    np.ndarray
+        Adjacency matrix of the k*NN graph.
+    """
+    num_samples = D.shape[0]
+
+    adj_mat = np.zeros_like(D)
+    for i in range(num_samples):
+        dists = D[:, i]
+        sortIndex = np.argsort(dists)
+        beta = np.append(L_C * dists[sortIndex], 10**6)
+        lambda_ = beta[0] + 1
+
+        k = 0
+        Sum_beta = 0
+        Sum_beta_square = 0
+        while (lambda_ > beta[k]) and (k < len(beta) - 1):
+            k += 1
+            Sum_beta += beta[k]
+            Sum_beta_square += beta[k] ** 2
+            lambda_ = (1 / k) * (Sum_beta + np.sqrt(k + Sum_beta**2 - k * Sum_beta_square))
+
+        w = np.maximum(lambda_ - L_C * dists, 0)
+        total_sum = np.sum(w)
+        if total_sum > 0:
+            adj_mat[:, i] = w / total_sum
+
+    if symmetrization == 1:  # if either node points to each other (OR)
+        adj_mat = (adj_mat + adj_mat.T) / 2
+    elif symmetrization == 2:  # if both node points to each other (AND)
+        adj_mat = np.sqrt(adj_mat * adj_mat.T)  # symmetrize
+
+    if post_normalize:
+        rs = 1 / np.sqrt(adj_mat.sum(axis=1)).squeeze()
+        cs = 1 / np.sqrt(adj_mat.sum(axis=0)).squeeze()
+        adj_mat = rs.T * adj_mat * cs
+
+    return adj_mat
