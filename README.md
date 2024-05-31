@@ -94,7 +94,7 @@ git submodule update --init
 OR, you can directly run:
 
 ```bash
-git clone --depth 1 --no-hardlinks --recurse-submodules --branch R-devel https://github.com/shmohammadi86/ACTIONet.git ACTIONet
+git clone --depth 1 --no-hardlinks --recurse-submodules --branch R-release https://github.com/shmohammadi86/ACTIONet.git ACTIONet
 ```
 
 and now you can install ACTIONet using the following command in the `ACTIONet` directory:
