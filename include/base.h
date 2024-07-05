@@ -358,17 +358,9 @@ namespace ACTIONet
 
   mat Prune_PageRank(mat &U, double density);
 
-  vec unsigned_cluster(sp_mat A, double resolution_parameter,
-                       uvec initial_clusters, int seed);
-  vec signed_cluster(sp_mat A, double resolution_parameter, uvec initial_clusters,
-                     int seed);
-
   Coreset compute_AA_coreset(sp_mat &S, int m);
 
   mat NetEnh(mat Adj);
-
-  mat unsigned_cluster_batch(sp_mat A, vec resolutions, uvec initial_clusters,
-                             int seed);
 
   vec LPA(sp_mat &G, vec labels, double lambda = 0, int iters = 3,
           double sig_threshold = 3, uvec fixed_labels = uvec(),
