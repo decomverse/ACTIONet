@@ -1,14 +1,7 @@
 #include "ACTIONet.h"
-//#include "dagConstruct.h"
-
-// vector<double> Corrector::vals;
 
 namespace ACTIONet
 {
-  mat unsigned_cluster_batch(sp_mat A, vec resolutions,
-                             uvec initial_clusters = uvec(), int seed = 0);
-  mat signed_cluster_batch(sp_mat A, vec resolutions,
-                           uvec initial_clusters = uvec(), int seed = 0);
 
   double Kappa(double p, double q)
   {
@@ -476,8 +469,6 @@ namespace ACTIONet
 
     stdout_printf("Unifying %d archetypes (%d threads):\n", C_stacked.n_cols,
                   thread_no);
-    // stdout_printf("\tParameters: backbone density = %0.2f, outlier threshold
-    // (on core #) = %d\n", backbone_density, outlier_threshold);
     FLUSH;
 
     unification_results output;
@@ -497,52 +488,7 @@ namespace ACTIONet
 
     stdout_printf("# unified archetypes: %d\n", (int)arch_no);
     output.selected_archetypes = candidates;
-    /*
-      double M = 16, ef_construction = 200, ef = 200;
-      sp_mat backbone =
-          ACTIONet::buildNetwork(H_arch, "k*nn", "jsd", backbone_density, 1, M,
-                                 ef_construction, ef, true, 10);
-      output.dag_adj = backbone;
 
-      vec initial_clusters = zeros(backbone.n_rows);
-      for (int i = backbone.n_rows - 1; i >= 0; i--) {
-        int v = candidates(i);
-        uvec N = find(vec(backbone.col(v)) > 0);
-
-        initial_clusters(v) = i;
-        initial_clusters(N) = i * ones(N.n_elem);
-      }
-
-      uvec initial_clusters_uvec = conv_to<uvec>::from(initial_clusters);
-      vec arch_clusters = ACTIONet::unsigned_cluster(backbone, resolution,
-                                                     initial_clusters_uvec, 0);
-      int idx = 1;
-      for (; idx <= max(arch_clusters); idx++) {
-        uvec selected_archs = find(arch_clusters == idx);
-        int cc = selected_archs.n_elem;
-        if (cc < min_cluster_size) {
-          break;
-        }
-      }
-      int arch_no = idx - 1;
-
-      stdout_printf("# unified archetypes: %d\n", arch_no);
-      output.selected_archetypes = conv_to<uvec>::from(arch_clusters - 1);
-
-      // Compute unified archetypes
-      vec c;
-      mat C_unified = zeros(C_stacked.n_rows, arch_no);
-      for (idx = 1; idx <= arch_no; idx++) {
-        uvec cur_archs = find(arch_clusters == idx);
-        if (cur_archs.n_elem == 1) {
-          c = C_stacked.col(cur_archs(0));
-        } else {
-          c = mean(C_stacked.cols(cur_archs), 1);
-        }
-        c = c / sum(c);
-        C_unified.col(idx - 1) = c;
-      }
-    */
     mat C_unified = C_stacked.cols(candidates);
 
     mat X_r = normalize_mat(S_r, normalization, 0);
@@ -553,94 +499,9 @@ namespace ACTIONet
 
     uvec assigned_archetypes = trans(index_max(H_unified, 0));
 
-    /*
-        // Construct Ontology!
-        mat Sim = 1+cor(W_r_unified);
-
-        graph_undirected inputNetwork(Sim);
-        DAGraph ontology;
-        ontology.setTerminalName("archetype");
-        nodeDistanceObject nodeDistances;
-
-        double threshold = 0.05;
-        double density = 0.5;
-
-        dagConstruct::constructDAG(inputNetwork, ontology, nodeDistances,
-       threshold, density);
-
-        vector<vector<int>> dag_nodes;
-        vector<int> dag_nodes_type;
-
-        for (int k = 0; k < Sim.n_rows; k++) {
-          vector<int> v;
-          v.push_back(k);
-          dag_nodes.push_back(v);
-          dag_nodes_type.push_back(0);
-        }
-
-        for (map<pair<unsigned, unsigned>, string>::iterator edgesIt =
-                 ontology.edgesBegin();
-             edgesIt != ontology.edgesEnd(); ++edgesIt) {
-          unsigned ii = edgesIt->first.first;
-          unsigned jj = edgesIt->first.second;
-
-          vector<int> v;
-          int tt;
-          if (edgesIt->second == "archetype") {
-            v.push_back(jj);
-            tt = 0;
-          } else {  // Internal node
-            for (int kk = 0; kk < dag_nodes[jj].size(); kk++) {
-              v.push_back(dag_nodes[jj][kk]);
-            }
-            tt = 1;
-          }
-
-          if (ii >= dag_nodes.size()) {
-            dag_nodes.push_back(v);
-            dag_nodes_type.push_back(tt);
-          } else {  // merge
-            for (int kk = 0; kk < v.size(); kk++) {
-              dag_nodes[ii].push_back(v[kk]);
-            }
-
-            if (edgesIt->second != "archetype") dag_nodes_type[ii] = 1;
-          }
-
-          // cout << ontology.getName(edgesIt->first.first) << "\t" <<
-          // ontology.getName(edgesIt->first.second) << "\t" << edgesIt->second <<
-          // "\t"
-          // << ontology.getWeight(edgesIt->first.first) << endl;
-        }
-
-        // Get internal adjacency matrix of DAGs
-        int dag_node_counts = dag_nodes.size();
-        mat dag_adj = zeros(dag_node_counts, dag_node_counts);
-        vec dag_node_annotations = zeros(dag_node_counts);
-        for (map<pair<unsigned, unsigned>, string>::iterator edgesIt =
-                 ontology.edgesBegin();
-             edgesIt != ontology.edgesEnd(); ++edgesIt) {
-          unsigned ii = edgesIt->first.first;
-          unsigned jj = edgesIt->first.second;
-          double w = ontology.getWeight(edgesIt->first.first);
-
-          if (edgesIt->second == "archetype") {
-            dag_node_annotations(ii) = 1;
-          } else {
-            dag_node_annotations(ii) = 2;
-          }
-
-          dag_adj(ii, jj) = 1;
-        }
-
-        output.dag_adj = dag_adj;
-        output.dag_node_annotations = dag_node_annotations;
-    */
-
     output.C_unified = C_unified;
     output.H_unified = H_unified;
     output.assigned_archetypes = assigned_archetypes;
-    // output.arch_membership_weights = H_NMU.cols(selected_cols);
 
     FLUSH;
     return (output);
