@@ -1,0 +1,58 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the article below."
+title: "ACTIONet: a multiresolution framework for single-cell state landscapes"
+abstract: >-
+  ACTIONet combines archetypal analysis with manifold learning to describe each
+  cell as a mixture of a small number of interpretable extreme states, resolved
+  at multiple resolutions simultaneously. The result is a cell-cell network and
+  matching embedding that support continuous rather than discrete
+  characterisation of cell identity.
+type: software
+repository-code: "https://github.com/shmohammadi86/ACTIONet"
+license: GPL-2.0-or-later
+authors:
+  - family-names: "Mohammadi"
+    given-names: "Shahin"
+    orcid: "https://orcid.org/0000-0001-8734-2326"
+  - family-names: "Davila-Velderrain"
+    given-names: "Jose"
+  - family-names: "Kellis"
+    given-names: "Manolis"
+keywords:
+  - single-cell
+  - archetypal analysis
+  - manifold learning
+  - cell state
+  - transcriptomics
+preferred-citation:
+  type: article
+  title: "A multiresolution framework to characterize single-cell state landscapes"
+  journal: "Nature Communications"
+  volume: 11
+  start: 5399
+  year: 2020
+  doi: "10.1038/s41467-020-18416-6"
+  authors:
+    - family-names: "Mohammadi"
+      given-names: "Shahin"
+    - family-names: "Davila-Velderrain"
+      given-names: "Jose"
+    - family-names: "Kellis"
+      given-names: "Manolis"
+references:
+  - type: article
+    title: "A geometric approach to characterize the functional identity of single cells"
+    journal: "Nature Communications"
+    volume: 9
+    start: 1516
+    year: 2018
+    doi: "10.1038/s41467-018-03933-2"
+    authors:
+      - family-names: "Mohammadi"
+        given-names: "Shahin"
+      - family-names: "Ravindra"
+        given-names: "Vikram"
+      - family-names: "Gleich"
+        given-names: "David F."
+      - family-names: "Grama"
+        given-names: "Ananth"
